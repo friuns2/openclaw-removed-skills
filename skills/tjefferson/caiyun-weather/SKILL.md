@@ -1,18 +1,13 @@
 ---
 name: caiyun-weather
-description: "通过彩云天气 API 查询天气数据 — 实时天气、逐小时/一周预报、历史天气和天气预警。当用户询问任何城市的天气、温度、空气质量、天气预报、降雨概率、历史天气或天气预警时使用此技能。需要设置 CAIYUN_WEATHER_API_TOKEN 环境变量。Use when: user asks about current weather, temperature, air quality, forecast, rain, historical weather, or alerts for any city."
+description: "天气查询 / Weather query. 实时查询天气、气温、空气质量（AQI/PM2.5）、逐小时预报、一周天气预报、历史天气和天气预警，支持中文城市名（北京/上海/深圳等）直接查询。Real-time weather, temperature, AQI, hourly/weekly forecast, historical weather and alerts via Caiyun Weather API. Supports Chinese city names directly. Requires CAIYUN_WEATHER_API_TOKEN."
+category: Data & APIs
 metadata:
-  {
-    "openclaw":
-      {
-        "requires":
-          {
-            "bins": ["python3"],
-            "env": ["CAIYUN_WEATHER_API_TOKEN"],
-          },
-        "primaryEnv": "CAIYUN_WEATHER_API_TOKEN",
-      },
-  }
+  openclaw:
+    requires:
+      bins: [python3]
+      env: [CAIYUN_WEATHER_API_TOKEN]
+    primaryEnv: CAIYUN_WEATHER_API_TOKEN
 ---
 
 # 彩云天气 (Caiyun Weather)

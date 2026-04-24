@@ -1,11 +1,17 @@
 {
   "owner": "tjefferson",
   "slug": "caiyun-weather",
-  "displayName": "Caiyun Weather",
+  "displayName": "彩云天气 / Caiyun Weather",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1772199654265,
-    "commit": "https://github.com/openclaw/skills/commit/0bf665986a5b98ddeb2bf90de96f6f95540ed066"
+    "version": "1.2.0",
+    "publishedAt": 1776569549198,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1772199654265,
+      "commit": "https://github.com/openclaw/skills/commit/0bf665986a5b98ddeb2bf90de96f6f95540ed066"
+    }
+  ]
 }
