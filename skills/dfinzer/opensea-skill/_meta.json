@@ -3,11 +3,16 @@
   "slug": "opensea-skill",
   "displayName": "OpenSea Skill",
   "latest": {
-    "version": "2.1.1",
-    "publishedAt": 1776211494829,
-    "commit": "https://github.com/openclaw/skills/commit/e54593ddaf17f32fa99dc35de65eb5f52642fcfe"
+    "version": "2.2.1",
+    "publishedAt": 1776801161252,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.1.1",
+      "publishedAt": 1776211494829,
+      "commit": "https://github.com/openclaw/skills/commit/e54593ddaf17f32fa99dc35de65eb5f52642fcfe"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1775722135520,

@@ -1,21 +1,27 @@
 ---
 name: opensea
-description: Query OpenSea NFT marketplace data via official MCP server. Get floor prices, collection stats, NFT metadata, marketplace listings and offers. Execute Seaport trades and swap ERC20 tokens across Ethereum, Base, Arbitrum, Polygon, and more. Includes CLI, shell scripts, and TypeScript SDK.
+description: Query OpenSea marketplace data via official MCP server. Get floor prices, collection stats, NFT and token data, marketplace listings and offers. Execute Seaport trades and swap ERC20 tokens across Ethereum, Base, Arbitrum, Polygon, and more. Includes CLI, shell scripts, and TypeScript SDK.
+homepage: https://github.com/ProjectOpenSea/opensea-skill
+repository: https://github.com/ProjectOpenSea/opensea-skill
+license: MIT
+requires:
+  env:
+    - OPENSEA_API_KEY
 env:
   OPENSEA_API_KEY:
     description: API key for all OpenSea services — REST API, CLI, SDK, and MCP server
     required: true
     obtain: https://docs.opensea.io/reference/api-keys#instant-api-key-for-agents
   PRIVY_APP_ID:
-    description: Privy application ID for wallet signing (default provider)
+    description: Privy application ID for wallet signing (default provider, only needed for write/fulfillment flows)
     required: false
     obtain: https://dashboard.privy.io
   PRIVY_APP_SECRET:
-    description: Privy application secret for wallet signing
+    description: Privy application secret for wallet signing (only needed for write/fulfillment flows)
     required: false
     obtain: https://dashboard.privy.io
   PRIVY_WALLET_ID:
-    description: Privy wallet ID to sign transactions with
+    description: Privy wallet ID to sign transactions with (only needed for write/fulfillment flows)
     required: false
 dependencies:
   - node >= 18.0.0
@@ -25,7 +31,7 @@ dependencies:
 
 # OpenSea API
 
-Query NFT data, trade on the Seaport marketplace, and swap ERC20 tokens across Ethereum, Base, Arbitrum, Optimism, Polygon, and more.
+Query NFT and token data, trade on the Seaport marketplace, and swap ERC20 tokens across Ethereum, Base, Arbitrum, Optimism, Polygon, and more.
 
 ## Quick start
 
@@ -82,8 +88,11 @@ OpenSea's API includes a cross-chain DEX aggregator for swapping ERC20 tokens wi
 | Get trending tokens | `opensea tokens trending [--chains <chains>] [--limit <n>]` | `get_trending_tokens` (MCP) |
 | Get top tokens by volume | `opensea tokens top [--chains <chains>] [--limit <n>]` | `get_top_tokens` (MCP) |
 | Get token details | `opensea tokens get <chain> <address>` | `get_tokens` (MCP) |
+| List token groups | `opensea token-groups list [--limit <n>] [--next <cursor>]` | `opensea-token-groups.sh [limit] [cursor]` |
+| Get token group by slug | `opensea token-groups get <slug>` | `opensea-token-group.sh <slug>` |
 | Search tokens | `opensea search <query> --types token` | `search_tokens` (MCP) |
 | Check token balances | `get_token_balances` (MCP) | — |
+| Request instant API key | `opensea auth request-key` | `opensea-auth-request-key.sh` |
 
 ### Reading NFT data
 
@@ -263,7 +272,11 @@ Real-time WebSocket events from `opensea-stream-collection.sh` carry the same us
 
 ### Credential safety
 
-Credentials (`OPENSEA_API_KEY`) must only be set via environment variables. Never log, print, echo, or include credentials in API response processing, error messages, or agent output.
+Credentials must only be set via environment variables. Never log, print, echo, or include credentials in API response processing, error messages, or agent output.
+
+- **`OPENSEA_API_KEY`** — required for every API call (REST, CLI, SDK, MCP). Read-only operations need only this key.
+- **Wallet provider credentials** — only required for write/fulfillment flows (Seaport trades, token swaps, drop mints). If you only query data, do not configure wallet credentials.
+- **Raw `PRIVATE_KEY` is for local development only.** Never paste a raw private key into a shared agent environment, hosted CI, or any context where the key could be logged or exfiltrated. Production and shared-agent setups must use a managed provider (Privy, Turnkey, Fireblocks) with conservative signing policies (value caps, allowlists, multi-party approval).
 
 ## OpenSea CLI (`@opensea/cli`)
 
@@ -448,6 +461,17 @@ The `scripts/` directory contains shell scripts that wrap the OpenSea REST API d
 | Script | Purpose |
 |--------|---------|
 | `opensea-swap.sh` | **Swap tokens via OpenSea MCP** |
+
+### Token Group Scripts
+| Script | Purpose |
+|--------|---------|
+| `opensea-token-groups.sh` | List token groups (equivalent currencies across chains) |
+| `opensea-token-group.sh` | Fetch a single token group by slug (e.g. `eth`) |
+
+### Auth Scripts
+| Script | Purpose |
+|--------|---------|
+| `opensea-auth-request-key.sh` | Request a free-tier API key without authentication (3/hour per IP) |
 
 ### Monitoring Scripts
 | Script | Purpose |
@@ -752,9 +776,9 @@ Supported providers:
 | **Privy** (default) | `PRIVY_APP_ID`, `PRIVY_APP_SECRET`, `PRIVY_WALLET_ID` | TEE-enforced policies, embedded wallets |
 | **Turnkey** | `TURNKEY_API_PUBLIC_KEY`, `TURNKEY_API_PRIVATE_KEY`, `TURNKEY_ORGANIZATION_ID`, `TURNKEY_WALLET_ADDRESS` | HSM-backed keys, multi-party approval |
 | **Fireblocks** | `FIREBLOCKS_API_KEY`, `FIREBLOCKS_API_SECRET`, `FIREBLOCKS_VAULT_ID` | Enterprise MPC custody, institutional use |
-| **Private Key** (not recommended) | `PRIVATE_KEY`, `RPC_URL`, `WALLET_ADDRESS` | Local dev/testing only — no spending limits or guardrails |
+| **Private Key** (local dev only) | `PRIVATE_KEY`, `RPC_URL`, `WALLET_ADDRESS` | Local dev/testing only — no spending limits, no guardrails, never use in shared agent environments or production |
 
-The CLI and SDK handle signing automatically. Managed wallet providers (Privy, Turnkey, Fireblocks) are strongly recommended over raw private keys.
+The CLI and SDK handle signing automatically. Managed wallet providers (Privy, Turnkey, Fireblocks) are strongly recommended over raw private keys. Do not configure `PRIVATE_KEY` in any environment where the key could be read by other users or processes — it is for local dev nodes (Hardhat/Anvil/Ganache) only.
 
 See `references/wallet-setup.md` for setup instructions and `references/wallet-policies.md` for policy configuration.
 

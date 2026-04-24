@@ -1,10 +1,10 @@
 # OpenSea Skill
 
-**Query NFT data, trade on the Seaport marketplace, and swap ERC20 tokens** across Ethereum, Base, Arbitrum, Optimism, Polygon, and more.
+**Query NFT and token data, trade on the Seaport marketplace, and swap ERC20 tokens** across Ethereum, Base, Arbitrum, Optimism, Polygon, and more.
 
 ## What is this?
 
-This is an [Agent Skill](https://skills.sh/docs) for AI coding assistants. Once installed, your agent can interact with the OpenSea API to query NFT data, execute marketplace operations, and swap ERC20 tokens using the [OpenSea CLI](https://github.com/ProjectOpenSea/opensea-cli), shell scripts, or the [MCP server](#opensea-mcp-server).
+This is an [Agent Skill](https://skills.sh/docs) for AI coding assistants. Once installed, your agent can interact with the OpenSea API to query NFT and token data, execute marketplace operations, and swap ERC20 tokens using the [OpenSea CLI](https://github.com/ProjectOpenSea/opensea-cli), shell scripts, or the [MCP server](#opensea-mcp-server).
 
 ## Prerequisites
 
@@ -22,7 +22,11 @@ curl -s -X POST https://api.opensea.io/api/v2/auth/keys | jq -r '.api_key'
 
 Or get a full key at [opensea.io/settings/developer](https://opensea.io/settings/developer) for higher rate limits. The same key works for the REST API, CLI, and MCP server.
 
-For write operations (swaps, Seaport fulfillment), you'll need a wallet that can sign transactions. Use whatever fits your security model — Privy, Fireblocks, a backend signing proxy, etc.
+For write operations (swaps, Seaport fulfillment), you'll need a wallet that can sign transactions. Use a managed provider — Privy, Turnkey, Fireblocks, or a backend signing proxy — and configure conservative signing policies (value caps, allowlists). Raw private keys are supported for local dev only and must not be used in shared agent environments.
+
+## Provenance
+
+This skill is published by OpenSea. The canonical source is the public GitHub repo [`ProjectOpenSea/opensea-skill`](https://github.com/ProjectOpenSea/opensea-skill), mirrored from the internal [`opensea-devtools`](https://github.com/ProjectOpenSea/opensea-devtools) monorepo. Releases are tagged `v<version>` (e.g. `v2.2.1`) and visible on the [Releases page](https://github.com/ProjectOpenSea/opensea-skill/releases). Always install from the official repo above; do not install forks or rehosts unless you have audited them.
 
 ## Installing the Skill
 
@@ -76,6 +80,9 @@ Ready-to-use scripts in [`scripts/`](scripts/) for common operations (alternativ
 | `opensea-swap.sh` | Swap tokens via OpenSea DEX aggregator |
 | `opensea-fulfill-listing.sh` | Get buy transaction data |
 | `opensea-fulfill-offer.sh` | Get sell transaction data |
+| `opensea-token-groups.sh` | List token groups (equivalent currencies across chains) |
+| `opensea-token-group.sh` | Fetch a single token group by slug |
+| `opensea-auth-request-key.sh` | Request a free-tier API key (no auth required) |
 
 See [`SKILL.md`](SKILL.md) for the full scripts reference and usage examples.
 
