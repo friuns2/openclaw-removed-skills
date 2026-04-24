@@ -15,6 +15,22 @@ Comandos:
   materia-id <codigo>     Matéria pelo código interno
   tramitacao <codigo>     Histórico de tramitação de uma matéria
   comissoes               Lista comissões permanentes
+  filiacoes <codigo>      Filiações partidárias de um senador
+  cargos <codigo>         Cargos exercidos por um senador
+  relatorias <codigo>     Relatorias de um senador
+  licencas <codigo>       Licenças de um senador
+  situacao <codigo>       Situação atual de uma matéria
+  emendas-materia <codigo>  Emendas de uma matéria
+  textos <codigo>         Textos de uma matéria
+  votacao-nominal <ano>   Votações nominais de um ano
+  resultado-dia <data>    Resultado do plenário em um dia (YYYYMMDD)
+  discursos-plenario <inicio> <fim>  Discursos em plenário no período (YYYYMMDD)
+  mesa-senado             Mesa diretora do Senado
+  liderancas              Lideranças partidárias
+  blocos                  Blocos parlamentares
+  comissao-detalhe <codigo>  Detalhes de uma comissão
+  composicao <codigo>     Composição (membros) de uma comissão
+  processo <codigo>       Processo legislativo completo de uma matéria
 """
 
 import sys
@@ -217,6 +233,220 @@ def comissoes():
         print(f"  {c.get('CodigoColegiado',''):5} | {c.get('SiglaColegiado',''):10} | {c.get('NomeColegiado','')}")
     print()
 
+def filiacoes(codigo):
+    r = get(f"/senador/{codigo}/filiacoes")
+    filiacoes = r.get("FiliacaoParlamentar", {}).get("Parlamentar", {}).get("Filiacoes", {}).get("Filiacao", [])
+    if isinstance(filiacoes, dict):
+        filiacoes = [filiacoes]
+    print(f"\n🏷️  Filiações Partidárias — Senador {codigo}\n{'='*60}")
+    for f in filiacoes:
+        partido = f.get("Partido", {}) if isinstance(f.get("Partido"), dict) else {"SiglaPartido": f.get("Partido", "")}
+        sigla = partido.get("SiglaPartido", str(partido))
+        data_fil = f.get("DataFiliacao", "")
+        data_des = f.get("DataDesfiliacao", "atual")
+        print(f"  {sigla:12} | {data_fil} - {data_des}")
+    print()
+
+def cargos(codigo):
+    r = get(f"/senador/{codigo}/cargos")
+    cargos = r.get("CargoParlamentar", {}).get("Parlamentar", {}).get("Cargos", {}).get("Cargo", [])
+    if isinstance(cargos, dict):
+        cargos = [cargos]
+    print(f"\n💼 Cargos — Senador {codigo}\n{'='*60}")
+    for c in cargos:
+        desc = c.get("DescricaoCargo", "")
+        inicio = c.get("DataInicio", "")
+        fim = c.get("DataFim", "atual")
+        print(f"  {desc:40} | {inicio} - {fim}")
+    print()
+
+def relatorias_senador(codigo):
+    r = get(f"/senador/{codigo}/relatorias")
+    rels = r.get("RelatoriaParlamentar", {}).get("Parlamentar", {}).get("Relatorias", {}).get("Relatoria", [])
+    if isinstance(rels, dict):
+        rels = [rels]
+    print(f"\n📋 Relatorias — Senador {codigo}\n{'='*60}")
+    for rel in rels[:20]:
+        materia = rel.get("IdentificacaoMateria", {})
+        desc = f"{materia.get('SiglaSubtipoMateria','')} {materia.get('NumeroMateria','')}/{materia.get('AnoMateria','')}"
+        comissao = rel.get("SiglaComissao", "")
+        print(f"  {desc:20} | Comissão: {comissao}")
+    print()
+
+def licencas(codigo):
+    r = get(f"/senador/{codigo}/licencas")
+    # Use DFS to find list
+    def find_list(obj):
+        if isinstance(obj, list): return obj
+        if isinstance(obj, dict):
+            for v in obj.values():
+                result = find_list(v)
+                if result is not None: return result
+        return None
+    lics = find_list(r) or []
+    print(f"\n📅 Licenças — Senador {codigo}\n{'='*60}")
+    if not lics:
+        print("  Nenhuma licença registrada.")
+    for l in lics:
+        inicio = l.get("DataInicio", "")
+        fim = l.get("DataFim", "")
+        motivo = l.get("Descricao", l.get("DescricaoMotivo", ""))
+        print(f"  {inicio} - {fim:10} | {motivo}")
+    print()
+
+def situacao(codigo):
+    r = get(f"/materia/situacaoatual/{codigo}")
+    sit = r.get("SituacaoAtualMateria", r)
+    ident = sit.get("IdentificacaoMateria", {})
+    aut = sit.get("Autuacao", {})
+    print(f"\n📄 Situação Atual — Matéria {codigo}\n{'='*60}")
+    print(f"  {ident.get('SiglaSubtipoMateria','')} {ident.get('NumeroMateria','')}/{ident.get('AnoMateria','')}")
+    print(f"  Ementa: {ident.get('EmentaMateria','')}")
+    print(f"  Situação: {aut.get('DescricaoSituacao', sit.get('DescricaoSituacao',''))}")
+    print()
+
+def emendas_materia(codigo):
+    r = get(f"/materia/emendas/{codigo}")
+    def find_list(obj):
+        if isinstance(obj, list): return obj
+        if isinstance(obj, dict):
+            for v in obj.values():
+                result = find_list(v)
+                if result is not None: return result
+        return None
+    emendas = find_list(r) or []
+    print(f"\n📝 Emendas — Matéria {codigo}\n{'='*60}")
+    if not emendas:
+        print("  Nenhuma emenda encontrada.")
+    for e in emendas[:20]:
+        autor = e.get("AutorEmenda", e.get("Autor", ""))
+        num = e.get("NumeroEmenda", e.get("Numero", ""))
+        print(f"  Emenda {num:5} | Autor: {autor}")
+    print()
+
+def textos_materia(codigo):
+    r = get(f"/materia/textos/{codigo}")
+    def find_list(obj):
+        if isinstance(obj, list): return obj
+        if isinstance(obj, dict):
+            for v in obj.values():
+                result = find_list(v)
+                if result is not None: return result
+        return None
+    textos = find_list(r) or []
+    print(f"\n📄 Textos — Matéria {codigo}\n{'='*60}")
+    if not textos:
+        print("  Nenhum texto encontrado.")
+    for t in textos:
+        tipo = t.get("TipoTexto", t.get("DescricaoTipoTexto", ""))
+        url = t.get("UrlTexto", "")
+        print(f"  {tipo:30} | {url}")
+    print()
+
+def votacao_nominal(ano):
+    r = get(f"/plenario/votacao/nominal/{ano}")
+    def find_list(obj):
+        if isinstance(obj, list): return obj
+        if isinstance(obj, dict):
+            for v in obj.values():
+                result = find_list(v)
+                if result is not None: return result
+        return None
+    vots = find_list(r) or []
+    print(f"\n🗳️  Votações Nominais — {ano} ({len(vots)} votações)\n{'='*60}")
+    for v in vots[:30]:
+        resultado = v.get("DescricaoResultado", v.get("Resultado", ""))
+        data = v.get("DataSessao", "")
+        materia = v.get("DescricaoIdentificacaoMateria", v.get("Materia", ""))
+        print(f"  {data:10} | {str(materia)[:40]:40} | {resultado}")
+    print()
+
+def resultado_dia(data):
+    d = norm_date(data)
+    r = get(f"/plenario/resultado/{d}")
+    print(f"\n📊 Resultado Plenário — {d[:4]}-{d[4:6]}-{d[6:]}\n{'='*60}")
+    print(f"  {json.dumps(r, ensure_ascii=False, indent=2)[:2000]}")
+    print()
+
+def discursos_plenario(inicio, fim):
+    i = norm_date(inicio)
+    f = norm_date(fim)
+    r = get(f"/plenario/lista/discursos/{i}/{f}")
+    def find_list(obj):
+        if isinstance(obj, list): return obj
+        if isinstance(obj, dict):
+            for v in obj.values():
+                result = find_list(v)
+                if result is not None: return result
+        return None
+    discursos = find_list(r) or []
+    print(f"\n🎤 Discursos em Plenário — {inicio} a {fim} ({len(discursos)})\n{'='*60}")
+    for d in discursos[:20]:
+        nome = d.get("NomeParlamentar", d.get("Autor", ""))
+        data = d.get("DataPronunciamento", d.get("Data", ""))
+        tipo = d.get("TipoPronunciamento", "")
+        print(f"  {data:10} | {nome:30} | {tipo}")
+    print()
+
+def mesa_senado():
+    r = get("/composicao/mesaSF")
+    print(f"\n🏛️  Mesa Diretora do Senado\n{'='*60}")
+    print(f"  {json.dumps(r, ensure_ascii=False, indent=2)[:2000]}")
+    print()
+
+def liderancas_cmd():
+    r = get("/composicao/lideranca")
+    print(f"\n👥 Lideranças Partidárias\n{'='*60}")
+    print(f"  {json.dumps(r, ensure_ascii=False, indent=2)[:2000]}")
+    print()
+
+def blocos():
+    r = get("/composicao/lista/blocos")
+    def find_list(obj):
+        if isinstance(obj, list): return obj
+        if isinstance(obj, dict):
+            for v in obj.values():
+                result = find_list(v)
+                if result is not None: return result
+        return None
+    blocs = find_list(r) or []
+    print(f"\n🧩 Blocos Parlamentares ({len(blocs)})\n{'='*60}")
+    for b in blocs:
+        nome = b.get("NomeBloco", b.get("Nome", ""))
+        sigla = b.get("SiglaBloco", b.get("Sigla", ""))
+        print(f"  {sigla:15} | {nome}")
+    print()
+
+def comissao_detalhe(codigo):
+    r = get(f"/comissao/{codigo}")
+    print(f"\n🏛️  Comissão — {codigo}\n{'='*60}")
+    print(f"  {json.dumps(r, ensure_ascii=False, indent=2)[:2000]}")
+    print()
+
+def composicao(codigo):
+    r = get(f"/composicao/comissao/{codigo}")
+    def find_list(obj):
+        if isinstance(obj, list): return obj
+        if isinstance(obj, dict):
+            for v in obj.values():
+                result = find_list(v)
+                if result is not None: return result
+        return None
+    membros = find_list(r) or []
+    print(f"\n👥 Composição Comissão — {codigo} ({len(membros)} membros)\n{'='*60}")
+    for m in membros:
+        nome = m.get("NomeParlamentar", m.get("Nome", ""))
+        cargo = m.get("DescricaoCargo", m.get("Cargo", ""))
+        partido = m.get("SiglaPartido", "")
+        print(f"  {nome:35} | {partido:8} | {cargo}")
+    print()
+
+def processo(codigo):
+    r = get(f"/processo/{codigo}")
+    print(f"\n⚖️  Processo Legislativo — {codigo}\n{'='*60}")
+    print(f"  {json.dumps(r, ensure_ascii=False, indent=2)[:3000]}")
+    print()
+
 COMMANDS = {
     "senadores": lambda args: senadores(),
     "senador": lambda args: buscar_senador(" ".join(args)),
@@ -230,6 +460,22 @@ COMMANDS = {
     "materia-id": lambda args: materia_id(args[0]),
     "tramitacao": lambda args: tramitacao(args[0]),
     "comissoes": lambda args: comissoes(),
+    "filiacoes": lambda args: filiacoes(args[0]),
+    "cargos": lambda args: cargos(args[0]),
+    "relatorias": lambda args: relatorias_senador(args[0]),
+    "licencas": lambda args: licencas(args[0]),
+    "situacao": lambda args: situacao(args[0]),
+    "emendas-materia": lambda args: emendas_materia(args[0]),
+    "textos": lambda args: textos_materia(args[0]),
+    "votacao-nominal": lambda args: votacao_nominal(args[0]),
+    "resultado-dia": lambda args: resultado_dia(args[0]),
+    "discursos-plenario": lambda args: discursos_plenario(args[0], args[1]),
+    "mesa-senado": lambda args: mesa_senado(),
+    "liderancas": lambda args: liderancas_cmd(),
+    "blocos": lambda args: blocos(),
+    "comissao-detalhe": lambda args: comissao_detalhe(args[0]),
+    "composicao": lambda args: composicao(args[0]),
+    "processo": lambda args: processo(args[0]),
 }
 
 if __name__ == "__main__":

@@ -3,9 +3,15 @@
   "slug": "senado-federal",
   "displayName": "Senado Federal",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1772616777983,
-    "commit": "https://github.com/openclaw/skills/commit/b2ae071673c7f8e3803e61fa38702de26bf18a6b"
+    "version": "1.0.2",
+    "publishedAt": 1776860529338,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1772616777983,
+      "commit": "https://github.com/openclaw/skills/commit/b2ae071673c7f8e3803e61fa38702de26bf18a6b"
+    }
+  ]
 }
