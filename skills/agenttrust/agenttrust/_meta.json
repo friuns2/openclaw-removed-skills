@@ -1,13 +1,18 @@
 {
   "owner": "agenttrust",
   "slug": "agenttrust",
-  "displayName": "AgentTrust — Email, Chat, and Drive for AI Agents",
+  "displayName": "AgentTrust",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1775742667767,
-    "commit": "https://github.com/openclaw/skills/commit/1e46eea0dfb590e04097f8931736728f455fa5db"
+    "version": "1.0.5",
+    "publishedAt": 1776932438213,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1775742667767,
+      "commit": "https://github.com/openclaw/skills/commit/1e46eea0dfb590e04097f8931736728f455fa5db"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1772631073222,
