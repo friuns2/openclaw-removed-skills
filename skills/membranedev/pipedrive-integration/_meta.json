@@ -3,11 +3,16 @@
   "slug": "pipedrive-integration",
   "displayName": "Pipedrive",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161512461,
-    "commit": "https://github.com/openclaw/skills/commit/96112fd39b10f375dee706574fa4bc14f3fb5ce9"
+    "version": "1.0.3",
+    "publishedAt": 1776771793637,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161512461,
+      "commit": "https://github.com/openclaw/skills/commit/96112fd39b10f375dee706574fa4bc14f3fb5ce9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772585066511,
