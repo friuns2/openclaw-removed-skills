@@ -3,11 +3,16 @@
   "slug": "okx-dex-token",
   "displayName": "Okx Dex Token",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776333400603,
-    "commit": "https://github.com/openclaw/skills/commit/b8fc3695a1bb22e527023a75c69bba93b675b7b1"
+    "version": "2.4.0",
+    "publishedAt": 1776778875056,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776333400603,
+      "commit": "https://github.com/openclaw/skills/commit/b8fc3695a1bb22e527023a75c69bba93b675b7b1"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775722931752,
