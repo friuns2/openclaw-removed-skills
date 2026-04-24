@@ -3,11 +3,16 @@
   "slug": "salesforce-integration",
   "displayName": "Salesforce",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1775161503763,
-    "commit": "https://github.com/openclaw/skills/commit/2cd7cfa3b1947284eb0b6fc3f7b740e3bda874b1"
+    "version": "1.0.10",
+    "publishedAt": 1776771753953,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1775161503763,
+      "commit": "https://github.com/openclaw/skills/commit/2cd7cfa3b1947284eb0b6fc3f7b740e3bda874b1"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1772585030152,
