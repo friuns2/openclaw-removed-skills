@@ -3,11 +3,16 @@
   "slug": "attio-integration",
   "displayName": "Attio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161571601,
-    "commit": "https://github.com/openclaw/skills/commit/0c2a2ceab3c777a8135400474a77c3b8b0570551"
+    "version": "1.0.3",
+    "publishedAt": 1776771835375,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161571601,
+      "commit": "https://github.com/openclaw/skills/commit/0c2a2ceab3c777a8135400474a77c3b8b0570551"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772607714110,
