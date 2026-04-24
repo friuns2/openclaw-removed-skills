@@ -3,11 +3,16 @@
   "slug": "somark-document-parser",
   "displayName": "Somark Document Parser",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1775365093483,
-    "commit": "https://github.com/openclaw/skills/commit/ce8997cf6a00095af2d178c77cc69a413d241014"
+    "version": "1.0.9",
+    "publishedAt": 1776777423123,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1775365093483,
+      "commit": "https://github.com/openclaw/skills/commit/ce8997cf6a00095af2d178c77cc69a413d241014"
+    },
     {
       "version": "1.0.7",
       "publishedAt": 1773824507051,
