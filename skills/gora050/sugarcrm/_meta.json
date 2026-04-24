@@ -3,11 +3,16 @@
   "slug": "sugarcrm",
   "displayName": "Sugarcrm",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775162344191,
-    "commit": "https://github.com/openclaw/skills/commit/4c16aab7875fe089bf3dc638acd6182dd1893f85"
+    "version": "1.0.4",
+    "publishedAt": 1776771956082,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775162344191,
+      "commit": "https://github.com/openclaw/skills/commit/4c16aab7875fe089bf3dc638acd6182dd1893f85"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1772629408860,
