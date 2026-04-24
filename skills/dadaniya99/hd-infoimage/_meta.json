@@ -3,11 +3,16 @@
   "slug": "hd-infoimage",
   "displayName": "Hd Infoimage",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776238119181,
-    "commit": "https://github.com/openclaw/skills/commit/ca4e803042a38288ef39310ffebadcfc4cb72c20"
+    "version": "1.2.0",
+    "publishedAt": 1776930228213,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776238119181,
+      "commit": "https://github.com/openclaw/skills/commit/ca4e803042a38288ef39310ffebadcfc4cb72c20"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772274440703,

@@ -1,6 +1,6 @@
 ---
 name: hd-infoimage
-description: 高密度信息大图生成技能。根据文章/内容生成高信息密度的视觉大图，适合知识干货、笔记分享、课程内容可视化。支持9种风格：坐标蓝图波普实验室、复古波普网格、文件夹风、色块热敏纸、复古手帐、档案混合媒介、色块酸性风、票据剧场戏票风、Claude陶土风。使用 Imagen 3（ZenMux API，建议4K）生成。当用户提供文章/内容并要求生成信息大图、干货图、知识图、高密度配图时触发此技能。
+description: 高密度信息大图生成技能。根据文章/内容生成高信息密度的视觉大图，适合知识干货、笔记分享、课程内容可视化。支持9种风格：坐标蓝图波普实验室、复古波普网格、文件夹风、色块热敏纸、复古手帐、档案混合媒介、色块酸性风、票据剧场戏票风、Claude陶土风。使用系统配置的图像生成模型（建议4K）生成。当用户提供文章/内容并要求生成信息大图、干货图、知识图、高密度配图时触发此技能。
 ---
 
 # 高密度信息大图（hd-infoimage）
@@ -32,18 +32,16 @@ description: 高密度信息大图生成技能。根据文章/内容生成高信
 
 ## 生成图片
 
-```bash
-cd /root/.openclaw/workspace/skills/zenmux-image-generation
-ZENMUX_API_KEY="<key>" python3 scripts/generate.py \
-  --output /root/myfiles/<filename>.png \
-  --prompt "<风格提示词> + <文章内容>"
-```
+使用系统配置的图像生成模型生成图片。
 
-建议生成4K质量（Imagen 3 默认支持）。
+```bash
+# 通过系统工具或配置的图像生成服务生成
+# 输出到 /root/myfiles/<filename>.png
+# 建议4K质量
+```
 
 ## 注意事项
 
 - 复古风提示词里如出现"小红书" logo，可删掉提示词中的"小红书"字样
 - 每张图建议包含 6-7 个子主题模块，信息密度要高
 - 生成后用 `send_to_feishu.sh` 发送（见 sketch-illustration skill）
-- API Key 读取：`cat ~/.openclaw/openclaw.json | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['models']['providers']['ZenMux']['apiKey'])"`
