@@ -3,11 +3,16 @@
   "slug": "hubspot-integration",
   "displayName": "Hubspot",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1775161508174,
-    "commit": "https://github.com/openclaw/skills/commit/75e85cfee530d6e8ac0a447049ec9f19923063ca"
+    "version": "1.0.10",
+    "publishedAt": 1776771770155,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1775161508174,
+      "commit": "https://github.com/openclaw/skills/commit/75e85cfee530d6e8ac0a447049ec9f19923063ca"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1772585046107,
