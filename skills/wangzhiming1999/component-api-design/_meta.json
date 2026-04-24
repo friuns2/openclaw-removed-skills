@@ -3,9 +3,15 @@
   "slug": "component-api-design",
   "displayName": "Component Api Design",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1772597241978,
-    "commit": "https://github.com/openclaw/skills/commit/cb688566f22f232c885dcf0f9ebf47d0c44a5577"
+    "version": "1.0.1",
+    "publishedAt": 1776668143704,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1772597241978,
+      "commit": "https://github.com/openclaw/skills/commit/cb688566f22f232c885dcf0f9ebf47d0c44a5577"
+    }
+  ]
 }

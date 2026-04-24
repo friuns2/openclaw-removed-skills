@@ -52,6 +52,89 @@ description: Designs reusable React/Vue component APIs and file structure for cl
   - `ComponentName/SubPart.tsx`（内部子组件）
 - 类型、常量、工具函数可共用的放上层或 shared
 
+## 执行流程
+
+### 1. 先判断用户在哪个阶段
+
+| 用户描述 | 实际需求 | 第一步 |
+|---------|---------|-------|
+| 「设计这个组件」「新建一个组件」 | 从零设计 | 问：这个组件是通用组件还是业务组件？会在几个地方用？ |
+| 「这个组件 API 怎么改」「props 太多了」 | 改现有组件 | 先读现有代码，找出问题所在，再给改法 |
+| 「props 怎么设计」「要不要用 children」 | 具体设计决策 | 直接给出该场景的推荐和理由 |
+| 「要不要拆组件」 | 拆分决策 | 问：是因为文件太长，还是因为逻辑复用需要？两个原因的拆法不同 |
+
+### 2. 从零设计时，先问清楚再动手
+
+设计前必须知道：
+- **使用场景**：在哪里用？用几次？（一次性业务组件 vs 多处复用的通用组件，设计原则完全不同）
+- **调用方是谁**：同一个人写还是团队共用？（团队共用的要更严格的类型和文档）
+- **技术栈约束**：项目用 Radix/shadcn 还是自己写？用 Tailwind 还是 CSS Modules？
+
+**通用组件和业务组件的设计原则不同：**
+
+| | 通用组件 | 业务组件 |
+|--|---------|---------|
+| props | 尽量少，保持中性 | 可以有业务语义 |
+| 样式 | 支持 `className` 覆盖 | 可以写死 |
+| 数据获取 | 不做，由外部传入 | 可以自己请求 |
+| 复杂度 | 宁可简单，不要过度设计 | 按业务需要 |
+
+### 3. Props 设计的决策规则
+
+遇到这些情况，给出明确建议：
+
+**「要不要加这个 prop」**
+- 能用 `children` 或组合表达的 → 不加 prop（如 `<Button icon={<Icon />}>` 优于 `<Button iconName="star">`）
+- 只有一个地方用到的特殊行为 → 不加 prop，在调用处处理
+- 3 处以上地方需要这个行为 → 加 prop
+
+**「布尔 prop 还是枚举」**
+- 两种状态 → 布尔（`disabled`、`loading`）
+- 三种及以上 → 枚举（`variant="primary|secondary|ghost"` 优于 `isPrimary isSecondary isGhost`）
+
+**「受控还是非受控」**
+- 需要外部控制状态（如表单联动）→ 受控：`value` + `onChange`
+- 独立使用、不需要外部感知 → 非受控：`defaultValue`
+- 两种都支持 → 同时提供 `value`/`onChange` 和 `defaultValue`，内部用 `useControllableState`
+
+**「要不要透传 HTML 属性」**
+- 表单类（input、button、select）→ 必须透传，用 `...rest` 传给原生元素
+- 展示类容器 → 至少透传 `className` 和 `style`
+- 原因：不透传会导致调用方无法加 `aria-*`、`data-*`、事件监听
+
+### 4. 给出设计方案时，必须包含反例
+
+只给正确做法不够，要说明**什么是错的**：
+
+```tsx
+// ❌ 错：用字符串传图标名，组件内部耦合图标库
+<Button iconName="star" />
+
+// ✅ 对：用 children 或 render prop，调用方决定用什么图标
+<Button icon={<StarIcon />} />
+```
+
+```tsx
+// ❌ 错：一堆布尔 prop，互斥关系不清晰
+<Button isPrimary isLarge isRounded />
+
+// ✅ 对：枚举表达变体，组合表达修饰
+<Button variant="primary" size="lg" rounded />
+```
+
+### 5. 文件结构的判断
+
+- 单文件（< 150 行，无子组件）→ 一个 `.tsx` 文件
+- 有样式文件或子组件 → 目录结构：
+  ```
+  Button/
+  ├── index.tsx        # 导出入口
+  ├── Button.tsx       # 实现
+  ├── types.ts         # Props 类型
+  └── Button.module.css
+  ```
+- 不要过早拆目录，等真的需要时再拆
+
 ## 输出模板
 
 ```markdown
