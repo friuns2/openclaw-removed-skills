@@ -3,9 +3,15 @@
   "slug": "refactor-safely",
   "displayName": "Refactor Safely",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1772605245327,
-    "commit": "https://github.com/openclaw/skills/commit/c02d8ba6f0a74bcf92631059a84b29744b0c1e6d"
+    "version": "1.0.1",
+    "publishedAt": 1776668278218,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1772605245327,
+      "commit": "https://github.com/openclaw/skills/commit/c02d8ba6f0a74bcf92631059a84b29744b0c1e6d"
+    }
+  ]
 }
