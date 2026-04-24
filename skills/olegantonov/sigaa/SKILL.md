@@ -17,6 +17,9 @@ metadata:
         description: "SIGAA institutional account (matricula/CPF + password)"
         env: SIGAA_USER,SIGAA_PASSWORD
     homepage: "https://github.com/olegantonov/sigaa-openclaw-skill"
+version: "1.1.1"
+author: "Daniel Marques"
+license: "MIT"
 ---
 
 # SIGAA Skill

@@ -3,11 +3,16 @@
   "slug": "sigaa",
   "displayName": "SIGAA",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1776860155431,
-    "commit": "https://github.com/openclaw/skills/commit/796ad5da80019437eabc25e9c8a8bf902718db9f"
+    "version": "1.1.2",
+    "publishedAt": 1776860529996,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1776860155431,
+      "commit": "https://github.com/openclaw/skills/commit/796ad5da80019437eabc25e9c8a8bf902718db9f"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1772449417494,

@@ -6,7 +6,7 @@ An OpenClaw agent skill for interacting with **SIGAA** (Sistema Integrado de Ges
 
 - 🔐 **Secure authentication**: CAS SSO (UNB-style) and direct login — credentials via env vars only, never CLI args
 - 🎓 **Student Portal**: enrollment status, grades, academic history, class schedule
-- 👨‍🏫 **Professor Portal**: class management, attendance, grade entry
+- 👨🏫 **Professor Portal**: class management, attendance, grade entry
 - 🏛️ **Multi-institution**: UNB, UFRN, UFC, UFPE, UFCG, UFPI, UFRRJ, and 40+ more
 - 🔒 **Security-first**: cookies chmod 600 + auto-deleted on exit, password cleared from env after login, rate limiting built-in
 
