@@ -3,11 +3,16 @@
   "slug": "google-drive-integration",
   "displayName": "Google Drive",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1775161495349,
-    "commit": "https://github.com/openclaw/skills/commit/c6c1618ec6f23eba2eec973f0515f5a544227721"
+    "version": "1.0.6",
+    "publishedAt": 1776771730598,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1775161495349,
+      "commit": "https://github.com/openclaw/skills/commit/c6c1618ec6f23eba2eec973f0515f5a544227721"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1772581762081,
