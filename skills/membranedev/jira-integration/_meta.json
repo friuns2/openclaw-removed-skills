@@ -3,11 +3,16 @@
   "slug": "jira-integration",
   "displayName": "Jira",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161520597,
-    "commit": "https://github.com/openclaw/skills/commit/d471952f9c3b6d74d261c055bef9533307b2131d"
+    "version": "1.0.3",
+    "publishedAt": 1776771843167,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161520597,
+      "commit": "https://github.com/openclaw/skills/commit/d471952f9c3b6d74d261c055bef9533307b2131d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772585097756,
