@@ -3,11 +3,16 @@
   "slug": "google-sheets-integration",
   "displayName": "Google Sheets",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161563348,
-    "commit": "https://github.com/openclaw/skills/commit/a72900d4f5ab94dc756c43a6da0a012bc97eea3c"
+    "version": "1.0.3",
+    "publishedAt": 1776771817370,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161563348,
+      "commit": "https://github.com/openclaw/skills/commit/a72900d4f5ab94dc756c43a6da0a012bc97eea3c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772607694142,
