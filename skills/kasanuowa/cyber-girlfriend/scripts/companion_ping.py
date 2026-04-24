@@ -550,7 +550,12 @@ def main():
     # Operational health check
     try:
         health_output = run_shell(config["runtime"]["healthcheck_command"], {}, expect_json=False)
-        gateway_healthy = "Runtime: running" in health_output and "RPC probe: ok" in health_output
+        runtime_ok = "Runtime: running" in health_output
+        probe_ok = any(
+            marker in health_output
+            for marker in ("RPC probe: ok", "Connectivity probe: ok")
+        )
+        gateway_healthy = runtime_ok and probe_ok
     except Exception:
         gateway_healthy = True
     issues = load_cron_issues(config)
