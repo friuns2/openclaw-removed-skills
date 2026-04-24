@@ -115,6 +115,36 @@ No photorealistic, no glossy 3D, no flat corporate vector poster, no dark backgr
 - 小龙虾：AI 代理、认真臭脸、会先分析后动手
 - 小人/学生：用户、执行者、学习者
 
+---
+
+## 风格 E：NotebookLM Tech 技术图解风
+
+**适用场景**：产品功能介绍、流程说明、概念图解、技术产品说明书、中等信息密度信息图  
+**参考**：NotebookLM 生成的信息图、技术产品说明图  
+**特征**：低饱和莫兰迪色系（灰绿、米白、浅棕）、扁平2.5D插画带轻微投影、模块化布局清晰、思源黑体类字体、线性图标+填充色块、右下角可放logo/水印区域
+
+### 风格块
+```
+Technical infographic illustration, NotebookLM style, low-saturation Morandi color palette (sage green, cream white, light brown), flat 2.5D illustration with subtle drop shadows, modular layout with clear sections, clean geometric icons, minimal line icons + filled color blocks, Source Han Sans / PingFang style typography, professional but friendly, medium information density, not overwhelming, suitable for product feature explanation and process diagrams. All text in Chinese.
+```
+
+### 负面约束
+```
+No high-density small text, no photorealistic, no 3D rendering, no glossy effects, no neon/bright colors, no messy overlapping elements, no complex gradients.
+```
+
+### 布局建议
+- **左右分栏**：左图右文，或左文右图
+- **上下分区**：顶部标题+主图，底部2-4个功能模块
+- **模块化卡片**：每个功能一个卡片，图标+短标题+一句话说明
+- **流程箭头**：步骤之间用清晰箭头连接
+
+### 与风格C的区别
+- 风格C（Flat Vector Retro）：黑色轮廓线、复古配色、填色书感
+- 风格E（NotebookLM Tech）：无黑色轮廓线、莫兰迪配色、更现代柔和、适合技术产品说明
+
+---
+
 ## 风格选择指南
 
 | 需求 | 推荐风格 |
@@ -131,3 +161,5 @@ No photorealistic, no glossy 3D, no flat corporate vector poster, no dark backgr
 | 白纸手绘知识图、方法论、概念对比 | Doodle D |
 | 拖延机制、知识卡片、课堂板书感 | Doodle D |
 | 拟人蜗牛/脑子/龙虾的高信息密度图 | Doodle D |
+| 产品功能说明、技术图解、中等信息密度 | NotebookLM Tech E |
+| 现代技术产品说明书风格 | NotebookLM Tech E |
