@@ -3,9 +3,15 @@
   "slug": "limesurvey-openclaw-skill",
   "displayName": "Limesurvey Openclaw Skill",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1772295104005,
-    "commit": "https://github.com/openclaw/skills/commit/0b0d43ca44f3837008a776dcc3ff6dfad60a8a30"
+    "version": "1.2.2",
+    "publishedAt": 1776860528392,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1772295104005,
+      "commit": "https://github.com/openclaw/skills/commit/0b0d43ca44f3837008a776dcc3ff6dfad60a8a30"
+    }
+  ]
 }

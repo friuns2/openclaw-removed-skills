@@ -13,6 +13,9 @@ metadata:
         description: "LimeSurvey RemoteControl service account (least-privilege recommended)"
         env: LIMESURVEY_USER,LIMESURVEY_PASSWORD
     homepage: "https://github.com/olegantonov/limesurvey-openclaw-skill"
+version: "1.2.1"
+author: "Daniel Marques"
+license: "MIT"
 ---
 
 # LimeSurvey RemoteControl 2 API
