@@ -3,11 +3,16 @@
   "slug": "farmdash-signal-architect",
   "displayName": "FarmDash Signal Architect",
   "latest": {
-    "version": "1.2.1",
-    "publishedAt": 1774920039298,
-    "commit": "https://github.com/openclaw/skills/commit/6a12fcc3f58450d007af2a90f4fbfd6d67284864"
+    "version": "1.2.2",
+    "publishedAt": 1776802750822,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.1",
+      "publishedAt": 1774920039298,
+      "commit": "https://github.com/openclaw/skills/commit/6a12fcc3f58450d007af2a90f4fbfd6d67284864"
+    },
     {
       "version": "1.2.0",
       "publishedAt": 1774658584516,
