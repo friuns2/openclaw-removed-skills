@@ -49,7 +49,7 @@ description: Reviews user-modified code (diffs/PRs), provides best-practice reco
 
 ### 5. 代码评分
 
-采用百分制，并给出等级与一句话总结：
+**先列 Blockers，再给评分**——有 Blocker 时评分仅供参考，不能用分数掩盖必须修的问题。
 
 | 分数区间 | 等级 | 含义 |
 |----------|------|------|
@@ -90,6 +90,7 @@ description: Reviews user-modified code (diffs/PRs), provides best-practice reco
 - （其他主要方案按需）
 
 ### 五、代码评分
+- **Blockers（必须改，不改不能合）**：…（无则写"无"）
 - **分数**：XX / 100（等级：X）
 - **一句话总结**：…
 ```
