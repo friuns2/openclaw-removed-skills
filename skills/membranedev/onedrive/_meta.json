@@ -3,11 +3,16 @@
   "slug": "onedrive",
   "displayName": "Onedrive",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161542422,
-    "commit": "https://github.com/openclaw/skills/commit/492e401c957855ec8592af0f8262c71a489f6d06"
+    "version": "1.0.3",
+    "publishedAt": 1776771746390,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161542422,
+      "commit": "https://github.com/openclaw/skills/commit/492e401c957855ec8592af0f8262c71a489f6d06"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772603749247,
