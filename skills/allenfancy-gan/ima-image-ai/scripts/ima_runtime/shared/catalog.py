@@ -7,6 +7,9 @@ from typing import Any
 logger = logging.getLogger("ima_skills")
 
 MODEL_ID_ALIASES = {
+    "gpt image 2": "gpt-image-2",
+    "gpt-image-2": "gpt-image-2",
+    "gptimage2": "gpt-image-2",
     "seedream": "doubao-seedream-4.5",
     "seedream 4.5": "doubao-seedream-4.5",
     "see dream": "doubao-seedream-4.5",
@@ -64,14 +67,23 @@ def list_all_models(product_tree: list) -> list[dict]:
     def walk(nodes: list) -> None:
         for node in nodes:
             if node.get("type") == "3":
-                credit_rule = (node.get("credit_rules") or [{}])[0]
+                try:
+                    resolved = extract_model_params(node)
+                    model_id = resolved["model_id"]
+                    credit = resolved["credit"]
+                    attr_id = resolved["attribute_id"]
+                except RuntimeError:
+                    credit_rule = (node.get("credit_rules") or [{}])[0]
+                    model_id = canonicalize_model_id(node.get("model_id", "")) or node.get("model_id", "")
+                    credit = credit_rule.get("points", 0)
+                    attr_id = credit_rule.get("attribute_id", 0)
                 result.append(
                     {
                         "name": node.get("name", ""),
-                        "model_id": canonicalize_model_id(node.get("model_id", "")) or node.get("model_id", ""),
+                        "model_id": model_id,
                         "version_id": node.get("id", ""),
-                        "credit": credit_rule.get("points", 0),
-                        "attr_id": credit_rule.get("attribute_id", 0),
+                        "credit": credit,
+                        "attr_id": attr_id,
                     }
                 )
             walk(node.get("children") or [])

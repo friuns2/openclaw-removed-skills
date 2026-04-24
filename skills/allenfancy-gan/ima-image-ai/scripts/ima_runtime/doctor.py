@@ -11,7 +11,12 @@ import sys
 import time
 from pathlib import Path
 
-from ima_runtime.shared.config import DEFAULT_BASE_URL, DEFAULT_MODEL_BY_TASK_TYPE, DEFAULT_MODEL_LABEL_BY_TASK_TYPE
+from ima_runtime.shared.config import (
+    DEFAULT_BASE_URL,
+    DEFAULT_MODEL_BY_TASK_TYPE,
+    DEFAULT_MODEL_LABEL_BY_TASK_TYPE,
+    DEFAULT_MODEL_RECOMMENDATION_BY_TASK_TYPE,
+)
 from ima_runtime.shared.errors import extract_error_info
 
 
@@ -135,6 +140,8 @@ def collect_diagnostics(api_key: str | None, base_url: str, language: str, inclu
             task_type: {
                 "model_id": model_id,
                 "label": DEFAULT_MODEL_LABEL_BY_TASK_TYPE[task_type],
+                "summary": DEFAULT_MODEL_RECOMMENDATION_BY_TASK_TYPE.get(task_type, {}).get("summary"),
+                "features": list(DEFAULT_MODEL_RECOMMENDATION_BY_TASK_TYPE.get(task_type, {}).get("features", ())),
             }
             for task_type, model_id in DEFAULT_MODEL_BY_TASK_TYPE.items()
         },
@@ -183,6 +190,8 @@ def _print_text_report(report: dict) -> None:
     print("Recommended defaults:")
     for task_type, info in report["recommended_defaults"].items():
         print(f"  - {task_type}: {info['label']} ({info['model_id']})")
+        if info.get("summary"):
+            print(f"    {info['summary']}")
     print(f"Network: {report['network']['status']}")
     for task_type, info in report["network"]["task_types"].items():
         if info["status"] == "ok":

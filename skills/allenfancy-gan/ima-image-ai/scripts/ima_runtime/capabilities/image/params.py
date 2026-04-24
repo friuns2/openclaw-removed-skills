@@ -16,6 +16,8 @@ Conflict resolution:
 """
 
 MODEL_ALIAS_HINTS = (
+    (r"(?<![a-z0-9])gpt[- ]image[- ]?2(?![a-z0-9])", "gpt-image-2"),
+    (r"(?<![a-z0-9])gptimage2(?![a-z0-9])", "gpt-image-2"),
     (r"(?<![a-z0-9])mj(?![a-z0-9])", "midjourney"),
     (r"(?<![a-z0-9])midjourney(?![a-z0-9])", "midjourney"),
     (r"香蕉\s*pro", "gemini-3-pro-image"),

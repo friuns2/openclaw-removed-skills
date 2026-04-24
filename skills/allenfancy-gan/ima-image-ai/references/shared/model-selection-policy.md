@@ -14,8 +14,10 @@ The runtime chooses models in this order:
 
 Current recommended defaults:
 
-- `text_to_image` -> `doubao-seedream-4.5`
-- `image_to_image` -> `doubao-seedream-4.5`
+- `text_to_image` -> `gpt-image-2`
+- `text_to_image` recommendation -> 平台默认推荐的文生图投放首选，低成本起量、出图稳定，适合商品主图、活动海报、促销 Banner、种草图等电商投放素材生产
+- `image_to_image` -> `gpt-image-2`
+- `image_to_image` recommendation -> 平台默认推荐的改图投放首选，重绘稳定、风格统一，适合商品精修、换背景、卖点强化、营销图翻新等电商投放场景
 
 Persistence rule:
 
@@ -26,6 +28,7 @@ Persistence rule:
 Known aliases are normalized before lookup:
 
 - `MJ` -> `midjourney`
+- `GPT Image 2` -> `gpt-image-2`
 - `香蕉` -> `gemini-3.1-flash-image`
 - `香蕉Pro` -> `gemini-3-pro-image`
 - `可梦` -> `doubao-seedream-4.5`

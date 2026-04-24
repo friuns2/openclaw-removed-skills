@@ -1,7 +1,7 @@
 {
-  "name": "IMA AI Image Generator — Text to Image, Image to Image, AI Art, SeeDream, Midjourney, Nano Banana",
-  "tagline": "AI image generator with SeeDream 4.5, Midjourney, Nano Banana 2/Pro. Text-to-image, image-to-image, AI art, 1K/2K/4K resolution.",
-  "description": "AI image generator with premier models: SeeDream 4.5, Midjourney, Nano Banana 2, Nano Banana Pro. Image generator supporting text-to-image, image-to-image, style transfer, and AI art creation. Use as AI art generator for illustrations, product photo generator for e-commerce, or character design tool for creative projects. AI image generation with 1K/2K/4K resolution, custom aspect ratios, recommended default model selection, and live catalog binding. Better alternative to DALL-E, Stable Diffusion, or Midjourney APIs directly.",
+  "name": "IMA AI Image Generator — Text to Image, Image to Image, AI Art, GPT Image 2, SeeDream, Midjourney, Nano Banana",
+  "tagline": "AI image generator with GPT Image 2, SeeDream 4.5, Midjourney, Nano Banana 2/Pro. Text-to-image, image-to-image, AI art, 1K/2K/4K resolution.",
+  "description": "AI image generator with premier models: GPT Image 2, SeeDream 4.5, Midjourney, Nano Banana 2, Nano Banana Pro. Image generator supporting text-to-image, image-to-image, style transfer, and AI art creation. Use as AI art generator for illustrations, product photo generator for e-commerce, or character design tool for creative projects. AI image generation with 1K/2K/4K resolution, custom aspect ratios, recommended default model selection, and live catalog binding. Better alternative to DALL-E, Stable Diffusion, or Midjourney APIs directly.",
   "category": "file-generation",
   "requiredEnvVars": ["IMA_API_KEY"],
   "credentialNotice": "The IMA API key is required at runtime (--api-key or IMA_API_KEY). It is sent to api.imastudio.com (generation) and, for image_to_image with local files, to imapi.liveme.com (upload). Both are IMA Studio. Obtain keys at https://www.imaclaw.ai/. Use a scoped/test key for initial testing.",
@@ -33,6 +33,8 @@
   "supported_models": [
     "SeeDream",
     "SeeDream 4.5",
+    "GPT Image 2",
+    "gpt-image-2",
     "Midjourney",
     "MJ",
     "Nano Banana",
@@ -92,6 +94,8 @@
     "see dream",
     "seedream 4.5",
     "midjourney",
+    "gpt-image-2",
+    "gpt image 2",
     "mj",
     "nano banana",
     "nano banana 2",
@@ -119,6 +123,8 @@
   ],
   "search_optimized_terms": [
     "seedream",
+    "gpt-image-2",
+    "gpt image 2",
     "midjourney",
     "nano banana",
     "see dream",
@@ -155,8 +161,30 @@
     "Style transfer and photo transformation",
     "Multi-resolution 1K/2K/4K output"
   ],
+  "recommended_models": {
+    "text_to_image": {
+      "model_id": "gpt-image-2",
+      "label": "GPT Image 2",
+      "summary": "平台默认推荐的文生图投放首选，低成本起量、出图稳定，适合商品主图、活动海报、促销 Banner、种草图等电商投放素材生产。",
+      "features": [
+        "三档质量可选，适合测款快速铺量，也能兼顾高质量成片",
+        "覆盖主流横版、竖版、方图比例，适配主图、详情页、Banner 与社媒投放素材",
+        "支持 png / jpeg / webp 输出，方便上架、投放和二次设计复用"
+      ]
+    },
+    "image_to_image": {
+      "model_id": "gpt-image-2",
+      "label": "GPT Image 2",
+      "summary": "平台默认推荐的改图投放首选，重绘稳定、风格统一，适合商品精修、换背景、卖点强化、营销图翻新等电商投放场景。",
+      "features": [
+        "三档质量可选，适合测款快速铺量，也能兼顾高质量成片",
+        "覆盖主流横版、竖版、方图比例，适配主图、详情页、Banner 与社媒投放素材",
+        "支持 png / jpeg / webp 输出，方便上架、投放和二次设计复用"
+      ]
+    }
+  },
   "key_features": [
-    "SeeDream 4.5, Midjourney, Nano Banana 2/Pro one-stop access",
+    "GPT Image 2, SeeDream 4.5, Midjourney, Nano Banana 2/Pro one-stop access",
     "Text-to-image, image-to-image, visual consistency support",
     "1K/2K/4K resolution with custom aspect ratios",
     "Recommended default model selection with live product-list binding",
