@@ -3,11 +3,16 @@
   "slug": "gmail-integration",
   "displayName": "Gmail",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1775161524970,
-    "commit": "https://github.com/openclaw/skills/commit/15cd9d9fb532b44ffdee35965384aa390eecb80d"
+    "version": "1.0.8",
+    "publishedAt": 1776771860884,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1775161524970,
+      "commit": "https://github.com/openclaw/skills/commit/15cd9d9fb532b44ffdee35965384aa390eecb80d"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1772585121351,
