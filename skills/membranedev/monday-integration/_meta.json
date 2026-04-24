@@ -3,11 +3,16 @@
   "slug": "monday-integration",
   "displayName": "Monday",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161559270,
-    "commit": "https://github.com/openclaw/skills/commit/99044851bf7475d0a9ce8af8af0aae3ac5fa8af8"
+    "version": "1.0.3",
+    "publishedAt": 1776771802787,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161559270,
+      "commit": "https://github.com/openclaw/skills/commit/99044851bf7475d0a9ce8af8af0aae3ac5fa8af8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772607688349,
