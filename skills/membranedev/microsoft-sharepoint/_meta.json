@@ -3,11 +3,16 @@
   "slug": "microsoft-sharepoint",
   "displayName": "Microsoft Sharepoint",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161532889,
-    "commit": "https://github.com/openclaw/skills/commit/4c95de75c1c0de323503a9114d64ba3c33969ccc"
+    "version": "1.0.3",
+    "publishedAt": 1776771714663,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161532889,
+      "commit": "https://github.com/openclaw/skills/commit/4c95de75c1c0de323503a9114d64ba3c33969ccc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772603737345,
