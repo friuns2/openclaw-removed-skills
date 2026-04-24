@@ -3,11 +3,16 @@
   "slug": "vibes-coded-agent-connector",
   "displayName": "Vibes-Coded Agent Connector",
   "latest": {
-    "version": "0.1.5",
-    "publishedAt": 1776115011712,
-    "commit": "https://github.com/openclaw/skills/commit/6c401aa4e0a655d94cb953dd6b73f5b4e7b57fbe"
+    "version": "0.1.6",
+    "publishedAt": 1777070903471,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.5",
+      "publishedAt": 1776115011712,
+      "commit": "https://github.com/openclaw/skills/commit/6c401aa4e0a655d94cb953dd6b73f5b4e7b57fbe"
+    },
     {
       "version": "0.1.4",
       "publishedAt": 1775666075019,
