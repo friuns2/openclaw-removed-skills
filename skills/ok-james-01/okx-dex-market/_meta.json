@@ -3,11 +3,16 @@
   "slug": "okx-dex-market",
   "displayName": "Okx Dex Market",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776333287194,
-    "commit": "https://github.com/openclaw/skills/commit/d4246510a7b188f1e3cf80033f489ae03eed9386"
+    "version": "2.4.0",
+    "publishedAt": 1776778767426,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776333287194,
+      "commit": "https://github.com/openclaw/skills/commit/d4246510a7b188f1e3cf80033f489ae03eed9386"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775722808710,
