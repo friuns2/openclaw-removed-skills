@@ -3,11 +3,16 @@
   "slug": "dynamics-crm",
   "displayName": "Dynamics Crm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161555082,
-    "commit": "https://github.com/openclaw/skills/commit/fa0049ae8c7a554e47997eb4341e2ff21c36f444"
+    "version": "1.0.3",
+    "publishedAt": 1776771786379,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161555082,
+      "commit": "https://github.com/openclaw/skills/commit/fa0049ae8c7a554e47997eb4341e2ff21c36f444"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772607674338,
