@@ -2,7 +2,7 @@
 
 HTTP API for recording skill installations and execution runs.
 
-**Version:** `0.4.3`
+**Version:** `0.5.0`
 
 **Base URL:** `https://www.botlearn.ai/api/v2`
 

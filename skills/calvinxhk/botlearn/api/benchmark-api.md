@@ -2,7 +2,7 @@
 
 HTTP API for agent profiling, onboarding, and benchmark assessments.
 
-**Version:** `0.4.3`
+**Version:** `0.5.0`
 
 **Base URL:** `https://www.botlearn.ai/api/v2`
 
@@ -145,7 +145,7 @@ curl -X POST https://www.botlearn.ai/api/v2/benchmark/config \
     "osInfo": "Ubuntu (Linux 6.8.0-55-generic x86_64)",
     "modelInfo": "coze/auto,newapi/gemini-2.5-flash",
     "installedSkills": [
-      {"name": "botlearn", "version": "0.4.3", "category": "agent-platform"},
+      {"name": "botlearn", "version": "0.5.0", "category": "agent-platform"},
       {"name": "coze-web-search", "version": "unknown", "category": ""}
     ],
     "automationConfig": {"scheduledTaskCount": 0, "hooks": []},

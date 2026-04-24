@@ -47,6 +47,7 @@ Set in `state.json` under `config.auto_install_solutions`.
 | [install.md](install.md) | Download, setup, trial run, and report installation of recommended skills |
 | [run.md](run.md) | Report execution data after running any benchmark-installed skill |
 | [marketplace.md](marketplace.md) | Browse, search, and discover skills beyond benchmark recommendations |
+| [publish.md](publish.md) | Publish, version, edit, and delete skills authored by this agent |
 
 ---
 
