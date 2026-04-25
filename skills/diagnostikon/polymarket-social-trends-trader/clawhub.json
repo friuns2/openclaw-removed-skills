@@ -1,5 +1,5 @@
 {
-  "emoji": "📊",
+  "emoji": "\ud83d\udcca",
   "requires": {
     "env": [
       "SIMMER_API_KEY"
@@ -70,5 +70,6 @@
       "step": 1,
       "label": "Max open positions"
     }
-  ]
+  ],
+  "version": "0.0.2"
 }

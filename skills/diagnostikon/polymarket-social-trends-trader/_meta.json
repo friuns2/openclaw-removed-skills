@@ -3,11 +3,16 @@
   "slug": "polymarket-social-trends-trader",
   "displayName": "Polymarket Social Trends Trader",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775317337550,
-    "commit": "https://github.com/openclaw/skills/commit/3170066f9849aa1cc667712e202779332735c7c3"
+    "version": "0.0.2",
+    "publishedAt": 1776513571498,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775317337550,
+      "commit": "https://github.com/openclaw/skills/commit/3170066f9849aa1cc667712e202779332735c7c3"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773857047657,
