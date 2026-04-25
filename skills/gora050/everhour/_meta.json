@@ -3,11 +3,16 @@
   "slug": "everhour",
   "displayName": "Everhour",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162879983,
-    "commit": "https://github.com/openclaw/skills/commit/f1c0501ae033fcd9546dcd9d1cb9d5bc566411a6"
+    "version": "1.0.3",
+    "publishedAt": 1776784002663,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162879983,
+      "commit": "https://github.com/openclaw/skills/commit/f1c0501ae033fcd9546dcd9d1cb9d5bc566411a6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772992938427,
