@@ -3,11 +3,16 @@
   "slug": "drift-integration",
   "displayName": "Drift",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163748250,
-    "commit": "https://github.com/openclaw/skills/commit/ba82a63bcc995c032222b770b830f2ffe246ab67"
+    "version": "1.0.3",
+    "publishedAt": 1776812553385,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163748250,
+      "commit": "https://github.com/openclaw/skills/commit/ba82a63bcc995c032222b770b830f2ffe246ab67"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773439353202,
