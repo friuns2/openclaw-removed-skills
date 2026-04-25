@@ -11,14 +11,27 @@
 
 import json
 import os
+import sys
 from datetime import datetime
 from typing import List, Dict, Optional
 import hashlib
 
+# 添加脚本目录到路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # 导入概念提取扩展
-from concept_extraction_extension import ConceptExtractionExtension
+try:
+    from concept_extraction_extension import ConceptExtractionExtension
+    CONCEPT_EXTRACTION_AVAILABLE = True
+except ImportError:
+    CONCEPT_EXTRACTION_AVAILABLE = False
+
 # 导入帮助模块
-from cognitive_insight_help import CognitiveInsightHelp
+try:
+    from cognitive_insight_help import CognitiveInsightHelp
+    HELP_AVAILABLE = True
+except ImportError:
+    HELP_AVAILABLE = False
 
 
 class CognitiveInsightV2:
@@ -40,10 +53,16 @@ class CognitiveInsightV2:
         self.pattern_library = self._load_json(self.pattern_library_file, {"strategies": [], "logics": [], "behaviors": [], "errors": []})
         
         # 初始化概念提取扩展
-        self.concept_extension = ConceptExtractionExtension(self)
+        if CONCEPT_EXTRACTION_AVAILABLE:
+            self.concept_extension = ConceptExtractionExtension(self)
+        else:
+            self.concept_extension = None
         
         # 初始化帮助模块
-        self._help_helper = CognitiveInsightHelp()
+        if HELP_AVAILABLE:
+            self._help_helper = CognitiveInsightHelp()
+        else:
+            self._help_helper = None
         
         # 适用性权重
         self.applicability_weights = {

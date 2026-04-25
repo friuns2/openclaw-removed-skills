@@ -1,6 +1,6 @@
 ---
 name: agi-evolution-model
-description: 基于双环架构的AGI进化模型，通过意向性分析、人格层映射和元认知检测实现持续自我演进；当用户需要智能对话、人格定制、复杂问题求解或自我迭代优化时使用
+description: 基于双环架构的AGI进化模型，通过意向性分析、人格层映射、元认知检测和错误智慧库实现持续自我演进；当用户需要智能对话、人格定制、复杂问题求解或从错误中学习时使用
 dependency:
   python:
     - aiofiles>=23.0.0
@@ -51,8 +51,9 @@ dependency:
 - 人格自定义模式（`/root` 命令）
 - 工程意向性分析模组（最外圈）
 - CLI工具箱（文件操作、系统信息、进程管理、命令执行）
+- **错误智慧库**：从错误中学习，避免重复犯错（Phase 1：工具性错误；Phase 2：认知性错误；Phase 3：预防引擎与时效性管理）
 
-**架构特性**：采用"节点工具箱"概念，三层架构：最外圈（工程意向性分析模组）→ 外环（三角形三顶点循环：得不到/数学/自我迭代）→ 内圈（记录层：双轨存储）。详见 [架构文档](references/architecture.md)。
+**架构特性**：采用"节点工具箱"概念，三层架构：最外圈（工程意向性分析模组）→ 外环（三角形三顶点循环：得不到/数学/自我迭代）→ 内圈（记录层：三轨存储，含错误智慧库）。详见 [架构文档](references/architecture.md)。
 
 触发条件：用户任何提问、任务请求或交互需求，以及 `/root` 自定义人格命令
 
@@ -66,12 +67,64 @@ dependency:
 
 ### C扩展（可选）
 - 预编译模块 `personality_core.so` 用于加速核心算法
-- 自动降级：不可用时使用纯Python实现
+- 自动降级：不可用时使用纯Python实现 `personality_core_pure.py`
 - 性能对比：C扩展比纯Python快15-20倍
 
 ### 目录准备
 ```bash
 mkdir -p ./agi_memory
+```
+
+---
+
+## 关键API调用
+
+### 首次交互检测
+```bash
+python3 scripts/init_dialogue_optimized.py --check --memory-dir ./agi_memory
+```
+
+### 人格自定义模式
+```bash
+python3 scripts/personality_customizer.py --memory-dir ./agi_memory
+```
+
+### 记忆存储与检索
+```bash
+# 存储记忆
+python3 scripts/memory_store_pure.py --action store --content "记忆内容" --memory-dir ./agi_memory
+
+# 检索记忆
+python3 scripts/memory_store_pure.py --action retrieve --query "查询关键词" --memory-dir ./agi_memory
+```
+
+### 客观性评估
+```bash
+python3 scripts/objectivity_evaluator.py --response "响应内容" --context-type scientific
+```
+
+### 错误智慧库管理
+```bash
+# 查看统计
+python3 scripts/error_wisdom_manager.py --memory-dir ./agi_memory --stats
+
+# 查询预防知识
+python3 scripts/error_wisdom_manager.py --memory-dir ./agi_memory --query-prevention --context '{"tool_name": "get_weather"}'
+```
+
+### 预防规则检查
+```bash
+python3 scripts/error_wisdom_prevention.py --memory-dir ./agi_memory check --tool-name "get_weather" --params '{"unit": "kelvin"}'
+```
+
+### 时效性审计
+```bash
+python3 scripts/error_wisdom_timeliness.py --memory-dir ./agi_memory --audit
+```
+
+### 规则自动生成
+```bash
+python3 scripts/error_wisdom_rule_generator.py --memory-dir ./agi_memory --generate
 ```
 
 ---
@@ -107,12 +160,16 @@ mkdir -p ./agi_memory
 - 存储完整记录并分析趋势
 - 持续优化人格向量和决策策略
 
-**阶段7：客观性评估器（元认知检测）（不打断主循环）**
+**阶段7：客观性评估器与认知性错误检测（元认知+错误智慧库集成）（不打断主循环）**
 - 执行5维度主观性检测
 - 根据场景类型判断适切性
 - 如触发，执行自我纠错
+- **Phase 2**：自动识别认知性错误（幻觉倾向、推理跳跃、知识缺失、偏见影响）
+- **Phase 2**：将认知性错误记录到错误智慧库，支持根因分析与预防建议生成
+- **Phase 3**：时效性管理（三重衰减：时间衰减、场景变化衰减、反例衰减）
+- **Phase 3**：预防规则自动生成（相似错误聚合≥3个→共性模式识别→规则提取）
 
-详见 [元认知检测组件](references/metacognition-check-component.md)
+详见 [元认知检测组件](references/metacognition-check-component.md) 和 [错误智慧库规范](references/error_wisdom_spec.md)
 
 **阶段8：认知架构洞察（深度分析）（不打断主循环）**
 - 从结构化模式中提取洞察
@@ -210,6 +267,11 @@ mkdir -p ./agi_memory
 - [scripts/memory_store_pure.py](scripts/memory_store_pure.py) - 记忆存储与检索（JSON轨）
 - [scripts/memory_store_async.py](scripts/memory_store_async.py) - 异步存储（Phase 0）
 - [scripts/history_manager.py](scripts/history_manager.py) - 历史记录管理
+- [scripts/error_wisdom_manager.py](scripts/error_wisdom_manager.py) - 错误智慧库管理器
+- [scripts/error_wisdom_prevention.py](scripts/error_wisdom_prevention.py) - 预防规则引擎
+- [scripts/cognitive_error_analyzer.py](scripts/cognitive_error_analyzer.py) - 认知性错误分析器（Phase 2）
+- [scripts/error_wisdom_timeliness.py](scripts/error_wisdom_timeliness.py) - 时效性管理模块（Phase 3）
+- [scripts/error_wisdom_rule_generator.py](scripts/error_wisdom_rule_generator.py) - 规则自动生成模块（Phase 3）
 
 **外环工具箱（最外圈工程意向性分析模组）**：
 - [scripts/intentionality_collector.py](scripts/intentionality_collector.py) - 意向性收集模块
@@ -224,6 +286,12 @@ mkdir -p ./agi_memory
 **初始化与配置**：
 - [scripts/init_dialogue_optimized.py](scripts/init_dialogue_optimized.py) - 首次交互处理与人格初始化
 - [scripts/personality_customizer.py](scripts/personality_customizer.py) - 人格自定义模式
+- [scripts/personality_core_pure.py](scripts/personality_core_pure.py) - 人格核心纯Python实现（C扩展不可用时降级使用）
+
+**辅助模块**：
+- [scripts/concept_extraction_extension.py](scripts/concept_extraction_extension.py) - 概念提取扩展
+- [scripts/metacognition_history.py](scripts/metacognition_history.py) - 元认知历史管理
+- [scripts/strategy_selector.py](scripts/strategy_selector.py) - 策略选择器
 
 **CLI工具箱（系统交互能力扩展）**：
 - [scripts/cli_file_operations.py](scripts/cli_file_operations.py) - 文件操作工具
@@ -231,21 +299,17 @@ mkdir -p ./agi_memory
 - [scripts/cli_process_manager.py](scripts/cli_process_manager.py) - 进程管理工具
 - [scripts/cli_executor.py](scripts/cli_executor.py) - 通用命令执行器
 
-**测试文件**：
-- [scripts/test_memory_async.py](scripts/test_memory_async.py) - 异步存储测试（Phase 0）
-- [scripts/test_intentionality_daemon.py](scripts/test_intentionality_daemon.py) - 守护协程测试（Phase 1）
-
 ### 领域参考文档
 
 **架构与哲学**：
 - [references/architecture.md](references/architecture.md) - 整体架构、哲学基础、信息流约束
 - [references/maslow_needs.md](references/maslow_needs.md) - 马斯洛需求层次在映射层中的应用
 - [references/intentionality_architecture.md](references/intentionality_architecture.md) - 工程意向性分析模组的完整架构
+- [references/error_wisdom_spec.md](references/error_wisdom_spec.md) - 错误智慧库规范（从错误中学习）
 
 **组件与实现**：
 - [references/metacognition-check-component.md](references/metacognition-check-component.md) - 元认知检测组件
 - [references/cognitive-insight-v2-implementation.md](references/cognitive-insight-v2-implementation.md) - 认知架构洞察组件V2
-- [references/cognitive-insight-positioning.md](references/cognitive-insight-positioning.md) - 认知架构洞察的设计理念
 - [references/cognitive-insight-quick-reference.md](references/cognitive-insight-quick-reference.md) - 认知架构洞察快速参考
 - [references/cognitive-architecture-insight-module.md](references/cognitive-architecture-insight-module.md) - 认知架构洞察模块技术规范
 

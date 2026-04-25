@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-客观性评估模块（独立分支）
+客观性评估模块（独立分支 + 错误智慧库集成）
 
 这是一个元认知监控框架的具体实现，用于评估智能体响应的客观性。
 特点：
@@ -8,12 +8,36 @@
 - 仅在推理完成后进行评估
 - 提供客观性评分和适切性判断
 - 不直接触发自我纠错，由映射层决定是否触发
+- 集成错误智慧库：评估结果自动记录认知性错误
 """
 
 import re
+import sys
+import os
 import time
+import logging
 from typing import Dict, List, Optional
 from dataclasses import dataclass, asdict
+
+# 添加脚本目录到路径
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('objectivity_evaluator')
+
+# 尝试导入错误智慧库模块
+try:
+    from cognitive_error_analyzer import CognitiveErrorAnalyzer
+    from error_wisdom_manager import ErrorWisdomManager
+    ERROR_WISDOM_AVAILABLE = True
+    logger.info("Error Wisdom integration enabled in ObjectivityEvaluator")
+except ImportError as e:
+    logger.warning(f"Error Wisdom modules not available: {e}")
+    ERROR_WISDOM_AVAILABLE = False
 
 
 @dataclass
@@ -63,12 +87,13 @@ class ObjectivityMetric:
 
 class ObjectivityEvaluator:
     """
-    客观性评估器
+    客观性评估器（集成错误智慧库）
     
     评估智能体响应的客观性水平，作为元认知监控的参考信息。
+    当检测到认知性错误时，自动记录到错误智慧库。
     """
 
-    def __init__(self):
+    def __init__(self, memory_dir: str = "./agi_memory"):
         # 场景客观性要求映射
         self.context_requirements = {
             'scientific': 0.9,
@@ -80,6 +105,19 @@ class ObjectivityEvaluator:
             'emotional': 0.2,
             'artistic': 0.1,
         }
+        
+        self.memory_dir = memory_dir
+        
+        # 初始化错误智慧库模块
+        self.cognitive_error_analyzer = None
+        self.error_wisdom_manager = None
+        
+        if ERROR_WISDOM_AVAILABLE:
+            try:
+                self.cognitive_error_analyzer = CognitiveErrorAnalyzer(memory_dir)
+                self.error_wisdom_manager = ErrorWisdomManager(memory_dir)
+            except Exception as e:
+                logger.warning(f"Failed to initialize Error Wisdom modules: {e}")
 
         # 模糊词库
         self.fuzzy_words = [
@@ -165,7 +203,7 @@ class ObjectivityEvaluator:
         # 步骤7：确定严重程度
         severity = self._determine_severity(appropriateness['gap'])
 
-        return ObjectivityMetric(
+        metric = ObjectivityMetric(
             timestamp=timestamp,
             subjectivity_score=subjectivity_score,
             objectivity_score=objectivity_score,
@@ -177,6 +215,18 @@ class ObjectivityEvaluator:
             meta_cognition=meta_cognition,
             severity=severity
         )
+        
+        # ========== 新增：记录认知性错误到错误智慧库 ==========
+        if severity in ['moderate', 'severe'] and self.error_wisdom_manager:
+            self._record_cognitive_error(
+                response=response,
+                metric=metric,
+                context_type=context_type,
+                reasoning_result=reasoning_result
+            )
+        # ========== 错误记录结束 ==========
+
+        return metric
 
     def calculate_dynamic_requirement(
         self,
@@ -403,13 +453,90 @@ class ObjectivityEvaluator:
             return 'moderate'
         else:
             return 'severe'
+    
+    # ==================== 错误智慧库集成方法 ====================
+    
+    def _record_cognitive_error(
+        self,
+        response: str,
+        metric: ObjectivityMetric,
+        context_type: str,
+        reasoning_result: Optional[Dict] = None
+    ):
+        """
+        记录认知性错误到错误智慧库
+        
+        Args:
+            response: 响应内容
+            metric: 客观性评估结果
+            context_type: 场景类型
+            reasoning_result: 推理结果（可选）
+        """
+        if not self.cognitive_error_analyzer or not self.error_wisdom_manager:
+            return
+        
+        try:
+            # 准备客观性指标
+            objectivity_metrics = {
+                "subjectivity_score": metric.subjectivity_score,
+                "objectivity_score": metric.objectivity_score,
+                "required_objectivity": metric.required_objectivity,
+                "gap": metric.gap,
+                "subjectivity_dimensions": metric.subjectivity_dimensions,
+                "is_appropriate": metric.is_appropriate,
+                "severity": metric.severity
+            }
+            
+            # 准备上下文
+            context = {
+                "task_type": context_type,
+                "complexity": "中等",
+                "information_completeness": "部分缺失",
+                "time_pressure": "适中"
+            }
+            
+            # 分析认知性错误
+            analysis = self.cognitive_error_analyzer.analyze(
+                response=response,
+                context=context,
+                objectivity_metrics=objectivity_metrics
+            )
+            
+            # 如果检测到认知性错误，记录到错误智慧库
+            if analysis.错误类型 != "无":
+                trace_id = f"trace_{int(time.time()*1000)}"
+                
+                # 转换为错误智慧库条目
+                entry = self.cognitive_error_analyzer.to_error_wisdom_entry(
+                    analysis=analysis,
+                    trace_id=trace_id,
+                    response=response
+                )
+                
+                if entry:
+                    # 存储条目
+                    entry_id = entry["id"]
+                    self.error_wisdom_manager.entries["entries"][entry_id] = entry
+                    self.error_wisdom_manager.entries["metadata"]["total_count"] = \
+                        len(self.error_wisdom_manager.entries["entries"])
+                    
+                    # 保存
+                    self.error_wisdom_manager._save_json(
+                        self.error_wisdom_manager.entries_file,
+                        self.error_wisdom_manager.entries
+                    )
+                    
+                    logger.info(f"Cognitive error recorded to wisdom: {entry_id}")
+        
+        except Exception as e:
+            logger.warning(f"Failed to record cognitive error: {e}")
 
 
 # ===== 命令行接口 =====
 
 def main():
     """命令行测试接口"""
-    print("=== 客观性评估模块（测试模式） ===\n")
+    print("=== 客观性评估模块（测试模式 + 错误智慧库集成） ===\n")
 
     evaluator = ObjectivityEvaluator()
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-感知节点 - Tool Use 接口（完整版）
+感知节点 - Tool Use 接口（完整版 + 错误智慧库集成）
 
 功能：
 - 工具调用（web_search, get_weather, calculator, search_documents）
@@ -13,6 +13,7 @@
 - 可观测性（调试模式、日志）
 - 版本控制
 - Token 预估
+- 错误智慧库集成（前置预防检查 + 错误记录）
 
 基于：tool_use_spec.md 接口规范（2026版）
 """
@@ -55,6 +56,16 @@ try:
 except ImportError as e:
     logger.warning(f"C extension not available: {e}, using pure Python implementation")
     C_EXT_AVAILABLE = False
+
+# 尝试导入错误智慧库模块
+try:
+    from error_wisdom_prevention import PreventionEngine, quick_pre_check
+    from error_wisdom_manager import ErrorWisdomManager
+    ERROR_WISDOM_AVAILABLE = True
+    logger.info("Error Wisdom modules loaded successfully")
+except ImportError as e:
+    logger.warning(f"Error Wisdom modules not available: {e}")
+    ERROR_WISDOM_AVAILABLE = False
 
 # ==================== 工具定义 ====================
 
@@ -270,12 +281,25 @@ class ObservabilityManager:
 # ==================== 感知节点主类 ====================
 
 class PerceptionNode:
-    """感知节点 - Tool Use 接口（完整版）"""
+    """感知节点 - Tool Use 接口（完整版 + 错误智慧库集成）"""
 
-    def __init__(self):
+    def __init__(self, memory_dir: str = "./agi_memory"):
         self.c_ext_available = C_EXT_AVAILABLE
         self.cache = ToolCache()
         self.observability = ObservabilityManager()
+        self.memory_dir = memory_dir
+        
+        # 初始化错误智慧库模块
+        self.prevention_engine = None
+        self.error_wisdom_manager = None
+        
+        if ERROR_WISDOM_AVAILABLE:
+            try:
+                self.prevention_engine = PreventionEngine(memory_dir)
+                self.error_wisdom_manager = ErrorWisdomManager(memory_dir)
+                logger.info("Error Wisdom integration enabled")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Error Wisdom: {e}")
 
     def call_tool(
         self,
@@ -339,6 +363,34 @@ class PerceptionNode:
 
         # 记录调用
         self.observability.log_call(tool_name, trace_id, params)
+        
+        # ========== 新增：前置预防检查 ==========
+        pre_check_result = self._pre_check(tool_name, params)
+        
+        # 如果前置检查发现严重错误，直接返回
+        if not pre_check_result.get("pass", True):
+            return {
+                "success": False,
+                "status": "error",
+                "error": {
+                    "code": "PREVENTION_CHECK_FAILED",
+                    "message": "; ".join(pre_check_result.get("warnings", [])),
+                    "suggestions": pre_check_result.get("suggestions", []),
+                    "prevention_triggered": True
+                },
+                "metadata": {
+                    "tool_name": tool_name,
+                    "timestamp": get_timestamp_iso8601(),
+                    "trace_id": trace_id
+                }
+            }
+        
+        # 应用自动修正
+        if pre_check_result.get("auto_fixes"):
+            params = params.copy()
+            params.update(pre_check_result["auto_fixes"])
+            logger.info(f"Auto-fixes applied: {pre_check_result['auto_fixes']}")
+        # ========== 预防检查结束 ==========
 
         start_time = time.time()
 
@@ -413,6 +465,10 @@ class PerceptionNode:
 
         except Exception as error:
             execution_time = (time.time() - start_time) * 1000
+            
+            # ========== 新增：记录错误到错误智慧库 ==========
+            self._record_error_to_wisdom(tool_name, params, error, trace_id)
+            # ========== 错误记录结束 ==========
 
             error_result = {
                 "success": False,
@@ -725,6 +781,183 @@ class PerceptionNode:
     def clear_cache(self) -> None:
         """清空缓存"""
         self.cache.clear()
+    
+    # ==================== 错误智慧库集成方法 ====================
+    
+    def _pre_check(self, tool_name: str, params: dict) -> dict:
+        """
+        前置预防检查
+        
+        Args:
+            tool_name: 工具名称
+            params: 调用参数
+        
+        Returns:
+            检查结果 {
+                "pass": bool,
+                "warnings": [],
+                "auto_fixes": {},
+                "suggestions": []
+            }
+        """
+        if not self.prevention_engine:
+            return {"pass": True}
+        
+        try:
+            # 获取工具schema（如果有）
+            tool_schema = self._get_tool_schema(tool_name)
+            
+            # 执行预防检查
+            result = self.prevention_engine.quick_check(tool_name, params, tool_schema)
+            
+            return result
+        except Exception as e:
+            logger.warning(f"Pre-check failed: {e}")
+            return {"pass": True}
+    
+    def _get_tool_schema(self, tool_name: str) -> Optional[dict]:
+        """
+        获取工具schema
+        
+        Args:
+            tool_name: 工具名称
+        
+        Returns:
+            工具schema（简化版）
+        """
+        # 简化实现：返回基本schema
+        schemas = {
+            "get_weather": {
+                "name": "get_weather",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "description": "城市名称"
+                        },
+                        "unit": {
+                            "type": "string",
+                            "enum": ["celsius", "fahrenheit"],
+                            "description": "温度单位"
+                        }
+                    },
+                    "required": ["location"]
+                }
+            },
+            "calculator": {
+                "name": "calculator",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "expression": {
+                            "type": "string",
+                            "description": "数学表达式"
+                        }
+                    },
+                    "required": ["expression"]
+                }
+            },
+            "web_search": {
+                "name": "web_search",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "搜索关键词"
+                        }
+                    },
+                    "required": ["query"]
+                }
+            },
+            "search_documents": {
+                "name": "search_documents",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "搜索关键词"
+                        },
+                        "limit": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "description": "返回数量"
+                        }
+                    },
+                    "required": ["query"]
+                }
+            }
+        }
+        
+        return schemas.get(tool_name)
+    
+    def _record_error_to_wisdom(
+        self,
+        tool_name: str,
+        params: dict,
+        error: Exception,
+        trace_id: str
+    ):
+        """
+        记录错误到错误智慧库
+        
+        Args:
+            tool_name: 工具名称
+            params: 调用参数
+            error: 异常对象
+            trace_id: 追踪ID
+        """
+        if not self.error_wisdom_manager:
+            return
+        
+        try:
+            # 分析错误类型
+            error_type = "工具性错误"
+            error_subtype = self._classify_tool_error(error)
+            
+            # 记录错误
+            self.error_wisdom_manager.record_error(
+                error_type=error_type,
+                error_subtype=error_subtype,
+                error_code="EXECUTION_ERROR",
+                error_description=f"工具 {tool_name} 执行失败: {str(error)}",
+                root_cause=f"参数: {params}, 异常: {type(error).__name__}",
+                solution="检查参数和工具状态",
+                prevention_strategy="前置参数验证",
+                trace_id=trace_id,
+                severity="moderate",
+                trigger_scenario=f"工具调用: {tool_name}"
+            )
+            
+            logger.info(f"Error recorded to wisdom: {trace_id}")
+        except Exception as e:
+            logger.warning(f"Failed to record error to wisdom: {e}")
+    
+    def _classify_tool_error(self, error: Exception) -> str:
+        """
+        分类工具错误
+        
+        Args:
+            error: 异常对象
+        
+        Returns:
+            错误子类型
+        """
+        error_name = type(error).__name__
+        
+        # 网络错误
+        if any(keyword in error_name.lower() for keyword in ['timeout', 'connection', 'network']):
+            return "调用失败类"
+        
+        # 参数错误
+        if any(keyword in error_name.lower() for keyword in ['value', 'type', 'parameter', 'argument']):
+            return "参数构造类"
+        
+        # 默认
+        return "调用失败类"
 
 
 # ==================== 命令行接口 ====================

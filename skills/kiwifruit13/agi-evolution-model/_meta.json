@@ -3,11 +3,16 @@
   "slug": "agi-evolution-model",
   "displayName": "AGI数字伙伴",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1774330611014,
-    "commit": "https://github.com/openclaw/skills/commit/e7a3d9210048277b67236ac66437c40d32e34f5e"
+    "version": "1.0.2",
+    "publishedAt": 1775360240088,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1774330611014,
+      "commit": "https://github.com/openclaw/skills/commit/e7a3d9210048277b67236ac66437c40d32e34f5e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773285909010,
