@@ -1,11 +1,17 @@
 {
   "owner": "gingiris",
   "slug": "aso-playbook",
-  "displayName": "ASO Playbook",
+  "displayName": "ASO — App Store Optimization Complete Guide",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773644583409,
-    "commit": "https://github.com/openclaw/skills/commit/4b1c7bfc28842489267c049de001468c87095761"
+    "version": "1.1.2",
+    "publishedAt": 1776567408507,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773644583409,
+      "commit": "https://github.com/openclaw/skills/commit/4b1c7bfc28842489267c049de001468c87095761"
+    }
+  ]
 }
