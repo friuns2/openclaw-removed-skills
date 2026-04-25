@@ -3,11 +3,16 @@
   "slug": "clockify-integration",
   "displayName": "Clockify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162758666,
-    "commit": "https://github.com/openclaw/skills/commit/f4416965748e74d568a99d0c337fc0b83b4e961f"
+    "version": "1.0.3",
+    "publishedAt": 1776783761894,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162758666,
+      "commit": "https://github.com/openclaw/skills/commit/f4416965748e74d568a99d0c337fc0b83b4e961f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772935359107,
