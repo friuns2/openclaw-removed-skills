@@ -3,11 +3,16 @@
   "slug": "nextcloud-integration",
   "displayName": "Nextcloud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164219164,
-    "commit": "https://github.com/openclaw/skills/commit/7f524d8043f0462a42c18d22da0f671d60d0c499"
+    "version": "1.0.3",
+    "publishedAt": 1776830736690,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164219164,
+      "commit": "https://github.com/openclaw/skills/commit/7f524d8043f0462a42c18d22da0f671d60d0c499"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773630152595,
