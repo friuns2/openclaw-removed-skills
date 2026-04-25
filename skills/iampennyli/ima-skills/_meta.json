@@ -3,11 +3,16 @@
   "slug": "ima-skills",
   "displayName": "ima skills",
   "latest": {
-    "version": "1.1.2",
-    "publishedAt": 1774317792140,
-    "commit": "https://github.com/openclaw/skills/commit/69bf46e8288ac416de2087cf1f1fcf5f6243e317"
+    "version": "1.1.7",
+    "publishedAt": 1777025159209,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.2",
+      "publishedAt": 1774317792140,
+      "commit": "https://github.com/openclaw/skills/commit/69bf46e8288ac416de2087cf1f1fcf5f6243e317"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1773919453218,
