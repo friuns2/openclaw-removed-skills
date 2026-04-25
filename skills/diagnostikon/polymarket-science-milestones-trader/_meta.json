@@ -3,11 +3,16 @@
   "slug": "polymarket-science-milestones-trader",
   "displayName": "Polymarket Science Milestones Trader",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775317330669,
-    "commit": "https://github.com/openclaw/skills/commit/84f5b4152e5ed4fc89cfdfec35a9bc77bc9a30e0"
+    "version": "0.0.2",
+    "publishedAt": 1776513564866,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775317330669,
+      "commit": "https://github.com/openclaw/skills/commit/84f5b4152e5ed4fc89cfdfec35a9bc77bc9a30e0"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773859418168,
