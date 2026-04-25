@@ -3,11 +3,16 @@
   "slug": "riskadvisor",
   "displayName": "Riskadvisor",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164352586,
-    "commit": "https://github.com/openclaw/skills/commit/cff5466c3255c066c002b6f8cf1e1899b412964c"
+    "version": "1.0.3",
+    "publishedAt": 1776834231343,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164352586,
+      "commit": "https://github.com/openclaw/skills/commit/cff5466c3255c066c002b6f8cf1e1899b412964c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773702227701,
