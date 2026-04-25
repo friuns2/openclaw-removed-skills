@@ -3,11 +3,16 @@
   "slug": "svix",
   "displayName": "Svix",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163639681,
-    "commit": "https://github.com/openclaw/skills/commit/9bcfc0ea8b5e1191db88aa99c9a8478ae7efb27d"
+    "version": "1.0.3",
+    "publishedAt": 1776805583514,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163639681,
+      "commit": "https://github.com/openclaw/skills/commit/9bcfc0ea8b5e1191db88aa99c9a8478ae7efb27d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773360154767,
