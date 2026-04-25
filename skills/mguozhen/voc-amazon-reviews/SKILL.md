@@ -1,86 +1,86 @@
 ---
 name: voc-amazon-reviews
-description: "VOC AI — Amazon Review Intelligence. Input an ASIN, automatically scrape Amazon reviews and run AI analysis. Outputs a structured bilingual report: sentiment breakdown, top pain points, key selling points, and Listing optimization suggestions. Triggers: voc, amazon review analysis, asin analysis, voice of customer, listing optimization, pain points, selling points, review insights, amazon fba, product research"
+description: "VOC AI — Amazon Review Intelligence. Input an ASIN, fetch real Amazon reviews via Shulex VOC API and run AI analysis. Outputs a structured bilingual report: sentiment breakdown, top pain points, key selling points, and Listing optimization suggestions. Triggers: voc, amazon review analysis, asin analysis, voice of customer, listing optimization, pain points, selling points, review insights, amazon fba, product research"
 allowed-tools: Bash
 metadata:
   openclaw:
-    requires:
-      skills:
-        - browser
     homepage: https://github.com/mguozhen/voc-amazon-reviews
 ---
 
 # VOC AI — Amazon Review Intelligence
 
-> Input an ASIN, AI automatically scrapes and deeply analyzes Amazon reviews, outputting a structured bilingual insight report.
+> Input an ASIN, fetch real Amazon reviews via Shulex VOC API, and get a structured bilingual insight report powered by AI.
 
-## Prerequisites
+## Quick Setup (30 seconds)
 
-Ensure the `browser` skill is installed (used for scraping reviews):
+1. **Get your free API key** at [apps.voc.ai/openapi](https://apps.voc.ai/openapi?utm_source=github&utm_medium=readme&utm_campaign=launch_apr)
+2. **Create a key** at [API Keys page](https://apps.voc.ai/openapi/api/keys?utm_source=github&utm_medium=readme&utm_campaign=launch_apr)
+3. **Set it**:
 
 ```bash
-npx skills add browserbase/skills@browser
+export VOC_API_KEY="your-api-key"
 ```
 
-Set your Claude API Key:
+New accounts include starter credits — enough for multiple analyses.
+
+## Usage
 
 ```bash
-export ANTHROPIC_API_KEY="your-api-key"
-```
-
-## Quick Start
-
-```bash
-# Basic analysis (scrapes latest 100 reviews by default)
+# Quick analysis — 8 reviews (5 credits)
 bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW
 
-# Specify review count
-bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW --limit 200
+# Deep analysis — 100 reviews (50 credits)
+bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW --limit 100
 
-# Specify marketplace (default: amazon.com)
-bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW --market amazon.co.uk
+# Japan marketplace
+bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW --market JP
 
 # Save report to file
-bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW --output report.md
+bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW --limit 100 --output report.md
 ```
+
+### Supported Marketplaces
+
+| Code | Marketplace |
+|------|-------------|
+| US | amazon.com |
+| CA | amazon.ca |
+| MX | amazon.com.mx |
+| GB | amazon.co.uk |
+| DE | amazon.de |
+| FR | amazon.fr |
+| IT | amazon.it |
+| ES | amazon.es |
+| JP | amazon.co.jp |
+| AU | amazon.com.au |
 
 ## Sample Output
 
 ```
-╔══════════════════════════════════════════════════════╗
-║     VOC AI Analysis Report                          ║
-║  ASIN: B08N5WRWNW  |  Reviews Analyzed: 100         ║
-║  Market: amazon.com  |  Generated: 2026-03-08        ║
-╚══════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════╗
+║     VOC AI Analysis Report                               ║
+║  ASIN: B08N5WRWNW  |  Reviews Analyzed: 100              ║
+║  Market: US  |  Generated: 2026-04-18                     ║
+╚══════════════════════════════════════════════════════════╝
 
 📊 Sentiment Distribution
-  Positive  ████████████░░░░  74%  (74 reviews)
-  Neutral   ███░░░░░░░░░░░░░  16%  (16 reviews)
-  Negative  ██░░░░░░░░░░░░░░  10%  (10 reviews)
+  Positive  ████████████████░░░░  74%
+  Neutral   ███░░░░░░░░░░░░░░░░░  16%
+  Negative  ██░░░░░░░░░░░░░░░░░░  10%
 
 🔴 Top 5 Pain Points
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. Short battery life (28 mentions)
    "Battery drained in 2 days, very disappointed"
 
-2. Unstable Bluetooth connection (19 mentions)
-   "Bluetooth keeps disconnecting randomly"
-
 🟢 Top 5 Selling Points
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. Excellent sound quality (52 mentions)
    "Amazing bass and crystal clear highs for the price"
 
 💡 Listing Optimization Suggestions
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. [Title] Add battery capacity (e.g. 800mAh) and playtime hours
-   to reduce negative reviews from mismatched expectations.
-
-2. [Images] Add a scene image showing Bluetooth range and include
-   pairing instructions in A+ Content.
-
-3. [Bullets] Lead first bullet with sound quality, use authentic
-   customer language like "crystal clear" and "deep bass".
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Add battery capacity and playtime hours to title
 ```
 
 ## How It Works
@@ -88,32 +88,41 @@ bash ~/.agents/skills/voc-amazon-reviews/voc.sh B08N5WRWNW --output report.md
 ```
 ① Input ASIN
       ↓
-② browser CLI opens Amazon review pages (with pagination)
+② Shulex VOC API fetches real-time Amazon reviews
       ↓
-③ Parse review data (rating, body, date, Verified badge)
+③ Structured review data (rating, body, date, verified, variant)
       ↓
-④ Claude AI deep semantic analysis
+④ AI deep semantic analysis (sentiment, pain points, selling points)
       ↓
-⑤ Output structured bilingual report
+⑤ Bilingual report (Chinese + English)
 ```
+
+## Cost Guide
+
+| Reviews | API Credits | Use Case |
+|---------|------------|----------|
+| 8 (default) | 5 credits | Quick competitor check |
+| 50 | 25 credits | Product validation |
+| 100 | 50 credits | Deep analysis |
+| 200 | 100 credits | Comprehensive audit |
 
 ## Scripts
 
 | File | Description |
 |---|---|
-| `voc.sh` | Main entry point |
-| `scraper.sh` | Amazon review scraper (based on browser CLI) |
-| `analyze.sh` | Claude API analysis script |
+| `voc.sh` | Main entry point — orchestrates fetch + analyze |
+| `fetch.sh` | Shulex VOC API client (submit task → poll → get reviews) |
+| `analyze.sh` | AI analysis engine (sentiment, pain points, selling points) |
+| `scraper.sh` | Legacy browser-based scraper (deprecated) |
 
-## Notes
+## Environment Variables
 
-- Amazon has strong anti-bot measures — configure `BROWSERBASE_API_KEY` for reliable remote browser access
-- Each analysis uses approximately 2,000–5,000 Claude API tokens (~$0.01–$0.03)
-- Review scraping takes ~5–10 seconds per page; 100 reviews ≈ 1–2 minutes
-- Please use responsibly — avoid frequent bulk scraping of the same product
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VOC_API_KEY` | Yes | Shulex VOC API key ([get one free](https://apps.voc.ai/openapi/api/keys?utm_source=github&utm_medium=readme&utm_campaign=launch_apr)) |
 
 ## Resources
 
-- [Amazon Seller Listing Optimization Guide](#)
-- [How VOC Data Drives Product Improvement](#)
-- [Using Review Data to Outcompete Rivals](#)
+- [Shulex VOC API Docs](https://apps.voc.ai/openapi?utm_source=github&utm_medium=readme&utm_campaign=launch_apr)
+- [API Keys](https://apps.voc.ai/openapi/api/keys?utm_source=github&utm_medium=readme&utm_campaign=launch_apr)
+- [Buy Credits](https://apps.voc.ai/openapi/api/billing?utm_source=github&utm_medium=readme&utm_campaign=launch_apr)

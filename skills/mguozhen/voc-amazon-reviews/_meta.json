@@ -1,13 +1,18 @@
 {
   "owner": "mguozhen",
   "slug": "voc-amazon-reviews",
-  "displayName": "VOC AI — Amazon Review Intelligence",
+  "displayName": "Voc Publish NPIIr8",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1773082966661,
-    "commit": "https://github.com/openclaw/skills/commit/a930493ac0e5f66982bbebd78224968e8e07fef4"
+    "version": "1.1.2",
+    "publishedAt": 1776642135545,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1773082966661,
+      "commit": "https://github.com/openclaw/skills/commit/a930493ac0e5f66982bbebd78224968e8e07fef4"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1772927020733,
