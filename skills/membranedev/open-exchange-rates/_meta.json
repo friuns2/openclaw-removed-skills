@@ -3,11 +3,16 @@
   "slug": "open-exchange-rates",
   "displayName": "Open Exchange Rates",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163502979,
-    "commit": "https://github.com/openclaw/skills/commit/bdd17624ae8ab4942b0e43cdad380f61adb91c23"
+    "version": "1.0.3",
+    "publishedAt": 1776805429510,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163502979,
+      "commit": "https://github.com/openclaw/skills/commit/bdd17624ae8ab4942b0e43cdad380f61adb91c23"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773349332942,
