@@ -3,11 +3,16 @@
   "slug": "safebase",
   "displayName": "Safebase",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162919331,
-    "commit": "https://github.com/openclaw/skills/commit/03887c41b0cd7292b41975bcb2d0151b82816b4a"
+    "version": "1.0.3",
+    "publishedAt": 1776898228752,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162919331,
+      "commit": "https://github.com/openclaw/skills/commit/03887c41b0cd7292b41975bcb2d0151b82816b4a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773083262056,
