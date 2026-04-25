@@ -3,11 +3,16 @@
   "slug": "postman-integration",
   "displayName": "Postman",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163081878,
-    "commit": "https://github.com/openclaw/skills/commit/c73f214fafabc196a65de163efc6b637b04915e3"
+    "version": "1.0.3",
+    "publishedAt": 1776790963333,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163081878,
+      "commit": "https://github.com/openclaw/skills/commit/c73f214fafabc196a65de163efc6b637b04915e3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773097375039,
