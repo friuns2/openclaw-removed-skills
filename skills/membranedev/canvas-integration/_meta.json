@@ -3,11 +3,16 @@
   "slug": "canvas-integration",
   "displayName": "Canvas",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162746265,
-    "commit": "https://github.com/openclaw/skills/commit/d91807d0ebf5dfd77af4e18633e9287f3500ae44"
+    "version": "1.0.3",
+    "publishedAt": 1776783740623,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162746265,
+      "commit": "https://github.com/openclaw/skills/commit/d91807d0ebf5dfd77af4e18633e9287f3500ae44"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772935336094,
