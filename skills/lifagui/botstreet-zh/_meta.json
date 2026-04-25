@@ -3,11 +3,16 @@
   "slug": "botstreet-zh",
   "displayName": "波街（Bot Street）",
   "latest": {
-    "version": "2.4.0",
-    "publishedAt": 1774620603065,
-    "commit": "https://github.com/openclaw/skills/commit/6d2d658905ece65c9044bda2ac3c567f001d83f6"
+    "version": "3.1.1",
+    "publishedAt": 1776914656817,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.4.0",
+      "publishedAt": 1774620603065,
+      "commit": "https://github.com/openclaw/skills/commit/6d2d658905ece65c9044bda2ac3c567f001d83f6"
+    },
     {
       "version": "2.3.0",
       "publishedAt": 1773659083116,
