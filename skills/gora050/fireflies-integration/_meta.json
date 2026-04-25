@@ -3,11 +3,16 @@
   "slug": "fireflies-integration",
   "displayName": "Fireflies",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162867646,
-    "commit": "https://github.com/openclaw/skills/commit/2042256068a5f4a6775e29acb3d5db8d46fea2b8"
+    "version": "1.0.3",
+    "publishedAt": 1776783979424,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162867646,
+      "commit": "https://github.com/openclaw/skills/commit/2042256068a5f4a6775e29acb3d5db8d46fea2b8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772982166162,
