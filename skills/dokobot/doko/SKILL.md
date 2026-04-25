@@ -14,7 +14,7 @@ compatibility: Requires @dokobot/cli (npm install -g @dokobot/cli) and Chrome br
 allowed-tools: Bash
 metadata:
   author: dokobot
-  version: "2.3.0"
+  version: "2.3.4"
   openclaw: {"requires": {"bins": ["dokobot"]}, "optionalEnv": ["DOKO_API_KEY"]}
 ---
 
@@ -35,12 +35,12 @@ Supports two modes: **local** (free, unlimited, via local bridge) and **remote**
 
 ## Discovering commands
 
-Run `dokobot doko --help` to list available commands. Run `dokobot doko <command> --help` to see full usage, flags, and defaults for any command.
+Run `dokobot --help` to list available commands. Run `dokobot <command> --help` to see full usage, flags, and defaults for any command.
 
 ```bash
-dokobot doko --help
-dokobot doko read --help
-dokobot doko search --help
+dokobot --help
+dokobot read --help
+dokobot search --help
 ```
 
 Always refer to `--help` output for the authoritative list of parameters and defaults. Do NOT assume flags or defaults from memory.
@@ -49,10 +49,11 @@ Always refer to `--help` output for the authoritative list of parameters and def
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `read <url>` | Read a web page and return text | `dokobot doko read 'https://example.com'` |
-| `search <query>` | Web search | `dokobot doko search 'latest news'` |
+| `read <url>` | Read a web page and return text | `dokobot read 'https://dokobot.ai/about'` |
+| `search <query>` | Web search | `dokobot search 'latest news'` |
+| `download images <url>` | Download images from a web page (supports private/lazy-loaded images) | `dokobot download images --local 'https://dokobot.ai/about'` |
 | `list` | List connected devices | `dokobot doko list` |
-| `close-session <id>` | Close an active read session | `dokobot doko close-session <SESSION_ID>` |
+| `close <id>` | Close an active read session | `dokobot doko close <SESSION_ID>` |
 
 ## Behavioral guidance
 
@@ -66,11 +67,11 @@ These are things `--help` does not cover:
 ### Session continuity
 When a read result includes `canContinue` and `sessionId`, pass the session ID to continue reading from where it stopped:
 ```bash
-dokobot doko read '<URL>' --session-id <SESSION_ID> --screens 5
+dokobot read '<URL>' --session-id <SESSION_ID> --screens 5
 ```
 Close a session explicitly with:
 ```bash
-dokobot doko close-session <SESSION_ID>
+dokobot doko close <SESSION_ID>
 ```
 
 ### Concurrency
@@ -88,6 +89,10 @@ If a command fails unexpectedly, check the CLI version and update if needed:
 ```bash
 dokobot --version
 dokobot update
+```
+To report a bug or request a feature:
+```bash
+dokobot feedback -t bug -m "description of the issue"
 ```
 
 ## Security & Permissions
