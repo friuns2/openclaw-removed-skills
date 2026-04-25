@@ -3,11 +3,16 @@
   "slug": "blackbaud",
   "displayName": "Blackbaud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162725908,
-    "commit": "https://github.com/openclaw/skills/commit/0c0c6724219127f8c3573ad45385db1114e52b23"
+    "version": "1.0.3",
+    "publishedAt": 1776780349849,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162725908,
+      "commit": "https://github.com/openclaw/skills/commit/0c0c6724219127f8c3573ad45385db1114e52b23"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772910162616,
