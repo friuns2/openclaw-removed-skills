@@ -3,11 +3,16 @@
   "slug": "lever",
   "displayName": "Lever",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161755796,
-    "commit": "https://github.com/openclaw/skills/commit/82e18df3ec2adbd0190a33c86dabdb5cd62f3bd1"
+    "version": "1.0.3",
+    "publishedAt": 1776776552824,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161755796,
+      "commit": "https://github.com/openclaw/skills/commit/82e18df3ec2adbd0190a33c86dabdb5cd62f3bd1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772758943389,
