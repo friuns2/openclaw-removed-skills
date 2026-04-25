@@ -3,11 +3,16 @@
   "slug": "amplitude-integration",
   "displayName": "Amplitude",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162776208,
-    "commit": "https://github.com/openclaw/skills/commit/271b46132d439d5f28b2379f1bb1ec0dfb38ba43"
+    "version": "1.0.3",
+    "publishedAt": 1776783794138,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162776208,
+      "commit": "https://github.com/openclaw/skills/commit/271b46132d439d5f28b2379f1bb1ec0dfb38ba43"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772938956471,
