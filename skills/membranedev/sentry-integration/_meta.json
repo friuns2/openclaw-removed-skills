@@ -3,11 +3,16 @@
   "slug": "sentry-integration",
   "displayName": "Sentry",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162786738,
-    "commit": "https://github.com/openclaw/skills/commit/e142e74e16edfc0c0fdb7ba2b6a95eff924cc947"
+    "version": "1.0.3",
+    "publishedAt": 1776783808601,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162786738,
+      "commit": "https://github.com/openclaw/skills/commit/e142e74e16edfc0c0fdb7ba2b6a95eff924cc947"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772953338567,
