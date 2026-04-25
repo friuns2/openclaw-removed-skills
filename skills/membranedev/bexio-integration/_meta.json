@@ -3,11 +3,16 @@
   "slug": "bexio-integration",
   "displayName": "Bexio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163373626,
-    "commit": "https://github.com/openclaw/skills/commit/8d65405c6c8e546d6cecd70179020b3744f95bb6"
+    "version": "1.0.3",
+    "publishedAt": 1776801731712,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163373626,
+      "commit": "https://github.com/openclaw/skills/commit/8d65405c6c8e546d6cecd70179020b3744f95bb6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773266559042,
