@@ -3,11 +3,16 @@
   "slug": "discourse",
   "displayName": "Discourse",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163936274,
-    "commit": "https://github.com/openclaw/skills/commit/25f4ba2fa64fc925e74de1bd0101987fd4cc7500"
+    "version": "1.0.3",
+    "publishedAt": 1776823380751,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163936274,
+      "commit": "https://github.com/openclaw/skills/commit/25f4ba2fa64fc925e74de1bd0101987fd4cc7500"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773529351760,
