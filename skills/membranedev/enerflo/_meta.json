@@ -3,11 +3,16 @@
   "slug": "enerflo",
   "displayName": "Enerflo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162813735,
-    "commit": "https://github.com/openclaw/skills/commit/45d5550c86b4f6792314689442843bea4b13edad"
+    "version": "1.0.3",
+    "publishedAt": 1776783853753,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162813735,
+      "commit": "https://github.com/openclaw/skills/commit/45d5550c86b4f6792314689442843bea4b13edad"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772967732516,
