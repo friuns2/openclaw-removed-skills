@@ -3,11 +3,16 @@
   "slug": "intercom-integration",
   "displayName": "Intercom",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161644345,
-    "commit": "https://github.com/openclaw/skills/commit/f8bc8f6b680c93c3c5eae65e7a7ac3f11f949c67"
+    "version": "1.0.3",
+    "publishedAt": 1776772928126,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161644345,
+      "commit": "https://github.com/openclaw/skills/commit/f8bc8f6b680c93c3c5eae65e7a7ac3f11f949c67"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772676139038,
