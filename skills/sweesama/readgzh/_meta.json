@@ -1,13 +1,18 @@
 {
   "owner": "sweesama",
   "slug": "readgzh",
-  "displayName": "Readgzh",
+  "displayName": "ReadGZH",
   "latest": {
-    "version": "1.3.8",
-    "publishedAt": 1776162020887,
-    "commit": "https://github.com/openclaw/skills/commit/23a9a59efb848f5455b40805ce0cea02f2d1dd22"
+    "version": "1.3.9",
+    "publishedAt": 1776791233782,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.8",
+      "publishedAt": 1776162020887,
+      "commit": "https://github.com/openclaw/skills/commit/23a9a59efb848f5455b40805ce0cea02f2d1dd22"
+    },
     {
       "version": "1.3.6",
       "publishedAt": 1774373535357,
