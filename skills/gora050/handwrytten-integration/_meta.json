@@ -3,9 +3,15 @@
   "slug": "handwrytten-integration",
   "displayName": "Handwrytten",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773378169525,
-    "commit": "https://github.com/openclaw/skills/commit/ad5340bb6cd2a147b04589a7127bd22297d20320"
+    "version": "1.0.1",
+    "publishedAt": 1776808975275,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773378169525,
+      "commit": "https://github.com/openclaw/skills/commit/ad5340bb6cd2a147b04589a7127bd22297d20320"
+    }
+  ]
 }
