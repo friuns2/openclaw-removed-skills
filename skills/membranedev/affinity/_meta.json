@@ -3,11 +3,16 @@
   "slug": "affinity",
   "displayName": "Affinity",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161769875,
-    "commit": "https://github.com/openclaw/skills/commit/83cdab5c2a90562952d4eed35ba9dc20f49a5a0d"
+    "version": "1.0.3",
+    "publishedAt": 1776776579429,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161769875,
+      "commit": "https://github.com/openclaw/skills/commit/83cdab5c2a90562952d4eed35ba9dc20f49a5a0d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772766130117,
