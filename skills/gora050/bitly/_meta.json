@@ -3,11 +3,16 @@
   "slug": "bitly",
   "displayName": "Bitly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163443145,
-    "commit": "https://github.com/openclaw/skills/commit/87c63175322fbcd363884d8c991cc4e7eb608778"
+    "version": "1.0.3",
+    "publishedAt": 1776801766951,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163443145,
+      "commit": "https://github.com/openclaw/skills/commit/87c63175322fbcd363884d8c991cc4e7eb608778"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773281005698,
