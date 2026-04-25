@@ -1,11 +1,17 @@
 {
   "owner": "x-rayluan",
   "slug": "ai-search-rank-tracker",
-  "displayName": "AI Search Rank Tracker",
+  "displayName": "Ai Search Rank Tracker",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1773565049950,
-    "commit": "https://github.com/openclaw/skills/commit/b98cdd4993287f0d74e3a813377276f39643fb3b"
+    "version": "0.1.1",
+    "publishedAt": 1777021182558,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1773565049950,
+      "commit": "https://github.com/openclaw/skills/commit/b98cdd4993287f0d74e3a813377276f39643fb3b"
+    }
+  ]
 }

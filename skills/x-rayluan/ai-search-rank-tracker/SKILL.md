@@ -46,6 +46,19 @@ Find reports in `output/`:
 - Markdown report
 - CSV report
 
+## Prompt database
+
+Use the built-in prompt database in `prompt-db/` for larger GEO / AI SEO scans.
+
+Included categories:
+- SaaS
+- AI tools
+- Developer tools
+- OpenClaw ecosystem
+- Local AI tools
+
+Each record includes category and commercial metadata so prompt sets can be grouped by intent, journey stage, and buyer value.
+
 ## Notes
 
 - Configure keys in `.env`
