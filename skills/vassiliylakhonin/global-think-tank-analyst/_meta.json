@@ -3,11 +3,16 @@
   "slug": "global-think-tank-analyst",
   "displayName": "Policy Risk Memo Architect",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776430061380,
-    "commit": "https://github.com/openclaw/skills/commit/a30d9b9cdf098b40849a4bbe49f9b5f77e040324"
+    "version": "1.0.4",
+    "publishedAt": 1776870246024,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776430061380,
+      "commit": "https://github.com/openclaw/skills/commit/a30d9b9cdf098b40849a4bbe49f9b5f77e040324"
+    },
     {
       "version": "0.2.6",
       "publishedAt": 1775786015682,
