@@ -3,11 +3,16 @@
   "slug": "calltrackingmetrics",
   "displayName": "Calltrackingmetrics",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162912658,
-    "commit": "https://github.com/openclaw/skills/commit/10a155ea5f9b738fca790464272a97994616bb2a"
+    "version": "1.0.3",
+    "publishedAt": 1776784060966,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162912658,
+      "commit": "https://github.com/openclaw/skills/commit/10a155ea5f9b738fca790464272a97994616bb2a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772996598073,
