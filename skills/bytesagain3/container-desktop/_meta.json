@@ -3,11 +3,16 @@
   "slug": "container-desktop",
   "displayName": "Container Desktop",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1773665395154,
-    "commit": "https://github.com/openclaw/skills/commit/9d34ac3828391b18f9f04d40bfbea0623a04ba30"
+    "version": "2.0.1",
+    "publishedAt": 1773830338384,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1773665395154,
+      "commit": "https://github.com/openclaw/skills/commit/9d34ac3828391b18f9f04d40bfbea0623a04ba30"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773450806026,
