@@ -3,11 +3,16 @@
   "slug": "microsoft-outlook",
   "displayName": "Microsoft Outlook",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162364832,
-    "commit": "https://github.com/openclaw/skills/commit/cadd8a78579a5bb420ba4f4ace406193192fe998"
+    "version": "1.0.3",
+    "publishedAt": 1776772005234,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162364832,
+      "commit": "https://github.com/openclaw/skills/commit/cadd8a78579a5bb420ba4f4ace406193192fe998"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772636555037,
