@@ -3,53 +3,85 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib.sh"
 
-SITEMAP_CACHE="${CACHE_DIR}/sitemap.txt"
+parse_version_flag "$@"
+set -- "${REMAINING_ARGS[@]}"
 
 case "$1" in
   status)
-    if [ -f "$SITEMAP_CACHE" ]; then
-      if is_cache_fresh "$SITEMAP_CACHE" "$SITEMAP_TTL"; then
-        local_mtime=""
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-          local_mtime=$(stat -f %m "$SITEMAP_CACHE")
-        else
-          local_mtime=$(stat -c %Y "$SITEMAP_CACHE")
-        fi
-        cached_at=$(date -d "@${local_mtime}" 2>/dev/null || date -r "$local_mtime" 2>/dev/null)
-        echo "Cache status: FRESH"
-        echo "Location:     $CACHE_DIR"
-        echo "Cached at:    ${cached_at}"
-        doc_count=$(ls "$CACHE_DIR"/doc_*.txt 2>/dev/null | wc -l)
-        echo "Cached docs:  $doc_count"
+    echo "Cache location: $CACHE_DIR"
+    echo ""
+    echo "Cached versions:"
+    found=0
+    for d in "$CACHE_DIR"/*/; do
+      [ -d "$d" ] || continue
+      ver=$(basename "$d")
+      doc_count=$(ls "$d"doc_*.txt 2>/dev/null | wc -l | tr -d ' ')
+      if [ -f "${d}index.txt" ]; then
+        idx="index: built"
       else
-        echo "Cache status: STALE"
-        echo "Run: ./scripts/cache.sh refresh"
+        idx="index: not built"
       fi
-    else
-      echo "Cache status: EMPTY"
-      echo "Run: ./scripts/sitemap.sh to populate"
-    fi
+      printf "  %-16s  %s docs   %s\n" "$ver" "$doc_count" "$idx"
+      found=1
+    done
+    [ "$found" -eq 0 ] && echo "  (none — run build-index.sh fetch)"
     echo ""
     echo "TTL config (override with env vars):"
-    echo "  Sitemap: ${SITEMAP_TTL}s  (OPENCLAW_SAGE_SITEMAP_TTL)"
-    echo "  Docs:    ${DOC_TTL}s  (OPENCLAW_SAGE_DOC_TTL)"
-    echo "  Dir:     ${CACHE_DIR}  (OPENCLAW_SAGE_CACHE_DIR)"
+    echo "  Docs:   ${DOC_TTL}s  (OPENCLAW_SAGE_DOC_TTL)"
+    echo "  Dir:    ${CACHE_DIR}  (OPENCLAW_SAGE_CACHE_DIR)"
+    echo "  Source: ${SOURCE}  (OPENCLAW_SAGE_SOURCE)"
     ;;
+
   refresh)
-    echo "Forcing cache refresh..."
-    rm -f "${CACHE_DIR}/sitemap.txt" "${CACHE_DIR}/sitemap.xml"
-    echo "Sitemap cache cleared. Next sitemap.sh call will re-fetch."
-    echo "(Cached docs preserved. Delete ${CACHE_DIR}/doc_*.txt to clear them.)"
+    echo "Clearing docs.json cache for version: $VERSION"
+    rm -f "${VERSION_CACHE_DIR}/docs.json"
+    echo "docs.json cleared. Next sitemap.sh or build-index.sh fetch will re-fetch."
     ;;
+
   clear-docs)
-    count=$(ls "$CACHE_DIR"/doc_*.txt 2>/dev/null | wc -l)
-    rm -f "${CACHE_DIR}"/doc_*.txt "${CACHE_DIR}"/doc_*.html "${CACHE_DIR}/index.txt" "${CACHE_DIR}/index_meta.json"
-    echo "Cleared $count cached docs and index."
+    count=$(ls "$VERSION_CACHE_DIR"/doc_*.txt 2>/dev/null | wc -l | tr -d ' ')
+    rm -f "${VERSION_CACHE_DIR}"/doc_*.txt \
+          "${VERSION_CACHE_DIR}"/doc_*.md \
+          "${VERSION_CACHE_DIR}/index.txt" \
+          "${VERSION_CACHE_DIR}/index_meta.json"
+    echo "Cleared $count cached docs and index from version: $VERSION"
     ;;
+
+  tags)
+    if [[ "$SOURCE" == local:* ]]; then
+      echo "Tag listing not available for local source mode."
+      echo "The local repo on disk is the only available version."
+      exit 0
+    fi
+    TAGS_CACHE="${CACHE_DIR}/github_tags.json"
+    if ! is_cache_fresh "$TAGS_CACHE" "$DOC_TTL"; then
+      echo "Fetching available OpenClaw release tags..." >&2
+      if ! curl -sf --max-time 10 \
+          -H "Accept: application/vnd.github+json" \
+          -H "User-Agent: openclaw-sage" \
+          "https://api.github.com/repos/openclaw/openclaw/tags?per_page=30" \
+          -o "$TAGS_CACHE" 2>/dev/null; then
+        echo "Error: failed to fetch tags from GitHub API" >&2
+        exit 1
+      fi
+    fi
+    python3 - "$TAGS_CACHE" <<'PYEOF'
+import sys, json
+with open(sys.argv[1]) as f:
+    tags = json.load(f)
+print("Available OpenClaw releases (most recent first):")
+for t in tags:
+    print(f"  {t['name']}")
+print()
+print("Fetch a version: ./scripts/build-index.sh fetch --version <tag>")
+PYEOF
+    ;;
+
   dir)
-    echo "$CACHE_DIR"
+    echo "$VERSION_CACHE_DIR"
     ;;
+
   *)
-    echo "Usage: cache.sh {status|refresh|clear-docs|dir}"
+    echo "Usage: cache.sh {status|refresh|clear-docs|tags|dir} [--version <tag>]"
     ;;
 esac

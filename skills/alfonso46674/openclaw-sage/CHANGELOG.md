@@ -5,6 +5,78 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.3.1] - 2026-04-24
+
+### Added
+
+- **`OPENCLAW_SAGE_SOURCE`** env var — `github` (default) or `local:/path/to/openclaw/docs`. Selects where docs are fetched from.
+- **`--version <tag>`** flag on all scripts — fetch and query docs at any OpenClaw release tag (e.g. `v2026.4.22`). Omit for `latest` (from `main`).
+- **`cache.sh tags`** — list available OpenClaw release tags from GitHub API.
+- **`cache.sh status`** now lists all cached versions with doc counts and index status per version.
+- Version-scoped cache layout: `$CACHE_DIR/<version>/` — multiple versions coexist on disk.
+
+### Changed
+
+- **`build-index.sh fetch`** now fetches raw Markdown files from the OpenClaw GitHub repo (or a local clone) instead of HTML from `docs.openclaw.ai`. Uses `docs.json` for doc discovery instead of `sitemap.xml`.
+- **`sitemap.sh`** reads `docs.json` navigation tree instead of `sitemap.xml`. Output format unchanged.
+- **`fetch-doc.sh --toc`/`--section`** now parses `#` Markdown headings instead of HTML `<h1>`–`<h6>`. No longer requires the HTML cache.
+- **`info.sh`** extracts title from YAML frontmatter instead of HTML `<title>`.
+- **`recent.sh`** removes the "updated at source" section (no `lastmod` in `docs.json`). Adds hints pointing to `cache.sh status` and `cache.sh tags`.
+
+### Removed
+
+- **HTML fetch pipeline** (`fetch_and_cache`, `fetch_text`, `clean_html_file`, `html_to_text` in `lib.sh`) — replaced by `fetch_markdown`, `clean_markdown`, `resolve_source`.
+- **`OPENCLAW_SAGE_SITEMAP_TTL`** env var — sitemap TTL is no longer relevant.
+- **`lynx`/`w3m`** optional deps — HTML-to-text conversion is no longer needed.
+- **`.html` cache files** (`doc_<path>.html`) — replaced by `.md` cache files.
+
+### Breaking Changes
+
+- Old flat cache (`$CACHE_DIR/doc_*.txt`, `sitemap.xml`) abandoned. Run `build-index.sh fetch` to repopulate.
+- `OPENCLAW_SAGE_SITEMAP_TTL` env var no longer has any effect.
+- `recent.sh` no longer shows "updated at source" dates.
+
+---
+
+## [0.3.0] — 2026-04-23
+
+### Fixed
+
+- **BUG-10** (`lib.sh`) — cached HTML is now reduced to a minimal parsing artifact instead of preserving most of the Mintlify page shell. The cleaner keeps the page title plus the actual content subtree used by `info.sh`, `fetch-doc.sh --toc`, and `fetch-doc.sh --section`, while stripping preload/meta clutter, layout chrome, and multiline script/style noise from both cached `.html` and derived `.txt`.
+
+### Added
+
+- **`OPENCLAW_SAGE_FETCH_JOBS`** env var in `lib.sh` — controls parallel worker count for `build-index.sh fetch` (default `8`; set to `1` for sequential behavior).
+- **`search.sh --max-results <n>`** — caps result count across BM25, cached-doc grep fallback, and sitemap path matches. Supported in both human-readable and `--json` output modes.
+- **`build-index.sh search --max-results <n>`** — caps ranked BM25 results on the index-only query path for consistency with `search.sh`.
+- `tests/test_build_index.bats` — regression coverage for cleaned/minimal cached HTML, `build-index.sh search --max-results`, parallel fetch worker usage, sequential fallback logging, and incremental index builds.
+- `tests/test_search.bats` — regression coverage for `search.sh --max-results` across BM25, JSON, and cached-doc fallback modes.
+- `tests/test_lib.bats` — helper coverage for the new `FETCH_JOBS` env var.
+
+### Changed
+
+- **`build-index.sh fetch`** — now downloads docs in parallel with `xargs -0 -n 1 -P` when available, emits one `  [done] <path>` line per completed fetch, and logs when it falls back to sequential downloading because `xargs` is unavailable or fails.
+- **`build-index.sh build`** — now refreshes `index.txt` incrementally: unchanged docs keep their existing index lines, only docs newer than `index.txt` are reprocessed, removed docs are dropped from the index, and the file is left untouched when the cached corpus has not changed. `index_meta.json` is still rebuilt from the current index state.
+- **Search docs** (`README.md`, `SKILL.md`) — now explicitly distinguish the two search entry points: `search.sh` is the discovery-first command with BM25/grep/sitemap fallbacks, while `build-index.sh search` is the index-only BM25 query tool.
+
+## [0.2.5] — 2026-04-23
+
+### Fixed
+
+- **BUG-11** (`build-index.sh`) — sitemap download failures during `build-index.sh fetch` were silently ignored, causing a misleading downstream "Could not get URL list from sitemap" error. The script now fails immediately with `Error: failed to fetch sitemap (network unreachable?)`.
+- **BUG-12** (`build-index.sh`) — `build-index.sh build` did not check whether `python3 ... build-meta` succeeded, so it could print success-style output after metadata generation failed. The build now exits with `Error: build-meta failed`.
+- **BUG-13** (`track-changes.sh`) — removed `for f in $(ls ... | sort)` snapshot iteration in favor of direct glob/array iteration, preserving chronological behavior without parsing `ls` output.
+- **BUG-14** (`lib.sh`, `cache.sh`, `info.sh`) — duplicated OS-specific mtime lookup logic was consolidated into a shared `get_mtime <file>` helper in `lib.sh`, and all callers now use that canonical path.
+- **BUG-16** (`build-index.sh`) — fetch progress rendering no longer leaves suffix garbage behind when a shorter path follows a longer one. Progress updates now pad to the widest path in the current run before rewriting the line.
+
+### Added
+
+- `tests/test_build_index.bats` — 3 new tests: BUG-11 sitemap fetch failure handling, BUG-12 build-meta failure handling, and BUG-16 carriage-return progress rendering regression.
+- `tests/test_track_changes.bats` — 2 new characterization tests covering snapshot ordering and oldest-snapshot selection used by the BUG-13 cleanup.
+- `tests/test_lib.bats` — 2 new helper tests covering `get_mtime` missing-file and epoch-output behavior.
+
+---
+
 ## [0.2.4] — 2026-03-11
 
 ### Fixed

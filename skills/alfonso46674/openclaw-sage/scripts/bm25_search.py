@@ -3,6 +3,7 @@
 
 Usage:
   bm25_search.py search <index_file> <query...>
+  bm25_search.py search <index_file> <query> <max_results>
   bm25_search.py build-meta <index_file>   # writes index_meta.json alongside index
 
 Output (search): score | path | excerpt   (sorted by score descending)
@@ -122,7 +123,13 @@ def main():
         print(f"Unknown mode: {mode}", file=sys.stderr)
         sys.exit(1)
 
-    query = ' '.join(sys.argv[3:])
+    max_results = MAX_RESULTS
+    query_args = sys.argv[3:]
+    if len(query_args) == 2 and query_args[-1].isdigit():
+        max_results = int(query_args[-1])
+        query_args = query_args[:-1]
+
+    query = ' '.join(query_args)
     if not query:
         print("No query provided", file=sys.stderr)
         sys.exit(1)
@@ -152,7 +159,7 @@ def main():
 
     results.sort(reverse=True)
 
-    for score, path, excerpt in results[:MAX_RESULTS]:
+    for score, path, excerpt in results[:max_results]:
         print(f"{score:.3f} | {path} | {excerpt}")
 
 

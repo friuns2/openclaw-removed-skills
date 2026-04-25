@@ -14,12 +14,13 @@ openclaw-sage is an OpenClaw skill that gives AI agents access to OpenClaw docum
 
 ## Critical rules
 
-- **Always source `lib.sh`** — never redefine `is_cache_fresh`, `fetch_text`, `fetch_and_cache`, `CACHE_DIR`, or `DOCS_BASE_URL` in a script.
+- **Always source `lib.sh`** — never redefine `is_cache_fresh`, `fetch_markdown`, `parse_version_flag`, `CACHE_DIR`, `VERSION_CACHE_DIR`, or `DOCS_BASE_URL` in a script.
 - **Never hardcode** `~/.cache/...` or `https://docs.openclaw.ai` — use `$CACHE_DIR` and `$DOCS_BASE_URL`.
 - **Every `curl` call must write to `$CACHE_DIR`** — no uncached network requests.
 - **stdout is data, stderr is diagnostics** — progress/warning messages go to `>&2`.
 - **Use Python for JSON** — never build JSON with bash string concatenation.
 - **No new required dependencies** — `bash` and `curl` are the only hard requirements.
+- **Use `VERSION_CACHE_DIR` for doc/index paths** — never use `$CACHE_DIR` directly for doc files; always call `parse_version_flag` first so `VERSION_CACHE_DIR` is set.
 
 ## Full conventions
 

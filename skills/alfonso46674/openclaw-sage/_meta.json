@@ -3,11 +3,16 @@
   "slug": "openclaw-sage",
   "displayName": "Openclaw Sage",
   "latest": {
-    "version": "0.2.4",
-    "publishedAt": 1773217560420,
-    "commit": "https://github.com/openclaw/skills/commit/73f526f149f1321c13e4ad619cc5dc941ef9309e"
+    "version": "0.3.1",
+    "publishedAt": 1777078305287,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.2.4",
+      "publishedAt": 1773217560420,
+      "commit": "https://github.com/openclaw/skills/commit/73f526f149f1321c13e4ad619cc5dc941ef9309e"
+    },
     {
       "version": "0.2.1",
       "publishedAt": 1773003912264,
