@@ -3,11 +3,16 @@
   "slug": "polymarket-food-agriculture-trader",
   "displayName": "Polymarket Food Agriculture Trader",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775988960436,
-    "commit": "https://github.com/openclaw/skills/commit/20f750274da586e5be0c266794def39de2241a50"
+    "version": "0.0.2",
+    "publishedAt": 1776513336294,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775988960436,
+      "commit": "https://github.com/openclaw/skills/commit/20f750274da586e5be0c266794def39de2241a50"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775317151165,
