@@ -3,11 +3,16 @@
   "slug": "drata",
   "displayName": "Drata",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163447333,
-    "commit": "https://github.com/openclaw/skills/commit/2209d593fb30f8ee2c452f7d3201d1e2fcbd5804"
+    "version": "1.0.3",
+    "publishedAt": 1776801774825,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163447333,
+      "commit": "https://github.com/openclaw/skills/commit/2209d593fb30f8ee2c452f7d3201d1e2fcbd5804"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773281012026,
