@@ -3,11 +3,16 @@
   "slug": "api-sports",
   "displayName": "Api Sports",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163255444,
-    "commit": "https://github.com/openclaw/skills/commit/77eb8374a723f18747637289a992b6a8755b032f"
+    "version": "1.0.3",
+    "publishedAt": 1776794592348,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163255444,
+      "commit": "https://github.com/openclaw/skills/commit/77eb8374a723f18747637289a992b6a8755b032f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773187369796,
