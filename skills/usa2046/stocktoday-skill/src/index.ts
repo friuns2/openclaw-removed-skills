@@ -5,11 +5,16 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 const TOKEN = process.env.STOCKTODAY_TOKEN || "";
 const BASE_URL = process.env.STOCKTODAY_URL || "https://tushare.citydata.club/";
 
+// 备用服务器地址
+const BACKUP_URL1 = process.env.STOCKTODAY_BACKUP_URL1 || "http://111.229.164.2:8083/";
+const BACKUP_URL2 = process.env.STOCKTODAY_BACKUP_URL2 || "http://124.223.112.152:6331/";
+const BACKUP_URL3 = process.env.STOCKTODAY_BACKUP_URL3 || "http://110.42.211.9:9900/";
+
 if (!TOKEN) {
-  console.error("⚠️ 请设置环境变量 STOCKTODAY_TOKEN 或 TUSHARE_TOKEN");
+  console.error("⚠️ 请设置环境变量 STOCKTODAY_TOKEN");
 }
 
-const server = new Server({ name: "stocktoday-mcp", version: "1.0.1" }, { capabilities: { tools: {} } });
+const server = new Server({ name: "stocktoday-mcp", version: "1.1.2" }, { capabilities: { tools: {} } });
 
 async function callAPI(endpoint: string, params: Record<string, any> = {}, token: string = TOKEN): Promise<any> {
   const formData = new URLSearchParams();
@@ -17,43 +22,72 @@ async function callAPI(endpoint: string, params: Record<string, any> = {}, token
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== "") formData.append(k, String(v));
   }
-  try {
-    const res = await fetch(`${BASE_URL}${endpoint}`, { method: "POST", body: formData, headers: { "Content-Type": "application/x-www-form-urlencoded" } });
-    return await res.json();
-  } catch (e: any) { return { error: e.message }; }
+
+  // 服务器列表：主站 + 备用站
+  const urls = [BASE_URL, BACKUP_URL1, BACKUP_URL2, BACKUP_URL3];
+  let lastError = "";
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(`${url}${endpoint}`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-Client-Type": "StockToday-skill",
+          "X-Client-Version": "1.1.1"
+        },
+        signal: AbortSignal.timeout(30000) // 30秒超时
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      lastError = `HTTP ${res.status}`;
+    } catch (e: any) {
+      lastError = e.message || "Unknown error";
+      // 网络错误继续尝试备用服务器
+      continue;
+    }
+  }
+
+  return { error: `请求失败: ${lastError}` };
 }
 
-// Tool definition type
 interface ToolDef {
   name: string;
   desc: string;
   params: Record<string, string>;
 }
 
-// All tools - v1.0.1 完整版
+// All tools - v1.0.6 完整版 (基于HTTP_CLIENT.py)
 const tools: ToolDef[] = [
   // ===== 1. 股票-基础数据 =====
   { name: "stock_basic", desc: "股票基本信息", params: { exchange: "交易所", list_status: "上市状态", ts_code: "股票代码", market: "市场", fields: "返回字段" }},
+  { name: "stk_premarket", desc: "新股上市", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "trade_cal", desc: "交易日历", params: { exchange: "交易所", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "stock_st", desc: "ST股票列表", params: { trade_date: "交易日期" }},
+  { name: "stock_st", desc: "ST股票列表", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "st", desc: "ST股票列表(别名)", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "namechange", desc: "股票名称变更", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "hs_const", desc: "沪深股通成分股", params: { hs_type: "类型", is_new: "是否最新" }},
   { name: "stock_company", desc: "上市公司信息", params: { ts_code: "股票代码", exchange: "交易所" }},
   { name: "stk_managers", desc: "公司管理层", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", ann_date: "公告日期" }},
   { name: "stk_rewards", desc: "高管薪酬", params: { ts_code: "股票代码" }},
-  { name: "new_share", desc: "新股上市", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "new_share", desc: "新股发行", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "bak_basic", desc: "备用基础数据", params: { exchange: "交易所", ts_code: "股票代码" }},
-  { name: "stk_account", desc: "股票账户", params: { trade_date: "交易日期" }},
-  { name: "stk_ah_comparison", desc: "AH股对比", params: { ts_code: "股票代码" }},
+  { name: "stk_account", desc: "股票账户", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "stk_account_old", desc: "股票账户(旧)", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "stk_ah_comparison", desc: "AH股对比", params: { trade_date: "交易日期" }},
+  { name: "stock_hsgt", desc: "沪深港通股票列表", params: { is_hs: "是否沪深港通(N/O)" }},
+  { name: "bse_mapping", desc: "北交所新旧代码对照", params: { ts_code: "股票代码" }},
 
-  // ===== 3. 股票-行情数据 =====
+  // ===== 2. 股票-行情数据 =====
   { name: "daily", desc: "日线行情", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "weekly", desc: "周线行情", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "monthly", desc: "月线行情", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
-  { name: "pro_bar", desc: "行情(支持复权)", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", asset: "资产", adj: "复权", freq: "频率", ma: "均线", factors: "因子" }},
+  { name: "stk_weekly_monthly", desc: "周月线行情", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "stk_week_month_adj", desc: "周月线复权行情", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "pro_bar", desc: "行情(支持复权)", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", asset: "资产", adj: "复权", freq: "频率", ma: "均线", factors: "因子", adjfactor: "复权因子" }},
   { name: "adj_factor", desc: "复权因子", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "daily_basic", desc: "每日指标", params: { ts_code: "股票代码", trade_date: "交易日期", fields: "返回字段" }},
+  { name: "daily_basic", desc: "每日指标", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "stk_limit", desc: "涨跌停", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "suspend_d", desc: "停复牌", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", suspend_type: "类型" }},
   { name: "hsgt_top10", desc: "沪深股通前十", params: { trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", market_type: "市场类型" }},
@@ -65,48 +99,50 @@ const tools: ToolDef[] = [
   { name: "get_index_daily", desc: "获取指数日线", params: { ts_code: "指数代码", trade_date: "交易日期" }},
   { name: "get_realtime_quote", desc: "实时行情", params: { ts_code: "股票代码" }},
 
-  // ===== 4. 股票-财务数据 =====
+  // ===== 3. 股票-财务数据 =====
   { name: "income", desc: "利润表", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "balancesheet", desc: "资产负债表", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "cashflow", desc: "现金流量表", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "forecast", desc: "业绩预告", params: { ann_date: "公告日期", fields: "返回字段" }},
   { name: "express", desc: "业绩快报", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "dividend", desc: "分红送股", params: { ts_code: "股票代码", fields: "返回字段" }},
-  { name: "fina_indicator", desc: "财务指标", params: { ts_code: "股票代码" }},
+  { name: "fina_indicator", desc: "财务指标", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "fina_audit", desc: "财务审计", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "fina_mainbz", desc: "主营业务", params: { ts_code: "股票代码", type: "类型" }},
   { name: "disclosure_date", desc: "披露日期", params: { end_date: "结束日期" }},
 
-  // ===== 5. 股票-参考数据 =====
+  // ===== 4. 股票-参考数据 =====
   { name: "top10_holders", desc: "十大股东", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "top10_floatholders", desc: "十大流通股东", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "pledge_stat", desc: "股权质押统计", params: { ts_code: "股票代码" }},
   { name: "pledge_detail", desc: "股权质押明细", params: { ts_code: "股票代码" }},
   { name: "repurchase", desc: "股份回购", params: { ann_date: "公告日期", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "concept", desc: "概念列表", params: {} },
-  { name: "concept_detail", desc: "概念详情", params: { id: "概念ID", ts_code: "股票代码" }},
   { name: "share_float", desc: "流通股本", params: { ann_date: "公告日期" }},
   { name: "block_trade", desc: "大宗交易", params: { trade_date: "交易日期" }},
   { name: "stk_holdernumber", desc: "股东户数", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "stk_holdertrade", desc: "股东增减持", params: { ts_code: "股票代码", ann_date: "公告日期", trade_type: "交易类型" }},
-  { name: "ci_index_member", desc: "中证指数成分", params: { index_code: "指数代码", ts_code: "股票代码" }},
 
-  // ===== 6. 股票-特色数据 =====
+  // ===== 5. 股票-特色数据 =====
   { name: "report_rc", desc: "研报", params: { ts_code: "股票代码", report_date: "报告日期" }},
-  { name: "cyq_perf", desc: "筹码活跃度", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "cyq_perf", desc: "筹码活跃度", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "cyq_chips", desc: "筹码分布", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "stk_factor", desc: "股票因子", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
-  { name: "stk_factor_pro", desc: "股票因子(专业版)", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
+  { name: "stk_factor_pro", desc: "股票因子(专业版)", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "ccass_hold", desc: "中央结算持股", params: { ts_code: "股票代码" }},
   { name: "ccass_hold_detail", desc: "中央结算持股明细", params: { ts_code: "股票代码", trade_date: "交易日期", fields: "返回字段" }},
   { name: "hk_hold", desc: "港股持股", params: { ts_code: "股票代码", exchange: "交易所" }},
-  { name: "stk_auction_o", desc: "集合竞价", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "stk_auction_o", desc: "集合竞价(开盘)", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "stk_auction_c", desc: "盘后定价", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "stk_auction", desc: "股票集合竞价", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "stk_nineturn", desc: "九转序列", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
   { name: "stk_surv", desc: "舆情监控", params: { ts_code: "股票代码", trade_date: "交易日期", fields: "返回字段" }},
   { name: "broker_recommend", desc: "券商研报推荐", params: { month: "月份" }},
+  { name: "anns_d", desc: "上市公司公告", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "cctv_news", desc: "新闻联播文字稿", params: { date: "日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "ths_news", desc: "同花顺新闻", params: { start_date: "开始日期", end_date: "结束日期", trade_date: "交易日期", limit: "数量" }},
+  { name: "npr", desc: "国家政策库", params: { start_date: "开始日期", end_date: "结束日期", search: "关键词" }},
+  { name: "research_report", desc: "券商研究报告", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
 
-  // ===== 7. 股票-两融 =====
+  // ===== 6. 股票-两融 =====
   { name: "margin", desc: "融资融券", params: { trade_date: "交易日期" }},
   { name: "margin_detail", desc: "融资融券明细", params: { trade_date: "交易日期" }},
   { name: "margin_secs", desc: "融资融券证券", params: { trade_date: "交易日期", exchange: "交易所" }},
@@ -115,17 +151,17 @@ const tools: ToolDef[] = [
   { name: "slb_sec_detail", desc: "融券余量明细", params: { trade_date: "交易日期" }},
   { name: "slb_len_mm", desc: "融资期限明细", params: { trade_date: "交易日期" }},
 
-  // ===== 8. 股票-资金流向 =====
+  // ===== 7. 股票-资金流向 =====
   { name: "moneyflow", desc: "资金流向", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "moneyflow_ths", desc: "资金流向(同花顺)", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "moneyflow_cnt_ths", desc: "资金流向分类(同花顺)", params: { trade_date: "交易日期" }},
+  { name: "moneyflow_cnt_ths", desc: "资金流向分类(同花顺)", params: { trade_date: "交易日期", ts_code: "股票代码" }},
   { name: "moneyflow_dc", desc: "资金流向(东方财富)", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "moneyflow_ind_ths", desc: "行业资金流向(同花顺)", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "moneyflow_ind_dc", desc: "行业资金流向(东方财富)", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "moneyflow_mkt_dc", desc: "市场资金流向(东方财富)", params: { trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "moneyflow_hsgt", desc: "沪深港通资金流向", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
 
-  // ===== 9. 股票-打板专题 =====
+  // ===== 8. 股票-打板专题 =====
   { name: "kpl_concept", desc: "开盘啦概念", params: { trade_date: "交易日期" }},
   { name: "kpl_concept_cons", desc: "开盘啦概念成分", params: { trade_date: "交易日期" }},
   { name: "kpl_list", desc: "开盘啦列表", params: { trade_date: "交易日期", tag: "标签", fields: "返回字段" }},
@@ -136,16 +172,15 @@ const tools: ToolDef[] = [
   { name: "limit_step", desc: "涨停阶梯", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", nums: "数量" }},
   { name: "limit_cpt_list", desc: "涨停股票池", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "ths_index", desc: "同花顺指数", params: {} },
-  { name: "ths_member", desc: "同花顺成分股", params: { ts_code: "股票代码" }},
-  { name: "dc_index", desc: "东财指数", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "dc_member", desc: "东财成分股", params: { ts_code: "股票代码", trade_date: "交易日期" }},
-  { name: "stk_auction", desc: "股票集合竞价", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "ths_member", desc: "同花顺成分股", params: { ts_code: "指数代码" }},
+  { name: "dc_index", desc: "东财指数", params: { ts_code: "指数代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "dc_member", desc: "东财成分股", params: { ts_code: "指数代码", trade_date: "交易日期" }},
   { name: "hm_list", desc: "活跃股列表", params: {} },
   { name: "hm_detail", desc: "活跃股明细", params: { trade_date: "交易日期" }},
   { name: "ths_hot", desc: "同花顺热点", params: { market: "市场", trade_date: "交易日期", fields: "返回字段" }},
   { name: "dc_hot", desc: "东方财富热点", params: { market: "市场", hot_type: "热点类型", trade_date: "交易日期", fields: "返回字段" }},
 
-  // ===== 10. 指数 =====
+  // ===== 9. 指数 =====
   { name: "index_basic", desc: "指数基本信息", params: { market: "市场" }},
   { name: "index_daily", desc: "指数日线", params: { ts_code: "指数代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "index_weekly", desc: "指数周线", params: { ts_code: "指数代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
@@ -155,6 +190,7 @@ const tools: ToolDef[] = [
   { name: "index_classify", desc: "指数分类", params: { level: "级别", src: "来源" }},
   { name: "index_member", desc: "指数成分股", params: { index_code: "指数代码", ts_code: "股票代码" }},
   { name: "index_member_all", desc: "指数成分股(全)", params: { l1_code: "一级代码", l2_code: "二级代码", l3_code: "三级代码", ts_code: "股票代码" }},
+  { name: "ci_index_member", desc: "中证指数成分", params: { index_code: "指数代码" }},
   { name: "daily_info", desc: "每日信息", params: { trade_date: "交易日期", exchange: "交易所", fields: "返回字段" }},
   { name: "sz_daily_info", desc: "深市每日信息", params: { trade_date: "交易日期", ts_code: "股票代码" }},
   { name: "ths_daily", desc: "同花顺指数日线", params: { ts_code: "指数代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
@@ -162,13 +198,14 @@ const tools: ToolDef[] = [
   { name: "sw_daily", desc: "申万指数日线", params: { trade_date: "交易日期", fields: "返回字段" }},
   { name: "index_global", desc: "全球指数", params: { ts_code: "指数代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "idx_factor_pro", desc: "指数因子(专业版)", params: { ts_code: "指数代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "dc_daily", desc: "东财指数每日", params: { ts_code: "指数代码", trade_date: "交易日期" }},
-  { name: "gz_index", desc: "国债指数", params: { ts_code: "指数代码", trade_date: "交易日期" }},
-  { name: "wz_index", desc: "中债指数", params: { ts_code: "指数代码", trade_date: "交易日期" }},
+  { name: "dc_daily", desc: "东财指数每日", params: { ts_code: "指数代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "tdx_index", desc: "通达信指数", params: { ts_code: "指数代码" }},
-  { name: "tdx_daily", desc: "通达信指数日线", params: { ts_code: "指数代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "tdx_daily", desc: "通达信指数日线", params: { ts_code: "指数代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "tdx_member", desc: "通达信板块成分", params: { ts_code: "板块代码" }},
+  { name: "gz_index", desc: "国证指数", params: { ts_code: "指数代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "wz_index", desc: "万德指数", params: { ts_code: "指数代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
 
-  // ===== 11. 基金 =====
+  // ===== 10. 基金 =====
   { name: "fund_basic", desc: "基金基本信息", params: { market: "市场" }},
   { name: "fund_company", desc: "基金公司", params: {} },
   { name: "fund_manager", desc: "基金经理", params: { ts_code: "基金代码" }},
@@ -176,19 +213,20 @@ const tools: ToolDef[] = [
   { name: "fund_nav", desc: "基金净值", params: { ts_code: "基金代码" }},
   { name: "fund_div", desc: "基金分红", params: { ann_date: "公告日期" }},
   { name: "fund_portfolio", desc: "基金持仓", params: { ts_code: "基金代码" }},
-  { name: "fund_daily", desc: "基金日线", params: { ts_code: "基金代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "fund_daily", desc: "基金日线", params: { ts_code: "基金代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
   { name: "fund_adj", desc: "基金复权", params: { ts_code: "基金代码", start_date: "开始日期", end_date: "结束日期" }},
   { name: "fund_factor_pro", desc: "基金因子(专业版)", params: { ts_code: "基金代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "fund_sales_ratio", desc: "基金销售比例", params: { trade_date: "交易日期" }},
-  { name: "fund_sales_vol", desc: "基金销售量", params: { trade_date: "交易日期" }},
-  { name: "etf_basic", desc: "ETF基本信息", params: {} },
-  { name: "etf_index", desc: "ETF关联指数", params: { ts_code: "ETF代码" }},
-  { name: "etf_share_size", desc: "ETF份额", params: { ts_code: "ETF代码", trade_date: "交易日期" }},
+  { name: "fund_sales_ratio", desc: "基金销售比例", params: { ts_code: "基金代码" }},
+  { name: "fund_sales_vol", desc: "基金销售量", params: { ts_code: "基金代码" }},
+  { name: "etf_basic", desc: "ETF基本信息", params: { market: "市场" }},
+  { name: "etf_index", desc: "ETF关联指数", params: { ts_code: "ETF代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "etf_share_size", desc: "ETF份额", params: { ts_code: "ETF代码" }},
 
-  // ===== 12. 期货 =====
+  // ===== 11. 期货 =====
   { name: "fut_basic", desc: "期货基本信息", params: { exchange: "交易所", fut_type: "期货类型", fields: "返回字段" }},
   { name: "fut_daily", desc: "期货日线", params: { ts_code: "期货代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", exchange: "交易所", fields: "返回字段" }},
   { name: "fut_weekly_monthly", desc: "期货周/月线", params: { ts_code: "期货代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", freq: "频率", exchange: "交易所" }},
+  { name: "ft_mins", desc: "期货分钟线", params: { ts_code: "期货代码", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
   { name: "fut_wsr", desc: "期货持仓", params: { trade_date: "交易日期", symbol: "合约" }},
   { name: "fut_settle", desc: "期货结算", params: { trade_date: "交易日期", exchange: "交易所" }},
   { name: "fut_holding", desc: "期货持仓量", params: { trade_date: "交易日期", symbol: "合约", exchange: "交易所" }},
@@ -197,61 +235,105 @@ const tools: ToolDef[] = [
   { name: "ft_limit", desc: "期货涨跌停", params: { trade_date: "交易日期", ts_code: "期货代码", cont: "合约" }},
   { name: "cb_factor_pro", desc: "可转债因子(专业版)", params: { ts_code: "可转债代码", trade_date: "交易日期" }},
 
-  // ===== 13. 现货 =====
-  { name: "sge_basic", desc: "现货基本信息", params: {} },
-  { name: "sge_daily", desc: "现货每日行情", params: {} },
+  // ===== 12. 现货 =====
+  { name: "sge_basic", desc: "现货基本信息", params: { ts_code: "品种代码" }},
+  { name: "sge_daily", desc: "现货每日行情", params: { trade_date: "交易日期", prd: "品种", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
 
-  // ===== 14. 期权 =====
+  // ===== 13. 期权 =====
   { name: "opt_basic", desc: "期权基本信息", params: { exchange: "交易所", fields: "返回字段" }},
-  { name: "opt_daily", desc: "期权每日行情", params: { ts_code: "期权代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "opt_daily", desc: "期权每日行情", params: { ts_code: "期权代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", exchange: "交易所" }},
+  { name: "opt_mins", desc: "期权分钟行情", params: { ts_code: "期权代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
 
-  // ===== 15. 可转债 =====
-  { name: "cb_basic", desc: "可转债基本信息", params: {} },
-  { name: "cb_issue", desc: "可转债发行", params: {} },
-  { name: "cb_call", desc: "可转债回售", params: {} },
-  { name: "cb_rate", desc: "可转债转股溢价率", params: {} },
-  { name: "cb_daily", desc: "可转债每日行情", params: { ts_code: "可转债代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "cb_price_chg", desc: "可转债价格变化", params: {} },
-  { name: "cb_share", desc: "可转债转股", params: {} },
+  // ===== 14. 可转债 =====
+  { name: "cb_basic", desc: "可转债基本信息", params: { fields: "返回字段" }},
+  { name: "cb_issue", desc: "可转债发行", params: { ann_date: "公告日期", fields: "返回字段" }},
+  { name: "cb_call", desc: "可转债回售", params: { fields: "返回字段" }},
+  { name: "cb_rate", desc: "可转债转股溢价率", params: { ts_code: "可转债代码", fields: "返回字段" }},
+  { name: "cb_daily", desc: "可转债每日行情", params: { ts_code: "可转债代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
+  { name: "cb_price_chg", desc: "可转债价格变化", params: { ts_code: "可转债代码", fields: "返回字段" }},
+  { name: "cb_share", desc: "可转债转股", params: { ts_code: "可转债代码", fields: "返回字段" }},
 
-  // ===== 16. 债券 =====
-  { name: "repo_daily", desc: "回购每日行情", params: {} },
-  { name: "bc_otcqt", desc: "银行间报价", params: {} },
-  { name: "bc_bestotcqt", desc: "银行间最优报价", params: {} },
-  { name: "bond_blk", desc: "债券大宗交易", params: {} },
-  { name: "bond_blk_detail", desc: "债券大宗交易明细", params: {} },
-  { name: "yc_cb", desc: "可转债收益率", params: {} },
+  // ===== 15. 债券 =====
+  { name: "repo_daily", desc: "回购每日行情", params: { trade_date: "交易日期" }},
+  { name: "bc_otcqt", desc: "银行间报价", params: { ts_code: "债券代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
+  { name: "bc_bestotcqt", desc: "银行间最优报价", params: { ts_code: "债券代码", start_date: "开始日期", end_date: "结束日期", fields: "返回字段" }},
+  { name: "bond_blk", desc: "债券大宗交易", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "bond_blk_detail", desc: "债券大宗交易明细", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "yc_cb", desc: "可转债收益率", params: { trade_date: "交易日期", curve_type: "曲线类型" }},
 
-  // ===== 17. 经济数据 =====
-  { name: "shibor", desc: "SHIBOR利率", params: {} },
-  { name: "shibor_quote", desc: "SHIBOR报价", params: {} },
-  { name: "cn_gdp", desc: "中国GDP", params: { quarter: "季度" }},
-  { name: "cn_cpi", desc: "中国CPI", params: { month: "月份" }},
-  { name: "cn_ppi", desc: "中国PPI", params: { month: "月份" }},
-  { name: "sf_month", desc: "上海期货月度数据", params: { month: "月份" }},
+  // ===== 16. 宏观经济 =====
+  { name: "eco_cal", desc: "经济日历", params: { date: "日期", country: "国家", event: "事件", fields: "返回字段" }},
+  { name: "shibor", desc: "Shibor利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "shibor_quote", desc: "Shibor报价", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "shibor_lpr", desc: "LPR贷款基础利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "cn_gdp", desc: "中国GDP", params: { quarter: "季度", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "cn_cpi", desc: "中国CPI", params: { month: "月份", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "cn_ppi", desc: "中国PPI", params: { month: "月份", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "cn_m", desc: "货币供应量(月)", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "cn_pmi", desc: "采购经理指数PMI", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "sf_month", desc: "上海黄金现货月报", params: { start_month: "开始月", end_month: "结束月" }},
+  { name: "libor", desc: "Libor利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "hibor", desc: "Hibor利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_tbr", desc: "美国短期国债利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_tycr", desc: "美国国债收益率曲线利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_trycr", desc: "美国国债实际收益率曲线利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_tltr", desc: "美国国债长期利率", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_trltr", desc: "美国国债实际长期利率平均值", params: { start_date: "开始日期", end_date: "结束日期" }},
 
-  // ===== 18. 外汇 =====
-  { name: "fx_obasic", desc: "外汇基本信息", params: {} },
-  { name: "fx_daily", desc: "外汇每日行情", params: {} },
+  // ===== 17. 外汇 =====
+  { name: "fx_obasic", desc: "外汇基本信息", params: { exchange: "交易所", classify: "分类", fields: "返回字段" }},
+  { name: "fx_daily", desc: "外汇每日行情", params: { ts_code: "外汇代码", start_date: "开始日期", end_date: "结束日期" }},
 
-  // ===== 19. 港股 =====
-  { name: "hk_basic", desc: "港股基本信息", params: {} },
+  // ===== 18. 港股 =====
+  { name: "hk_basic", desc: "港股基本信息", params: { list_status: "上市状态", trade_date: "交易日期" }},
   { name: "hk_tradecal", desc: "港股交易日历", params: { start_date: "开始日期", end_date: "结束日期" }},
-  { name: "hk_daily", desc: "港股每日行情", params: { ts_code: "港股代码", start_date: "开始日期", end_date: "结束日期" }},
-  { name: "hk_income", desc: "港股利润表", params: { ts_code: "港股代码" }},
-  { name: "hk_balancesheet", desc: "港股资产负债表", params: { ts_code: "港股代码" }},
-  { name: "hk_cashflow", desc: "港股现金流量表", params: { ts_code: "港股代码" }},
+  { name: "hk_daily", desc: "港股每日行情", params: { ts_code: "港股代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "hk_daily_adj", desc: "港股每日行情(复权)", params: { ts_code: "港股代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "hk_mins", desc: "港股分钟线", params: { ts_code: "港股代码", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
+  { name: "hk_income", desc: "港股利润表", params: { ts_code: "港股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "hk_balancesheet", desc: "港股资产负债表", params: { ts_code: "港股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "hk_cashflow", desc: "港股现金流量表", params: { ts_code: "港股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "hk_adjfactor", desc: "港股复权因子", params: { ts_code: "港股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "hk_fina_indicator", desc: "港股财务指标", params: { ts_code: "港股代码", start_date: "开始日期", end_date: "结束日期" }},
 
-  // ===== 20. 美股 =====
+  // ===== 19. 美股 =====
   { name: "us_basic", desc: "美股基本信息", params: {} },
   { name: "us_tradecal", desc: "美股交易日历", params: { start_date: "开始日期", end_date: "结束日期" }},
-  { name: "us_income", desc: "美股利润表", params: { ts_code: "美股代码" }},
-  { name: "us_balancesheet", desc: "美股资产负债表", params: { ts_code: "美股代码" }},
-  { name: "us_cashflow", desc: "美股现金流量表", params: { ts_code: "美股代码" }},
+  { name: "us_daily", desc: "美股每日行情", params: { ts_code: "美股代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_daily_adj", desc: "美股每日行情(复权)", params: { ts_code: "美股代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", exchange: "交易所" }},
+  { name: "us_income", desc: "美股利润表", params: { ts_code: "美股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_balancesheet", desc: "美股资产负债表", params: { ts_code: "美股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_cashflow", desc: "美股现金流量表", params: { ts_code: "美股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_adjfactor", desc: "美股复权因子", params: { ts_code: "美股代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "us_fina_indicator", desc: "美股财务指标", params: { ts_code: "美股代码", start_date: "开始日期", end_date: "结束日期" }},
 
-  // ===== 21. 资讯 =====
-  { name: "news", desc: "新闻", params: { date: "日期", limit: "数量" }},
-  { name: "major_news", desc: "重要新闻", params: { date: "日期", limit: "数量" }},
+  // ===== 20. 资讯 =====
+  { name: "news", desc: "资讯", params: { src: "来源", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "major_news", desc: "重要资讯", params: { trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期" }},
+
+  // ===== 21. 其他 =====
+  { name: "tmt_twincome", desc: "台湾电子产业月营收", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "tmt_twincomedetail", desc: "TMT月营收明细", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "film_record", desc: "电影剧本备案公示", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "teleplay_record", desc: "电视剧备案公示", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "bo_daily", desc: "电影日度票房", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "bo_monthly", desc: "电影月度票房", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "bo_weekly", desc: "电影周度票房", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "bo_cinema", desc: "影院日度票房", params: { start_date: "开始日期", end_date: "结束日期" }},
+  { name: "irm_qa_sh", desc: "上证e互动问答", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
+  { name: "irm_qa_sz", desc: "深证易互动问答", params: { ts_code: "股票代码", start_date: "开始日期", end_date: "结束日期" }},
+
+  // ===== 22. 实时数据 =====
+  { name: "rt_min", desc: "股票实时分钟", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
+  { name: "rt_k", desc: "股票实时日线", params: { ts_code: "股票代码", asset: "资产" }},
+  { name: "rt_idx_k", desc: "指数实时日线", params: { ts_code: "指数代码" }},
+  { name: "rt_idx_min", desc: "指数实时分钟", params: { ts_code: "指数代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
+  { name: "rt_sw_k", desc: "申万指数实时行情", params: {} },
+  { name: "rt_etf_k", desc: "ETF实时日线", params: { ts_code: "ETF代码" }},
+  { name: "rt_fut_min", desc: "期货实时分钟", params: { ts_code: "期货代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
+  { name: "rt_hk_k", desc: "港股实时日线", params: { ts_code: "港股代码" }},
+  { name: "stk_mins", desc: "股票历史分钟", params: { ts_code: "股票代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
+  { name: "idx_mins", desc: "指数历史分钟", params: { ts_code: "指数代码", trade_date: "交易日期", start_date: "开始日期", end_date: "结束日期", freq: "频率" }},
 ];
 
 // Register tools
@@ -283,12 +365,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         params[k] = v;
       }
     }
-    // 支持通过参数传入 token
     const token = params.token || TOKEN;
     if (!token) {
       return { content: [{ type: "text", text: JSON.stringify({ error: "请设置 STOCKTODAY_TOKEN 环境变量或传入 token 参数" }) }] };
     }
-    // 从 params 中移除 token，避免传递给 API
     delete params.token;
     const result = await callAPI(endpoint, params, token);
     return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
@@ -301,6 +381,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("StockToday MCP v1.0.1 running");
+  console.error("StockToday MCP v1.0.6 running");
 }
 main().catch(console.error);

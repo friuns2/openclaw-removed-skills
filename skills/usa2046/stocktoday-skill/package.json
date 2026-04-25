@@ -1,7 +1,7 @@
 {
   "name": "stocktoday-skill",
-  "version": "1.0.4",
-  "description": "A-stock market data MCP server",
+  "version": "1.1.2",
+  "description": "A-stock market data Skill",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

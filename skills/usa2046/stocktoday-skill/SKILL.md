@@ -1,16 +1,17 @@
 # StockToday Skill
 
-股票数据 MCP 服务器，提供 180+ A 股市场数据接口。
+股票数据 MCP 服务器，提供 **200+** A股市场数据接口。
 
 ## 功能
 
 - 股票基础数据（代码、财务、股东等）
-- 实时行情数据
+- 实时行情数据（支持复权、分钟线）
 - 财务数据（资产负债表、利润表、现金流）
-- 资金流向
-- 指数数据
+- 资金流向（同花顺、东方财富）
+- 指数数据（沪深、全球、板块指数）
 - 基金/期货/期权/现货数据
-- 特色数据（龙虎榜、融资融券等）
+- 特色数据（龙虎榜、融资融券、筹码等）
+- 港股、美股、宏观数据
 
 ## 配置
 
@@ -19,49 +20,57 @@
 ```bash
 # 设置 token
 export STOCKTODAY_TOKEN="your_token"
+
+# 可选：自定义API地址
+export STOCKTODAY_URL="https://tushare.citydata.club/"
 ```
 
 ## 使用示例
 
 ```
 User: 查一下茅台今天的行情
-→ pro_bar { "ts_code": "600519.SH", "start_date": "20260313", "end_date": "20260313", "adj": "qfq", "freq": "D" }
+→ pro_bar { "ts_code": "600519.SH", "start_date": "20260425", "end_date": "20260425", "adj": "qfq", "freq": "D" }
 
 User: 上证指数今天怎么样？
-→ index_daily { "ts_code": "000001.SH", "start_date": "20260313", "end_date": "20260313" }
+→ index_daily { "ts_code": "000001.SH", "start_date": "20260425", "end_date": "20260425" }
 
 User: 今天龙虎榜有哪些？
-→ top_list { "trade_date": "20260313" }
+→ top_list { "trade_date": "20260425" }
 
 User: 茅台的财务数据
 → income { "ts_code": "600519.SH" }
 ```
 
-## 工具列表 (181)
+## 工具列表 (200+)
 
-### 股票-基础数据 (13)
+### 股票-基础数据 (16)
 | 工具 | 说明 |
 |------|------|
 | `stock_basic` | 股票基本信息 |
+| `stk_premarket` | 新股上市 |
 | `trade_cal` | 交易日历 |
 | `stock_st` | ST股票列表 |
 | `st` | ST股票列表(别名) |
 | `namechange` | 股票名称变更 |
-| `hs_const` | 沪深股通成分股 |
 | `stock_company` | 上市公司信息 |
 | `stk_managers` | 公司管理层 |
 | `stk_rewards` | 高管薪酬 |
-| `new_share` | 新股上市 |
+| `new_share` | 新股发行 |
 | `bak_basic` | 备用基础数据 |
 | `stk_account` | 股票账户 |
+| `stk_account_old` | 股票账户(旧) |
 | `stk_ah_comparison` | AH股对比 |
+| `stock_hsgt` | 沪深港通股票列表 |
+| `bse_mapping` | 北交所新旧代码对照 |
 
-### 股票-行情数据 (16)
+### 股票-行情数据 (18)
 | 工具 | 说明 |
 |------|------|
 | `daily` | 日线行情 |
 | `weekly` | 周线行情 |
 | `monthly` | 月线行情 |
+| `stk_weekly_monthly` | 周月线行情 |
+| `stk_week_month_adj` | 周月线复权行情 |
 | `pro_bar` | 行情(支持复权) |
 | `adj_factor` | 复权因子 |
 | `daily_basic` | 每日指标 |
@@ -90,7 +99,7 @@ User: 茅台的财务数据
 | `fina_mainbz` | 主营业务 |
 | `disclosure_date` | 披露日期 |
 
-### 股票-参考数据 (12)
+### 股票-参考数据 (9)
 | 工具 | 说明 |
 |------|------|
 | `top10_holders` | 十大股东 |
@@ -98,30 +107,32 @@ User: 茅台的财务数据
 | `pledge_stat` | 股权质押统计 |
 | `pledge_detail` | 股权质押明细 |
 | `repurchase` | 股份回购 |
-| `concept` | 概念列表 |
-| `concept_detail` | 概念详情 |
 | `share_float` | 流通股本 |
 | `block_trade` | 大宗交易 |
 | `stk_holdernumber` | 股东户数 |
 | `stk_holdertrade` | 股东增减持 |
-| `ci_index_member` | 中证指数成分 |
 
-### 股票-特色数据 (13)
+### 股票-特色数据 (18)
 | 工具 | 说明 |
 |------|------|
 | `report_rc` | 研报 |
 | `cyq_perf` | 筹码活跃度 |
 | `cyq_chips` | 筹码分布 |
-| `stk_factor` | 股票因子 |
 | `stk_factor_pro` | 股票因子(专业版) |
 | `ccass_hold` | 中央结算持股 |
 | `ccass_hold_detail` | 中央结算持股明细 |
 | `hk_hold` | 港股持股 |
-| `stk_auction_o` | 集合竞价 |
+| `stk_auction_o` | 集合竞价(开盘) |
 | `stk_auction_c` | 盘后定价 |
+| `stk_auction` | 股票集合竞价 |
 | `stk_nineturn` | 九转序列 |
 | `stk_surv` | 舆情监控 |
 | `broker_recommend` | 券商研报推荐 |
+| `anns_d` | 上市公司公告 |
+| `cctv_news` | 新闻联播文字稿 |
+| `ths_news` | 同花顺新闻 |
+| `npr` | 国家政策库 |
+| `research_report` | 券商研究报告 |
 
 ### 股票-两融 (7)
 | 工具 | 说明 |
@@ -146,7 +157,7 @@ User: 茅台的财务数据
 | `moneyflow_mkt_dc` | 市场资金流向(东方财富) |
 | `moneyflow_hsgt` | 沪深港通资金流向 |
 
-### 股票-打板专题 (18)
+### 股票-打板专题 (17)
 | 工具 | 说明 |
 |------|------|
 | `kpl_concept` | 开盘啦概念 |
@@ -162,13 +173,12 @@ User: 茅台的财务数据
 | `ths_member` | 同花顺成分股 |
 | `dc_index` | 东财指数 |
 | `dc_member` | 东财成分股 |
-| `stk_auction` | 股票集合竞价 |
 | `hm_list` | 活跃股列表 |
 | `hm_detail` | 活跃股明细 |
 | `ths_hot` | 同花顺热点 |
 | `dc_hot` | 东方财富热点 |
 
-### 指数 (21)
+### 指数 (22)
 | 工具 | 说明 |
 |------|------|
 | `index_basic` | 指数基本信息 |
@@ -180,6 +190,7 @@ User: 茅台的财务数据
 | `index_classify` | 指数分类 |
 | `index_member` | 指数成分股 |
 | `index_member_all` | 指数成分股(全) |
+| `ci_index_member` | 中证指数成分 |
 | `daily_info` | 每日信息 |
 | `sz_daily_info` | 深市每日信息 |
 | `ths_daily` | 同花顺指数日线 |
@@ -188,10 +199,11 @@ User: 茅台的财务数据
 | `index_global` | 全球指数 |
 | `idx_factor_pro` | 指数因子(专业版) |
 | `dc_daily` | 东财指数每日 |
-| `gz_index` | 国债指数 |
-| `wz_index` | 中债指数 |
 | `tdx_index` | 通达信指数 |
 | `tdx_daily` | 通达信指数日线 |
+| `tdx_member` | 通达信板块成分 |
+| `gz_index` | 国证指数 |
+| `wz_index` | 万德指数 |
 
 ### 基金 (15)
 | 工具 | 说明 |
@@ -212,12 +224,13 @@ User: 茅台的财务数据
 | `etf_index` | ETF关联指数 |
 | `etf_share_size` | ETF份额 |
 
-### 期货 (10)
+### 期货 (11)
 | 工具 | 说明 |
 |------|------|
 | `fut_basic` | 期货基本信息 |
 | `fut_daily` | 期货日线 |
 | `fut_weekly_monthly` | 期货周/月线 |
+| `ft_mins` | 期货分钟线 |
 | `fut_wsr` | 期货持仓 |
 | `fut_settle` | 期货结算 |
 | `fut_holding` | 期货持仓量 |
@@ -232,11 +245,12 @@ User: 茅台的财务数据
 | `sge_basic` | 现货基本信息 |
 | `sge_daily` | 现货每日行情 |
 
-### 期权 (2)
+### 期权 (3)
 | 工具 | 说明 |
 |------|------|
 | `opt_basic` | 期权基本信息 |
 | `opt_daily` | 期权每日行情 |
+| `opt_mins` | 期权分钟行情 |
 
 ### 可转债 (7)
 | 工具 | 说明 |
@@ -259,15 +273,26 @@ User: 茅台的财务数据
 | `bond_blk_detail` | 债券大宗交易明细 |
 | `yc_cb` | 可转债收益率 |
 
-### 经济数据 (6)
+### 宏观经济 (17)
 | 工具 | 说明 |
 |------|------|
+| `eco_cal` | 经济日历 |
 | `shibor` | SHIBOR利率 |
 | `shibor_quote` | SHIBOR报价 |
+| `shibor_lpr` | LPR贷款基础利率 |
 | `cn_gdp` | 中国GDP |
 | `cn_cpi` | 中国CPI |
 | `cn_ppi` | 中国PPI |
-| `sf_month` | 上海期货月度数据 |
+| `cn_m` | 货币供应量(月) |
+| `cn_pmi` | 采购经理指数PMI |
+| `sf_month` | 上海黄金现货月报 |
+| `libor` | Libor利率 |
+| `hibor` | Hibor利率 |
+| `us_tbr` | 美国短期国债利率 |
+| `us_tycr` | 美国国债收益率曲线利率 |
+| `us_trycr` | 美国国债实际收益率曲线利率 |
+| `us_tltr` | 美国国债长期利率 |
+| `us_trltr` | 美国国债实际长期利率平均值 |
 
 ### 外汇 (2)
 | 工具 | 说明 |
@@ -275,30 +300,66 @@ User: 茅台的财务数据
 | `fx_obasic` | 外汇基本信息 |
 | `fx_daily` | 外汇每日行情 |
 
-### 港股 (6)
+### 港股 (10)
 | 工具 | 说明 |
 |------|------|
 | `hk_basic` | 港股基本信息 |
 | `hk_tradecal` | 港股交易日历 |
 | `hk_daily` | 港股每日行情 |
+| `hk_daily_adj` | 港股每日行情(复权) |
+| `hk_mins` | 港股分钟线 |
 | `hk_income` | 港股利润表 |
 | `hk_balancesheet` | 港股资产负债表 |
 | `hk_cashflow` | 港股现金流量表 |
+| `hk_adjfactor` | 港股复权因子 |
+| `hk_fina_indicator` | 港股财务指标 |
 
-### 美股 (5)
+### 美股 (9)
 | 工具 | 说明 |
 |------|------|
 | `us_basic` | 美股基本信息 |
 | `us_tradecal` | 美股交易日历 |
+| `us_daily` | 美股每日行情 |
+| `us_daily_adj` | 美股每日行情(复权) |
 | `us_income` | 美股利润表 |
 | `us_balancesheet` | 美股资产负债表 |
 | `us_cashflow` | 美股现金流量表 |
+| `us_adjfactor` | 美股复权因子 |
+| `us_fina_indicator` | 美股财务指标 |
 
 ### 资讯 (2)
 | 工具 | 说明 |
 |------|------|
-| `news` | 新闻 |
-| `major_news` | 重要新闻 |
+| `news` | 资讯 |
+| `major_news` | 重要资讯 |
+
+### 其他 (10)
+| 工具 | 说明 |
+|------|------|
+| `tmt_twincome` | 台湾电子产业月营收 |
+| `tmt_twincomedetail` | TMT月营收明细 |
+| `film_record` | 电影剧本备案公示 |
+| `teleplay_record` | 电视剧备案公示 |
+| `bo_daily` | 电影日度票房 |
+| `bo_monthly` | 电影月度票房 |
+| `bo_weekly` | 电影周度票房 |
+| `bo_cinema` | 影院日度票房 |
+| `irm_qa_sh` | 上证e互动问答 |
+| `irm_qa_sz` | 深证易互动问答 |
+
+### 实时数据 (11)
+| 工具 | 说明 |
+|------|------|
+| `rt_min` | 股票实时分钟 |
+| `rt_k` | 股票实时日线 |
+| `rt_idx_k` | 指数实时日线 |
+| `rt_idx_min` | 指数实时分钟 |
+| `rt_sw_k` | 申万指数实时行情 |
+| `rt_etf_k` | ETF实时日线 |
+| `rt_fut_min` | 期货实时分钟 |
+| `rt_hk_k` | 港股实时日线 |
+| `stk_mins` | 股票历史分钟 |
+| `idx_mins` | 指数历史分钟 |
 
 ## 后端
 
@@ -307,5 +368,5 @@ User: 茅台的财务数据
 不需要 Tushare 官方 Token。
 
 ---
-
 *Published via ClawHub*
+*Version 1.0.6*
