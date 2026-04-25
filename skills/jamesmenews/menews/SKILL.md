@@ -1,10 +1,11 @@
 ---
 name: menews
 description: AIMPACT 提供 AI 领域早报、晚报、热点新闻和精选内容，基于 AI 评分智能排序，支持定时推送。当用户说"查询 AIMPACT 早报"、"查询 AIMPACT 晚报"、"查询 24H 热点新闻榜"或"查询 AI 精选内容"时调用。
+version: 1.0.11
 metadata:
   openclaw:
     requires:
-      tools: [exec]
+      bins: [curl]
     optional:
       tools: [web_fetch, message]
 ---
@@ -37,8 +38,8 @@ metadata:
 - 提供 AIMPACT 早报、晚报、热点新闻榜
 - 基于 AI 评分智能排序，优先展示高价值内容
 - 按分类整理（大模型/Agent/融资/安全/应用/开源）
-- 支持定时推送到飞书、Telegram、Discord 等渠道
-- 提供去重与增量更新能力
+- 可选推送：基于 OpenClaw 已配置的 `message` 工具与渠道凭据，提供已配置渠道的推送能力
+- 去重：默认基于当前批次结果去重（标题或 ID）
 
 ## 使用方式
 
@@ -60,7 +61,12 @@ metadata:
 
 ### 定时推送（可选）
 
-在 Hermes/OpenClaw 外部配置 cron 任务：
+在 OpenClaw 外部配置 cron 任务：
+
+前提说明：
+- 本技能不内置、不存储任何渠道凭据。
+- 如需推送，需在 OpenClaw 中预先配置 `message` 工具及渠道凭据。
+- 若未配置 `message` 或渠道凭据，则仅输出报告，不执行推送。
 
 **推荐时间**:
 - 早报: 每日 12:00
@@ -114,7 +120,7 @@ schtasks /create /tn "AIMPACT早报" /tr "openclaw agent --message '查询 AIMPA
 - 早报推送：12:00 (Asia/Shanghai)
 - 晚报推送：22:00 (Asia/Shanghai)
 - 热点推送：18:00 (Asia/Shanghai)
-- 推送渠道：feishu（或 telegram/discord）
+- 推送渠道：已配置渠道
 - 内容数量：最多 10 条/次
 - 排序规则：按 AI 评分降序
 ```
@@ -133,7 +139,7 @@ schtasks /create /tn "AIMPACT早报" /tr "openclaw agent --message '查询 AIMPA
    - 早报：前一天 00:00 - 当天 12:00
    - 晚报：当天 12:00 - 24:00
    - 热点：最近 24 小时
-5. **去重过滤**：与历史采集结果执行去重（基于标题或 ID）
+5. **去重过滤**：基于本次采集结果去重（按标题或 ID）
 6. **智能排序**：按 AI 评分降序排序（如 API 提供）
 7. **分类标注**：根据内容关键词补充分类标签（大模型/Agent/融资等）
 8. **筛选数量**：选出 Top 10 条
@@ -153,3 +159,4 @@ schtasks /create /tn "AIMPACT早报" /tr "openclaw agent --message '查询 AIMPA
 - 所有内容基于 AI 评分智能排序，优先展示高价值资讯
 - 输出格式以 `format.md` 为唯一标准，不得自行变更结构
 - 首次使用建议先手动触发，确认输出格式与推送渠道
+- 本技能不负责管理任何第三方渠道密钥，也不要求写入本地持久化存储
