@@ -3,9 +3,15 @@
   "slug": "wrike-integration",
   "displayName": "Wrike",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162513033,
-    "commit": "https://github.com/openclaw/skills/commit/cab4d2592f9f8a7eae1c40bbd4311bb5e8f35554"
+    "version": "1.0.3",
+    "publishedAt": 1776776782305,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162513033,
+      "commit": "https://github.com/openclaw/skills/commit/cab4d2592f9f8a7eae1c40bbd4311bb5e8f35554"
+    }
+  ]
 }
