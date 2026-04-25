@@ -3,11 +3,16 @@
   "slug": "polymarket-ai-tech-trader",
   "displayName": "Polymarket Ai Tech Trader",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1775989128430,
-    "commit": "https://github.com/openclaw/skills/commit/4ccc186b9216e89b84384957ad42826b184a6878"
+    "version": "0.0.2",
+    "publishedAt": 1776512969936,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1775989128430,
+      "commit": "https://github.com/openclaw/skills/commit/4ccc186b9216e89b84384957ad42826b184a6878"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775316942007,
