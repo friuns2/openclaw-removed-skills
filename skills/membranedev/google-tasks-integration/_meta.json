@@ -3,11 +3,16 @@
   "slug": "google-tasks-integration",
   "displayName": "Google Tasks",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162771899,
-    "commit": "https://github.com/openclaw/skills/commit/db304913829e45fe582ed7beca43d9c35e08d004"
+    "version": "1.0.3",
+    "publishedAt": 1776783786761,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162771899,
+      "commit": "https://github.com/openclaw/skills/commit/db304913829e45fe582ed7beca43d9c35e08d004"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772938949564,
