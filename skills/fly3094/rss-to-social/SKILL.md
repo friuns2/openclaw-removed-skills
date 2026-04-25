@@ -2,7 +2,7 @@
 name: rss-to-social
 description: Automatically monitor RSS feeds and post to social media. Schedule content, generate posts with AI, and publish to Twitter/LinkedIn.
 author: fly3094
-version: 1.1.0
+version: 1.2.0
 tags: [rss, social-media, automation, twitter, linkedin, scheduling, content, podcast, youtube, dedup, ai-summary]
 support: 
   paypal: 492227637@qq.com

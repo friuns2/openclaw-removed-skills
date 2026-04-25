@@ -3,11 +3,16 @@
   "slug": "rss-to-social",
   "displayName": "Rss To Social",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776180349876,
-    "commit": "https://github.com/openclaw/skills/commit/a5699b49ab4e2ec1078d7c76719408c6f7b5120a"
+    "version": "1.2.0",
+    "publishedAt": 1776675553225,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776180349876,
+      "commit": "https://github.com/openclaw/skills/commit/a5699b49ab4e2ec1078d7c76719408c6f7b5120a"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1773634795956,
