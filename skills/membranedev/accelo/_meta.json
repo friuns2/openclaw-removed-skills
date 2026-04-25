@@ -3,11 +3,16 @@
   "slug": "accelo",
   "displayName": "Accelo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161689584,
-    "commit": "https://github.com/openclaw/skills/commit/76a91f163ed690c7eda554bf7f60e37628ea32dc"
+    "version": "1.0.3",
+    "publishedAt": 1776773006703,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161689584,
+      "commit": "https://github.com/openclaw/skills/commit/76a91f163ed690c7eda554bf7f60e37628ea32dc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772694157264,
