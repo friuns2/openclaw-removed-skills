@@ -3,11 +3,16 @@
   "slug": "workday",
   "displayName": "Workday",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162445681,
-    "commit": "https://github.com/openclaw/skills/commit/21151079575df12842b32a1b522cd489cbc96c4a"
+    "version": "1.0.3",
+    "publishedAt": 1776773146296,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162445681,
+      "commit": "https://github.com/openclaw/skills/commit/21151079575df12842b32a1b522cd489cbc96c4a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772722958109,
