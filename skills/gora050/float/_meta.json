@@ -3,11 +3,16 @@
   "slug": "float",
   "displayName": "Float",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163893466,
-    "commit": "https://github.com/openclaw/skills/commit/a1553c01ea43b2adba03ce0650e65a9e075acfaa"
+    "version": "1.0.3",
+    "publishedAt": 1776816162520,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163893466,
+      "commit": "https://github.com/openclaw/skills/commit/a1553c01ea43b2adba03ce0650e65a9e075acfaa"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773464573529,
