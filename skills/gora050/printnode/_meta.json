@@ -3,11 +3,16 @@
   "slug": "printnode",
   "displayName": "Printnode",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164348136,
-    "commit": "https://github.com/openclaw/skills/commit/4f70c08c92151943ae6201156ae9fdecc26b6e13"
+    "version": "1.0.3",
+    "publishedAt": 1776834223262,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164348136,
+      "commit": "https://github.com/openclaw/skills/commit/4f70c08c92151943ae6201156ae9fdecc26b6e13"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773702221852,
