@@ -3,11 +3,16 @@
   "slug": "gohighlevel",
   "displayName": "Gohighlevel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162462948,
-    "commit": "https://github.com/openclaw/skills/commit/764b87260beccc8670d3d4083c58aeb41d9c88ec"
+    "version": "1.0.3",
+    "publishedAt": 1776773176970,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162462948,
+      "commit": "https://github.com/openclaw/skills/commit/764b87260beccc8670d3d4083c58aeb41d9c88ec"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772730154482,
