@@ -3,11 +3,16 @@
   "slug": "salesloft",
   "displayName": "Salesloft",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162377379,
-    "commit": "https://github.com/openclaw/skills/commit/a9d5f47166522f2e312a2cce068bacea8dda8d11"
+    "version": "1.0.3",
+    "publishedAt": 1776772025499,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162377379,
+      "commit": "https://github.com/openclaw/skills/commit/a9d5f47166522f2e312a2cce068bacea8dda8d11"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772640150296,
