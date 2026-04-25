@@ -3,11 +3,16 @@
   "slug": "surveymonkey",
   "displayName": "Surveymonkey",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162717739,
-    "commit": "https://github.com/openclaw/skills/commit/15a4e596a57903bee57482270e31146b5da24e06"
+    "version": "1.0.3",
+    "publishedAt": 1776780334614,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162717739,
+      "commit": "https://github.com/openclaw/skills/commit/15a4e596a57903bee57482270e31146b5da24e06"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772910144845,
