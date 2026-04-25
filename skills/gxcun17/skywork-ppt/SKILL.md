@@ -1,6 +1,6 @@
 ---
 name: Skywork-ppt
-description: Skywork PPT (skywork) - Use when the user wants to work with PowerPoint presentations. Triggers: (1) Generate a new PPT from a topic — 'generate a PPT', 'create a presentation about X', 'make slides', '帮我做个PPT', '生成演示文稿', 'PPTを作って', 'スライドを作って', 'PPT 만들어줘', '슬라이드 만들어줘'; (2) Imitate an existing .pptx style/template — 'use this template', 'imitate this PPT/style', '用这个模板', '仿照这个PPT', 'このテンプレートを使って', '이 템플릿 써줘'; (3) Edit existing PPT via natural language — 'modify slide N', 'change background', 'add a slide', 'make it more beautiful', '修改第N页', '更换背景', '新增一页', '美化一下', 'N枚目を修正', '背景を変えて', 'きれいにして', 'N번 슬라이드 수정', '배경 바꿔줘'; (4) Local .pptx file ops — 'delete slide N', 'reorder slides', 'merge pptx', 'extract slides', 'how many slides', '删除第N页', '调整顺序', '合并PPT', '提取幻灯片', 'スライドを削除/並べ替え/結合/抽出', '슬라이드 삭제/순서 변경/합치기/추출'.
+description: "Skywork PPT (skywork) - Use when the user wants to work with PowerPoint presentations. Triggers: (1) Generate a new PPT from a topic — 'generate a PPT', 'create a presentation about X', 'make slides', '帮我做个PPT', '生成演示文稿', 'PPTを作って', 'スライドを作って', 'PPT 만들어줘', '슬라이드 만들어줘'; (2) Imitate an existing .pptx style/template — 'use this template', 'imitate this PPT/style', '用这个模板', '仿照这个PPT', 'このテンプレートを使って', '이 템플릿 써줘'; (3) Edit existing PPT via natural language — 'modify slide N', 'change background', 'add a slide', 'make it more beautiful', '修改第N页', '更换背景', '新增一页', '美化一下', 'N枚目を修正', '背景を変えて', 'きれいにして', 'N번 슬라이드 수정', '배경 바꿔줘'; (4) Convert NotebookLM-exported pptx/pdf into editable pptx — 'make this notebooklm ppt editable', 'convert notebooklm export to editable pptx', '把这个notebooklm导出的pptx改成可编辑pptx', '把这个pdf转成可编辑pptx'; (5) Local .pptx file ops — 'delete slide N', 'reorder slides', 'merge pptx', 'extract slides', 'how many slides', '删除第N页', '调整顺序', '合并PPT', '提取幻灯片', 'スライドを削除/並べ替え/結合/抽出', '슬라이드 삭제/순서 변경/합치기/추출'."
 metadata:
   openclaw:
     requires:
@@ -13,7 +13,7 @@ metadata:
 
 # PPT Write Skill
 
-Four capabilities: **generate**, **template imitation**, **edit existing PPT**, and **local file operations**.
+Five capabilities: **generate**, **template imitation**, **edit existing PPT**, **convert NotebookLM export to editable PPTX**, and **local file operations**.
 
 ---
 
@@ -32,7 +32,7 @@ For detailed setup instructions, see:
 
 ## Privacy & Remote Calls (Read Before Use)
 
-- **Remote upload & processing**: Layers 1/2/4 upload local files and send the full, verbatim user query to the Skywork service. Avoid sensitive or confidential content unless you trust the remote service and its data handling policies.
+- **Remote upload & processing**: Layers 1/2/4/5 upload local files and send the full, verbatim user query to the Skywork service. Avoid sensitive or confidential content unless you trust the remote service and its data handling policies.
 - **Polling behavior**: The generation/edit workflows include periodic status polling (about every 5 seconds) while waiting for backend jobs. This is expected.
 
 ---
@@ -44,6 +44,7 @@ For detailed setup instructions, see:
 | Generate a new PPT from a topic, set of requirements or reference files | **Layer 1** — Generate |
 | Use an existing .pptx as a layout/style template to create a new presentation | **Layer 2** — Imitate |
 | Edit an existing PPT: modify slides, add slides, change style, split/merge | **Layer 4** — Edit |
+| Convert a NotebookLM-exported `.pptx` or `.pdf` into an editable `.pptx` | **Layer 5** — Convert to editable PPTX |
 | Delete / reorder / extract / merge slides in a local file (no backend) | **Layer 3** — Local ops |
 
 ---
@@ -125,6 +126,27 @@ Use this layer when the user wants to modify an existing PPT using natural langu
 
 ---
 
+## Layer 5 — Convert NotebookLM Export to Editable PPTX
+
+Use this layer when the user provides a local `.pptx` or `.pdf` exported from NotebookLM and wants an editable `.pptx`.
+
+### Steps
+0. **Detailed workflow** - Read [workflow_convert_editable.md](workflow_convert_editable.md) immediately before any action you do!!!
+1. **Environment check** — run the check above to get `$PYTHON_CMD`.
+2. **Locate the source file** — extract the absolute path of the local `.pptx` or `.pdf`; ask the user if the path is unclear.
+3. **Upload the source file** — upload it and extract `SOURCE_URL` from the output.
+4. **Run the script**:
+   ```bash
+   $PYTHON_CMD scripts/run_editable_convert.py \
+     --file-url "https://cdn.example.com/source.pptx" \
+     --file-type "pptx" \
+     -o /absolute/path/output_editable.pptx
+   ```
+   > **Important**: set exec tool `yieldMs` to `600000` (10 minutes).
+5. **Deliver** — provide download link, local path, and the original filename used as the source.
+
+---
+
 ## Layer 3 — PPT File operations
 
 ```bash
@@ -150,7 +172,7 @@ Read [workflow_local.md](workflow_local.md) immidiately before any action you do
 
 ## Error Handling
 
-- **Insufficient benefit**: When calling scripts (generate, imitate, or edit), the script or log may show a message like `Insufficient benefit. Please upgrade your account at {url}`, meaning the user's benefit level does not meet the requirement for this skill.
+- **Insufficient benefit**: When calling scripts (generate, imitate, edit, or convert to editable), the script or log may show a message like `Insufficient benefit. Please upgrade your account at {url}`, meaning the user's benefit level does not meet the requirement for this skill.
 
 ### How to reply when benefit is insufficient
 
@@ -180,4 +202,5 @@ When you detect the above, **reply in the user's current language** — do not e
 | Generate a PPT from a topic or existing reference files | Layer 1 |
 | Imitate the layout/style of an existing .pptx | Layer 2 |
 | Edit/modify an existing PPT via natural language | Layer 4 |
+| Convert NotebookLM-exported `.pptx` / `.pdf` into editable `.pptx` | Layer 5 |
 | Delete / reorder / extract / merge local .pptx files (no backend) | Layer 3 |

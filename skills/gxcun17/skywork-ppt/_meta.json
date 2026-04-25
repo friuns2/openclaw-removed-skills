@@ -3,11 +3,16 @@
   "slug": "skywork-ppt",
   "displayName": "Skywork PPT",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1775828241791,
-    "commit": "https://github.com/openclaw/skills/commit/d985b9fc794fdfca82c9c33a7df45b4629f2ba47"
+    "version": "1.0.9",
+    "publishedAt": 1776949188398,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1775828241791,
+      "commit": "https://github.com/openclaw/skills/commit/d985b9fc794fdfca82c9c33a7df45b4629f2ba47"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1775098473845,
