@@ -3,11 +3,16 @@
   "slug": "resend-integration",
   "displayName": "Resend",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163198513,
-    "commit": "https://github.com/openclaw/skills/commit/f36eec9e541a2a94021a5ab3af016ad7171b007f"
+    "version": "1.0.3",
+    "publishedAt": 1776791176713,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163198513,
+      "commit": "https://github.com/openclaw/skills/commit/f36eec9e541a2a94021a5ab3af016ad7171b007f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773180187078,
