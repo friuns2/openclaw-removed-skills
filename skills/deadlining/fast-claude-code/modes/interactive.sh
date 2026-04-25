@@ -13,6 +13,7 @@ LABEL="interactive-$(date +%s)"
 PERMISSION_MODE="auto"
 TASK=""
 CALLBACK="openclaw"
+SESSION_KEY=""
 SESSION_TIMEOUT=10800  # 3 hours in seconds
 
 # Parse arguments
@@ -38,6 +39,10 @@ while [[ $# -gt 0 ]]; do
             CALLBACK="$2"
             shift 2
             ;;
+        --session-key)
+            SESSION_KEY="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -48,6 +53,11 @@ done
 # Validate required arguments
 if [[ -z "$PROJECT_DIR" ]]; then
     echo "Error: --project is required"
+    exit 1
+fi
+
+if [[ -z "$SESSION_KEY" ]]; then
+    echo "Error: --session-key is required"
     exit 1
 fi
 
@@ -178,9 +188,19 @@ fi
 
 # Set persistent completion protocol
 # This tells Claude to always output CC_CALLBACK_DONE after every task completion
-PROTOCOL_INSTRUCTION="From now on, whenever you complete a task or answer a question, output exactly on its own line:
+PROTOCOL_INSTRUCTION="⚠️ COMPLETION PROTOCOL (STRICT REQUIREMENT):
+
+From now on, whenever you complete ANY task, answer ANY question, or respond to ANY request, you MUST output exactly the following marker on its own line:
 
 CC_CALLBACK_DONE
+
+This marker is required for automated callback detection. You MUST include it after:
+- Each task you complete
+- Each question you answer  
+- Each request you fulfill
+- Every response you provide
+
+Do NOT skip this marker for ANY reason, including simple queries, greetings, or non-coding tasks.
 
 If I type TASK_COMPLETE, output exactly:
 
@@ -273,7 +293,8 @@ $TASK"
                         --mode interactive \
                         --task "$SESSION" \
                         --message "$TASK" \
-                        --output "$TASK_OUTPUT"
+                        --output "$TASK_OUTPUT" \
+                        --session-key "$SESSION_KEY"
                     log_success "✅ Task completed, callback triggered! Monitor exiting."
                     break
                 fi
@@ -319,7 +340,8 @@ echo "SESSION_NAME=\"$SESSION\"" >> "$SESSION_STATE_FILE"
                 --mode interactive \
                 --task "$SESSION" \
                 --message "Session closed after $((SESSION_TIMEOUT / 3600)) hours timeout" \
-                --output "$SESSION_OUTPUT"
+                --output "$SESSION_OUTPUT" \
+                --session-key "$SESSION_KEY"
             log_info "⏰ Session timeout after $((SESSION_TIMEOUT / 3600)) hours"
             rm -f "$SESSION_STATE_FILE"
             break
@@ -345,7 +367,8 @@ echo "SESSION_NAME=\"$SESSION\"" >> "$SESSION_STATE_FILE"
                 --mode interactive \
                 --task "$SESSION" \
                 --message "Session closed by user request" \
-                --output "$SESSION_OUTPUT"
+                --output "$SESSION_OUTPUT" \
+                --session-key "$SESSION_KEY"
             log_info "🔚 Session closed by user request"
             rm -f "$SESSION_STATE_FILE"
             break

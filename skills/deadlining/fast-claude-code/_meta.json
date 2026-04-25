@@ -1,13 +1,18 @@
 {
   "owner": "deadlining",
   "slug": "fast-claude-code",
-  "displayName": "Fast Claude Code",
+  "displayName": "fast-claude-code",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1773826332835,
-    "commit": "https://github.com/openclaw/skills/commit/e5d14638a918fa0669d8583f14e6afc9775f48ca"
+    "version": "1.0.5",
+    "publishedAt": 1775292839413,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1773826332835,
+      "commit": "https://github.com/openclaw/skills/commit/e5d14638a918fa0669d8583f14e6afc9775f48ca"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773589751206,

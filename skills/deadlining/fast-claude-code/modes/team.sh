@@ -23,6 +23,7 @@ PROJECT_DIR=""
 TASK=""
 TEMPLATE=""
 CALLBACK="openclaw"
+SESSION_KEY=""
 PERMISSION_MODE="auto"
 
 # Parse arguments
@@ -44,6 +45,10 @@ while [[ $# -gt 0 ]]; do
             CALLBACK="$2"
             shift 2
             ;;
+        --session-key)
+            SESSION_KEY="$2"
+            shift 2
+            ;;
         --permission-mode)
             PERMISSION_MODE="$2"
             shift 2
@@ -58,6 +63,11 @@ done
 # Validate required arguments
 if [[ -z "$PROJECT_DIR" ]]; then
     echo "Error: --project is required"
+    exit 1
+fi
+
+if [[ -z "$SESSION_KEY" ]]; then
+    echo "Error: --session-key is required"
     exit 1
 fi
 
@@ -195,25 +205,40 @@ fi
 # List all non-hidden files and directories (expand folders)
 TEAM_OUTPUTS="Team 任务完成！\n项目目录: \$CWD\n\n文件列表：\n\n"
 
-# Function to list files recursively
+MAX_FILE_COUNT=20
+FILE_COUNT=0
+
+# Function to list files recursively (max 3 levels deep, 200 files total)
 list_dir() {
     local dir="\$1"
     local indent="\$2"
+    local depth="\$3"
+    if [[ "\$depth" -ge 3 ]] || [[ "\$FILE_COUNT" -ge "\$MAX_FILE_COUNT" ]]; then
+        return
+    fi
     for item in "\$dir"/*; do
+        if [[ "\$FILE_COUNT" -ge "\$MAX_FILE_COUNT" ]]; then
+            break
+        fi
         if [[ -e "\$item" ]]; then
+            FILE_COUNT=\$((FILE_COUNT + 1))
             name=\$(basename "\$item")
             if [[ -d "\$item" ]]; then
-                TEAM_OUTPUTS="\$OUTPUT\n\$TEAM_OUTPUTS\${indent}📁 \$name/\n"
-                list_dir "\$item" "  \$indent"
+                TEAM_OUTPUTS="\$TEAM_OUTPUTS\${indent}📁 \$name/\n"
+                list_dir "\$item" "  \$indent" "\$((depth + 1))"
             else
-                size=\$(ls -lh "\$item" | awk '{print \$5}')
-                TEAM_OUTPUTS="\$OUTPUT\n\$TEAM_OUTPUTS\${indent}📄 \$name (\$size)\n"
+                size=\$(stat -f %z -- "\$item" 2>/dev/null || stat --format=%s -- "\$item" 2>/dev/null || echo "?")
+                TEAM_OUTPUTS="\$TEAM_OUTPUTS\${indent}📄 \$name (\$size bytes)\n"
             fi
         fi
     done
 }
 
-list_dir "\$CWD" ""
+list_dir "\$CWD" "" 0
+
+if [[ "\$FILE_COUNT" -ge "\$MAX_FILE_COUNT" ]]; then
+    TEAM_OUTPUTS="\$TEAM_OUTPUTS\n(文件数量已达上限 \$MAX_FILE_COUNT，更多文件未显示)\n"
+fi
 
 # Trigger callback with file list
 "\$CALLBACK_SCRIPT" \
@@ -221,7 +246,8 @@ list_dir "\$CWD" ""
     --mode team \
     --task "team-session-\$SESSION_ID" \
     --message "\$ORIGINAL_TASK" \
-    --output "\$TEAM_OUTPUTS"
+    --output "\$TEAM_OUTPUTS" \
+    --session-key "$SESSION_KEY"
 # Cleanup: Remove team hooks after callback completes
 # 1. Delete on-stop.sh hook file
 rm -f ".claude/hooks/on-stop.sh"
@@ -300,7 +326,7 @@ if [[ -n "$TASK" ]]; then
         SPAWN_PROMPT=$(echo "$SPAWN_PROMPT" | sed "s|\${TARGET_DIR}|$PROJECT_DIR|g")
         # Integrate CC_CALLBACK_DONE into the final reporting step
         # Replace "Report completion with summary" with instructions to output marker
-        SPAWN_PROMPT=$(echo "$SPAWN_PROMPT" | sed 's/Report completion with summary/Report completion with summary, then output exactly CC_CALLBACK_DONE/')
+        SPAWN_PROMPT=$(echo "$SPAWN_PROMPT" | sed "s/Report completion with summary/Report completion with summary. ⚠️ CRITICAL: After reporting, you MUST output exactly CC_CALLBACK_DONE on its own line./")
         # Add Session Id
         SPAWN_PROMPT=$(echo -e "$SPAWN_PROMPT\n\n=== START ${SESSION} ===")
     else
@@ -322,7 +348,7 @@ Use delegate mode: I coordinate, teammates execute.
 
 When ready, spawn the team and begin working on the task.
 
-Report completion with summary, then output exactly CC_CALLBACK_DONE"
+⚠️ CRITICAL INSTRUCTION: After completing the task and reporting the summary, you MUST output exactly CC_CALLBACK_DONE on its own line. This is required for automated completion detection."
 
         SPAWN_PROMPT=$(echo -e "$SPAWN_PROMPT\n\n=== START ${SESSION} ===")
     fi

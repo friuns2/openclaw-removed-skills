@@ -10,6 +10,7 @@ BASE_DIR="$(dirname "$SCRIPT_DIR")"
 SESSION=""
 TASK=""
 CALLBACK="${CC_CALLBACK:-openclaw}"
+SESSION_KEY=""
 TIMEOUT=600  # 10 minutes
 
 while [[ $# -gt 0 ]]; do
@@ -24,6 +25,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --callback)
             CALLBACK="$2"
+            shift 2
+            ;;
+        --session-key)
+            SESSION_KEY="$2"
             shift 2
             ;;
         --timeout)
@@ -44,6 +49,11 @@ fi
 
 if [[ -z "$TASK" ]]; then
     echo "Error: --task is required"
+    exit 1
+fi
+
+if [[ -z "$SESSION_KEY" ]]; then
+    echo "Error: --session-key is required"
     exit 1
 fi
 
@@ -86,7 +96,9 @@ TASK_MARKER="=== START ${TASK_ID} ==="
 # Prepend unique task marker
 TASK_WITH_MARKER="$TASK_MARKER
 
-$TASK"
+$TASK
+
+⚠️ 注意协议要求输出：CC_CALLBACK_DONE"
 
 # Send task via temp file + tmux load-buffer to handle multi-line safely
 TMPFILE=$(mktemp /tmp/cc-task-XXXXXX.txt)
@@ -157,7 +169,8 @@ log_info "Monitoring for completion in background (timeout: ${TIMEOUT}s, task_id
                     --mode interactive \
                     --task "$SESSION" \
                     --message "$TASK" \
-                    --output "$TASK_OUTPUT"
+                    --output "$TASK_OUTPUT" \
+                    --session-key "$SESSION_KEY"
                 log_success "✅ Task completed, callback triggered! Monitor exiting."
                 exit 0
             fi

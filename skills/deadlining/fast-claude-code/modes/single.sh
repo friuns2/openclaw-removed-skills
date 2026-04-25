@@ -12,6 +12,7 @@ TASK=""
 PROJECT_DIR=""
 PERMISSION_MODE="auto"
 CALLBACK="openclaw"
+SESSION_KEY=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -32,6 +33,10 @@ while [[ $# -gt 0 ]]; do
             CALLBACK="$2"
             shift 2
             ;;
+        --session-key)
+            SESSION_KEY="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -47,6 +52,11 @@ fi
 
 if [[ -z "$PROJECT_DIR" ]]; then
     echo "Error: --project is required"
+    exit 1
+fi
+
+if [[ -z "$SESSION_KEY" ]]; then
+    echo "Error: --session-key is required"
     exit 1
 fi
 
@@ -91,9 +101,12 @@ log_warn() {
 # We ask Claude to output a marker when done, then we detect it and trigger callback
 TASK_WITH_CALLBACK="$TASK
 
-When the task is fully completed, output exactly:
+⚠️ COMPLETION PROTOCOL (MUST FOLLOW):
+After you complete the requested task, you MUST output exactly the following marker on its own line:
 
-CC_CALLBACK_DONE"
+CC_CALLBACK_DONE
+
+This marker is required for automated callback detection. Do not skip it for any reason, including simple queries or non-coding tasks."
 
 log_info "Starting Single mode..."
 log_info "Project: $PROJECT_DIR"
@@ -170,14 +183,16 @@ log_info "Running in background mode..."
             --mode single \
             --task "a single task" \
             --message "$TASK" \
-            --output "$TASK_OUTPUT"
+            --output "$TASK_OUTPUT" \
+            --session-key "$SESSION_KEY"
     else
         "$BASE_DIR/callbacks/$CALLBACK.sh" \
             --status error \
             --mode single \
             --task "a single task" \
             --message "$TASK" \
-            --output "CC_CALLBACK_DONE marker not found. Original output:\n${OUTPUT}"
+            --output "CC_CALLBACK_DONE marker not found. Original output:\n${OUTPUT}" \
+            --session-key "$SESSION_KEY"
     fi
 ) &
 

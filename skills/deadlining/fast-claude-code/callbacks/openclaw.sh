@@ -1,5 +1,5 @@
 #!/bin/bash
-# OpenClaw Callback - Send callback via OpenClaw system event
+# OpenClaw Callback - Send callback via OpenClaw gateway call agent
 
 set -euo pipefail
 
@@ -9,6 +9,7 @@ MODE="single"
 TASK=""
 MESSAGE=""
 OUTPUT=""
+SESSION_KEY=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -31,6 +32,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --output)
             OUTPUT="$2"
+            shift 2
+            ;;
+        --session-key)
+            SESSION_KEY="$2"
             shift 2
             ;;
         *)
@@ -70,9 +75,33 @@ else
 (无输出内容)"
 fi
 
+# Generate idempotencyKey from task parameters to prevent duplicate sends on retry
+IDEMPOTENCY_KEY="${MODE}:${TASK}:$(date +%s)"
+
+# Escape strings for JSON
+escape_json() {
+    local string="$1"
+    string="${string//\\/\\\\}"
+    string="${string//\"/\\\"}"
+    string="${string//$'\n'/\\n}"
+    string="${string//$'\r'/\\r}"
+    string="${string//$'\t'/\\t}"
+    printf '%s' "$string"
+}
+
+MSG_JSON=$(escape_json "$MSG")
+SESSION_KEY_JSON=$(escape_json "$SESSION_KEY")
+IDEMPOTENCY_KEY_JSON=$(escape_json "$IDEMPOTENCY_KEY")
+
+# Build params JSON
+PARAMS=$(cat << EOF
+{"sessionKey":"$SESSION_KEY_JSON","message":"$MSG_JSON","idempotencyKey":"$IDEMPOTENCY_KEY_JSON"}
+EOF
+)
+
 # Check if openclaw is available
 if command -v openclaw &> /dev/null; then
-    openclaw system event --text "$MSG" --mode now
+    openclaw gateway call agent --params "$PARAMS"
 else
     echo "Warning: openclaw not found, using echo instead"
     echo "$MSG"
