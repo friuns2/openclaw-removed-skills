@@ -3,11 +3,16 @@
   "slug": "google-search-console-integration",
   "displayName": "Google Search Console",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162900942,
-    "commit": "https://github.com/openclaw/skills/commit/b5411ec11c68ffb4f788906291b64bb3b3bdea7c"
+    "version": "1.0.3",
+    "publishedAt": 1776784038986,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162900942,
+      "commit": "https://github.com/openclaw/skills/commit/b5411ec11c68ffb4f788906291b64bb3b3bdea7c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772996565782,
