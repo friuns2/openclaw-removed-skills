@@ -3,11 +3,16 @@
   "slug": "ramp",
   "displayName": "Ramp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163132255,
-    "commit": "https://github.com/openclaw/skills/commit/b2c3cfcb089ac30703745b93e949260e0a57b650"
+    "version": "1.0.3",
+    "publishedAt": 1776791042617,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163132255,
+      "commit": "https://github.com/openclaw/skills/commit/b2c3cfcb089ac30703745b93e949260e0a57b650"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773172965209,
