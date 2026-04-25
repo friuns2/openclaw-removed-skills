@@ -3,11 +3,16 @@
   "slug": "baoyu-markdown-to-html",
   "displayName": "Baoyu Markdown To Html",
   "latest": {
-    "version": "1.76.1",
-    "publishedAt": 1774153425718,
-    "commit": "https://github.com/openclaw/skills/commit/1d5d1ab79320e7b57265428960e6aa1f6180525b"
+    "version": "1.103.2",
+    "publishedAt": 1776808972529,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.76.1",
+      "publishedAt": 1774153425718,
+      "commit": "https://github.com/openclaw/skills/commit/1d5d1ab79320e7b57265428960e6aa1f6180525b"
+    },
     {
       "version": "1.60.0",
       "publishedAt": 1773287428737,
