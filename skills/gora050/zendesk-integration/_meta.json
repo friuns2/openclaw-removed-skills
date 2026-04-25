@@ -3,11 +3,16 @@
   "slug": "zendesk-integration",
   "displayName": "Zendesk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162373053,
-    "commit": "https://github.com/openclaw/skills/commit/d075bea18e80eaee5f258152dccd9baef454e9c4"
+    "version": "1.0.3",
+    "publishedAt": 1776772018523,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162373053,
+      "commit": "https://github.com/openclaw/skills/commit/d075bea18e80eaee5f258152dccd9baef454e9c4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772640144550,
