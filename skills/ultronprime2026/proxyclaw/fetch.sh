@@ -72,7 +72,7 @@ if [ -z "${IPLOOP_API_KEY:-}" ]; then
 fi
 
 # ── Build proxy auth ──
-AUTH="user:${IPLOOP_API_KEY}"
+AUTH=":${IPLOOP_API_KEY}"
 [ -n "$COUNTRY" ]    && AUTH="${AUTH}-country-${COUNTRY}"
 [ -n "$CITY" ]       && AUTH="${AUTH}-city-${CITY}"
 [ -n "$SESSION_ID" ] && AUTH="${AUTH}-session-${SESSION_ID}"

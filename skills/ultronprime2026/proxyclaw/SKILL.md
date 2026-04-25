@@ -1,12 +1,13 @@
 ---
 name: proxyclaw
 description: |
-  ProxyClaw by IPLoop — Residential proxy access for AI agents. Route requests through 2M+ residential IPs across 195+ countries from real Android, Windows, Mac & Smart TV devices. Bypass geo-restrictions, rotate IPs automatically. Free tier with 0.5GB included. Earn unlimited proxy credits by contributing bandwidth via Docker. Use OPENCLAW for 20% off any paid plan.
+  ProxyClaw by IPLoop — Residential proxy access for AI agents. Route requests through 175M+ residential IPs across 195+ countries from real Android, Windows, Mac & Smart TV devices. Bypass geo-restrictions, rotate IPs automatically. Free tier with 0.5GB included. Earn unlimited proxy credits by contributing bandwidth via Docker.
 compatibility: Requires network access
 metadata:
   author: iploop
-  version: "2.5.1"
+  version: "2.4.8"
   website: https://proxyclaw.ai
+  source: https://github.com/Iploop/proxyclaw
   platform: https://iploop.io
   docker: ultronloop2026/iploop-node
   openclaw:
@@ -19,27 +20,22 @@ metadata:
 
 # 🌐 ProxyClaw by IPLoop
 
-**This is an action skill.** When a user asks to fetch a URL, scrape a site, or use a proxy — execute the request yourself and return the result. Do not just show instructions.
+Route web requests through 175M+ residential IPs across 195+ countries. Bypass geo-restrictions, rotate IPs automatically, and scrape sites with anti-bot bypass.
 
-**Expected behaviour:**
-- Call `./fetch.sh <URL> [--country CC] [--format markdown]` yourself and return the content
-- When the user asks "fetch this page through a US proxy" — run it, show the result
-- Only show setup instructions when `IPLOOP_API_KEY` is missing or the user explicitly asks how to set up
-
-**A good check:** If your response says "you can run this command to…" — reconsider. The user wants results, not instructions.
+**Usage:** Run `./fetch.sh <URL>` to fetch a URL through the proxy. Requires `IPLOOP_API_KEY` environment variable.
 
 ---
 
-## 🔒 Security Posture
+## 🔒 Security Notes
 
 | Aspect | Detail |
 |--------|--------|
-| **Environment variables** | `IPLOOP_API_KEY` — checked for existence only, never echoed or logged |
+| **Environment variables** | `IPLOOP_API_KEY` — set via env var, not hardcoded |
 | **Files read** | None |
 | **Files written** | `mktemp` temp file (auto-deleted on exit, including SIGINT) |
 | **Network destinations** | `proxy.iploop.io:8880` (proxy gateway) + user-specified target URLs |
-| **Secrets handling** | API key passed via `--proxy-user` (not in URL or command line args visible in `ps aux`) |
-| **Proxy transport** | HTTP proxy protocol — key is encrypted via HTTPS CONNECT tunnel to HTTPS targets |
+| **Secrets handling** | API key passed via `--proxy-user` to curl. Note: curl args may be transiently visible in process listings on shared systems. Use session-scoped env vars rather than storing in `~/.bashrc`. |
+| **Proxy transport** | HTTP proxy protocol. Proxy authentication is sent to `proxy.iploop.io` before TLS to the target. For HTTPS targets, payload is protected by TLS; the proxy auth header itself is in plaintext to the proxy. |
 | **Input validation** | URL (must start with http/https), country (2-letter ISO code), timeout (1-120s) |
 
 ---
@@ -50,13 +46,13 @@ metadata:
 
 Sign up at **[iploop.io/signup](https://iploop.io/signup.html)** — 0.5 GB free, no credit card required.
 
-Use code **`OPENCLAW`** for 20% off any paid plan.
-
 ### 2. Set Your Key
 
 ```bash
 export IPLOOP_API_KEY="your_api_key"
 ```
+
+> ⚠️ Set this in your session only — avoid storing in `~/.bashrc` to limit exposure.
 
 ### 3. Fetch Anything
 
@@ -78,7 +74,7 @@ export IPLOOP_API_KEY="your_api_key"
 
 # Or use curl directly
 curl --proxy "http://proxy.iploop.io:8880" \
-     --proxy-user "user:${IPLOOP_API_KEY}" \
+     --proxy-user ":${IPLOOP_API_KEY}" \
      https://example.com
 ```
 
@@ -119,34 +115,31 @@ Append `-country-{CC}` to your API key in the proxy password:
 
 ```bash
 # 195+ countries supported
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-country-US" https://example.com
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-country-DE" https://example.com
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-country-GB" https://example.com
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-country-JP" https://example.com
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-country-BR" https://example.com
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-country-US" https://example.com
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-country-DE" https://example.com
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-country-GB" https://example.com
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-country-JP" https://example.com
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-country-BR" https://example.com
 ```
 
 Advanced targeting (curl-only options also available via `./fetch.sh` flags):
 ```bash
 # City level (--city flag in fetch.sh)
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-country-US-city-newyork" ...
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-country-US-city-newyork" ...
 
 # Sticky session (--session flag in fetch.sh)
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-session-mysession" ...
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-session-mysession" ...
 
 # ISP/ASN targeting (--asn flag in fetch.sh)
-curl --proxy "http://proxy.iploop.io:8880" --proxy-user "user:${IPLOOP_API_KEY}-asn-12345" ...
+curl --proxy "http://proxy.iploop.io:8880" --proxy-user ":${IPLOOP_API_KEY}-asn-12345" ...
 ```
 
 ---
 
 ## 🐍 Python SDK
 
-> ⚠️ **Coming Soon** — The `iploop` Python package is not yet available on PyPI. The examples below show the planned API; check [iploop.io](https://iploop.io) for release status.
-
 ```bash
-pip install iploop-sdk   # v1.8.0 — 66 site presets + anti-detection
-# Includes: 14-header Chrome fingerprint, TLS/JA3 spoofing, auto-retry, 66 presets
+pip install iploop
 ```
 
 ```python
@@ -169,7 +162,7 @@ r2 = session.fetch("http://httpbin.org/ip")  # same IP
 
 # Manual proxy config (available now via standard requests)
 import os, requests
-proxies = {"https": f"http://user:{os.environ['IPLOOP_API_KEY']}-country-US@proxy.iploop.io:8880"}
+proxies = {"https": f"http://:{os.environ['IPLOOP_API_KEY']}-country-US@proxy.iploop.io:8880"}
 r = requests.get("https://example.com", proxies=proxies)
 ```
 
@@ -183,7 +176,7 @@ const browser = await puppeteer.launch({
   args: [`--proxy-server=http://proxy.iploop.io:8880`]
 });
 const page = await browser.newPage();
-await page.authenticate({ username: 'user', password: `${process.env.IPLOOP_API_KEY}-country-US` });
+await page.authenticate({ username: '', password: `${process.env.IPLOOP_API_KEY}-country-US` });
 await page.goto('https://example.com');
 ```
 
@@ -191,7 +184,7 @@ await page.goto('https://example.com');
 ```python
 browser = p.chromium.launch(proxy={
     "server": "http://proxy.iploop.io:8880",
-    "username": "user",
+    "username": "",
     "password": f"{os.environ['IPLOOP_API_KEY']}-country-US"
 })
 ```
@@ -199,7 +192,7 @@ browser = p.chromium.launch(proxy={
 ### Scrapy
 ```python
 import os
-HTTP_PROXY = f'http://user:{os.environ["IPLOOP_API_KEY"]}-country-US@proxy.iploop.io:8880'
+HTTP_PROXY = f'http://:{os.environ["IPLOOP_API_KEY"]}-country-US@proxy.iploop.io:8880'
 ```
 
 ---
@@ -209,12 +202,8 @@ HTTP_PROXY = f'http://user:{os.environ["IPLOOP_API_KEY"]}-country-US@proxy.iploo
 | Plan | Per GB | Rate Limit |
 |------|--------|------------|
 | **Free** | $0 | 30 req/min (0.5 GB included) |
-| **Starter** | $4.50 | 120 req/min |
-| **Growth** | $3.50 | 300 req/min |
-| **Business** | $2.50 | 600 req/min |
+| **Growth** | $0.50 | 300 req/min |
 | **Enterprise** | Custom | 1000 req/min |
-
-🎁 Use code **`OPENCLAW`** for **20% off** any paid plan at [iploop.io/signup](https://iploop.io/signup.html)
 
 ---
 
@@ -232,7 +221,7 @@ Runs on Linux, macOS, Windows, Raspberry Pi. Uses < 50MB RAM.
 
 ## 📊 Network
 
-- **2M+** residential IPs
+- **175M+** residential IPs
 - **23,000+** nodes online
 - **98,000+** daily unique IPs
 - **195+** countries
@@ -243,12 +232,13 @@ Runs on Linux, macOS, Windows, Raspberry Pi. Uses < 50MB RAM.
 
 ## 🔧 Setup & Troubleshooting
 
-See [rules/setup.md](./rules/setup.md) for full setup guide and troubleshooting.
+See [rules/setup.md](https://github.com/Iploop/proxyclaw/blob/main/rules/setup.md) for full setup guide and troubleshooting, or read `rules/setup.md` in the downloaded skill package.
 
 ## Links
 
 - **ProxyClaw:** [proxyclaw.ai](https://proxyclaw.ai)
 - **Sign Up:** [iploop.io/signup](https://iploop.io/signup.html)
-- **Python SDK:** `pip install iploop-sdk` v1.8.0 on PyPI — 66 site presets, Chrome fingerprint, TLS spoofing
+- **Python SDK:** Coming soon
+- **Node.js SDK:** Coming soon
 - **Docker Hub:** [ultronloop2026/iploop-node](https://hub.docker.com/r/ultronloop2026/iploop-node)
 - **Support:** partners@iploop.io

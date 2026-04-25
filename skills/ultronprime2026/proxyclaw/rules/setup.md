@@ -9,17 +9,11 @@
 
 1. Sign up at [iploop.io/signup](https://iploop.io/signup.html)
 2. Copy your API key from the dashboard
-3. Use code **`OPENCLAW`** for 20% off any paid plan
-
 ```bash
 export IPLOOP_API_KEY="your_api_key_here"
 ```
 
-To make it permanent, add to your shell profile:
-```bash
-echo 'export IPLOOP_API_KEY="your_api_key"' >> ~/.bashrc
-source ~/.bashrc
-```
+> ⚠️ **Do not** add your API key to `~/.bashrc` or any shell profile — it persists in plaintext and is visible to any process reading your environment. Export it in your session only, or store it in a secrets manager / file with `chmod 600`.
 
 ## Verify Connection
 
@@ -29,8 +23,13 @@ source ~/.bashrc
 
 Expected output:
 ```
+=== ProxyClaw Setup ===
 ✅ IPLOOP_API_KEY is set
+Testing proxy connectivity...
 ✅ Proxy connection successful
+ℹ️  node-html-markdown not installed (optional)
+   Install: npm install -g node-html-markdown
+
 ✅ ProxyClaw is ready
 ```
 
