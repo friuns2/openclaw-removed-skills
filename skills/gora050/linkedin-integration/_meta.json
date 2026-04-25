@@ -3,11 +3,16 @@
   "slug": "linkedin-integration",
   "displayName": "Linkedin",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162554555,
-    "commit": "https://github.com/openclaw/skills/commit/47099ece733c98a09592d4ac1d665d7138aa498e"
+    "version": "1.0.3",
+    "publishedAt": 1776776850357,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162554555,
+      "commit": "https://github.com/openclaw/skills/commit/47099ece733c98a09592d4ac1d665d7138aa498e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772820157980,
