@@ -3,11 +3,16 @@
   "slug": "gong-integration",
   "displayName": "Gong",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161693959,
-    "commit": "https://github.com/openclaw/skills/commit/6143abaa63ac5c645c7b9cf4ea91a06257f26c8f"
+    "version": "1.0.3",
+    "publishedAt": 1776773014187,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161693959,
+      "commit": "https://github.com/openclaw/skills/commit/6143abaa63ac5c645c7b9cf4ea91a06257f26c8f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772694171084,
