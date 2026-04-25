@@ -50,14 +50,22 @@ All endpoints are under `/v1/`.
 
 **Request body (JSON):**
 
-| Field            | Type    | Required | Description                                                  |
-|------------------|---------|----------|--------------------------------------------------------------|
-| `query`          | string  | Yes      | Job search keywords (e.g. "software engineer")               |
-| `location`       | string  | No       | City, state, or country (e.g. "San Francisco, CA")           |
-| `remote`         | boolean | No       | Filter for remote jobs only                                  |
-| `employmentType` | string  | No       | E.g. "fulltime", "parttime", "contract"                      |
-| `datePosted`     | string  | No       | Recency filter (e.g. "today", "3days", "week", "month")      |
-| `page`           | number  | No       | Page number, starts at 1. Each page returns up to 25 results |
+| Field               | Type     | Required | Description                                                        |
+|---------------------|----------|----------|--------------------------------------------------------------------|
+| `query`             | string   | Yes      | Job search keywords (e.g. "software engineer")                     |
+| `location`          | string   | No       | City, state, or country (e.g. "San Francisco, CA")                 |
+| `remote`            | boolean  | No       | Filter for remote jobs only                                        |
+| `workArrangement`   | string   | No       | One of: `remote`, `hybrid`, `onsite`                               |
+| `employmentType`    | string   | No       | E.g. "fulltime", "parttime", "contract"                            |
+| `datePosted`        | string   | No       | Recency filter (e.g. "today", "3days", "week", "month")            |
+| `salaryMin`         | number   | No       | Minimum annual salary filter                                       |
+| `country`           | string   | No       | Country code or name                                               |
+| `benefits`          | string[] | No       | Required benefits to filter on                                     |
+| `includeKeywords`   | string[] | No       | Keywords that must appear in the job                               |
+| `excludeKeywords`   | string[] | No       | Keywords that must NOT appear in the job                           |
+| `includeCompanies`  | string[] | No       | Limit to specific companies                                        |
+| `excludeCompanies`  | string[] | No       | Exclude specific companies                                         |
+| `cursor`            | string   | No       | Opaque pagination cursor from a previous response's `nextCursor`   |
 
 **Curl example:**
 
@@ -68,8 +76,7 @@ curl -s -X POST https://api.mokaru.ai/v1/jobs/search \
   -d '{
     "query": "frontend engineer",
     "location": "New York",
-    "remote": true,
-    "page": 1
+    "remote": true
   }' | jq .
 ```
 
@@ -104,14 +111,13 @@ curl -s -X POST https://api.mokaru.ai/v1/jobs/search \
   ],
   "total": 142,
   "hasMore": true,
-  "page": 1,
-  "source": "database+providers"
+  "nextCursor": "eyJwYWdlIjoyfQ=="
 }
 ```
 
-The `source` field indicates whether results came from the internal database only (`"database"`) or also from external providers (`"database+providers"`). External providers require a Plus subscription.
+**Pagination:** Pass the `nextCursor` from a response as `cursor` in the next request to fetch more results. When `hasMore` is `false`, `nextCursor` is `null`.
 
-**How to use the results:** Present jobs in a readable list. Include the title, company, location, salary range (if available), and the apply link. If `hasMore` is true, you can fetch the next page.
+**How to use the results:** Present jobs in a readable list. Include the title, company, location, salary range (if available), and the apply link. If `hasMore` is true, fetch the next page with `cursor`.
 
 ---
 
@@ -132,11 +138,11 @@ The `source` field indicates whether results came from the internal database onl
 | `jobTitle`       | string | Yes      | Job title (max 200 chars)                                                                        |
 | `company`        | string | Yes      | Company name (max 200 chars)                                                                     |
 | `location`       | string | No       | Job location (max 200 chars)                                                                     |
-| `jobUrl`         | string | No       | URL of the job posting (must be a valid URL). Used for duplicate detection                       |
-| `jobDescription` | string | No       | Full job description text (max 50,000 chars). Required for `autoPrepare` (min 500 chars).        |
+| `jobUrl`         | string | No       | URL of the job posting (max 2000 chars, must be a valid URL). Used for duplicate detection       |
+| `jobDescription` | string | No       | Full job description text (max 50,000 chars). Required (non-empty) for `autoPrepare`.            |
 | `jobListingId`   | string | No       | If saving from a Mokaru search result, pass the job's `id` to automatically pull salary/details  |
 | `source`         | string | No       | One of: `LinkedIn`, `CompanyWebsite`, `JobWebsite`, `Referral`, `Agency`, `Other`. Defaults to `Other` |
-| `autoPrepare`    | boolean | No      | When `true`, Mokaru duplicates the user's default resume and tailors it to the job description using AI. Requires Plus plan, a default resume, and a job description of at least 500 characters. |
+| `autoPrepare`    | boolean | No      | When `true`, Mokaru duplicates the user's default resume and tailors it to the job description using AI. Requires Plus plan, a default resume, and a non-empty job description. |
 
 **Curl example:**
 
@@ -173,7 +179,7 @@ If `autoPrepare` is `true` in the response, Mokaru is tailoring the user's resum
 **Auto-prep errors:** If auto-prep fails, the API returns a clear error code:
 - `PLAN_REQUIRED` (403) - user needs a Plus plan
 - `NO_DEFAULT_RESUME` (400) - user must set a default resume in Mokaru first
-- `JOB_DESCRIPTION_TOO_SHORT` (400) - job description must be at least 500 characters
+- `JOB_DESCRIPTION_TOO_SHORT` (400) - job description is missing or empty
 
 **Workflow tip:** When saving a job from search results, pass the `id` from the search result as `jobListingId`. This auto-fills salary and description data. Add `"autoPrepare": true` to also tailor the resume automatically.
 
@@ -274,6 +280,7 @@ curl -s https://api.mokaru.ai/v1/tracker/applications/clx_abc123 \
     "notes": "Great conversation with hiring manager",
     "salaryMin": 120000,
     "salaryMax": 160000,
+    "salaryPeriod": "year",
     "cvId": "clx_cv456",
     "appliedDate": "2026-03-10T...",
     "createdAt": "2026-03-10T...",
@@ -616,7 +623,6 @@ curl -s https://api.mokaru.ai/v1/profile \
     "address": "New York, NY",
     "country": "US",
     "province": "NY",
-    "seniority": "mid",
     "jobTitle": "Frontend Engineer",
     "summary": "5 years of experience in...",
     "sector": "Technology",
@@ -628,8 +634,8 @@ curl -s https://api.mokaru.ai/v1/profile \
       { "title": "React Developer", "displayOrder": 1 }
     ],
     "skills": [
-      { "name": "React", "category": "Frontend", "level": "expert" },
-      { "name": "TypeScript", "category": "Frontend", "level": "advanced" }
+      { "name": "React", "category": "TECHNICAL", "level": "expert" },
+      { "name": "TypeScript", "category": "TECHNICAL", "level": "advanced" }
     ],
     "workExperiences": [
       {
@@ -658,7 +664,9 @@ curl -s https://api.mokaru.ai/v1/profile \
 }
 ```
 
-**How to use:** Pull the user's job titles, skills, and seniority to craft better search queries. Mention their background when recommending jobs.
+**Note:** The profile response uses friendly aliases `school` / `field` for education (derived from the DB fields `institution` / `fieldOfStudy`). When calling the dedicated `/v1/education` endpoints, use `institution` and `fieldOfStudy` instead (see section 24-28). Skill `category` values are the enum `TECHNICAL`, `SOFT`, or `LANGUAGE`.
+
+**How to use:** Pull the user's job titles, skills, and current role to craft better search queries. Mention their background when recommending jobs.
 
 ---
 
@@ -808,13 +816,14 @@ curl -s https://api.mokaru.ai/v1/resume/clx_abc123 \
     "designSettings": { ... },
     "optionalFields": { ... },
     "sectionOrder": ["personal", "experience", "education", "skills"],
+    "hiddenItems": { ... },
     "createdAt": "2026-01-15T...",
     "updatedAt": "2026-03-20T..."
   }
 }
 ```
 
-The `cvData` field contains the full resume content: personal info, work experiences, education, skills, languages, certificates, projects, and more.
+The `cvData` field contains the full resume content: personal info, work experiences, education, skills, languages, certificates, projects, and more. The `hiddenItems` field tracks which individual entries (experiences, education, etc.) are hidden from the rendered resume.
 
 ---
 
@@ -934,7 +943,7 @@ curl -s -X DELETE https://api.mokaru.ai/v1/resume/clx_abc123 \
 }
 ```
 
-If the deleted resume was the default, another resume is automatically promoted. Applications linked to this resume are unlinked (not deleted).
+If the deleted resume was the default, another resume is automatically promoted. Applications linked to this resume are unlinked (`cvId` set to null, the application itself is not deleted). Any Autopilot searches that reference this resume are also deleted.
 
 ---
 
@@ -968,7 +977,9 @@ curl -s -X POST https://api.mokaru.ai/v1/resume/clx_abc123/export/pdf \
 
 **Important:** This endpoint returns a binary file, not JSON. The PDF is rendered server-side with the user's chosen template and design settings.
 
-**Auto-prep check:** If the resume is currently being tailored by auto-prep (status 409, code `RESUME_PROCESSING`), wait 5-10 seconds and retry. Do not export a resume that is still being processed.
+**Export errors:**
+- `RESUME_PROCESSING` (409) - resume is being tailored by auto-prep. Wait 5-10 seconds and retry.
+- `EMPTY_RESUME` (400) - the resume has no `cvData` yet. Ask the user to fill in their resume first.
 
 ---
 
@@ -1011,8 +1022,6 @@ curl -s -G https://api.mokaru.ai/v1/experiences \
       "endDate": null,
       "isCurrent": true,
       "description": "Building and maintaining the core platform",
-      "responsibilities": ["Led frontend architecture"],
-      "achievements": ["Reduced bundle size by 40%"],
       "createdAt": "2026-01-10T...",
       "updatedAt": "2026-03-15T..."
     }
@@ -1023,6 +1032,8 @@ curl -s -G https://api.mokaru.ai/v1/experiences \
   "offset": 0
 }
 ```
+
+**Note:** The list response does not include `responsibilities` or `achievements` - use `GET /v1/experiences/{id}` to fetch those.
 
 ---
 
@@ -1043,12 +1054,14 @@ curl -s -G https://api.mokaru.ai/v1/experiences \
 | `jobTitle`         | string  | Yes      | Job title (max 200 chars)                      |
 | `company`          | string  | Yes      | Company name (max 200 chars)                   |
 | `location`         | string  | No       | Work location (max 200 chars)                  |
-| `startDate`        | string  | No       | ISO date string (e.g. "2022-07-01")            |
-| `endDate`          | string  | No       | ISO date string (null for current position)    |
+| `startDate`        | string  | No       | Full ISO-8601 datetime (e.g. "2022-07-01T00:00:00.000Z") |
+| `endDate`          | string  | No       | Full ISO-8601 datetime (omit for current position)        |
 | `isCurrent`        | boolean | No       | Whether this is the current position            |
-| `description`      | string  | No       | Role description (max 5000 chars)              |
+| `description`      | string  | No       | Role description                                |
 | `responsibilities` | array   | No       | List of responsibilities (array of strings)    |
 | `achievements`     | array   | No       | List of achievements (array of strings)        |
+
+**Date format:** `startDate` and `endDate` must be full ISO-8601 datetimes (`YYYY-MM-DDTHH:mm:ss.sssZ`). A date-only string like `"2022-07-01"` will be rejected.
 
 **Curl example:**
 
@@ -1060,7 +1073,7 @@ curl -s -X POST https://api.mokaru.ai/v1/experiences \
     "jobTitle": "Senior Software Engineer",
     "company": "Acme Corp",
     "location": "San Francisco, CA",
-    "startDate": "2022-07-01",
+    "startDate": "2022-07-01T00:00:00.000Z",
     "isCurrent": true,
     "description": "Building the core platform",
     "responsibilities": ["Led frontend architecture"],
@@ -1133,15 +1146,17 @@ curl -s https://api.mokaru.ai/v1/experiences/clx_abc123 \
 
 | Field              | Type         | Description                                    |
 |--------------------|--------------|------------------------------------------------|
-| `jobTitle`         | string       | Job title (max 200 chars)                      |
-| `company`          | string       | Company name (max 200 chars)                   |
-| `location`         | string/null  | Work location (max 200 chars, null to clear)   |
-| `startDate`        | string/null  | ISO date string (null to clear)                |
-| `endDate`          | string/null  | ISO date string (null to clear)                |
-| `isCurrent`        | boolean      | Whether this is the current position            |
-| `description`      | string/null  | Role description (max 5000 chars, null to clear)|
-| `responsibilities` | array/null   | List of responsibilities (null to clear)        |
-| `achievements`     | array/null   | List of achievements (null to clear)            |
+| `jobTitle`         | string       | Job title (max 200 chars)                                      |
+| `company`          | string       | Company name (max 200 chars)                                   |
+| `location`         | string/null  | Work location (max 200 chars, null to clear)                   |
+| `startDate`        | string/null  | Full ISO-8601 datetime (null to clear)                         |
+| `endDate`          | string/null  | Full ISO-8601 datetime (null to clear)                         |
+| `isCurrent`        | boolean/null | Whether this is the current position (null to clear)            |
+| `description`      | string/null  | Role description (null to clear)                               |
+| `responsibilities` | array/null   | List of responsibilities (null to clear)                       |
+| `achievements`     | array/null   | List of achievements (null to clear)                           |
+
+**Date format:** `startDate` and `endDate` must be full ISO-8601 datetimes (`YYYY-MM-DDTHH:mm:ss.sssZ`). A date-only string will be rejected.
 
 **Curl example:**
 
@@ -1151,7 +1166,7 @@ curl -s -X PATCH https://api.mokaru.ai/v1/experiences/clx_abc123 \
   -H "Content-Type: application/json" \
   -d '{
     "isCurrent": false,
-    "endDate": "2026-03-15"
+    "endDate": "2026-03-15T00:00:00.000Z"
   }' | jq .
 ```
 
@@ -1227,13 +1242,14 @@ curl -s -G https://api.mokaru.ai/v1/education \
   "data": [
     {
       "id": "clx...",
-      "school": "Stanford University",
+      "institution": "Stanford University",
       "degree": "Bachelor of Science",
-      "field": "Computer Science",
+      "fieldOfStudy": "Computer Science",
+      "location": "Stanford, CA",
       "startDate": "2018-09-01T00:00:00.000Z",
       "endDate": "2022-06-15T00:00:00.000Z",
       "isCurrent": false,
-      "description": "Graduated with honors",
+      "grade": "Magna Cum Laude",
       "createdAt": "2026-01-10T...",
       "updatedAt": "2026-03-15T..."
     }
@@ -1244,6 +1260,8 @@ curl -s -G https://api.mokaru.ai/v1/education \
   "offset": 0
 }
 ```
+
+**Note:** The list response does not include `description` or `gpa` - use `GET /v1/education/{id}` to fetch those.
 
 ---
 
@@ -1261,13 +1279,18 @@ curl -s -G https://api.mokaru.ai/v1/education \
 
 | Field         | Type    | Required | Description                                    |
 |---------------|---------|----------|------------------------------------------------|
-| `school`      | string  | Yes      | School or institution name (max 200 chars)     |
-| `degree`      | string  | No       | Degree type (max 200 chars)                    |
-| `field`       | string  | No       | Field of study (max 200 chars)                 |
-| `startDate`   | string  | No       | ISO date string (e.g. "2018-09-01")            |
-| `endDate`     | string  | No       | ISO date string (null if currently enrolled)   |
-| `isCurrent`   | boolean | No       | Whether currently enrolled                      |
-| `description` | string  | No       | Additional details (max 5000 chars)            |
+| `institution`  | string  | Yes      | School or institution name (max 200 chars)                    |
+| `degree`       | string  | Yes      | Degree type (max 200 chars)                                   |
+| `fieldOfStudy` | string  | No       | Field of study (max 200 chars)                                |
+| `location`     | string  | No       | Location of the school (max 200 chars)                        |
+| `startDate`    | string  | No       | Full ISO-8601 datetime (e.g. "2018-09-01T00:00:00.000Z")      |
+| `endDate`      | string  | No       | Full ISO-8601 datetime (omit if currently enrolled)           |
+| `isCurrent`    | boolean | No       | Whether currently enrolled                                     |
+| `description`  | string  | No       | Additional details                                             |
+| `grade`        | string  | No       | Grade or honors (max 50 chars, e.g. "Magna Cum Laude")        |
+| `gpa`          | number  | No       | GPA value                                                      |
+
+**Date format:** `startDate` and `endDate` must be full ISO-8601 datetimes (`YYYY-MM-DDTHH:mm:ss.sssZ`). A date-only string will be rejected.
 
 **Curl example:**
 
@@ -1276,11 +1299,11 @@ curl -s -X POST https://api.mokaru.ai/v1/education \
   -H "Authorization: Bearer $MOKARU_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "school": "Stanford University",
+    "institution": "Stanford University",
     "degree": "Bachelor of Science",
-    "field": "Computer Science",
-    "startDate": "2018-09-01",
-    "endDate": "2022-06-15"
+    "fieldOfStudy": "Computer Science",
+    "startDate": "2018-09-01T00:00:00.000Z",
+    "endDate": "2022-06-15T00:00:00.000Z"
   }' | jq .
 ```
 
@@ -1318,13 +1341,16 @@ curl -s https://api.mokaru.ai/v1/education/clx_abc123 \
 {
   "data": {
     "id": "clx_abc123",
-    "school": "Stanford University",
+    "institution": "Stanford University",
     "degree": "Bachelor of Science",
-    "field": "Computer Science",
+    "fieldOfStudy": "Computer Science",
+    "location": "Stanford, CA",
     "startDate": "2018-09-01T00:00:00.000Z",
     "endDate": "2022-06-15T00:00:00.000Z",
     "isCurrent": false,
     "description": "Graduated with honors",
+    "grade": "Magna Cum Laude",
+    "gpa": 3.8,
     "createdAt": "2026-01-10T...",
     "updatedAt": "2026-03-15T..."
   }
@@ -1347,13 +1373,18 @@ curl -s https://api.mokaru.ai/v1/education/clx_abc123 \
 
 | Field         | Type        | Description                                    |
 |---------------|-------------|------------------------------------------------|
-| `school`      | string      | School name (max 200 chars)                    |
-| `degree`      | string/null | Degree type (max 200 chars, null to clear)     |
-| `field`       | string/null | Field of study (max 200 chars, null to clear)  |
-| `startDate`   | string/null | ISO date string (null to clear)                |
-| `endDate`     | string/null | ISO date string (null to clear)                |
-| `isCurrent`   | boolean     | Whether currently enrolled                      |
-| `description` | string/null | Additional details (max 5000 chars, null to clear)|
+| `institution`  | string       | School name (max 200 chars)                                   |
+| `degree`       | string       | Degree type (max 200 chars)                                   |
+| `fieldOfStudy` | string/null  | Field of study (max 200 chars, null to clear)                 |
+| `location`     | string/null  | Location of the school (max 200 chars, null to clear)         |
+| `startDate`    | string/null  | Full ISO-8601 datetime (null to clear)                        |
+| `endDate`      | string/null  | Full ISO-8601 datetime (null to clear)                        |
+| `isCurrent`    | boolean/null | Whether currently enrolled (null to clear)                     |
+| `description`  | string/null  | Additional details (null to clear)                            |
+| `grade`        | string/null  | Grade or honors (max 50 chars, null to clear)                 |
+| `gpa`          | number/null  | GPA value (null to clear)                                     |
+
+**Date format:** `startDate` and `endDate` must be full ISO-8601 datetimes (`YYYY-MM-DDTHH:mm:ss.sssZ`).
 
 **Curl example:**
 
@@ -1363,7 +1394,7 @@ curl -s -X PATCH https://api.mokaru.ai/v1/education/clx_abc123 \
   -H "Content-Type: application/json" \
   -d '{
     "degree": "Master of Science",
-    "field": "Machine Learning"
+    "fieldOfStudy": "Machine Learning"
   }' | jq .
 ```
 
@@ -1417,17 +1448,19 @@ curl -s -X DELETE https://api.mokaru.ai/v1/education/clx_abc123 \
 
 **Query parameters:**
 
-| Param    | Type   | Required | Description                           |
-|----------|--------|----------|---------------------------------------|
-| `limit`  | number | No       | Results per page, default 25, max 100 |
-| `offset` | number | No       | Number of results to skip             |
+| Param      | Type   | Required | Description                                            |
+|------------|--------|----------|--------------------------------------------------------|
+| `limit`    | number | No       | Results per page, default 25, max 100                  |
+| `offset`   | number | No       | Number of results to skip                              |
+| `category` | string | No       | Filter by category: `TECHNICAL`, `SOFT`, or `LANGUAGE` |
 
 **Curl example:**
 
 ```bash
 curl -s -G https://api.mokaru.ai/v1/skills \
   -H "Authorization: Bearer $MOKARU_API_KEY" \
-  --data-urlencode "limit=50" | jq .
+  --data-urlencode "limit=50" \
+  --data-urlencode "category=TECHNICAL" | jq .
 ```
 
 **Response shape:**
@@ -1438,8 +1471,12 @@ curl -s -G https://api.mokaru.ai/v1/skills \
     {
       "id": "clx...",
       "name": "TypeScript",
-      "category": "Frontend",
+      "category": "TECHNICAL",
       "level": "expert",
+      "score": 5,
+      "displayOrder": 0,
+      "isVisible": true,
+      "categoryRelation": { "name": "programming", "labelEn": "Programming Languages" },
       "createdAt": "2026-01-10T...",
       "updatedAt": "2026-03-15T..."
     }
@@ -1450,6 +1487,8 @@ curl -s -G https://api.mokaru.ai/v1/skills \
   "offset": 0
 }
 ```
+
+The `category` field is the legacy enum (`TECHNICAL` / `SOFT` / `LANGUAGE`). The optional `categoryRelation` object holds an extended category definition (system-defined or user-defined) when the skill is linked to one.
 
 ---
 
@@ -1467,9 +1506,10 @@ curl -s -G https://api.mokaru.ai/v1/skills \
 
 | Field      | Type   | Required | Description                                    |
 |------------|--------|----------|------------------------------------------------|
-| `name`     | string | Yes      | Skill name (max 100 chars)                     |
-| `category` | string | No       | Skill category, e.g. "Frontend" (max 100 chars)|
-| `level`    | string | No       | One of: beginner, intermediate, advanced, expert|
+| `name`     | string | Yes      | Skill name (max 200 chars)                                        |
+| `category` | string | No       | One of: `TECHNICAL`, `SOFT`, `LANGUAGE`. Defaults to `TECHNICAL`. |
+| `level`    | string | No       | Free-form proficiency label (max 50 chars, e.g. "expert")         |
+| `score`    | number | No       | Integer 1-5 (higher means more proficient)                        |
 
 **Curl example:**
 
@@ -1479,8 +1519,9 @@ curl -s -X POST https://api.mokaru.ai/v1/skills \
   -H "Content-Type: application/json" \
   -d '{
     "name": "TypeScript",
-    "category": "Frontend",
-    "level": "expert"
+    "category": "TECHNICAL",
+    "level": "expert",
+    "score": 5
   }' | jq .
 ```
 
@@ -1519,13 +1560,19 @@ curl -s https://api.mokaru.ai/v1/skills/clx_abc123 \
   "data": {
     "id": "clx_abc123",
     "name": "TypeScript",
-    "category": "Frontend",
+    "categoryLegacy": "TECHNICAL",
+    "categoryId": null,
     "level": "expert",
+    "score": 5,
+    "displayOrder": 0,
+    "isVisible": true,
     "createdAt": "2026-01-10T...",
     "updatedAt": "2026-03-15T..."
   }
 }
 ```
+
+**Note:** Unlike the list endpoint, the detail endpoint returns the raw database row. The enum category is on `categoryLegacy` (not remapped to `category`), and the optional extended category link is on `categoryId`.
 
 ---
 
@@ -1543,9 +1590,12 @@ curl -s https://api.mokaru.ai/v1/skills/clx_abc123 \
 
 | Field      | Type        | Description                                    |
 |------------|-------------|------------------------------------------------|
-| `name`     | string      | Skill name (max 100 chars)                     |
-| `category` | string/null | Skill category (max 100 chars, null to clear)  |
-| `level`    | string/null | Proficiency level (null to clear)              |
+| `name`         | string      | Skill name (max 200 chars)                                        |
+| `category`     | string      | One of: `TECHNICAL`, `SOFT`, `LANGUAGE`                           |
+| `level`        | string/null | Free-form proficiency label (max 50 chars, null to clear)         |
+| `score`        | number/null | Integer 1-5 (null to clear)                                       |
+| `isVisible`    | boolean     | Whether this skill shows on rendered resumes                       |
+| `displayOrder` | number      | Integer position used for sorting skills                           |
 
 **Curl example:**
 
@@ -1555,7 +1605,7 @@ curl -s -X PATCH https://api.mokaru.ai/v1/skills/clx_abc123 \
   -H "Content-Type: application/json" \
   -d '{
     "level": "expert",
-    "category": "Programming Languages"
+    "score": 5
   }' | jq .
 ```
 
@@ -1622,7 +1672,7 @@ curl -s -X DELETE https://api.mokaru.ai/v1/tracker/applications/clx_abc123 \
 }
 ```
 
-The application and its timeline entries are permanently removed. Any linked resume is unlinked but not deleted.
+The application is soft-deleted (marked as deleted but retained in the database). Timeline entries are preserved. Any linked resume is not modified.
 
 ---
 
@@ -1662,7 +1712,7 @@ The application and its timeline entries are permanently removed. Any linked res
 
 1. Call `GET /v1/education` to list all education entries.
 2. Call `GET /v1/education/{id}` to see full details of a specific education entry.
-3. To add, call `POST /v1/education` with at least `school`.
+3. To add, call `POST /v1/education` with at least `institution` and `degree`.
 4. To update, call `PATCH /v1/education/{id}` with the fields to change. Pass `null` to clear optional fields.
 5. To delete, call `DELETE /v1/education/{id}`.
 
@@ -1696,6 +1746,7 @@ The application and its timeline entries are permanently removed. Any linked res
 | 409    | Processing               | Resume is being tailored by auto-prep. Wait and retry.            |
 | 429    | Rate limited             | Wait before retrying. Do not hammer the endpoint.                 |
 | 500    | Server error             | Retry once. If it persists, tell the user something went wrong.   |
+| 503    | Service unavailable      | Rate limiter or export service is temporarily down. Retry after a short wait. |
 
 Always check the HTTP status before parsing the response body. On errors, the body contains an `error` field with a human-readable message.
 

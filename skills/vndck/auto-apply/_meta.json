@@ -3,11 +3,16 @@
   "slug": "auto-apply",
   "displayName": "Automate your Job Search",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1774435306042,
-    "commit": "https://github.com/openclaw/skills/commit/53176191f0d01d6bcba97a6d9c6eb2c5f5fa8b5e"
+    "version": "1.0.7",
+    "publishedAt": 1776611560355,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1774435306042,
+      "commit": "https://github.com/openclaw/skills/commit/53176191f0d01d6bcba97a6d9c6eb2c5f5fa8b5e"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1774044626730,
