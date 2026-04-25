@@ -3,11 +3,16 @@
   "slug": "hive",
   "displayName": "Hive",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162542432,
-    "commit": "https://github.com/openclaw/skills/commit/1b14aafe0b421b81d48cc22b8764942d43e81bf0"
+    "version": "1.0.3",
+    "publishedAt": 1776776830606,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162542432,
+      "commit": "https://github.com/openclaw/skills/commit/1b14aafe0b421b81d48cc22b8764942d43e81bf0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772820141022,
