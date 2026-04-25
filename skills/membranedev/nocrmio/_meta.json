@@ -3,11 +3,16 @@
   "slug": "nocrmio",
   "displayName": "Nocrmio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163322297,
-    "commit": "https://github.com/openclaw/skills/commit/5be2a4a1782f74a717cb2e8177e84be293ca1abb"
+    "version": "1.0.3",
+    "publishedAt": 1776798232157,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163322297,
+      "commit": "https://github.com/openclaw/skills/commit/5be2a4a1782f74a717cb2e8177e84be293ca1abb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773262943413,
