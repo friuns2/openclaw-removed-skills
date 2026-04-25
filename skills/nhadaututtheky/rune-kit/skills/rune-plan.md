@@ -84,6 +84,7 @@ High-level multi-feature planning — organize features into milestones.
 
 - `scout` (L2): scan codebase for existing patterns, conventions, and structure
 - `brainstorm` (L2): when multiple valid approaches exist
+- `adversary` (L2): optional red-team gate on critical plan output (features touching auth, payments, or data integrity)
 - `research` (L3): external knowledge lookup
 - `sequential-thinking` (L3): complex architecture with many trade-offs
 - L4 extension packs: domain-specific architecture patterns
@@ -99,6 +100,8 @@ High-level multi-feature planning — organize features into milestones.
 - `scaffold` (L1): Phase 3 architecture planning
 - `skill-forge` (L2): plan structure for new skill
 - User: `/rune plan` direct invocation
+- `debug` (L2): when root cause requires architectural changes
+- `retro` (L2): reference past plans during retrospective analysis
 
 ## Data Flow
 
@@ -114,6 +117,7 @@ High-level multi-feature planning — organize features into milestones.
 - `ba` (L2): Requirements Document → plan's primary input (locked decisions, user stories)
 - `scout` (L2): codebase analysis → plan's convention/pattern awareness
 - `neural-memory` (external): past architectural decisions → plan's precedent context
+- `sentinel` (L2): repeated security blocks → plan's constraint awareness for future features
 
 ### Feedback Loops ↻
 
@@ -126,7 +130,11 @@ High-level multi-feature planning — organize features into milestones.
 
 Check for `.rune/features/*/requirements.md` via glob. If a Requirements Document exists (from `rune-ba.md`), read it — it contains user stories, acceptance criteria, scope, constraints. Do NOT re-gather what BA already elicited.
 
+If `project.onboarded` signal was received, scout output is already available in session context — skip re-invoking scout.
+
 Invoke `rune-scout.md` if not already done — plans without context produce wrong file paths. Call `neural-memory` (Recall Mode) to surface past architecture decisions before making new ones.
+
+**Feature Map**: Check for `.rune/features.md` via glob. If it exists, read it — understand the existing feature landscape, dependencies, and known gaps BEFORE planning. Cross-reference: does the new feature overlap, conflict with, or depend on existing features? If `.rune/features.md` does not exist, note this — Step 6.5 will create it.
 
 ### Step 2 — Classify Complexity
 
@@ -203,6 +211,25 @@ When presenting alternatives (from brainstorm or Step 3), rate each **Completene
 ### Step 6 — Present and Get Approval
 
 Present the **master plan** to user (NOT all phase files). User reviews: phase breakdown, key decisions, risks, completeness scores. Wait for explicit approval ("go", "proceed", "yes") before writing phase files.
+
+### Step 6.5 — Update Feature Map (Always)
+<MUST-READ path="references/feature-map.md" trigger="every plan invocation"/>
+
+After plan approval, update `.rune/features.md`:
+
+**If `.rune/features.md` does NOT exist** (first run):
+1. Reverse-engineer features from scout output — each top-level module = 1 feature
+2. Map inter-feature dependencies from imports and shared types
+3. Assess status per feature (complete, partial, planned)
+4. Generate `.rune/features.md` with Features table, Dependency Graph, Detected Gaps
+
+**If `.rune/features.md` exists** (subsequent runs):
+1. Add or update the current feature's row (status, deps, key files)
+2. Cross-reference: new feature resolves existing gaps? Creates new ones?
+3. Validate dependency graph — flag missing features, orphans, circular deps, dead signals
+4. Write updated `.rune/features.md`
+
+**Skip if**: Inline plan for trivial task (no feature-level impact).
 
 ### Step 7 — Execution Handoff
 
@@ -302,6 +329,7 @@ When producing phase files with wave-based task grouping, every task MUST declar
 11. MUST include failure scenarios table — what happens when things go wrong
 12. MUST include rejection criteria — explicit "DO NOT" anti-patterns to prevent common mistakes
 13. MUST include cross-phase context — what's assumed from prior phases, what's exported for future
+14. MUST update `.rune/features.md` after every non-trivial plan — feature map is a living artifact
 
 ## Returns
 
@@ -311,7 +339,38 @@ When producing phase files with wave-based task grouping, every task MUST declar
 | Phase files | Markdown | `.rune/plan-<feature>-phase<N>.md` (one per phase) |
 | Feature spec | Markdown | `.rune/features/<name>/spec.md` (Feature Spec Mode only) |
 | Roadmap | Markdown | `.rune/roadmap.md` (Roadmap Mode only) |
+| Feature map | Markdown | `.rune/features.md` (auto-maintained) |
 | Inline plan | Markdown (inline) | Emitted directly for trivial tasks |
+
+## Chain Metadata
+
+Append to plan output when invoked standalone. Suppress when called as sub-skill inside an L1 orchestrator (cook, team, etc.) — the orchestrator emits a consolidated block. See `docs/references/chain-metadata.md`.
+
+```yaml
+chain_metadata:
+  skill: "rune-plan.md"
+  version: "1.5.0"
+  status: "[DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED]"
+  domain: "[area planned]"
+  files_changed:
+    - "[.rune/plan-*.md files created]"
+  exports:
+    plan_file: "[.rune/plan-<feature>.md path]"
+    phase_count: [N]
+    estimated_complexity: "[low | medium | high]"
+    risk_areas: ["[domains with identified risks]"]
+  suggested_next:
+    - skill: "rune-adversary.md"
+      reason: "[grounded in plan — e.g., 'Plan touches auth + payments — stress-test assumptions']"
+      consumes: ["plan_file", "risk_areas"]
+    - skill: "rune-autopilot.md"
+      reason: "Plan approved — autonomous execution available (Pro tier, multi-session)"
+      consumes: ["plan_file", "phase_count"]
+      condition: "Pro tier installed AND phase_count >= 3 AND user signals autonomous intent"
+    - skill: "rune-cook.md"
+      reason: "Plan ready for execution"
+      consumes: ["plan_file", "phase_count"]
+```
 
 ## Sharp Edges
 
@@ -338,6 +397,8 @@ When producing phase files with wave-based task grouping, every task MUST declar
 | Outcome Block "Next Action" is a list, not one action | LOW | One action only — ambiguity about where to start causes re-analysis and lost context |
 | Overlapping file ownership across parallel phases/streams | HIGH | Change Stacking: every task declares `touches[]` — overlap detection flags same file in 2+ tasks before execution |
 | Missing dependency between tasks that share artifacts | HIGH | Every task declares `provides[]` and `requires[]` — cycle detection + missing dep check before dispatch |
+| New feature planned without checking existing feature map | HIGH | Step 1 reads `.rune/features.md` — catches overlaps, conflicts, and missing dependencies before planning begins |
+| Feature map never created — gaps accumulate silently | MEDIUM | Step 6.5 always runs (create or update) — feature map grows organically with each plan invocation |
 
 ## Self-Validation
 
@@ -349,6 +410,8 @@ SELF-VALIDATION (run before presenting plan to user):
 - [ ] Phase files have ALL Amateur-Proof sections (data flow, code contracts, failure scenarios, rejection criteria)
 - [ ] Locked decisions from BA are reflected in plan — none contradicted or ignored
 - [ ] Every BA requirement has a corresponding Req ID in at least one phase's Traceability Matrix
+- [ ] `.rune/features.md` updated with current feature (or created if first run)
+- [ ] No cross-feature conflicts detected (or flagged to user if found)
 ```
 
 ## Done When
@@ -367,13 +430,15 @@ SELF-VALIDATION (run before presenting plan to user):
 - Self-Validation: all checks passed
 - Outcome Block present in every plan output (master plan, phase files, inline plan)
 - Outcome Block contains: What Was Planned + Immediate Next Action (single action) + How to Measure table
+- `.rune/features.md` created (first run) or updated (subsequent) with current feature
+- Cross-feature dependencies validated — no conflicts or orphans left unaddressed
 
 ## Cost Profile
 
 ~3000-8000 tokens input, ~2000-5000 tokens output (master + all phase files). Opus for architectural reasoning. Most expensive L2 skill but runs infrequently. Phase files are written once, executed by cheaper models (Sonnet/Haiku).
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

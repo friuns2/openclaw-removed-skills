@@ -203,6 +203,12 @@ None — pure scanner using Glob, Grep, Read, and Bash tools directly. Does not 
 - `perf` (L2): find hotpath files and performance-critical code
 - `review-intake` (L2): scan codebase for review context
 - `skill-forge` (L2): scan existing skills for patterns when creating new skills
+- `ba` (L2): scan existing codebase for context before requirements elicitation
+- `retro` (L2): scan commit history and codebase for retrospective analysis
+- `graft` (L2): scan target codebase before grafting code from external repo
+- `docs` (L2): scan codebase structure for documentation generation
+- `logic-guardian` (L2): scan business logic modules for protection mapping
+- `adversary` (L2): scan codebase before red-team analysis
 
 ## Output Format
 
@@ -268,7 +274,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail**: Do not expand the scan to unrelated modules or write files beyond `.rune/codebase-map.md` unless explicitly delegated by the parent agent.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

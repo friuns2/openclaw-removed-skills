@@ -29,6 +29,8 @@ Solve the #1 developer complaint: context loss across sessions. Session-bridge a
 - Auto-trigger: when a convention/pattern is established
 - Auto-trigger: before context compaction
 - Auto-trigger: at session end (stop hook)
+- Signal: `checkpoint.request` — explicit checkpoint from cook/team mid-phase
+- `/checkpoint` — manual checkpoint (save exact resume point)
 - `/rune status` — manual state check
 
 ## Calls (outbound)
@@ -41,17 +43,21 @@ Solve the #1 developer complaint: context loss across sessions. Session-bridge a
 - `cook` (L1): auto-save decisions during feature implementation
 - `rescue` (L1): state management throughout refactoring
 - `context-engine` (L3): save state before compaction
+- `context-pack` (L3): coordinate state for sub-agent handoff
+- `neural-memory` (L3): sync key decisions back to `.rune/` files after Capture Mode
 
 ## State Files Managed
 
 ```
 .rune/
-├── decisions.md      — Architectural decisions log
-├── conventions.md    — Established patterns & style
-├── progress.md       — Task progress tracker
-├── session-log.md    — Brief log of each session
-├── instincts.md      — Learned project-specific patterns (trigger→action)
-└── cumulative-notes.md — Living project understanding (profile, themes, relationships)
+├── decisions.md        — Architectural decisions log
+├── conventions.md      — Established patterns & style
+├── progress.md         — Task progress tracker
+├── session-log.md      — Brief log of each session
+├── instincts.md        — Learned project-specific patterns (trigger→action)
+├── cumulative-notes.md — Living project understanding (profile, themes, relationships)
+├── learnings.jsonl     — Structured learning log (append-only, queryable)
+└── checkpoint.md       — Exact resume point for cross-session continuity
 ```
 
 ## Execution
@@ -205,6 +211,48 @@ Extract atomic "instincts" — learned trigger→action patterns — from this s
 
 **Max instincts**: Keep `.rune/instincts.md` under 20 entries. When full, evict the lowest-confidence entry.
 
+#### Step 5.8 — Learnings Log (Structured JSONL)
+
+Append structured learning entries to `.rune/learnings.jsonl` — an append-only log that captures decisions, insights, and error resolutions in a machine-queryable format. Unlike markdown state files (which are for human reading), JSONL enables fast filtering and "latest winner" lookups.
+
+**Entry schema** — one JSON object per line:
+
+```json
+{"ts":"2026-04-04T14:30:00Z","skill":"cook","type":"decision","key":"state-lib","insight":"Chose Zustand over Redux — fewer re-renders in dashboard with 50+ real-time widgets","confidence":0.8,"files":["src/store/index.ts"]}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ts` | ISO 8601 | When the learning was captured |
+| `skill` | string | Which skill produced this learning |
+| `type` | enum | `decision` · `error` · `insight` · `convention` · `performance` |
+| `key` | string | Dedup key — latest entry per key+type wins on read |
+| `insight` | string | 1-2 sentences, causal language ("Chose X because Y", "Root cause was X") |
+| `confidence` | 0.1–1.0 | How certain this learning is (0.3=hunch, 0.7=validated, 0.9=battle-tested) |
+| `files` | string[] | Optional — affected file paths |
+
+**Write rules:**
+- Append only — never edit or delete lines in the JSONL file
+- Max 1-3 entries per session (only genuinely transferable learnings)
+- Use causal/comparative language, not flat facts
+- Key must be kebab-case, descriptive (e.g., `auth-lib`, `db-migration-strategy`, `react-hook-pitfall`)
+
+**Read rules (latest-winner):**
+- When loading learnings, group by `key+type` and take the entry with the latest `ts`
+- This means updating a learning = just append a new entry with the same key+type
+- No dedup needed on write — dedup happens on read
+
+**Query patterns** (for other skills or session-start):
+- All learnings: read `.rune/learnings.jsonl`, parse line-by-line
+- By type: filter `type === "error"` to surface past mistakes before coding
+- By skill: filter `skill === "cook"` to see cook-specific learnings
+- By recency: sort by `ts` descending, take top N
+- Surface top 5 learnings at session start if file has 10+ entries
+
+**Pruning**: When file exceeds 100 entries, compact by keeping only the latest-winner per key+type. Write compacted entries to a new file, replace original.
+
+**Why**: Markdown state files (decisions.md, conventions.md) are great for human reading but hard to query programmatically. JSONL enables structured recall — "show me all errors from last week" or "what did we decide about auth?" — without parsing markdown headers.
+
 #### Step 5.9 — Cumulative Project Notes (Structured Memory)
 
 Maintain a running **cumulative notes** file at `.rune/cumulative-notes.md` that evolves across sessions. Unlike `progress.md` (which tracks tasks) or `decisions.md` (which logs choices), cumulative notes capture the **living understanding** of the project — patterns learned, relationships discovered, recurring themes, and open threads.
@@ -314,6 +362,54 @@ Handle results:
 - `SUSPICIOUS` → present warning to user with specific findings. Ask: "Suspicious patterns detected in .rune/ files. Load anyway?" If user approves → proceed. If not → exit load mode.
 - `TAINTED` → **BLOCK load**. Report: ".rune/ integrity check FAILED — possible poisoning detected. Run `/rune integrity` for details."
 
+#### Step 1.7 — Load invariants (auto-discipline)
+
+Before loading the usual state files, run the invariants loader so the agent sees active discipline rules without being told to look:
+
+```
+Execute: node skills/session-bridge/scripts/load-invariants.js --root <project-root> --json
+```
+
+The loader:
+- Reads `.rune/INVARIANTS.md` (silent no-op if missing)
+- Strips the `## Archived` section (retired rules don't re-activate)
+- Parses active rules into `{ section, title, what, where, why }`
+- Returns a token-budgeted preview (≤ 500 tokens by default)
+- Flags staleness when mtime > 30 days
+
+**Emit signal**: `invariants.loaded` with payload `{ loaded, count, rules, stats, stale, overflow, path }` where:
+- `loaded` (boolean) — whether any active rules were parsed
+- `count` (number) — total active rules (convenience alias for `stats.total`)
+- `rules` (array) — full rule objects `[{ section, title, what, where: string[], why }]` — consumers cache these for glob matching
+- `stats` — `{ danger, critical, state, cross, total, archivedSkipped }`
+- `stale` (boolean) — mtime > 30 days
+- `overflow` (number) — rules present but not shown in preview (budget overflow)
+- `path` (string) — absolute path to `.rune/INVARIANTS.md`
+
+Downstream listeners (`logic-guardian`, Pro `autopilot`) consume `rules[]` directly — no second file read needed.
+
+**Present to agent** (injected verbatim into the Load Mode summary):
+
+```
+📎 Active Invariants (.rune/INVARIANTS.md)
+⚠  skills/skill-router/** — L0 router, never bypass
+🔒  compiler/parser.js — IR schema is the adapter contract
+🔁  compiler/hooks/dispatch.js — phase order is pre → run → post
+🔗  .claude-plugin/marketplace.json — mirrors plugin.json
+…+2 more rules in .rune/INVARIANTS.md
+```
+
+**Staleness warning** (emit ONCE per session, not per tool call):
+
+```
+⚠ Invariants file is stale (> 30 days since last onboard). Consider `rune onboard --refresh`.
+```
+
+**Failure modes**:
+- Missing file → silent no-op (no preview, no error). Don't nag fresh repos.
+- Malformed file → `loaded: false, rules: []`. Log a single-line warning, continue.
+- File fails `integrity-check` in Step 1.5 → this step is skipped entirely (load already blocked).
+
 #### Step 2 — Load files
 
 Use read_file on all four state files in parallel:
@@ -342,6 +438,81 @@ Present the loaded context to the agent in a structured summary:
 
 Identify the next concrete task from `progress.md` → "Next Session Should" section. Present it as the recommended starting point to the calling orchestrator.
 
+### Checkpoint Mode (explicit save-and-resume point)
+
+Unlike Save Mode (which captures session state broadly), Checkpoint Mode creates an **exact resume point** — a single file that tells the next session precisely where to pick up, what's in-flight, and what decisions are load-bearing.
+
+**Trigger**: User says `/checkpoint`, or `cook`/`team` emits `checkpoint.request` signal when pausing mid-phase.
+
+#### Step 1 — Capture resume state
+
+Collect into a structured checkpoint:
+
+```markdown
+# Checkpoint — [YYYY-MM-DD HH:MM]
+
+## What I Was Doing
+[1-2 sentences: the exact task and sub-step in progress]
+
+## Current Git State
+- Branch: [branch name]
+- Last commit: [short hash + message]
+- Uncommitted changes: [list of modified/untracked files, or "clean"]
+- Stashed: [yes/no — if yes, stash message]
+
+## Decisions Made This Session (Load-Bearing)
+[Only decisions that affect the remaining work — not all decisions]
+- [Decision 1]: [choice + why]
+- [Decision 2]: [choice + why]
+
+## What's Left (Ordered)
+1. [Next immediate step — be specific: file, function, what to change]
+2. [Step after that]
+3. [Remaining steps...]
+
+## Context the Next Session Needs
+[Critical info that's NOT in the code or git history — mental model, gotchas discovered, things tried and failed]
+- [Item 1]
+- [Item 2]
+
+## Resume Command
+[Exact instruction for the next session to pick up — e.g., "Continue Phase 2 Task 3: implement the retry logic in src/api/client.ts, the happy path is done, need error handling"]
+```
+
+#### Step 2 — Write checkpoint file
+
+Write to `.rune/checkpoint.md` (overwrite — only one active checkpoint at a time).
+
+#### Step 3 — Confirm to user
+
+```
+## Checkpoint Saved
+- **Resume point**: [1-line summary of what to continue]
+- **Git state**: [branch] @ [commit hash] — [clean/N uncommitted files]
+- **Remaining tasks**: [count]
+- Next session will auto-detect this checkpoint and offer to resume.
+```
+
+#### Checkpoint Resume (in Load Mode)
+
+At Load Mode Step 1, after checking `.rune/*.md` existence, also check for `.rune/checkpoint.md`:
+
+- If checkpoint exists, read it FIRST (before other state files)
+- Present the resume point prominently:
+  ```
+  ## Checkpoint Detected — [date]
+  **Resume**: [Resume Command from checkpoint]
+  **Git state**: [branch] @ [commit] — [clean/dirty]
+  **Tasks remaining**: [count]
+  ```
+- After successful resume (user confirms they've picked up where they left off), rename checkpoint:
+  ```bash
+  mv .rune/checkpoint.md .rune/checkpoint-[date].resolved.md
+  ```
+- Keep last 3 resolved checkpoints for history, delete older ones
+
+**Why**: Save Mode captures everything broadly. Checkpoint captures the **exact needle position** — like a bookmark in a book vs. a summary of chapters read. The next session doesn't need to scan all state files to figure out what to do; the checkpoint tells it directly.
+
 ## Output Format
 
 ### Save Mode
@@ -358,9 +529,20 @@ Identify the next concrete task from `progress.md` → "Next Session Should" sec
 ```
 ## Session Bridge — Loaded
 - **Last session**: [date and summary]
+- **Checkpoint**: [detected — resume point] | [none]
+- **Invariants**: [N loaded from .rune/INVARIANTS.md] | [none] | [stale — run rune onboard --refresh]
 - **Decisions on file**: [count]
 - **Conventions on file**: [count]
+- **Learnings on file**: [count] (top 5 surfaced if 10+)
 - **Next task**: [task description]
+```
+
+### Checkpoint Mode
+```
+## Checkpoint Saved
+- **Resume point**: [1-line summary]
+- **Git state**: [branch] @ [hash] — [clean/N files]
+- **Remaining tasks**: [count]
 ```
 
 ## Constraints
@@ -380,6 +562,9 @@ Known failure modes for this skill. Check these before declaring done.
 | Load mode presenting stale context without age marker | MEDIUM | Mark each loaded entry with its session date — caller knows how fresh it is |
 | Silent failure when git unavailable | MEDIUM | Note "no git available" in report — do not fail silently or skip without logging |
 | Loading poisoned .rune/ files without verification | CRITICAL | Step 1.5 integrity-check MUST run before loading — TAINTED = block load |
+| Learnings JSONL grows unbounded | MEDIUM | Auto-compact at 100 entries — keep only latest-winner per key+type |
+| Checkpoint stale after code changes | MEDIUM | Checkpoint includes git state — if branch/commit differ at resume, warn user that checkpoint may be outdated |
+| Multiple checkpoints overwrite each other | LOW | By design — only one active checkpoint. Resolved ones archived with date suffix |
 
 ## Done When (Save Mode)
 
@@ -387,23 +572,35 @@ Known failure modes for this skill. Check these before declaring done.
 - conventions.md updated with all new patterns established
 - progress.md updated with completed/in-progress/blocked task status
 - session-log.md appended with one-line session summary
+- learnings.jsonl appended with 1-3 structured entries (if transferable learnings exist)
 - Git commit made (or "no git" noted in report)
 - Session Bridge Saved report emitted
 
 ## Done When (Load Mode)
 
 - .rune/*.md files found and read
+- Checkpoint detected and presented (if exists)
+- Learnings surfaced (top 5 if 10+ entries)
 - Last session summary presented
 - Current in-progress and blocked tasks identified
-- Next task recommendation from progress.md
+- Next task recommendation from progress.md (or checkpoint resume command)
 - Session Bridge Loaded report emitted
+
+## Done When (Checkpoint Mode)
+
+- Git state captured (branch, commit, uncommitted files)
+- Load-bearing decisions documented
+- Remaining tasks listed in execution order
+- Resume command written (specific enough for a fresh session to act on)
+- checkpoint.md written to .rune/
+- Checkpoint Saved report emitted
 
 ## Cost Profile
 
 ~100-300 tokens per save. ~500-1000 tokens per load. Always haiku. Negligible cost.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

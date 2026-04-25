@@ -223,7 +223,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail:** surgeon operates on ONE module per session (max 5 files). Any work beyond that scope must be deferred to a separate surgeon session.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

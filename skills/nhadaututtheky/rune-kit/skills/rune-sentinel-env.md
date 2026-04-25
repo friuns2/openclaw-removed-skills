@@ -122,25 +122,36 @@ Detect and verify tools the project depends on:
    - grep for `subprocess.run(`, `child_process.exec(`, `Deno.Command(` → project invokes external CLI
    - read_file README/docs for "requires X installed" or "depends on X"
 
-   For each detected hard dependency:
-   ```bash
-   # Verify the tool exists on PATH
-   which <tool-name> 2>/dev/null || echo "MISSING: <tool-name>"
-   # If found, check version
-   <tool-name> --version 2>/dev/null
-   ```
+   For each detected hard dependency, apply the **9-tier binary detection** below — checking only `which`/`where` is insufficient and produces the largest category of "works on my machine" false-negatives (user has binary installed but PATH is stale, or installed via a package manager that didn't register it, or installed as a desktop app with a bundled binary).
+
+   **9-Tier Binary Detection** (stop at first hit):
+
+   | Tier | Source | Catches |
+   |------|--------|---------|
+   | 1 | Explicit `--<tool>-bin <path>` flag | CI, automation, manual override |
+   | 2 | Skill-specific env var `<SKILL>_<TOOL>_BIN` | Per-project pinning |
+   | 3 | Tool-family env var `<TOOL>_APP_BIN` | Ecosystem conventions |
+   | 4 | Generic tool env var `<TOOL>_BIN` | Legacy overrides |
+   | 5 | Platform desktop-app bundle (macOS `.app/Contents/Resources`, Windows `%LOCALAPPDATA%\Programs`, Linux `/opt`) | Desktop app users (~40% of population) |
+   | 6 | PATH lookup (`which`/`where.exe`) | Standard shell users |
+   | 7 | Package manager global bin (`npm config get prefix`, `pnpm`, `pipx --list`, `cargo install --root`) | npm-global on Windows (PATH oversight) |
+   | 8 | Platform common directories (`~/.local/bin`, `~/.npm-global/bin`, Homebrew, `%APPDATA%\npm`, `%LOCALAPPDATA%\Microsoft\WindowsApps`, `%ProgramFiles%\nodejs`) | Manual installers |
+   | 9 | Platform release archive names (e.g., `codex-x86_64-unknown-linux-musl`, `<tool>-aarch64-apple-darwin`) | Release-tarball downloaders |
 
    **Verdict:**
-   - Tool found on PATH → PASS (log version)
-   - Tool NOT found → **BLOCK** with clear install instructions per OS:
+   - Tool found via any tier → PASS (log which tier + version)
+   - Tool NOT found → **BLOCK** with per-OS install guidance:
      ```
-     [ENV-XXX] Required tool '<tool>' not found on PATH
+     [ENV-XXX] Required tool '<tool>' not found (9-tier lookup exhausted)
        → Debian/Ubuntu: sudo apt install <tool>
-       → macOS: brew install <tool>
+       → macOS: brew install <tool> (or desktop app: <URL>)
        → Windows: winget install <tool> (or choco install <tool>)
-       → Manual: <download URL if known>
+       → Any platform: npm install -g <package> (if Node tool)
+       → Manual: <download URL>
+       → Pin explicitly: export <TOOL>_BIN=/path/to/binary
      ```
    - This prevents the entire class of "it worked in CI but not locally" failures where `subprocess.run()` silently fails
+   - Reference implementation: `scripts/codex_imagen_bridge.mjs` in `@rune-pro/media` ports this pattern
 
 ### Step 4: Port Availability Check
 
@@ -259,7 +270,7 @@ For each finding, include a specific remediation command the developer can copy-
 ~500-1000 tokens input, ~500-1000 tokens output. Haiku model — this is fast, cheap, read-only scanning. Runs once per new project (or on manual invoke). Sub-10-second execution target.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

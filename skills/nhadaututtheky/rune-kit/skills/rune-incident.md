@@ -26,6 +26,7 @@ Structured incident response for production issues. Follows a strict order: tria
 - `/rune incident "description of what's broken"` — direct user invocation
 - Called by `launch` (L1): watchdog alerts during Phase 3 VERIFY
 - Called by `deploy` (L2): health check fails post-deploy
+- Signal: auto-triggers when `watchdog` emits `incident.detected` — no manual invocation needed
 
 ## Calls (outbound)
 
@@ -33,6 +34,7 @@ Structured incident response for production issues. Follows a strict order: tria
 - `autopsy` (L2): root cause analysis after containment
 - `journal` (L3): record incident timeline and decisions
 - `sentinel` (L2): check for security dimension (data exposure, unauthorized access)
+- `neural-memory` (ext): after resolution — capture incident root cause + fix pattern cross-session so the same failure mode is never diagnosed twice
 
 ## Called By (inbound)
 
@@ -255,7 +257,7 @@ Known failure modes for this skill. Check these before declaring done.
 ~3000-8000 tokens input, ~1000-2500 tokens output. Sonnet for response coordination.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

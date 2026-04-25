@@ -313,6 +313,12 @@ Save eval files as `skills/<name>/evals.md`. Each eval is a numbered scenario (E
 - `launch` (L1): pre-deployment test suite
 - `safeguard` (L2): writing characterization tests for legacy code
 - `review-intake` (L2): write tests for issues identified during review intake
+- `scaffold` (L1): generate initial test suite for new project
+- `graft` (L2): write integration tests for grafted code
+- `skill-forge` (L2): write tests for new skill functionality
+- `mcp-builder` (L2): write tests for MCP server tools
+- `debug` (L2): write regression test capturing the bug
+- `plan` (L2): reference test requirements in implementation plan
 
 ## Calls (outbound)
 
@@ -548,6 +554,33 @@ Examples of test slop:
 | Coverage report | Inline stdout | Shown in Test Report |
 | Test Report | Markdown (inline) | Emitted to calling skill (cook, fix, review) |
 
+## Chain Metadata
+
+Append to Test Report when invoked standalone. Suppress when called as sub-skill inside an L1 orchestrator (cook, team, etc.) — the orchestrator emits a consolidated block. See `docs/references/chain-metadata.md`.
+
+```yaml
+chain_metadata:
+  skill: "rune-test.md"
+  version: "1.2.0"
+  status: "[DONE]"
+  domain: "[area tested]"
+  files_changed:
+    - "[test files created/modified]"
+  exports:
+    test_results: { passed: [N], failed: [N], coverage: [N] }
+    test_files: ["[paths to test files]"]
+    status: "[RED | GREEN]"  # RED = TDD failing (expected), GREEN = all pass
+  suggested_next:  # status-aware — pick based on RED or GREEN
+    # When GREEN:
+    - skill: "rune-preflight.md"
+      reason: "[grounded in results — e.g., 'All 15 tests GREEN, check edge case completeness']"
+      consumes: ["test_results", "test_files"]
+    # When RED (TDD expected):
+    - skill: "rune-fix.md"
+      reason: "[grounded in failures — e.g., '3 tests RED as expected, implement to make them pass']"
+      consumes: ["test_results", "test_files"]
+```
+
 ## Sharp Edges
 
 Known failure modes for this skill. Check these before declaring done.
@@ -593,7 +626,7 @@ SELF-VALIDATION (run before emitting Test Report):
 **Scope guardrail**: Do not modify source or implementation files to make tests pass unless explicitly delegated by the parent agent.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

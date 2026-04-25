@@ -204,6 +204,36 @@ Output the following structure:
 - Score basis: -10 per critical CVE, -5 per high CVE, -2 per outdated major, -1 per outdated minor
 ```
 
+## Upgrade Campaign Mode
+
+When health score < 60 OR CRITICAL/SECURITY items exist, dependency-doctor can orchestrate a full upgrade campaign — not just report, but execute. Triggered by: user says "upgrade all", "fix deps", "run the update plan", or health score triggers.
+
+### Campaign Chain
+
+```
+1. TRIAGE     → Run Steps 1-7 (standard report). Identify upgrade order.
+2. CHECKPOINT → Save current lock file state: `cp package-lock.json .rune/dep-backup/`
+3. PER-PACKAGE LOOP (CRITICAL → SECURITY → PATCH → MINOR, skip MAJOR):
+   a. Upgrade one package at a time: `npm install pkg@latest`
+   b. Call `rune-verification.md` — run tests + build
+   c. If PASS → commit: `feat(deps): upgrade {pkg} {old} → {new}`
+   d. If FAIL → rollback package: `npm install pkg@{old}`, log as BLOCKED
+4. MAJOR BUMPS → present to user: breaking change notes + migration guide link. Never auto-upgrade.
+5. REPORT     → final health score delta, packages upgraded/skipped/blocked
+```
+
+**One package at a time** — bulk upgrades make it impossible to identify which package broke the build.
+
+**MAJOR upgrades require:**
+- User confirmation
+- Breaking change summary (from npm docs or package CHANGELOG)
+- Migration checklist before upgrading
+
+### Calls (outbound — Campaign Mode only)
+
+- `verification` (L3): test + build after each package upgrade
+- `fix` (L2): when a minor/patch upgrade breaks tests and fix is straightforward
+
 ## Output Format
 
 Dependency Report with package manager, counts, CVE findings by severity, outdated packages by risk level, unused dependencies, ordered update plan, and health score (0-100). See Step 7 Report above for full template.
@@ -241,7 +271,7 @@ Known failure modes for this skill. Check these before declaring done.
 ~300-600 tokens input, ~200-500 tokens output. Haiku. Most time spent in package manager commands.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

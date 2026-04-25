@@ -32,6 +32,10 @@ None — pure L3 utility using `WebSearch` and `WebFetch` tools directly.
 - `marketing` (L2): competitor analysis, SEO data
 - `hallucination-guard` (L3): verify package existence on npm/pypi
 - `autopsy` (L2): research best practices for legacy patterns
+- `ba` (L2): research similar products and integrations
+- `graft` (L2): research source repo patterns before grafting
+- `mcp-builder` (L2): research MCP standards and existing implementations
+- `scaffold` (L1): research project templates and best practices
 
 ## Execution
 
@@ -177,7 +181,7 @@ Known failure modes for this skill. Check these before declaring done.
 ~300-800 tokens input, ~200-500 tokens output. Haiku. Fast and cheap.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

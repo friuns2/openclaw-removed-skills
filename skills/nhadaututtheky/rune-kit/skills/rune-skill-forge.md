@@ -13,6 +13,7 @@
 
 ## Platform Constraints
 
+- MUST NOT: Never run commands containing hardcoded secrets, API keys, or tokens. Scan all shell commands for secret patterns before execution.
 - SHOULD: Monitor your context usage. If working on a long task, summarize progress before context fills up.
 - MUST: Before summarizing/compacting context, save important decisions and progress to project files.
 - SHOULD: Before ending, save architectural decisions and progress to .rune/ directory for future sessions.
@@ -38,6 +39,7 @@ The skill that builds skills. Applies Test-Driven Development to skill authoring
 ## Called By (inbound)
 
 - `cook` (L1): when the feature being built IS a new skill
+- `scaffold` (L1): when scaffolded project includes custom skills
 
 ## References
 
@@ -280,6 +282,154 @@ Research (Meincke et al., 2025, 28,000 conversations) shows 33% → 72% complian
 - **Reciprocity** ("I helped you, now follow the rules") → feels manipulative
 
 **Ethical test**: Would this serve the user's genuine interests if they fully understood the technique?
+
+### Phase 5.25 — SCRIPT CONTRACT (skills with helper scripts only)
+
+If the skill bundles executable scripts in its `scripts/` directory, those scripts MUST follow the Rune script output contract. This is a testable contract — orchestrators (cook, team, marketing) rely on it for piping and retry logic.
+
+#### The Three-Mode Contract
+
+Every helper script supports three output modes:
+
+| Mode | Stdout | Stderr | File Artifacts |
+|------|--------|--------|----------------|
+| default | One artifact path per line | Diagnostics + warnings | Artifacts in declared out-dir |
+| `--json` | Structured JSON summary | Diagnostics (unchanged) | Artifacts (unchanged) |
+| `--debug` | Default stdout (paths) | Verbose trace + diagnostics | Default + JSONL redacted trace at `<out-dir>/<slug>.jsonl` |
+
+**Why**: default-mode stdout-as-paths is the Unix way. Downstream skills pipe directly without log-parsing. `--json` is opt-in for callers that need metadata.
+
+#### Required Flags
+
+Every helper script MUST accept at least these flags:
+
+```
+--help              Print usage + exit 0
+--version           Print version + exit 0
+--json              Structured JSON on stdout
+--debug             Write JSONL redacted trace
+--dry-run           Report plan, make no changes, exit 0
+--smoke             Pre-flight check (validate deps, exit 0 if healthy)
+--out-dir <path>    Override default artifact directory
+```
+
+And SHOULD accept when applicable:
+```
+--prompt-file <path>  Read long text input from file (avoids shell-quoting hell on Windows)
+--confirm             Skip confirmation gate for expensive/destructive ops
+--timeout-ms <n>      Operation timeout (with semantic exit codes below)
+```
+
+#### Semantic Exit Codes
+
+Adopt the standard Rune exit-code vocabulary:
+
+| Code | Meaning | Orchestrator Response |
+|------|---------|-----------------------|
+| `0` | Success | Accept + chain to next |
+| `1` | Execution failed (retryable) | Log + retry with alternate config |
+| `2` | Usage error (bug) | Abort — don't retry |
+| `3` | Data-integrity error | Halt — don't retry |
+| `4` | Timeout with partial results | **Accept partial + continue** |
+| `124` | Timeout with zero results | Retry with longer timeout or alternate provider |
+
+Codes `5-63` are skill-specific. Document every code used in `references/<skill>/exit-codes.md`.
+
+**Why `4` vs `124` matters**: Standard Unix collapses "timeout-with-2-of-3-images" and "timeout-with-0-images" into `124`. They are fundamentally different outcomes. Split them.
+
+#### Default Artifact Directory Resolution
+
+Resolve `--out-dir` in this fallback order:
+
+1. `--out-dir <path>` explicit flag
+2. `<SKILL>_OUT_DIR` env var (skill-specific)
+3. `OPENCLAW_OUTPUT_DIR` (OpenClaw platform convention)
+4. `OPENCLAW_AGENT_DIR/artifacts/<skill>` (OpenClaw default)
+5. `OPENCLAW_STATE_DIR/artifacts/<skill>` (OpenClaw state fallback)
+6. `./.rune/<skill>/` (project-local default)
+
+**Why**: OpenClaw is one of Rune's adapter targets. Scripts that honor this convention work across adapters without modification.
+
+#### Sensitive-Data Redaction
+
+`--debug` trace MUST redact sensitive fields before write:
+- Regex: `/authorization|bearer|token|api[_-]?key|secret|cookie|session[_-]?id|chatgpt[_-]?account/i` (key names)
+- Any value exceeding 500 chars truncates to `<first-500>...`
+- Never log env var VALUES — only presence check
+
+#### Contract Test
+
+Before shipping a helper script, verify:
+
+```bash
+# Contract smoke test:
+node scripts/<script>.mjs --help          # exit 0
+node scripts/<script>.mjs --version       # exit 0, prints version only
+node scripts/<script>.mjs --smoke         # exit 0 or 1, human-readable stderr
+node scripts/<script>.mjs --dry-run ...   # exit 0, no side effects
+node scripts/<script>.mjs ... --json      # stdout is parseable JSON
+node scripts/<script>.mjs ... | head -1   # stdout default mode = path
+```
+
+<HARD-GATE>
+Scripts that don't honor the contract cannot be shipped.
+Specifically:
+- Mixing paths and progress on stdout = BLOCK
+- Silent failure (no install guidance on miss) = BLOCK
+- Logging credentials in trace = CRITICAL-BLOCK
+- Binary exit code (0/1 only) when timeout semantics apply = BLOCK
+</HARD-GATE>
+
+**Reference implementations**:
+- `@rune-pro/media/scripts/codex_imagen_bridge.mjs` — full 9-tier binary detection + contract
+- `@rune-pro/media/scripts/provider_probe.mjs` — `--smoke` convention exemplar
+- `@rune-pro/media/scripts/image_optimizer.py` — Python contract implementation
+
+**Reference docs**:
+- `references/image-generator/script-contract.md` (pack-level contract)
+- `references/image-generator/exit-codes.md` (exit-code vocabulary)
+- `references/image-generator/binary-detection.md` (9-tier lookup)
+
+### Phase 5.5 — SECURITY MODEL
+
+Every skill that touches external systems, user data, or destructive operations MUST define an explicit Security Model section. This is a contract — not aspirational, but testable.
+
+**Add to SKILL.md after Sharp Edges:**
+
+```markdown
+## Security Model
+
+### Trust Boundaries
+- [What this skill reads] — e.g., "Reads .env files, user source code, git history"
+- [What this skill writes] — e.g., "Writes to .rune/ only, never modifies source code"
+- [What this skill executes] — e.g., "Runs npm test, never runs arbitrary shell commands"
+
+### This Skill Will NEVER
+- [Explicit denial 1] — e.g., "Execute user-provided strings as shell commands"
+- [Explicit denial 2] — e.g., "Read or log credential files (.env, secrets.json)"
+- [Explicit denial 3] — e.g., "Send data to external endpoints"
+
+### Threat Surface
+| Threat | Mitigated By |
+|--------|-------------|
+| Prompt injection via user input | Input validated before processing |
+| Credential exposure in output | Secrets pattern detection before emit |
+| Destructive operation on wrong target | Confirmation gate before delete/overwrite |
+```
+
+**When to require Security Model:**
+- Skill uses run_command tool → REQUIRED (can execute arbitrary commands)
+- Skill reads `.env` or credentials → REQUIRED
+- Skill writes/deletes files outside `.rune/` → REQUIRED
+- Skill calls external APIs or MCP tools → REQUIRED
+- Skill is read-only analysis (review, audit, scout) → OPTIONAL but recommended
+
+**Eval integration**: Phase 7 evals for skills with Security Model MUST include:
+- E05: Attempt to make skill execute unintended command
+- E06: Attempt to make skill expose credentials in output
+- E07: Attempt to make skill write outside its declared boundary
+
+If Security Model is required but missing → Phase 7 EVAL HARD-GATE blocks ship.
 
 ### Phase 6 — INTEGRATE
 
@@ -544,7 +694,7 @@ Techniques:
 **Scope guardrail:** skill-forge authors and tests skill files — it does not implement the features those skills describe.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

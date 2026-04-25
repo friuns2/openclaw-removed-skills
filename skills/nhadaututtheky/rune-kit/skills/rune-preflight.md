@@ -212,6 +212,7 @@ If a domain hook flags BLOCK, the overall preflight verdict is BLOCK regardless 
 | `openapi.*`, `*.graphql`, `*.proto` | API Contract | Breaking changes flagged, version bumped, deprecated fields documented |
 | `docs/policies/*`, `PRIVACY*`, `TERMS*` | Legal/Compliance | No placeholder text, review date current, practice matches policy |
 | `**/billing*`, `**/payment*`, `**/invoice*` | Financial | Decimal precision correct, currency locale-aware, no hardcoded rates |
+| `*.tsx`, `*.jsx`, `*.svelte`, `*.vue`, `components/*` | UI/Frontend | Design token compliance, animation a11y, touch targets, visual hierarchy |
 | `skills/*/SKILL.md`, `extensions/*/PACK.md` | Rune Skill | Frontmatter valid, all required sections present, word count within layer budget |
 | `*.test.*`, `*.spec.*`, `__tests__/*` | Test Quality | No `.skip`/`.only` left in, assertions present (not empty tests), no hardcoded timeouts |
 
@@ -224,6 +225,34 @@ For each detected domain, run its checks on the relevant files in the diff:
 3. **Scan** each relevant file for domain violations
 4. **Classify** findings: BLOCK (data loss risk, breaking contract) or WARN (best practice, incomplete)
 5. **Append** to preflight report under `### Domain Quality` section
+
+#### UI/Frontend Domain Checks
+
+When UI/Frontend hook is triggered, run these checks on all `.tsx`/`.jsx`/`.svelte`/`.vue` files in the diff.
+
+**Preamble — load design contract**: If `.rune/design-system.md` exists, read it once. Apply the project's **Scale Minimums** block over the defaults below (e.g., a project declaring `body ≥18px` should flag 16px body text). If the file is absent, use defaults and emit a LOW advisory: "No `.rune/design-system.md` — run `rune design` to lock visual decisions."
+
+| Check | What to Scan | Severity |
+|-------|-------------|----------|
+| **Design token compliance** | Hardcoded colors (`#fff`, `rgb(`, `hsl(`) instead of CSS variables or Tailwind tokens | WARN: "Hardcoded color at {file}:{line} — use design token" |
+| **UI-SPEC drift** | If `.rune/ui-spec.md` exists, compare component decisions (card style, form layout, nav type) against spec | BLOCK: "Component at {file} uses bordered cards but UI-SPEC locks elevated cards" |
+| **Animation accessibility** | Animations/transitions without `prefers-reduced-motion` guard | WARN: "Animation at {file}:{line} missing reduced-motion check" |
+| **Touch target size** | Interactive elements with explicit small sizing (`w-5 h-5`, `p-0.5` on buttons/links) < 44×44px (or project override from design-system.md) | WARN: "Touch target too small at {file}:{line}" |
+| **Scale Minimum — body text** | `text-sm` / `text-xs` / explicit `font-size: 14px` on `<p>` or primary body regions (not meta/secondary) | WARN: "Body text below 16px at {file}:{line} — reads as AI boilerplate" |
+| **Scale Minimum — hero display** | `<h1>` with `text-3xl` or smaller (30px) when the heading is in a hero/landing section | WARN: "Hero heading below 48px at {file}:{line} — insufficient visual hierarchy" |
+| **Hand-rolled SVG for standard icons** | Inline `<svg viewBox=` in JSX when the surrounding comment/class names indicate standard iconography (dashboard, menu, close, chevron, arrow, search, home, user, settings, bell, trash) | WARN: "Hand-rolled SVG at {file}:{line} — use @phosphor-icons/react or huge-icons, or ship boxed placeholder" |
+| **Manual hex accent shading** | CSS/Tailwind config defining 2+ sibling `--accent-hover` / `--accent-pressed` / `--accent-active` with hex literals (no `oklch(from ...)` or design-token chain) | WARN: "Manual hex shade at {file}:{line} — derive via oklch(from var(--accent) calc(l - 0.08) c h)" |
+| **Missing states** | Components fetching data without loading/error/empty states | WARN: "Async component at {file} missing [loading|error|empty] state" |
+| **Icon accessibility** | Decorative icons without `aria-hidden="true"`, functional icons without `aria-label` | WARN: "Icon at {file}:{line} missing aria attribute" |
+| **Inline styles** | `style={{` or `style=` attribute usage instead of classes/tokens | WARN: "Inline style at {file}:{line} — use CSS class or Tailwind" |
+| **Font loading** | Custom font imports without `font-display: swap` or Next.js font optimization | WARN: "Font at {file} may cause layout shift — add font-display: swap" |
+| **Placeholder content** | Strings like "Lorem ipsum", "TODO", "placeholder", "test text" in JSX/template | BLOCK: "Placeholder content at {file}:{line} — replace before shipping" |
+
+**Skip if**: Diff contains only test files, config files, or non-UI code (detected by absence of JSX/template syntax).
+
+**Exception for Scale Minimums**: Secondary/meta text (`<time>`, `<small>`, form hints, table captions) is allowed at 14px. The check only fires on primary body regions — paragraphs inside `<main>`, `<article>`, card body, marketing hero/features. Use common sense or an explicit `data-scale="meta"` attribute to opt out.
+
+**Exception for hand-rolled SVG**: Project logos, data visualizations (charts/graphs via d3/recharts/visx), and human-designed illustrations are never flagged. The check fires only when class/comment context names a standard icon.
 
 #### Pack Integration
 
@@ -400,7 +429,7 @@ WARN — 3 issues found (0 blocking, 3 must-acknowledge). Resolve before commit 
 ~2000-4000 tokens input, ~500-1500 tokens output. Sonnet for logic analysis quality.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

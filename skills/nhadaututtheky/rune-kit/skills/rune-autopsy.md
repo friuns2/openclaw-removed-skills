@@ -40,6 +40,32 @@ Full codebase health assessment for legacy projects. Autopsy analyzes complexity
 
 ## Execution Steps
 
+### Step 0 — Repo intelligence (if GitHub-hosted)
+
+If the project is a GitHub repository, gather repo-level metrics before diving into code:
+
+```bash
+# Fetch via GitHub API (requires gh CLI or curl + GITHUB_TOKEN)
+gh api repos/{owner}/{repo} --jq '{stars: .stargazers_count, forks: .forks_count, open_issues: .open_issues_count, license: .license.spdx_id, language: .language, topics: .topics, created: .created_at, pushed: .pushed_at}'
+
+# Contributor count and top contributors
+gh api repos/{owner}/{repo}/contributors --jq 'length' 
+gh api repos/{owner}/{repo}/contributors --jq '.[0:5] | .[] | "\(.login): \(.contributions)"'
+
+# Commit frequency (last 52 weeks)
+gh api repos/{owner}/{repo}/stats/commit_activity --jq '[.[] | .total] | add'
+
+# Language byte distribution
+gh api repos/{owner}/{repo}/languages
+```
+
+Record in working notes:
+- **Activity signal**: commits/week (>5 = active, 1-5 = maintained, <1 = stale)
+- **Bus factor**: contributor count (1 = critical risk, 2-3 = low, >5 = healthy)
+- **Community signal**: stars/forks ratio, open issue count, staleness of latest push
+
+Skip this step for local-only projects with no remote.
+
 ### Step 1 — Structure scan
 
 Call `rune-scout.md` with a request for a full project map. Ask scout to return:
@@ -92,6 +118,12 @@ git log --before="1 year ago" --format="%H" | head -1 | xargs -I{} git diff --na
 
 # Authors per file (high author count = high churn risk)
 git log --format="%an" -- <file> | sort -u | wc -l
+
+# Commit velocity by month (trend detection)
+git log --format="%Y-%m" | sort | uniq -c | tail -12
+
+# Issue/PR close rate (GitHub only)
+gh api repos/{owner}/{repo}/issues --jq '[.[] | select(.pull_request == null)] | length'
 ```
 
 Identify:
@@ -99,6 +131,7 @@ Identify:
 - God files (> 500 LOC with many importers)
 - Hotspot files (changed most often = highest bug density)
 - Dead files (no importers, no recent commits)
+- Velocity trend: accelerating, stable, or decelerating (compare last 3 months)
 
 ### Step 5 — Generate RESCUE-REPORT.md
 
@@ -116,7 +149,22 @@ Generated: [date]
 | [name] | [n]   | [low/med/high] | [%] | [low/med/high] | [tier] | [1-N] |
 
 ## Dependency Graph
-[Mermaid diagram of module coupling]
+[Mermaid flowchart of module coupling — use subgraphs for clusters]
+
+## Language Distribution
+[Mermaid pie chart — e.g., pie title Languages "TypeScript" : 65 "JavaScript" : 20 "CSS" : 15]
+
+## Commit Velocity (Last 12 Months)
+[Trend: accelerating / stable / decelerating — include monthly commit counts]
+
+## Repo Intelligence (GitHub only)
+| Metric | Value | Signal |
+|--------|-------|--------|
+| Stars | [n] | [community interest level] |
+| Contributors | [n] | [bus factor: critical/low/healthy] |
+| Open issues | [n] | [maintenance signal] |
+| Commits/week | [n] | [activity: active/maintained/stale] |
+| Last push | [date] | [freshness] |
 
 ## Surgery Queue (Priority Order)
 1. [module] — Score: [n] — [primary reason] — Suggested pattern: [pattern]
@@ -143,6 +191,34 @@ Output a summary of the findings:
 - Top 3 worst modules with scores and recommended patterns
 - Confirm RESCUE-REPORT.md was saved
 - Recommended next step: call `rune-safeguard.md` on the top-priority module
+
+## Confidence Scoring
+
+Every finding in the autopsy report MUST carry a confidence level:
+
+| Level | Range | Criteria |
+|-------|-------|----------|
+| High | 90-100% | Measured directly from code/git — LOC counted, tests run, deps parsed |
+| Medium | 70-89% | Inferred from strong signals — file patterns, naming conventions, partial git data |
+| Low | 50-69% | Estimated from weak signals — no git history, binary files, generated code |
+
+Rules:
+- Health scores backed by actual code metrics → High confidence
+- Health scores using git archaeology only (no code read) → Medium confidence
+- Health scores for modules where files couldn't be read (binary, encrypted, too large) → Low confidence
+- **Overall report confidence** = weighted average of module confidences (by LOC weight)
+- Include confidence in RESCUE-REPORT.md header: `Confidence: [High|Medium|Low] ([n]%)`
+
+## Multi-Round Analysis
+
+Autopsy follows a broad-to-narrow pattern to avoid missing systemic issues:
+
+1. **Round 1 — Surface scan** (Steps 0-1): Repo metrics + structure map. Goal: identify scope and major clusters.
+2. **Round 2 — Module deep dive** (Steps 2-3): Read and score each module. Goal: quantified health per module.
+3. **Round 3 — Cross-cutting analysis** (Step 4): Git archaeology + dependency graph. Goal: find systemic risks invisible at module level (circular deps, hotspot clusters, bus factor).
+4. **Round 4 — Synthesis** (Steps 5-6): Combine all rounds into prioritized report. Findings from later rounds may revise earlier scores.
+
+Do NOT skip rounds. Round 3 cross-cutting analysis frequently reveals risks that per-module analysis misses (e.g., a "healthy" module that is the single point of failure for 10 others).
 
 ## Health Score Factors
 
@@ -267,7 +343,7 @@ RESCUE-REPORT.md               — Detailed technical report (standard autopsy)
 - If org teams don't map to code modules: show "Unmapped" in cross-domain table
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

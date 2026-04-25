@@ -152,8 +152,11 @@ These 5 skills are the main interface. Most user intents route here first:
 | Legacy code / rescue / modernize | `rune-rescue.md` | Old/messy codebase |
 | Check project health / full audit | `rune-audit.md` | Quality assessment |
 | New project / bootstrap / scaffold | `rune-scaffold.md` | Greenfield project creation |
+| Auto / autopilot / autonomous / "do it all" / "làm hết" / "đi ngủ" | `rune-autopilot.md` ⚡Pro | Autonomous multi-session execution (requires approved plan + Pro tier installed) |
 
 **Default route**: If unclear, route to `rune-cook.md`. Cook handles 70% of all requests.
+
+> **Pro skill note**: `rune-autopilot.md` requires `@rune-pro` installed. If not available, fall back to `rune-cook.md` with the approved plan and inform user that autopilot is a Pro feature.
 
 #### Tier 2 — Power User Skills (Direct Invocation)
 
@@ -332,9 +335,34 @@ These DO NOT need skill routing:
 
 At the end of a skill's workflow, skill-router MAY suggest a **complementary skill** — limited to ONE recommendation to prevent infinite referral chains.
 
+### Chain Metadata Awareness (Priority Source)
+
+When a previous skill's output contains a `chain_metadata` block in the conversation context, skill-router MUST use it as the PRIMARY source for next-skill suggestions:
+
+1. **Read `chain_metadata.suggested_next`** — these are data-driven recommendations from the skill that just ran. They have MORE context than the hardcoded table below.
+2. **Read `chain_metadata.status`** — override suggestion logic based on outcome:
+   - `BLOCKED` → suggest `debug` or `fix` regardless of what the hardcoded table says
+   - `NEEDS_CONTEXT` → suggest `scout` or `research`
+   - `DONE_WITH_CONCERNS` → suggest `review` or `sentinel`
+3. **Read `chain_metadata.domain`** — trigger L4 pack auto-suggest (see below)
+4. **Forward `chain_metadata.exports`** — when announcing the suggestion, mention what data is available: "Review can use the 5 changed files and test results from cook."
+
+**Conflict resolution:** If `chain_metadata.suggested_next` recommends skill A but the hardcoded table below recommends skill B, **prefer chain_metadata** — it was generated from actual output data, not generic rules.
+
+**Announcement format with chain_metadata:**
+```
+Suggested next: `rune:<skill>` — <chain_metadata.suggested_next.reason>
+Available data: <list of export keys the suggested skill would consume>
+Run it? (skip to continue)
+```
+
+### Hardcoded Fallback Table
+
+When NO chain_metadata is present (skill didn't emit one, or legacy invocation), fall back to this static table:
+
 | After This Skill | Suggest | Rationale |
 |-----------------|---------|-----------|
-| `debug` | `review` | Root cause found — review the fix area for broader issues |
+| `debug` | `fix` | Root cause found — apply the fix |
 | `fix` | `test` | Code changed — verify with tests |
 | `plan` | `adversary` | Plan created — stress-test before implementation |
 | `test` (GREEN) | `preflight` | Tests pass — check for edge cases and completeness |
@@ -450,7 +478,7 @@ If the request type is `QUESTION` or `EXPLORE` (LITE enforcement):
 ~0 tokens (routing logic is internalized from this document). Cost comes from the skills it routes to, not from skill-router itself. The routing table is loaded once and cached in context.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

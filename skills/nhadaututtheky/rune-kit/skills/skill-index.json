@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "generated": "2026-03-31T17:48:18.568Z",
-  "skillCount": 61,
+  "generated": "2026-04-22T18:27:10.537Z",
+  "skillCount": 62,
   "skills": {
     "adversary": {
       "layer": "L2",
       "model": "opus",
       "group": "quality",
-      "description": "Pre-implementation red-team analysis. Challenges plans before code is written — finds edge cases, security holes, scalability bottlenecks, error propagation risks, and integration conflicts. Catches f",
+      "description": "Pre-implementation red-team analysis. Use when a plan is high-risk, critical path, or expensive to reverse. Challenges plans before code is written — finds edge cases, security holes, scalability bott",
       "connections": [
         "sentinel",
         "perf",
@@ -32,13 +32,19 @@
         "journal",
         "sentinel",
         "dependency-doctor"
-      ]
+      ],
+      "signals": {
+        "emit": [
+          "audit.complete"
+        ],
+        "listen": []
+      }
     },
     "autopsy": {
       "layer": "L2",
       "model": "opus",
       "group": "rescue",
-      "description": "Full codebase health assessment. Analyzes complexity, dependencies, dead code, tech debt, and git hotspots. Produces a health score and rescue plan.",
+      "description": "Full codebase health assessment. Use when diagnosing project health or starting a rescue workflow on legacy code. Analyzes complexity, dependencies, dead code, tech debt, and git hotspots. Produces a ",
       "connections": [
         "scout",
         "journal",
@@ -109,7 +115,7 @@
       "layer": "L3",
       "model": "haiku",
       "group": "state",
-      "description": "Creates structured handoff briefings between agents. Packages task context, constraints, and progress into a compact packet that subagents can consume without re-reading the full conversation. Prevent",
+      "description": "Creates structured handoff briefings between agents. Use when delegating complex work to subagents that would otherwise lose context. Packages task context, constraints, and progress into a compact pa",
       "connections": []
     },
     "cook": {
@@ -118,32 +124,43 @@
       "group": "orchestrator",
       "description": "Feature implementation orchestrator. ALWAYS use this skill for ANY code change — implement, build, add feature, create, fix bug, or any task that modifies source code. This is the default route for 70",
       "connections": [
+        "incident",
+        "fix",
+        "verification",
+        "sentinel",
+        "deploy",
+        "watchdog",
+        "journal",
+        "neural-memory",
+        "graft",
         "sentinel-env",
         "scout",
         "ba",
         "plan",
         "brainstorm",
+        "design",
         "adversary",
         "test",
-        "fix",
         "debug",
         "preflight",
-        "sentinel",
         "review",
         "completion-gate",
         "session-bridge",
         "context-pack",
-        "verification",
         "hallucination-guard",
         "git"
       ],
       "signals": {
         "emit": [
-          "phase.complete"
+          "phase.complete",
+          "checkpoint.request"
         ],
         "listen": [
           "plan.ready",
-          "review.complete"
+          "review.complete",
+          "ideas.ready",
+          "preflight.passed",
+          "verification.complete"
         ]
       }
     },
@@ -152,7 +169,13 @@
       "model": "sonnet",
       "group": "development",
       "description": "Database workflow specialist. Generates migration files with rollback scripts, detects breaking schema changes, and validates query parameterization.",
-      "connections": []
+      "connections": [],
+      "signals": {
+        "emit": [
+          "db.migrated"
+        ],
+        "listen": []
+      }
     },
     "debug": {
       "layer": "L2",
@@ -166,7 +189,8 @@
         "browser-pilot",
         "scout",
         "brainstorm",
-        "plan"
+        "plan",
+        "debug"
       ],
       "signals": {
         "emit": [
@@ -183,7 +207,8 @@
       "group": "deps",
       "description": "Dependency health management. Detects package manager, checks outdated packages and vulnerabilities, and produces a prioritized update plan.",
       "connections": [
-        "docs-seeker"
+        "docs-seeker",
+        "verification"
       ]
     },
     "deploy": {
@@ -203,7 +228,10 @@
         ],
         "listen": [
           "security.passed",
-          "tests.passed"
+          "tests.passed",
+          "docs.updated",
+          "audit.complete",
+          "db.migrated"
         ]
       }
     },
@@ -212,7 +240,9 @@
       "model": "sonnet",
       "group": "creation",
       "description": "Design system reasoning. Maps product domain to style, palette, typography, and platform-specific patterns. Generates .rune/design-system.md as the shared design contract for all UI-generating skills.",
-      "connections": []
+      "connections": [
+        "review"
+      ]
     },
     "doc-processor": {
       "layer": "L3",
@@ -236,7 +266,13 @@
       "connections": [
         "scout",
         "git"
-      ]
+      ],
+      "signals": {
+        "emit": [
+          "docs.updated"
+        ],
+        "listen": []
+      }
     },
     "fix": {
       "layer": "L2",
@@ -248,7 +284,9 @@
         "scout",
         "hallucination-guard",
         "docs-seeker",
-        "review"
+        "review",
+        "fix",
+        "test"
       ],
       "signals": {
         "emit": [
@@ -269,6 +307,26 @@
       "description": "Specialized git operations — semantic commits, PR descriptions, branch management, conflict resolution guidance. Replaces ad-hoc git commands with a dedicated, convention-aware utility.",
       "connections": []
     },
+    "graft": {
+      "layer": "L2",
+      "model": "sonnet",
+      "group": "creation",
+      "description": "Clone, port, or convert features from any GitHub repo into your project. Use when stealing patterns from external repos or porting proven code. Understand before copy, challenge before implement. 4 mo",
+      "connections": [
+        "scout",
+        "fix",
+        "review",
+        "research"
+      ],
+      "signals": {
+        "emit": [
+          "graft.complete"
+        ],
+        "listen": [
+          "codebase.scanned"
+        ]
+      }
+    },
     "hallucination-guard": {
       "layer": "L3",
       "model": "haiku",
@@ -286,7 +344,13 @@
       "description": "Structured incident response. Use when user reports an outage, production error, or says 'incident', 'something is down', 'users are affected'. Triage severity, contain blast radius, root-cause, docum",
       "connections": [
         "journal"
-      ]
+      ],
+      "signals": {
+        "emit": [],
+        "listen": [
+          "incident.detected"
+        ]
+      }
     },
     "integrity-check": {
       "layer": "L3",
@@ -299,8 +363,14 @@
       "layer": "L3",
       "model": "haiku",
       "group": "state",
-      "description": "Persistent state tracking and Architecture Decision Records across sessions. Manages progress state, module health, dependency graphs, and ADRs for any workflow.",
-      "connections": []
+      "description": "Persistent state tracking and Architecture Decision Records across sessions. Use when recording a decision, ADR, or progress that must survive session boundaries. Manages progress state, module health",
+      "connections": [],
+      "signals": {
+        "emit": [],
+        "listen": [
+          "graft.complete"
+        ]
+      }
     },
     "launch": {
       "layer": "L1",
@@ -314,14 +384,26 @@
         "watchdog",
         "marketing",
         "video-creator"
-      ]
+      ],
+      "signals": {
+        "emit": [],
+        "listen": [
+          "audit.complete"
+        ]
+      }
     },
     "logic-guardian": {
       "layer": "L2",
       "model": "sonnet",
       "group": "quality",
       "description": "Protects complex business logic from accidental deletion or overwrite. Maintains a logic manifest, enforces pre-edit gates, and validates post-edit diffs.",
-      "connections": []
+      "connections": [],
+      "signals": {
+        "emit": [],
+        "listen": [
+          "invariants.loaded"
+        ]
+      }
     },
     "marketing": {
       "layer": "L2",
@@ -336,7 +418,13 @@
         "video-creator",
         "slides",
         "browser-pilot"
-      ]
+      ],
+      "signals": {
+        "emit": [
+          "media.request"
+        ],
+        "listen": []
+      }
     },
     "mcp-builder": {
       "layer": "L2",
@@ -364,7 +452,8 @@
       ],
       "signals": {
         "emit": [
-          "project.onboarded"
+          "project.onboarded",
+          "invariants.seeded"
         ],
         "listen": []
       }
@@ -383,14 +472,20 @@
       "description": "Create structured implementation plans from requirements. Produces master plan + phase files for enterprise-scale project management. Master plan = overview (<80 lines). Phase files = execution detail",
       "connections": [
         "ba",
-        "scout"
+        "scout",
+        "plan",
+        "adversary",
+        "autopilot",
+        "cook"
       ],
       "signals": {
         "emit": [
           "plan.ready"
         ],
         "listen": [
-          "codebase.scanned"
+          "codebase.scanned",
+          "project.onboarded",
+          "security.blocked"
         ]
       }
     },
@@ -419,7 +514,7 @@
       "layer": "L3",
       "model": "sonnet",
       "group": "reasoning",
-      "description": "Structured reasoning frameworks for complex problems. 14 analytical frameworks, 12 cognitive bias detectors, 10 decomposition methods, 8 mental models, and 6 communication patterns. McKinsey-grade pro",
+      "description": "Structured reasoning frameworks for complex problems. 19 analytical frameworks, 12 cognitive bias detectors, 10 decomposition methods, 10 mental models, Cynefin domain classification, ethical dimensio",
       "connections": []
     },
     "rescue": {
@@ -469,7 +564,9 @@
         "test",
         "sentinel",
         "scout",
-        "adversary"
+        "adversary",
+        "design",
+        "review"
       ],
       "signals": {
         "emit": [
@@ -477,7 +574,8 @@
           "review.issues"
         ],
         "listen": [
-          "code.changed"
+          "code.changed",
+          "docs.updated"
         ]
       }
     },
@@ -485,7 +583,7 @@
       "layer": "L2",
       "model": "sonnet",
       "group": "rescue",
-      "description": "Build safety nets before refactoring. Creates characterization tests, boundary markers, config freezes, and rollback points.",
+      "description": "Build safety nets before refactoring. Use when running surgeon or any risky refactor that needs a rollback point. Creates characterization tests, boundary markers, config freezes, and rollback points.",
       "connections": [
         "scout",
         "verification",
@@ -522,7 +620,7 @@
       "layer": "L3",
       "model": "haiku",
       "group": "monitoring",
-      "description": "Detects scope creep. Auto-triggered by L1 orchestrators when files exceed the original plan. Compares current git changes against plan, flags out-of-scope files, reports IN_SCOPE or CREEP_DETECTED.",
+      "description": "Detects scope creep by quantifying drift percentage. Auto-triggered by L1 orchestrators when files exceed the original plan. Compares git changes against plan, classifies drift into 4 tiers: ON_TRACK,",
       "connections": []
     },
     "scout": {
@@ -579,9 +677,12 @@
         "integrity-check"
       ],
       "signals": {
-        "emit": [],
+        "emit": [
+          "invariants.loaded"
+        ],
         "listen": [
-          "phase.complete"
+          "phase.complete",
+          "checkpoint.request"
         ]
       }
     },
@@ -606,6 +707,7 @@
         "rescue",
         "audit",
         "scaffold",
+        "autopilot",
         "plan",
         "brainstorm",
         "review",
@@ -653,7 +755,7 @@
       "layer": "L2",
       "model": "sonnet",
       "group": "rescue",
-      "description": "Incremental refactorer. Refactors ONE module per session using proven patterns — Strangler Fig, Branch by Abstraction, Expand-Migrate-Contract.",
+      "description": "Incremental refactorer. Use within a rescue workflow after safeguard has set up safety nets. Refactors ONE module per session using proven patterns — Strangler Fig, Branch by Abstraction, Expand-Migra",
       "connections": [
         "scout",
         "safeguard",
@@ -690,7 +792,9 @@
       "description": "TDD test writer. Writes failing tests FIRST (red), then verifies they pass after implementation (green). Covers unit, integration, and e2e tests.",
       "connections": [
         "fix",
-        "debug"
+        "debug",
+        "test",
+        "preflight"
       ],
       "signals": {
         "emit": [
@@ -698,7 +802,8 @@
           "tests.failed"
         ],
         "listen": [
-          "code.changed"
+          "code.changed",
+          "db.migrated"
         ]
       }
     },
@@ -716,7 +821,9 @@
       "description": "Universal verification runner. Runs lint, type-check, tests, and build. Use after any code change to verify nothing is broken.",
       "connections": [],
       "signals": {
-        "emit": [],
+        "emit": [
+          "verification.complete"
+        ],
         "listen": [
           "code.changed"
         ]
@@ -789,22 +896,29 @@
     ],
     "context-pack": [],
     "cook": [
+      "incident",
+      "fix",
+      "verification",
+      "sentinel",
+      "deploy",
+      "watchdog",
+      "journal",
+      "neural-memory",
+      "graft",
       "sentinel-env",
       "scout",
       "ba",
       "plan",
       "brainstorm",
+      "design",
       "adversary",
       "test",
-      "fix",
       "debug",
       "preflight",
-      "sentinel",
       "review",
       "completion-gate",
       "session-bridge",
       "context-pack",
-      "verification",
       "hallucination-guard",
       "git"
     ],
@@ -816,10 +930,12 @@
       "browser-pilot",
       "scout",
       "brainstorm",
-      "plan"
+      "plan",
+      "debug"
     ],
     "dependency-doctor": [
-      "docs-seeker"
+      "docs-seeker",
+      "verification"
     ],
     "deploy": [
       "verification",
@@ -827,7 +943,9 @@
       "browser-pilot",
       "watchdog"
     ],
-    "design": [],
+    "design": [
+      "review"
+    ],
     "doc-processor": [],
     "docs-seeker": [],
     "docs": [
@@ -839,9 +957,17 @@
       "scout",
       "hallucination-guard",
       "docs-seeker",
-      "review"
+      "review",
+      "fix",
+      "test"
     ],
     "git": [],
+    "graft": [
+      "scout",
+      "fix",
+      "review",
+      "research"
+    ],
     "hallucination-guard": [
       "research",
       "docs-seeker"
@@ -879,7 +1005,11 @@
     "perf": [],
     "plan": [
       "ba",
-      "scout"
+      "scout",
+      "plan",
+      "adversary",
+      "autopilot",
+      "cook"
     ],
     "preflight": [
       "scout",
@@ -906,7 +1036,9 @@
       "test",
       "sentinel",
       "scout",
-      "adversary"
+      "adversary",
+      "design",
+      "review"
     ],
     "safeguard": [
       "scout",
@@ -947,6 +1079,7 @@
       "rescue",
       "audit",
       "scaffold",
+      "autopilot",
       "plan",
       "brainstorm",
       "review",
@@ -1001,7 +1134,9 @@
     ],
     "test": [
       "fix",
-      "debug"
+      "debug",
+      "test",
+      "preflight"
     ],
     "trend-scout": [],
     "verification": [],
@@ -1010,11 +1145,22 @@
     "worktree": []
   },
   "signals": {
+    "audit.complete": {
+      "emitters": [
+        "audit"
+      ],
+      "listeners": [
+        "deploy",
+        "launch"
+      ]
+    },
     "ideas.ready": {
       "emitters": [
         "brainstorm"
       ],
-      "listeners": []
+      "listeners": [
+        "cook"
+      ]
     },
     "codebase.scanned": {
       "emitters": [
@@ -1022,6 +1168,7 @@
       ],
       "listeners": [
         "brainstorm",
+        "graft",
         "plan"
       ]
     },
@@ -1029,6 +1176,14 @@
       "emitters": [
         "cook",
         "team"
+      ],
+      "listeners": [
+        "session-bridge"
+      ]
+    },
+    "checkpoint.request": {
+      "emitters": [
+        "cook"
       ],
       "listeners": [
         "session-bridge"
@@ -1048,6 +1203,31 @@
       ],
       "listeners": [
         "cook"
+      ]
+    },
+    "preflight.passed": {
+      "emitters": [
+        "preflight"
+      ],
+      "listeners": [
+        "cook"
+      ]
+    },
+    "verification.complete": {
+      "emitters": [
+        "verification"
+      ],
+      "listeners": [
+        "cook"
+      ]
+    },
+    "db.migrated": {
+      "emitters": [
+        "db"
+      ],
+      "listeners": [
+        "deploy",
+        "test"
       ]
     },
     "bug.diagnosed": {
@@ -1090,6 +1270,15 @@
         "deploy"
       ]
     },
+    "docs.updated": {
+      "emitters": [
+        "docs"
+      ],
+      "listeners": [
+        "deploy",
+        "review"
+      ]
+    },
     "code.changed": {
       "emitters": [
         "fix"
@@ -1123,24 +1312,51 @@
         "sentinel"
       ],
       "listeners": [
-        "fix"
+        "fix",
+        "plan"
       ]
+    },
+    "graft.complete": {
+      "emitters": [
+        "graft"
+      ],
+      "listeners": [
+        "journal"
+      ]
+    },
+    "incident.detected": {
+      "emitters": [
+        "watchdog"
+      ],
+      "listeners": [
+        "incident"
+      ]
+    },
+    "invariants.loaded": {
+      "emitters": [
+        "session-bridge"
+      ],
+      "listeners": [
+        "logic-guardian"
+      ]
+    },
+    "media.request": {
+      "emitters": [
+        "marketing"
+      ],
+      "listeners": []
     },
     "project.onboarded": {
       "emitters": [
         "onboard"
       ],
-      "listeners": []
+      "listeners": [
+        "plan"
+      ]
     },
-    "preflight.passed": {
+    "invariants.seeded": {
       "emitters": [
-        "preflight"
-      ],
-      "listeners": []
-    },
-    "incident.detected": {
-      "emitters": [
-        "watchdog"
+        "onboard"
       ],
       "listeners": []
     }
@@ -1163,11 +1379,11 @@
       "model": "sonnet",
       "chain": [
         "cook",
-        "sentinel-env",
-        "scout",
-        "ba",
-        "plan",
-        "brainstorm"
+        "incident",
+        "fix",
+        "verification",
+        "sentinel",
+        "deploy"
       ]
     },
     "team": {
@@ -1263,7 +1479,10 @@
       "chain": [
         "plan",
         "ba",
-        "scout"
+        "scout",
+        "plan",
+        "adversary",
+        "cook"
       ]
     },
     "brainstorm": {
@@ -1339,7 +1558,9 @@
       "chain": [
         "test",
         "fix",
-        "debug"
+        "debug",
+        "test",
+        "preflight"
       ]
     },
     "review": {
@@ -1421,7 +1642,8 @@
       "layer": "L2",
       "model": "sonnet",
       "chain": [
-        "design"
+        "design",
+        "review"
       ]
     },
     "perf": {

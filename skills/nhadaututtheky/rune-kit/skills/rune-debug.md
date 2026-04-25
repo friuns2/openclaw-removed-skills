@@ -409,6 +409,28 @@ Debug returns one of four statuses to its caller (cook, fix, test, surgeon). The
 | Fix recommendation | Inline (Debug Report) | Direction only — no code changes |
 | Debug knowledge base entry | Markdown | `.rune/debug/knowledge-base.md` (appended on success) |
 
+## Chain Metadata
+
+Append to Debug Report when invoked standalone. Suppress when called as sub-skill inside an L1 orchestrator (cook, team, etc.) — the orchestrator emits a consolidated block. See `docs/references/chain-metadata.md`.
+
+```yaml
+chain_metadata:
+  skill: "rune-debug.md"
+  version: "1.1.0"
+  status: "[DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED]"
+  domain: "[area debugged]"
+  files_changed: []  # debug never changes files
+  exports:
+    root_cause: { file: "[path]", line: [N], explanation: "[cause]" }
+    severity: "[critical | high | medium | low]"
+    confidence: "[high | medium | low]"
+    fix_recommendation: "[direction for fix skill]"
+  suggested_next:
+    - skill: "rune-fix.md"
+      reason: "[grounded in root cause — e.g., 'Critical race condition found in auth.ts:42']"
+      consumes: ["root_cause", "fix_recommendation"]
+```
+
 ## Sharp Edges
 
 | Failure Mode | Severity | Mitigation |
@@ -447,7 +469,7 @@ Debug returns one of four statuses to its caller (cook, fix, test, surgeon). The
 **Scope guardrail**: Do not apply code changes or expand investigation beyond the locked scope directory unless explicitly delegated by the parent agent.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

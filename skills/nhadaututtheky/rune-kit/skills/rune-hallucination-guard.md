@@ -43,6 +43,7 @@ Post-generation validation that verifies AI-generated code references actually e
 - `db` (L2): verify SQL syntax and ORM method calls are real
 - `review-intake` (L2): verify imports in code submitted for review
 - `skill-forge` (L2): verify imports in newly generated skill code
+- `adversary` (L2): verify APIs/packages in plan actually exist
 
 ## Execution
 
@@ -224,7 +225,7 @@ Known failure modes for this skill. Check these before declaring done.
 ~500-1500 tokens input, ~200-500 tokens output. Haiku for speed — this runs frequently as a sub-check.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

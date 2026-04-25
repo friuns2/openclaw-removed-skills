@@ -100,12 +100,14 @@ Before decomposing, classify the task into a complexity tier. Each tier defines 
 - `integrity-check` (L3): verify cook report integrity before merge
 - `completion-gate` (L3): validate workstream completion claims against evidence
 - `constraint-check` (L3): audit HARD-GATE compliance across parallel streams
+- `scope-guard` (L3): pre-merge scope verification — validate each stream's actual file changes against declared ownership
 - `worktree` (L3): create isolated worktrees for parallel cook instances
 - `context-pack` (L3): create structured handoff briefings before spawning subagents
 - L4 extension packs: domain-specific patterns when context matches (e.g., @rune/mobile when porting web to mobile)
 
 ## Called By (inbound)
 
+- `scaffold` (L1): decompose scaffolding into parallel workstreams
 - User: `/rune team <task>` direct invocation only
 
 ---
@@ -479,6 +481,47 @@ All streams done     → MERGE sequentially (avoid conflicts)
 | Integration test results | Inline stdout | Captured in Phase 5 verify |
 | Team Report | Markdown (inline) | Emitted at end of session |
 
+## Document Ownership
+
+| Scope | Access | Files |
+|-------|--------|-------|
+| **Owns** (read + write) | `.rune/team-report-*.md`, worktree branches, merge commits |
+| **Reads** (never writes) | `.rune/plan-*.md`, `.rune/contract.md`, `CLAUDE.md`, cook reports from sub-agents |
+| **Never modifies** | Source files directly (delegates to cook instances), `SKILL.md` files, `compiler/**` |
+
+Each cook instance owns its declared file set (disjoint). Team owns coordination artifacts only — never touches source code directly.
+
+## Monorepo Awareness
+
+When the project is a monorepo (signals: `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, or `packages/` directory with multiple `package.json`):
+
+**Stream assignment rules for monorepos:**
+- Assign streams by **package boundary**, not by file type — one stream per package (e.g., Stream A = `packages/api`, Stream B = `packages/web`)
+- Cross-package changes (e.g., shared types in `packages/core` consumed by both api + web) must be in a **dependency stream** that completes before consumer streams start
+- Use `turbo run test --filter=...[HEAD^1]` in Phase 5 (VERIFY) to test only affected packages — do NOT run the full test suite when only 1 package changed
+
+**Dependency stream pattern for cross-package changes:**
+
+```
+Stream A (depends_on: []): packages/core — shared types + utilities
+Stream B (depends_on: ["A"]): packages/api — consumes updated core types
+Stream C (depends_on: ["A"]): packages/web — consumes updated core types
+B and C run in parallel after A completes.
+```
+
+## Anti-Patterns
+
+Common multi-agent orchestration failures. These cause the most expensive rework in team workflows.
+
+| Anti-Pattern | Why It Fails | Correct Approach |
+|---|---|---|
+| **Overlapping file ownership** — two agents write to the same file | Merge conflicts, lost work, non-deterministic output | Enforce disjoint `touches[]` per stream. Move shared files to a single owner |
+| **Blind merge** — merging cook reports without reviewing them | Poisoned output propagates. One bad stream corrupts the whole feature | `integrity-check` + `completion-gate` on every cook report before merge |
+| **Over-parallelization** — launching 5+ agents for a 3-file task | Context fragmentation, coordination overhead > implementation time | Auto-detect: ≤5 files → lite mode (max 2 agents). Full mode caps at 3 |
+| **Cross-domain implementation** — one agent implements both frontend and backend | Domain expertise diluted. Agent makes shallow choices in unfamiliar territory | Split by domain. Frontend agent ≠ backend agent. Each gets domain context |
+| **Missing handoff context** — bare prompt to cook instance without scope/conventions | Agent guesses project conventions, uses wrong patterns, produces inconsistent code | NEXUS Handoff Template: always include metadata, deliverables, conventions, quality expectations |
+| **Sequential when parallel is safe** — running independent streams one by one | Wastes time. 3 independent streams × 5min = 15min sequential vs 5min parallel | Check dependency graph. Independent streams → parallel. Dependent → sequential |
+
 ## Sharp Edges
 
 Known failure modes for this skill. Check these before declaring done.
@@ -516,7 +559,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail**: Do not invoke launch, rescue, or scaffold autonomously unless explicitly delegated by the parent agent.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

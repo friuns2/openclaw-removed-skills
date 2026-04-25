@@ -40,6 +40,7 @@ If status is BLOCK, output the report and STOP. Do not hand off to commit. The c
 - `verification` (L3): run security tools (npm audit, pip audit, cargo audit)
 - `integrity-check` (L3): agentic security validation of .rune/ state files
 - `sast` (L3): deep static analysis with Semgrep, Bandit, ESLint security rules
+- `neural-memory` (ext): after any BLOCK finding — capture vulnerability pattern + root cause so the same vector isn't introduced again in future sessions
 
 ## Called By (inbound)
 
@@ -50,6 +51,8 @@ If status is BLOCK, output the report and STOP. Do not hand off to commit. The c
 - `audit` (L2): Phase 2 full security audit
 - `incident` (L2): security dimension check during incident response
 - `review-intake` (L2): security scan on code submitted for structured review
+- `adversary` (L2): deep security analysis when attack vectors identified in plan
+- `scaffold` (L1): security baseline for new projects
 
 ## Severity Levels
 
@@ -201,6 +204,34 @@ If `.rune/contract.md` exists, validate staged changes against project contract 
 4. Contract violations are NOT subject to Six-Gate downgrading — they are project-level invariants, not security heuristics
 
 If `.rune/contract.md` does not exist, skip and log INFO: "no project contract, contract validation skipped".
+
+### Step 4.87 — Config Leak Threshold Detection
+
+Detect when agent output or code changes accidentally expose internal configuration files, skill definitions, or sensitive project structure to end users.
+
+**Why**: Agents processing SKILL.md, CLAUDE.md, `.rune/` files may copy-paste internal content into user-facing output (chat responses, generated docs, UI strings). This leaks architecture details, security rules, and proprietary skill content.
+
+**Detection patterns** (scan agent output + staged files):
+
+| Pattern | What to Detect | Severity |
+|---------|---------------|----------|
+| **Internal file exposure** | 3+ distinct internal file names mentioned in plain text (not code blocks): `CLAUDE.md`, `SKILL.md`, `PACK.md`, `.rune/contract.md`, `.rune/runbook.md` | WARN |
+| **Skill content leak** | Verbatim SKILL.md content (>50 chars) appearing in user-facing strings, README, or generated docs | BLOCK |
+| **Config path exposure** | Absolute paths containing user home directory (`/Users/`, `C:\Users\`) in committed code or output | WARN |
+| **Environment variable dump** | `process.env` or `os.environ` iterated/serialized without filtering (exposes all env vars) | BLOCK |
+| **Debug config in production** | `DEBUG=true`, `LOG_LEVEL=debug`, `NODE_ENV=development` in committed config files | WARN |
+| **Connection string patterns** | Strings matching `://user:pass@host` or `mongodb+srv://` or `postgres://` in non-.env files | BLOCK |
+
+**Threshold rules:**
+- Single mention of an internal file name → PASS (could be legitimate reference)
+- 3+ distinct internal file names in one output → WARN: "Agent may be leaking internal config"
+- Any SKILL.md verbatim content in user-facing code → BLOCK: "Skill content leaked to output"
+
+**Exclusions** (prevent false positives):
+- Code blocks in architecture docs (legitimate documentation)
+- References inside other SKILL.md files (internal cross-references)
+- Test fixtures explicitly testing config handling
+- `.env.example` files (intentionally public)
 
 ### Step 4.86 — Organization Policy Enforcement (Business)
 
@@ -357,7 +388,7 @@ BLOCKED — 2 critical findings must be resolved before commit.
 ~1000-3000 tokens input, ~500-1000 tokens output. Sonnet default, opus for deep audit on critical findings.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

@@ -238,6 +238,27 @@ Use Grep to find every animation/transition declaration. Verify each is wrapped 
 **Step 4 — Page transition patterns**
 Apply View Transitions API for same-document navigations (SvelteKit, Astro, vanilla JS). For React/Next.js, use Framer Motion `AnimatePresence` + `layoutId` for shared layout animations. Emit transition wrapper component with both strategies.
 
+**Step 5 — Mood-to-Animation Timing**
+
+If `.rune/design-system.md` contains a `## Mood` section, read the selected mood and apply the matching motion profile. This ensures animation feel aligns with the product's emotional intent — not just technical correctness.
+
+| Mood | Duration | Easing | Hover | Enter/Exit | Scroll | Signature |
+|------|----------|--------|-------|------------|--------|-----------|
+| **Impressed** | 0.8-1.2s | `ease-out` | Scale 1.03 + deep shadow | Fade-up 24px | Parallax layers | Staggered reveals with 100ms delay between items |
+| **Excited** | 0.4-0.6s | `spring(1, 80, 10)` | Scale 1.06 + color shift | Slide-in from edge | Snap scroll | Overshoot on entry (1.56 bounce), pulse on data change |
+| **Calm** | 0.6-0.8s | `ease-out-quad` | Subtle opacity 0.8→1 | Slow fade 300ms | Gentle float | Breathing rhythm on idle elements (opacity 0.7↔1, 4s loop) |
+| **Confident** | 0.3-0.5s | `ease` | Precise underline/border | Clean slide 16px | None or minimal | Sharp, decisive — no overshoot, no bounce |
+| **Playful** | 0.4-0.6s | `spring(1, 100, 12)` | Wobble or tilt (rotate ±2°) | Bounce-in from bottom | Elastic snap | Squish on click (scaleX 1.05, scaleY 0.95), emoji-like feedback |
+| **Techy** | 0.15-0.3s | `ease-out` | Glow border or underline | Instant or 100ms fade | Sticky headers | Typewriter text, cursor blink, terminal-feel transitions |
+| **Professional** | 0.2-0.3s | `ease` | Background tint only | Simple fade | Fixed header | Minimal — motion serves function, never decoration |
+| **Inspired** | 0.5-0.8s | `cubic-bezier(0.4, 0, 0.2, 1)` | Reveal hidden detail | Scroll-driven enter | Parallax + reveal | Cinematic — content appears as user discovers, like turning pages |
+
+**Usage rules:**
+1. Read mood from `.rune/design-system.md` → select matching row → apply as default motion tokens
+2. If no mood defined, fall back to **Professional** (safest, least opinionated)
+3. ALL timing values must be wrapped in `prefers-reduced-motion` check — mood doesn't override accessibility
+4. Mood overrides generic Step 2 micro-interactions where they conflict
+
 #### Example
 
 ```tsx
@@ -338,6 +359,31 @@ Write the refactored component skeleton following the compound component pattern
 
 **Step 4 — Composition vs inheritance + slot patterns**
 After structural refactor, audit for slot opportunities (Svelte `<slot>`, Vue `v-slot`, React `children` with typed slots). Enforce: prefer composition (pass components as props) over inheritance (extend base class). Flag any `extends React.Component` or class-based patterns for migration.
+
+**Step 5 — Bento Card Archetypes**
+
+When designing card-based layouts, apply named archetypes instead of uniform grids. Each archetype has a specific interaction model and animation signature. Mix archetypes within a page to create visual hierarchy.
+
+| Archetype | Content Type | Layout | Interaction | Animation |
+|-----------|-------------|--------|-------------|-----------|
+| **Intelligent List** | Ranked/sortable items (leaderboard, top assets, recent activity) | Vertical stack, auto-reorders | Drag to reorder, click to expand | `layoutId` shared animation on reorder — items slide to new position (Framer Motion `layout` prop) |
+| **Command Input** | Search, AI prompt, quick actions | Single input + dropdown results | Type to filter, keyboard nav, Enter to execute | Typewriter placeholder text + shimmer gradient on focus + results fade-in with 50ms stagger |
+| **Live Status** | Real-time metrics (uptime, price, active users) | Compact card, number-dominant | Hover for sparkline/history | Breathing pulse on idle (opacity 0.85↔1, 3s), overshoot scale on value change (spring) |
+| **Wide Data Stream** | Horizontal feed (news, transactions, timeline) | Full-width horizontal scroll or infinite carousel | Swipe/drag, auto-advance optional | Infinite scroll with momentum, snap to item, fade edges to signal overflow |
+| **Contextual Panel** | Detail view, settings, metadata | Expandable from parent card or sidebar | Click parent → panel slides in | Stagger children (50ms each), float-in from right (translateX 24px → 0) |
+
+**Anti-patterns for card layouts:**
+- ❌ **Uniform grid** — all cards same size, same padding, same content structure = AI signature
+- ❌ **Card soup** — cards with no clear grouping or hierarchy
+- ❌ **Static bento** — bento layout without interaction model = decorative, not functional
+
+**Composition rules:**
+1. A page should use 2-4 archetypes max — more = visual noise
+2. **Live Status** cards cluster together (dashboard KPI row)
+3. **Intelligent List** is the primary content area — usually takes 60%+ of viewport
+4. **Command Input** is a singleton — ONE per page, always accessible (often pinned top or Cmd+K)
+5. **Wide Data Stream** breaks vertical rhythm — use as section separator between dense blocks
+6. **Contextual Panel** is secondary — triggered by interaction, never shown by default on load
 
 #### Example
 
@@ -635,7 +681,7 @@ export function SplitHero() {
           <em className="not-italic text-[var(--primary)]">before the sprint</em>
         </h1>
         <p className="text-[var(--text-secondary)] text-body leading-relaxed mb-8 max-w-md">
-          Rune wires your AI coding assistant to a mesh of 55 skills so you spend time building, not prompting.
+          Rune wires your AI coding assistant to a mesh of 62 skills so you spend time building, not prompting.
         </p>
         <div className="flex flex-wrap gap-3">
           <a
@@ -1227,7 +1273,7 @@ Top Issues (by estimated impact):
 | Preconnect removal breaks actual resource loading | Always verify zero requests went to the origin before recommending removal |
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

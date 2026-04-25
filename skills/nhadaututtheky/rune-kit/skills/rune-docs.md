@@ -197,7 +197,7 @@ After updating any doc, verify consistency across all project documentation:
 Cross-Doc Consistency:
 - [x] README.md ↔ CLAUDE.md: versions match, commands match
 - [x] README.md ↔ docs/index.html: stats match, features match
-- [ ] README.md says "61 skills" but CLAUDE.md says "59" → FIX CLAUDE.md
+- [ ] README.md says "62 skills" but CLAUDE.md says "59" → FIX CLAUDE.md
 ```
 
 **Fix inconsistencies immediately** — don't just report them. Update the stale doc to match the source of truth (usually the code or the most recently updated doc).
@@ -378,7 +378,7 @@ Docs Update Report:
 ~2000-5000 tokens input, ~1000-3000 tokens output. Sonnet — documentation requires understanding code patterns but not deep architectural reasoning.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

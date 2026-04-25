@@ -39,6 +39,9 @@ Design system reasoning layer. Converts a product description into a concrete de
 ## Called By (inbound)
 
 - `cook` (L1): before any frontend code generation
+- `scaffold` (L1): design system for new project
+- `brainstorm` (L2): when selected approach has UI/UX implications
+- `ba` (L2): when requirements include UI/UX components
 - `review` (L2): when AI anti-pattern detected in diff
 - `perf` (L2): when Lighthouse Accessibility score blocks
 - User: `/rune design` direct invocation
@@ -103,6 +106,109 @@ From the user's task description + codebase context, classify product type:
 | **AI-Native** | AI assistant interface, chatbot, model explorer |
 
 If domain is unclear: ask one clarifying question — "Is this closer to X or Y?"
+
+### Step 2.5 — Mood-to-Constraint Mapping
+
+After classifying domain, ask ONE question: **"What should users feel when they use this?"**
+
+Accept a single mood keyword (or infer from context if obvious). Map mood to concrete design constraints:
+
+| Mood | Color Temp | Typography Weight | Whitespace | Animation | Shadow |
+|------|-----------|-------------------|------------|-----------|--------|
+| **Impressed** | Cool (blue-slate) | Heavy display (700-800) | Generous (xl-3xl) | Dramatic reveals (0.8-1.2s ease-out) | Deep, layered |
+| **Excited** | Warm (amber-orange) | Bold contrasts (400 vs 800) | Tight-medium (sm-lg) | Energetic springs (0.4-0.6s spring) | Elevation lifts |
+| **Calm** | Neutral-warm (stone-sage) | Light-medium (300-500) | Very generous (2xl-3xl) | Slow fades (0.6-0.8s ease-out-quad) | Soft, minimal |
+| **Confident** | Cool-neutral (zinc-slate) | Medium-heavy (500-700) | Structured (md-xl) | Precise slides (0.3-0.5s ease) | Crisp, defined |
+| **Playful** | Saturated (multi-hue) | Round + bold (600-700) | Medium, irregular (md-lg) | Bouncy springs (0.4-0.6s spring, overshoot) | Hard/comic (3-5px offset) |
+| **Techy** | Cold (gray-cyan) | Mono-heavy, crisp (400-600) | Dense, grid-aligned (sm-md) | Sharp snaps (0.15-0.3s ease-out) | Minimal or glow |
+| **Professional** | Muted neutrals | System fonts, readable (400-500) | Balanced (md-lg) | Subtle (0.2-0.3s ease) | Standard elevation |
+| **Inspired** | Rich-warm (gold-terracotta) | Editorial display (300-700 range) | Asymmetric, generous | Scroll-driven reveals (0.5-0.8s) | Dramatic, directional |
+
+**Mapping rules:**
+1. Mood constraints OVERRIDE generic domain defaults where they conflict (mood is user intent, domain is convention)
+2. If mood contradicts domain safety (e.g., "Playful" + Healthcare), WARN user: "Playful tone may reduce trust in medical context — proceed?"
+3. Write selected mood + resolved constraints to `.rune/design-system.md` under `## Mood` section
+4. Downstream skills (`animation-patterns`, `palette-picker`, `type-system`) read mood constraints from design-system.md
+
+**Skip if**: User says "no preference" or "just follow domain defaults" — proceed to Step 3 with domain-only reasoning.
+
+### Step 2.7 — Tweaks, Not Menus (Default Style Pattern)
+
+Picking from a 10-option style menu is how AI UI gets generic. Instead:
+
+1. **Propose ONE opinionated default** based on domain + mood (from Step 2.5). Describe it in 2-3 lines — style, palette direction, typography pairing.
+2. **Ask for tweaks, not choices.** The question is **"Any tweaks to this, or ship it?"** — not "Which of these do you prefer?"
+3. **Accept natural-language adjustments.** Map phrases → design system edits:
+   - "more professional" → heavier type weights, reduce saturation, tighter spacing
+   - "less corporate" → looser weights, brighter accent, more whitespace
+   - "darker" → swap base for darker neutral, raise contrast on elevated surfaces
+   - "more playful" → add subtle animation, soften corners, bolder accent
+   - "more trust" → cooler palette (slate/blue), heavier headers, smaller radius
+4. **If the user asks for a menu**, provide max 3 options — but mark one as the recommended default. Never present a neutral list of 5+ equivalent styles.
+
+Why: Every menu option dilutes commitment. A single confident default gets committed, tweaked, and shipped. A menu gets deliberated, A/B'd, and abandoned. This is the **Tweaks Default** pattern from Anthropic's design system guidance — the AI commits first, humans steer second.
+
+### Step 2.9 — Universal Anti-AI Rules (apply to ALL domains)
+
+These rules apply regardless of domain, mood, or platform. Every generated design system MUST comply.
+
+**Enforcement**: `rune-review.md` v1.1.0+ reads `.rune/design-system.md` § Scale Minimums and flags violations of all 3 rules below as MEDIUM/HIGH findings. Design defines, review enforces — this is the contract.
+
+#### Rule 1 — Scale Minimums
+
+Below these thresholds, designs read as "AI boilerplate" no matter how good the palette is.
+
+| Element | Minimum | Ideal |
+|---------|---------|-------|
+| Hero/display text | 48px | 56-72px |
+| H1 (page title) | 32px | 36-40px |
+| Body text | 16px (never 14px for primary content) | 16-18px |
+| Secondary/meta text | 14px | 14-15px |
+| Touch targets (mobile) | 44×44px | 48×48px |
+| Touch target gap (mobile) | 8px | 12px |
+| Focus-visible ring | 2px | 3px |
+
+Write these minimums to `.rune/design-system.md` under `## Scale Minimums`. Downstream skills (`cook`, `fix`) treat violations as review findings.
+
+#### Rule 2 — Placeholder Over Bad SVG
+
+If the design calls for an icon, illustration, or graphic that the agent cannot generate at high quality, **ship a boxed placeholder, not a malformed SVG**.
+
+```html
+<!-- GOOD: placeholder -->
+<div class="placeholder" data-icon="dashboard" aria-label="Dashboard icon — design pass needed">
+  [ ICON: dashboard ]
+</div>
+
+<!-- BAD: AI-generated SVG with broken geometry -->
+<svg viewBox="0 0 24 24">
+  <path d="M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5"/>
+</svg>
+```
+
+- Use **Phosphor Icons** (`@phosphor-icons/react`) or **Huge Icons** as the library default. Never generate custom SVG for standard iconography.
+- For illustrations, reference a placeholder string (e.g., `[ILLUSTRATION: empty-state-dashboard]`) that a human or asset-creator pass fills in later.
+- Malformed SVG is the #1 AI tell. A clean labeled placeholder is honest and professional.
+
+#### Rule 3 — Color Derivation via oklch(), not Manual Shading
+
+When the design needs a darker hover, lighter surface, or tinted state, **derive from the accent via oklch()** — never eyeball a hex value.
+
+```css
+/* GOOD: relative derivation */
+--accent: oklch(65% 0.2 255);
+--accent-hover:  oklch(from var(--accent) calc(l - 0.08) c h);
+--accent-pressed: oklch(from var(--accent) calc(l - 0.15) c h);
+--accent-subtle:  oklch(from var(--accent) calc(l + 0.3) calc(c * 0.4) h);
+
+/* BAD: manual hex shading — breaks hue/chroma consistency */
+--accent: #3b82f6;
+--accent-hover: #2563eb;  /* guessed darker */
+```
+
+Why: HSL shading distorts perceived brightness at different hues. oklch() keeps perceptual lightness consistent, so derived states look intentional rather than "kinda close." Write derived tokens to `.rune/design-system.md` — downstream skills reuse these, not re-derive.
+
+Bonus: use `text-wrap: pretty` on headings to prevent widow words. One line, zero ceremony.
 
 ### Step 3 — Apply Domain Reasoning Rules
 
@@ -340,6 +446,44 @@ sm: 6px | md: 8px | lg: 12px | xl: 16px | full: 9999px
 - [ ] Responsive tested at 375px / 768px / 1024px / 1440px
 ```
 
+### Step 5.5 — UI Design Contract (UI-SPEC.md)
+
+After generating the design system, lock key visual decisions in `.rune/ui-spec.md` — a binding contract that prevents design drift during implementation.
+
+**Why**: design-system.md defines tokens (what's available). UI-SPEC locks decisions (what was chosen and WHY). Without a spec, each component re-decides layout, density, and hierarchy — causing visual inconsistency.
+
+**Generate `.rune/ui-spec.md`:**
+
+```markdown
+# UI Specification: [Project Name]
+Locked: [YYYY-MM-DD] | Mood: [selected mood]
+
+## Layout Decisions
+- Page max-width: [value]px
+- Sidebar: [yes/no] — [width]px [fixed/collapsible]
+- Content density: [compact/balanced/spacious]
+- Card sizing: [uniform/varied] — if varied, specify hierarchy rules
+
+## Visual Hierarchy Rules
+- Primary action: [color] [size] [weight] — ONE per viewport
+- Secondary action: [ghost/outline] style — max 2 per section
+- Data emphasis: [monospace + bold] for numbers, [color accent] for status
+- Section separation: [border/spacing/background] — pick ONE, be consistent
+
+## Component Decisions
+- Card style: [elevated/bordered/glass] — reasoning: [why]
+- Table style: [striped/bordered/minimal] — reasoning: [why]
+- Form layout: [stacked/inline/grid] — reasoning: [why]
+- Navigation: [sidebar/topbar/tabs] — reasoning: [why]
+
+## Locked Anti-Decisions (things we explicitly chose NOT to do)
+- ❌ [rejected option] — because [reason]
+```
+
+<HARD-GATE>
+UI-SPEC.md is a contract. Once written, changes require explicit user approval ("I want to change the card style"). Skills that generate UI (`cook`, `fix`, `scaffold`) MUST read UI-SPEC.md before producing components. Drift from spec = review finding.
+</HARD-GATE>
+
 ### Step 6 — Accessibility Review
 
 Run a focused accessibility audit on the design system and any existing UI code. This step ensures the design contract doesn't produce inaccessible outputs.
@@ -355,6 +499,39 @@ Run a focused accessibility audit on the design system and any existing UI code.
 **Output**: Accessibility audit section in Design Report with pass/fail per check and specific file:line violations.
 
 If violations found → add them to `.rune/design-system.md` Anti-Patterns section as concrete rules.
+
+### Step 6.5 — 6-Pillar Visual Audit
+
+Score the generated design system across 6 pillars. Each pillar scored 1-4 (1=Poor, 2=Fair, 3=Good, 4=Excellent). Minimum passing score: **18/24** (average 3.0).
+
+| Pillar | Score 1 (Poor) | Score 2 (Fair) | Score 3 (Good) | Score 4 (Excellent) |
+|--------|---------------|----------------|----------------|---------------------|
+| **Copy** | Placeholder text, generic CTAs ("Submit"), no voice | Real copy but inconsistent tone | Consistent voice, domain-appropriate, clear CTAs | Personality-rich, scannable, microcopy for every state |
+| **Visuals** | Stock photos, generic icons, no visual identity | Consistent icon set, basic imagery | Custom illustrations or curated photography, clear hierarchy | Distinctive visual language, icons tell stories, zero stock |
+| **Color** | Default framework palette, no semantic meaning | Brand colors defined but inconsistent usage | Full semantic palette, dark mode, accessible contrast | Mood-aligned, colorblind-safe, context-adaptive (profit/loss/status) |
+| **Typography** | Single font, no scale | Font pairing exists but inconsistent sizing | Clear hierarchy (display/heading/body/mono), numbers monospace | Mood-aligned pairing, fluid scaling, platform-native where needed |
+| **Spacing** | Inconsistent gaps, cramped or too loose | Base unit defined but not consistently applied | 8px grid, consistent section/component/element spacing | Density variants (compact/default/spacious), rhythm feels intentional |
+| **UX** | Missing states (empty/error/loading), no feedback | Basic states exist, some interactive feedback | All states covered, toast/loading/skeleton, focus management | Delightful micro-interactions, smart defaults, zero dead-ends |
+
+**Audit output:**
+
+```
+### Visual Audit Score: [total]/24
+
+| Pillar | Score | Notes |
+|--------|-------|-------|
+| Copy | 3 | Consistent voice, missing loading microcopy |
+| Visuals | 2 | Using Phosphor icons (good), no custom illustration |
+| Color | 4 | Full semantic palette, colorblind alternates defined |
+| Typography | 3 | JetBrains Mono for numbers, Inter for prose — solid |
+| Spacing | 3 | 8px grid applied, density variants not needed yet |
+| UX | 3 | All states covered, micro-interactions in progress |
+| **Total** | **18/24** | PASS — ship-ready with Copy improvements recommended |
+```
+
+**If score < 18**: Flag specific weak pillars in Design Report. Add improvement tasks to `.rune/design-system.md` under `## Improvement Backlog`.
+
+**Registry safety check**: If an existing component library is in use (shadcn, MUI, etc.), verify the design system doesn't conflict with the library's token structure. Flag collisions.
 
 ### Step 7 — UX Writing Patterns
 
@@ -440,6 +617,10 @@ Trading/Fintech — Data-Dense Dark — Web
 4. MUST write `.rune/design-system.md` — ephemeral design decisions evaporate; persistence is the point
 5. MUST NOT overwrite existing design-system.md without user confirmation
 6. MUST include platform-specific overrides when platform is iOS or Android
+7. MUST propose ONE opinionated default and ask for tweaks — never present a neutral 5+ option menu (Step 2.7 Tweaks Default)
+8. MUST enforce Scale Minimums (hero ≥48px, body ≥16px, touch targets ≥44px) in every design system (Step 2.9 Rule 1)
+9. MUST use Phosphor/Huge icons or boxed placeholders — NEVER generate custom SVG for standard iconography (Step 2.9 Rule 2)
+10. MUST derive accent variants via `oklch(from var(--accent) ...)` — NEVER hand-shade hex values (Step 2.9 Rule 3)
 
 ## Mesh Gates (L1/L2 only)
 
@@ -449,14 +630,20 @@ Trading/Fintech — Data-Dense Dark — Web
 | Anti-Pattern Gate | Anti-pattern list derived from domain rules (not generic) | Domain-specific list required |
 | Persistence Gate | .rune/design-system.md written before reporting done | Write file first |
 | Platform Gate | Platform detected before generating tokens | Default to web, note assumption |
+| Tweaks-Default Gate | One opinionated default proposed before asking for tweaks | Do NOT present neutral 5-option menus |
+| Scale-Minimums Gate | Hero ≥48px, body ≥16px, touch ≥44px written into design-system.md | Emit minimums block in output |
+| SVG-Placeholder Gate | No hand-rolled SVG for standard icons — Phosphor/Huge or placeholder | Swap to icon library or `[ ICON: name ]` box |
+| oklch-Derivation Gate | All accent variants derived via `oklch(from ...)` | Rewrite manual hex shades as relative oklch |
 
 ## Returns
 
 | Artifact | Format | Location |
 |----------|--------|----------|
 | Design system file | Markdown | `.rune/design-system.md` |
+| UI specification contract | Markdown | `.rune/ui-spec.md` |
 | Design report | Markdown | inline (chat output) |
 | Accessibility audit findings | Markdown list | inline + appended to design-system.md |
+| Visual audit score | Table (6 pillars × 1-4) | inline + appended to design report |
 | UX writing guidelines | Markdown section | `.rune/design-system.md` § UX Writing |
 
 ## Sharp Edges
@@ -469,19 +656,33 @@ Known failure modes for this skill. Check these before declaring done.
 | Purple/indigo accent on non-AI-native product | HIGH | Constraint 3 blocks this — re-generate with domain-appropriate accent |
 | Anti-pattern list copied from generic sources (not domain-specific) | HIGH | Each anti-pattern must cite why it fails in THIS specific domain |
 | design-system.md not written (only reported verbally) | HIGH | Constraint 4 — no file = no persistence = future sessions lose design context |
+| Mood contradicts domain safety conventions | HIGH | Step 2.5 warns user before proceeding (e.g., Playful + Healthcare) |
+| UI-SPEC.md drift — components diverge from locked decisions | HIGH | HARD-GATE: cook/fix must read ui-spec.md before generating UI |
+| Visual audit score < 18 shipped without improvement plan | MEDIUM | Step 6.5 flags weak pillars and creates backlog items |
 | iOS target generating solid-background cards | MEDIUM | Platform Gate: iOS 26 Liquid Glass deprecates this pattern |
 | Android target using hardcoded hex colors | MEDIUM | Platform Gate: MaterialTheme.colorScheme is mandatory for dynamic color |
+| Presenting a neutral 5+ option style menu (deliberation death) | HIGH | Step 2.7 Tweaks Default — propose ONE opinionated default, ask for tweaks |
+| Body text at 14px or hero at <40px (AI boilerplate scale) | HIGH | Step 2.9 Rule 1 — enforce Scale Minimums table in every design system |
+| Hand-rolled SVG for dashboard/menu/close icons (malformed geometry) | HIGH | Step 2.9 Rule 2 — Phosphor/Huge Icons or `[ ICON: name ]` placeholder, never custom |
+| Accent variants shaded by eyeball (inconsistent perceived brightness) | MEDIUM | Step 2.9 Rule 3 — `oklch(from var(--accent) calc(l - 0.1) c h)` |
+| Missing `text-wrap: pretty` on headings (widow words) | LOW | One-line CSS — add to base heading styles |
 
 ## Done When
 
 - Design reference loaded (user override or baseline)
 - Domain classified (one of the 10 categories or explicit custom reasoning)
-- Design system generated with: colors (primitive + semantic), typography, spacing, effects, anti-patterns
+- Mood mapped to constraints (or explicitly skipped with "domain defaults")
+- Opinionated default proposed (Step 2.7) — user confirmed or requested tweaks
+- Universal anti-AI rules applied (Step 2.9): Scale Minimums, Placeholder-over-bad-SVG, oklch() color derivation
+- Design system generated with: colors (primitive + semantic, oklch-derived variants), typography, spacing, effects, anti-patterns
 - Platform-specific overrides applied (if iOS/Android target)
+- UI-SPEC.md written with locked layout, hierarchy, and component decisions
 - Accessibility review completed (6 checks: contrast, focus, touch targets, labels, semantic HTML, motion)
+- 6-Pillar Visual Audit scored ≥ 18/24 (or weak pillars flagged with improvement tasks)
 - UX writing guidelines generated (error, empty state, confirmation, loading, button templates)
-- `.rune/design-system.md` written (includes UX Writing section)
-- Design Report emitted with accent/typography reasoning and anti-pattern count
+- `.rune/design-system.md` written (includes Mood + UX Writing sections)
+- `.rune/ui-spec.md` written (design contract for UI-generating skills)
+- Design Report emitted with mood, accent/typography reasoning, visual audit score, and anti-pattern count
 - Pre-Delivery Checklist included in design-system.md
 
 ## Cost Profile
@@ -489,7 +690,7 @@ Known failure modes for this skill. Check these before declaring done.
 ~2000-5000 tokens input, ~800-1500 tokens output. Sonnet for design reasoning quality.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

@@ -55,6 +55,8 @@ If unsure whether the test is wrong or the implementation is wrong → call `run
 - `review` (L2): bug found during review, needs fixing
 - `surgeon` (L2): apply refactoring changes
 - `review-intake` (L2): apply fixes identified during structured review intake
+- `graft` (L2): apply integration fixes for grafted code
+- `scaffold` (L1): apply fixes during project scaffolding
 
 ## Cross-Hub Connections
 
@@ -277,6 +279,28 @@ Fix returns one of four statuses to its caller (cook, debug, review, surgeon). T
 | Fix Report | Markdown (inline) | Emitted to calling skill (cook, debug, review, surgeon) |
 | Verification output | Inline (Fix Report) | Lint + types + test results |
 
+## Chain Metadata
+
+Append to Fix Report when invoked standalone. Suppress when called as sub-skill inside an L1 orchestrator (cook, team, etc.) — the orchestrator emits a consolidated block. See `docs/references/chain-metadata.md`.
+
+```yaml
+chain_metadata:
+  skill: "rune-fix.md"
+  version: "1.0.0"
+  status: "[DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED]"
+  domain: "[area fixed]"
+  files_changed:
+    - "[list of modified files]"
+  exports:
+    fix_applied: { files: ["[paths]"], description: "[what was fixed]" }
+    verification: { lint: "[PASS/FAIL]", types: "[PASS/FAIL]", tests: "[PASS/FAIL]" }
+    commit_hash: "[hash if committed]"
+  suggested_next:
+    - skill: "rune-test.md"
+      reason: "[grounded in changes — e.g., 'Modified 3 files in auth module, edge cases need coverage']"
+      consumes: ["fix_applied", "verification"]
+```
+
 ## Sharp Edges
 
 Known failure modes for this skill. Check these before declaring done.
@@ -314,7 +338,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail**: Do not refactor unrelated code or create new features beyond the diagnosed fix target unless explicitly delegated by the parent agent.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

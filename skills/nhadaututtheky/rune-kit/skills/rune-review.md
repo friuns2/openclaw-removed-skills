@@ -56,6 +56,8 @@ Every review MUST cite at least one specific concern, suggestion, or explicit ap
 - User: `/rune review` direct invocation
 - `surgeon` (L2): review refactored code quality
 - `rescue` (L1): review refactored code quality
+- `design` (L2): review UI/design implementation quality
+- `graft` (L2): review grafted code integration
 
 ## Cross-Hub Connections
 
@@ -198,6 +200,30 @@ Check: Does the API have sensible defaults? Does misuse fail loudly (not silentl
 
 **Skip if**: Code is internal-only (no external consumers), single-use utility, or test-only.
 
+### Step 4.7: API Contract / Breaking Change Check
+
+For any change that modifies exported functions, REST endpoints, event schemas, or shared types, check for backward-compatibility violations before proceeding.
+
+**Breaking change signals** — flag any of these as HIGH:
+
+| Signal | Example | Why it Breaks |
+|--------|---------|---------------|
+| Removed export | `export function getUser` deleted | Callers crash at import |
+| Renamed parameter | `id: string` → `userId: string` | Named-argument callers break |
+| Narrowed return type | `User \| null` → `User` (null removed) | Callers that handle null crash |
+| Required arg added | `fn(a)` → `fn(a, b: string)` | All existing callers missing `b` |
+| Status code changed | 200 → 204 on success | Clients checking for body break |
+| Event schema changed | `{ userId }` → `{ user_id }` | Consumers miss the field |
+| Endpoint path renamed | `/users/:id` → `/users/:userId` | All client URLs broken |
+
+**Versioning check:**
+1. Run `git diff main...HEAD` — list every changed exported symbol
+2. For each changed export: check if old signature still exists as an alias or overload
+3. If breaking and no version bump → WARN: "Breaking change detected in [symbol] — needs CHANGELOG entry and version bump"
+4. If `CHANGELOG.md` found: check that breaking changes are documented in the current version entry
+
+**Skip if**: Change is internal-only (no exports changed, no public API surface affected), or in test files only.
+
 ### Step 5: Test Coverage
 
 Identify gaps in test coverage.
@@ -207,6 +233,36 @@ Identify gaps in test coverage.
 - Read the test file and verify: are the new functions covered? are edge cases tested?
 - If untested code found: call `rune-test.md` with specific instructions on what to test
 - Flag as HIGH if business logic is untested, MEDIUM if utility code is untested
+
+#### Per-Function Test Gap Analysis
+
+Go beyond "test file exists" — check coverage at function granularity:
+
+1. **Extract changed functions** — from the diff, list every function/method that was added or modified (name + file:line)
+2. **Map to test assertions** — for each changed function, Grep the test file for its name. Count distinct test cases (look for `it(`, `test(`, `describe(` blocks that reference the function)
+3. **Classify gap severity**:
+
+| Function Type | 0 tests | 1 test | 2+ tests |
+|--------------|---------|--------|----------|
+| Business logic (money, auth, state) | BLOCK | WARN: "only happy path" | PASS |
+| Data transform (parse, format, map) | HIGH | PASS | PASS |
+| Event handler (onClick, onSubmit) | MEDIUM | PASS | PASS |
+| Pure utility (string, math, date) | MEDIUM | PASS | PASS |
+
+4. **Output per-function table** in review report:
+
+```
+### Test Gap Analysis
+| Function | File | Tests Found | Verdict |
+|----------|------|-------------|---------|
+| calculateTotal | src/billing.ts:42 | 3 (happy, zero, overflow) | PASS |
+| processRefund | src/billing.ts:89 | 0 | BLOCK — business logic untested |
+| formatCurrency | src/utils.ts:12 | 1 | PASS |
+```
+
+5. **Flag untested edge cases** — for functions with only 1 test, check if the test covers: empty/null input, boundary values, error path. If only happy path → WARN: "only happy path tested for {function}"
+
+**Skip if**: Diff only touches config, docs, styles, or test files themselves.
 
 ### Step 5.5: Two-Stage Review Gate
 
@@ -329,6 +385,9 @@ Apply **only** when `.tsx`, `.jsx`, `.svelte`, `.vue`, or `.html` files are in t
 
 These are the **"AI UI signature"** — patterns that make AI-generated frontends visually identifiable as non-human-designed. Flag each as MEDIUM severity.
 
+**Preamble — load design contract first:**
+If `.rune/design-system.md` exists, read it first. Pull the project's **Scale Minimums** block (if authored by `rune-design.md` v0.5.0+) and apply those thresholds instead of the defaults below. Missing design-system.md → use defaults and add a LOW finding: "Project has no design-system.md — run `rune design` to lock visual decisions." Never enforce stale defaults against a project that has already declared stricter/looser minimums.
+
 **AI_ANTIPATTERN — Purple/indigo default accent with no domain justification:**
 ```tsx
 // BAD: LLM default color bias — signals "AI-generated" to experienced designers
@@ -362,6 +421,55 @@ className="bg-indigo-600 text-white"  // every button/CTA is indigo
 // GOOD: monospace for all numbers that need alignment
 <span className="font-mono text-2xl font-bold">${price}</span>
 ```
+
+**AI_ANTIPATTERN — Scale Minimum violations (AI boilerplate tell):**
+```tsx
+// BAD: body text at 14px (AI default) — primary content must be ≥16px
+<p className="text-sm">Welcome to the dashboard.</p>
+
+// BAD: hero/display text below 40px — reads as "section heading", not "hero"
+<h1 className="text-3xl font-bold">Ship Faster</h1>  // 30px
+
+// BAD: touch target below 44×44px on mobile
+<button className="w-8 h-8"><XIcon /></button>  // 32px — WCAG 2.5.8 failure
+
+// GOOD: hero ≥48px, body ≥16px, touch ≥44×44px
+<h1 className="text-5xl md:text-6xl font-bold">Ship Faster</h1>   // 48-60px
+<p className="text-base">Welcome to the dashboard.</p>             // 16px
+<button className="w-11 h-11"><XIcon /></button>                   // 44px
+```
+Pull project-specific overrides from `.rune/design-system.md` § Scale Minimums.
+
+**AI_ANTIPATTERN — Hand-rolled SVG for standard iconography:**
+```tsx
+// BAD: custom <svg> for dashboard/menu/close/chevron — AI geometry almost always malformed
+<svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z M3 9h18 M9 3v18"/></svg>
+
+// GOOD: Phosphor Icons (preferred) or Huge Icons
+import { House, List, X } from '@phosphor-icons/react';
+<House weight="bold" size={24} />
+
+// GOOD: labeled placeholder when no icon library available yet
+<span className="icon-placeholder" aria-label="Dashboard icon — design pass needed">
+  [ ICON: dashboard ]
+</span>
+```
+Exceptions: inline SVG for project-unique logos, data visualizations (charts/graphs), or decorative illustrations generated by a human designer — these are not "standard iconography."
+
+**AI_ANTIPATTERN — Manual hex shading for accent states (oklch() violation):**
+```css
+/* BAD: hand-darkened hex — breaks perceived lightness consistency */
+--accent: #3b82f6;
+--accent-hover: #2563eb;    /* guessed darker */
+--accent-pressed: #1d4ed8;  /* guessed even darker */
+
+/* GOOD: relative oklch() derivation */
+--accent: oklch(62% 0.19 258);
+--accent-hover:   oklch(from var(--accent) calc(l - 0.08) c h);
+--accent-pressed: oklch(from var(--accent) calc(l - 0.15) c h);
+--accent-subtle:  oklch(from var(--accent) calc(l + 0.3) calc(c * 0.4) h);
+```
+Flag any CSS file defining 2+ hover/pressed/active variants with sibling hex literals. Not a finding if accent uses a design-token library (Radix Colors, Tailwind palette) that already ships perceptually-tuned scales.
 
 **AI_ANTIPATTERN — Missing UI states (only happy path rendered):**
 ```tsx
@@ -507,6 +615,29 @@ When `cook` or `ship` checks review status: compare review commit hash with curr
 | Composite quality score | Markdown table | inline (when `mode: "scored"`) |
 | Blast radius assessment | Markdown table | inline |
 
+## Chain Metadata
+
+Append to Code Review Report when invoked standalone. Suppress when called as sub-skill inside an L1 orchestrator (cook, team, etc.) — the orchestrator emits a consolidated block. See `docs/references/chain-metadata.md`.
+
+```yaml
+chain_metadata:
+  skill: "rune-review.md"
+  version: "1.0.0"
+  status: "[DONE | DONE_WITH_CONCERNS]"
+  domain: "[area reviewed]"
+  files_changed: []  # review doesn't change files
+  exports:
+    findings_count: { critical: [N], high: [N], medium: [N], low: [N] }
+    findings:
+      - { severity: "[level]", file: "[path]", line: [N], message: "[issue]" }
+    verdict: "[APPROVE | REQUEST_CHANGES | NEEDS_DISCUSSION]"
+    quality_score: [0-100]  # when mode: "scored"
+  suggested_next:
+    - skill: "rune-fix.md"
+      reason: "[grounded in findings — e.g., '2 HIGH findings in api/users.ts need remediation']"
+      consumes: ["findings"]
+```
+
 ## Sharp Edges
 
 | Failure Mode | Severity | Mitigation |
@@ -539,7 +670,7 @@ When `cook` or `ship` checks review status: compare review commit hash with curr
 ~3000-6000 tokens input, ~1000-2000 tokens output. Sonnet default, opus for security-critical reviews. Runs once per implementation cycle.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

@@ -30,6 +30,7 @@ None — pure L3 utility using `WebSearch`, `WebFetch`, and Context7 MCP tools d
 - `debug` (L2): lookup API docs for unclear errors
 - `fix` (L2): check correct API usage before applying changes
 - `review` (L2): verify API usage is current and correct
+- `adversary` (L2): verify framework/API assumptions in plan are correct
 
 ## Execution
 
@@ -182,7 +183,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail:** docs-seeker looks up documentation only — it does not apply changes, write code, or interpret whether the API fits the caller's use case.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

@@ -90,6 +90,7 @@ Direct API call ≠ Wrapper/middleware layer ≠ Reverse engineering ≠ Browser
 ## Calls (outbound)
 
 - `plan` (L2): when idea is selected and needs structuring into actionable steps
+- `design` (L2): when selected approach has UI/UX implications — hand off visual decisions
 - `research` (L3): gather data for informed brainstorming (existing solutions, benchmarks)
 - `trend-scout` (L3): market context and trends for product-oriented brainstorming
 - `problem-solver` (L3): structured reasoning frameworks (SCAMPER, First Principles, 6 Hats)
@@ -103,6 +104,7 @@ Direct API call ≠ Wrapper/middleware layer ≠ Reverse engineering ≠ Browser
 - `plan` (L2): when architecture decision needs creative exploration (Discovery Mode)
 - User: `/rune brainstorm <topic>` direct invocation (Discovery Mode)
 - User: `/rune brainstorm rescue <context>` manual rescue (Rescue Mode)
+- `ba` (L2): when multiple requirement approaches exist
 
 ## Cross-Hub Connections
 
@@ -245,12 +247,49 @@ Additionally in Rescue Mode:
 For approaches with many interacting variables, invoke `rune-sequential-thinking.md` to reason through trade-offs systematically.
 
 ### Step 4 — Recommend
+
 Select ONE approach as the recommendation. State:
 - Which option is recommended
 - Primary reason (1 sentence)
 - Conditions under which a different option would be better (hedge case)
 
 Do not recommend "it depends" without a concrete decision rule.
+
+### Step 4.5 — Tiered Recommendations (Product/Strategy Mode)
+
+For product-level brainstorming (Vision Mode or when approaches have strategic implications), structure the recommendation into **time-horizon tiers**:
+
+| Tier | Timeframe | Focus |
+|------|-----------|-------|
+| **Quick Win** | 0-30 days | Immediate value, validates direction, low risk |
+| **Differentiation** | 1-3 months | Competitive advantage, harder to copy |
+| **Long-term Moat** | 6-12 months | Defensible position, compounds over time |
+
+**For each tier, specify:**
+
+```markdown
+### Quick Win (0-30 days)
+- **Action**: [specific deliverable from the chosen approach]
+- **Resources**: [team/tools needed]
+- **Expected Impact**: [measurable outcome]
+- **Validates**: [what assumption this proves/disproves]
+
+### Differentiation (1-3 months)
+- **Action**: [...]
+- **Resources**: [...]
+- **Expected Impact**: [...]
+
+### Long-term Moat (6-12 months)
+- **Action**: [...]
+- **Resources**: [...]
+- **Expected Impact**: [...]
+```
+
+**Rules:**
+- Quick Win MUST be achievable with chosen approach in first sprint
+- Each tier builds on the previous — not 3 independent tracks
+- Skip this step for pure technical brainstorming (no product/strategy dimension)
+- If all tiers look equally expensive → approach may be too complex for Quick Win
 
 ### Step 5 — Return to Plan
 Pass the recommended approach back to `rune-plan.md` for structuring into an executable implementation plan. Include:
@@ -344,7 +383,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail:** Brainstorm produces options and a recommendation — never implementation code or an execution plan. All code and planning begins only after user approves an approach and `rune-plan.md` is invoked.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

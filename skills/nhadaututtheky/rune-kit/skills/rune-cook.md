@@ -38,10 +38,35 @@ Cook supports predefined workflow chains for common task types. Use these as sho
 /rune cook bugfix     → Diagnose → fix → verify (Phase 1 → 4 → 6 → 7)
 /rune cook refactor   → Understand → plan → implement → quality (Phase 1 → 2 → 4 → 5 → 6 → 7)
 /rune cook security   → Full pipeline + sentinel@opus + sast (all phases, security-escalated)
-/rune cook hotfix     → Minimal: fix → verify → commit (Phase 4 → 6 → 7, skip scout if user provides context)
+/rune cook hotfix     → Production Hotfix Protocol: contain → fix → verify → deploy → watchdog → postmortem (see below)
 /rune cook nano       → Trivial: do → verify → done (no phases, ≤3 steps)
 /rune cook --template <name> → Load pre-built workflow template from installed Pro/Business packs
 ```
+
+### Production Hotfix Protocol
+
+When `hotfix` chain is active AND triggered from a live incident (not a dev-time fix), follow the full orchestrated chain — not just fix → verify → commit.
+
+```
+FULL HOTFIX CHAIN (when incident is active):
+
+1. CONTAIN   → `rune-incident.md` (if not already running): triage + contain blast radius first
+2. BRANCH    → create hotfix branch via worktree (isolate from main)
+3. FIX       → `rune-fix.md` (minimal change only — no refactoring, no scope creep)
+4. VERIFY    → `rune-verification.md` (full test suite on hotfix branch)
+5. SENTINEL  → `rune-sentinel.md` (security check — fix may introduce new surface)
+6. DEPLOY    → `rune-deploy.md` (deploy hotfix to production)
+7. WATCHDOG  → `rune-watchdog.md` (confirm health check passes post-deploy)
+8. POSTMORTEM → `rune-journal.md` + `rune-neural-memory.md` (capture root cause + fix pattern)
+
+HARD-GATES:
+- Do NOT skip CONTAIN if users are actively affected
+- Do NOT skip SENTINEL on hotfix — rushed fixes frequently introduce new vulnerabilities
+- Do NOT merge hotfix to main without VERIFY passing
+- Do NOT skip POSTMORTEM — hotfix without learning = same incident next month
+```
+
+**Minimal hotfix chain (non-incident, dev-time):** Phase 4 → 6 → 7 (fix → verify → commit). User provides context, skip scout.
 
 ### Template Workflows (Pro/Business)
 
@@ -74,6 +99,7 @@ When `--template <name>` is provided, cook loads a pre-built workflow template i
 - Contains "security", "auth", "vulnerability", "CVE" → `security`
 - Contains "urgent", "hotfix", "production" → `hotfix`
 - Contains "quick", "just", "chỉ cần", "copy", "move", "rename", "bump" → `nano`
+- Contains "graft", "port from", "copy from repo", "clone feature from" → **delegate to `rune-graft.md`** (not a cook chain — hand off entirely)
 - Contains `--template` → load template workflow (see above)
 - Default → `feature`
 
@@ -282,9 +308,10 @@ Contract violations are NON-NEGOTIABLE. If `.rune/contract.md` exists and a plan
 2. **Feature workspace** (opt-in) — for non-trivial features (3+ phases), suggest creating `.rune/features/<feature-name>/` with `spec.md`, `plan.md`, `decisions.md`, `status.md`. Skip for simple bug fixes, fast mode.
 3. Create implementation plan: exact files to create/modify, change order, dependencies, active decision constraints
 4. If multiple valid approaches exist → invoke `rune-brainstorm.md` for trade-off analysis
-5. Present plan to user for approval
-6. If feature workspace was created, write approved plan to `.rune/features/<name>/plan.md`
-7. Mark Phase 2 as `completed`
+5. **Frontend detection** — if task touches `.tsx/.jsx/.vue/.svelte/.css`, component files, or mentions "UI/page/screen/design/layout/landing": invoke `rune-design.md` BEFORE plan approval. Pass hint `mode: "tweaks-default"` — design proposes ONE opinionated default per `.rune/design-system.md` (Step 2.7), not a 5-option menu. User replies with tweaks ("more professional", "darker") rather than picking from a list. If `.rune/design-system.md` is missing, design creates it first.
+6. Present plan to user for approval
+7. If feature workspace was created, write approved plan to `.rune/features/<name>/plan.md`
+8. Mark Phase 2 as `completed`
 
 **Gate**: User MUST approve the plan before proceeding. Do NOT skip this.
 
@@ -380,6 +407,11 @@ If the coder model needs info from other phases, it's in the Cross-Phase Context
 
 Quality checks run in **two stages** — spec compliance gates code review. Reviewing code quality before verifying it matches the spec wastes effort on code that may need rewriting.
 
+**Signal dispatch ordering**: When `fix` emits `code.changed`, 4 listeners react (preflight, sentinel, test, review). Cook coordinates dispatch order — do NOT let all 4 fire simultaneously:
+- **Stage 1**: preflight + sentinel (parallel — independent checks)
+- **Stage 2**: test (after Stage 1 passes — no point testing non-compliant code)
+- **Stage 3**: review (after test passes — review verified code only)
+
 ```
 STAGE 1 (parallel):
   Launch 5a (preflight) + 5b (sentinel) simultaneously.
@@ -391,6 +423,29 @@ STAGE 2 (after Stage 1 passes):
   Launch 5c (review) + 5d (completion-gate) simultaneously.
   If any returns BLOCK → fix findings, re-run the blocking check only.
 ```
+
+### Remediation Cycle Counter
+
+Every BLOCK finding gets a cycle counter. Fix → re-run → still BLOCK? Increment. **Max 3 cycles per gate** before escalation.
+
+```
+Cycle 1: fix finding → re-run gate
+Cycle 2: different fix → re-run gate
+Cycle 3: last attempt → re-run gate
+Cycle 4: STOP. Escalate to user with all 3 failed attempts + evidence.
+```
+
+Track per-gate, not globally — preflight cycle 2 does not count against sentinel cycle 1. If the SAME finding persists across 3 cycles, the fix approach is wrong — do NOT keep trying the same strategy. Cycle 2+ MUST try a different fix than Cycle 1.
+
+### Upstream Inconsistency Protocol
+
+During Phase 5 quality checks, if a gate finding traces to an **upstream artifact** (plan was wrong, spec was incomplete, architecture was flawed) rather than an implementation bug:
+
+1. Tag finding as `UPSTREAM:<phase>` (e.g., `UPSTREAM:plan`, `UPSTREAM:spec`)
+2. STOP current quality gate — fixing code won't resolve an upstream problem
+3. Re-invoke the upstream skill (`rune-plan.md` for plan issues, `rune-ba.md` for spec gaps) with the finding as context
+4. Get user approval on the corrected upstream artifact
+5. Resume Phase 5 from the beginning (re-run all gates — upstream change may invalidate prior PASS results)
 
 ### 5a. Preflight (Spec Compliance + Logic) — STAGE 1
 **REQUIRED SUB-SKILL**: Use `rune-preflight.md`
@@ -695,9 +750,10 @@ Mentally track tool call fingerprints. 3 identical calls → WARN. 5 identical c
 | 1 | `scout` | L2 | Scan codebase before planning |
 | 1 | `onboard` | L2 | Initialize project context if no CLAUDE.md |
 | 1 | `ba` | L2 | Requirement elicitation for features |
+| 1 | `logic-guardian` | L2 | Conditional: when `.rune/logic-manifest.json` exists — protect complex business logic before any edits |
 | 2 | `plan` | L2 | Create implementation plan |
 | 2 | `brainstorm` | L2 | Trade-off analysis / rescue mode |
-| 2 | `design` | L2 | UI/design phase for frontend features |
+| 2 | `design` | L2 | UI/design phase for frontend features — invoke with `mode: "tweaks-default"` (one opinionated default + accept natural-language tweaks, not a 5-option menu) |
 | 2.5 | `adversary` | L2 | Red-team challenge on approved plan |
 | 3 | `test` | L2 | Write failing tests (RED phase) |
 | 4 | `fix` | L2 | Implement code changes (GREEN phase) |
@@ -707,6 +763,7 @@ Mentally track tool call fingerprints. 3 identical calls → WARN. 5 identical c
 | 5a | `preflight` | L2 | Spec compliance + logic review |
 | 5b | `sentinel` | L2 | Security scan |
 | 5c | `review` | L2 | Code quality review |
+| 5 | `scope-guard` | L3 | Verify changed files match approved plan scope (flag out-of-scope files before commit) |
 | 5 | `perf` | L2 | Performance regression check (optional) |
 | 5 | `audit` | L2 | Project health audit when scope warrants |
 | 5 | `review-intake` | L2 | Structured review intake for complex PRs |
@@ -807,6 +864,31 @@ When invoked by `team` with a NEXUS Handoff, include the Deliverables table — 
 | Cook Report | Markdown (inline) | Emitted at end of session |
 | Session state | Markdown | `.rune/decisions.md`, `.rune/progress.md`, `.rune/conventions.md` |
 
+## Document Ownership
+
+| Scope | Access | Files |
+|-------|--------|-------|
+| **Owns** (read + write) | `.rune/plan-*.md`, `.rune/progress.md`, `.rune/decisions.md`, `.rune/conventions.md`, source files per approved plan |
+| **Reads** (never writes) | `CLAUDE.md`, `SKILL.md` (any), `.rune/contract.md`, `.rune/checkpoint.md` |
+| **Never modifies** | `compiler/**`, `extensions/**`, `PACK.md`, other skills' `SKILL.md`, `.rune/learnings.jsonl` |
+
+When delegating to sub-skills (scout, plan, test, review), each sub-skill owns its own output. Cook coordinates but does not overwrite sub-skill artifacts.
+
+## Anti-Patterns
+
+Common multi-agent failures to explicitly avoid. These are NOT edge cases — they are the most frequent cook failures in production.
+
+| Anti-Pattern | Why It Fails | Correct Approach |
+|---|---|---|
+| **Bypass hierarchy** — skipping scout/plan and jumping to Phase 4 code | Builds wrong thing. Most "wasted work" traces back to missing Phase 1-2 | Follow phase gates. Even "obvious" tasks benefit from 30s of scout |
+| **Shadow decisions** — making architectural choices without logging to decisions.md | Next session repeats the same debate. Team agents contradict each other | Log every non-trivial choice via `decisions.md` or `journal` |
+| **Gold-plating** — adding "nice-to-have" features not in the approved plan | Scope creep, delayed delivery, untested code paths | Build ONLY what's in the plan. Log extras as follow-up tasks |
+| **Test-after** — writing tests after implementation instead of before (TDD violation) | Tests validate implementation bugs, not requirements. Coverage looks good but misses edge cases | Phase 3 (RED) before Phase 4 (GREEN). Always |
+| **Monolithic commit** — one giant commit with all changes | Impossible to revert partially. Review is overwhelming | Commit per phase or per logical unit. Small, reviewable diffs |
+| **Assumption-based implementation** — guessing requirements instead of asking | Builds the wrong thing confidently. User discovers mismatch late | If ambiguous, ask. 30s of clarification saves 30min of rework |
+| **Infinite remediation loop** — fixing the same BLOCK finding 4+ times with the same approach | Wastes tokens, drifts further from solution. If 3 attempts failed, the approach is wrong | Remediation Cycle Counter: max 3 cycles, Cycle 2+ must try different strategy, Cycle 4 escalates to user |
+| **Code fix for upstream problem** — fixing implementation when the plan/spec was wrong | Code "passes" but implements the wrong thing. Bug resurfaces in integration | Upstream Inconsistency Protocol: tag as UPSTREAM, re-invoke upstream skill, get approval, re-run gates |
+
 ## Sharp Edges
 
 <MUST-READ path="references/sharp-edges.md" trigger="before declaring done — review all 18 failure modes"/>
@@ -821,6 +903,8 @@ SELF-VALIDATION (run before emitting Cook Report):
 - [ ] Plan approval gate was not bypassed — user said "go" (check conversation history)
 - [ ] No Phase 4 code was written before Phase 3 tests (TDD order preserved)
 - [ ] All Phase 5 quality gates (preflight, sentinel, review) ran — not just claimed
+- [ ] No quality gate exceeded 3 remediation cycles without user escalation
+- [ ] No upstream issue was fixed by code change alone — UPSTREAM findings re-invoked the source skill
 - [ ] Cook Report contains actual commit hash, not placeholder
 ```
 
@@ -835,7 +919,7 @@ All applicable phases complete + Self-Validation passed:
 ~$0.05-0.15 per feature. Haiku for scanning (Phase 1), sonnet for coding (Phase 3-4), opus for complex planning (Phase 2 when needed).
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

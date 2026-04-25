@@ -36,6 +36,7 @@ Orchestrate the full deployment and marketing pipeline. Launch coordinates testi
 - `audit` (L2): pre-launch health check — full 7-phase quality gate
 - `deploy` (L2): push to target platform
 - `incident` (L2): if post-launch health check fails → triage and contain
+- `retro` (L2): post-launch retrospective — what went well, what didn't
 - `browser-pilot` (L3): verify live site screenshots and performance
 - `marketing` (L2): create launch assets (landing copy, social, SEO)
 - `watchdog` (L3): setup post-deploy monitoring
@@ -344,7 +345,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail**: Do not publish marketing assets or trigger external announcements unless explicitly delegated by the parent agent.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

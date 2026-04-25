@@ -146,8 +146,27 @@ Slide body content
 4. Keep slide count reasonable (5-15 for demos, 10-25 for talks)
 5. Always include speaker notes for non-trivial slides
 
+## Returns
+
+| Artifact | Format | Location |
+|----------|--------|----------|
+| Slide schema | JSON | `slides.json` (temporary) |
+| Presentation deck | Marp Markdown | `deck.md` or user-specified path |
+
+## Done When
+
+- Presentation type identified (demo/sprint/talk/tutorial/pitch)
+- JSON schema generated with correct slide types
+- build-deck.js executed (or fallback markdown generated)
+- Output file path presented to user
+- Preview/export commands provided
+
+## Cost Profile
+
+~500-1500 tokens input, ~300-800 tokens output. Sonnet for quality copy and structure.
+
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

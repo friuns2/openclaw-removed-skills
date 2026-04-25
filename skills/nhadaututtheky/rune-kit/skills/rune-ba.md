@@ -39,12 +39,14 @@ Output is a Requirements Document → hand off to rune-plan.md for implementatio
 - `research` (L3): look up similar products, APIs, integrations
 - `plan` (L2): hand off Requirements Document for implementation planning
 - `brainstorm` (L2): when multiple approaches exist for a requirement
+- `design` (L2): when requirements include UI/UX components — hand off visual requirements
 
 ## Called By (inbound)
 
 - `cook` (L1): before Phase 2 PLAN, when task is non-trivial
 - `scaffold` (L1): Phase 1, before any project generation
 - `plan` (L2): when plan receives vague requirements
+- `mcp-builder` (L2): requirements elicitation before MCP server design
 - User: `/rune ba` direct invocation
 
 ## Cross-Hub Connections
@@ -69,7 +71,7 @@ Read the user's request. Classify the requirement type:
 | Greenfield | "new project", "build from scratch" | Full BA + market context |
 
 If Bug Fix → skip BA, route to cook/debug directly.
-If Refactor → light version (Step 1 + Step 4 only).
+If Refactor → light version (Step 1 + Step 4 only). Skip Steps 2, 2.5, 3, 5, 6.
 
 If existing codebase → invoke `rune-scout.md` for context before proceeding.
 
@@ -89,6 +91,23 @@ If user says "just build it" → respond with: "I'll build it better with 2 minu
 Each question must be asked separately, wait for answer before next.
 Exception: if user provides a detailed spec/PRD → extract answers from it, confirm with user.
 </HARD-GATE>
+
+#### Question Discipline (MANDATORY)
+
+Every question the user answers burns attention you don't get back. Protect it.
+
+1. **Max 5 questions total across the whole BA session.** If you find yourself wanting a 6th, the answer is in the first 5 or you're stalling — re-read, don't re-ask.
+2. **Prefer yes/no or multiple-choice over open-ended.** An open-ended question is a last resort when no reasonable option set exists.
+   - BAD: "What auth strategy do you want?"
+   - GOOD: "Auth: **(a)** email+password with JWT, **(b)** OAuth (Google/GitHub), **(c)** magic link, **(d)** I'll decide — pick one."
+3. **Never ask what you can infer.** If the answer is in the repo, the user's message, or the classification from Step 1 — don't ask it.
+   - Wrong stack? → read `package.json`, don't ask.
+   - Wrong audience? → check the `README`, don't ask.
+   - Wrong framework? → check config files, don't ask.
+4. **Cache the answer.** Write each Q→A pair into the Requirements Document verbatim. If the user restarts the BA session on the same feature, reuse the cached answers — never re-ask what was already answered.
+5. **Bundle yes/no questions after Q1 if the user is concise.** A user who replies "y" / "n" / "skip" in 1-2 words tolerates a bundle. A user who replies with paragraphs wants the slow pace — keep one-at-a-time.
+
+Every Q should earn its slot: removing it must leave the Requirements Document materially worse. If it wouldn't, cut the question.
 
 #### Structured Elicitation Frameworks
 
@@ -114,6 +133,72 @@ O: 30% faster incident detection (measurable KPI)
 - Data/Analytics/Research feature → PICO (forces measurable outcome definition)
 - Product/UX feature → Jobs-to-be-Done (keeps focus on user motivation)
 - Integration → 5 Questions only (frameworks add noise for plumbing tasks)
+
+### Step 2.5 — Ambiguity Scoring (Execution Gate)
+
+After each question round, compute an **Ambiguity Score** to determine if requirements are clear enough to proceed. This prevents premature handoff to `plan` with vague inputs.
+
+#### Scoring Formula
+
+```
+Ambiguity = 1 - weighted_average(dimensions)
+
+Dimensions (weights vary by requirement type):
+  Greenfield:  Goal (40%) + Constraints (30%) + Success Criteria (30%)
+  Feature:     Goal (30%) + Constraints (30%) + Success Criteria (20%) + Integration (20%)
+  Integration: Goal (20%) + Constraints (25%) + Success Criteria (20%) + API Contract (35%)
+```
+
+#### Dimension Scoring (0.0 – 1.0)
+
+| Dimension | 0.0 (Unknown) | 0.5 (Partial) | 1.0 (Clear) |
+|-----------|---------------|----------------|--------------|
+| **Goal** | "Make it better" | "Improve dashboard performance" | "Dashboard loads in <2s with 10k rows" |
+| **Constraints** | No constraints mentioned | "Use existing DB" | "PostgreSQL 15, no new deps, GDPR compliant" |
+| **Success Criteria** | "It should work" | "Users can see their data" | "AC-1.1: GIVEN 10k rows WHEN page loads THEN render <2s" |
+| **Integration** | "Connect to the API" | "Use REST, need auth" | "POST /api/v2/orders, OAuth2, rate limit 100/min" |
+| **API Contract** | "It sends data somewhere" | "JSON payload to endpoint" | "OpenAPI spec provided, request/response schemas defined" |
+
+#### Threshold Gate
+
+| Ambiguity | Level | Action |
+|-----------|-------|--------|
+| **< 15%** | Crystal Clear | Proceed to Step 3 immediately |
+| **15-25%** | Acceptable | Proceed with noted assumptions — flag gaps in Requirements Doc |
+| **25-40%** | Unclear | Ask 1-2 targeted follow-up questions on weakest dimension |
+| **> 40%** | Blocked | Do NOT proceed. Re-ask the weakest dimension question with examples |
+
+<HARD-GATE>
+NEVER hand off to plan with Ambiguity > 40%.
+If user insists "just build it" at > 40%, respond:
+"Ambiguity is [X]% — the weakest area is [dimension]. One more answer cuts this in half: [targeted question]"
+</HARD-GATE>
+
+#### Scoring After Each Question
+
+After each of the 5 Questions (Step 2), update the score:
+
+```
+Round 1 (WHO):    Goal ≈ 0.3, others = 0.0 → Ambiguity ≈ 91%
+Round 2 (WHAT):   Goal ≈ 0.7, Success ≈ 0.3 → Ambiguity ≈ 72%
+Round 3 (WHY):    Goal ≈ 0.9, Success ≈ 0.5 → Ambiguity ≈ 47%
+Round 4 (BOUNDS): Constraints ≈ 0.6 → Ambiguity ≈ 30%
+Round 5 (CONSTR): Constraints ≈ 0.9 → Ambiguity ≈ 12% ✅
+```
+
+If Ambiguity drops below 15% before all 5 questions are asked (e.g., user provides a detailed PRD), skip remaining questions and proceed. The gate is about clarity, not ceremony.
+
+#### Display Format
+
+After completing Step 2, show the user:
+
+```
+Clarity Score: [100 - ambiguity]%
+  Goal:             [██████████] 0.9
+  Constraints:      [████████░░] 0.8
+  Success Criteria: [██████░░░░] 0.6  ← weakest
+  Status: ACCEPTABLE (ambiguity 23%) — proceeding with noted gaps
+```
 
 ### Step 3 — Hidden Requirement Discovery
 
@@ -209,6 +294,47 @@ Assess and document ONLY relevant NFRs:
 
 Only include NFRs relevant to this specific task. Don't generate a generic checklist.
 
+### Step 6.5 — Tiered Recommendations
+
+For product-oriented requirements (Feature Request, Integration, Greenfield), generate **tiered strategic recommendations**. This structures the path forward into actionable time horizons.
+
+**Three Tiers:**
+
+| Tier | Timeframe | Focus | Characteristics |
+|------|-----------|-------|-----------------|
+| **Quick Win** | 0-30 days | Immediate impact | Low effort, high visibility, builds momentum |
+| **Differentiation** | 1-3 months | Competitive edge | Medium effort, unique value, hard to copy |
+| **Long-term Moat** | 6-12 months | Sustainable advantage | High effort, defensible, compounds over time |
+
+**For each tier, specify:**
+
+```markdown
+### Quick Win (0-30 days)
+- **Action**: [Specific deliverable]
+- **Resources**: [Team size, tools, dependencies]
+- **Expected Impact**: [Measurable outcome]
+- **Risk if skipped**: [What happens without this]
+
+### Differentiation (1-3 months)
+- **Action**: [...]
+- **Resources**: [...]
+- **Expected Impact**: [...]
+- **Risk if skipped**: [...]
+
+### Long-term Moat (6-12 months)
+- **Action**: [...]
+- **Resources**: [...]
+- **Expected Impact**: [...]
+- **Risk if skipped**: [...]
+```
+
+**Rules:**
+- Quick Win MUST be achievable in first sprint — no dependencies on later tiers
+- Differentiation should create switching costs or unique capabilities
+- Long-term Moat should compound (network effects, data moats, ecosystem lock-in)
+- Every tier includes "Risk if skipped" — makes trade-offs explicit
+- Skip this step for Bug Fix and Refactor types (no strategic dimension)
+
 ### Step 7 — Requirements Document
 
 Produce structured output and hand off to `plan`:
@@ -243,6 +369,24 @@ Created: [date] | BA Session: [summary]
 
 ## Risks
 - [risk]: [mitigation]
+
+## Strategic Recommendations
+[from Step 6.5 — skip for Bug Fix/Refactor]
+
+### Quick Win (0-30 days)
+- **Action**: [specific deliverable]
+- **Resources**: [effort estimate]
+- **Expected Impact**: [measurable outcome]
+
+### Differentiation (1-3 months)
+- **Action**: [...]
+- **Resources**: [...]
+- **Expected Impact**: [...]
+
+### Long-term Moat (6-12 months)
+- **Action**: [...]
+- **Resources**: [...]
+- **Expected Impact**: [...]
 
 ## Next Step
 → Hand off to rune-plan.md for implementation planning
@@ -298,6 +442,27 @@ US-1: As a [persona], I want to [action] so that [benefit]
 
 Plan gates on Decision compliance — Discretion items don't need approval.
 
+## Strategic Recommendations
+[Skip for Bug Fix/Refactor]
+
+### Quick Win (0-30 days)
+- **Action**: [immediate deliverable]
+- **Resources**: [effort + dependencies]
+- **Expected Impact**: [measurable KPI]
+- **Risk if skipped**: [consequence]
+
+### Differentiation (1-3 months)
+- **Action**: [competitive advantage work]
+- **Resources**: [...]
+- **Expected Impact**: [...]
+- **Risk if skipped**: [...]
+
+### Long-term Moat (6-12 months)
+- **Action**: [defensible position work]
+- **Resources**: [...]
+- **Expected Impact**: [...]
+- **Risk if skipped**: [...]
+
 ## Next Step
 → Hand off to rune-plan.md for implementation planning
 ```
@@ -306,13 +471,16 @@ Saved to `.rune/features/<feature-name>/requirements.md`
 
 ## Constraints
 
-1. MUST ask 5 probing questions before producing requirements — no assumptions
-2. MUST identify hidden requirements — the obvious ones are never the full picture
-3. MUST define out-of-scope explicitly — prevents scope creep
-4. MUST produce testable acceptance criteria — they become test cases
-5. MUST NOT write code or plan implementation — BA produces WHAT, plan produces HOW
-6. MUST ask ONE question at a time — don't overwhelm user with 5 questions at once
-7. MUST NOT skip BA for non-trivial tasks — "just build it" gets redirected to Question 1
+1. MUST ask up to 5 probing questions before producing requirements — never more, skip any you can infer from context
+2. MUST prefer yes/no or multiple-choice questions — open-ended only when no reasonable option set exists
+3. MUST NOT ask for information already present in the user's message, the repo, or classification — read/grep first, ask second
+4. MUST cache each Q→A pair in the Requirements Document and reuse on subsequent BA sessions for the same feature
+5. MUST identify hidden requirements — the obvious ones are never the full picture
+6. MUST define out-of-scope explicitly — prevents scope creep
+7. MUST produce testable acceptance criteria — they become test cases
+8. MUST NOT write code or plan implementation — BA produces WHAT, plan produces HOW
+9. MUST ask ONE question at a time by default; bundle yes/no batches only after user shows concise replies
+10. MUST NOT skip BA for non-trivial tasks — "just build it" gets redirected to Question 1
 
 ## Returns
 
@@ -333,19 +501,29 @@ Known failure modes for this skill. Check these before declaring done.
 | Answering own questions instead of asking user | HIGH | Questions require USER input — BA doesn't guess |
 | Producing implementation details (HOW) instead of requirements (WHAT) | HIGH | BA outputs requirements doc → plan outputs implementation |
 | All-at-once question dump (asking 5 questions in one message) | MEDIUM | One question at a time, wait for answer before next |
+| Asking open-ended questions when yes/no or multiple-choice would work | HIGH | Question Discipline rule 2 — option sets are faster to answer and easier to cache |
+| Asking for info already in the repo/message (stack, framework, audience) | HIGH | Question Discipline rule 3 — read `package.json`/README/config first, ask only what you genuinely can't find |
+| Exceeding 5 questions when the user seems "engaged" | MEDIUM | Question Discipline rule 1 — hard cap at 5. A 6th question is a sign of stalling, not thoroughness |
+| Re-asking on session restart when answers were cached | MEDIUM | Question Discipline rule 4 — load `.rune/features/<name>/requirements.md` and reuse cached Q→A pairs |
 | Missing hidden requirements (auth, error handling, edge cases) | HIGH | Step 3 checklist is mandatory scan |
 | Requirements doc too verbose (>500 lines) | MEDIUM | Max 200 lines — concise, actionable, testable |
 | Skipping BA for "simple" features that turn out complex | HIGH | Let cook's complexity detection trigger BA, not user judgment |
 | Recommending shortcuts without Completeness Score | MEDIUM | Step 3.5: every option needs X/10 score + dual effort estimate (human vs AI). "90% coverage" is a red flag when 100% costs 15 min more |
+| Handing off to plan with ambiguity > 40% | CRITICAL | Step 2.5 HARD-GATE: compute ambiguity score after elicitation, block handoff if > 40%, ask targeted follow-up on weakest dimension |
+| Skipping ambiguity scoring because "user seems clear" | HIGH | Always compute the score — perceived clarity ≠ measured clarity. The formula catches gaps humans miss |
+| Tiered recommendations too vague ("improve things") | MEDIUM | Each tier needs specific Action + measurable Expected Impact. "Build better UX" → "Reduce checkout steps from 5 to 3, targeting 15% conversion lift" |
+| All three tiers have same resources/effort | MEDIUM | Quick Win should be low-effort. If all tiers need "2 engineers, 3 months" → re-scope Quick Win to something achievable in 1 sprint |
 
 ## Done When
 
 - Requirement type classified (feature/refactor/integration/greenfield)
 - 5 probing questions asked and answered (or extracted from spec/PRD)
+- Ambiguity Score computed and displayed — must be ≤ 40% before proceeding (≤ 25% preferred)
 - Hidden requirements discovered and confirmed with user
 - Scope defined (in/out/assumptions/dependencies)
 - User stories with testable acceptance criteria produced
 - Non-functional requirements assessed (relevant ones only)
+- Tiered recommendations generated (Quick Win / Differentiation / Moat) — skip for Bug Fix/Refactor
 - Requirements Document saved to `.rune/features/<name>/requirements.md`
 - Handed off to `plan` for implementation planning
 
@@ -354,7 +532,7 @@ Known failure modes for this skill. Check these before declaring done.
 ~3000-6000 tokens input, ~1500-3000 tokens output. Opus for deep requirement analysis — understanding WHAT to build is the most expensive mistake to get wrong.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

@@ -42,6 +42,8 @@ None — pure L3 state management utility.
 - `audit` (L2): save AUDIT-REPORT.md and record health trend entry
 - `incident` (L2): record incident timeline and postmortem
 - `skill-forge` (L2): record skill creation decisions and rationale
+- `graft` (L2): auto-log graft operations — source URL, mode, challenge score, files changed
+- `retro` (L2): record retrospective insights and decisions
 
 ## Files Managed
 
@@ -245,7 +247,7 @@ Known failure modes for this skill. Check these before declaring done.
 ~200-500 tokens input, ~100-300 tokens output. Haiku. Pure file management.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

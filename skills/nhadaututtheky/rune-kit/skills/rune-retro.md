@@ -40,12 +40,16 @@ Retro is ENCOURAGING but CANDID. Every critique is anchored in specific commits,
 ## Calls (outbound)
 
 - `scout` (L2): scan codebase for test file counts, project structure
-- `neural-memory` (L3): recall past retro insights for trend comparison
+- `plan` (L2): when retro identifies systemic bottlenecks — hand findings to plan for next sprint (e.g., "fix ratio >50% → allocate debugging time in next phase")
+- `journal` (L3): retro findings → ADR entries for recurring team patterns
+- `neural-memory` (L3): recall past retro insights for trend comparison; save this retro's key insights for future sessions
 
 ## Called By (inbound)
 
 - `audit` (L2): engineering velocity and health dimension
 - `cook` (L1): optional — after completing a multi-phase feature, suggest retro
+- `rescue` (L1): post-rescue retrospective
+- `launch` (L1): post-launch retrospective
 - User: `/rune retro` direct invocation
 
 ## Data Flow
@@ -424,7 +428,7 @@ The HTML report includes: KPI cards with trend deltas, domain performance bars (
 **Scope guardrail:** retro is read-only — it analyzes and reports. It does NOT modify code, create PRs, or change any files except its own output artifacts in `.rune/retros/`.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)

@@ -36,8 +36,11 @@ Create marketing assets and execute launch strategy. Marketing generates landing
 - `asset-creator` (L3): generate OG images, social cards, banners
 - `video-creator` (L3): create demo/explainer video plan
 - `slides` (L3): generate presentation decks for launches and demos
+- `doc-processor` (L3): export marketing deliverables as PDF/DOCX (press kits, one-pagers, sponsor decks)
 - `browser-pilot` (L3): capture screenshots for marketing assets
 - L4 extension packs: domain-specific content when context matches (e.g., @rune/content for blog posts, @rune/analytics for campaign measurement)
+- `@rune-pro/growth/content-scorer` (L4 Pro, optional): 5-dimension content quality gate — if available, score all generated copy for AI phrase contamination and humanity
+- `@rune-pro/growth/cro-analyst` (L4 Pro, optional): psychology-driven CRO analysis for landing pages — if available, audit generated landing copy through 7 behavioral lenses
 
 ## Execution Steps
 
@@ -94,8 +97,15 @@ If `marketing/brand-voice.md` already exists → Read it and apply. Do NOT regen
 
 Using product understanding, market research, and **brand voice contract**, produce:
 
+**Anti-AI Copy Rules** (apply to ALL generated copy):
+- NEVER open with "In today's...", "Are you struggling with...", "Have you ever wondered..."
+- NEVER use: "game-changer", "revolutionary", "seamlessly", "leverage", "unlock the power of", "dive deep into", "delve", "robust", "streamline", "cutting-edge"
+- MUST use one of 5 hook types for headlines: Provocative Question, Specific Scenario, Surprising Statistic, Bold Statement, or Counterintuitive Claim
+- MUST include specific numbers, names, or outcomes — not vague claims ("many users love it")
+- If the copy sounds like it was written by a generic AI → rewrite until it has personality
+
 **Hero section**
-- Headline (under 10 words, outcome-focused)
+- Headline (under 10 words, outcome-focused, uses one of the 5 hook types above)
 - Subheadline (1-2 sentences expanding the promise)
 - Primary CTA button text
 
@@ -108,6 +118,61 @@ Using product understanding, market research, and **brand voice contract**, prod
 **Social proof section** (placeholder copy if no real testimonials)
 
 **Secondary CTA** (bottom of page)
+
+### Step 3.5 — Competitive Response Playbook
+
+When `trend-scout` identifies active competitors or market threats, generate pre-planned counter-strategies. This turns reactive scrambling into prepared responses.
+
+**Four Threat Scenarios:**
+
+| Scenario | Trigger Signal | Response Window |
+|----------|---------------|-----------------|
+| **Price War** | Competitor drops price >20% | 24-48 hours |
+| **New Market Entry** | New competitor launches in your space | 1-2 weeks |
+| **Viral Competitor** | Competitor content goes viral (10x normal engagement) | 24-72 hours |
+| **Fast Follower** | Competitor copies your feature within 30 days of launch | 1 week |
+
+**For each relevant scenario, document:**
+
+```markdown
+## Counter-Strategy: [Scenario Name]
+
+### Trigger
+- Signal: [what to watch for]
+- Detection: [how to monitor — social listening, price tracking, etc.]
+- Response window: [how fast to react]
+
+### Counter-Move
+- **Immediate (Day 1)**: [first response — usually messaging/positioning]
+- **Short-term (Week 1)**: [tactical moves — promos, content, outreach]
+- **Medium-term (Month 1)**: [strategic adjustments — product, pricing, positioning]
+
+### Resources Required
+- Team: [who needs to be involved]
+- Budget: [estimated cost]
+- Assets: [what to prepare in advance]
+
+### Success Metric
+- [How to know the counter-strategy worked]
+
+### Pre-Built Assets
+- [ ] Response messaging template
+- [ ] Social post drafts
+- [ ] Email to existing customers
+- [ ] FAQ for sales/support team
+```
+
+**Rules:**
+- Only generate playbooks for scenarios relevant to this market (skip if no direct competitors)
+- Pre-build assets NOW — when the trigger fires, you execute, not create
+- Response window is real — if you can't respond in time, the playbook failed
+- Test the detection mechanism — if you can't see the trigger, you can't respond
+
+**Skip this step if:**
+- Product is in a blue ocean (no direct competitors yet)
+- User explicitly requests marketing assets only, no strategy
+
+Save to `marketing/counter-playbook.md`.
 
 ### Step 4 — Social posts
 
@@ -154,6 +219,41 @@ If the project already has a deployed site or existing pages, run a technical SE
 7. **Sitemap**: Check for `sitemap.xml` or sitemap generation in build config. Flag if missing.
 8. **Robots**: Check for `robots.txt`. Verify it doesn't accidentally block important pages.
 
+**9. Schema Markup**: Check for `application/ld+json` blocks. Recommend adding relevant types:
+
+| Content Type | Schema Type | Key Properties |
+|-------------|-------------|---------------|
+| Product page | `Product` | name, description, offers, review, aggregateRating |
+| Article/Blog | `Article` | headline, author, datePublished, dateModified, image |
+| FAQ section | `FAQPage` | mainEntity[].name, mainEntity[].acceptedAnswer |
+| How-to guide | `HowTo` | name, step[].name, step[].text, totalTime |
+| Organization | `Organization` | name, url, logo, sameAs[] |
+| Breadcrumbs | `BreadcrumbList` | itemListElement[].name, itemListElement[].item |
+| Software | `SoftwareApplication` | name, operatingSystem, applicationCategory, offers |
+| Review | `Review` | itemReviewed, reviewRating, author, reviewBody |
+| Comparison | `ItemList` | itemListElement[] with individual Product/Review schemas |
+| Local biz | `LocalBusiness` | name, address, telephone, openingHoursSpecification |
+
+Use `@graph` pattern to combine multiple schema types on a single page:
+```json
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Organization", ... },
+    { "@type": "WebPage", ... },
+    { "@type": "BreadcrumbList", ... }
+  ]
+}
+```
+
+**10. Programmatic SEO awareness**: If the site has repeatable content patterns (product listings, city pages, comparison pages), note the opportunity for template-driven SEO pages. Common playbooks:
+- **Templates**: `best [tool] for [persona]` pages across personas
+- **Comparisons**: `[product A] vs [product B]` for all competitor pairs
+- **Locations**: `[service] in [city]` for local reach
+- **Integrations**: `[product] + [integration]` for every supported integration
+
+Flag programmatic SEO opportunities in the audit report. Execution details are in `@rune-pro/growth` pack.
+
 **Output**: SEO Audit Report with pass/fail per check. Save to `marketing/seo-audit.md`.
 
 Fix critical SEO issues (missing titles, broken heading hierarchy) in the implementation plan. Non-critical issues go to `marketing/seo-backlog.md`.
@@ -180,6 +280,7 @@ Output all assets as structured markdown sections. Present to user for review be
 After user approves, Write_file to save:
 - `marketing/brand-voice.md` — voice contract from Step 2.5
 - `marketing/landing-copy.md` — all copy from Step 3
+- `marketing/counter-playbook.md` — competitive response strategies from Step 3.5 (if competitors exist)
 - `marketing/social-posts.md` — all posts from Step 4
 - `marketing/seo-meta.json` — SEO data from Step 5
 - `marketing/seo-audit.md` — SEO audit results from Step 5.5 (if existing site)
@@ -220,12 +321,16 @@ Known failure modes for this skill. Check these before declaring done.
 | Copy not based on actual codebase features (invented value props) | HIGH | scout must run in Step 1 — features extracted from actual code, not assumptions |
 | Missing SEO keyword analysis (no research call) | MEDIUM | Step 2: research call for keyword data is mandatory for SEO section |
 | Files saved without user approval | MEDIUM | Step 7: present ALL assets to user, wait for approval before writing files |
+| Counter-playbook without detection mechanism | HIGH | Every scenario needs a monitoring method — "watch for price drops" is useless without specifying WHERE to watch and HOW to automate |
+| Counter-playbook with unrealistic response windows | MEDIUM | If response window is 24h but pre-built assets don't exist, the playbook will fail — either extend window or create assets NOW |
+| Generating counter-playbook for blue ocean products | LOW | Skip Step 3.5 if no direct competitors — counter-strategies need someone to counter |
 
 ## Done When
 
 - scout completed and actual feature list extracted
 - Brand voice contract established (or existing one loaded)
 - Competitor/trend analysis done via trend-scout + research
+- Competitive response playbook generated (if competitors exist) with pre-built asset checklist
 - Hero copy, value props, social posts, and SEO metadata generated (following brand voice)
 - SEO audit completed (if existing site) with pass/fail results
 - Visual assets requested from asset-creator
@@ -240,6 +345,7 @@ Known failure modes for this skill. Check these before declaring done.
 |----------|--------|----------|
 | Brand voice contract | Markdown | `marketing/brand-voice.md` |
 | Landing page copy | Markdown | `marketing/landing-copy.md` |
+| Competitive response playbook | Markdown | `marketing/counter-playbook.md` |
 | Social media posts | Markdown | `marketing/social-posts.md` |
 | SEO metadata | JSON | `marketing/seo-meta.json` |
 | SEO audit report | Markdown | `marketing/seo-audit.md` |
@@ -252,7 +358,7 @@ Known failure modes for this skill. Check these before declaring done.
 **Scope guardrail:** marketing generates assets based on actual product capabilities only — no aspirational copy, no fabricated stats.
 
 ---
-> **Rune Skill Mesh** — 59 skills, 200+ connections, 14 extension packs
+> **Rune Skill Mesh** — 62 skills, 215+ connections, 14 extension packs
 > [Landing Page](https://rune-kit.github.io/rune) · [Source](https://github.com/rune-kit/rune) (MIT)
 > **Rune Pro** ($49 lifetime) — product, sales, data-science, support packs → [rune-kit/rune-pro](https://github.com/rune-kit/rune-pro)
 > **Rune Business** ($149 lifetime) — finance, legal, HR, enterprise-search packs → [rune-kit/rune-business](https://github.com/rune-kit/rune-business)
