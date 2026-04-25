@@ -3,11 +3,16 @@
   "slug": "sierra-interactive",
   "displayName": "Sierra Interactive",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163388550,
-    "commit": "https://github.com/openclaw/skills/commit/67278fb0a06293e3521e60756de2a66529e15404"
+    "version": "1.0.3",
+    "publishedAt": 1776798393031,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163388550,
+      "commit": "https://github.com/openclaw/skills/commit/67278fb0a06293e3521e60756de2a66529e15404"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773266595740,
