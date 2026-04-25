@@ -3,11 +3,16 @@
   "slug": "bunnycdn",
   "displayName": "Bunnycdn",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163897787,
-    "commit": "https://github.com/openclaw/skills/commit/942de046d5cbf00a220a4735578e91cbd7007841"
+    "version": "1.0.3",
+    "publishedAt": 1776816170424,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163897787,
+      "commit": "https://github.com/openclaw/skills/commit/942de046d5cbf00a220a4735578e91cbd7007841"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773464580442,
