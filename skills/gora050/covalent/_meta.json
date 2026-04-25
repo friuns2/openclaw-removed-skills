@@ -3,11 +3,16 @@
   "slug": "covalent",
   "displayName": "Covalent",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163858595,
-    "commit": "https://github.com/openclaw/skills/commit/689714a21fc40d67744c92322668b4613ea242d9"
+    "version": "1.0.3",
+    "publishedAt": 1776812816191,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163858595,
+      "commit": "https://github.com/openclaw/skills/commit/689714a21fc40d67744c92322668b4613ea242d9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773460960075,
