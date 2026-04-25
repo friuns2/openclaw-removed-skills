@@ -3,11 +3,16 @@
   "slug": "whatsapp-integration",
   "displayName": "Whatsapp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162437626,
-    "commit": "https://github.com/openclaw/skills/commit/102a0023b9a7ac67e619310eb961d7778c0f565e"
+    "version": "1.0.3",
+    "publishedAt": 1776773130569,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162437626,
+      "commit": "https://github.com/openclaw/skills/commit/102a0023b9a7ac67e619310eb961d7778c0f565e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772722944955,
