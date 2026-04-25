@@ -3,9 +3,15 @@
   "slug": "google-gemini",
   "displayName": "Google Gemini",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773457330506,
-    "commit": "https://github.com/openclaw/skills/commit/a9dab4ada73d9841d63ccae8e48f86aa494d0262"
+    "version": "1.0.2",
+    "publishedAt": 1775163817896,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773457330506,
+      "commit": "https://github.com/openclaw/skills/commit/a9dab4ada73d9841d63ccae8e48f86aa494d0262"
+    }
+  ]
 }
