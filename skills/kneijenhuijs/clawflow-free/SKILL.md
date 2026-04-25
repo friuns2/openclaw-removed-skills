@@ -64,7 +64,7 @@ Parse for tasks due today. Show priority with icons:
 ### Step 5: Get Yesterday's Open Items (Optional)
 Try to read `~/.openclaw/workspace/memory/<YESTERDAY>.md`.
 
-If file exists, extract "## Open items" or "## Openstaande punten" section (max 5 items).
+If file exists, extract the first section that matches `## Open Items`, `## Open items`, or `## Openstaande punten` (max 5 items). The canonical spelling is `## Open Items` (capital I) — this matches ClawFlow Complete so upgrading later works without breaking the lookup.
 
 If file doesn't exist, skip this section.
 
@@ -102,10 +102,17 @@ Format (translate section headers to user's language from USER.md):
 🚀 **[Success message in user's language]!**
 ```
 
-**Translation examples:**
-- English: "Good morning!", "Success message: Have a great day!"
-- Dutch: "Goedemorgen!", "Success message: Succes vandaag!"
-- German: "Guten Morgen!", "Success message: Viel Erfolg heute!"
+**Language support:**
+- **English** and **Dutch (Nederlands)** are the primary languages —
+  greetings and success messages have canonical phrasings:
+  - English: "Good morning!", "Have a great day!"
+  - Dutch: "Goedemorgen!", "Succes vandaag!"
+- **Other languages** (German, Spanish, French, Italian, Portuguese, …)
+  are best-effort: the LLM translates greeting + success message at
+  runtime based on `USER.md` → `Language:`. Quality varies. Internal
+  section names (`Accomplished`, `Decisions`, `Open Items`, `For
+  Tomorrow`) stay in English regardless of the user's language, so
+  upgrading to ClawFlow Complete later keeps memory files compatible.
 
 ---
 
@@ -156,28 +163,35 @@ Wait for user response (max 2 minutes). If no response or "skip", proceed with a
 
 ### Step 5: Write Summary
 
-Save to: `~/.openclaw/workspace/memory/<YYYY-MM-DD>.md`
+Save to: `~/.openclaw/workspace/memory/<YYYY-MM-DD>.md`.
 
-Format (translate section headers to user's language):
+**Important:** keep the four section names below **in English** even when
+the user's Language is set to Dutch. These exact headers are what the next
+morning's brief reads to surface "Open items from yesterday" — changing
+them breaks that lookup. Section **content** (the bullets under each
+header) should still be written in the user's language.
+
+Format:
 
 ```markdown
 # Daily Summary YYYY-MM-DD
 
-## What was done
-[Based on: chat history, completed tasks, user input]
+## Accomplished
+[What got done — based on chat history, completed tasks, user input.
+Include any documents created or updated in the workspace today.]
 
-## Documents created/updated
-[List files modified today in workspace]
+## Decisions
+[Key decisions or learnings from today.]
 
-## Decisions & insights
-[Key decisions or learnings from today]
+## Open Items
+[What's pending, blocked, or carries over to tomorrow.]
 
-## Open items
-[What's pending or blocked]
-
-## Priority tomorrow (calendar)
-[Tomorrow's calendar events, if available]
+## For Tomorrow
+[Priority focus + tomorrow's calendar preview, if available.]
 ```
+
+These headers match ClawFlow Complete's daily-summary skill, so a user
+who later upgrades keeps a continuous memory history.
 
 ### Step 6: Send Summary to Chat
 
@@ -186,22 +200,24 @@ After writing the file, send a brief summary (max 15 lines) to the user in chat:
 ```
 [emoji] **Daily Summary [Date]**
 
-**Wat gedaan:**
+**Accomplished:**
 [Top 3-5 accomplishments]
 
-**Beslissingen:**
+**Decisions:**
 [Key decisions, if any]
 
-**Open items:**
+**Open Items:**
 [What's pending]
 
-**Morgen:**
+**For Tomorrow:**
 [Tomorrow's calendar preview, if available]
 
 ✅ Full summary saved to memory/<date>.md
 ```
 
-Translate to user's language from USER.md.
+Translate only the bullet content to the user's language from USER.md.
+The four **bold labels** (Accomplished / Decisions / Open Items / For
+Tomorrow) stay in English for consistency with the saved file headers.
 
 ---
 
@@ -227,7 +243,7 @@ If integrations are missing, skill works with reduced functionality (skips those
 # USER.md - User Profile
 
 - Name: [Your Name]
-- Language: [English/Dutch/German/etc.]
+- Language: [English or Dutch — other languages best-effort]
 - Timezone: [Your Timezone]
 ```
 

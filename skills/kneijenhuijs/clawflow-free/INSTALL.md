@@ -52,12 +52,17 @@ Edit `~/.openclaw/workspace/USER.md`:
 # USER.md - User Profile
 
 - Name: [Your Name]              # e.g., "Koen"
-- Language: [Your Language]      # e.g., "English", "Dutch", "German"
+- Language: [Your Language]      # e.g., "English", "Dutch"
 - Timezone: [Your Timezone]      # e.g., "America/New_York", "Europe/Amsterdam"
 ```
 
-**Supported languages:**
-English, Dutch (Nederlands), German (Deutsch), Spanish (Español), French (Français), Italian (Italiano), Portuguese (Português)
+**Language support:**
+- **Primary:** English, Dutch (Nederlands) — full coverage for greetings
+  and success messages.
+- **Best-effort:** any other language (German, Spanish, French, Italian,
+  Portuguese, …) — the LLM translates at runtime from the `Language:`
+  field in `USER.md`. Quality varies; internal section names stay in
+  English for compatibility with ClawFlow Complete if you upgrade later.
 
 ---
 

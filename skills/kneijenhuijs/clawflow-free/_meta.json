@@ -3,9 +3,15 @@
   "slug": "clawflow-free",
   "displayName": "Clawflow Free",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773392106339,
-    "commit": "https://github.com/openclaw/skills/commit/2ed780e654db85441a63b8be2726f3f928a97cf7"
+    "version": "1.0.1",
+    "publishedAt": 1777034951502,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773392106339,
+      "commit": "https://github.com/openclaw/skills/commit/2ed780e654db85441a63b8be2726f3f928a97cf7"
+    }
+  ]
 }
