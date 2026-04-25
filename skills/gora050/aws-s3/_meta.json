@@ -3,11 +3,16 @@
   "slug": "aws-s3",
   "displayName": "Aws S3",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162404213,
-    "commit": "https://github.com/openclaw/skills/commit/4b57d32271c90f2676ba59a7469bbfda166df894"
+    "version": "1.0.3",
+    "publishedAt": 1776773064182,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162404213,
+      "commit": "https://github.com/openclaw/skills/commit/4b57d32271c90f2676ba59a7469bbfda166df894"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772708560750,
