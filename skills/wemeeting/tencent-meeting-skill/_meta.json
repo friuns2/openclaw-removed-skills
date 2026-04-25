@@ -3,11 +3,16 @@
   "slug": "tencent-meeting-skill",
   "displayName": "腾讯会议",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1774956379963,
-    "commit": "https://github.com/openclaw/skills/commit/8459aebf69adcb4706e4294a0a4e783f1f1bce2d"
+    "version": "1.0.7",
+    "publishedAt": 1776944443566,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1774956379963,
+      "commit": "https://github.com/openclaw/skills/commit/8459aebf69adcb4706e4294a0a4e783f1f1bce2d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773514095632,
