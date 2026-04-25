@@ -23,6 +23,8 @@ preferred_aspect: null    # 3:4|4:3|16:9
 
 language: null            # zh|en|ja|ko|auto
 
+preferred_image_backend: auto  # auto|ask|<backend-id>
+
 character_presets:
   - name: my-characters
     roles:
@@ -46,6 +48,7 @@ character_presets:
 | `preferred_layout` | string | null | Layout preference or null |
 | `preferred_aspect` | string | null | Aspect ratio (3:4, 4:3, 16:9) |
 | `language` | string | null | Output language (null = auto-detect) |
+| `preferred_image_backend` | string | `auto` | Image backend selection. `auto` = prefer runtime-native tool, fall back to the only installed backend, ask if multiple non-native are present. `ask` = always confirm on every run. `<backend-id>` (e.g., `codex-imagegen`, `baoyu-imagine`, `image_generate`) = pin this backend when available; fall back to `auto` when it isn't. Absent = `auto`. Resolution logic is documented in `SKILL.md`'s `## Image Generation Tools` section. |
 | `character_presets` | array | [] | Preset character roles for styles like ohmsha |
 
 ## Art Style Options
@@ -121,6 +124,8 @@ preferred_layout: webtoon
 preferred_aspect: "3:4"
 
 language: zh
+
+preferred_image_backend: codex-imagegen
 
 character_presets:
   - name: tech-tutorial
