@@ -3,11 +3,16 @@
   "slug": "companycam-integration",
   "displayName": "Companycam",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164004611,
-    "commit": "https://github.com/openclaw/skills/commit/f27efc9158dd97f0ce0be38dae770f75cb2b5803"
+    "version": "1.0.3",
+    "publishedAt": 1776823555210,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164004611,
+      "commit": "https://github.com/openclaw/skills/commit/f27efc9158dd97f0ce0be38dae770f75cb2b5803"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773536582354,
