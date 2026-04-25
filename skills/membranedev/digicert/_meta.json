@@ -3,11 +3,16 @@
   "slug": "digicert",
   "displayName": "Digicert",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164129705,
-    "commit": "https://github.com/openclaw/skills/commit/93fd4af50a0840cda7ff7758b7884f312e5d0c0d"
+    "version": "1.0.3",
+    "publishedAt": 1776830573775,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164129705,
+      "commit": "https://github.com/openclaw/skills/commit/93fd4af50a0840cda7ff7758b7884f312e5d0c0d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773615750452,
