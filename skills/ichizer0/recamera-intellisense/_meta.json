@@ -3,9 +3,15 @@
   "slug": "recamera-intellisense",
   "displayName": "reCamera Intellisense",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1772877324836,
-    "commit": "https://github.com/openclaw/skills/commit/dd266daf205599f2c3afde4787fc9ee6bd6a7c4c"
+    "version": "2.0.8",
+    "publishedAt": 1776770984436,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1772877324836,
+      "commit": "https://github.com/openclaw/skills/commit/dd266daf205599f2c3afde4787fc9ee6bd6a7c4c"
+    }
+  ]
 }
