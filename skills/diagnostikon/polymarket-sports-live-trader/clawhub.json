@@ -1,5 +1,5 @@
 {
-  "emoji": "⚽",
+  "emoji": "\u26bd",
   "requires": {
     "env": [
       "SIMMER_API_KEY"
@@ -98,5 +98,6 @@
       "step": 1,
       "label": "Min trade size (USD)"
     }
-  ]
+  ],
+  "version": "0.0.2"
 }
