@@ -3,11 +3,16 @@
   "slug": "linkedin-ads",
   "displayName": "Linkedin Ads",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162636067,
-    "commit": "https://github.com/openclaw/skills/commit/c4ad993a7ba5ffb34da04ae3c7523d28e1452ebf"
+    "version": "1.0.3",
+    "publishedAt": 1776780190306,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162636067,
+      "commit": "https://github.com/openclaw/skills/commit/c4ad993a7ba5ffb34da04ae3c7523d28e1452ebf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772877731989,
