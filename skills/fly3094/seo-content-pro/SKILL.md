@@ -2,8 +2,8 @@
 name: seo-content-pro
 description: Advanced SEO content creation with AI humanization, image generation, multi-language support, content refresh, SEO scoring, and competitor analysis. Perfect for content creators and agencies.
 author: fly3094
-version: 1.3.0
-tags: [seo, content, writing, article, blog, marketing, multi-language, research, video-seo, ai-detection]
+version: 1.4.0
+tags: [seo, content, writing, article, blog, marketing, multi-language, research, video-seo, ai-detection, youtube, bilibili, transcript]
 support: 
   paypal: 492227637@qq.com
   email: 492227637@qq.com
@@ -53,6 +53,8 @@ metadata:
 - 📈 **SEO Score**: Get content quality score (0-100) with specific improvement suggestions
 - 🤖 **AI Humanization** (v1.2 NEW): Detect and transform AI-generated text to bypass AI detectors
 - 🖼️ **Image Generation** (v1.2 NEW): Generate featured images using Google Gemini 3 Pro Image API
+- 🎬 **Video SEO** (v1.4 NEW): Optimize YouTube/B 站 video titles, descriptions, tags, and transcripts
+- 📝 **Transcript Processing** (v1.4 NEW): Extract and optimize video transcripts for SEO
 
 ## Quick Start (2 minutes)
 
@@ -107,6 +109,29 @@ python3 scripts/compare.py --input article.md
 - 🟠 High: AI vocabulary, significance inflation, promotional language
 - 🟡 Medium: Superficial analysis, filler phrases
 - 🟢 Style: Curly quotes, em-dashes overuse
+
+### 🎬 Video SEO (v1.4 NEW)
+
+Optimize videos for YouTube and B 站 (Bilibili) to rank higher in video search results.
+
+**Usage:**
+```bash
+# Optimize YouTube video
+python3 scripts/video_seo.py --platform youtube --title "AI Automation Tutorial" --duration "10:25"
+
+# Optimize B 站 video
+python3 scripts/video_seo.py --platform bilibili --title "AI 自动化教程" --tags "[AI,自动化，教程]"
+
+# Process transcript
+python3 scripts/transcript.py --input video.srt --output optimized.txt
+```
+
+**Features:**
+- Title optimization (under 60 characters for YouTube, under 80 for B 站)
+- Description generation with timestamps
+- Tag suggestions based on topic
+- Transcript SEO optimization
+- Chapter markers for long videos
 
 ### 🖼️ Featured Image Generation
 
