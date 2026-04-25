@@ -3,9 +3,15 @@
   "slug": "docraptor",
   "displayName": "Docraptor",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773378193595,
-    "commit": "https://github.com/openclaw/skills/commit/cb8754e0237ee8fd634878611f171f36ad105eb1"
+    "version": "1.0.1",
+    "publishedAt": 1776808988537,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773378193595,
+      "commit": "https://github.com/openclaw/skills/commit/cb8754e0237ee8fd634878611f171f36ad105eb1"
+    }
+  ]
 }
