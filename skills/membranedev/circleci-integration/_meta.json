@@ -3,11 +3,16 @@
   "slug": "circleci-integration",
   "displayName": "Circleci",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163575886,
-    "commit": "https://github.com/openclaw/skills/commit/26a5536fcb5f5864526543c4f457a3599890af80"
+    "version": "1.0.3",
+    "publishedAt": 1776805452152,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163575886,
+      "commit": "https://github.com/openclaw/skills/commit/26a5536fcb5f5864526543c4f457a3599890af80"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773352936022,
