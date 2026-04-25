@@ -1,6 +1,6 @@
-# InvAssistant — 美股买卖信号检查器
+# InvAssistant — 投资组合交易信号检查系统
 
-**今天该买、该卖、还是该持有？** 这是一个 CodeBuddy/WorkBuddy Skill，用规则驱动、无情绪干扰的方式回答你的美股持仓决策问题。基于可配置的**「三条红线」入场过滤系统**和**「多层退出引擎」**（阶梯止盈/止损清仓/趋势破位/动量衰竭/VIX 恐慌防守），通过 Yahoo Finance 获取实时行情数据，逐标的检查买卖信号，并推送到企业微信、钉钉或飞书群机器人。
+一个 CodeBuddy/WorkBuddy Skill，基于可配置的**「三条红线」入场过滤系统**和**「多层退出引擎」**检查投资组合交易信号。通过 Yahoo Finance 获取实时行情数据，按策略规则检查每个标的的建仓/加仓/减仓/清仓信号，并推送到企业微信、钉钉或飞书群机器人。
 
 ## 核心特性
 
@@ -31,20 +31,10 @@ python scripts/init_config.py
 
 生成 `invassistant-config.json` 默认配置文件。编辑该文件自定义你的关注列表和推送渠道。
 
-Skill 支持**双配置自动回退**：
-
-1. `my_portfolio.json` — 个人配置（中文名、港股内嵌）—— **优先检查**
-2. `invassistant-config.json` — 标准配置（英文，init_config.py 生成）—— **回退**
-
-如果使用 `my_portfolio.json`，`_normalize_config()` 会自动适配为标准格式（包括从文本字段提取港股持仓信息）。
-
 ### 3. 运行
 
 ```bash
-# V2 入口（推荐）— 模块化，支持双配置
-python check_portfolio_v2.py
-
-# V1 入口（旧版回退 — 单一胖脚本）
+# 全组合检查
 python check_portfolio.py
 
 # TSLA 详细分析
@@ -250,10 +240,8 @@ python scripts/send_feishu.py --test
 ```
 invassistant-skill/
 ├── SKILL.md                    # Skill 核心定义（触发词、工作流、逻辑说明）
-├── invassistant-config.json    # 标准配置文件（gitignored，含 webhook 密钥）
-├── my_portfolio.json           # 个人配置（可选，中文，优先加载）
-├── check_portfolio_v2.py       # V2 入口: 瘦壳 → scripts/portfolio_checker.py
-├── check_portfolio.py          # V1 入口: 旧版胖脚本（341行，回退用）
+├── invassistant-config.json    # 你的配置文件（gitignored，含 webhook 密钥）
+├── check_portfolio.py          # 快捷入口: 全组合检查
 ├── check_tsla_entry.py         # 快捷入口: TSLA 红线检查
 ├── check_detail.py             # 快捷入口: TSLA 详细分析
 ├── scripts/
@@ -261,7 +249,7 @@ invassistant-skill/
 │   ├── data_fetcher.py         # Yahoo Finance 数据获取（重试+限流）
 │   ├── redline_engine.py       # 三条红线入场引擎（可配置参数）
 │   ├── exit_engine.py          # 退出引擎（止盈/止损/趋势破位/动量衰竭/系统性风险）
-│   ├── portfolio_checker.py    # 组合检查主程序（双配置+入场+退出信号分发+报告格式化）
+│   ├── portfolio_checker.py    # 组合检查主程序（入场+退出信号分发+报告格式化）
 │   ├── send_wecom.py           # 企业微信推送
 │   ├── send_dingtalk.py        # 钉钉推送（支持加签）
 │   └── send_feishu.py          # 飞书推送（富文本/卡片）
@@ -271,13 +259,6 @@ invassistant-skill/
 ├── CONTRIBUTING.md             # 贡献指南
 └── README_zh.md                # 本文件
 ```
-
-## 📝 更新记录
-
-| 版本 | 日期 | 更新摘要 |
-|------|------|---------|
-| **2.0** | 2026-04-14 | 双配置支持（`my_portfolio.json` > `invassistant-config.json`，含 `_normalize_config()` 自动适配）；新增 V2 入口（`check_portfolio_v2.py` 瘦壳 → 模块化 `scripts/portfolio_checker.py`）；硬性规则（5条——信号优先级/红线是过滤器/不编造/HOLD保护/推送前确认）；失败处理（6种场景）；全部步骤标注[确定性]（零LLM调用）；退出引擎模块(`exit_engine.py`) |
-| **1.0** | 2026-03-15 | 首次发布：三条红线入场系统、多层退出引擎、3个推送渠道（企微/钉钉/飞书）、模块化架构 |
 
 ## 三条红线详解（入场系统）
 

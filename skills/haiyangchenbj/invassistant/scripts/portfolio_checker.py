@@ -42,81 +42,22 @@ from exit_engine import (
 
 
 def load_config():
-    """加载配置文件。
-
-    查找顺序:
-    1. 环境变量 INVASSISTANT_CONFIG 指定的路径
-    2. 项目根目录 my_portfolio.json (个人工作目录格式，自动适配)
-    3. 项目根目录 invassistant-config.json (通用 Skill 格式)
-    4. 内置默认配置
-    """
+    """加载配置文件。"""
     config_path = os.environ.get("INVASSISTANT_CONFIG")
     if config_path:
         config_path = Path(config_path)
-        if config_path.exists():
-            with open(config_path, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-            return _normalize_config(raw, config_path)
+    else:
+        config_path = PROJECT_DIR / "invassistant-config.json"
 
-    # 优先查找 my_portfolio.json
-    my_portfolio_path = PROJECT_DIR / "my_portfolio.json"
-    if my_portfolio_path.exists():
-        print(f"[配置] 使用 {my_portfolio_path.name}", file=sys.stderr)
-        with open(my_portfolio_path, "r", encoding="utf-8") as f:
-            raw = json.load(f)
-        return _normalize_config(raw, my_portfolio_path)
+    if not config_path.exists():
+        print(f"[警告] 配置文件不存在: {config_path}", file=sys.stderr)
+        print(f"[提示] 运行 python scripts/init_config.py 生成默认配置", file=sys.stderr)
+        # 返回内置默认配置
+        from init_config import DEFAULT_CONFIG
+        return DEFAULT_CONFIG
 
-    # 回退到 invassistant-config.json
-    skill_config_path = PROJECT_DIR / "invassistant-config.json"
-    if skill_config_path.exists():
-        print(f"[配置] 使用 {skill_config_path.name}", file=sys.stderr)
-        with open(skill_config_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    print(f"[警告] 无配置文件，使用内置默认", file=sys.stderr)
-    from init_config import DEFAULT_CONFIG
-    return DEFAULT_CONFIG
-
-
-def _normalize_config(raw, source_path):
-    """将 my_portfolio.json 格式适配为标准 invassistant-config 格式。
-
-    如果已经是标准格式(有 "portfolio" 键)则直接返回。
-    如果是中文个人格式(有 "策略总览" 键)则转换。
-    """
-    if "portfolio" in raw:
-        return raw  # 已是标准格式
-
-    # --- 中文个人格式 → 标准格式 ---
-    # 美股标的硬编码映射（my_portfolio.json 不含美股 watchlist，沿用默认）
-    from init_config import DEFAULT_CONFIG
-    config = json.loads(json.dumps(DEFAULT_CONFIG))  # deep copy
-
-    # 从 my_portfolio.json 中提取港股持仓信息，填入 watchlist 末尾
-    hk_holdings = raw.get("港股持仓", {}).get("标的", [])
-    for hk in hk_holdings:
-        code = hk.get("code", "")
-        if not code:
-            continue
-        config["portfolio"]["watchlist"].append({
-            "symbol": code,
-            "name": hk.get("name", code),
-            "strategy": "hold",
-            "exit_params": {
-                "cost_basis": hk.get("参考交割价", 0),
-                "position_size": hk.get("股数", 0),
-                "stop_loss_enabled": True,
-                "stop_loss_pct": -10,
-                "stop_loss_action": "清仓",
-                "take_profit_enabled": False,
-                "trend_break_enabled": False,
-                "momentum_fade_enabled": False
-            }
-        })
-
-    # 标记来源，方便调试
-    config["_source"] = str(source_path)
-    return config
+    with open(config_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def format_signal_report(results, market_detail, timestamp, systemic_risk=None):

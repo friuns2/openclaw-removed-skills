@@ -1,13 +1,18 @@
 {
   "owner": "haiyangchenbj",
   "slug": "invassistant",
-  "displayName": "Invassistant Skill",
+  "displayName": "InvAssistant",
   "latest": {
-    "version": "2.0.1",
-    "publishedAt": 1776227657833,
-    "commit": "https://github.com/openclaw/skills/commit/a5ff4a539d353b6fb643b8d06f8dca2cbae908a0"
+    "version": "2.1.0",
+    "publishedAt": 1776920161626,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.0.1",
+      "publishedAt": 1776227657833,
+      "commit": "https://github.com/openclaw/skills/commit/a5ff4a539d353b6fb643b8d06f8dca2cbae908a0"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1773293573403,
