@@ -3,11 +3,16 @@
   "slug": "vectcut",
   "displayName": "VectCut: The first \"To-Agent\" video editing platform. Build automated video workflows with our stable cloud APIs in Coze, Dify, or OpenClaw.",
   "latest": {
-    "version": "1.1.9",
-    "publishedAt": 1774776187145,
-    "commit": "https://github.com/openclaw/skills/commit/87c136e756624a57446b7c8b70ed0276dd950197"
+    "version": "1.5.7",
+    "publishedAt": 1776587053228,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.9",
+      "publishedAt": 1774776187145,
+      "commit": "https://github.com/openclaw/skills/commit/87c136e756624a57446b7c8b70ed0276dd950197"
+    },
     {
       "version": "1.1.6",
       "publishedAt": 1774187486163,
