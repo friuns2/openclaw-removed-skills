@@ -3,11 +3,16 @@
   "slug": "sendcloud",
   "displayName": "Sendcloud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163034217,
-    "commit": "https://github.com/openclaw/skills/commit/05d2e367880341d934ae9fcc6bd8e481e95634ef"
+    "version": "1.0.3",
+    "publishedAt": 1776787334980,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163034217,
+      "commit": "https://github.com/openclaw/skills/commit/05d2e367880341d934ae9fcc6bd8e481e95634ef"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773093759487,
