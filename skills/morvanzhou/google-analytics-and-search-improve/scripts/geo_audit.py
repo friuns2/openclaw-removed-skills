@@ -32,31 +32,13 @@ import time
 from pathlib import Path
 from urllib.parse import urljoin
 
-from dotenv import load_dotenv
+import utils  # noqa: F401  — triggers .env loading & warning suppression
 
 try:
     import requests
 except ImportError:
     print("Error: 'requests' package required. Install with: pip install requests", file=sys.stderr)
     sys.exit(1)
-
-
-# ---------------------------------------------------------------------------
-# Env loading
-# ---------------------------------------------------------------------------
-
-def _find_env():
-    d = Path(__file__).resolve().parent
-    while d != d.parent:
-        candidate = d / ".skills-data" / "google-analytics-and-search-improve" / ".env"
-        if candidate.exists():
-            return candidate
-        d = d.parent
-    return None
-
-_env_path = _find_env()
-if _env_path:
-    load_dotenv(_env_path)
 
 
 # ---------------------------------------------------------------------------

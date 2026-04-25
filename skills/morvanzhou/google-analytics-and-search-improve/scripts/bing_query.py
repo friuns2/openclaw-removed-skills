@@ -20,26 +20,9 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta
-from pathlib import Path
 
+import utils  # noqa: F401  — triggers .env loading & warning suppression
 import requests
-from dotenv import load_dotenv
-
-
-def _find_env():
-    """Walk up from script dir to find .skills-data/.../.env at project root."""
-    d = Path(__file__).resolve().parent
-    while d != d.parent:
-        candidate = d / ".skills-data" / "google-analytics-and-search-improve" / ".env"
-        if candidate.exists():
-            return candidate
-        d = d.parent
-    return None
-
-
-_env_path = _find_env()
-if _env_path:
-    load_dotenv(_env_path)
 
 
 BASE_URL = "https://ssl.bing.com/webmaster/api.svc/json"

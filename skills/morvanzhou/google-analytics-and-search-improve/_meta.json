@@ -3,11 +3,16 @@
   "slug": "google-analytics-and-search-improve",
   "displayName": "google analytics and search improve",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776153438428,
-    "commit": "https://github.com/openclaw/skills/commit/dc31c846832619f005a529d256cd2e806056fb81"
+    "version": "1.0.5",
+    "publishedAt": 1776820800609,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776153438428,
+      "commit": "https://github.com/openclaw/skills/commit/dc31c846832619f005a529d256cd2e806056fb81"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775548855318,
