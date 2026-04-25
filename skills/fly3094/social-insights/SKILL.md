@@ -2,8 +2,8 @@
 name: social-insights
 description: Social media analytics and performance tracking. Track engagement, optimal posting times, competitor analysis, AI-powered insights, auto-generated charts, and weekly/monthly reports.
 author: fly3094
-version: 1.2.0
-tags: [analytics, social-media, twitter, linkedin, tiktok, youtube, instagram, reporting, data, insights, charts, ai-predictions]
+version: 1.3.0
+tags: [analytics, social-media, twitter, linkedin, tiktok, youtube, instagram, threads, bluesky, reporting, data, insights, charts, ai-predictions]
 support: 
   paypal: 492227637@qq.com
   email: 492227637@qq.com
@@ -24,6 +24,15 @@ metadata:
           required: false
         LINKEDIN_ACCESS_TOKEN:
           description: LinkedIn Access Token
+          required: false
+        THREADS_TOKEN:
+          description: Threads API Token
+          required: false
+        BLUESKY_HANDLE:
+          description: Bluesky Handle (e.g., @user.bsky.social)
+          required: false
+        BLUESKY_APP_PASSWORD:
+          description: Bluesky App Password
           required: false
         ANALYTICS_PLATFORMS:
           description: Platforms to analyze (twitter,linkedin,all)
@@ -48,6 +57,8 @@ metadata:
 - 💡 **AI Recommendations**: Specific, actionable improvement suggestions
 - 📋 **Auto Reports**: Weekly/monthly reports delivered automatically (PNG/PDF)
 - 📉 **Data Visualization**: Beautiful charts and graphs for stakeholder presentations
+- 🧵 **Threads Support** (v1.3 NEW): Track Threads post performance and engagement
+- 🦋 **Bluesky Support** (v1.3 NEW): Monitor Bluesky analytics via AT Protocol
 - 📈 **Trend Prediction**: AI-powered growth forecasting (next 30/60/90 days)
 - 🎯 **Goal Tracking**: Set engagement goals and track progress with alerts
 
