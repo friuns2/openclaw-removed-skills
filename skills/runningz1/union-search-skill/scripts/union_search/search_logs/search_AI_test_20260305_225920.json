@@ -1,0 +1,83 @@
+{
+  "keyword": "AI test",
+  "timestamp": "2026-03-05T22:59:20.584112",
+  "results": [
+    {
+      "kind": "customsearch#result",
+      "title": "Why You Shouldn't Use AI to Write Your Tests : r/programming - Reddit",
+      "htmlTitle": "Why You Shouldn&#39;t Use <b>AI</b> to Write Your <b>Tests</b> : r/programming - Reddit",
+      "link": "https://www.reddit.com/r/programming/comments/1dqh17d/why_you_shouldnt_use_ai_to_write_your_tests/",
+      "displayLink": "www.reddit.com",
+      "snippet": "Jun 28, 2024 ... Additionally, the post highlights that relying on AI for test writing can lead to a false sense of security, as the generated tests might not ...",
+      "htmlSnippet": "Jun 28, 2024 <b>...</b> Additionally, the post highlights that relying on <b>AI</b> for <b>test</b> writing can lead to a false sense of security, as the generated <b>tests</b> might not&nbsp;...",
+      "formattedUrl": "https://www.reddit.com/r/.../why_you_shouldnt_use_ai_to_write_your_test...",
+      "htmlFormattedUrl": "https://www.reddit.com/r/.../why_you_shouldnt_use_<b>ai</b>_to_write_your_<b>test</b>...",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRR_RV6qE0wo7W0y1JvNBMZN6FwbRDJRrLNm3ZBRVvAAXSlwOIZ4ORrE3xA&s",
+            "width": "318",
+            "height": "159"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://external-preview.redd.it/why-you-shouldnt-use-ai-to-write-your-tests-v0-WRqFxmv3s2Mx_ZmDQocunS79axxhC6Sf5IeEua09mgE.jpg?width=1080&crop=smart&auto=webp&s=da92430904c8f9b9e3135f0048c116d12cc1ca91",
+            "theme-color": "#000000",
+            "og:image:width": "1080",
+            "og:type": "website",
+            "twitter:card": "summary_large_image",
+            "twitter:title": "r/programming on Reddit: Why You Shouldn't Use AI to Write Your Tests",
+            "og:site_name": "Reddit",
+            "og:title": "r/programming on Reddit: Why You Shouldn't Use AI to Write Your Tests",
+            "og:image:height": "540",
+            "msapplication-navbutton-color": "#000000",
+            "og:description": "Posted by u/fagnerbrack - 248 votes and 128 comments",
+            "twitter:image": "https://external-preview.redd.it/why-you-shouldnt-use-ai-to-write-your-tests-v0-WRqFxmv3s2Mx_ZmDQocunS79axxhC6Sf5IeEua09mgE.jpg?width=1080&crop=smart&auto=webp&s=da92430904c8f9b9e3135f0048c116d12cc1ca91",
+            "apple-mobile-web-app-status-bar-style": "black",
+            "twitter:site": "@reddit",
+            "viewport": "width=device-width, initial-scale=1, viewport-fit=cover",
+            "apple-mobile-web-app-capable": "yes",
+            "og:ttl": "600",
+            "og:url": "https://www.reddit.com/r/programming/comments/1dqh17d/why_you_shouldnt_use_ai_to_write_your_tests/?seeker-session=true"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://external-preview.redd.it/why-you-shouldnt-use-ai-to-write-your-tests-v0-WRqFxmv3s2Mx_ZmDQocunS79axxhC6Sf5IeEua09mgE.jpg?width=1080&crop=smart&auto=webp&s=da92430904c8f9b9e3135f0048c116d12cc1ca91"
+          }
+        ]
+      },
+      "_source_platform": "google"
+    }
+  ],
+  "metadata": {
+    "response_time": 4.452967,
+    "status": "success",
+    "total_platforms": 1,
+    "successful_platforms": 1,
+    "failed_platforms": 0,
+    "total_items": 1,
+    "platform_details": [
+      {
+        "platform": "google",
+        "status": "success",
+        "items": 1,
+        "timing_ms": 4449,
+        "error": null
+      }
+    ]
+  },
+  "verbose_info": {
+    "platform_details": [
+      {
+        "platform": "google",
+        "status": "success",
+        "items": 1,
+        "timing_ms": 4449,
+        "error": null
+      }
+    ],
+    "response_times": {}
+  }
+}

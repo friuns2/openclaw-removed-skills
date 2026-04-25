@@ -1,0 +1,13 @@
+export declare const ENTRY_POINT_ELEMENTS: string[];
+export declare const MOBILE_WIDTH = 600;
+export declare const BLOCK_ELEMENTS: string[];
+export declare const PRESERVE_ELEMENTS: Set<string>;
+export declare const INLINE_ELEMENTS: Set<string>;
+export declare const EXACT_SELECTORS: string[];
+export declare const TEST_ATTRIBUTES: string[];
+export declare const PARTIAL_SELECTORS: string[];
+export declare const FOOTNOTE_INLINE_REFERENCES: string;
+export declare const FOOTNOTE_LIST_SELECTORS: string;
+export declare const ALLOWED_EMPTY_ELEMENTS: Set<string>;
+export declare const ALLOWED_ATTRIBUTES: Set<string>;
+export declare const ALLOWED_ATTRIBUTES_DEBUG: Set<string>;

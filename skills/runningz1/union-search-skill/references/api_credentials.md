@@ -108,6 +108,30 @@ TAVILY_API_KEY=tvly-your_tavily_api_key_here
 
 ---
 
+## 百度千帆 API Key
+
+**获取地址**: https://console.bce.baidu.com/ai-search/qianfan/ais/console/apiKey
+
+**步骤**:
+1. 登录百度智能云账号
+2. 进入 AI Search 控制台
+3. 创建应用或在已有应用中查看 API Key
+4. 复制 `bce-v3/...` 格式的 API Key
+
+**配置方式**:
+```bash
+# 推荐变量名（新）
+BAIDU_API_KEY=your_baidu_api_key_here
+
+# 兼容旧变量名（可选）
+BAIDU_QIANFAN_API_KEY=your_baidu_api_key_here
+```
+
+**详细指引**:
+- 参考 [baidu_apikey_fetch.md](baidu_apikey_fetch.md)
+
+---
+
 ## YouTube Data API
 
 **获取地址**: https://console.cloud.google.com/apis/credentials
@@ -216,7 +240,7 @@ ANNASARCHIVE_PROXY=http://127.0.0.1:7890
 
 1. **不要提交凭据到 Git**
    - `.env` 文件已在 `.gitignore` 中
-   - 使用 `.env.example` 作为模板
+   - 使用 `ENV_TEMPLATE.txt` 作为模板
 
 2. **定期轮换密钥**
    - API Key 建议每 3-6 个月更换

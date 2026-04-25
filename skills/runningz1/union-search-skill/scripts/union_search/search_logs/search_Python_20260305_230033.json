@@ -1,0 +1,70 @@
+{
+  "keyword": "Python",
+  "timestamp": "2026-03-05T23:00:33.189532",
+  "results": [
+    {
+      "kind": "customsearch#result",
+      "title": "Welcome to Python.org",
+      "htmlTitle": "Welcome to <b>Python</b>.org",
+      "link": "https://www.python.org/",
+      "displayLink": "www.python.org",
+      "snippet": "The official home of the Python Programming Language.",
+      "htmlSnippet": "The official home of the <b>Python</b> Programming Language.",
+      "formattedUrl": "https://www.python.org/",
+      "htmlFormattedUrl": "https://www.<b>python</b>.org/",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-wRuWdLHQDV50Bvs30LBfvbDRoaXHxbiZ1CXFrsMnEPMz94ccOmx8z5xE&s",
+            "width": "200",
+            "height": "200"
+          }
+        ],
+        "metatags": [
+          {
+            "application-name": "Python.org",
+            "msapplication-tilecolor": "#3673a5",
+            "og:image": "https://www.python.org/static/opengraph-icon-200x200.png",
+            "og:type": "website",
+            "og:site_name": "Python.org",
+            "handheldfriendly": "True",
+            "apple-mobile-web-app-title": "Python.org",
+            "og:title": "Welcome to Python.org",
+            "msapplication-tileimage": "/static/metro-icon-144x144.png",
+            "msapplication-navbutton-color": "#3673a5",
+            "og:description": "The official home of the Python Programming Language",
+            "og:image:secure_url": "https://www.python.org/static/opengraph-icon-200x200.png",
+            "apple-mobile-web-app-status-bar-style": "black",
+            "viewport": "width=device-width, initial-scale=1.0",
+            "apple-mobile-web-app-capable": "yes",
+            "og:url": "https://www.python.org/",
+            "format-detection": "telephone=no"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://www.python.org/static/opengraph-icon-200x200.png"
+          }
+        ]
+      },
+      "_source_platform": "google"
+    }
+  ],
+  "metadata": {
+    "response_time": 4.925357,
+    "status": "success",
+    "total_platforms": 1,
+    "successful_platforms": 1,
+    "failed_platforms": 0,
+    "total_items": 1,
+    "platform_details": [
+      {
+        "platform": "google",
+        "status": "success",
+        "items": 1,
+        "timing_ms": 4916,
+        "error": null
+      }
+    ]
+  }
+}

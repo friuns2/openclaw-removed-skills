@@ -1,0 +1,357 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.XOembedExtractor = void 0;
+const _base_1 = require("./_base");
+const dom_1 = require("../utils/dom");
+class XOembedExtractor extends _base_1.BaseExtractor {
+    canExtract() {
+        return false;
+    }
+    extract() {
+        return {
+            content: '',
+            contentHtml: '',
+        };
+    }
+    canExtractAsync() {
+        return /\/(status|article)\/\d+/.test(this.url);
+    }
+    async extractAsync() {
+        // Try FxTwitter first — it has full tweet text and media
+        const fxResult = await this.tryExtractFxTwitter();
+        if (fxResult) {
+            return fxResult;
+        }
+        // Fall back to oEmbed (truncates long tweets but always available)
+        return this.extractOembed();
+    }
+    async extractOembed() {
+        const oembedUrl = `https://publish.twitter.com/oembed?url=${encodeURIComponent(this.url)}&omit_script=true`;
+        const response = await fetch(oembedUrl);
+        if (!response.ok) {
+            throw new Error(`oEmbed request failed: ${response.status}`);
+        }
+        const data = await response.json();
+        // Parse the oEmbed HTML to extract tweet text
+        const div = this.document.createElement('div');
+        div.appendChild((0, dom_1.parseHTML)(this.document, data.html));
+        // The oEmbed HTML contains a <blockquote> with <p> tags for text
+        // and an <a> tag for the date
+        const blockquote = div.querySelector('blockquote');
+        const paragraphs = blockquote?.querySelectorAll('p') || [];
+        const tweetText = Array.from(paragraphs)
+            .map(p => `<p>${(0, dom_1.serializeHTML)(p)}</p>`)
+            .join('\n');
+        const handle = data.author_url
+            ? `@${data.author_url.split('/').pop()}`
+            : '';
+        const dateLink = blockquote?.querySelector('a:last-child');
+        const dateText = dateLink?.textContent?.trim() || '';
+        const permalink = dateLink?.getAttribute('href') || this.url;
+        const escapedAuthorName = this.escapeHtml(data.author_name);
+        const escapedHandle = this.escapeHtml(handle);
+        const escapedDateText = this.escapeHtml(dateText);
+        const escapedPermalink = this.escapeHtml(permalink);
+        const contentHtml = `
+			<div class="tweet-thread">
+				<div class="main-tweet">
+					<div class="tweet">
+						<div class="tweet-header">
+							<span class="tweet-author"><strong>${escapedAuthorName}</strong> <span class="tweet-handle">${escapedHandle}</span></span>
+							${dateText ? `<a href="${escapedPermalink}" class="tweet-date">${escapedDateText}</a>` : ''}
+						</div>
+						${tweetText ? `<div class="tweet-text">${tweetText}</div>` : ''}
+					</div>
+				</div>
+			</div>
+		`.trim();
+        return {
+            content: contentHtml,
+            contentHtml: contentHtml,
+            variables: {
+                title: `Post by ${handle || data.author_name}`,
+                author: handle || data.author_name,
+                site: 'X (Twitter)',
+            }
+        };
+    }
+    async tryExtractFxTwitter() {
+        const match = this.url.match(/\/([a-zA-Z][a-zA-Z0-9_]{0,14})\/(status|article)\/(\d+)/);
+        if (!match)
+            return null;
+        try {
+            const data = await this.fetchFxTwitter(match[1], match[3]);
+            // If it's an article, use the rich article renderer
+            if (data.tweet?.article) {
+                return this.buildArticleResult(data);
+            }
+            // Otherwise use the full tweet text from FxTwitter
+            if (data.tweet?.text) {
+                return this.buildTweetResult(data);
+            }
+            return null;
+        }
+        catch {
+            return null;
+        }
+    }
+    async fetchFxTwitter(username, id) {
+        const apiUrl = `https://api.fxtwitter.com/${username}/status/${id}`;
+        const response = await fetch(apiUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; Defuddle/1.0; +https://defuddle.md)',
+            },
+        });
+        if (!response.ok) {
+            throw new Error(`FxTwitter API request failed: ${response.status}`);
+        }
+        return response.json();
+    }
+    buildArticleResult(data) {
+        const article = data.tweet.article;
+        const { blocks, entityMap } = article.content;
+        const contentHtml = this.renderArticle(blocks, entityMap, article.cover_media);
+        const handle = `@${data.tweet.author.screen_name}`;
+        return {
+            content: contentHtml,
+            contentHtml,
+            variables: {
+                title: article.title,
+                author: handle,
+                site: 'X (Twitter)',
+                description: article.preview_text,
+            }
+        };
+    }
+    buildTweetResult(data) {
+        const tweet = data.tweet;
+        const handle = `@${tweet.author.screen_name}`;
+        const contentHtml = this.renderTweet(tweet);
+        return {
+            content: contentHtml,
+            contentHtml,
+            variables: {
+                title: `Post by ${handle}`,
+                author: handle,
+                site: 'X (Twitter)',
+            }
+        };
+    }
+    renderTweet(tweet) {
+        const text = tweet.raw_text?.text || tweet.text;
+        // Filter out media facets — FxTwitter already strips pic.twitter.com
+        // links from the text, so media facet indices are stale
+        const facets = (tweet.raw_text?.facets || []).filter(f => f.type !== 'media');
+        // Split text into paragraphs on double newlines
+        const paragraphs = text.split(/\n\n+/);
+        let offset = 0;
+        const htmlParts = [];
+        for (const para of paragraphs) {
+            const paraStart = text.indexOf(para, offset);
+            const paraEnd = paraStart + para.length;
+            offset = paraEnd;
+            // Check if this paragraph is a blockquote (starts with >)
+            const isBlockquote = para.trimStart().startsWith('>');
+            let paraText = isBlockquote ? para.trimStart().slice(1).trimStart() : para;
+            const paraTextStart = isBlockquote
+                ? paraStart + (para.length - para.trimStart().length) + 1 + (para.trimStart().slice(1).length - para.trimStart().slice(1).trimStart().length)
+                : paraStart;
+            // Apply facets within this paragraph
+            const rendered = this.applyFacets(paraText, paraTextStart, paraEnd, facets);
+            // Handle line breaks within paragraph
+            const withBreaks = rendered.replace(/\n/g, '<br>');
+            if (isBlockquote) {
+                htmlParts.push(`<blockquote><p>${withBreaks}</p></blockquote>`);
+            }
+            else if (withBreaks.trim()) {
+                htmlParts.push(`<p>${withBreaks}</p>`);
+            }
+        }
+        // Append media images
+        if (tweet.media?.photos) {
+            for (const photo of tweet.media.photos) {
+                htmlParts.push(`<img src="${this.escapeHtml(photo.url)}" alt="">`);
+            }
+        }
+        const handle = this.escapeHtml(`@${tweet.author.screen_name}`);
+        const authorName = this.escapeHtml(tweet.author.name);
+        return `<div class="tweet-thread"><div class="main-tweet"><div class="tweet">` +
+            `<div class="tweet-header"><span class="tweet-author"><strong>${authorName}</strong> <span class="tweet-handle">${handle}</span></span></div>` +
+            `<div class="tweet-text">${htmlParts.join('\n')}</div>` +
+            `</div></div></div>`;
+    }
+    applyMarkers(text, markers) {
+        if (markers.length === 0) {
+            return this.escapeHtml(text);
+        }
+        markers.sort((a, b) => {
+            if (a.offset !== b.offset)
+                return a.offset - b.offset;
+            if (a.type === 'close' && b.type === 'open')
+                return -1;
+            if (a.type === 'open' && b.type === 'close')
+                return 1;
+            return 0;
+        });
+        let result = '';
+        let pos = 0;
+        for (const marker of markers) {
+            if (marker.offset > pos) {
+                result += this.escapeHtml(text.slice(pos, marker.offset));
+            }
+            result += marker.tag;
+            pos = marker.offset;
+        }
+        if (pos < text.length) {
+            result += this.escapeHtml(text.slice(pos));
+        }
+        return result;
+    }
+    applyFacets(text, textStart, textEnd, facets) {
+        const markers = [];
+        for (const facet of facets) {
+            const [fStart, fEnd] = facet.indices;
+            if (fEnd <= textStart || fStart >= textEnd)
+                continue;
+            const relStart = Math.max(0, fStart - textStart);
+            const relEnd = Math.min(text.length, fEnd - textStart);
+            if (facet.type === 'italic') {
+                markers.push({ offset: relStart, type: 'open', tag: '<em>' });
+                markers.push({ offset: relEnd, type: 'close', tag: '</em>' });
+            }
+            else if (facet.type === 'mention' && facet.text) {
+                const url = `https://x.com/${this.escapeHtml(facet.text)}`;
+                markers.push({ offset: relStart, type: 'open', tag: `<a href="${url}">` });
+                markers.push({ offset: relEnd, type: 'close', tag: '</a>' });
+            }
+            else if (facet.type === 'url' && facet.original) {
+                const url = this.escapeHtml(facet.original);
+                markers.push({ offset: relStart, type: 'open', tag: `<a href="${url}">` });
+                markers.push({ offset: relEnd, type: 'close', tag: '</a>' });
+            }
+        }
+        return this.applyMarkers(text, markers);
+    }
+    renderArticle(blocks, entityMap, coverMedia) {
+        const parts = [];
+        // Add cover image if available
+        if (coverMedia?.media_info?.original_img_url) {
+            parts.push(`<img src="${this.escapeHtml(coverMedia.media_info.original_img_url)}" alt="Cover image">`);
+        }
+        let i = 0;
+        while (i < blocks.length) {
+            const block = blocks[i];
+            if (block.type === 'unordered-list-item') {
+                // Group consecutive list items into a <ul>
+                const items = [];
+                while (i < blocks.length && blocks[i].type === 'unordered-list-item') {
+                    items.push(`<li>${this.renderInlineContent(blocks[i], entityMap)}</li>`);
+                    i++;
+                }
+                parts.push(`<ul>${items.join('')}</ul>`);
+                continue;
+            }
+            const html = this.renderBlock(block, entityMap);
+            if (html) {
+                parts.push(html);
+            }
+            i++;
+        }
+        return `<article class="x-article">${parts.join('')}</article>`;
+    }
+    renderBlock(block, entityMap) {
+        switch (block.type) {
+            case 'unstyled': {
+                if (!block.text.trim())
+                    return '';
+                return `<p>${this.renderInlineContent(block, entityMap)}</p>`;
+            }
+            case 'header-two':
+                return `<h2>${this.renderInlineContent(block, entityMap)}</h2>`;
+            case 'header-three':
+                return `<h3>${this.renderInlineContent(block, entityMap)}</h3>`;
+            case 'atomic':
+                return this.renderAtomicBlock(block, entityMap);
+            default: {
+                if (!block.text.trim())
+                    return '';
+                return `<p>${this.renderInlineContent(block, entityMap)}</p>`;
+            }
+        }
+    }
+    renderAtomicBlock(block, entityMap) {
+        if (block.entityRanges.length === 0)
+            return '';
+        const entityEntry = entityMap.find(e => e.key === String(block.entityRanges[0].key));
+        if (!entityEntry)
+            return '';
+        const entity = entityEntry.value;
+        switch (entity.type) {
+            case 'MEDIA': {
+                const caption = entity.data.caption;
+                if (caption) {
+                    return `<figure><figcaption>${this.escapeHtml(caption)}</figcaption></figure>`;
+                }
+                return '';
+            }
+            case 'MARKDOWN': {
+                const markdown = entity.data.markdown || '';
+                // Strip the wrapping ```...``` fences
+                const codeMatch = markdown.match(/^```(\w*)\n([\s\S]*?)\n?```$/);
+                if (codeMatch) {
+                    const lang = codeMatch[1];
+                    const code = codeMatch[2];
+                    const langAttr = lang ? ` class="language-${this.escapeHtml(lang)}" data-lang="${this.escapeHtml(lang)}"` : '';
+                    return `<pre><code${langAttr}>${this.escapeHtml(code)}</code></pre>`;
+                }
+                return `<pre><code>${this.escapeHtml(markdown)}</code></pre>`;
+            }
+            default:
+                return '';
+        }
+    }
+    renderInlineContent(block, entityMap) {
+        const text = block.text;
+        if (!text)
+            return '';
+        const markers = [];
+        for (const range of block.inlineStyleRanges) {
+            if (range.style === 'Bold') {
+                markers.push({ offset: range.offset, type: 'open', tag: '<strong>' });
+                markers.push({ offset: range.offset + range.length, type: 'close', tag: '</strong>' });
+            }
+        }
+        for (const range of block.entityRanges) {
+            const entityEntry = entityMap.find(e => e.key === String(range.key));
+            if (entityEntry?.value.type === 'LINK' && entityEntry.value.data.url) {
+                const url = this.escapeHtml(entityEntry.value.data.url);
+                markers.push({ offset: range.offset, type: 'open', tag: `<a href="${url}">` });
+                markers.push({ offset: range.offset + range.length, type: 'close', tag: '</a>' });
+            }
+        }
+        if (block.data?.mentions) {
+            for (const mention of block.data.mentions) {
+                const url = `https://x.com/${this.escapeHtml(mention.text)}`;
+                markers.push({ offset: mention.fromIndex, type: 'open', tag: `<a href="${url}">` });
+                markers.push({ offset: mention.toIndex, type: 'close', tag: '</a>' });
+            }
+        }
+        if (block.data?.urls) {
+            for (const urlData of block.data.urls) {
+                const url = this.escapeHtml(urlData.text);
+                markers.push({ offset: urlData.fromIndex, type: 'open', tag: `<a href="${url}">` });
+                markers.push({ offset: urlData.toIndex, type: 'close', tag: '</a>' });
+            }
+        }
+        return this.applyMarkers(text, markers);
+    }
+    escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+}
+exports.XOembedExtractor = XOembedExtractor;
+//# sourceMappingURL=x-oembed.js.map

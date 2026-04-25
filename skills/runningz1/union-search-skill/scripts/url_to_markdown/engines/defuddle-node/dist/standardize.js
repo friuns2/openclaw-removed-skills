@@ -1,0 +1,1045 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.standardizeContent = standardizeContent;
+const constants_1 = require("./constants");
+const math_1 = require("./elements/math");
+const code_1 = require("./elements/code");
+const headings_1 = require("./elements/headings");
+const images_1 = require("./elements/images");
+const utils_1 = require("./utils");
+const dom_1 = require("./utils/dom");
+// Module-level debug flag, set by standardizeContent for child functions
+let _debug = false;
+const ELEMENT_STANDARDIZATION_RULES = [
+    ...math_1.mathRules,
+    ...code_1.codeBlockRules,
+    ...headings_1.headingRules,
+    ...images_1.imageRules,
+    // Convert callout asides to blockquotes with data-callout attribute
+    {
+        selector: 'aside[class*="callout"]',
+        element: 'blockquote',
+        transform: (el, doc) => {
+            const blockquote = doc.createElement('blockquote');
+            // Extract callout type from class (e.g., "callout-tip" → "tip")
+            const typeClass = Array.from(el.classList).find(c => c.startsWith('callout-'));
+            const type = typeClass ? typeClass.replace('callout-', '') : 'note';
+            blockquote.setAttribute('data-callout', type);
+            // Get content from .callout-content div, or fall back to whole aside
+            const contentEl = el.querySelector('.callout-content');
+            (0, dom_1.transferContent)(contentEl || el, blockquote);
+            return blockquote;
+        }
+    },
+    // Convert divs with paragraph role to actual paragraphs
+    {
+        selector: 'div[data-testid^="paragraph"], div[role="paragraph"]',
+        element: 'p',
+        transform: (el, doc) => {
+            const p = doc.createElement('p');
+            (0, dom_1.transferContent)(el, p);
+            // Copy allowed attributes
+            Array.from(el.attributes).forEach(attr => {
+                if (constants_1.ALLOWED_ATTRIBUTES.has(attr.name)) {
+                    p.setAttribute(attr.name, attr.value);
+                }
+            });
+            return p;
+        }
+    },
+    // Convert divs with list roles to actual lists
+    {
+        selector: 'div[role="list"]',
+        element: 'ul',
+        // Custom handler for list type detection and transformation
+        transform: (el, doc) => {
+            // First determine if this is an ordered list
+            const firstItem = el.querySelector('div[role="listitem"] .label');
+            const label = firstItem?.textContent?.trim() || '';
+            const isOrdered = label.match(/^\d+\)/);
+            // Create the appropriate list type
+            const list = doc.createElement(isOrdered ? 'ol' : 'ul');
+            // Process each list item
+            const items = el.querySelectorAll('div[role="listitem"]');
+            items.forEach(item => {
+                const li = doc.createElement('li');
+                const content = item.querySelector('.content');
+                if (content) {
+                    // Convert any paragraph divs inside content
+                    const paragraphDivs = content.querySelectorAll('div[role="paragraph"]');
+                    paragraphDivs.forEach(div => {
+                        const p = doc.createElement('p');
+                        (0, dom_1.transferContent)(div, p);
+                        div.replaceWith(p);
+                    });
+                    // Convert any nested lists recursively
+                    const nestedLists = content.querySelectorAll('div[role="list"]');
+                    nestedLists.forEach(nestedList => {
+                        const firstNestedItem = nestedList.querySelector('div[role="listitem"] .label');
+                        const nestedLabel = firstNestedItem?.textContent?.trim() || '';
+                        const isNestedOrdered = nestedLabel.match(/^\d+\)/);
+                        const newNestedList = doc.createElement(isNestedOrdered ? 'ol' : 'ul');
+                        // Process nested items
+                        const nestedItems = nestedList.querySelectorAll('div[role="listitem"]');
+                        nestedItems.forEach(nestedItem => {
+                            const nestedLi = doc.createElement('li');
+                            const nestedContent = nestedItem.querySelector('.content');
+                            if (nestedContent) {
+                                // Convert paragraph divs in nested items
+                                const nestedParagraphs = nestedContent.querySelectorAll('div[role="paragraph"]');
+                                nestedParagraphs.forEach(div => {
+                                    const p = doc.createElement('p');
+                                    (0, dom_1.transferContent)(div, p);
+                                    div.replaceWith(p);
+                                });
+                                (0, dom_1.transferContent)(nestedContent, nestedLi);
+                            }
+                            newNestedList.appendChild(nestedLi);
+                        });
+                        nestedList.replaceWith(newNestedList);
+                    });
+                    (0, dom_1.transferContent)(content, li);
+                }
+                list.appendChild(li);
+            });
+            return list;
+        }
+    },
+    {
+        selector: 'div[role="listitem"]',
+        element: 'li',
+        // Custom handler for list item content
+        transform: (el, doc) => {
+            const content = el.querySelector('.content');
+            if (!content)
+                return el;
+            // Convert any paragraph divs inside content
+            const paragraphDivs = content.querySelectorAll('div[role="paragraph"]');
+            paragraphDivs.forEach(div => {
+                const p = doc.createElement('p');
+                (0, dom_1.transferContent)(div, p);
+                div.replaceWith(p);
+            });
+            return content;
+        }
+    }
+];
+function standardizeContent(element, metadata, doc, debug = false) {
+    _debug = debug;
+    standardizeSpaces(element);
+    // Remove HTML comments
+    removeHtmlComments(element);
+    // Handle H1 elements - remove first one and convert others to H2
+    standardizeHeadings(element, metadata.title, doc);
+    // Wrap code elements with white-space: pre in <pre> before attribute stripping
+    wrapPreformattedCode(element, doc);
+    // Convert embedded content to standard formats
+    standardizeElements(element, doc);
+    // If not debug mode, do the full cleanup
+    if (!debug) {
+        // First pass of div flattening
+        flattenWrapperElements(element, doc);
+        // Strip unwanted attributes
+        stripUnwantedAttributes(element, debug);
+        // Unwrap bare spans (no attributes remaining after stripping)
+        unwrapBareSpans(element);
+        // Unwrap javascript: links — keep text, remove the link
+        const jsLinks = Array.from(element.querySelectorAll('a[href^="javascript:"]'));
+        jsLinks.forEach(link => {
+            while (link.firstChild) {
+                link.parentNode?.insertBefore(link.firstChild, link);
+            }
+            link.remove();
+        });
+        // Unwrap anchor links that wrap headings (e.g. clickable section headers)
+        const headingAnchors = Array.from(element.querySelectorAll('a[href^="#"]'));
+        headingAnchors.forEach(link => {
+            if (link.querySelector('h1, h2, h3, h4, h5, h6')) {
+                while (link.firstChild) {
+                    link.parentNode?.insertBefore(link.firstChild, link);
+                }
+                link.remove();
+            }
+        });
+        // Remove obsolete plugin elements
+        element.querySelectorAll('object, embed, applet').forEach(el => el.remove());
+        // Remove empty elements
+        removeEmptyElements(element);
+        // Remove trailing headings
+        removeTrailingHeadings(element);
+        // Remove orphaned leading/trailing <hr> elements
+        removeOrphanedDividers(element);
+        // Final pass of div flattening after cleanup operations
+        flattenWrapperElements(element, doc);
+        // Standardize consecutive br elements
+        stripExtraBrElements(element);
+        // Clean up empty lines
+        removeEmptyLines(element, doc);
+    }
+    else {
+        // In debug mode, still do basic cleanup but preserve structure
+        stripUnwantedAttributes(element, debug);
+        removeTrailingHeadings(element);
+        stripExtraBrElements(element);
+        (0, utils_1.logDebug)(_debug, 'Debug mode: Skipping div flattening to preserve structure');
+    }
+}
+/**
+ * Wrap <code> elements that have white-space: pre (via inline style)
+ * in a <pre> element, so they get treated as code blocks.
+ */
+function wrapPreformattedCode(element, doc) {
+    const codeElements = Array.from(element.querySelectorAll('code'));
+    for (const code of codeElements) {
+        // Skip if already inside a <pre>
+        if (code.closest('pre'))
+            continue;
+        // Check inline style for white-space: pre
+        const style = code.getAttribute('style') || '';
+        if (!/white-space\s*:\s*pre/.test(style))
+            continue;
+        // Wrap in <pre>
+        const pre = doc.createElement('pre');
+        code.parentNode?.insertBefore(pre, code);
+        pre.appendChild(code);
+    }
+}
+function standardizeSpaces(element) {
+    const processNode = (node) => {
+        // Skip pre and code elements
+        if ((0, utils_1.isElement)(node)) {
+            const tag = node.tagName.toLowerCase();
+            if (tag === 'pre' || tag === 'code') {
+                return;
+            }
+        }
+        // Process text nodes
+        if ((0, utils_1.isTextNode)(node)) {
+            const text = node.textContent || '';
+            // Replace &nbsp; with regular spaces, preserving them between words
+            const newText = text.replace(/\xA0/g, ' ');
+            if (newText !== text) {
+                node.textContent = newText;
+            }
+        }
+        // Process children recursively
+        if (node.hasChildNodes()) {
+            Array.from(node.childNodes).forEach(processNode);
+        }
+    };
+    processNode(element);
+}
+function removeTrailingHeadings(element) {
+    let removedCount = 0;
+    const hasContentAfter = (el) => {
+        // Check if there's any meaningful content after this element
+        let nextContent = '';
+        let sibling = el.nextSibling;
+        // First check direct siblings
+        while (sibling) {
+            if ((0, utils_1.isTextNode)(sibling)) { // TEXT_NODE
+                nextContent += sibling.textContent || '';
+            }
+            else if ((0, utils_1.isElement)(sibling)) { // ELEMENT_NODE
+                // If we find an element sibling, check its content
+                nextContent += sibling.textContent || '';
+            }
+            sibling = sibling.nextSibling;
+        }
+        // If we found meaningful content at this level, return true
+        if (nextContent.trim()) {
+            return true;
+        }
+        // If no content found at this level and we have a parent,
+        // check for content after the parent
+        const parent = el.parentElement;
+        if (parent && parent !== element) {
+            return hasContentAfter(parent);
+        }
+        return false;
+    };
+    // Process all headings from bottom to top
+    const headings = Array.from(element.querySelectorAll('h1, h2, h3, h4, h5, h6'))
+        .reverse();
+    for (const heading of headings) {
+        if (!hasContentAfter(heading)) {
+            heading.remove();
+            removedCount++;
+        }
+        else {
+            // Stop processing once we find a heading with content after it
+            break;
+        }
+    }
+    if (removedCount > 0) {
+        (0, utils_1.logDebug)(_debug, 'Removed trailing headings:', removedCount);
+    }
+}
+function removeOrphanedDividers(element) {
+    // Remove leading <hr> elements (skipping whitespace text nodes)
+    while (true) {
+        let node = element.firstChild;
+        while (node && (0, utils_1.isTextNode)(node) && !(node.textContent || '').trim()) {
+            node = node.nextSibling;
+        }
+        if (node && (0, utils_1.isElement)(node) && node.tagName.toLowerCase() === 'hr') {
+            node.remove();
+        }
+        else {
+            break;
+        }
+    }
+    // Remove trailing <hr> elements (skipping whitespace text nodes)
+    while (true) {
+        let node = element.lastChild;
+        while (node && (0, utils_1.isTextNode)(node) && !(node.textContent || '').trim()) {
+            node = node.previousSibling;
+        }
+        if (node && (0, utils_1.isElement)(node) && node.tagName.toLowerCase() === 'hr') {
+            node.remove();
+        }
+        else {
+            break;
+        }
+    }
+}
+function standardizeHeadings(element, title, doc) {
+    const normalizeText = (text) => {
+        return text
+            .replace(/\u00A0/g, ' ') // Convert non-breaking spaces to regular spaces
+            .replace(/\s+/g, ' ') // Normalize all whitespace to single spaces
+            .trim()
+            .toLowerCase();
+    };
+    const h1s = element.getElementsByTagName('h1');
+    Array.from(h1s).forEach(h1 => {
+        const h2 = doc.createElement('h2');
+        (0, dom_1.transferContent)(h1, h2);
+        // Copy allowed attributes
+        Array.from(h1.attributes).forEach(attr => {
+            if (constants_1.ALLOWED_ATTRIBUTES.has(attr.name)) {
+                h2.setAttribute(attr.name, attr.value);
+            }
+        });
+        h1.parentNode?.replaceChild(h2, h1);
+    });
+    // Remove first H2 if it matches title
+    const h2s = element.getElementsByTagName('h2');
+    if (h2s.length > 0) {
+        const firstH2 = h2s[0];
+        const firstH2Text = normalizeText(firstH2.textContent || '');
+        const normalizedTitle = normalizeText(title);
+        if (normalizedTitle && normalizedTitle === firstH2Text) {
+            firstH2.remove();
+        }
+    }
+}
+function removeHtmlComments(element) {
+    let removedCount = 0;
+    // Get all elements and check their child nodes
+    const allElements = Array.from(element.getElementsByTagName('*'));
+    // Process each element's child nodes
+    allElements.forEach(el => {
+        const childNodes = Array.from(el.childNodes);
+        childNodes.forEach(node => {
+            if ((0, utils_1.isCommentNode)(node)) {
+                node.remove();
+                removedCount++;
+            }
+        });
+    });
+    (0, utils_1.logDebug)(_debug, 'Removed HTML comments:', removedCount);
+}
+function stripUnwantedAttributes(element, debug) {
+    let attributeCount = 0;
+    const processElement = (el) => {
+        // Skip SVG elements - preserve all their attributes
+        if (el.tagName.toLowerCase() === 'svg' || el.namespaceURI === 'http://www.w3.org/2000/svg') {
+            return;
+        }
+        const attributes = Array.from(el.attributes);
+        const tag = el.tagName.toLowerCase();
+        attributes.forEach(attr => {
+            const attrName = attr.name.toLowerCase();
+            const attrValue = attr.value;
+            // Special cases for preserving specific attributes
+            if (
+            // Preserve footnote IDs
+            (attrName === 'id' && (attrValue.startsWith('fnref:') || // Footnote reference
+                attrValue.startsWith('fn:') || // Footnote content
+                attrValue === 'footnotes' // Footnotes container
+            )) ||
+                // Preserve code block language classes and footnote backref class
+                (attrName === 'class' && ((tag === 'code' && attrValue.startsWith('language-')) ||
+                    attrValue === 'footnote-backref'))) {
+                return;
+            }
+            // In debug mode, allow debug attributes and data- attributes
+            if (debug) {
+                if (!constants_1.ALLOWED_ATTRIBUTES.has(attrName) &&
+                    !constants_1.ALLOWED_ATTRIBUTES_DEBUG.has(attrName) &&
+                    !attrName.startsWith('data-')) {
+                    el.removeAttribute(attr.name);
+                    attributeCount++;
+                }
+            }
+            else {
+                // In normal mode, only allow standard attributes
+                if (!constants_1.ALLOWED_ATTRIBUTES.has(attrName)) {
+                    el.removeAttribute(attr.name);
+                    attributeCount++;
+                }
+            }
+        });
+    };
+    processElement(element);
+    element.querySelectorAll('*').forEach(processElement);
+    (0, utils_1.logDebug)(_debug, 'Stripped attributes:', attributeCount);
+}
+function unwrapBareSpans(element) {
+    // Process deepest spans first so nested bare spans collapse in one pass
+    const spans = Array.from(element.querySelectorAll('span')).reverse();
+    let unwrappedCount = 0;
+    for (const span of spans) {
+        if (!span.isConnected)
+            continue;
+        if (span.attributes.length > 0)
+            continue;
+        const parent = span.parentNode;
+        if (!parent)
+            continue;
+        // Replace span with its children
+        while (span.firstChild) {
+            parent.insertBefore(span.firstChild, span);
+        }
+        span.remove();
+        unwrappedCount++;
+    }
+    // Merge adjacent text nodes left behind in one pass
+    if (unwrappedCount > 0) {
+        element.normalize();
+    }
+    (0, utils_1.logDebug)(_debug, 'Unwrapped bare spans:', unwrappedCount);
+}
+function removeEmptyElements(element) {
+    let removedCount = 0;
+    let iterations = 0;
+    let keepRemoving = true;
+    while (keepRemoving) {
+        iterations++;
+        keepRemoving = false;
+        // Get all elements without children, working from deepest first
+        const emptyElements = Array.from(element.getElementsByTagName('*')).filter(el => {
+            if (constants_1.ALLOWED_EMPTY_ELEMENTS.has(el.tagName.toLowerCase())) {
+                return false;
+            }
+            // Check if element has only whitespace or &nbsp;
+            const textContent = el.textContent || '';
+            const hasOnlyWhitespace = textContent.trim().length === 0;
+            const hasNbsp = textContent.includes('\u00A0'); // Unicode non-breaking space
+            // Check if element has no meaningful children
+            const hasNoChildren = !el.hasChildNodes() ||
+                (Array.from(el.childNodes).every(node => {
+                    if ((0, utils_1.isTextNode)(node)) { // TEXT_NODE
+                        const nodeText = node.textContent || '';
+                        return nodeText.trim().length === 0 && !nodeText.includes('\u00A0');
+                    }
+                    return false;
+                }));
+            // Special case: Check for divs that only contain spans with commas
+            if (el.tagName.toLowerCase() === 'div') {
+                const children = Array.from(el.children);
+                const hasOnlyCommaSpans = children.length > 0 && children.every(child => {
+                    if (child.tagName.toLowerCase() !== 'span')
+                        return false;
+                    const content = child.textContent?.trim() || '';
+                    return content === ',' || content === '' || content === ' ';
+                });
+                if (hasOnlyCommaSpans)
+                    return true;
+            }
+            return hasOnlyWhitespace && !hasNbsp && hasNoChildren;
+        });
+        if (emptyElements.length > 0) {
+            emptyElements.forEach(el => {
+                el.remove();
+                removedCount++;
+            });
+            keepRemoving = true;
+        }
+    }
+    (0, utils_1.logDebug)(_debug, 'Removed empty elements:', removedCount, 'iterations:', iterations);
+}
+function stripExtraBrElements(element) {
+    let processedCount = 0;
+    const startTime = Date.now();
+    // Get all br elements directly
+    const brElements = Array.from(element.getElementsByTagName('br'));
+    // Keep track of consecutive br elements
+    let consecutiveBrs = [];
+    // Helper to process collected br elements
+    const processBrs = () => {
+        if (consecutiveBrs.length > 2) {
+            // Keep only two br elements
+            for (let i = 2; i < consecutiveBrs.length; i++) {
+                consecutiveBrs[i].remove();
+                processedCount++;
+            }
+        }
+        consecutiveBrs = [];
+    };
+    // Process all br elements
+    brElements.forEach(currentNode => {
+        // Check if this br is consecutive with previous ones
+        let isConsecutive = false;
+        if (consecutiveBrs.length > 0) {
+            const lastBr = consecutiveBrs[consecutiveBrs.length - 1];
+            let node = currentNode.previousSibling;
+            // Skip whitespace text nodes
+            while (node && (0, utils_1.isTextNode)(node) && !node.textContent?.trim()) {
+                node = node.previousSibling;
+            }
+            if (node === lastBr) {
+                isConsecutive = true;
+            }
+        }
+        if (isConsecutive) {
+            consecutiveBrs.push(currentNode);
+        }
+        else {
+            // Process any previously collected brs before starting new group
+            processBrs();
+            consecutiveBrs = [currentNode];
+        }
+    });
+    // Process any remaining br elements
+    processBrs();
+    const endTime = Date.now();
+    (0, utils_1.logDebug)(_debug, 'Standardized br elements:', {
+        removed: processedCount,
+        processingTime: `${(endTime - startTime).toFixed(2)}ms`
+    });
+}
+function moveWhitespaceOutside(node, doc, direction) {
+    const child = direction === 'leading' ? node.firstChild : node.lastChild;
+    if (!child || !(0, utils_1.isTextNode)(child))
+        return 0;
+    const text = child.textContent || '';
+    const trimmed = direction === 'leading' ? text.replace(/^\s+/, '') : text.replace(/\s+$/, '');
+    if (trimmed === text || !node.parentNode)
+        return 0;
+    child.textContent = trimmed;
+    // Ensure a space exists on the outside
+    const neighbor = direction === 'leading' ? node.previousSibling : node.nextSibling;
+    const neighborHasSpace = neighbor && (0, utils_1.isTextNode)(neighbor) && (direction === 'leading'
+        ? (neighbor.textContent || '').endsWith(' ')
+        : (neighbor.textContent || '').startsWith(' '));
+    if (!neighborHasSpace) {
+        const insertBefore = direction === 'leading' ? node : node.nextSibling;
+        node.parentNode.insertBefore(doc.createTextNode(' '), insertBefore);
+    }
+    return 1;
+}
+function removeEmptyLines(element, doc) {
+    let removedCount = 0;
+    const startTime = Date.now();
+    // First pass: remove empty text nodes
+    const removeEmptyTextNodes = (node) => {
+        // Skip if inside pre or code
+        if ((0, utils_1.isElement)(node)) {
+            const tag = node.tagName.toLowerCase();
+            if (tag === 'pre' || tag === 'code') {
+                return;
+            }
+        }
+        // Process children first (depth-first)
+        const children = Array.from(node.childNodes);
+        children.forEach(removeEmptyTextNodes);
+        // Then handle this node
+        if ((0, utils_1.isTextNode)(node)) {
+            const text = node.textContent || '';
+            // If it's completely empty or just zero-width/invisible characters, remove it
+            // Preserve nodes with regular spaces or &nbsp; as they may separate words
+            if (!text || text.match(/^[\u200C\u200B\u200D\u200E\u200F\uFEFF]*$/)) {
+                node.parentNode?.removeChild(node);
+                removedCount++;
+            }
+            else {
+                // Clean up the text content while preserving important spaces
+                // Collapse newlines to spaces (CSS white-space: normal behavior)
+                const newText = text
+                    .replace(/[\n\r]+/g, ' ') // Newlines -> spaces
+                    .replace(/\t+/g, ' ') // Tabs -> spaces
+                    .replace(/ {2,}/g, ' ') // 2+ spaces -> 1 space
+                    .replace(/^[ ]+$/, ' ') // Multiple spaces between elements -> single space
+                    .replace(/\s+([,.!?:;])/g, '$1') // Remove spaces before punctuation
+                    // Clean up zero-width characters (except ZWNJ \u200C used in Farsi) and multiple non-breaking spaces
+                    .replace(/[\u200B\u200D\u200E\u200F\uFEFF]+/g, '')
+                    .replace(/(?:\xA0){2,}/g, '\xA0'); // Multiple &nbsp; -> single &nbsp;
+                if (newText !== text) {
+                    node.textContent = newText;
+                    removedCount += text.length - newText.length;
+                }
+            }
+        }
+    };
+    // Second pass: clean up empty elements and normalize spacing
+    const cleanupEmptyElements = (node) => {
+        if (!(0, utils_1.isElement)(node))
+            return;
+        // Skip pre and code elements
+        const tag = node.tagName.toLowerCase();
+        if (tag === 'pre' || tag === 'code') {
+            return;
+        }
+        // Process children first (depth-first)
+        Array.from(node.childNodes)
+            .filter(utils_1.isElement)
+            .forEach(cleanupEmptyElements);
+        // Then normalize this element's whitespace
+        node.normalize(); // Combine adjacent text nodes
+        // Special handling for block elements
+        const isBlockElement = (0, utils_1.getComputedStyle)(node)?.display === 'block';
+        // Remove whitespace-only text nodes at start/end
+        const whitespacePattern = isBlockElement ? /^[\n\r\t \u200C\u200B\u200D\u200E\u200F\uFEFF\xA0]*$/ : /^[\n\r\t\u200C\u200B\u200D\u200E\u200F\uFEFF]*$/;
+        while (node.firstChild &&
+            (0, utils_1.isTextNode)(node.firstChild) &&
+            (node.firstChild.textContent || '').match(whitespacePattern)) {
+            node.removeChild(node.firstChild);
+            removedCount++;
+        }
+        while (node.lastChild &&
+            (0, utils_1.isTextNode)(node.lastChild) &&
+            (node.lastChild.textContent || '').match(whitespacePattern)) {
+            node.removeChild(node.lastChild);
+            removedCount++;
+        }
+        // For inline elements, move leading/trailing spaces outside the element
+        if (!isBlockElement && constants_1.INLINE_ELEMENTS.has(tag) && node.parentNode) {
+            removedCount += moveWhitespaceOutside(node, doc, 'leading');
+            removedCount += moveWhitespaceOutside(node, doc, 'trailing');
+        }
+        // Ensure there's a space between inline elements if needed
+        if (!isBlockElement) {
+            const children = Array.from(node.childNodes);
+            for (let i = 0; i < children.length - 1; i++) {
+                const current = children[i];
+                const next = children[i + 1];
+                // Only add space between elements or between element and text
+                if ((0, utils_1.isElement)(current) || (0, utils_1.isElement)(next)) {
+                    // Get the text content
+                    const nextContent = next.textContent || '';
+                    const currentContent = current.textContent || '';
+                    // Don't add space if:
+                    // 1. Next content starts with punctuation or closing parenthesis
+                    // 2. Current content ends with punctuation or opening parenthesis
+                    // 3. There's already a space
+                    const nextStartsWithPunctuation = nextContent.match(/^[,.!?:;)\]]/);
+                    const currentEndsWithPunctuation = currentContent.match(/[,.!?:;(\[]\s*$/);
+                    const hasSpace = ((0, utils_1.isTextNode)(current) &&
+                        (current.textContent || '').endsWith(' ')) ||
+                        ((0, utils_1.isTextNode)(next) &&
+                            (next.textContent || '').startsWith(' '));
+                    // Only add space if none of the above conditions are true
+                    if (!nextStartsWithPunctuation &&
+                        !currentEndsWithPunctuation &&
+                        !hasSpace) {
+                        const space = doc.createTextNode(' ');
+                        node.insertBefore(space, next);
+                    }
+                }
+            }
+        }
+    };
+    // Run both passes
+    removeEmptyTextNodes(element);
+    cleanupEmptyElements(element);
+    const endTime = Date.now();
+    (0, utils_1.logDebug)(_debug, 'Removed empty lines:', {
+        charactersRemoved: removedCount,
+        processingTime: `${(endTime - startTime).toFixed(2)}ms`
+    });
+}
+function standardizeElements(element, doc) {
+    let processedCount = 0;
+    // Convert elements based on standardization rules
+    ELEMENT_STANDARDIZATION_RULES.forEach(rule => {
+        let elements;
+        try {
+            elements = element.querySelectorAll(rule.selector);
+        }
+        catch (e) {
+            // Some selectors use :has() which isn't supported by jsdom/nwsapi.
+            // Skip the rule gracefully in those environments.
+            return;
+        }
+        elements.forEach(el => {
+            if (rule.transform) {
+                // If there's a transform function, use it to create the new element
+                const transformed = rule.transform(el, doc);
+                el.replaceWith(transformed);
+                processedCount++;
+            }
+        });
+    });
+    // arXiv LaTeXML: Convert equation tables to <math> elements before attribute stripping
+    const equationTables = Array.from(element.querySelectorAll('table.ltx_equation, table.ltx_eqn_table, table.ltx_equationgroup'));
+    equationTables.forEach(table => {
+        const mathElements = table.querySelectorAll('math');
+        if (mathElements.length === 0)
+            return;
+        const fragment = doc.createDocumentFragment();
+        mathElements.forEach(mathEl => {
+            // Extract LaTeX from alttext or annotation
+            const alttext = mathEl.getAttribute('alttext');
+            const annotation = mathEl.querySelector('annotation[encoding="application/x-tex"]');
+            const latex = alttext || annotation?.textContent?.trim() || '';
+            if (!latex)
+                return;
+            const isBlock = mathEl.getAttribute('display') === 'block' ||
+                table.classList.contains('ltx_equation') ||
+                table.classList.contains('ltx_equationgroup');
+            const cleanMath = doc.createElement('math');
+            cleanMath.setAttribute('xmlns', 'http://www.w3.org/1998/Math/MathML');
+            cleanMath.setAttribute('display', isBlock ? 'block' : 'inline');
+            cleanMath.setAttribute('data-latex', latex);
+            cleanMath.textContent = latex;
+            fragment.appendChild(cleanMath);
+        });
+        if (fragment.childNodes.length > 0) {
+            table.replaceWith(fragment);
+            processedCount++;
+        }
+    });
+    // arXiv LaTeXML: Remove hidden ltx_note_outer spans (CSS display:none on arxiv.org)
+    // These contain duplicated footnote marks and "footnotemark:" text
+    const noteOuters = Array.from(element.querySelectorAll('span.ltx_note_outer'));
+    noteOuters.forEach(outer => {
+        outer.remove();
+        processedCount++;
+    });
+    // arXiv LaTeXML: Unwrap ltx_ref_tag spans so cross-reference numbers are preserved
+    // These spans (e.g. <span class="ltx_text ltx_ref_tag">1</span>) get stripped to bare
+    // spans during attribute stripping, then unwrapped — but their parent <a> links get
+    // removed by the exact selector `a[href^="#"][class*="ref" i]`. Fix by unwrapping the
+    // link and keeping the text inline.
+    const refLinks = Array.from(element.querySelectorAll('a.ltx_ref'));
+    refLinks.forEach(link => {
+        const refTag = link.querySelector('span.ltx_ref_tag, span.ltx_text.ltx_ref_tag');
+        if (refTag) {
+            // Replace the link with just the text content
+            const text = doc.createTextNode(link.textContent || '');
+            link.replaceWith(text);
+            processedCount++;
+        }
+    });
+    // Unwrap single-column layout tables (used for styling/positioning, not data)
+    const tables = Array.from(element.querySelectorAll('table'));
+    tables.forEach(table => {
+        if (!table.isConnected)
+            return;
+        const directCells = Array.from(table.querySelectorAll('td, th'))
+            .filter(cell => (0, dom_1.isDirectTableChild)(cell, table));
+        // Skip data tables that have direct header cells
+        if (directCells.some(cell => cell.tagName === 'TH'))
+            return;
+        const directRows = Array.from(table.querySelectorAll('tr'))
+            .filter(row => (0, dom_1.isDirectTableChild)(row, table));
+        if (directRows.length === 0)
+            return;
+        // Check that every row has at most one direct cell
+        const isSingleColumn = directRows.every(tr => directCells.filter(cell => cell.parentNode === tr).length <= 1);
+        if (!isSingleColumn)
+            return;
+        const fragment = doc.createDocumentFragment();
+        directCells.forEach(cell => {
+            while (cell.firstChild) {
+                fragment.appendChild(cell.firstChild);
+            }
+        });
+        table.replaceWith(fragment);
+        processedCount++;
+    });
+    // Convert lite-youtube elements
+    const liteYoutubeElements = element.querySelectorAll('lite-youtube');
+    liteYoutubeElements.forEach(el => {
+        const videoId = el.getAttribute('videoid');
+        if (!videoId)
+            return;
+        const iframe = doc.createElement('iframe');
+        iframe.width = '560';
+        iframe.height = '315';
+        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+        iframe.title = el.getAttribute('videotitle') || 'YouTube video player';
+        iframe.frameBorder = '0';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.setAttribute('allowfullscreen', '');
+        el.replaceWith(iframe);
+        processedCount++;
+    });
+    (0, utils_1.logDebug)(_debug, 'Converted embedded elements:', processedCount);
+}
+function flattenWrapperElements(element, doc) {
+    let processedCount = 0;
+    const startTime = Date.now();
+    // Process in batches to maintain performance
+    let keepProcessing = true;
+    // Helper function to check if an element directly contains inline content
+    // This helps prevent unwrapping divs that visually act as paragraphs.
+    function hasDirectInlineContent(el) {
+        for (const child of el.childNodes) {
+            // Check for non-empty text nodes
+            if ((0, utils_1.isTextNode)(child) && child.textContent?.trim()) {
+                return true;
+            }
+            // Check for element nodes that are considered inline
+            if ((0, utils_1.isElement)(child) && constants_1.INLINE_ELEMENTS.has(child.nodeName.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    const shouldPreserveElement = (el) => {
+        const tagName = el.tagName.toLowerCase();
+        // Check if element should be preserved
+        if (constants_1.PRESERVE_ELEMENTS.has(tagName))
+            return true;
+        // Check for semantic roles
+        const role = el.getAttribute('role');
+        if (role && ['article', 'main', 'navigation', 'banner', 'contentinfo'].includes(role)) {
+            return true;
+        }
+        // Check for semantic classes
+        const className = el.className;
+        if (typeof className === 'string' && className.toLowerCase().match(/(?:article|main|content|footnote|reference|bibliography)/)) {
+            return true;
+        }
+        // Check if element contains mixed content types that should be preserved
+        const children = Array.from(el.children);
+        const hasPreservedElements = children.some(child => constants_1.PRESERVE_ELEMENTS.has(child.tagName.toLowerCase()) ||
+            child.getAttribute('role') === 'article' ||
+            (child.className && typeof child.className === 'string' &&
+                child.className.toLowerCase().match(/(?:article|main|content|footnote|reference|bibliography)/)));
+        if (hasPreservedElements)
+            return true;
+        return false;
+    };
+    const isWrapperElement = (el) => {
+        // If it directly contains inline content, it's NOT a wrapper
+        if (hasDirectInlineContent(el)) {
+            return false;
+        }
+        // Check if it's just empty space
+        if (!el.textContent?.trim())
+            return true;
+        // Check if it only contains other block elements
+        const children = Array.from(el.children);
+        if (children.length === 0)
+            return true;
+        // Check if all children are block elements
+        const allBlockElements = children.every(child => {
+            const tag = child.tagName.toLowerCase();
+            return constants_1.BLOCK_ELEMENTS.includes(tag) ||
+                tag === 'p' || tag === 'h1' || tag === 'h2' ||
+                tag === 'h3' || tag === 'h4' || tag === 'h5' || tag === 'h6' ||
+                tag === 'ul' || tag === 'ol' || tag === 'pre' || tag === 'blockquote' ||
+                tag === 'figure';
+        });
+        if (allBlockElements)
+            return true;
+        // Check for common wrapper patterns
+        const className = el.className.toLowerCase();
+        const isWrapper = /(?:wrapper|container|layout|row|col|grid|flex|outer|inner|content-area)/i.test(className);
+        if (isWrapper)
+            return true;
+        // Check if it has excessive whitespace or empty text nodes
+        const textNodes = Array.from(el.childNodes).filter(node => (0, utils_1.isTextNode)(node) && node.textContent?.trim());
+        if (textNodes.length === 0)
+            return true;
+        // Check if it only contains block elements
+        const hasOnlyBlockElements = children.length > 0 && !children.some(child => {
+            const tag = child.tagName.toLowerCase();
+            return constants_1.INLINE_ELEMENTS.has(tag);
+        });
+        if (hasOnlyBlockElements)
+            return true;
+        return false;
+    };
+    // Function to process a single element
+    const processElement = (el) => {
+        // Skip processing if element has been removed or should be preserved
+        if (!el.isConnected || shouldPreserveElement(el))
+            return false;
+        const tagName = el.tagName.toLowerCase();
+        // Case 1: Element is truly empty (no text content, no child elements) and not self-closing
+        if (!constants_1.ALLOWED_EMPTY_ELEMENTS.has(tagName) && !el.children.length && !el.textContent?.trim()) {
+            el.remove();
+            processedCount++;
+            return true;
+        }
+        // Case 2: Top-level element - be more aggressive
+        if (el.parentElement === element) {
+            const children = Array.from(el.children);
+            const hasOnlyBlockElements = children.length > 0 && !children.some(child => {
+                const tag = child.tagName.toLowerCase();
+                return constants_1.INLINE_ELEMENTS.has(tag);
+            });
+            if (hasOnlyBlockElements) {
+                const fragment = doc.createDocumentFragment();
+                while (el.firstChild) {
+                    fragment.appendChild(el.firstChild);
+                }
+                el.replaceWith(fragment);
+                processedCount++;
+                return true;
+            }
+        }
+        // Case 3: Wrapper element - merge up aggressively
+        if (isWrapperElement(el)) {
+            // Special case: if element only contains block elements, merge them up
+            const children = Array.from(el.children);
+            const onlyBlockElements = !children.some(child => {
+                const tag = child.tagName.toLowerCase();
+                return constants_1.INLINE_ELEMENTS.has(tag);
+            });
+            if (onlyBlockElements) {
+                const fragment = doc.createDocumentFragment();
+                while (el.firstChild) {
+                    fragment.appendChild(el.firstChild);
+                }
+                el.replaceWith(fragment);
+                processedCount++;
+                return true;
+            }
+            // Otherwise handle as normal wrapper
+            const fragment = doc.createDocumentFragment();
+            while (el.firstChild) {
+                fragment.appendChild(el.firstChild);
+            }
+            el.replaceWith(fragment);
+            processedCount++;
+            return true;
+        }
+        // Case 4: Element only contains text and/or inline elements - convert to paragraph
+        const childNodes = Array.from(el.childNodes);
+        const hasOnlyInlineOrText = childNodes.length > 0 && childNodes.every(child => ((0, utils_1.isTextNode)(child)) ||
+            ((0, utils_1.isElement)(child) && constants_1.INLINE_ELEMENTS.has(child.nodeName.toLowerCase())));
+        if (hasOnlyInlineOrText && el.textContent?.trim()) { // Ensure there's actual content
+            const p = doc.createElement('p');
+            // Move all children (including inline tags like <font>) to the new <p>
+            while (el.firstChild) {
+                p.appendChild(el.firstChild);
+            }
+            el.replaceWith(p);
+            processedCount++;
+            return true;
+        }
+        // Case 5: Element has single child - unwrap only if child is block-level
+        if (el.children.length === 1) {
+            const child = el.firstElementChild;
+            const childTag = child.tagName.toLowerCase();
+            // Only unwrap if the single child is a block element and not preserved
+            if (constants_1.BLOCK_ELEMENTS.includes(childTag) && !shouldPreserveElement(child)) {
+                el.replaceWith(child);
+                processedCount++;
+                return true;
+            }
+        }
+        // Case 6: Deeply nested element - merge up
+        let nestingDepth = 0;
+        let parent = el.parentElement;
+        while (parent) {
+            const parentTag = parent.tagName.toLowerCase();
+            if (constants_1.BLOCK_ELEMENTS.includes(parentTag)) {
+                nestingDepth++;
+            }
+            parent = parent.parentElement;
+        }
+        // Only unwrap if nested AND does not contain direct inline content
+        if (nestingDepth > 0 && !hasDirectInlineContent(el)) {
+            const fragment = doc.createDocumentFragment();
+            while (el.firstChild) {
+                fragment.appendChild(el.firstChild);
+            }
+            el.replaceWith(fragment);
+            processedCount++;
+            return true;
+        }
+        return false;
+    };
+    // First pass: Process top-level wrapper elements
+    const processTopLevelElements = () => {
+        const topElements = Array.from(element.children).filter(el => constants_1.BLOCK_ELEMENTS.includes(el.tagName.toLowerCase()));
+        let modified = false;
+        topElements.forEach(el => {
+            if (processElement(el)) {
+                modified = true;
+            }
+        });
+        return modified;
+    };
+    // Second pass: Process remaining wrapper elements from deepest to shallowest
+    const processRemainingElements = () => {
+        // Get all wrapper elements
+        const allElements = Array.from(element.querySelectorAll(constants_1.BLOCK_ELEMENTS.join(',')))
+            .sort((a, b) => {
+            // Count nesting depth
+            const getDepth = (el) => {
+                let depth = 0;
+                let parent = el.parentElement;
+                while (parent) {
+                    const parentTag = parent.tagName.toLowerCase();
+                    if (constants_1.BLOCK_ELEMENTS.includes(parentTag))
+                        depth++;
+                    parent = parent.parentElement;
+                }
+                return depth;
+            };
+            return getDepth(b) - getDepth(a); // Process deepest first
+        });
+        let modified = false;
+        allElements.forEach(el => {
+            if (processElement(el)) {
+                modified = true;
+            }
+        });
+        return modified;
+    };
+    // Final cleanup pass - aggressively flatten remaining wrapper elements
+    const finalCleanup = () => {
+        const remainingElements = Array.from(element.querySelectorAll(constants_1.BLOCK_ELEMENTS.join(',')));
+        let modified = false;
+        remainingElements.forEach(el => {
+            // Check if element only contains paragraphs
+            const children = Array.from(el.children);
+            const onlyParagraphs = children.length > 0 && children.every(child => child.tagName.toLowerCase() === 'p');
+            // Unwrap if it only contains paragraphs OR is a non-preserved wrapper element
+            if (onlyParagraphs || (!shouldPreserveElement(el) && isWrapperElement(el))) {
+                const fragment = doc.createDocumentFragment();
+                while (el.firstChild) {
+                    fragment.appendChild(el.firstChild);
+                }
+                el.replaceWith(fragment);
+                processedCount++;
+                modified = true;
+            }
+        });
+        return modified;
+    };
+    // Execute all passes until no more changes
+    do {
+        keepProcessing = false;
+        if (processTopLevelElements())
+            keepProcessing = true;
+        if (processRemainingElements())
+            keepProcessing = true;
+        if (finalCleanup())
+            keepProcessing = true;
+    } while (keepProcessing);
+    const endTime = Date.now();
+    (0, utils_1.logDebug)(_debug, 'Flattened wrapper elements:', {
+        count: processedCount,
+        processingTime: `${(endTime - startTime).toFixed(2)}ms`
+    });
+}
+//# sourceMappingURL=standardize.js.map

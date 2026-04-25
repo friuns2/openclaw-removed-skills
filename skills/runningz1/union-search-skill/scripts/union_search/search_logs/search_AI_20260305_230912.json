@@ -1,0 +1,82 @@
+{
+  "keyword": "AI",
+  "timestamp": "2026-03-05T23:09:12.493042",
+  "results": [
+    {
+      "kind": "customsearch#result",
+      "title": "OpenAI",
+      "htmlTitle": "OpenAI",
+      "link": "https://openai.com/",
+      "displayLink": "openai.com",
+      "snippet": "oai Taisei 1x1. Taisei Corporation shapes the next generation of talent with ChatGPT. ChatGPT ; oai TrustBank English 1x1. Powering tax donations with AI powered ...",
+      "htmlSnippet": "oai Taisei 1x1. Taisei Corporation shapes the next generation of talent with ChatGPT. ChatGPT ; oai TrustBank English 1x1. Powering tax donations with <b>AI</b> powered&nbsp;...",
+      "formattedUrl": "https://openai.com/",
+      "htmlFormattedUrl": "https://openai.com/",
+      "pagemap": {
+        "cse_thumbnail": [
+          {
+            "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFK-eK6Aa7kb51G1x4B0Ew80oCOwsZU9cfWsPfeibOvy4Wd8ikJh2BBj4&s",
+            "width": "300",
+            "height": "168"
+          }
+        ],
+        "metatags": [
+          {
+            "og:image": "https://images.ctfassets.net/kftzwdyauwt9/3KGOHkSXu53naMuSFNaiwv/cdb0e2f899f524abb71314ab20e09c9c/OAI-white-on-black.png?w=1600&h=900&fit=fill",
+            "og:image:width": "1600",
+            "og:image:alt": "Abstract art featuring a striking contrast of teal and pink brushstrokes on an orange canvas, overlaid with the white OpenAI logo.",
+            "og:type": "website",
+            "twitter:card": "summary_large_image",
+            "twitter:title": "OpenAI",
+            "og:title": "OpenAI",
+            "og:image:height": "900",
+            "twitter:image:height": "900",
+            "og:description": "We believe our research will eventually lead to artificial general intelligence, a system that can solve human-level problems. Building safe and beneficial AGI is our mission.",
+            "twitter:image": "https://images.ctfassets.net/kftzwdyauwt9/3KGOHkSXu53naMuSFNaiwv/cdb0e2f899f524abb71314ab20e09c9c/OAI-white-on-black.png?w=1600&h=900&fit=fill",
+            "twitter:image:alt": "Abstract art featuring a striking contrast of teal and pink brushstrokes on an orange canvas, overlaid with the white OpenAI logo.",
+            "twitter:site": "@OpenAI",
+            "twitter:image:width": "1600",
+            "viewport": "width=device-width, initial-scale=1",
+            "twitter:description": "We believe our research will eventually lead to artificial general intelligence, a system that can solve human-level problems. Building safe and beneficial AGI is our mission.",
+            "og:locale": "en-US"
+          }
+        ],
+        "cse_image": [
+          {
+            "src": "https://images.ctfassets.net/kftzwdyauwt9/3KGOHkSXu53naMuSFNaiwv/cdb0e2f899f524abb71314ab20e09c9c/OAI-white-on-black.png?w=1600&h=900&fit=fill"
+          }
+        ]
+      },
+      "_source_platform": "google"
+    }
+  ],
+  "metadata": {
+    "response_time": 3.957717,
+    "status": "success",
+    "total_platforms": 1,
+    "successful_platforms": 1,
+    "failed_platforms": 0,
+    "total_items": 1,
+    "platform_details": [
+      {
+        "platform": "google",
+        "status": "success",
+        "items": 1,
+        "timing_ms": 3955,
+        "error": null
+      }
+    ]
+  },
+  "verbose_info": {
+    "platform_details": [
+      {
+        "platform": "google",
+        "status": "success",
+        "items": 1,
+        "timing_ms": 3955,
+        "error": null
+      }
+    ],
+    "response_times": {}
+  }
+}
