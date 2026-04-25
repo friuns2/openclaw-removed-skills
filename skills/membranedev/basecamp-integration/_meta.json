@@ -3,11 +3,16 @@
   "slug": "basecamp-integration",
   "displayName": "Basecamp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161765687,
-    "commit": "https://github.com/openclaw/skills/commit/915764f5c5a880e8ebce034d0502e7d0c64abc41"
+    "version": "1.0.3",
+    "publishedAt": 1776776571257,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161765687,
+      "commit": "https://github.com/openclaw/skills/commit/915764f5c5a880e8ebce034d0502e7d0c64abc41"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772758963939,
