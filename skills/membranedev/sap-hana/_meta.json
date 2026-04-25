@@ -3,11 +3,16 @@
   "slug": "sap-hana",
   "displayName": "Sap Hana",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161648898,
-    "commit": "https://github.com/openclaw/skills/commit/e74daa9f9d68f66150ef55af7c9fca86694f28ed"
+    "version": "1.0.3",
+    "publishedAt": 1776772935682,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161648898,
+      "commit": "https://github.com/openclaw/skills/commit/e74daa9f9d68f66150ef55af7c9fca86694f28ed"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772676143725,
