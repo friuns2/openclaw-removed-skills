@@ -3,11 +3,16 @@
   "slug": "freshservice",
   "displayName": "Freshservice",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162516894,
-    "commit": "https://github.com/openclaw/skills/commit/56234ca4c80b0ee39d1a921731aa77eadf607c2b"
+    "version": "1.0.3",
+    "publishedAt": 1776776789284,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162516894,
+      "commit": "https://github.com/openclaw/skills/commit/56234ca4c80b0ee39d1a921731aa77eadf607c2b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772805765347,
