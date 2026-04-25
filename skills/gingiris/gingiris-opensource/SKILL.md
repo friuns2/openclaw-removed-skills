@@ -1,7 +1,7 @@
 ---
-name: gingiris-opensource
+name: "Open Source Marketing & GitHub Stars Growth Playbook"
 description: |
-  GitHub Stars Growth & Open Source Marketing Playbook — How to get 10k+ GitHub stars. Complete OSS launch strategy from AFFiNE (33k stars in 18 months). Covers: GitHub trending tactics, awesome-list submissions, Reddit r/programming marketing, HackerNews launches, developer community building, Discord/Slack growth, tech influencer outreach, documentation SEO.
+  Grow your open source project from 0 to 10,000+ GitHub stars. The same strategy AFFiNE used to hit 33k stars in 18 months — includes OSS launch SOPs, HN/Reddit submission tactics, README optimization, KOL outreach lists, and developer community building templates. Multi-language: EN/ZH/JA/KO.
 
   🇨🇳 开源项目营销手册 | 🇯🇵 オープンソースマーケティング | 🇰🇷 오픈소스 마케팅
 
