@@ -1,11 +1,17 @@
 {
   "owner": "binggg",
   "slug": "miniprogram-development",
-  "displayName": "WeChat 小程序(Mini Program) development",
+  "displayName": "Miniprogram Development",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1773371564975,
-    "commit": "https://github.com/openclaw/skills/commit/3d5e3009107907f3a2692dbaf992ddfb4c439216"
+    "version": "1.13.0",
+    "publishedAt": 1776227187317,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1773371564975,
+      "commit": "https://github.com/openclaw/skills/commit/3d5e3009107907f3a2692dbaf992ddfb4c439216"
+    }
+  ]
 }
