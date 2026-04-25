@@ -3,11 +3,16 @@
   "slug": "swaggerhub",
   "displayName": "Swaggerhub",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163119442,
-    "commit": "https://github.com/openclaw/skills/commit/ddae25014da10bd9888bc604c304e8d7b5378264"
+    "version": "1.0.3",
+    "publishedAt": 1776791020571,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163119442,
+      "commit": "https://github.com/openclaw/skills/commit/ddae25014da10bd9888bc604c304e8d7b5378264"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773172945955,
