@@ -3,11 +3,16 @@
   "slug": "microsoft-teams-integration",
   "displayName": "Microsoft Teams",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162385636,
-    "commit": "https://github.com/openclaw/skills/commit/ea6aedd2f9212a33c0a1ba1bc22f91dc0562593a"
+    "version": "1.0.3",
+    "publishedAt": 1776772040922,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162385636,
+      "commit": "https://github.com/openclaw/skills/commit/ea6aedd2f9212a33c0a1ba1bc22f91dc0562593a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772640173522,
