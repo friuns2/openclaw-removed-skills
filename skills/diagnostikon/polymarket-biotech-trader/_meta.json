@@ -3,11 +3,16 @@
   "slug": "polymarket-biotech-trader",
   "displayName": "Polymarket Biotech Trader",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775988948795,
-    "commit": "https://github.com/openclaw/skills/commit/cfc3534cdf0e014d067e8d11137ef8639ca6d496"
+    "version": "0.0.2",
+    "publishedAt": 1776513118986,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775988948795,
+      "commit": "https://github.com/openclaw/skills/commit/cfc3534cdf0e014d067e8d11137ef8639ca6d496"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775316948007,
