@@ -3,11 +3,16 @@
   "slug": "klaviyo-integration",
   "displayName": "Klaviyo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162449661,
-    "commit": "https://github.com/openclaw/skills/commit/55826c02515ae3e7cdf5c56151a2eee46e351c61"
+    "version": "1.0.3",
+    "publishedAt": 1776773154178,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162449661,
+      "commit": "https://github.com/openclaw/skills/commit/55826c02515ae3e7cdf5c56151a2eee46e351c61"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772722967878,
