@@ -3,11 +3,16 @@
   "slug": "hasura",
   "displayName": "Hasura",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163077154,
-    "commit": "https://github.com/openclaw/skills/commit/13d8ec5cc0a0f48b38bd3e8647f99c46430475a9"
+    "version": "1.0.3",
+    "publishedAt": 1776790956801,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163077154,
+      "commit": "https://github.com/openclaw/skills/commit/13d8ec5cc0a0f48b38bd3e8647f99c46430475a9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773097361462,
