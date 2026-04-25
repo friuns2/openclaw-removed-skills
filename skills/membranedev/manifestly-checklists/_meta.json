@@ -3,11 +3,16 @@
   "slug": "manifestly-checklists",
   "displayName": "Manifestly Checklists",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164142493,
-    "commit": "https://github.com/openclaw/skills/commit/ec4dea290cbe83a810f199c701030c0ac2a718ea"
+    "version": "1.0.3",
+    "publishedAt": 1776830597121,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164142493,
+      "commit": "https://github.com/openclaw/skills/commit/ec4dea290cbe83a810f199c701030c0ac2a718ea"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773615773900,
