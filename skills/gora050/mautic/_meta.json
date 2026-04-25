@@ -3,11 +3,16 @@
   "slug": "mautic",
   "displayName": "Mautic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162550700,
-    "commit": "https://github.com/openclaw/skills/commit/64644b0d4e9e845d9cccf2cbec296a7ca9ff7bd4"
+    "version": "1.0.3",
+    "publishedAt": 1776776843954,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162550700,
+      "commit": "https://github.com/openclaw/skills/commit/64644b0d4e9e845d9cccf2cbec296a7ca9ff7bd4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772820151594,
