@@ -3,11 +3,16 @@
   "slug": "brex",
   "displayName": "Brex",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775162947917,
-    "commit": "https://github.com/openclaw/skills/commit/1126e91cc1c649105ad709e2a2589cf3f9ffa0ca"
+    "version": "1.0.4",
+    "publishedAt": 1776784076807,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775162947917,
+      "commit": "https://github.com/openclaw/skills/commit/1126e91cc1c649105ad709e2a2589cf3f9ffa0ca"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773083356716,
