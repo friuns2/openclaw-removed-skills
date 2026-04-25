@@ -3,11 +3,16 @@
   "slug": "beeswax",
   "displayName": "Beeswax",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162705416,
-    "commit": "https://github.com/openclaw/skills/commit/314deb53e149cefa4655387be3a3fcec440e8346"
+    "version": "1.0.3",
+    "publishedAt": 1776780312674,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162705416,
+      "commit": "https://github.com/openclaw/skills/commit/314deb53e149cefa4655387be3a3fcec440e8346"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772902956323,
