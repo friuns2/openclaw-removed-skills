@@ -3,11 +3,16 @@
   "slug": "adp-workforce",
   "displayName": "Adp Workforce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162441724,
-    "commit": "https://github.com/openclaw/skills/commit/62fef28a6085c1e0a080d261acfd8a7846662d75"
+    "version": "1.0.3",
+    "publishedAt": 1776773137573,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162441724,
+      "commit": "https://github.com/openclaw/skills/commit/62fef28a6085c1e0a080d261acfd8a7846662d75"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772722953726,
