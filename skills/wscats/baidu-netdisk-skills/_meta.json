@@ -1,11 +1,17 @@
 {
   "owner": "wscats",
   "slug": "baidu-netdisk-skills",
-  "displayName": "Baidu Netdisk Skills",
+  "displayName": "百度网盘",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773587199974,
-    "commit": "https://github.com/openclaw/skills/commit/60d84c5a596247189cb665d4c7d9dc20ac028638"
+    "version": "1.0.1",
+    "publishedAt": 1775347516444,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773587199974,
+      "commit": "https://github.com/openclaw/skills/commit/60d84c5a596247189cb665d4c7d9dc20ac028638"
+    }
+  ]
 }
