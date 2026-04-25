@@ -3,11 +3,16 @@
   "slug": "polymarket-legal-regulatory-trader",
   "displayName": "Polymarket Legal Regulatory Trader",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775317220280,
-    "commit": "https://github.com/openclaw/skills/commit/47d3c41749b7ab70121a49ff5169c2afd55acd05"
+    "version": "0.0.2",
+    "publishedAt": 1776513412850,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775317220280,
+      "commit": "https://github.com/openclaw/skills/commit/47d3c41749b7ab70121a49ff5169c2afd55acd05"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1773782172489,
