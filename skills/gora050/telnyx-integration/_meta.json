@@ -3,11 +3,16 @@
   "slug": "telnyx-integration",
   "displayName": "Telnyx",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163392864,
-    "commit": "https://github.com/openclaw/skills/commit/b3236c98c892d186bbfe5c0d8ce693ae01aba2f6"
+    "version": "1.0.3",
+    "publishedAt": 1776798401223,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163392864,
+      "commit": "https://github.com/openclaw/skills/commit/b3236c98c892d186bbfe5c0d8ce693ae01aba2f6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773266603431,
