@@ -3,11 +3,16 @@
   "slug": "netsuite",
   "displayName": "Netsuite",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162352237,
-    "commit": "https://github.com/openclaw/skills/commit/b08c5bfeb900539efc74efaeb091b897ac7f1d48"
+    "version": "1.0.3",
+    "publishedAt": 1776771983814,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162352237,
+      "commit": "https://github.com/openclaw/skills/commit/b08c5bfeb900539efc74efaeb091b897ac7f1d48"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772636536735,
