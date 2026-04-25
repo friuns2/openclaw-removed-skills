@@ -3,11 +3,16 @@
   "slug": "google-my-business",
   "displayName": "Google My Business",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163976029,
-    "commit": "https://github.com/openclaw/skills/commit/43cc8df144a9f61b9e073d558038943de0427b0a"
+    "version": "1.0.3",
+    "publishedAt": 1776823463512,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163976029,
+      "commit": "https://github.com/openclaw/skills/commit/43cc8df144a9f61b9e073d558038943de0427b0a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773536532661,
