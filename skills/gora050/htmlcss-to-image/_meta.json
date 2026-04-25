@@ -3,11 +3,16 @@
   "slug": "htmlcss-to-image",
   "displayName": "Htmlcss To Image",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163854256,
-    "commit": "https://github.com/openclaw/skills/commit/e6d197ffa47bfd9453368966495e5a71df3a3a21"
+    "version": "1.0.3",
+    "publishedAt": 1776812809280,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163854256,
+      "commit": "https://github.com/openclaw/skills/commit/e6d197ffa47bfd9453368966495e5a71df3a3a21"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773460953114,
