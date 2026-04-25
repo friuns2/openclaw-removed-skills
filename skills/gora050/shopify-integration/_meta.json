@@ -3,11 +3,16 @@
   "slug": "shopify-integration",
   "displayName": "Shopify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162369081,
-    "commit": "https://github.com/openclaw/skills/commit/a808530a86ead21cb4bf3e477da9ac5b8a6ac6b7"
+    "version": "1.0.3",
+    "publishedAt": 1776772012218,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162369081,
+      "commit": "https://github.com/openclaw/skills/commit/a808530a86ead21cb4bf3e477da9ac5b8a6ac6b7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772636561617,
