@@ -41,7 +41,10 @@
 | `3d-icon` | 现代3D图标、光效、微渐变 | modern 3D style icons, subtle glow, depth |
 | `flat-vector` | 扁平矢量、干净线条、无阴影 | flat vector, clean lines, no shadows, solid colors |
 | `hand-drawn` | 手绘马克笔、不均匀线条 | hand-drawn marker style, uneven strokes, sketch quality |
+| `painterly` | 水彩/油画质感、柔和边缘、艺术感 | watercolor soft edges, painterly brushstrokes, dreamy artistic |
+| `digital` | 数据可视化、仪表盘风、打磨感 | polished digital render, data dashboard aesthetic, clean gradients |
 | `screen-print` | 丝网印刷、半色调、2-4色 | screen print poster art, halftone dots, 2-4 flat colors, stencil-cut |
+| `chalk` | 黑板粉笔、教学感、粗糙质感 | chalkboard style, chalk texture, rough hand-lettering, dark background |
 
 ### 维度 4：文字密度（Text）
 
@@ -50,14 +53,125 @@
 | `none` | 纯视觉，无文字 | 抽象概念封面（少用） |
 | `title-only` | 仅主标题（**默认**） | 大多数文章 |
 | `title-subtitle` | 主标题 + 副标题/系列名 | 系列文章、教程 |
+| `text-rich` | 标题 + 副标题 + 2-4 关键词标签 | 公告、多要点文章 |
 
 ### 维度 5：视觉强度（Mood）
 
-| 级别 | 效果 | 适用 |
-|------|------|------|
-| `subtle` | 低对比、柔和、专业克制 | 方法论、学术类 |
-| `balanced` | 中等对比（**默认**） | 大多数文章 |
-| `bold` | 高对比、强冲击、饱和色 | 重磅观点、争议话题 |
+| 级别 | 效果 | 量化调整 | 适用 |
+|------|------|---------|------|
+| `subtle` | 低对比、柔和、专业克制 | 对比度 -20~30%，饱和度 -20~30%，线条更细 | 方法论、学术类 |
+| `balanced` | 中等对比（**默认**） | 标准 | 大多数文章 |
+| `bold` | 高对比、强冲击、饱和色 | 对比度 +20~30%，饱和度 +20~30%，线条更粗 | 重磅观点、争议话题 |
+
+### 维度 6：字体风格（Font）← 新增
+
+| 字体 | 视觉感受 | Prompt 关键词 | 适用 |
+|------|---------|-------------|------|
+| `clean` | 无衬线、现代、干净（**默认**） | clean sans-serif typography | 技术、产品、大多数文章 |
+| `handwritten` | 手写体、亲和、个人感 | handwritten casual font style | 个人故事、生活感悟 |
+| `serif` | 衬线体、经典、学术感 | classic serif editorial typography | 深度长文、学术、书评 |
+| `display` | 粗重装饰体、冲击力 | bold decorative display font | 公告、事件、促销类 |
+
+---
+
+## 构图核心原则（融合 baoyu-cover-image Base Prompt）
+
+每次生成封面图，prompt 末尾必须附加以下构图约束：
+
+```
+Composition rules:
+- Generous whitespace: maintain 40-60% breathing room, avoid cluttered layouts
+- Visual anchor: main element centered or offset left (reserve right side for title area if title included)
+- Information hierarchy: one dominant focal point, 1-2 supporting elements, decorative accents
+- Clean backgrounds: solid colors or subtle gradients, no complex textures or patterns
+- Characters: simplified silhouettes only, NO realistic human faces or bodies
+- Icon vocabulary: use simple recognizable icons to represent concepts (see table below)
+- Chinese text must be clearly readable, text and visuals must not overlap
+- No emoji (renders as color blocks in browser screenshots)
+```
+
+### 图标词汇表速查
+
+| 类别 | 图标 |
+|------|------|
+| 技术 | 代码窗口、齿轮、电路、云、锁、API 括号 |
+| 创意 | 灯泡、火箭、靶心、拼图、钥匙、放大镜 |
+| 沟通 | 对话气泡、聊天点、喇叭、信封 |
+| 成长 | 植物/幼苗、树、箭头、图表、山 |
+| 工具 | 扳手、铅笔、画笔、清单、时钟 |
+| 抽象概念 | 无穷≡、太极、螺旋、层叠/堆叠、桥、门/传送门、镜子/倒影 |
+
+### 图标组合模式
+
+通过组合图标创建视觉比喻：
+
+| 组合 | 表达 |
+|------|------|
+| 灯泡 + 齿轮 | 创新工程 |
+| 植物 + 代码 | 有机技术增长 |
+| 火箭 + 靶心 | 精准加速 |
+| 钥匙 + 锁 | 安全解决方案 |
+| 桥 + 人物 | 团队连接 |
+| 放大镜 + 数据 | 分析洞察 |
+
+### 渲染风格与图标处理
+
+| Rendering | 图标风格 |
+|-----------|----------|
+| `3d-icon` | 立体感、微渐变、光影 |
+| `flat-vector` | 几何化、简单形状、均匀填充 |
+| `hand-drawn` | 涂鸦感、有机线条、手绘质感 |
+| `painterly` | 柔和边缘、笔触感 |
+| `digital` | 精确、微渐变、打磨 |
+| `screen-print` | 模板切割、单色块、半色调 |
+| `chalk` | 粗糙、粉笔质感、网格对齐 |
+
+---
+
+## Rendering 详细定义
+
+每种渲染风格的线条/纹理/深度/元素规范，prompt 中引用对应条目：
+
+| Rendering | Lines | Texture | Depth | Prompt 特征词 |
+|-----------|-------|---------|-------|---------------|
+| `3d-icon` | 干净圆滑 | 微光泰效果 | 有立体感和阴影 | modern 3D icons, subtle glow, soft shadows, depth layers |
+| `flat-vector` | 均匀精确、无变化 | 无纹理、纯色填充 | 完全扁平 | flat vector, clean uniform lines, solid fills, no shadows, no gradients |
+| `hand-drawn` | 不均匀、略有抖动 | 马克笔/铅笔质感 | 最小深度 | hand-drawn marker sketch, slightly shaky lines, paper texture, doodle quality |
+| `painterly` | 柔和笔触、模糊边缘 | 水彩/油画质感 | 柔和边缘、光影渗透 | watercolor soft washes, visible brushstrokes, dreamy blending, artistic texture |
+| `digital` | 精确干净、圆滑 | 微光泰效果 | 微层次感 | polished digital render, clean gradients, dashboard aesthetic, subtle depth |
+| `screen-print` | 模板切割、粗犷 | 半色调点/色块边缘 | 扁平、无深度 | screen print poster, halftone dots, 2-4 flat colors, stencil-cut edges, bold contrast |
+| `chalk` | 粗糙手写、不均匀 | 粉笔飞粉感 | 扁平 | chalkboard style, chalk dust texture, rough hand-lettering, dark background, educational feel |
+
+---
+
+## 参考图处理流程
+
+当提供参考图时（老板给了风格参考、竞品封面等）：
+
+### 流程
+
+1. **保存参考图**：复制到 `refs/ref-NN-{slug}.{ext}`
+2. **深度分析**：提取具体、可复现的元素（不是“有个 logo”，而是“logo 用平行竖线拼 m”）
+3. **分类用途**：
+   - `direct`：参考图直接传给模型 `--ref`（需要复现人物/核心元素时）
+   - `style`：只提取视觉风格（线条、纹理、构图）
+   - `palette`：只提取配色方案（hex 色值）
+4. **写入 prompt**：用 MUST/REQUIRED 前缀强制约束，不能只传 `--ref` 不写文字描述（模型经常忽略 ref 图片）
+
+### 深度分析提取清单
+
+| 分析维度 | 好的描述 | 差的描述 |
+|----------|---------|----------|
+| 配色 | “#2D4A3E 深青 + #F5F0E0 米白” | “有深色和浅色” |
+| 线条 | “2px 均匀线条，圆角端点” | “有线条” |
+| 布局 | “底部 30% 暗色横幅放品牌” | “有个横幅” |
+| 字体 | “大写、宽字距、无衬线” | “有文字” |
+
+### 优先级规则
+
+- 参考图 **覆盖默认**：如果参考图风格与预设配色/渲染冲突，参考图优先
+- 具体 > 模糊：提取具体元素，不要“干净风格”这种模糊描述
+- 生成后检查：确认参考元素在产出中可见，不可见则加强 prompt 重试
 
 ---
 
@@ -65,14 +179,14 @@
 
 ### Type × Rendering
 
-| Type \ Rendering | 3d-icon | flat-vector | hand-drawn | screen-print |
-|---|:---:|:---:|:---:|:---:|
-| `hero` | ✓✓ | ✓ | ✓ | ✓ |
-| `conceptual` | ✓✓ | ✓✓ | ✗ | ✓ |
-| `typography` | ✓ | ✓✓ | ✓ | ✓✓ |
-| `metaphor` | ✓ | ✓ | ✓✓ | ✓✓ |
-| `split` | ✓✓ | ✓✓ | ✓ | ✓ |
-| `minimal` | ✓ | ✓✓ | ✓ | ✓✓ |
+| Type \ Rendering | 3d-icon | flat-vector | hand-drawn | painterly | digital | screen-print | chalk |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `hero` | ✓✓ | ✓ | ✓ | ✓ | ✓✓ | ✓ | ✗ |
+| `conceptual` | ✓✓ | ✓✓ | ✗ | ✗ | ✓✓ | ✓ | ✓ |
+| `typography` | ✓ | ✓✓ | ✓ | ✗ | ✓ | ✓✓ | ✓✓ |
+| `metaphor` | ✓ | ✓ | ✓✓ | ✓✓ | ✓ | ✓✓ | ✓ |
+| `split` | ✓✓ | ✓✓ | ✓ | ✗ | ✓✓ | ✓ | ✗ |
+| `minimal` | ✓ | ✓✓ | ✓ | ✓✓ | ✓ | ✓✓ | ✓ |
 
 ### Type × Mood
 
@@ -87,26 +201,54 @@
 
 ### Palette × Rendering
 
-| Palette \ Rendering | 3d-icon | flat-vector | hand-drawn | screen-print |
-|---|:---:|:---:|:---:|:---:|
-| `tech-blue` | ✓✓ | ✓ | ✗ | ✓ |
-| `insight-blue` | ✓✓ | ✓✓ | ✗ | ✓ |
-| `action-orange` | ✓✓ | ✓ | ✓ | ✓ |
-| `solution-green` | ✓✓ | ✓ | ✓ | ✗ |
-| `trend-cyan` | ✓✓ | ✓✓ | ✗ | ✓ |
-| `mono` | ✓ | ✓✓ | ✓ | ✓✓ |
-| `warm` | ✓ | ✓ | ✓✓ | ✓ |
-| `dark` | ✓✓ | ✓ | ✗ | ✓✓ |
+| Palette \ Rendering | 3d-icon | flat-vector | hand-drawn | painterly | digital | screen-print | chalk |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `tech-blue` | ✓✓ | ✓ | ✗ | ✗ | ✓✓ | ✓ | ✗ |
+| `insight-blue` | ✓✓ | ✓✓ | ✗ | ✗ | ✓✓ | ✓ | ✗ |
+| `action-orange` | ✓✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| `solution-green` | ✓✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
+| `trend-cyan` | ✓✓ | ✓✓ | ✗ | ✗ | ✓✓ | ✓ | ✗ |
+| `mono` | ✓ | ✓✓ | ✓ | ✗ | ✓ | ✓✓ | ✓✓ |
+| `warm` | ✓ | ✓ | ✓✓ | ✓✓ | ✓ | ✓ | ✗ |
+| `dark` | ✓✓ | ✓ | ✗ | ✗ | ✓✓ | ✓✓ | ✓✓ |
 
 > ✓✓ 强推荐 | ✓ 可用 | ✗ 不推荐
 
-**兼容检查**：选定五维度后，检查上方 3 张矩阵中是否有 ✗ 组合。有则提示调整。
+### Type × Text
+
+| Type \ Text | none | title-only | title-subtitle | text-rich |
+|---|:---:|:---:|:---:|:---:|
+| `hero` | ✓ | ✓✓ | ✓✓ | ✓ |
+| `conceptual` | ✓✓ | ✓✓ | ✓ | ✓ |
+| `typography` | ✗ | ✓ | ✓✓ | ✓✓ |
+| `metaphor` | ✓✓ | ✓ | ✓ | ✗ |
+| `split` | ✓ | ✓✓ | ✓ | ✓ |
+| `minimal` | ✓✓ | ✓✓ | ✓ | ✗ |
+
+### Font × Rendering
+
+| Font \ Rendering | 3d-icon | flat-vector | hand-drawn | painterly | digital | screen-print | chalk |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `clean` | ✓✓ | ✓✓ | ✗ | ✗ | ✓✓ | ✓ | ✗ |
+| `handwritten` | ✓ | ✓ | ✓✓ | ✓✓ | ✓ | ✗ | ✓✓ |
+| `serif` | ✓ | ✓ | ✗ | ✓ | ✓✓ | ✓ | ✗ |
+| `display` | ✓✓ | ✓✓ | ✓ | ✓ | ✓✓ | ✓✓ | ✓ |
+
+**兼容检查**：选定六维度后，检查上方 5 张矩阵中是否有 ✗ 组合。有则提示调整。
 
 ---
 
 ## 内容信号自动推荐
 
-根据文章关键词自动推荐五维度组合：
+**决策规则**（与小红书 presets.md 统一逻辑）：
+1. 扫描文章关键词，匹配下表第一个命中行
+2. 取推荐的六维度组合（或直接用预设快捷方式）
+3. 用上方兼容矩阵校验组合无 ✗
+4. 混合信号时取第一个匹配，不迭加多个维度推荐
+
+公众号用「六维度」因为封面图是 AI 生图需要细粒度控制；小红书用「预设」因为预设已封装最佳组合。两套体系底层逻辑一致：内容信号 → 自动推荐 → 兼容校验 → 生成。
+
+根据文章关键词自动推荐六维度组合：
 
 | 文章关键词/类型 | Type | Palette | Rendering | Text | Mood |
 |---------------|------|---------|-----------|------|------|
@@ -127,18 +269,24 @@
 
 常用组合一键选择：
 
-| 预设名 | Type | Palette | Rendering | 典型文章 |
-|--------|------|---------|-----------|---------|
-| `ai-product` | hero | tech-blue | 3d-icon | AI产品拆解（**最常用**） |
-| `methodology` | conceptual | insight-blue | flat-vector | 方法论/框架文 |
-| `bold-opinion` | typography | dark | screen-print | 观点输出/声明 |
-| `pm-growth` | metaphor | warm | hand-drawn | 个人成长/转型 |
-| `versus` | split | tech-blue | 3d-icon | 对比类文章 |
-| `zen-core` | minimal | mono | flat-vector | 极简深度文 |
-| `efficiency` | hero | action-orange | 3d-icon | 效率/实战 |
-| `trend-report` | hero | trend-cyan | 3d-icon | 行业观察 |
+| 预设名 | Type | Palette | Rendering | Font | 典型文章 |
+|--------|------|---------|-----------|------|---------|
+| `ai-product` | hero | tech-blue | 3d-icon | clean | AI产品拆解（**最常用**） |
+| `methodology` | conceptual | insight-blue | flat-vector | clean | 方法论/框架文 |
+| `bold-opinion` | typography | dark | screen-print | display | 观点输出/声明（mood=bold） |
+| `pm-growth` | metaphor | warm | hand-drawn | handwritten | 个人成长/转型 |
+| `versus` | split | tech-blue | 3d-icon | clean | 对比类文章 |
+| `zen-core` | minimal | mono | flat-vector | serif | 极简深度文（mood=subtle） |
+| `efficiency` | hero | action-orange | 3d-icon | clean | 效率/实战 |
+| `trend-report` | hero | trend-cyan | digital | clean | 行业观察/数据 |
+| `chalkboard` | conceptual | dark | chalk | handwritten | 教程/解释概念 |
+| `watercolor` | metaphor | warm | painterly | serif | 文学/艺术/反思 |
+| `cinematic` | hero | dark | screen-print | display | 电影感深度解读（mood=bold） |
+| `dashboard` | conceptual | insight-blue | digital | clean | 数据分析/SaaS拆解 |
 
-Text 和 Mood 默认为 `title-only` + `balanced`，除非预设特别指定（如 bold-opinion → bold）。
+Text 默认 `title-only`，Mood 默认 `balanced`，除非预设标注（如 bold-opinion/cinematic → bold，zen-core → subtle）。
+
+> ℹ️ 融合自 baoyu-cover-image v1.56.1 五维度体系 + Style Presets，适配公众号封面场景。
 
 ---
 
@@ -191,9 +339,13 @@ mood: [subtle/balanced/bold]
 - 横版，高质量
 ```
 
-### Seedream 调用
+### 生图调用
 
 ```bash
+# 首选：idealab Chat API（团队AK免费）
+<WORKSPACE>/scripts/generate-image.sh "[组装好的 prompt]" cover.jpg
+
+# 降级：Seedream（idealab 不可用时）
 <WORKSPACE>/scripts/seedream-generate.sh \
   "[组装好的 prompt]" \
   cover.jpg "2560x1440" 1
@@ -228,9 +380,9 @@ sips -c 1090 2560 cover.jpg
 
 ## 生图工具优先级
 
-1. **Seedream 5.0 Lite**（优先）：`<WORKSPACE>/scripts/seedream-generate.sh`，0.22元/张，无水印
-2. **nano-banana-pro**（备选）：Gemini 免费层级，需去水印
-3. **DashScope qwen-image-2.0-pro**（中文文字专用）：当 Seedream 中文渲染失败时
+1. **idealab Chat API**（首选）：`<WORKSPACE>/scripts/generate-image.sh`，团队AK免费无额度压力，~25s/张
+2. **Seedream 5.0 Lite**（降级）：`<WORKSPACE>/scripts/seedream-generate.sh`，0.22元/张，idealab不可用时
+3. **DashScope qwen-image-2.0-pro**（中文文字专用）：当中文渲染失败时
 4. **HTML 截图**（兜底）：typography 类型封面可用 HTML 精确控制文字
 
 ---

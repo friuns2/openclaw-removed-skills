@@ -3,11 +3,16 @@
   "slug": "wemp-ops",
   "displayName": "Wemp Ops",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775968728584,
-    "commit": "https://github.com/openclaw/skills/commit/40264fca6a9f9fb1fe84ca54a3a65d7866b19cc6"
+    "version": "1.0.4",
+    "publishedAt": 1776571444691,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775968728584,
+      "commit": "https://github.com/openclaw/skills/commit/40264fca6a9f9fb1fe84ca54a3a65d7866b19cc6"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775787828169,

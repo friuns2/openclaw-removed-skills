@@ -180,7 +180,7 @@ node scripts/setup.mjs
 
 ### Step 4: 封面图
 
-设计指南见 `references/cover-image-guide.md`。三种方案按优先级：
+设计指南见 `references/cover-image-guide.md`（六维度体系：Type/Palette/Rendering/Text/Mood/Font + 12 个预设 + 兼容矩阵 + 构图核心原则）。三种方案按优先级：
 
 **方案 A（优先）：idealab Chat API**
 - `<WORKSPACE>/scripts/generate-image.sh --prompt "prompt" --filename output.jpg`
@@ -216,8 +216,8 @@ node scripts/setup.mjs
    - 架构/分层/系统 → `framework` | 步骤/流程 → `flowchart` | vs/对比 → `comparison`
    - 数据/百分比 → `infographic` | 叙事/经历 → `scene` | 代码/界面 → `screenshot`
 
-3. **锁定全文 Style**（一篇文章只用一种 AI 生图风格）：
-   - 技术/产品文 → `notion-sketch`（默认）| 数据/架构文 → `tech-flat` | 故事/教育文 → `warm-doodle`
+3. **锁定全文 Style**（一篇文章只用一种 AI 生图风格，从 `cover-image-guide.md` 预设中选）：
+   - 技术/产品文 → `ai-product`（默认）| 数据/架构文 → `dashboard` | 故事/教育文 → `pm-growth` | 观点文 → `bold-opinion`
 
 4. **输出配图计划表**（保存到 `illustration-plan.md`），让老板确认后再生图。
    密度参考：2000 字 3 张、3000 字 4-5 张，正文配图硬上限 5 张。
@@ -299,6 +299,27 @@ python3 scripts/markdown_to_html.py --input article.md --theme tech --output art
 主题选择：tech（科技风，默认）、minimal（简约风）、business（商务风）。
 排版约束详见 `references/weixin-constraints.md`。
 
+#### Step 5.5: 外链转底部引用（微信外链不可点击问题）
+
+微信公众号不支持外链点击跳转，文章中的外链对读者没有交互价值。排版时自动处理：
+
+**处理规则**：
+1. 普通外链 `[text](https://example.com)` → 文中显示为 `text¹`（上标序号），链接收集到文末「引用链接」章节
+2. `https://mp.weixin.qq.com/...` 链接保留为直接链接（微信内部链接可点击）
+3. 裸链接（链接文本 = URL 本身）保留不动（已是展示型，读者可复制）
+4. 没有外链的文章跳过此步
+
+**文末引用格式**：
+```markdown
+---
+## 引用链接
+
+1. example.com: https://example.com/article
+2. GitHub: https://github.com/user/repo
+```
+
+**执行时机**：Markdown 转 HTML 之前处理（在 Markdown 层面替换，不是 HTML 层面）。可在 `markdown_to_html.py` 中集成，或作为单独的预处理步骤。
+
 如果有额外配图需要手动插入（非 Markdown 内嵌图片），先上传再手动插入 HTML。
 
 ### Step 6: 推送草稿箱
@@ -326,6 +347,20 @@ node scripts/publisher.mjs --publish --media-id <草稿media_id>
 
 **默认停在草稿箱，不自动发布。** 告知用户草稿已创建，确认后再发布。
 推送新版本时自动清理同标题旧草稿（`--no-cleanup` 跳过）。
+
+### Step 6+: 发布数据回流（推送草稿箱后自动执行）
+
+推送草稿箱成功后，顺便采集历史文章数据，用于选题评分校准。
+
+```
+1. browser(action=tabs, profile="user") 检查是否有 mp.weixin.qq.com tab
+2. 有 → browser(action=snapshot, targetId=<tab_id>) 读取发表记录页
+3. 从 snapshot 提取每篇文章的：标题、阅读量、点赞、分享、留言
+4. 自动更新 collections/topics/publish-feedback.md
+5. 没有 tab 或 snapshot 失败 → 跳过，不影响主流程
+```
+
+注意：此步不影响主流程，失败就跳过。数据用于选题评分校准（见 eval-criteria.md + publish-feedback.md）。
 
 ### Step 6.5: 五维内容自检（交付前必做）
 
