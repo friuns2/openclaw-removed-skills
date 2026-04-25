@@ -3,11 +3,16 @@
   "slug": "hibob",
   "displayName": "Hibob",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161821776,
-    "commit": "https://github.com/openclaw/skills/commit/511f8e0a1e2bbb6194e95b61fbda90530cb94db9"
+    "version": "1.0.3",
+    "publishedAt": 1776776669257,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161821776,
+      "commit": "https://github.com/openclaw/skills/commit/511f8e0a1e2bbb6194e95b61fbda90530cb94db9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772787745201,
