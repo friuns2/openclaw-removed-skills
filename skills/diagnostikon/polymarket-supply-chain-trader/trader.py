@@ -54,6 +54,8 @@ def get_client(live: bool = False) -> SimmerClient:
             venue=venue,
         )
         # Load tunable overrides set via the Simmer UI (SIMMER_* vars only).
+        if live:
+            _client.live = True
         try:
             _client.apply_skill_config(SKILL_SLUG)
         except AttributeError:

@@ -3,11 +3,16 @@
   "slug": "polymarket-supply-chain-trader",
   "displayName": "Polymarket Supply Chain Trader",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1775987830344,
-    "commit": "https://github.com/openclaw/skills/commit/e94a101ecd3e3ecdcb127cf4261e02d2125b03e6"
+    "version": "0.0.2",
+    "publishedAt": 1776513591652,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1775987830344,
+      "commit": "https://github.com/openclaw/skills/commit/e94a101ecd3e3ecdcb127cf4261e02d2125b03e6"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1775317356153,
