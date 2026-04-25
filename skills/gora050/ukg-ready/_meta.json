@@ -3,11 +3,16 @@
   "slug": "ukg-ready",
   "displayName": "Ukg Ready",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162721794,
-    "commit": "https://github.com/openclaw/skills/commit/e2b79a30134be01dec9b8b9c0d2be8d7d7926892"
+    "version": "1.0.3",
+    "publishedAt": 1776780342402,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162721794,
+      "commit": "https://github.com/openclaw/skills/commit/e2b79a30134be01dec9b8b9c0d2be8d7d7926892"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772910152584,
