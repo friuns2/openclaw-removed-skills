@@ -3,11 +3,16 @@
   "slug": "clearbit-integration",
   "displayName": "Clearbit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163719701,
-    "commit": "https://github.com/openclaw/skills/commit/63a470dad329856240a5dbb849aa57fa1600966d"
+    "version": "1.0.3",
+    "publishedAt": 1776808951511,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163719701,
+      "commit": "https://github.com/openclaw/skills/commit/63a470dad329856240a5dbb849aa57fa1600966d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773378149582,
