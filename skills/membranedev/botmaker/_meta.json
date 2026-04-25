@@ -3,11 +3,16 @@
   "slug": "botmaker",
   "displayName": "Botmaker",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163744392,
-    "commit": "https://github.com/openclaw/skills/commit/1688e4f0c2736e704cefeba21de297435cff2fad"
+    "version": "1.0.3",
+    "publishedAt": 1776812546165,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163744392,
+      "commit": "https://github.com/openclaw/skills/commit/1688e4f0c2736e704cefeba21de297435cff2fad"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773439344836,
