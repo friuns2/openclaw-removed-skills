@@ -3,9 +3,15 @@
   "slug": "google-vertex-ai",
   "displayName": "Google Vertex Ai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773378187408,
-    "commit": "https://github.com/openclaw/skills/commit/3987a8b46291ea5bcf15639fd981a76025134900"
+    "version": "1.0.1",
+    "publishedAt": 1776808983193,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773378187408,
+      "commit": "https://github.com/openclaw/skills/commit/3987a8b46291ea5bcf15639fd981a76025134900"
+    }
+  ]
 }
