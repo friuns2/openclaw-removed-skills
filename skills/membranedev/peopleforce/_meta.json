@@ -3,11 +3,16 @@
   "slug": "peopleforce",
   "displayName": "Peopleforce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162935917,
-    "commit": "https://github.com/openclaw/skills/commit/4a1d79871c7d2f83ee83a5c98082021484705151"
+    "version": "1.0.3",
+    "publishedAt": 1776898259927,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162935917,
+      "commit": "https://github.com/openclaw/skills/commit/4a1d79871c7d2f83ee83a5c98082021484705151"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773083296892,
