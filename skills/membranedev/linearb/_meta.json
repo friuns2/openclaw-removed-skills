@@ -3,11 +3,16 @@
   "slug": "linearb",
   "displayName": "Linearb",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164110925,
-    "commit": "https://github.com/openclaw/skills/commit/a5b29ba32eb9486e921b6eae3a8edccb1d879593"
+    "version": "1.0.3",
+    "publishedAt": 1776830544314,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164110925,
+      "commit": "https://github.com/openclaw/skills/commit/a5b29ba32eb9486e921b6eae3a8edccb1d879593"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773612138998,
