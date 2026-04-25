@@ -3,11 +3,16 @@
   "slug": "razorpay",
   "displayName": "Razorpay",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163155593,
-    "commit": "https://github.com/openclaw/skills/commit/bf39f170281bce2fcdb1d512e462833f7314cc20"
+    "version": "1.0.3",
+    "publishedAt": 1776791105146,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163155593,
+      "commit": "https://github.com/openclaw/skills/commit/bf39f170281bce2fcdb1d512e462833f7314cc20"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773173011308,
