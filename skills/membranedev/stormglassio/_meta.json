@@ -3,11 +3,16 @@
   "slug": "stormglassio",
   "displayName": "Stormglassio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164138335,
-    "commit": "https://github.com/openclaw/skills/commit/93590d4d86fb0f2d5ea1c86b525a1907cbb93a99"
+    "version": "1.0.3",
+    "publishedAt": 1776830589925,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164138335,
+      "commit": "https://github.com/openclaw/skills/commit/93590d4d86fb0f2d5ea1c86b525a1907cbb93a99"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773615765333,
