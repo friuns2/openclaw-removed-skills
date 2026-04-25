@@ -1,22 +1,57 @@
 ---
 name: token-pilot
 description: Automatic token optimization during interaction. Behavioral rules + plugin synergy + workspace analyzer. Pure Node.js, cross-platform. Activate on session start (rules auto-apply) or when user asks about token usage/cost/audit.
-version: 2.5.0
-author: beyou
+version: 3.6.0
+author: beyound87
 ---
 
 # Token Pilot
 
 ## 🚀 首次加载行动（Agent 必读）
 
-**当你第一次加载此技能时（新 session 或刚安装），主动执行以下操作：**
+**当你加载此技能时，立即按顺序执行：**
 
-1. **检查是否已跑过初始诊断**：查看 workspace 下有无 `token-pilot-audit.log` 文件
-   - 有 → 跳过，直接应用规则
-   - 没有 → 说明从未跑过诊断，**主动告知用户**：
-     > "检测到 token-pilot 首次加载，建议运行一次诊断扫描。我来帮你跑：`node C:\Users\Administrator\.openclaw\skills\token-pilot\scripts\audit.js --all`"
+**Step 1 — 检查是否已初始化**
 
-2. **触发时机**：用户说"开始工作"、"帮我做 XX"等开启对话时，如果检测到首次加载，**在正式回复前先提示诊断**，不要默默跳过
+```bash
+ls ~/.openclaw/skills/token-pilot/.initialized 2>/dev/null
+```
+
+- **文件存在** → 已初始化，跳过，进入 Step 2
+- **文件不存在** → 执行以下流程
+
+**Step 1b — 读取当前内容，告知用户将要做什么**
+
+注入前先了解现状：
+
+```bash
+for d in ~/.openclaw/agents/*/agent/AGENTS.md; do
+  agent=$(echo "$d" | sed 's|.*/agents/||;s|/agent/AGENTS.md||')
+  lines=$(wc -l < "$d" 2>/dev/null || echo 0)
+  echo "$agent: ${lines}行"
+done
+```
+
+将以下信息告知用户，**等待用户明确同意后**再执行注入：
+
+> "检测到尚未注入 Token 优化规则。计划向 [N] 只 Agent 的 AGENTS.md 末尾追加 36 行核心规则（9条，覆盖读文件/工具调用/写文件/Prompt Cache/动态内容上限/浏览器替代/重复任务封装/长上下文管理）。注入脚本会先显示预览并检测潜在重叠，需要你在终端确认一次。是否现在执行？"
+
+**Step 1c — 用户同意后执行注入**
+
+```bash
+bash ~/.openclaw/skills/token-pilot/scripts/init.sh
+```
+
+脚本会列出所有将受影响的 Agent 及当前状态，检测是否已有类似规则，然后等待终端确认后才写入。
+
+**Step 2 — 检查是否已跑过诊断**
+
+查看 workspace 下有无 `token-pilot-audit.log` 文件：
+- **有** → 跳过，直接应用规则
+- **没有** → 主动告知用户：
+  > "建议运行一次诊断扫描，帮你找出 token 消耗大户。我来帮你跑：`node ~/.openclaw/skills/token-pilot/scripts/audit.js --all`"
+
+**触发时机**：用户说"开始工作"、"帮我做 XX"等开启对话时，在正式回复前先完成以上检查，不要默默跳过。
 
 3. **Heartbeat cron 自动维护**（可选配置，降低长期维护成本）：
    如果用户 openclaw.json 中有 cron 配置，建议添加一条每周一次的优化扫描：
@@ -24,7 +59,7 @@ author: beyou
    {
      "kind": "agentTurn",
      "schedule": "0 9 * * 1",
-     "message": "运行 token-pilot 周度诊断：node C:\\Users\\Administrator\\.openclaw\\skills\\token-pilot\\scripts\\optimize.js --cron。输出建议但不自动修改配置，把结果摘要告诉我。",
+     "message": "运行 token-pilot 周度诊断：node ~/.openclaw/skills/token-pilot/scripts/optimize.js --cron。输出建议但不自动修改配置，把结果摘要告诉我。",
      "lightContext": true,
      "model": "Qwen/Qwen3-8B"
    }
@@ -35,7 +70,7 @@ author: beyou
 
 ## Auto-Apply Rules
 
-These 6 rules apply every session automatically. No scripts needed.
+These 9 rules (R1/R4/R5/R6/R8/R9/R10 + 浏览器替代优先级 + 长上下文管理) are injected via init.sh and apply every session automatically via AGENTS.md.
 
 ### R1: Smart Read
 `read(path, limit=30)` first. Full read only for files known <2KB.
@@ -292,6 +327,104 @@ Claude Code 检测"原地转圈"：连续 3 轮产出极少但在消耗 token，
 
 ---
 
+## 主动降耗策略（用户可随时触发）
+
+### 主记忆自我重整（定期做）
+MEMORY.md 可能随时间积累大量临时内容，导致每次会话冷启动 token 虚高。
+
+**触发方式**：直接告诉主 Agent——"帮我重整记忆索引"
+
+Agent 执行步骤：
+1. 读取 MEMORY.md，识别临时性条目（已过时的任务状态、单次事件记录）
+2. 将详情移入 `memory/topics/` 子文件，MEMORY.md 只保留一行指针
+3. 合并相似条目，删除超过2周且无长期价值的记录
+4. 目标：MEMORY.md ≤ 200行 / 25KB，每行一条指针（`- [标题](path) — 摘要`）
+
+**信号**：若 `/context detail` 显示 MEMORY.md 占比异常高，立即触发重整。
+
+---
+
+### 换模型策略（按任务重量分配）
+当前 Agent 使用的模型决定了 token 的单价，不是所有任务都需要顶级模型。
+
+**判断原则：**
+
+| 任务类型 | 推荐模型 | 理由 |
+|---------|---------|------|
+| 收件箱扫描、状态检查、文件读写 | 最廉价（Qwen3-8B / Haiku） | 不需要推理，不需要大上下文 |
+| 网页搜索、内容起草、代码审查 | 中档（Sonnet / GPT-4o-mini） | 需要一定理解力 |
+| 架构决策、复杂调试、策略规划 | 顶级（Opus / GPT-4o） | 需要深度推理 |
+| Cron 定时任务 | 默认用最廉价 + `lightContext: true` | 定时任务通常是轻量操作 |
+
+**多 Agent 团队按需分配**：不同 Agent 在 openclaw.json 里设置不同默认模型，主 Agent 负责调度，子 Agent 用匹配其任务的最低可用模型。
+
+**换模型命令**：直接说"这个任务用便宜点的模型做"，或在 Cron 配置里设 `"model": "Qwen/Qwen3-8B"`。
+
+---
+
+### 浏览器替代层级（避免最贵的操作）
+浏览器调用 = 截图 + DOM 解析 + 大模型视觉 token，是单次 token 消耗最高的操作之一。
+
+**替代优先级（从低消耗到高消耗）：**
+
+```
+① 内部系统 API（联系系统负责人获取）
+   → 无截图、无 DOM、无视觉 token，消耗最低
+   → 适合：ERP、OA、内部平台操作
+
+② web_fetch（直接获取页面 HTML/JSON）
+   → 适合：读取公开网页内容、API 文档、价格页面
+   → 不需要登录的页面首选
+
+③ openclaw profile 调用模式
+   → 适合：需要登录的网站，Profile 模式复用已登录 Cookie
+   → 比完整 browser 会话启动更轻量
+
+④ browser（完整浏览器控制）
+   → 仅在前三者均不可行时使用
+   → 尽量用最低价格模型执行浏览器任务
+
+⑤ RPA 工具（影刀等）
+   → 适合：固定重复流程（每天同样的点击操作）
+   → 彻底不占 Agent token，独立运行
+```
+
+**遇到浏览器任务时**，Agent 应先问"是否有 API 可用"，再决定走哪条路径。
+
+---
+
+### 排查异常 Token 消耗
+当感觉 token 消耗异常偏高时，直接告诉 Agent：**"帮我排查 token 异常消耗"**
+
+Agent 排查清单：
+- [ ] `/context detail` — 查各来源 token 占比，定位大户
+- [ ] 是否有截图/视觉任务在频繁运行（截图单次消耗极高）
+- [ ] 是否有后台 cron 任务未设 `lightContext: true` 和便宜模型
+- [ ] workspace 根目录是否有脚本/大文件（每个文件=每次注入）
+- [ ] MEMORY.md 是否需要重整（索引臃肿）
+- [ ] 是否有 subagent 卡死在无限循环（连续失败不停重试）
+- [ ] Agent 是否在重复读同一文件（R4 未生效）
+- [ ] tools.allow 是否还是 `["*"]`（全量工具定义 ≈ 4000-8000 tok 额外开销）
+
+**快速诊断命令**：
+```bash
+node ~/.openclaw/skills/token-pilot/scripts/audit.js --all
+```
+
+---
+
+### 高频重复任务封装 Skill
+同样的操作流程手动重复 ≥2次，就应该封装成 Skill。
+
+**封装收益**：
+- 手动重复：每次都要在对话里重新描述操作步骤 → O(n) token
+- Skill 复用：Agent 直接 `skill_get` 调用，步骤在 SKILL.md 里，对话里只需一句话 → O(1) token
+- 多 Agent 团队共享同一个 Skill，所有 Agent 的重复任务一次封装，全部受益
+
+**触发信号**：当你发现同一类请求出现第二次时，主动提醒用户"这个任务可以封装成 Skill，以后一句话触发"。
+
+---
+
 ## Config Change Safety Rules（改配置铁律）
 
 > 这三条是本次实测中踩坑总结出的，每次修改 openclaw.json 前必须遵守。
@@ -315,7 +448,13 @@ gateway config.schema.lookup <path>
 ## Setup / Config / Scripts
 
 ### Setup
-无需初始化。安装后规则自动生效。
+**安装后执行一次注入脚本**，将核心规则写入所有 Agent 底层记忆（自动生效，无需触发词）：
+
+```bash
+bash ~/.openclaw/skills/token-pilot/scripts/init.sh
+```
+
+R3（回复简短）、R7（按角色裁剪工具）等交互敏感规则仍由 SKILL.md 按需加载，不做强制注入。
 
 ### openclaw.json 配置说明
 安装此技能**无需修改 openclaw.json**，行为规则自动生效。
