@@ -69,15 +69,17 @@ npm install -g rollinggo@latest
 解析顺序：`--api-key` 参数 → `RollingGo_API_KEY` 环境变量。
 
 ```bash
-# PowerShell
-$env:RollingGo_API_KEY="YOUR_API_KEY"
-
 # Bash / zsh
 export RollingGo_API_KEY="YOUR_API_KEY"
+
+# PowerShell
+$env:RollingGo_API_KEY="YOUR_API_KEY"
 
 # 单条命令临时指定
 rollinggo hotel-tags --api-key YOUR_API_KEY
 ```
+
+宿主经常丢失 `RollingGo_API_KEY` 时，见 [claw-host-env.md](claw-host-env.md)。
 
 申请 Key：https://mcp.agentichotel.cn/apply
 
@@ -183,7 +185,7 @@ rollinggo search-hotels \
 ## 问题排查
 
 - **`rollinggo: command not found`：** 使用 `npx --yes --package rollinggo@latest rollinggo ...` 或 `npm install -g rollinggo@latest`
-- **缺少 API Key 报错：** 传入 `--api-key` 或设置 `RollingGo_API_KEY` 环境变量
+- **缺少 API Key 报错：** 传入 `--api-key`、设置 `RollingGo_API_KEY`，或者如果你跑在任何 claw 风格宿主里，就按 [claw-host-env.md](claw-host-env.md) 把同一个 key 注入到那个宿主的配置层
 - **退出码 `2`（参数校验失败）：** 加 `--help` 重新运行，检查必填参数、日期格式、`--child-count` 与 `--child-age` 数量是否一致
 - **没有返回任何酒店：** 移除 `--star-ratings` → 增大 `--size` 或 `--distance-in-meter` → 移除标签筛选
 - **`hotel-detail` 无房型返回：** 这是正常业务结果，不是错误；尝试换其他酒店、换日期或调整入住人数

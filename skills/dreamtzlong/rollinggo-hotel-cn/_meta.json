@@ -3,11 +3,16 @@
   "slug": "rollinggo-hotel-cn",
   "displayName": "rollinggo-hotel-cn",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1774319342419,
-    "commit": "https://github.com/openclaw/skills/commit/b6efc0cb5a27e2600f302dfd34d20d2a751cc5b8"
+    "version": "1.0.2",
+    "publishedAt": 1776766531734,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1774319342419,
+      "commit": "https://github.com/openclaw/skills/commit/b6efc0cb5a27e2600f302dfd34d20d2a751cc5b8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773389000900,

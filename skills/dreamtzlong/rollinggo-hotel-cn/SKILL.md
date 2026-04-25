@@ -6,6 +6,7 @@ metadata:
   {
     "openclaw": {
       "emoji": "🏨",
+      "skillKey": "rollinggo-searchhotel",
       "primaryEnv": "RollingGo_API_KEY",
       "requires": {
         "anyBins": ["rollinggo", "npx", "node", "uvx", "uv"],
@@ -15,16 +16,9 @@ metadata:
         {
           "id": "node",
           "kind": "node",
-          "package": "rollinggo",
+          "package": "rollinggo@latest",
           "bins": ["rollinggo"],
           "label": "Install rollinggo (npm)"
-        },
-        {
-          "id": "uv",
-          "kind": "uv",
-          "package": "rollinggo",
-          "bins": ["rollinggo"],
-          "label": "Install rollinggo (uv)"
         }
       ]
     }
@@ -54,25 +48,19 @@ metadata:
 
 ## 运行环境
 
-根据用户环境选择，加载对应的参考文件，并在整个会话中保持一致。
-
-- **`npm`、`npx`、Node 或无明确偏好：** 加载 [references/rollinggo-npx.md](references/rollinggo-npx.md)
-- **`uv`、`uvx`、PyPI 或 Python：** 加载 [references/rollinggo-uv.md](references/rollinggo-uv.md)
-- **一致性检查或对比：** 同时加载两个参考文件
-
-未明确指定时默认使用 **npm/npx**（跨环境兼容性更好）。
+默认加载 [references/rollinggo-npx.md](references/rollinggo-npx.md)；用户明确使用 `uv`/`uvx`/Python 时改加载 [references/rollinggo-uv.md](references/rollinggo-uv.md)。API Key 持久化配置见 [references/claw-host-env.md](references/claw-host-env.md)。
 
 ## 版本新鲜度（始终使用最新版）
 
 本技能默认策略：每次执行都使用最新发布版本。
 
 - **npm/npx：** `npx --yes --package rollinggo@latest rollinggo ...`
-- **uvx：** `uvx --refresh --from rollinggo rollinggo ...`
+- **uvx：** `uvx --refresh --from rollinggo@latest rollinggo ...`
 
 如果使用已安装命令而不是临时执行，先升级再运行：
 
 - **npm 全局：** `npm install -g rollinggo@latest`
-- **uv 工具：** `uv tool upgrade rollinggo`
+- **uv 工具：** `uv tool upgrade rollinggo@latest`
 
 ## 主要工作流
 
