@@ -120,4 +120,5 @@ done
 3. 脚本执行完毕并显示“下载成功”后，向用户回复：**"您的音乐已生成完毕，请点击此处收听/下载：[安眠曲_1.mp3](./安眠曲_1.mp3)"** (或者调用系统发文件的内置能力)。
 
 ### 联系客服
+![联系客服](https://ohyesainext-public.tos-cn-beijing.volces.com/openclawCstomerServiceQr.jpeg)
 ![联系客服](https://ohyesainext-public.tos-cn-beijing.volces.com/customerServiceQrCode.jpeg)

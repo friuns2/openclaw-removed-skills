@@ -3,11 +3,16 @@
   "slug": "ohyesai-music",
   "displayName": "音乐生成",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1774260998638,
-    "commit": "https://github.com/openclaw/skills/commit/0c06d1cd0a42ca1a8879ddc20f801f465b739153"
+    "version": "1.0.6",
+    "publishedAt": 1776909963516,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1774260998638,
+      "commit": "https://github.com/openclaw/skills/commit/0c06d1cd0a42ca1a8879ddc20f801f465b739153"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1773714559898,
