@@ -3,11 +3,16 @@
   "slug": "polymarket-equity-markets-trader",
   "displayName": "Polymarket Equity Markets Trader",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775317138029,
-    "commit": "https://github.com/openclaw/skills/commit/4eec079d88d6c68b3f8859f1c0bdd70e5275bf75"
+    "version": "0.0.2",
+    "publishedAt": 1776513322313,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775317138029,
+      "commit": "https://github.com/openclaw/skills/commit/4eec079d88d6c68b3f8859f1c0bdd70e5275bf75"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773864824111,
