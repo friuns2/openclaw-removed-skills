@@ -3,11 +3,16 @@
   "slug": "baoyu-translate",
   "displayName": "Baoyu Translate",
   "latest": {
-    "version": "1.103.1",
-    "publishedAt": 1776097077367,
-    "commit": "https://github.com/openclaw/skills/commit/b3a3f222d0e1c9c40963fa8d6a1ce95768f01878"
+    "version": "1.103.2",
+    "publishedAt": 1776809043692,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.103.1",
+      "publishedAt": 1776097077367,
+      "commit": "https://github.com/openclaw/skills/commit/b3a3f222d0e1c9c40963fa8d6a1ce95768f01878"
+    },
     {
       "version": "1.76.4",
       "publishedAt": 1775752186613,
