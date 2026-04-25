@@ -3,9 +3,15 @@
   "slug": "bigcommerce",
   "displayName": "Bigcommerce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162521085,
-    "commit": "https://github.com/openclaw/skills/commit/91ec72ea622bef05b0dfc257fc0e616ffd75c2e6"
+    "version": "1.0.3",
+    "publishedAt": 1776776796185,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162521085,
+      "commit": "https://github.com/openclaw/skills/commit/91ec72ea622bef05b0dfc257fc0e616ffd75c2e6"
+    }
+  ]
 }
