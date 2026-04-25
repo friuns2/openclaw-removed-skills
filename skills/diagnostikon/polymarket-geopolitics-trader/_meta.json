@@ -3,11 +3,16 @@
   "slug": "polymarket-geopolitics-trader",
   "displayName": "Polymarket Geopolitics Trader",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775988540411,
-    "commit": "https://github.com/openclaw/skills/commit/2fc53f14e2615dca4813c97fc7d4441e1822e7b5"
+    "version": "0.0.2",
+    "publishedAt": 1776513355711,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775988540411,
+      "commit": "https://github.com/openclaw/skills/commit/2fc53f14e2615dca4813c97fc7d4441e1822e7b5"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775317170361,
