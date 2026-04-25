@@ -3,11 +3,16 @@
   "slug": "bubble",
   "displayName": "Bubble",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163736727,
-    "commit": "https://github.com/openclaw/skills/commit/a54587ef480d2c484587cf9880efcdd531959fa1"
+    "version": "1.0.3",
+    "publishedAt": 1776812530116,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163736727,
+      "commit": "https://github.com/openclaw/skills/commit/a54587ef480d2c484587cf9880efcdd531959fa1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773439329365,
