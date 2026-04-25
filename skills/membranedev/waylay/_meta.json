@@ -3,11 +3,16 @@
   "slug": "waylay",
   "displayName": "Waylay",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162931574,
-    "commit": "https://github.com/openclaw/skills/commit/79e97dd2ca6d4298112b7a777ab01da36f21a0ba"
+    "version": "1.0.3",
+    "publishedAt": 1776898252901,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162931574,
+      "commit": "https://github.com/openclaw/skills/commit/79e97dd2ca6d4298112b7a777ab01da36f21a0ba"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773083282486,
