@@ -3,11 +3,16 @@
   "slug": "vidu-skill",
   "displayName": "Vidu official video generation. Image to video / Text to video / Reference to video / Text to image / Reference to image / Video edit / Image edit",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1774007102330,
-    "commit": "https://github.com/openclaw/skills/commit/3db91f7020f548f443003f2928b9c51cc649e4c4"
+    "version": "1.4.2",
+    "publishedAt": 1776778069912,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1774007102330,
+      "commit": "https://github.com/openclaw/skills/commit/3db91f7020f548f443003f2928b9c51cc649e4c4"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773568162293,
