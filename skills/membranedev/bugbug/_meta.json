@@ -3,11 +3,16 @@
   "slug": "bugbug",
   "displayName": "Bugbug",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164214957,
-    "commit": "https://github.com/openclaw/skills/commit/a94d298fd4623474df9ffb65cee83006a0e55ea0"
+    "version": "1.0.3",
+    "publishedAt": 1776830730087,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164214957,
+      "commit": "https://github.com/openclaw/skills/commit/a94d298fd4623474df9ffb65cee83006a0e55ea0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773630144891,
