@@ -3,11 +3,16 @@
   "slug": "phrase",
   "displayName": "Phrase",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163566857,
-    "commit": "https://github.com/openclaw/skills/commit/875896a94c34024bbcead6c1b25077763d6f10ad"
+    "version": "1.0.3",
+    "publishedAt": 1776805444555,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163566857,
+      "commit": "https://github.com/openclaw/skills/commit/875896a94c34024bbcead6c1b25077763d6f10ad"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775163565051,
