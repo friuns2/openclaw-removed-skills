@@ -3,11 +3,16 @@
   "slug": "heroku",
   "displayName": "Heroku",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162614999,
-    "commit": "https://github.com/openclaw/skills/commit/7695fc7bd0e7bf373fca3fa3c9b5e9dfcdb2ae42"
+    "version": "1.0.3",
+    "publishedAt": 1776780152232,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162614999,
+      "commit": "https://github.com/openclaw/skills/commit/7695fc7bd0e7bf373fca3fa3c9b5e9dfcdb2ae42"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772866939184,
