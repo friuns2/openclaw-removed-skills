@@ -3,11 +3,16 @@
   "slug": "woocommerce-integration",
   "displayName": "Woocommerce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162467053,
-    "commit": "https://github.com/openclaw/skills/commit/495e9e024695b2d6ff031ec0bb8e20d7d9c92007"
+    "version": "1.0.3",
+    "publishedAt": 1776773184857,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162467053,
+      "commit": "https://github.com/openclaw/skills/commit/495e9e024695b2d6ff031ec0bb8e20d7d9c92007"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772730161116,
