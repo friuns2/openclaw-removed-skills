@@ -3,11 +3,16 @@
   "slug": "sendgrid-integration",
   "displayName": "Sendgrid",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162692589,
-    "commit": "https://github.com/openclaw/skills/commit/7512dd4be84a7c245d4d0aa68adb5a44e378f9dd"
+    "version": "1.0.3",
+    "publishedAt": 1776780289647,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162692589,
+      "commit": "https://github.com/openclaw/skills/commit/7512dd4be84a7c245d4d0aa68adb5a44e378f9dd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772895768277,
