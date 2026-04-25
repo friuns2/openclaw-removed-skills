@@ -3,11 +3,16 @@
   "slug": "replyio",
   "displayName": "Replyio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163649407,
-    "commit": "https://github.com/openclaw/skills/commit/7838d38a9abdfa3212b157fc0a927b5ea387389c"
+    "version": "1.0.3",
+    "publishedAt": 1776805599836,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163649407,
+      "commit": "https://github.com/openclaw/skills/commit/7838d38a9abdfa3212b157fc0a927b5ea387389c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773360166113,
