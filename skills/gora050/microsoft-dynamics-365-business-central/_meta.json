@@ -3,11 +3,16 @@
   "slug": "microsoft-dynamics-365-business-central",
   "displayName": "Microsoft Dynamics 365 Business Central",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162659752,
-    "commit": "https://github.com/openclaw/skills/commit/469d33f19eecaf2149a193d04f11e6ee5ec37574"
+    "version": "1.0.3",
+    "publishedAt": 1776780234748,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162659752,
+      "commit": "https://github.com/openclaw/skills/commit/469d33f19eecaf2149a193d04f11e6ee5ec37574"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772888587436,
