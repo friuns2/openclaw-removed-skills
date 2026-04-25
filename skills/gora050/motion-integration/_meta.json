@@ -3,11 +3,16 @@
   "slug": "motion-integration",
   "displayName": "Motion",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163700670,
-    "commit": "https://github.com/openclaw/skills/commit/8617f5d0cd5208c0702dc1c5715d710bf7670a13"
+    "version": "1.0.3",
+    "publishedAt": 1776805697684,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163700670,
+      "commit": "https://github.com/openclaw/skills/commit/8617f5d0cd5208c0702dc1c5715d710bf7670a13"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773370995068,
