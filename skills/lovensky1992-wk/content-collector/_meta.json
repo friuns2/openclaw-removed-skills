@@ -3,11 +3,16 @@
   "slug": "content-collector",
   "displayName": "Content Collector",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775968764982,
-    "commit": "https://github.com/openclaw/skills/commit/268a247a6df93ccc10b985958f9982e25d90d1d0"
+    "version": "1.1.1",
+    "publishedAt": 1776571368649,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775968764982,
+      "commit": "https://github.com/openclaw/skills/commit/268a247a6df93ccc10b985958f9982e25d90d1d0"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775787829816,
