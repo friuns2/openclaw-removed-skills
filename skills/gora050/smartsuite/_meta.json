@@ -3,11 +3,16 @@
   "slug": "smartsuite",
   "displayName": "Smartsuite",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162408878,
-    "commit": "https://github.com/openclaw/skills/commit/ab90629116192e7d4fd2596473bd112af583f57d"
+    "version": "1.0.3",
+    "publishedAt": 1776773072111,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162408878,
+      "commit": "https://github.com/openclaw/skills/commit/ab90629116192e7d4fd2596473bd112af583f57d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772708565589,
