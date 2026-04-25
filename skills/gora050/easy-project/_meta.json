@@ -3,11 +3,16 @@
   "slug": "easy-project",
   "displayName": "Easy Project",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164099600,
-    "commit": "https://github.com/openclaw/skills/commit/65851b71d1a7a2ab478af506b8596422a424c21d"
+    "version": "1.0.3",
+    "publishedAt": 1776827001251,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164099600,
+      "commit": "https://github.com/openclaw/skills/commit/65851b71d1a7a2ab478af506b8596422a424c21d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773554556487,
