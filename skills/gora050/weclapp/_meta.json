@@ -3,11 +3,16 @@
   "slug": "weclapp",
   "displayName": "Weclapp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162458477,
-    "commit": "https://github.com/openclaw/skills/commit/50dae55ffc2097c345a48632dfeb83f4a8aa0e19"
+    "version": "1.0.3",
+    "publishedAt": 1776773169116,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162458477,
+      "commit": "https://github.com/openclaw/skills/commit/50dae55ffc2097c345a48632dfeb83f4a8aa0e19"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772730146261,
