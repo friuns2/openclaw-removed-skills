@@ -1,12 +1,12 @@
 ---
 name: social-media-automator
-description: Automatically generate social media posts from articles. Supports Twitter, LinkedIn, Instagram, TikTok, and YouTube Shorts. Perfect for content repurposing.
+description: Automatically generate social media posts from articles. Supports Twitter, LinkedIn, Instagram, TikTok, YouTube Shorts, Threads, and Bluesky. Perfect for content repurposing.
 author: fly3094
-version: 1.1.0
+version: 1.2.0
 support: 
   paypal: 492227637@qq.com
   email: 492227637@qq.com
-metadata: {"clawdbot":{"emoji":"📱","requires":{"bins":["curl"]},"install":[{"kind":"npm","package":"threads-api"},{"kind":"npm","package":"bluesky-sdk"}]}}
+metadata: {"clawdbot":{"emoji":"📱","requires":{"bins":["curl"]},"install":[{"kind":"npm","package":"threads-api"},{"kind":"npm","package":"@atproto/api"}]}}
 ---
 
 # Social Media Automator 📱
