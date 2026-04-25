@@ -3,11 +3,16 @@
   "slug": "formio",
   "displayName": "Formio",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775162952305,
-    "commit": "https://github.com/openclaw/skills/commit/9a954de81141196cc092ed0bfc8c7273ac83c5f8"
+    "version": "1.0.4",
+    "publishedAt": 1776784084110,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775162952305,
+      "commit": "https://github.com/openclaw/skills/commit/9a954de81141196cc092ed0bfc8c7273ac83c5f8"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773083366536,
