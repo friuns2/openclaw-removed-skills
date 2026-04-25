@@ -3,11 +3,16 @@
   "slug": "solve-crm",
   "displayName": "Solve Crm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163115336,
-    "commit": "https://github.com/openclaw/skills/commit/57d77c3b5274c7bfd7b06dc80981f849b6c00000"
+    "version": "1.0.3",
+    "publishedAt": 1776791013040,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163115336,
+      "commit": "https://github.com/openclaw/skills/commit/57d77c3b5274c7bfd7b06dc80981f849b6c00000"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773172934357,
