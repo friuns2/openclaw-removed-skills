@@ -39,8 +39,7 @@ body { background-color: #0d1117; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-snap-type: y mandatory; height: 100%; }
 body {
-    height: 100%; overflow-x: hidden;
-    background: var(--bg);
+    height: 100%; background: var(--bg);
     font-family: var(--font-mono);
     color: var(--text);
 }
@@ -482,7 +481,6 @@ class SlidePresentation {
         this.setupObserver();
         this.setupKeyboard();
         this.setupTouch();
-        this.setupWheel();
         this.setupPresenter();
         this.updateProgress();
         this.initWatermark();
@@ -526,10 +524,6 @@ class SlidePresentation {
         let start = null;
         document.addEventListener('touchstart', e => { start = e.touches[0].clientY; }, { passive: true });
         document.addEventListener('touchend', e => { if (start !== null) { const diff = start - e.changedTouches[0].clientY; if (Math.abs(diff) > 50) { diff > 0 ? this.next() : this.prev(); } start = null; } });
-    }
-    setupWheel() {
-        let ticking = false;
-        document.addEventListener('wheel', () => { if (!ticking) { requestAnimationFrame(() => { this.updateProgress(); this.updateDots(); this.broadcastState(); this.updateNotesPanel(); ticking = false; }); ticking = true; } }, { passive: true });
     }
     setupPresenter() {
         this.channel.onmessage = e => { if (e.data.type === 'goTo') this.goTo(e.data.index); };

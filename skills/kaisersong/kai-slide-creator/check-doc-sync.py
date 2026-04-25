@@ -58,9 +58,10 @@ def evaluate(root: Path) -> list[RuleResult]:
     ok, detail = contains_all(
         skill,
         [
-            "Edit Mode (default-on, optional)",
+            "默认开启",
             "--plan",
             "--generate",
+            "BRIEF.json",
             "themes/<name>/reference.md",
         ],
     )
@@ -71,10 +72,11 @@ def evaluate(root: Path) -> list[RuleResult]:
     ok, detail = contains_all(
         readme,
         [
-            "Two-stage workflow",
+            "IR-first workflow",
+            "BRIEF.json",
             "--plan",
             "--generate",
-            "Default-on, optional",
+            "Default-on",
             "themes/your-theme/",
             "reference.md",
         ],
@@ -87,6 +89,7 @@ def evaluate(root: Path) -> list[RuleResult]:
         workflow,
         [
             "Enhancement Mode (existing HTML)",
+            "If `BRIEF.json` exists, it's the source of truth",
             "single AskUserQuestion call with all 5 questions at once",
             "1280x720",
         ],
@@ -111,8 +114,8 @@ def evaluate(root: Path) -> list[RuleResult]:
     )
 
     edit_mode_ok = (
-        "Edit Mode (default-on, optional)" in skill
-        and "Default-on, optional" in readme
+        "默认开启" in skill
+        and "Default-on" in readme
         and "Every generated HTML file MUST include both of these" not in skill
     )
     results.append(

@@ -39,13 +39,14 @@ Mode label display rule:
 
 1. Scan `resources/` — read text/markdown files, note images. Tell the user what was found (or "Planning from prompt only" if empty).
 2. Extract: topic, audience, tone, language, slide count, goals, and the correct planning depth from the prompt.
-3. Draft the plan following [planning-template.md](planning-template.md).
-4. In `自动` / `Auto`, keep the plan lightweight: outline, style direction, images as resources, and deliverables only.
-5. In `精修` / `Polish`, add deck thesis, narrative arc, page roles, style constraints, and image intent for only the slides that truly need imagery. If the visual lock benefits from references, run `参考驱动` as an internal sub-step here instead of exposing it as a user-facing mode.
-6. Save as `PLANNING.md` in the working directory.
+3. Draft the IR following [brief-template.json](brief-template.json).
+4. In `自动` / `Auto`, keep the IR lightweight: thesis, page roles, style direction, and deliverables only.
+5. In `精修` / `Polish`, add stronger deck thesis, narrative arc, style constraints, and image intent only for the slides that truly need imagery. If the visual lock benefits from references, run `参考驱动` as an internal sub-step here instead of exposing it as a user-facing mode.
+6. Save as `BRIEF.json` in the working directory.
 7. Add a `Timing` section with estimated `plan`, `generate`, `validate`, `polish`, and `total` ranges.
-8. Present slide count, structure, planning depth, timing estimate, and key decisions. Ask for approval.
-9. **Stop. Do NOT generate HTML.**
+8. Only create `PLANNING.md` if the user explicitly asks to review a human-readable plan.
+9. Present slide count, structure, planning depth, timing estimate, and key decisions. Ask for approval.
+10. **Stop. Do NOT generate HTML.**
 
 ---
 
@@ -107,7 +108,7 @@ Most people can't articulate design preferences in words. Generate 3 mini visual
 
 If the deck is in `精修` / `Polish`, add a short design-lock step before generating previews: define deck thesis, narrative arc, page roles, and style constraints so the previews support the presentation's rhetorical structure rather than acting as disconnected skins.
 
-If the user already approved a preset or PLANNING.md already names one, skip fresh preset routing and keep that preset. Do not reinterpret the same deck into a different theme just because the planning depth changed.
+If the user already approved a preset or `BRIEF.json` already names one, skip fresh preset routing and keep that preset. Do not reinterpret the same deck into a different theme just because the planning depth changed.
 
 ### Style Path
 
@@ -134,7 +135,7 @@ Present the 3 files with a one-sentence description each, then ask via AskUserQu
 
 ## Phase 3: Generate Presentation
 
-Generate the presentation based on content from Phase 1 and style from Phase 2. If PLANNING.md exists, it's the source of truth — skip Phases 1 and 2.
+Generate the presentation based on content from Phase 1 and style from Phase 2. If `BRIEF.json` exists, it's the source of truth — skip Phases 1 and 2.
 
 Before writing HTML, tell the user the expected end-to-end time window based on planning depth:
 
@@ -194,6 +195,10 @@ For each of the 12 slides:
 6. Fill content and components with the style's visual tokens
 
 **Architecture note:** Signature elements ARE layout constraints, not a separate injection step. The `.bold-ghost` positioned at the bottom-right, the `.slide-num` at the top-left — these define the spatial composition that all other content responds to.
+
+**Swiss Modern native-export guard:** Swiss Modern must stay on the canonical path used by the reference demo. Panels are direct children of `.slide`; `.bg-num` and `.slide-num-label` stay as direct children of `.slide`; tokens stay on `--bg/--bg-dark/--text/--red`; and each slide should emit `data-export-role` matching the chosen named layout (`title_grid`, `column_content`, `stat_block`, `pull_quote`, `geometric_diagram`, `data_table`, `contents_index`). Compatible aliases like `.left-col`, `.right-col`, `.stat-block`, `.content-block`, `.quote-block`, `--bg-primary`, or `--accent` are legacy inputs only and must not be emitted by `--generate`. Swiss Modern title handling still follows the global title-balance rule, but keeps Swiss-specific asymmetric anchoring (left / bottom-left, never centered).
+
+**High-risk preset guards:** Enterprise Dark, Data Story, Glassmorphism, and Chinese Chan also have canonical export paths now. Honor each reference file's `## Canonical Export Contract`: emit `data-export-role`, keep canonical token names, and do not emit shorthand alias classes when the reference marks them as input-only. Data Story keeps chart rendering pure SVG/CSS, Glassmorphism keeps orb layers behind blurred cards, and Chinese Chan keeps decorative elements outside `.slide-content`.
 
 **CRITICAL: Use the style's full component palette.** Every style provides multiple component patterns. Do NOT put every piece of content inside a generic card with bullets. Each slide should use 2-3 distinct component types. If every slide looks like "card + bullet list," redesign at least half before writing HTML.
 
@@ -267,12 +272,14 @@ Alternate between text-heavy and visual-heavy slides. Three or more consecutive 
 
 ### Step 7: Pre-write validation (ALL modes — Auto, Polish, --generate)
 
-Before writing the final HTML, scan the assembled output for these violations and fix each one found:
+Before writing the final HTML, save the assembled HTML to a temporary file (for example `"$TMP_HTML"`) and run `python3 tests/validate.py "$TMP_HTML" --strict`.
+Treat strict failures as generation failures: fix or regenerate, then rerun strict validate until it passes. Only then write the final deliverable.
+After the strict gate passes, scan the assembled output for these violations and fix each one found:
 
 **Core 8 checks:**
 1. **Search `:::` in HTML** → convert any unconverted directive blocks
 2. **Search generic slide titles** from forbidden list (概览, Overview, 架构介绍, Key Insights, 总结, 结论, Next Steps, 简介, 说明, 关键发现) → rewrite as assertion-style titles
-3. **Search slide title line wraps** → flag any title wrapping ≥4 lines; shorten or restructure
+3. **Search slide title wraps + balance** → flag any title wrapping ≥4 lines, any single-character orphan line, or any obviously collapsed middle line; shorten, widen, or explicitly control line breaks
 4. **Search content density** → any slide filling <50% of its area → switch to emphasis layout (large stat, quote, single statement)
 5. **Search column balance** → in two/three-column slides, verify no column <60% of tallest; fix imbalance
 6. **Search consecutive same-layout slides** → 3+ consecutive identical layouts → insert visual break (quote, diagram, big stat)
@@ -288,10 +295,10 @@ Before writing the final HTML, scan the assembled output for these violations an
 14. **Search cramped padding** → `padding: 0.[1-5]rem` on cards → increase to ≥0.75rem
 15. **Search gray on colored bg** → `color: #[89]99` or `var(--text-secondary)` on non-white background → darken text
 16. **Search component monotony** → if >50% of slides use the same component pattern (e.g., only `.g` + `.bl`) → redesign at least half to use 2-3 distinct component types (step/callout/stat/kbd/table/quote)
-17. **Search present mode JS** → must contain `PresentMode` class or `enterPresent()` function, `'F5'` key listener, `#present-btn` CSS, and `body.presenting` CSS → missing = generation error, must fix
-18. **Search watermark placement** → must be JS-injected into last slide (`slides[slides.length - 1].appendChild`), CSS must be `position: absolute` → if `position: fixed` or hardcoded `<div class="slide-credit">` before `</body>`, move to JS injection
+17. **Search shared runtime JS** → non-Blue-Sky decks must contain `class SlidePresentation`, the first-slide `.visible` fix, the `?presenter` branch, `PresentMode`, `'F5'` key listener, `#present-btn` CSS, and `body.presenting` CSS → missing = generation error, must fix
+18. **Search watermark placement** → must be JS-injected into last slide (`slides[slides.length - 1].appendChild`), CSS must be `position: absolute` → if hardcoded `<div class="slide-credit">` before `</body>`, move to JS injection
 19. **Search architecture contamination (non-Blue-Sky only)** → if style is NOT Blue Sky, search for `#stage`, `#track`, `calc(100vw * var(--slide-count))`, or `translateX` slide navigation → these are Blue Sky-exclusive patterns. Replace with `html-template.md`'s `scroll-snap-type: y mandatory` + `SlidePresentation` class architecture
-20. **Search `.slide` background overriding body gradient** → if the style reference file defines `radial-gradient`, `linear-gradient`, `background-image` patterns, or `animation` on `body`, search for `.slide` elements with `background` / `background-color` → these block the body gradient. Remove `background` from `.slide` rules. The template's `background: var(--bg-primary)` safety net does NOT apply to gradient/animated body backgrounds
+20. **Search `.slide` background overriding body gradient** → if the style reference file defines `radial-gradient`, `linear-gradient`, `background-image` patterns, or `animation` on `body`, search for `.slide` elements with `background` / `background-color` → these block the body gradient. Remove `background` from `.slide` rules. The template does NOT set `.slide` background (template neutrality). Style files may set `.slide` background for styles that need per-slide control
 
 > Load `references/impeccable-anti-patterns.md` for the full detection patterns and fix guidance.
 
@@ -397,7 +404,7 @@ Read [pptx-extraction.md](pptx-extraction.md) for the Python extraction script.
 
 1. **Clean up:** delete `.claude-design/slide-previews/` if it exists.
 2. **Embed speaker notes** — every `.slide` section must have a `data-notes="..."` attribute with 2-4 sentences (what to say, key emphasis, transition cue). These power the built-in Presenter Mode.
-3. **Generate `PRESENTATION_SCRIPT.md`** if deck has 8+ slides or was created from PLANNING.md.
+3. **Generate `PRESENTATION_SCRIPT.md`** if deck has 8+ slides or was created from `BRIEF.json`.
 4. **Open:** `open [filename].html`
 5. **Summarize:**
 

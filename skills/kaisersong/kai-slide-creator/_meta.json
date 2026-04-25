@@ -3,11 +3,16 @@
   "slug": "kai-slide-creator",
   "displayName": "Slide Creator",
   "latest": {
-    "version": "2.18.0",
-    "publishedAt": 1776433692220,
-    "commit": "https://github.com/openclaw/skills/commit/1767af3df89b87459a246cdb8c337f11ae0247ee"
+    "version": "2.23.1",
+    "publishedAt": 1777135753964,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.18.0",
+      "publishedAt": 1776433692220,
+      "commit": "https://github.com/openclaw/skills/commit/1767af3df89b87459a246cdb8c337f11ae0247ee"
+    },
     {
       "version": "2.12.0",
       "publishedAt": 1775900785992,

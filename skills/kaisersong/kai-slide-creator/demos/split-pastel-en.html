@@ -28,7 +28,6 @@ html { scroll-snap-type: y mandatory; height: 100%; }
 
 body {
     height: 100%;
-    overflow-x: hidden;
     font-family: 'Nunito', system-ui, sans-serif;
     color: var(--text-primary);
 }
@@ -413,7 +412,7 @@ body.editing .edit-toggle { opacity: 1; background: rgba(16,185,129,0.80); color
         </div>
         <div style="background:rgba(255,255,255,0.60); border:1px solid rgba(5,150,105,0.15); border-radius:12px; padding:clamp(16px,3vw,24px); display:flex; align-items:center; gap:16px;">
             <div style="font-size:clamp(14px,1.5vw,18px); font-weight:800; color:#059669; font-family:monospace;">/slide-creator --generate</div>
-            <p style="font-size:clamp(13px,1.4vw,15px); color:rgba(6,78,59,0.70); flex:1;">Build from PLANNING.md — full HTML with all modes</p>
+            <p style="font-size:clamp(13px,1.4vw,15px); color:rgba(6,78,59,0.70); flex:1;">Build from BRIEF.json — full HTML with all modes</p>
         </div>
     </div>
 </div>
@@ -587,12 +586,9 @@ class SlidePresentation {
     });
   }
   goTo(index) {
-    this.slides.forEach((slide, i) => {
-      slide.classList.toggle('visible', i === index);
-      var reveals = slide.querySelectorAll('.reveal');
-      reveals.forEach(function(r) { r.classList.toggle('visible', i === index); });
-    });
-    this.slides[index]?.scrollIntoView({ behavior: 'smooth' });
+
+      this.slides[index]?.scrollIntoView({ behavior: "smooth" });
+
   }
   next() { this.goTo(Math.min(this.currentSlide + 1, this.slides.length - 1)); }
   prev() { this.goTo(Math.max(this.currentSlide - 1, 0)); }

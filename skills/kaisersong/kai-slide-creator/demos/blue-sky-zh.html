@@ -383,7 +383,7 @@ body.presenting #notes-panel { display: none !important; }
 
 </style>
 </head>
-<body>
+<body data-preset="Blue Sky">
 
 <div class="orb" id="orb1"></div>
 <div class="orb" id="orb2"></div>
@@ -546,7 +546,7 @@ body.presenting #notes-panel { display: none !important; }
       <span class="pill" style="margin-bottom:14px;display:inline-block;">设计预设</span>
       <h2 class="gt">21 种设计预设，每种都有签名视觉语言</h2>
       <div class="divider"></div>
-      <div class="bento" style="grid-template-columns:repeat(2,1fr);grid-auto-rows:180px;">
+      <div class="bento" style="grid-template-columns:repeat(2,1fr);grid-auto-rows:120px;">
         <div class="g span2" style="padding:20px;">
           <div style="font-size:1.6rem;margin-bottom:8px;">Bold Signal</div>
           <h4 style="margin-bottom:4px;">商业路演</h4>
@@ -742,14 +742,14 @@ body.presenting #notes-panel { display: none !important; }
         <div class="g" style="padding:18px 20px;">
           <div class="cmd" style="margin-bottom:10px;">/slide-creator --plan</div>
           <ul class="bl">
-            <li>生成 PLANNING.md 大纲</li>
+            <li>生成 BRIEF.json IR</li>
             <li>可编辑后再生成</li>
           </ul>
         </div>
         <div class="g" style="padding:18px 20px;">
           <div class="cmd" style="margin-bottom:10px;">/slide-creator --generate</div>
           <ul class="bl">
-            <li>从 PLANNING.md 生成 HTML</li>
+            <li>从 BRIEF.json 生成 HTML</li>
             <li>执行 16 项质量校验</li>
           </ul>
         </div>
@@ -1068,7 +1068,8 @@ const o1 = document.getElementById('orb1');
 const o2 = document.getElementById('orb2');
 const o3 = document.getElementById('orb3');
 let idx  = 0;
-let active = true;
+let wState = 'idle';
+let wLastTime = 0;
 
 // Build dots
 for (let i = 0; i < TOTAL; i++) {
@@ -1080,9 +1081,14 @@ for (let i = 0; i < TOTAL; i++) {
 }
 
 function goTo(i) {
-  if (!active) return;
   idx = Math.max(0, Math.min(i, TOTAL - 1));
+  wState = 'animating';
   track.style.transform = `translateX(${-idx * 100}vw)`;
+  track.addEventListener('transitionend', function handler() {
+    track.removeEventListener('transitionend', handler);
+    wState = 'draining';
+    wLastTime = 0;
+  }, { once: true });
   updateDots();
   updateCounter();
   updateNotes();
@@ -1132,12 +1138,17 @@ document.addEventListener('touchend', e => {
   if (Math.abs(d) > 50) goTo(idx + (d > 0 ? 1 : -1));
 });
 
-// Wheel (debounced)
-let wheelTimer = null;
+// Wheel (gap-based momentum detection)
 document.addEventListener('wheel', e => {
-  if (!active) return;
-  if (wheelTimer) return;
-  wheelTimer = setTimeout(() => { wheelTimer = null; }, 800);
+  const now = Date.now();
+  if (wState === 'animating') return;
+  if (wState === 'draining') {
+    const gap = now - wLastTime;
+    wLastTime = now;
+    if (gap < 80) return; // momentum tail — ignore
+    wState = 'idle'; // new intentional swipe
+  }
+  // wState === 'idle'
   goTo(idx + (e.deltaY > 0 ? 1 : -1));
 }, { passive: true });
 
@@ -1160,6 +1171,7 @@ moveOrbs();
 updateDots();
 updateCounter();
 slides[0]?.classList.add('active');
+slides[0]?.querySelectorAll('.reveal').forEach(r => r.classList.add('visible'));
 
 // ═══════════════════════════════════════════════════════
 // EDIT MODE
@@ -1293,10 +1305,17 @@ goTo = function(i) {
   if (pm.presenting) pm.syncSlides();
 };
 
+// Watermark injection
+var lastSlide = slides[slides.length - 1];
+if (lastSlide) {
+  var credit = document.createElement('div');
+  credit.className = 'slide-credit';
+  credit.textContent = 'By kai-slide-creator v2.16.0 · Blue Sky';
+  lastSlide.appendChild(credit);
+}
+
 }
 </script>
-
-<div class="slide-credit">By kai-slide-creator v2.16.0 &middot; Blue Sky</div>
 
 </body>
 </html>

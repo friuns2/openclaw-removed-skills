@@ -39,18 +39,22 @@ def test_doc_sync_checker_passes_for_valid_fixture():
     repo = write_fixture_repo(
         make_case_dir("valid"),
         skill=(
-            "Edit Mode (default-on, optional)\n"
-            "Two-stage workflow: --plan then --generate\n"
+            "默认开启\n"
+            "IR-first workflow: --plan creates BRIEF.json, --generate reads BRIEF.json\n"
+            "PLANNING.md only on explicit request\n"
             "Custom theme: themes/<name>/reference.md\n"
         ),
         readme=(
-            "Two-stage workflow with --plan and --generate.\n"
+            "IR-first workflow with BRIEF.json and optional PLANNING.md view.\n"
+            "--plan\n"
+            "--generate\n"
             "Inline editing is Default-on, optional.\n"
             "Custom theme system via themes/your-theme/reference.md.\n"
         ),
         workflow=(
             "single AskUserQuestion call with all 5 questions at once\n"
             "Enhancement Mode (existing HTML)\n"
+            "If `BRIEF.json` exists, it's the source of truth\n"
             "Validate the edited deck at a practical presentation size such as 1280x720 before handing it back.\n"
         ),
     )
@@ -80,18 +84,22 @@ def test_doc_sync_checker_dry_run_does_not_modify_files():
     repo = write_fixture_repo(
         make_case_dir("dry-run"),
         skill=(
-            "Edit Mode (default-on, optional)\n"
-            "Two-stage workflow: --plan then --generate\n"
+            "默认开启\n"
+            "IR-first workflow: --plan creates BRIEF.json, --generate reads BRIEF.json\n"
+            "PLANNING.md only on explicit request\n"
             "Custom theme: themes/<name>/reference.md\n"
         ),
         readme=(
-            "Two-stage workflow with --plan and --generate.\n"
+            "IR-first workflow with BRIEF.json and optional PLANNING.md view.\n"
+            "--plan\n"
+            "--generate\n"
             "Inline editing is Default-on, optional.\n"
             "Custom theme system via themes/your-theme/reference.md.\n"
         ),
         workflow=(
             "single AskUserQuestion call with all 5 questions at once\n"
             "Enhancement Mode (existing HTML)\n"
+            "If `BRIEF.json` exists, it's the source of truth\n"
             "Validate the edited deck at a practical presentation size such as 1280x720 before handing it back.\n"
         ),
     )

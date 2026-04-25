@@ -12,13 +12,15 @@ Every generated HTML must include all of the following:
 
 1. **Present mode CSS** — `#present-btn`, `#present-counter`, `body.presenting .slide`, `body.presenting .slide.p-on`, `body.presenting.presenting-black`
 2. **Edit hotzone HTML** — `<div class="edit-hotzone">` + `<button class="edit-toggle" id="editToggle">` + `#notes-panel`
-3. **`SlidePresentation` class** — navigation, dots, keyboard, touch, wheel, BroadcastChannel
-4. **`?presenter` branch** — replaces body with notes/timer UI when `?presenter` in URL
-5. **`PresentMode` class** — inside the `else` block, never inside `if (presenter)`
+3. **`SlidePresentation` class** — navigation, dots, keyboard, touch, wheel, BroadcastChannel; for non-Blue-Sky decks, insert the shared runtime from `references/js-engine.md` verbatim
+4. **`?presenter` branch** — replaces body with notes/timer UI when `?presenter` in URL; do not replace this with a summary snippet
+5. **`PresentMode` class** — inside the `else` block, never inside `if (presenter)`; bootstrap with `new PresentMode(new SlidePresentation())`
 6. **`setupEditor()` call** — edit hotzone + notes panel wired up
 7. **`data-notes` on every `<section class="slide">`** — 1-3 sentence speaker note per slide
 8. **Preset fidelity metadata** — `data-preset="Preset Name"` on `<body>` when a preset is selected
-9. **Watermark footer** — injected by JS into last slide as `<div class="slide-credit">By kai-slide-creator v[version] · [preset-name]</div>` with CSS: `position: absolute; bottom: 8px; right: 14px; font-size: 9px; color: var(--text-secondary, #999); opacity: 0.35; pointer-events: none; z-index: 1; font-family: system-ui, sans-serif;` and `body.presenting .slide-credit { display: none; }`
+9. **Watermark footer** — injected by JS into last slide as `<div class="slide-credit">By kai-slide-creator v{actual-version} · {actual-preset}</div>` with CSS: `position: absolute; bottom: 8px; right: 14px; font-size: 9px; color: var(--text-secondary, #999); opacity: 0.35; pointer-events: none; z-index: 1; font-family: system-ui, sans-serif;` and `body.presenting .slide-credit { display: none !important; }`. Placeholders in `references/js-engine.md` are documentation tokens only; generated HTML must never emit `[version]` or `[preset-name]`.
+
+**Runtime note:** For every non-Blue-Sky preset, `references/js-engine.md` is a hard dependency, not optional inspiration. Insert both code blocks verbatim, including the first-slide `.visible` fix and the `?presenter` branch.
 
 ---
 
@@ -31,7 +33,9 @@ Every generated HTML must include all of the following:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Presentation Title</title>
-    <!-- Fonts from selected style reference -- single Google Fonts URL with display=swap -->
+    <!-- Fonts: combine style file fonts + CJK fallback in single Google Fonts URL -->
+    <!-- CJK RULE: for Chinese (lang="zh"/lang="zh-CN"), append &family=Noto+Sans+SC:wght@400;700 -->
+    <!--   for serif Chinese styles, use Noto_Serif_SC:wght@300;400;700 instead -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="[SINGLE COMBINED GOOGLE FONTS URL]&display=swap" rel="stylesheet">
@@ -42,7 +46,7 @@ Every generated HTML must include all of the following:
         :root {
             --bg-primary: [from style file]; --bg-secondary: [from style file];
             --text-primary: [from style file]; --text-secondary: [from style file]; --accent: [from style file];
-            --font-display: '[font name from style file]', sans-serif; --font-body: '[font name from style file]', sans-serif;
+            --font-display: '[font name from style file]', 'Noto Sans SC', sans-serif; --font-body: '[font name from style file]', 'Noto Sans SC', sans-serif;
             --title-size: clamp(2rem, 6vw, 5rem); --subtitle-size: clamp(0.875rem, 2vw, 1.25rem); --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
             --slide-padding: clamp(1.5rem, 4vw, 4rem); --content-gap: clamp(1rem, 2vw, 2rem);
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); --duration-normal: 0.6s;
@@ -52,24 +56,31 @@ Every generated HTML must include all of the following:
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-snap-type: y mandatory; height: 100%; }
 
-        body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); overflow-x: hidden; height: 100%; }
+        body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); height: 100%; }
         body[data-export-progress="false"] .progress-bar,
         body[data-export-progress="false"] .nav-dots { display: none !important; }
 
-        /* Slide container — exactly fills viewport, no scrolling within */
+        /* Slide container — exactly fills viewport, no scrolling within.
+           FUNCTIONAL ONLY: do NOT add background, justify-content, align-items, or color.
+           21 styles have different visual needs (dark/light, hero flex, etc.).
+           Template owns mechanics (scroll-snap, overflow, display).
+           Styles own visuals (background, alignment, colors) via style files. */
         .slide {
             width: 100vw; height: 100vh; height: 100dvh;
-            /* No padding — full-bleed panels touch screen edges. Per-slide padding via style file or inline style. */
-            scroll-snap-align: start; display: flex; flex-direction: column; justify-content: center;
+            scroll-snap-align: start; display: flex; flex-direction: column;
             position: relative; overflow: hidden;
-            /* Must carry own background so present mode (body.presenting = #000) doesn't bleed through.
-               EXCEPTION: If style file defines body gradient/pattern/image, set background: transparent instead. */
-            background: var(--bg-primary);
         }
 
         .slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
 
-        /* LAYOUT PANEL RULE: style-defined panels MUST be direct children of .slide, NOT nested in .slide-content. .slide-content is for text inside panels only. WRONG: .slide > .slide-content > .panel | RIGHT: .slide > .panel > .slide-content */
+        /* LAYOUT PANEL RULE: style-defined panels MUST be direct children of .slide, NOT nested in .slide-content. .slide-content is for text inside panels only. WRONG: .slide > .slide-content > .panel | RIGHT: .slide > .panel > .slide-content
+           CRITICAL: No wrapper divs around panels. The .slide IS the flex container.
+           Use #slide-N { flex-direction: row/column } in CSS to control layout.
+           WRONG: <section class="slide"><div class="wrapper-flex"><div class="left-panel">...
+           RIGHT: <section class="slide" id="slide-1"><div class="left-panel">...
+           Swiss Modern native-export guard: keep `.bg-num` / `.slide-num-label` as direct children of `.slide`, and never emit `.slide > .slide-content > .left-col/.right-col`.
+           Panel backgrounds, padding, flex ratios MUST be defined via #slide-N CSS selectors, NEVER inline style.
+           Per-slide CSS in <style>: #slide-1 { flex-direction: row } / #slide-1 .left-panel { background: #fff } */
 
         /* Responsive breakpoints */
         @media (max-height: 700px) { :root { --slide-padding: clamp(0.75rem, 3vw, 2rem); --content-gap: clamp(0.4rem, 1.5vw, 1rem); --title-size: clamp(1.25rem, 4.5vw, 2.5rem); } }
@@ -133,18 +144,33 @@ Every generated HTML must include all of the following:
     </style>
 </head>
 <body data-export-progress="true" data-preset="Enterprise Dark">
-    <div class="progress-bar" style="position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0%;z-index:100;transition:width 0.3s ease;"></div>
+    <span id="brand-mark">[deck title or contextual brand mark]</span>
+    <div class="progress-bar"></div>
     <nav class="nav-dots" aria-label="Slide navigation"></nav>
+    <div class="edit-hotzone"></div>
+    <button class="edit-toggle" id="editToggle" title="Edit mode (E)">Edit</button>
+    <div id="notes-panel">
+        <div id="notes-panel-header">
+            <div id="notes-panel-label">SPEAKER NOTES — SLIDE 1 / 8</div>
+            <div id="notes-drag-hint"></div>
+            <button id="notes-collapse-btn" title="Collapse / expand">▾</button>
+        </div>
+        <div id="notes-body">
+            <textarea id="notes-textarea" placeholder="Add speaker notes…"></textarea>
+        </div>
+    </div>
 
-    <!-- Slides — always add data-notes to every slide -->
-    <section class="slide title-slide" data-notes="..." aria-label="Title slide">
+    <!-- Slides — every slide has id="slide-N", data-notes, aria-label, .slide-num-label -->
+    <!-- ZERO INLINE STYLES: layout/background/positioning via #slide-N CSS selectors only -->
+    <section class="slide" id="slide-1" data-notes="..." aria-label="Title slide">
         <div class="slide-content">
             <h1 class="reveal">Presentation Title</h1>
             <p class="reveal">Subtitle or author</p>
         </div>
+        <span class="slide-num-label">01 / 08</span>
     </section>
 
-    <section class="slide" data-notes="..." aria-label="Slide 2">
+    <section class="slide" id="slide-2" data-notes="..." aria-label="Slide 2">
         <div class="slide-content">
             <h2 class="reveal">Slide Title</h2>
             <ul class="reveal bullet-list">
@@ -152,15 +178,142 @@ Every generated HTML must include all of the following:
                 <li>Point two</li>
             </ul>
         </div>
+        <span class="slide-num-label">02 / 08</span>
     </section>
 
     <!-- JS Engine: read references/js-engine.md and insert verbatim -->
     <script>
     /* [INSERT JS ENGINE FROM references/js-engine.md — SlidePresentation class, ?presenter branch, PresentMode class, watermark] */
-    </script>
+
+    /* Example active-slide wiring (full version in js-engine.md):
+setActiveSlide(index) {
+    this.slides.forEach((slide, i) => {
+        const active = i === index;
+        slide.classList.toggle('visible', active);
+        slide.querySelectorAll('.reveal').forEach(r => r.classList.toggle('visible', active));
+    });
+}
+
+Example goTo implementation (full version in js-engine.md):
+goTo(index) {
+    const idx = Math.max(0, Math.min(index, this.slides.length - 1));
+    this.currentSlide = idx;
+    this.setActiveSlide(idx);
+    this.slides[idx]?.scrollIntoView({ behavior: 'smooth' });
+    this.updateProgress(); this.updateDots(); this.broadcastState();
+}
+
+Example constructor (first slide visible fix):
+constructor() {
+    this.slides = document.querySelectorAll('.slide');
+    this.currentSlide = 0;
+    this.slides[0]?.classList.add('visible');
+    this.slides[0]?.querySelectorAll('.reveal').forEach(r => r.classList.add('visible'));
+    this.setActiveSlide(0);
+    // ... rest of constructor ...
+}
+
+Example PresentMode class (full version in js-engine.md):
+class PresentMode {
+    constructor(ctrl) {
+        this.ctrl = ctrl;
+        this.active = false;
+        const btn = document.createElement('button');
+        btn.id = 'present-btn';
+        btn.addEventListener('click', () => this.enter());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F5') { e.preventDefault(); this.enter(); }
+            if (e.key === 'Escape' && this.active) this.exit();
+        });
+        // ... rest of PresentMode ...
+    }
+}
+*/
+</script>
 </body>
 </html>
 ```
+
+### Allowed Components
+- Audit coverage: .decorative .keyboard-hint .left-panel .logo .screenshot
+
+---
+
+## Zero Inline Style Guide
+
+The rule is `style=""` ≤ 5 per file. In practice, aim for 0. Every inline style is a missed CSS class. Here's how:
+
+### Per-Slide Positioning → `#slide-N` selectors
+
+```css
+/* ❌ WRONG: inline style on decorative element */
+<div class="deco-circle" style="width:600px;height:600px;top:-200px;right:-200px;">
+
+/* ✅ CORRECT: CSS class via #slide-N selector */
+#slide-1 .deco-circle { width:600px; height:600px; top:-200px; right:-200px; }
+#slide-1 .deco-circle:nth-of-type(2) { width:200px; height:200px; bottom:80px; left:60px; }
+```
+
+```html
+<!-- HTML has NO inline styles -->
+<div class="deco-circle"></div>
+<div class="deco-circle"></div>
+```
+
+### Per-Slide Layout Direction → `#slide-N` selectors
+
+```css
+/* ❌ WRONG: inline flex on wrapper div */
+<section class="slide"><div style="display:flex;flex-direction:row;">
+
+/* ✅ CORRECT: #slide-N CSS */
+#slide-1 { flex-direction: row; }
+#slide-1 .left-panel { flex: 1; background: var(--bg-secondary); }
+#slide-1 .right-panel { flex: 2; }
+```
+
+```html
+<section class="slide" id="slide-1">
+    <div class="left-panel">...</div>
+    <div class="right-panel">...</div>
+</section>
+```
+
+### Margin/Spacing → utility classes or `#slide-N`
+
+```css
+/* ❌ WRONG: inline margin */
+<p style="margin-top:16px;">text</p>
+
+/* ✅ CORRECT: utility class */
+.mt-s { margin-top: 8px; }
+.mt-m { margin-top: 16px; }
+.mt-l { margin-top: 24px; }
+```
+
+```html
+<p class="mt-m">text</p>
+```
+
+### Max-Width on Headlines → `#slide-N` or a class
+
+```css
+/* ❌ WRONG */
+<h2 style="max-width:500px;">Headline</h2>
+
+/* ✅ CORRECT */
+#slide-2 .headline { max-width: 500px; }
+/* or for repeated pattern: */
+.headline-narrow { max-width: 500px; }
+```
+
+### The Only Acceptable Inline Styles
+
+1. `style="display:none"` on JS-toggled elements (rare)
+2. CSS-in-JS dynamic values that can't be predicted (e.g., progress width %)
+3. Emergency override when CSS selector specificity fails
+
+If you find yourself adding `style=""` for positioning, sizing, colors, margins, or backgrounds — you need a CSS class instead.
 
 ---
 
