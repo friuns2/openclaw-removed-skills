@@ -3,11 +3,16 @@
   "slug": "square",
   "displayName": "Square",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161826155,
-    "commit": "https://github.com/openclaw/skills/commit/06d600109a3df14a86906a55e5815be534e7faae"
+    "version": "1.0.3",
+    "publishedAt": 1776776675689,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161826155,
+      "commit": "https://github.com/openclaw/skills/commit/06d600109a3df14a86906a55e5815be534e7faae"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772787750858,
