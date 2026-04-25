@@ -3,11 +3,16 @@
   "slug": "x-profile-deep-dive",
   "displayName": "X Profile Deep Dive",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775968720974,
-    "commit": "https://github.com/openclaw/skills/commit/7d723432c8e2d97311532bc0237b23708f95ec18"
+    "version": "1.0.3",
+    "publishedAt": 1776571418084,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775968720974,
+      "commit": "https://github.com/openclaw/skills/commit/7d723432c8e2d97311532bc0237b23708f95ec18"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775787822199,
