@@ -3,11 +3,16 @@
   "slug": "stormboard",
   "displayName": "Stormboard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163707611,
-    "commit": "https://github.com/openclaw/skills/commit/9c565a8d2a3afc590a879168f9803790223d3931"
+    "version": "1.0.3",
+    "publishedAt": 1776808928981,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163707611,
+      "commit": "https://github.com/openclaw/skills/commit/9c565a8d2a3afc590a879168f9803790223d3931"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773378127778,
