@@ -3,11 +3,16 @@
   "slug": "codacy",
   "displayName": "Codacy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163944801,
-    "commit": "https://github.com/openclaw/skills/commit/d949daa2ee7b2c17a7a0d4caeb1775018c6aad31"
+    "version": "1.0.3",
+    "publishedAt": 1776823394786,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163944801,
+      "commit": "https://github.com/openclaw/skills/commit/d949daa2ee7b2c17a7a0d4caeb1775018c6aad31"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773529362415,
