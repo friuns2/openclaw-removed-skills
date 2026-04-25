@@ -3,11 +3,16 @@
   "slug": "magnetic",
   "displayName": "Magnetic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164332858,
-    "commit": "https://github.com/openclaw/skills/commit/4f97610f47ba5afc24543ab2f024c1782e3386ed"
+    "version": "1.0.3",
+    "publishedAt": 1776834165868,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164332858,
+      "commit": "https://github.com/openclaw/skills/commit/4f97610f47ba5afc24543ab2f024c1782e3386ed"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773702162916,
