@@ -3,11 +3,16 @@
   "slug": "happyfox-chat",
   "displayName": "Happyfox Chat",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164000190,
-    "commit": "https://github.com/openclaw/skills/commit/db7fd49daa07d79f52860678ea008fc10b2be0a6"
+    "version": "1.0.3",
+    "publishedAt": 1776823546839,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164000190,
+      "commit": "https://github.com/openclaw/skills/commit/db7fd49daa07d79f52860678ea008fc10b2be0a6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773536575149,
