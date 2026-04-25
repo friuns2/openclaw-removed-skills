@@ -3,11 +3,16 @@
   "slug": "markettime",
   "displayName": "Markettime",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164344282,
-    "commit": "https://github.com/openclaw/skills/commit/cea89511fcdb4de75456e16c0f3a0859674dcb07"
+    "version": "1.0.3",
+    "publishedAt": 1776834216548,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164344282,
+      "commit": "https://github.com/openclaw/skills/commit/cea89511fcdb4de75456e16c0f3a0859674dcb07"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773702214698,
