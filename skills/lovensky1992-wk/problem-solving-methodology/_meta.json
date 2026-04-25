@@ -3,11 +3,16 @@
   "slug": "problem-solving-methodology",
   "displayName": "Problem Solving",
   "latest": {
-    "version": "0.1.3",
-    "publishedAt": 1775968717250,
-    "commit": "https://github.com/openclaw/skills/commit/f2dbb4f866bb28d2b5d5b0ea37af8d665664ba97"
+    "version": "1.0.1",
+    "publishedAt": 1776571374682,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.3",
+      "publishedAt": 1775968717250,
+      "commit": "https://github.com/openclaw/skills/commit/f2dbb4f866bb28d2b5d5b0ea37af8d665664ba97"
+    },
     {
       "version": "0.1.2",
       "publishedAt": 1775787820835,
