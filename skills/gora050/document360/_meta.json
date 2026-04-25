@@ -3,11 +3,16 @@
   "slug": "document360",
   "displayName": "Document360",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162680629,
-    "commit": "https://github.com/openclaw/skills/commit/ba20cd32cd3420142b7e47fde200d88977e1c9b7"
+    "version": "1.0.3",
+    "publishedAt": 1776780268283,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162680629,
+      "commit": "https://github.com/openclaw/skills/commit/ba20cd32cd3420142b7e47fde200d88977e1c9b7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772895746873,
