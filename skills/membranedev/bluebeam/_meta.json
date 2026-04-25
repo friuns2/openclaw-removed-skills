@@ -3,11 +3,16 @@
   "slug": "bluebeam",
   "displayName": "Bluebeam",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162627359,
-    "commit": "https://github.com/openclaw/skills/commit/479d12272689aad87d6ed307f50fdfdc4daf58b9"
+    "version": "1.0.3",
+    "publishedAt": 1776780175664,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162627359,
+      "commit": "https://github.com/openclaw/skills/commit/479d12272689aad87d6ed307f50fdfdc4daf58b9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772870533110,
