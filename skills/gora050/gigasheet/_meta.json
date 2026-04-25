@@ -3,11 +3,16 @@
   "slug": "gigasheet",
   "displayName": "Gigasheet",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162730130,
-    "commit": "https://github.com/openclaw/skills/commit/cfad4427baf9599a3a62c0cd30dec2b77e848359"
+    "version": "1.0.3",
+    "publishedAt": 1776780357619,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162730130,
+      "commit": "https://github.com/openclaw/skills/commit/cfad4427baf9599a3a62c0cd30dec2b77e848359"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772910172276,
