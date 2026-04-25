@@ -3,11 +3,16 @@
   "slug": "incidentio-integration",
   "displayName": "Incidentio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163058256,
-    "commit": "https://github.com/openclaw/skills/commit/83099834e38f74e1a1d1022acedea54e426e094e"
+    "version": "1.0.3",
+    "publishedAt": 1776787379373,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163058256,
+      "commit": "https://github.com/openclaw/skills/commit/83099834e38f74e1a1d1022acedea54e426e094e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773093800104,
