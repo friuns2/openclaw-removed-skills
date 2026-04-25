@@ -3,11 +3,16 @@
   "slug": "0codekit",
   "displayName": "0Codekit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162790934,
-    "commit": "https://github.com/openclaw/skills/commit/eb3dfd670d10b5db6b2491ae8c247c836dddbc7a"
+    "version": "1.0.3",
+    "publishedAt": 1776783815777,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162790934,
+      "commit": "https://github.com/openclaw/skills/commit/eb3dfd670d10b5db6b2491ae8c247c836dddbc7a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772953344813,
