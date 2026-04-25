@@ -3,11 +3,16 @@
   "slug": "sage-hr",
   "displayName": "Sage Hr",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161751818,
-    "commit": "https://github.com/openclaw/skills/commit/51488e95e871415db09077014a4f6ac7eb7ae3aa"
+    "version": "1.0.3",
+    "publishedAt": 1776776545137,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161751818,
+      "commit": "https://github.com/openclaw/skills/commit/51488e95e871415db09077014a4f6ac7eb7ae3aa"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775161749570,
