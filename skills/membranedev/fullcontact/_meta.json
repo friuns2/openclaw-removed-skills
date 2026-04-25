@@ -3,11 +3,16 @@
   "slug": "fullcontact",
   "displayName": "Fullcontact",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163471660,
-    "commit": "https://github.com/openclaw/skills/commit/6c9ab493eb66cc4aa0313db6df65c8d90c0ea68d"
+    "version": "1.0.3",
+    "publishedAt": 1776805364740,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163471660,
+      "commit": "https://github.com/openclaw/skills/commit/6c9ab493eb66cc4aa0313db6df65c8d90c0ea68d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773288141786,
