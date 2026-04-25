@@ -3,11 +3,16 @@
   "slug": "decision-maker",
   "displayName": "Decision Maker",
   "latest": {
-    "version": "2.3.6",
-    "publishedAt": 1773665713228,
-    "commit": "https://github.com/openclaw/skills/commit/4da54560d1e8367ba9521f5e5bb2cf5faee59acc"
+    "version": "2.0.0",
+    "publishedAt": 1773773599575,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.3.6",
+      "publishedAt": 1773665713228,
+      "commit": "https://github.com/openclaw/skills/commit/4da54560d1e8367ba9521f5e5bb2cf5faee59acc"
+    },
     {
       "version": "2.3.0",
       "publishedAt": 1773447074393,
