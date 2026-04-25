@@ -1,13 +1,18 @@
 {
   "owner": "newt0n",
   "slug": "creatok-generate-video",
-  "displayName": "CreatOK Generate Video",
+  "displayName": "Creatok Generate Video",
   "latest": {
-    "version": "0.1.5",
-    "publishedAt": 1775380387794,
-    "commit": "https://github.com/openclaw/skills/commit/44e93a03a31b50932f48e7e1c643407f8bae9f32"
+    "version": "0.1.6",
+    "publishedAt": 1776960012586,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.5",
+      "publishedAt": 1775380387794,
+      "commit": "https://github.com/openclaw/skills/commit/44e93a03a31b50932f48e7e1c643407f8bae9f32"
+    },
     {
       "version": "0.1.4",
       "publishedAt": 1774800054281,
