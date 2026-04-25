@@ -3,11 +3,16 @@
   "slug": "facebook-ads",
   "displayName": "Facebook Ads",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162421440,
-    "commit": "https://github.com/openclaw/skills/commit/c11ad68f641364eb4cb5f7ed721c58ab86ac8c18"
+    "version": "1.0.3",
+    "publishedAt": 1776773099505,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162421440,
+      "commit": "https://github.com/openclaw/skills/commit/c11ad68f641364eb4cb5f7ed721c58ab86ac8c18"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772715771338,
