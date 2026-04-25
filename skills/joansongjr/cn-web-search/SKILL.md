@@ -1,7 +1,7 @@
 ---
 name: cn-web-search
-version: 2.3.0
-description: 中文网页搜索 - 聚合 17 个免费搜索引擎，无需 API Key，纯网页抓取，支持公众号/财经/技术/学术/知识搜索。
+version: 2.4.0
+description: 中文网页搜索 - 聚合 28 个免费搜索引擎，无需 API Key，纯网页抓取，支持公众号/财经/技术/学术/知识/美股/宏观/Pre-IPO搜索。
 author: joansongjr
 author_url: https://github.com/joansongjr
 repository: https://github.com/joansongjr/cn-web-search
@@ -42,6 +42,15 @@ tags:
   - 免费无需API
   - 投资
   - 知识百科
+  - 美股
+  - 港股
+  - 全球宏观
+  - 美债
+  - 散户情绪
+  - reddit
+  - wsb
+  - pre-ipo
+  - 独角兽
 ---
 
 # 中文网页搜索 (CN Web Search)
@@ -51,9 +60,9 @@ tags:
 > clawhub install cn-web-search
 > ```
 
-多引擎聚合搜索，**全部免费，无需 API Key，纯网页抓取**。17 个引擎覆盖中英文、公众号、技术、财经、知识百科。
+多引擎聚合搜索，**全部免费，无需 API Key，纯网页抓取**。28 个引擎覆盖中英文、公众号、技术、财经、知识百科、美股深度、全球宏观、Pre-IPO。
 
-## 引擎总览（17 个）
+## 引擎总览（28 个）
 
 | 类别 | 引擎 | 数量 |
 |------|------|------|
@@ -63,6 +72,10 @@ tags:
 | 技术社区 | Stack Overflow、GitHub Trending | 2 |
 | 财经/投资 | 东方财富、集思录、财新 | 3 |
 | 知识百科 | Wikipedia 中文、Wikipedia 英文 | 2 |
+| 美股深度 | Seeking Alpha、Finviz、Macrotrends | 3 |
+| 全球宏观 | BEA、Treasury、Census | 3 |
+| 政治/情绪 | Reddit WSB、Nitter (Trump) | 2 |
+| Pre-IPO | IPOScoop、StockAnalysis、CB Insights | 3 |
 
 > 全部通过 `web_fetch` 抓取网页，零 API 依赖。
 
@@ -158,7 +171,7 @@ tags:
 
 ---
 
-## 5. 财经/投资
+## 5. 财经/投资（中文）
 
 ### 5.1 东方财富
 
@@ -192,6 +205,104 @@ tags:
 
 ---
 
+## 7. 美股深度
+
+### 7.1 Seeking Alpha
+
+`https://seekingalpha.com/symbol/TICKER`
+
+公司基本面描述、业务分析。返回公司介绍、产品线、行业定位。
+
+**示例：** `https://seekingalpha.com/symbol/AAPL`
+
+### 7.2 Finviz
+
+`https://finviz.com/quote.ashx?t=TICKER`
+
+美股筛选器，返回 P/E、EPS、Market Cap、内部人交易、机构持仓、技术指标。
+
+**示例：** `https://finviz.com/quote.ashx?t=NVDA`
+
+### 7.3 Macrotrends
+
+`https://www.macrotrends.net/stocks/charts/TICKER/NAME/revenue`
+
+历史财务数据，年度/季度收入、利润、EPS、股价趋势。
+
+**示例：** `https://www.macrotrends.net/stocks/charts/AAPL/apple/revenue`
+
+---
+
+## 8. 全球宏观
+
+### 8.1 BEA（美国经济分析局）
+
+`https://www.bea.gov/news/current-releases`
+
+GDP、个人收入、国际贸易、企业利润等经济数据发布日历。
+
+### 8.2 Treasury（美国财政部）
+
+`https://home.treasury.gov/`
+
+国债收益率曲线（1个月-30年），实时利率数据。
+
+**抓取内容：** Daily Treasury Par Yield Curve Rates
+
+### 8.3 Census（美国人口普查局）
+
+`https://www.census.gov/economic-indicators/`
+
+经济指标：建筑许可、住房、零售贸易、批发贸易、制造业 PMI。
+
+---
+
+## 9. 政治 / 散户情绪
+
+### 9.1 Reddit WSB（RSS）
+
+`https://www.reddit.com/r/wallstreetbets/top/.rss`
+
+散户情绪、热帖标题、讨论热点。
+
+**其他 RSS：**
+- 最新：`https://www.reddit.com/r/wallstreetbets/new/.rss`
+- 搜索：`https://www.reddit.com/r/wallstreetbets/search.rss?q=TICKER&sort=new`
+
+### 9.2 Nitter（Trump X/Twitter RSS）
+
+`https://nitter.net/realDonaldTrump/rss`
+
+Trump 推文全文 RSS，政策风向监测。
+
+**其他账号：** `https://nitter.net/USERNAME/rss`
+
+---
+
+## 10. Pre-IPO
+
+### 10.1 IPOScoop
+
+`https://www.iposcoop.com/ipo-calendar/`
+
+即将上市的 IPO 日历：公司名、代码、承销商、发行价区间、预计上市日期、SCOOP 评级。
+
+### 10.2 StockAnalysis
+
+`https://stockanalysis.com/ipos/`
+
+最近 200 个 IPO：首日涨幅、当前价格、破发情况。
+
+### 10.3 CB Insights（独角兽）
+
+`https://www.cbinsights.com/research-unicorn-companies`
+
+全球独角兽名单：估值、成立时间、国家、行业、投资方。
+
+**Top 5：** OpenAI ($840B)、ByteDance ($480B)、SpaceX ($400B)、Anthropic ($380B)、Stripe ($159B)
+
+---
+
 ## 使用示例
 
 **中文搜索：**
@@ -201,6 +312,23 @@ tags:
 **英文搜索：**
 - Brave：`web_fetch(url="https://search.brave.com/search?q=AI+news", extractMode="text", maxChars=8000)`
 - DDG：`web_fetch(url="https://lite.duckduckgo.com/lite/?q=AI+news", extractMode="text", maxChars=8000)`
+
+**美股深度：**
+- Seeking Alpha：`web_fetch(url="https://seekingalpha.com/symbol/AAPL", extractMode="text", maxChars=8000)`
+- Finviz：`web_fetch(url="https://finviz.com/quote.ashx?t=NVDA", extractMode="text", maxChars=8000)`
+- Macrotrends：`web_fetch(url="https://www.macrotrends.net/stocks/charts/AAPL/apple/revenue", extractMode="text", maxChars=8000)`
+
+**宏观数据：**
+- Treasury 收益率：`web_fetch(url="https://home.treasury.gov/", extractMode="text", maxChars=8000)`
+- BEA 发布：`web_fetch(url="https://www.bea.gov/news/current-releases", extractMode="text", maxChars=8000)`
+
+**Pre-IPO：**
+- IPO 日历：`web_fetch(url="https://www.iposcoop.com/ipo-calendar/", extractMode="text", maxChars=8000)`
+- 独角兽：`web_fetch(url="https://www.cbinsights.com/research-unicorn-companies", extractMode="text", maxChars=8000)`
+
+**情绪/政治：**
+- Reddit WSB：`web_fetch(url="https://www.reddit.com/r/wallstreetbets/top/.rss", extractMode="text", maxChars=8000)`
+- Trump：`web_fetch(url="https://nitter.net/realDonaldTrump/rss", extractMode="text", maxChars=8000)`
 
 **公众号：**
 - 搜狗微信：`web_fetch(url="https://weixin.sogou.com/weixin?type=2&query=英伟达&page=1", extractMode="text", maxChars=10000)`
@@ -226,6 +354,13 @@ tags:
 | 财经深度 | 财新 |
 | 知识/定义 | Wikipedia 中文 → Wikipedia 英文 |
 | 隐私优先 | Brave → Mojeek → DDG |
+| 美股基本面 | Seeking Alpha → Macrotrends |
+| 美股数据 | Finviz（内部人交易+筛选器） |
+| 宏观数据 | Treasury（美债）→ BEA（GDP）→ Census（PMI） |
+| 散户情绪 | Reddit WSB |
+| 政策风向 | Nitter Trump |
+| IPO 日历 | IPOScoop → StockAnalysis |
+| 独角兽/Pre-IPO | CB Insights |
 
 ---
 
@@ -277,6 +412,18 @@ web_fetch(url="https://www.sogou.com/web?query=英伟达财报2026Q1业绩预测
 ---
 
 ## 更新日志
+
+### v2.4.0
+- 🆕 新增 11 个海外信息源：
+  - 美股深度：Seeking Alpha、Finviz、Macrotrends
+  - 全球宏观：BEA、Treasury、Census
+  - 政治/情绪：Reddit WSB (RSS)、Nitter (Trump RSS)
+  - Pre-IPO：IPOScoop、StockAnalysis、CB Insights
+- 📊 引擎总数：17 → 28
+- 🎯 覆盖美股、美债、宏观、散户情绪、IPO、独角兽
+
+### v2.3.0
+- 优化 SKILL.md 格式：纯 Markdown 列表替代代码块，ClawHub 页面可读性提升
 
 ### v2.2.0
 - 📊 新增「实战对比」章节：有 cn-web-search vs 没有（以英伟达财报投研为例）
