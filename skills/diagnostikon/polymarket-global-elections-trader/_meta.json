@@ -3,11 +3,16 @@
   "slug": "polymarket-global-elections-trader",
   "displayName": "Polymarket Global Elections Trader",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775317182912,
-    "commit": "https://github.com/openclaw/skills/commit/d058558401932dc67b01ac054986fb58d8e20104"
+    "version": "0.0.2",
+    "publishedAt": 1776513370908,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775317182912,
+      "commit": "https://github.com/openclaw/skills/commit/d058558401932dc67b01ac054986fb58d8e20104"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773859794001,
