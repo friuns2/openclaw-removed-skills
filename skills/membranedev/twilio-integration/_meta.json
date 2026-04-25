@@ -3,11 +3,16 @@
   "slug": "twilio-integration",
   "displayName": "Twilio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162602128,
-    "commit": "https://github.com/openclaw/skills/commit/9a8fb04cb5a55e693433cbf3c13c03f7d0ff64ac"
+    "version": "1.0.3",
+    "publishedAt": 1776780128218,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162602128,
+      "commit": "https://github.com/openclaw/skills/commit/9a8fb04cb5a55e693433cbf3c13c03f7d0ff64ac"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772852555858,
