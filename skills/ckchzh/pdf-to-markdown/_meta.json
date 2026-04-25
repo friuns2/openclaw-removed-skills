@@ -3,11 +3,16 @@
   "slug": "pdf-to-markdown",
   "displayName": "Pdf To Markdown",
   "latest": {
-    "version": "2.3.6",
-    "publishedAt": 1773666711732,
-    "commit": "https://github.com/openclaw/skills/commit/ad15b6fc333390c51831e4bfa6c9b02305e486ad"
+    "version": "3.0.1",
+    "publishedAt": 1773880841421,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.3.6",
+      "publishedAt": 1773666711732,
+      "commit": "https://github.com/openclaw/skills/commit/ad15b6fc333390c51831e4bfa6c9b02305e486ad"
+    },
     {
       "version": "2.3.0",
       "publishedAt": 1773447224316,
