@@ -3,11 +3,16 @@
   "slug": "dropship-helper",
   "displayName": "Dropship Helper",
   "latest": {
-    "version": "2.3.4",
-    "publishedAt": 1773665839357,
-    "commit": "https://github.com/openclaw/skills/commit/4a060548245ec7eae1d6f8c5fba7a156008a0b17"
+    "version": "4.0.2",
+    "publishedAt": 1774314907034,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.3.4",
+      "publishedAt": 1773665839357,
+      "commit": "https://github.com/openclaw/skills/commit/4a060548245ec7eae1d6f8c5fba7a156008a0b17"
+    },
     {
       "version": "2.3.0",
       "publishedAt": 1773447091787,

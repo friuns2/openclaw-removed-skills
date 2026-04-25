@@ -1,102 +1,233 @@
 #!/usr/bin/env bash
-# dropship-helper - System operations and monitoring tool
+# dropship-helper — Dropship Helper reference tool. Use when working with dropship helper in finance contexts.
+# Powered by BytesAgain | bytesagain.com | hello@bytesagain.com
 set -euo pipefail
-VERSION="2.0.0"
-DATA_DIR="${DROPSHIP_HELPER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/dropship-helper}"
-DB="$DATA_DIR/data.log"
-mkdir -p "$DATA_DIR"
+
+VERSION="4.0.0"
 
 show_help() {
-    cat << EOF
-dropship-helper v$VERSION
+    cat << 'HELPEOF'
+dropship-helper v$VERSION — Dropship Helper Reference Tool
 
-System operations and monitoring tool
-
-Usage: dropship-helper <command> [args]
+Usage: dropship-helper <command>
 
 Commands:
-  status               System status
-  check                Health check
-  monitor              Start monitoring
-  logs                 View logs
-  config               Show config
-  restart              Restart guide
-  backup               Backup helper
-  alert                Set alert
-  optimize             Optimization tips
-  info                 System info
-  help                 Show this help
-  version              Show version
+  intro           Overview and fundamentals
+  formulas        Key formulas and calculations
+  regulations     Regulatory framework and compliance
+  risks           Risk factors and mitigation
+  instruments     Instruments and tools overview
+  strategies      Common strategies and approaches
+  glossary        Key terms and definitions
+  checklist       Due diligence checklist
+  help              Show this help
+  version           Show version
 
-Data: \$DATA_DIR
+Powered by BytesAgain | bytesagain.com
+HELPEOF
+}
+
+cmd_intro() {
+    cat << 'EOF'
+# Dropship Helper — Overview
+
+## What is Dropship Helper?
+Dropship Helper (dropship-helper) is a specialized tool/concept in the finance domain.
+It provides essential capabilities for professionals working with dropship helper.
+
+## Key Concepts
+- Core dropship helper principles and fundamentals
+- How dropship helper fits into the broader finance ecosystem  
+- Essential terminology every practitioner should know
+
+## Why Dropship Helper Matters
+Understanding dropship helper is critical for:
+- Improving efficiency in finance workflows
+- Reducing errors and downtime
+- Meeting industry standards and compliance requirements
+- Enabling better decision-making with accurate data
+
+## Getting Started
+1. Understand the basic dropship helper concepts
+2. Learn the standard tools and interfaces
+3. Practice with common scenarios
+4. Review safety and compliance requirements
 EOF
 }
 
-_log() { echo "$(date '+%m-%d %H:%M') $1: $2" >> "$DATA_DIR/history.log"; }
+cmd_formulas() {
+    cat << 'EOF'
+# Dropship Helper — Key Formulas & Calculations
 
-cmd_status() {
-    echo "  $(uptime 2>/dev/null || echo "uptime: unknown")"
-    _log "status" "${1:-}"
+## Core Formulas
+- **Basic ratio**: Value = Input / Reference × 100
+- **Growth rate**: (Current - Previous) / Previous × 100%
+- **Weighted average**: Sum(Value × Weight) / Sum(Weight)
+
+## Common Calculations
+1. Risk-adjusted return
+2. Break-even analysis
+3. Compound growth
+4. Present/future value
+5. Standard deviation
+
+## Quick Reference
+| Metric | Formula | Use Case |
+|--------|---------|----------|
+| ROI | (Gain - Cost) / Cost | Investment evaluation |
+| CAGR | (End/Start)^(1/n) - 1 | Growth measurement |
+| Sharpe | (Return - RiskFree) / StdDev | Risk-adjusted performance |
+EOF
 }
 
-cmd_check() {
-    echo "  CPU: $(grep -c processor /proc/cpuinfo 2>/dev/null || echo "?") cores
-      Mem: $(free -h 2>/dev/null | awk "/Mem/{print \$3"/"\$2}" || echo "?")"
-    _log "check" "${1:-}"
+cmd_regulations() {
+    cat << 'EOF'
+# Dropship Helper — Regulatory Framework
+
+## Key Regulations
+- Primary governing laws and statutes
+- Industry-specific compliance requirements
+- International standards and agreements
+
+## Compliance Requirements
+- Registration and licensing
+- Reporting obligations
+- Record-keeping requirements
+- Audit and inspection readiness
+
+## Enforcement
+- Regulatory bodies and their jurisdiction
+- Penalty structures for non-compliance
+- Appeal and dispute resolution processes
+EOF
 }
 
-cmd_monitor() {
-    echo "  Monitoring: $1"
-    _log "monitor" "${1:-}"
+cmd_risks() {
+    cat << 'EOF'
+# Dropship Helper — Risk Analysis
+
+## Risk Categories
+1. **Market Risk**: Price volatility and liquidity
+2. **Operational Risk**: System failures and human error
+3. **Regulatory Risk**: Changing laws and compliance
+4. **Credit Risk**: Counterparty default
+
+## Risk Mitigation
+- Diversification strategies
+- Hedging instruments
+- Insurance and guarantees
+- Contingency planning
+
+## Risk Assessment Framework
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| High | Likely | Severe | Immediate action |
+| Medium | Possible | Moderate | Monitor closely |
+| Low | Unlikely | Minor | Accept or transfer |
+EOF
 }
 
-cmd_logs() {
-    echo "  Recent: $(tail -5 /var/log/syslog 2>/dev/null || echo "no access")"
-    _log "logs" "${1:-}"
+cmd_instruments() {
+    cat << 'EOF'
+# Dropship Helper — Instruments & Tools Overview
+
+## Primary Instruments
+- Core tools used in dropship helper operations
+- Measurement and monitoring equipment
+- Software platforms and applications
+
+## Selection Guide
+1. Define requirements and constraints
+2. Evaluate available options
+3. Consider total cost of ownership
+4. Assess vendor support and community
+5. Test before committing
+EOF
 }
 
-cmd_config() {
-    echo "  Config dir: $DATA_DIR"
-    _log "config" "${1:-}"
+cmd_strategies() {
+    cat << 'EOF'
+# Dropship Helper — Common Strategies
+
+## Fundamental Strategies
+1. **Conservative**: Low risk, steady returns
+2. **Balanced**: Moderate risk, diversified approach
+3. **Aggressive**: Higher risk, growth-focused
+
+## Implementation Steps
+1. Define objectives and constraints
+2. Select appropriate strategy
+3. Execute with discipline
+4. Monitor and adjust
+5. Review periodically
+EOF
 }
 
-cmd_restart() {
-    echo "  systemctl restart $1"
-    _log "restart" "${1:-}"
+cmd_glossary() {
+    cat << 'EOF'
+# Dropship Helper — Key Terms & Definitions
+
+## Core Terminology
+- **Dropship Helper**: The primary subject of this reference
+- **finance**: The broader domain category
+- **Baseline**: A reference point for comparison
+- **Benchmark**: A standard for measuring performance
+- **Compliance**: Adherence to rules and standards
+- **Configuration**: System settings and parameters
+- **Diagnostics**: Tools and procedures for identifying issues
+- **Integration**: Connecting multiple systems together
+- **Protocol**: A set of rules governing communication
+- **Specification**: Detailed requirements document
+EOF
 }
 
-cmd_backup() {
-    echo "  Backup: tar czf backup-$(date +%Y%m%d).tar.gz $1"
-    _log "backup" "${1:-}"
+cmd_checklist() {
+    cat << 'EOF'
+# Dropship Helper — Inspection Checklist
+
+## Pre-Operation Checklist
+- [ ] Visual inspection completed
+- [ ] All connections secure
+- [ ] Safety systems functional
+- [ ] Operating parameters within range
+- [ ] Documentation current
+
+## Daily Checks
+- [ ] System startup normal
+- [ ] No error indicators or alarms
+- [ ] Performance within expected range
+- [ ] Environmental conditions acceptable
+- [ ] Log entries reviewed
+
+## Periodic Inspection
+- [ ] Comprehensive system test
+- [ ] Calibration verification
+- [ ] Wear component inspection
+- [ ] Firmware/software version check
+- [ ] Backup systems tested
+
+## Shutdown Checklist
+- [ ] Proper shutdown sequence followed
+- [ ] All data saved and backed up
+- [ ] System secured
+- [ ] Maintenance items logged
+- [ ] Next startup requirements noted
+EOF
 }
 
-cmd_alert() {
-    echo "  Alert: $1 threshold $2"
-    _log "alert" "${1:-}"
-}
+CMD="${1:-help}"
+shift 2>/dev/null || true
 
-cmd_optimize() {
-    echo "  1. Clear cache | 2. Compress logs | 3. Kill zombies"
-    _log "optimize" "${1:-}"
-}
-
-cmd_info() {
-    uname -a 2>/dev/null; echo "  Disk: $(df -h / 2>/dev/null | tail -1)"
-    _log "info" "${1:-}"
-}
-
-case "${1:-help}" in
-    status) shift; cmd_status "$@" ;;
-    check) shift; cmd_check "$@" ;;
-    monitor) shift; cmd_monitor "$@" ;;
-    logs) shift; cmd_logs "$@" ;;
-    config) shift; cmd_config "$@" ;;
-    restart) shift; cmd_restart "$@" ;;
-    backup) shift; cmd_backup "$@" ;;
-    alert) shift; cmd_alert "$@" ;;
-    optimize) shift; cmd_optimize "$@" ;;
-    info) shift; cmd_info "$@" ;;
-    help|-h) show_help ;;
-    version|-v) echo "dropship-helper v$VERSION" ;;
-    *) echo "Unknown: $1"; show_help; exit 1 ;;
+case "$CMD" in
+    intro) cmd_intro "$@" ;;
+    formulas) cmd_formulas "$@" ;;
+    regulations) cmd_regulations "$@" ;;
+    risks) cmd_risks "$@" ;;
+    instruments) cmd_instruments "$@" ;;
+    strategies) cmd_strategies "$@" ;;
+    glossary) cmd_glossary "$@" ;;
+    checklist) cmd_checklist "$@" ;;
+    help|--help|-h) show_help ;;
+    version|--version|-v) echo "dropship-helper v$VERSION — Powered by BytesAgain" ;;
+    *) echo "Unknown: $CMD"; echo "Run: dropship-helper help"; exit 1 ;;
 esac
