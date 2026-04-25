@@ -2,7 +2,7 @@
 name: email-automation
 description: Automate email processing: smart triage, auto-categorization, draft replies, and inbox zero. Works with Gmail, Outlook, and IMAP.
 author: fly3094
-version: 1.1.0
+version: 1.2.0
 tags: [email, automation, gmail, outlook, inbox, productivity, ai, templates, batch, tracking]
 support: 
   paypal: 492227637@qq.com

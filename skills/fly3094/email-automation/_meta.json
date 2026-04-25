@@ -3,11 +3,16 @@
   "slug": "email-automation",
   "displayName": "Email Automation",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776180139331,
-    "commit": "https://github.com/openclaw/skills/commit/dbee2fa39204f0c96a76e7db57dee74c0ae7e73c"
+    "version": "1.2.0",
+    "publishedAt": 1776675557696,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776180139331,
+      "commit": "https://github.com/openclaw/skills/commit/dbee2fa39204f0c96a76e7db57dee74c0ae7e73c"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1773634798901,
