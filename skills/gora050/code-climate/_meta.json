@@ -3,11 +3,16 @@
   "slug": "code-climate",
   "displayName": "Code Climate",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163400678,
-    "commit": "https://github.com/openclaw/skills/commit/0089aac6ace2319cf336fa2e679b2e26cf82977e"
+    "version": "1.0.3",
+    "publishedAt": 1776798416840,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163400678,
+      "commit": "https://github.com/openclaw/skills/commit/0089aac6ace2319cf336fa2e679b2e26cf82977e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773266623368,
