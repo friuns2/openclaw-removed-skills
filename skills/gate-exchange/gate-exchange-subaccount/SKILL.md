@@ -1,13 +1,62 @@
 ---
 name: gate-exchange-subaccount
-version: "2026.3.12-1"
-updated: "2026-03-12"
-description: Manage sub-accounts on Gate Exchange including querying status, listing, creating, locking, and unlocking sub-accounts. Use this skill whenever the user asks about sub-account management, sub-account status, creating sub-accounts, locking or unlocking sub-accounts. Trigger phrases include "sub-account", "subaccount", "sub account status", "create sub-account", "lock sub-account", "unlock sub-account", "list sub-accounts", "my sub-accounts", or any request involving sub-account queries or management operations.
+version: "2026.3.23-1"
+updated: "2026-03-23"
+description: "Gate Exchange sub-account management skill. Use when the user asks to manage, create, lock, unlock, or list their sub-accounts. Triggers on 'sub-account status', 'create sub-account', 'lock sub-account', 'my sub-accounts'."
 ---
 
 # Gate Exchange Sub-Account Skill
 
-Provide sub-account management capabilities on Gate, including querying sub-account status, listing all sub-accounts, creating new sub-accounts, and locking/unlocking sub-accounts.
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_sa_get_sa
+- cex_sa_list_sas
+- cex_sa_lock_sa
+- cex_sa_unlock_sa
+
+**Execution Operations (Write)**
+
+- cex_sa_create_sa
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Sa:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's sub-account workflow.
+
+- `SKILL.md` keeps intent routing and permission boundaries.
+- `references/mcp.md` is the authoritative MCP execution layer for create/lock/unlock confirmation gates and status verification.
 
 ## Prerequisites
 

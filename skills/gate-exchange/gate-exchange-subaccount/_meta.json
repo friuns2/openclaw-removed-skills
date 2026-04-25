@@ -1,11 +1,17 @@
 {
   "owner": "gate-exchange",
   "slug": "gate-exchange-subaccount",
-  "displayName": "Gate Exchange Subaccount",
+  "displayName": "Gate Exchange Sub-Account",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773452437018,
-    "commit": "https://github.com/openclaw/skills/commit/4f99b93b9c1b4c22fff5abaf09a819bd2d28cb39"
+    "version": "1.0.2",
+    "publishedAt": 1775115359531,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773452437018,
+      "commit": "https://github.com/openclaw/skills/commit/4f99b93b9c1b4c22fff5abaf09a819bd2d28cb39"
+    }
+  ]
 }
