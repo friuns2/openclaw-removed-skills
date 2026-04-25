@@ -3,11 +3,16 @@
   "slug": "config",
   "displayName": "Config",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1773665383774,
-    "commit": "https://github.com/openclaw/skills/commit/57ec2a5f26921f4b5482196b290d1bf4bb48fbc7"
+    "version": "2.0.1",
+    "publishedAt": 1773830326329,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1773665383774,
+      "commit": "https://github.com/openclaw/skills/commit/57ec2a5f26921f4b5482196b290d1bf4bb48fbc7"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1773610789733,
