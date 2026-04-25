@@ -3,11 +3,16 @@
   "slug": "kartra",
   "displayName": "Kartra",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162558807,
-    "commit": "https://github.com/openclaw/skills/commit/14f1a2d2ad7055a6a02e289ad56aa00f6cb1fa78"
+    "version": "1.0.3",
+    "publishedAt": 1776776857700,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162558807,
+      "commit": "https://github.com/openclaw/skills/commit/14f1a2d2ad7055a6a02e289ad56aa00f6cb1fa78"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772820164164,
