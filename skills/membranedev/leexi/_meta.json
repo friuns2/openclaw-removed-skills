@@ -3,11 +3,16 @@
   "slug": "leexi",
   "displayName": "Leexi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164373316,
-    "commit": "https://github.com/openclaw/skills/commit/25e0e6cafdef52e80f091a1b156afc0f283df1bb"
+    "version": "1.0.3",
+    "publishedAt": 1776837756157,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164373316,
+      "commit": "https://github.com/openclaw/skills/commit/25e0e6cafdef52e80f091a1b156afc0f283df1bb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773709356037,
