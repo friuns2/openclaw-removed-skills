@@ -1,8 +1,8 @@
 ---
-name: product-hunt-playbook
+name: "Product Hunt Launch Playbook — Win #1 Daily"
 version: 1.2.0
 description: |
-  Product Hunt Launch Playbook — Complete guide to launching on Product Hunt and winning #1. Proven tactics from 30x daily winner, 3x weekly winner. Covers: Product Hunt ranking algorithm, launch timing, hunter selection, community mobilization, upvote strategies, maker comments, and post-launch momentum.
+  Win #1 Product of the Day on Product Hunt. Reverse-engineered from 30x daily winner and 3x weekly winner campaigns — covers ranking algorithm secrets, optimal launch timing, hunter selection, community mobilization, upvote strategy, and post-launch momentum tactics.
 
   🇨🇳 Product Hunt 打榜完整攻略 | 🇯🇵 Product Hunt ローンチガイド | 🇰🇷 Product Hunt 런칭 가이드
 

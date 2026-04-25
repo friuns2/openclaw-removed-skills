@@ -1,13 +1,18 @@
 {
   "owner": "gingiris",
   "slug": "product-hunt-playbook",
-  "displayName": "Product Hunt Playbook",
+  "displayName": "Product Hunt Launch Playbook — Win #1 Daily",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1774840195666,
-    "commit": "https://github.com/openclaw/skills/commit/db4957f35fbc2125a5126c0ad468540ee0ca2a5f"
+    "version": "1.3.2",
+    "publishedAt": 1776567394157,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1774840195666,
+      "commit": "https://github.com/openclaw/skills/commit/db4957f35fbc2125a5126c0ad468540ee0ca2a5f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773644580440,
