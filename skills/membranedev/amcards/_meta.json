@@ -3,11 +3,16 @@
   "slug": "amcards",
   "displayName": "Amcards",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163234904,
-    "commit": "https://github.com/openclaw/skills/commit/1428211590399cc96e2d7011faa50cfb6cc7087c"
+    "version": "1.0.3",
+    "publishedAt": 1776794550500,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163234904,
+      "commit": "https://github.com/openclaw/skills/commit/1428211590399cc96e2d7011faa50cfb6cc7087c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773187341984,
