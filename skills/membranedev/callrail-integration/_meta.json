@@ -3,11 +3,16 @@
   "slug": "callrail-integration",
   "displayName": "Callrail",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163073434,
-    "commit": "https://github.com/openclaw/skills/commit/644464d64ca3ae0f782166799c5eaef14895fdac"
+    "version": "1.0.3",
+    "publishedAt": 1776790949990,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163073434,
+      "commit": "https://github.com/openclaw/skills/commit/644464d64ca3ae0f782166799c5eaef14895fdac"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773097356943,
