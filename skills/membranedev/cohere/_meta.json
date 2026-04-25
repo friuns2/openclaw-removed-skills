@@ -3,11 +3,16 @@
   "slug": "cohere",
   "displayName": "Cohere",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163280909,
-    "commit": "https://github.com/openclaw/skills/commit/a1557b9f0c1ba0b5a84a736280cb1345a80ed8f5"
+    "version": "1.0.3",
+    "publishedAt": 1776798142100,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163280909,
+      "commit": "https://github.com/openclaw/skills/commit/a1557b9f0c1ba0b5a84a736280cb1345a80ed8f5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773190942856,
