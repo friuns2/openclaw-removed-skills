@@ -36,7 +36,8 @@ def test_codex_subprocess_env_filtered(monkeypatch, tmp_path):
     module.spawn_governed(contract, engine="codex53")
 
     codex_env = calls[-1]
-    assert set(codex_env.keys()) == {"PATH", "NO_COLOR"}
+    for key in codex_env:
+        assert key in module._CODEX_ALLOWED_VARS
 
 
 def test_openclaw_subprocess_env_filtered(monkeypatch, tmp_path):
@@ -53,11 +54,13 @@ def test_openclaw_subprocess_env_filtered(monkeypatch, tmp_path):
     module.spawn_governed(contract, engine="openclaw")
 
     openclaw_env = calls[-1]
-    assert set(openclaw_env.keys()) == {"PATH", "NO_COLOR"}
+    for key in openclaw_env:
+        assert key in module._OPENCLAW_ALLOWED_VARS
 
 
 def test_secret_keys_not_in_subprocess_env(monkeypatch, tmp_path):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "secret")
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
     module = _setup_module(monkeypatch, tmp_path)
     calls = []
 
@@ -75,11 +78,14 @@ def test_secret_keys_not_in_subprocess_env(monkeypatch, tmp_path):
 
     for env in calls:
         assert "ANTHROPIC_API_KEY" not in env
+        assert "OPENAI_API_KEY" not in env
 
 
-def test_governed_pass_env_escape_hatch(monkeypatch, tmp_path):
+def test_pass_env_flag_is_ignored(monkeypatch, tmp_path):
+    """GOVERNED_PASS_ENV=1 must NOT bypass the allowlist (escape hatch removed)."""
     monkeypatch.setenv("GOVERNED_PASS_ENV", "1")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "secret")
+    monkeypatch.setenv("OPENAI_API_KEY", "secret")
     module = _setup_module(monkeypatch, tmp_path)
     calls = []
 
@@ -95,7 +101,12 @@ def test_governed_pass_env_escape_hatch(monkeypatch, tmp_path):
     contract = TaskContract(objective="x", acceptance_criteria=[], required_files=[])
     module.spawn_governed(contract, engine="codex53")
 
-    assert "ANTHROPIC_API_KEY" in calls[-1]
+    # Even with GOVERNED_PASS_ENV=1, secrets must NOT be in subprocess env
+    for env in calls:
+        assert "ANTHROPIC_API_KEY" not in env
+        assert "OPENAI_API_KEY" not in env
+        for key in env:
+            assert key in module._CODEX_ALLOWED_VARS
 
 
 def test_git_subprocess_inherits_minimal_env(monkeypatch, tmp_path):
@@ -115,47 +126,5 @@ def test_git_subprocess_inherits_minimal_env(monkeypatch, tmp_path):
     module.spawn_governed(contract, engine="codex53")
 
     git_env = calls[0][1]
-    assert set(git_env.keys()) == {"PATH", "NO_COLOR"}
-
-
-def test_pass_env_disabled_by_default(monkeypatch, tmp_path):
-    monkeypatch.delenv("GOVERNED_PASS_ENV", raising=False)
-    monkeypatch.setenv("EXTRA_SECRET", "secret")
-    module = _setup_module(monkeypatch, tmp_path)
-    calls = []
-
-    def _mock_run(cmd, **kwargs):
-        calls.append(kwargs.get("env", {}))
-        if cmd[0] == "git":
-            return DummyProc()
-        return DummyProc(stdout='```json {"status": "FAILED"} ```')
-
-    monkeypatch.setattr(module.subprocess, "run", _mock_run)
-    module.CODEX53_CLI = "codex"
-
-    contract = TaskContract(objective="x", acceptance_criteria=[], required_files=[])
-    module.spawn_governed(contract, engine="codex53")
-
-    codex_env = calls[-1]
-    assert codex_env == {"PATH": os.environ.get("PATH", ""), "NO_COLOR": "1"}
-
-
-def test_pass_env_warns_when_enabled(monkeypatch, tmp_path, caplog):
-    monkeypatch.setenv("GOVERNED_PASS_ENV", "1")
-    module = _setup_module(monkeypatch, tmp_path)
-    calls = []
-
-    def _mock_run(cmd, **kwargs):
-        calls.append(kwargs.get("env", {}))
-        if cmd[0] == "git":
-            return DummyProc()
-        return DummyProc(stdout='```json {"status": "FAILED"} ```')
-
-    monkeypatch.setattr(module.subprocess, "run", _mock_run)
-    module.CODEX53_CLI = "codex"
-
-    contract = TaskContract(objective="x", acceptance_criteria=[], required_files=[])
-    with caplog.at_level("WARNING"):
-        module.spawn_governed(contract, engine="codex53")
-
-    assert "GOVERNED_PASS_ENV=1" in caplog.text
+    for key in git_env:
+        assert key in module._CODEX_ALLOWED_VARS

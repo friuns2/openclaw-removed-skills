@@ -3,11 +3,16 @@
   "slug": "governed-agents",
   "displayName": "Governed Agents",
   "latest": {
-    "version": "0.1.7",
-    "publishedAt": 1773415098183,
-    "commit": "https://github.com/openclaw/skills/commit/90c3392836a709760561dd5c74ee771765c32e7d"
+    "version": "0.1.11",
+    "publishedAt": 1774001872431,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.7",
+      "publishedAt": 1773415098183,
+      "commit": "https://github.com/openclaw/skills/commit/90c3392836a709760561dd5c74ee771765c32e7d"
+    },
     {
       "version": "0.1.3",
       "publishedAt": 1773356235271,

@@ -1,17 +1,26 @@
 ---
 name: governed-agents
 description: "Deterministic verification + reputation scoring for AI sub-agents. Prevents hallucinated success via 4 code gates (files, tests, lint, AST) and a 3-layer pipeline (Structural → Grounding → LLM Council) for open-ended tasks."
+source: https://github.com/Nefas11/governed-agents
+homepage: https://github.com/Nefas11/governed-agents
 install: {"kind": "script", "script": "install.sh"}
 filesystem_writes: ["~/.openclaw/workspace/.state/governed_agents/"]
 capabilities: ["persistent_db_writes", "external_cli_execution", "network_requests"]
 network_access: true
+env_vars:
+  OPENCLAW_WORKSPACE: {"required": false, "description": "Workspace root directory (default: ~/.openclaw/workspace)"}
+  GOVERNED_WORK_DIR: {"required": false, "description": "Temporary working directory (default: /tmp/governed)"}
+  GOVERNED_DB_PATH: {"required": false, "description": "SQLite reputation database path"}
+  GOVERNED_AUTH_TOKEN: {"required": false, "description": "Bearer token for HTTP API mode"}
 metadata:
   {
     "openclaw":
       {
         "emoji": "🛡️",
-        "type": "executable / with-install-spec",
-        "requires": { "bins": ["codex", "openclaw", "git", "pytest", "ruff", "flake8", "pylint"] },
+        "type": "executable/with-install",
+        "source": "https://github.com/Nefas11/governed-agents",
+        "requires": { "bins": ["codex", "git", "pytest"] },
+        "optional_bins": ["ruff", "flake8", "pylint"],
         "install":
           [
             {
