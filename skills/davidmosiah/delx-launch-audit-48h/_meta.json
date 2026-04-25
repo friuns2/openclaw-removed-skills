@@ -3,9 +3,15 @@
   "slug": "delx-launch-audit-48h",
   "displayName": "Delx Launch Audit (48h)",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1772725780175,
-    "commit": "https://github.com/openclaw/skills/commit/f4d5cf31c69631897eaf0515b82951644357e416"
+    "version": "0.2.0",
+    "publishedAt": 1776528701883,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1772725780175,
+      "commit": "https://github.com/openclaw/skills/commit/f4d5cf31c69631897eaf0515b82951644357e416"
+    }
+  ]
 }
