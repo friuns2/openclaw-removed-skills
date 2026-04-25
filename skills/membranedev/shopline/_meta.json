@@ -3,11 +3,16 @@
   "slug": "shopline",
   "displayName": "Shopline",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161778507,
-    "commit": "https://github.com/openclaw/skills/commit/a8a8e6ccc6c130bd0792600ef4f73a0cb19bc5b6"
+    "version": "1.0.3",
+    "publishedAt": 1776776595422,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161778507,
+      "commit": "https://github.com/openclaw/skills/commit/a8a8e6ccc6c130bd0792600ef4f73a0cb19bc5b6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772766143995,
