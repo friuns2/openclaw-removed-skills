@@ -1,11 +1,17 @@
 {
   "owner": "twinsgeeks",
   "slug": "adopt-a-tortoise",
-  "displayName": "Adopt a Tortoise — Virtual Exotic Pet for AI Agents",
+  "displayName": "Tortoise — Adopt a Tortoise. Exotic Animal. 陆龟。Tortuga.",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773286048999,
-    "commit": "https://github.com/openclaw/skills/commit/11cdc8f647384826f6367d71878261093236a7c6"
+    "version": "1.0.3",
+    "publishedAt": 1775008728079,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773286048999,
+      "commit": "https://github.com/openclaw/skills/commit/11cdc8f647384826f6367d71878261093236a7c6"
+    }
+  ]
 }
