@@ -3,11 +3,16 @@
   "slug": "xreplyai",
   "displayName": "XReplyAI - Social Post Manager",
   "latest": {
-    "version": "0.3.16",
-    "publishedAt": 1776298104612,
-    "commit": "https://github.com/openclaw/skills/commit/2ee0180ab71238b78f27559be8013ce25c1bded4"
+    "version": "0.3.17",
+    "publishedAt": 1776750179504,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.3.16",
+      "publishedAt": 1776298104612,
+      "commit": "https://github.com/openclaw/skills/commit/2ee0180ab71238b78f27559be8013ce25c1bded4"
+    },
     {
       "version": "0.3.11",
       "publishedAt": 1773867758835,
