@@ -3,11 +3,16 @@
   "slug": "podio-integration",
   "displayName": "Podio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162709501,
-    "commit": "https://github.com/openclaw/skills/commit/e202a519792dac69c0bae9be0db4994846a951ca"
+    "version": "1.0.3",
+    "publishedAt": 1776780319648,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162709501,
+      "commit": "https://github.com/openclaw/skills/commit/e202a519792dac69c0bae9be0db4994846a951ca"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772902963148,
