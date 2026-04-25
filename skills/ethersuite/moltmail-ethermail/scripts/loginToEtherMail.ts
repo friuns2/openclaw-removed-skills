@@ -35,5 +35,3 @@ main().then(token => {
     console.error(err instanceof Error ? err.message : err);
     process.exit(1);
 })
-
-https://github.com/EtherMailOrg/moltmail-skill/archive/refs/heads/master.zip
