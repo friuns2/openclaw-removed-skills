@@ -3,11 +3,16 @@
   "slug": "yahoo-fantasy-baseball",
   "displayName": "Yahoo Fantasy Baseball",
   "latest": {
-    "version": "0.1.24",
-    "publishedAt": 1776441033404,
-    "commit": "https://github.com/openclaw/skills/commit/2938073de24b0307bae30b7b5e1ea57b92aefaff"
+    "version": "0.1.25",
+    "publishedAt": 1777130910756,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.24",
+      "publishedAt": 1776441033404,
+      "commit": "https://github.com/openclaw/skills/commit/2938073de24b0307bae30b7b5e1ea57b92aefaff"
+    },
     {
       "version": "0.1.18",
       "publishedAt": 1775666979820,

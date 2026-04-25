@@ -153,10 +153,12 @@ Three analysis categories:
 2. **Pitcher rotation** — priority-based pitcher slot optimization with swap suggestions. Relief pitchers whose teams are playing today are prioritized over non-starting SPs or pitchers whose teams are off. Probable starters get highest priority. Outputs grouped swap instructions (same format as batter swaps). Locked games are excluded.
 3. **IL management** — players with IL designations (IL, IL10, IL15, IL60) not in IL slots, cleared players still in IL. DTD players are excluded since Yahoo does not allow moving them to IL.
 
-Each move includes team, opponent, and score context. Moves to BN may include a `reason` indicator:
+Each move includes team, opponent, score, and (when set) Yahoo injury status (e.g. `DTD`, `IL10`) inline in the parenthetical. If a player suggested to *start* is `DTD`, a `⚠️ Day-to-day — confirm in lineup before locking.` caution is rendered beneath the line — the optimizer scores ignore status, so a higher-scoring DTD player can still surface as a swap recommendation. Moves to BN may include a `reason` indicator:
 - `⚠️` — player not in confirmed MLB lineup (urgent — they won't play)
 - `🔒` — player's game has already started (locked by Yahoo)
 - `📅` — player's team is off today
+
+In `--format json`, every entry in `swap_groups[].start`, `swap_groups[].bench`, `swap_groups[].reshuffle` (and the pitcher equivalents) carries a `status` field — empty string when the player has no Yahoo status.
 
 **Early-season preseason rank blending:** The optimizer blends Yahoo's preseason overall rank (OR) into player scores during the first weeks of the season, when current-year stats are too small a sample to be reliable. The blending schedule:
 - **Weeks 1–2**: Full weight — preseason rank contributes up to 15 bonus points (rank 1 gets the max, last-ranked gets 0)

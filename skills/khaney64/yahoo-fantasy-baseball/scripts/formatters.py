@@ -992,12 +992,16 @@ def format_optimize(suggestions, fmt="text"):
             for m in group.get("start", []):
                 opp_str = f" vs {m['opponent']}" if m.get("opponent") else ""
                 slot_note = f" at {m['to_slot']}" if group.get("reshuffle") else ""
-                lines.append(f"      ▶ Start {m['player']}{slot_note} ({m['team']}{opp_str}, score: {m['score']})")
+                status_str = f", {m['status']}" if m.get("status") else ""
+                lines.append(f"      ▶ Start {m['player']}{slot_note} ({m['team']}{opp_str}{status_str}, score: {m['score']})")
+                if (m.get("status") or "").upper() == "DTD":
+                    lines.append(f"        ⚠️  Day-to-day — confirm in lineup before locking.")
             for m in group.get("reshuffle", []):
                 lines.append(f"      ↔ Move {m['player']} from {m['from_slot']} → {m['to_slot']}")
             for m in group.get("bench", []):
                 opp_str = f" vs {m['opponent']}" if m.get("opponent") else ""
-                lines.append(f"      ▼ Bench {m['player']} ({m['team']}{opp_str}, score: {m['score']})")
+                status_str = f", {m['status']}" if m.get("status") else ""
+                lines.append(f"      ▼ Bench {m['player']} ({m['team']}{opp_str}{status_str}, score: {m['score']})")
                 reason = m.get("reason", "")
                 if reason:
                     if "not in confirmed" in reason.lower():
@@ -1025,12 +1029,16 @@ def format_optimize(suggestions, fmt="text"):
                 opp_str = f" vs {m['opponent']}" if m.get("opponent") else ""
                 slot_note = f" at {m['to_slot']}" if group.get("reshuffle") else ""
                 reason_str = f" — {m['reason']}" if m.get("reason") else ""
-                lines.append(f"      ▶ Start {m['player']}{slot_note} ({m['team']}{opp_str}, score: {m['score']}){reason_str}")
+                status_str = f", {m['status']}" if m.get("status") else ""
+                lines.append(f"      ▶ Start {m['player']}{slot_note} ({m['team']}{opp_str}{status_str}, score: {m['score']}){reason_str}")
+                if (m.get("status") or "").upper() == "DTD":
+                    lines.append(f"        ⚠️  Day-to-day — confirm in lineup before locking.")
             for m in group.get("reshuffle", []):
                 lines.append(f"      ↔ Move {m['player']} from {m['from_slot']} → {m['to_slot']}")
             for m in group.get("bench", []):
                 opp_str = f" vs {m['opponent']}" if m.get("opponent") else ""
-                lines.append(f"      ▼ Bench {m['player']} ({m['team']}{opp_str}, score: {m['score']})")
+                status_str = f", {m['status']}" if m.get("status") else ""
+                lines.append(f"      ▼ Bench {m['player']} ({m['team']}{opp_str}{status_str}, score: {m['score']})")
                 reason = m.get("reason", "")
                 if reason:
                     if "off today" in reason.lower():

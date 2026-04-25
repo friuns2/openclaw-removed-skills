@@ -1227,6 +1227,7 @@ def _diff_lineup_moves(optimal, roster, teams_playing, opponents, sitting_player
             "to_slot": new_slot,
             "score": p.get("_opt_score", 0),
             "reason": reason,
+            "status": formatters._player_status(p),
         })
 
     return moves
@@ -1377,6 +1378,7 @@ def _diff_pitcher_moves(optimal, roster, unlocked_teams, opponents, teams_playin
             "to_slot": new_slot,
             "score": p.get("_opt_score", 0),
             "reason": reason,
+            "status": formatters._player_status(p),
         })
 
     return moves
