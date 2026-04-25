@@ -3,11 +3,16 @@
   "slug": "apiflash",
   "displayName": "Apiflash",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163069273,
-    "commit": "https://github.com/openclaw/skills/commit/2d07475f6b65615e1a1f161841849fbc6082cdb5"
+    "version": "1.0.3",
+    "publishedAt": 1776790942168,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163069273,
+      "commit": "https://github.com/openclaw/skills/commit/2d07475f6b65615e1a1f161841849fbc6082cdb5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773097340891,
