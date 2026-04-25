@@ -1,18 +1,3 @@
----
-name: weiyun-management
-license: MIT
-description: >
-  This skill should be used when the user needs to manage Tencent Weiyun
-  cloud storage, including file upload/download, sharing, space management,
-  and account authentication via QR code scanning or cookies. It provides
-  a complete Python toolkit for automating Weiyun operations with CLI and
-  SDK support. Trigger phrases include "upload to weiyun", "download from
-  weiyun", "weiyun share", "weiyun space", "manage weiyun files",
-  "weiyun login", "scan QR code", "微云管理", "微云上传", "微云下载",
-  "微云分享", "微云空间", "扫码登录", "文件管理", "云存储管理",
-  "微云文件", "weiyun files", "cloud storage".
----
-
 # 腾讯微云管理 Skills
 > 一套用于管理腾讯微云（Weiyun）云存储服务的 Python 工具集，支持 **扫码登录** 和 **Cookies 登录** 两种认证方式。
 

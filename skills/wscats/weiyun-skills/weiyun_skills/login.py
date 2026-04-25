@@ -56,31 +56,67 @@ def load_cookies(save_path: str = DEFAULT_COOKIES_PATH) -> dict:
 
 
 def _display_qr_terminal(img_bytes: bytes) -> None:
-    """Display QR code image in terminal using ASCII art.
+    """Display QR code image in terminal using half-block characters.
+
+    Also saves the QR code as PNG files (original + enlarged) for easy scanning.
 
     Args:
         img_bytes: QR code image bytes.
     """
-    if qrcode is None:
-        print("[ERROR] qrcode package not installed. Run: pip install qrcode[pil]")
-        return
+    import os
 
+    # Save QR code as image file for easy access
+    qr_path = os.path.join(os.getcwd(), "weiyun_qrcode.png")
+    try:
+        with open(qr_path, "wb") as f:
+            f.write(img_bytes)
+        print(f"[*] QR code saved to: {qr_path}")
+    except Exception as e:
+        print(f"[WARN] Failed to save QR code image: {e}")
+
+    # Try to display in terminal using pixel-accurate half-block rendering
     try:
         from PIL import Image
-        img = Image.open(io.BytesIO(img_bytes))
-        # Convert image to ASCII QR code for terminal display
-        img = img.convert("L")
-        width, height = img.size
-        # Scale down for terminal
-        scale = max(1, width // 40)
-        for y in range(0, height, scale * 2):
-            line = ""
-            for x in range(0, width, scale):
-                pixel = img.getpixel((min(x, width - 1), min(y, height - 1)))
-                line += "██" if pixel < 128 else "  "
+
+        img = Image.open(io.BytesIO(img_bytes)).convert("L")
+        w, h = img.size
+
+        # Save an enlarged version for easier phone scanning
+        if w < 300:
+            scale_factor = 300 // w + 1
+            enlarged = img.resize(
+                (w * scale_factor, h * scale_factor), Image.NEAREST
+            )
+            enlarged_path = qr_path.replace(".png", "_large.png")
+            enlarged.save(enlarged_path)
+            print(f"[*] Enlarged QR saved to: {enlarged_path}")
+
+        # Render using half-block characters (▀ ▄ █ and space)
+        # Each character represents 2 vertical pixels for accurate display
+        print()
+        for y in range(0, h - 1, 2):
+            line = "  "  # indent
+            for x in range(w):
+                top = img.getpixel((x, y)) < 128
+                bottom = img.getpixel((x, y + 1)) < 128 if y + 1 < h else False
+                if top and bottom:
+                    line += "█"
+                elif top and not bottom:
+                    line += "▀"
+                elif not top and bottom:
+                    line += "▄"
+                else:
+                    line += " "
             print(line)
+        if h % 2 == 1:
+            line = "  "
+            for x in range(w):
+                line += "▀" if img.getpixel((x, h - 1)) < 128 else " "
+            print(line)
+        print()
     except ImportError:
-        print("[ERROR] Pillow package not installed. Run: pip install Pillow")
+        print("[WARN] Pillow not installed. Please open the PNG file to scan.")
+        print("  Install: pip install Pillow")
 
 
 def qrcode_login(save_path: str = DEFAULT_COOKIES_PATH) -> dict:
@@ -224,7 +260,6 @@ def qrcode_login(save_path: str = DEFAULT_COOKIES_PATH) -> dict:
                 return build_response(True, data={
                     "uin": all_cookies.get("uin", ""),
                     "nickname": "",
-                    "cookies_str": cookies_str,
                     "save_path": save_path,
                 })
 

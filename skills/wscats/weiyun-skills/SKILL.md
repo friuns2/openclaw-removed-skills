@@ -53,13 +53,15 @@ description: >
   - [2. 文件管理 Skills](#2-文件管理-skills)
     - [2.1 list\_files — 列出文件](#21-list_files--列出文件)
     - [2.2 upload\_file — 上传文件](#22-upload_file--上传文件)
-    - [2.3 download\_file — 下载文件](#23-download_file--下载文件)
-    - [2.4 delete\_file — 删除文件](#24-delete_file--删除文件)
-    - [2.5 move\_file — 移动文件](#25-move_file--移动文件)
-    - [2.6 copy\_file — 复制文件](#26-copy_file--复制文件)
-    - [2.7 rename\_file — 重命名](#27-rename_file--重命名)
-    - [2.8 create\_folder — 创建文件夹](#28-create_folder--创建文件夹)
-    - [2.9 search\_files — 搜索文件](#29-search_files--搜索文件)
+    - [2.3 upload\_folder — 上传文件夹](#23-upload_folder--上传文件夹)
+    - [2.4 download\_file — 下载文件](#24-download_file--下载文件)
+    - [2.5 download\_folder — 下载文件夹](#25-download_folder--下载文件夹)
+    - [2.6 delete\_file — 删除文件](#26-delete_file--删除文件)
+    - [2.7 move\_file — 移动文件](#27-move_file--移动文件)
+    - [2.8 copy\_file — 复制文件](#28-copy_file--复制文件)
+    - [2.9 rename\_file — 重命名](#29-rename_file--重命名)
+    - [2.10 create\_folder — 创建文件夹](#210-create_folder--创建文件夹)
+    - [2.11 search\_files — 搜索文件](#211-search_files--搜索文件)
   - [3. 分享管理 Skills](#3-分享管理-skills)
     - [3.1 create\_share — 创建分享](#31-create_share--创建分享)
     - [3.2 cancel\_share — 取消分享](#32-cancel_share--取消分享)
@@ -290,7 +292,87 @@ result = client.upload_file("./report.pdf", "/我的文档/report.pdf", overwrit
 
 ---
 
-### 2.3 download_file — 下载文件
+### 2.3 upload_folder — 上传文件夹
+
+**描述**：将本地文件夹递归上传到微云，自动创建对应的目录结构。跳过隐藏文件和 `__pycache__` 等缓存目录。
+
+**CLI**：
+
+```bash
+# Upload folder to Weiyun root
+python weiyun_skills/main.py upload-folder ./my_docs/
+
+# Upload folder to a specific remote directory
+python weiyun_skills/main.py upload-folder ./my_docs/ /目标文件夹/
+
+# Overwrite existing files
+python weiyun_skills/main.py upload-folder ./my_docs/ / --overwrite
+```
+
+**Python**：
+
+```python
+# Upload to root
+result = client.upload_folder("./my_docs/")
+
+# Upload to a specific folder, overwrite existing
+result = client.upload_folder("./my_docs/", remote_path="/目标文件夹/", overwrite=True)
+```
+
+**输入参数**：
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| `local_path` | `string` | ✅ | - | 本地文件夹路径 |
+| `remote_path` | `string` | ❌ | `/` | 微云目标路径（`/` 表示根目录） |
+| `overwrite` | `boolean` | ❌ | `false` | 是否覆盖同名文件 |
+
+**输出参数**：
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| `folder_name` | `string` | 上传的文件夹名称 |
+| `uploaded_files` | `array` | 成功上传的文件列表 |
+| `uploaded_files[].name` | `string` | 文件名 |
+| `uploaded_files[].size` | `integer` | 文件大小（字节） |
+| `uploaded_files[].size_str` | `string` | 可读大小 |
+| `uploaded_files[].instant_upload` | `boolean` | 是否秒传 |
+| `failed_files` | `array` | 上传失败的文件列表 |
+| `failed_files[].name` | `string` | 文件名 |
+| `failed_files[].error` | `string` | 错误信息 |
+| `uploaded_count` | `integer` | 成功上传数量 |
+| `failed_count` | `integer` | 失败数量 |
+| `total_size_str` | `string` | 总上传大小 |
+| `elapsed` | `float` | 上传耗时（秒） |
+
+**示例输出**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "folder_name": "upload_file",
+    "uploaded_files": [
+      {
+        "name": "abc.txt",
+        "size": 6,
+        "size_str": "6.00 B",
+        "instant_upload": false
+      }
+    ],
+    "failed_files": [],
+    "uploaded_count": 1,
+    "failed_count": 0,
+    "total_size_str": "6.00 B",
+    "elapsed": 2.35
+  },
+  "message": "ok"
+}
+```
+
+---
+
+### 2.4 download_file — 下载文件
 
 **描述**：从微云下载文件到本地。
 
@@ -326,7 +408,98 @@ result = client.download_file("/我的文档/report.pdf", "./downloads/report.pd
 
 ---
 
-### 2.4 delete_file — 删除文件
+### 2.5 download_folder — 下载文件夹
+
+**描述**：从微云下载整个文件夹到本地。支持两种模式：递归下载（保留目录结构）和打包下载（下载为 zip 文件）。
+
+**CLI**：
+
+```bash
+# Recursive download (preserves folder structure)
+python weiyun_skills/main.py download-folder QQ ./downloads/
+python weiyun_skills/main.py download-folder QQ ./downloads/ --overwrite
+
+# Download as zip
+python weiyun_skills/main.py download-folder QQ ./downloads/ --zip
+```
+
+**Python**：
+
+```python
+# Recursive download
+result = client.download_folder("QQ", "./downloads/")
+
+# Download as zip
+result = client.download_folder("QQ", "./downloads/", as_zip=True)
+```
+
+**输入参数**：
+
+| 参数名 | 类型 | 必填 | 默认值 | 说明 |
+|--------|------|------|--------|------|
+| `folder_name` | `string` | ✅ | - | 微云上的文件夹名称 |
+| `local_path` | `string` | ✅ | - | 本地保存目录（或 zip 文件路径） |
+| `overwrite` | `boolean` | ❌ | `false` | 是否覆盖已存在的本地文件 |
+| `as_zip` | `boolean` | ❌ | `false` | 是否打包为 zip 下载 |
+
+**输出参数（递归模式）**：
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| `folder_name` | `string` | 文件夹名称 |
+| `local_path` | `string` | 本地保存路径 |
+| `downloaded_files` | `array` | 成功下载的文件列表 |
+| `downloaded_files[].name` | `string` | 文件名 |
+| `downloaded_files[].local_path` | `string` | 本地路径 |
+| `downloaded_files[].size` | `integer` | 文件大小（字节） |
+| `downloaded_files[].size_str` | `string` | 可读大小 |
+| `failed_files` | `array` | 下载失败的文件列表 |
+| `failed_files[].name` | `string` | 文件名 |
+| `failed_files[].error` | `string` | 错误信息 |
+| `downloaded_count` | `integer` | 成功下载数量 |
+| `failed_count` | `integer` | 失败数量 |
+| `total_size_str` | `string` | 总下载大小 |
+| `elapsed` | `float` | 下载耗时（秒） |
+
+**输出参数（zip 模式）**：
+
+| 参数名 | 类型 | 说明 |
+|--------|------|------|
+| `local_path` | `string` | zip 文件本地路径 |
+| `size` | `integer` | 文件大小（字节） |
+| `size_str` | `string` | 可读大小 |
+| `md5` | `string` | MD5 校验值 |
+| `elapsed` | `float` | 下载耗时（秒） |
+
+**示例输出（递归模式）**：
+
+```json
+{
+  "success": true,
+  "data": {
+    "folder_name": "QQ",
+    "local_path": "./downloads/QQ",
+    "downloaded_files": [
+      {
+        "name": "report.pdf",
+        "local_path": "./downloads/QQ/report.pdf",
+        "size": 8663503,
+        "size_str": "8.26 MB"
+      }
+    ],
+    "failed_files": [],
+    "downloaded_count": 6,
+    "failed_count": 0,
+    "total_size_str": "33.11 MB",
+    "elapsed": 5.88
+  },
+  "message": "ok"
+}
+```
+
+---
+
+### 2.6 delete_file — 删除文件
 
 **描述**：删除微云文件或文件夹（移入回收站）。
 
@@ -360,7 +533,7 @@ result = client.delete_file("/我的文档/old_file.pdf", permanent=False)
 
 ---
 
-### 2.5 move_file — 移动文件
+### 2.7 move_file — 移动文件
 
 **描述**：将文件或文件夹移动到另一个目录。
 
@@ -392,7 +565,7 @@ result = client.move_file("/我的文档/report.pdf", "/归档/2026/")
 
 ---
 
-### 2.6 copy_file — 复制文件
+### 2.8 copy_file — 复制文件
 
 **描述**：复制文件或文件夹到另一个目录。
 
@@ -425,7 +598,7 @@ result = client.copy_file("/我的文档/report.pdf", "/备份/")
 
 ---
 
-### 2.7 rename_file — 重命名
+### 2.9 rename_file — 重命名
 
 **描述**：重命名文件或文件夹。
 
@@ -457,7 +630,7 @@ result = client.rename_file("/我的文档/report.pdf", "年度报告.pdf")
 
 ---
 
-### 2.8 create_folder — 创建文件夹
+### 2.10 create_folder — 创建文件夹
 
 **描述**：在微云上创建文件夹，支持递归创建多级目录。
 
@@ -489,7 +662,7 @@ result = client.create_folder("/工作/2026/Q1/报告")
 
 ---
 
-### 2.9 search_files — 搜索文件
+### 2.11 search_files — 搜索文件
 
 **描述**：按关键词搜索微云中的文件。
 
