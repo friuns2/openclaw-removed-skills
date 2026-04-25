@@ -3,11 +3,16 @@
   "slug": "algolia-search",
   "displayName": "Algolia Search",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162688673,
-    "commit": "https://github.com/openclaw/skills/commit/9f47d8e77badcf220e6207ebfcd0eab8d3db9bf4"
+    "version": "1.0.3",
+    "publishedAt": 1776780282833,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162688673,
+      "commit": "https://github.com/openclaw/skills/commit/9f47d8e77badcf220e6207ebfcd0eab8d3db9bf4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772895761103,
