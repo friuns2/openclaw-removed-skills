@@ -1,13 +1,18 @@
 {
   "owner": "gingiris",
   "slug": "gingiris-launch",
-  "displayName": "Gingiris Launch",
+  "displayName": "GTM Strategy & Product Hunt Launch Playbook",
   "latest": {
-    "version": "1.3.1",
-    "publishedAt": 1775647787367,
-    "commit": "https://github.com/openclaw/skills/commit/c909d908034ba6ec2f2feb13eace2d585975e66f"
+    "version": "1.3.4",
+    "publishedAt": 1776567312566,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.1",
+      "publishedAt": 1775647787367,
+      "commit": "https://github.com/openclaw/skills/commit/c909d908034ba6ec2f2feb13eace2d585975e66f"
+    },
     {
       "version": "2.0.0",
       "publishedAt": 1774329621392,

@@ -1,7 +1,7 @@
 ---
-name: gingiris-launch
+name: "GTM Strategy & Product Hunt Launch Playbook"
 description: |
-  Go-to-Market (GTM) Strategy & Product Hunt Launch Playbook — Complete go-to-market playbook for startups and product launches. Proven GTM tactics from Manus, Devin, AFFiNE (33k GitHub stars). Covers: Product Hunt #1 ranking (30x daily winner), go-to-market planning, launch strategy, KOL/influencer outreach templates, Reddit & HackerNews marketing, viral campaigns. Real case studies with exact timelines and budgets.
+  Help your AI product achieve a viral global launch — from zero buzz to Product Hunt #1 and thousands of sign-ups on day one. Battle-tested GTM playbook with launch week checklists, KOL outreach templates, Reddit/HN strategy, and press kits. Based on real launches (AFFiNE, top PH winners). Multi-language: EN/ZH/JA/KO.
 
   🇨🇳 AI产品全球发布行动指南 | 🇯🇵 AIプロダクトローンチガイド | 🇰🇷 AI 제품 런칭 플레이북
 
