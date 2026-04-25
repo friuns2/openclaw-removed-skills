@@ -3,11 +3,16 @@
   "slug": "brevo-integration",
   "displayName": "Brevo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162631775,
-    "commit": "https://github.com/openclaw/skills/commit/3f67c1a5ade8f857c3e7ef8a6ce6790e08d40adc"
+    "version": "1.0.3",
+    "publishedAt": 1776780182817,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162631775,
+      "commit": "https://github.com/openclaw/skills/commit/3f67c1a5ade8f857c3e7ef8a6ce6790e08d40adc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772870541432,
