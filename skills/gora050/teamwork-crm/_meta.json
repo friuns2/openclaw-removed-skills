@@ -3,11 +3,16 @@
   "slug": "teamwork-crm",
   "displayName": "Teamwork Crm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162684750,
-    "commit": "https://github.com/openclaw/skills/commit/1c2e81fa5ab4405abda8e5e8476fa40566fdfeb5"
+    "version": "1.0.3",
+    "publishedAt": 1776780275692,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162684750,
+      "commit": "https://github.com/openclaw/skills/commit/1c2e81fa5ab4405abda8e5e8476fa40566fdfeb5"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775162683070,
