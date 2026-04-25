@@ -3,11 +3,16 @@
   "slug": "perigon",
   "displayName": "Perigon",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163740552,
-    "commit": "https://github.com/openclaw/skills/commit/5c6fcd86e3fefdd1016c41f8be0a2ea74624cff4"
+    "version": "1.0.3",
+    "publishedAt": 1776812538679,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163740552,
+      "commit": "https://github.com/openclaw/skills/commit/5c6fcd86e3fefdd1016c41f8be0a2ea74624cff4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773439337937,
