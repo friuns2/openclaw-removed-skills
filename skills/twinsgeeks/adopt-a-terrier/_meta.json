@@ -1,11 +1,17 @@
 {
   "owner": "twinsgeeks",
   "slug": "adopt-a-terrier",
-  "displayName": "Adopt a Terrier — Virtual Dog Pet for AI Agents",
+  "displayName": "Terrier — Adopt a Terrier. Dog. 梗犬。Terrier.",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1773303129524,
-    "commit": "https://github.com/openclaw/skills/commit/9eb1c19f2fa160e9b54232208f9b76738f879d36"
+    "version": "1.0.3",
+    "publishedAt": 1775008694575,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1773303129524,
+      "commit": "https://github.com/openclaw/skills/commit/9eb1c19f2fa160e9b54232208f9b76738f879d36"
+    }
+  ]
 }
