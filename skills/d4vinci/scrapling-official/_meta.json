@@ -3,11 +3,16 @@
   "slug": "scrapling-official",
   "displayName": "Scrapling Official Skill",
   "latest": {
-    "version": "0.4.6",
-    "publishedAt": 1776087201154,
-    "commit": "https://github.com/openclaw/skills/commit/7edc936759a25e8f1ab419988aee66799a145058"
+    "version": "0.4.7",
+    "publishedAt": 1776460254737,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.4.6",
+      "publishedAt": 1776087201154,
+      "commit": "https://github.com/openclaw/skills/commit/7edc936759a25e8f1ab419988aee66799a145058"
+    },
     {
       "version": "0.4.5",
       "publishedAt": 1775535925003,
