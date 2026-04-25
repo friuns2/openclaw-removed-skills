@@ -3,11 +3,16 @@
   "slug": "superoffice",
   "displayName": "Superoffice",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162412737,
-    "commit": "https://github.com/openclaw/skills/commit/580e05691d30ffc951bc887687f99768322ca02b"
+    "version": "1.0.3",
+    "publishedAt": 1776773082416,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162412737,
+      "commit": "https://github.com/openclaw/skills/commit/580e05691d30ffc951bc887687f99768322ca02b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772708571039,
