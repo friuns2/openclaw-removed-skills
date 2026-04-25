@@ -3,11 +3,16 @@
   "slug": "currencyapi",
   "displayName": "Currencyapi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163251588,
-    "commit": "https://github.com/openclaw/skills/commit/31649d79f43386d0c18826d3380fa7e99f65d78b"
+    "version": "1.0.3",
+    "publishedAt": 1776794584871,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163251588,
+      "commit": "https://github.com/openclaw/skills/commit/31649d79f43386d0c18826d3380fa7e99f65d78b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773187365112,
