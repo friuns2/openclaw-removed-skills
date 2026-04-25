@@ -47,9 +47,11 @@ node scripts/visualize.mjs <image> '[]' preview.png \
 ### 第 7 步：调用技能
 
 ```bash
-echo '{"input0":{"image":"photo.jpg","roi":{...}}}' | \
+echo '{"input0":{"image":"photo.jpg","roi":{"id":"1","name":"zone","kind":"ROI","points":[...]}}}' | \
   node scripts/invoke.mjs ep-xxxx-yyyy
 ```
+
+> **重要：** 自定义 ROI 必须通过 `invoke.mjs` 传入。不要使用 `intent-invoke.mjs`，因为它会自动添加全图 ROI 覆盖掉你的自定义区域。
 
 ---
 

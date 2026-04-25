@@ -1,7 +1,7 @@
 {
   "name": "baidu-yijian-vision",
-  "version": "0.9.30",
-  "description": "Client tool for registering and invoking Baidu Yijian vision skills",
+  "version": "0.9.36",
+  "description": "Baidu Yijian Vision Skill - Intent-driven visual analysis with automatic skill routing",
   "type": "module",
   "private": true,
   "engines": {
@@ -10,11 +10,20 @@
   },
   "scripts": {
     "pack": "node scripts/pack.mjs",
-    "test": "node --test 'tests/*.test.mjs'"
+    "test": "node --test 'tests/*.test.mjs'",
+    "test:integration": "node tests/run-integration.mjs --skip-e2e",
+    "test:integration:all": "node tests/run-integration.mjs",
+    "test:integration:e2e": "node tests/run-integration.mjs --e2e",
+    "test:integration:agent": "node tests/run-integration.mjs --agent",
+    "test:integration:docker": "node tests/run-docker.mjs",
+    "test:all": "npm test && npm run test:integration"
   },
-  "dependencies": {},
   "devDependencies": {
-    "archiver": "^7.0.1"
+    "archiver": "^7.0.1",
+    "openclaw": "github:openclaw/openclaw#main"
+  },
+  "optionalDevDependencies": {
+    "_openclaw": "https://github.com/openclaw/openclaw.git#main"
   },
   "optionalDependencies": {
     "sharp": "^0.33.0"

@@ -2,52 +2,6 @@
 
 import https from 'https';
 import http from 'http';
-import fs from 'fs';
-import path from 'path';
-
-export const REGISTRY_FILENAME = '.claude/yijian-skills.local.md';
-
-const REGISTRY_HEADER = `---
-description: Yijian skills registry
----
-# Yijian Skills Registry
-
-`;
-
-/**
- * Read the registry from the project directory.
- * Returns { skills: {} } if the file doesn't exist.
- */
-export function readRegistry(projectDir) {
-  const filePath = path.join(projectDir, REGISTRY_FILENAME);
-  if (!fs.existsSync(filePath)) {
-    return { skills: {} };
-  }
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const jsonMatch = content.match(/```json\s*\n([\s\S]*?)\n```/);
-  if (!jsonMatch) {
-    return { skills: {} };
-  }
-  try {
-    return JSON.parse(jsonMatch[1]);
-  } catch {
-    return { skills: {} };
-  }
-}
-
-/**
- * Write the registry to the project directory.
- * Creates the .claude directory if it doesn't exist.
- */
-export function writeRegistry(projectDir, registry) {
-  const dirPath = path.join(projectDir, '.claude');
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-  const filePath = path.join(projectDir, REGISTRY_FILENAME);
-  const content = REGISTRY_HEADER + '```json\n' + JSON.stringify(registry, null, 2) + '\n```\n';
-  fs.writeFileSync(filePath, content, 'utf-8');
-}
 
 /**
  * Make an HTTPS (or HTTP) request. Returns a Promise that resolves to { statusCode, headers, body }.
@@ -105,4 +59,32 @@ export function metadataUrl(epId) {
  */
 export function runUrl(epId) {
   return `https://yijian-next.cloud.baidu.com/api/skills/v1/${epId}/run`;
+}
+
+/**
+ * Construct the router query URL for intent-based skill matching.
+ */
+export function routerQueryUrl() {
+  return 'https://yijian.baidubce.com/harness/v1/router/query';
+}
+
+/**
+ * Construct the router multimodal URL for direct inference.
+ */
+export function routerMultimodalUrl() {
+  return 'https://yijian.baidubce.com/harness/v1/router/multimodal';
+}
+
+/**
+ * Construct the workspaces get URL.
+ */
+export function workspacesGetUrl() {
+  return 'https://yijian-next.cloud.baidu.com/api/vistudio/v1/workspaces/get';
+}
+
+/**
+ * Construct the workspace skills get URL.
+ */
+export function workspaceSkillsGetUrl(workspaceId) {
+  return `https://yijian-next.cloud.baidu.com/api/vistudio/v1/workspaces/${workspaceId}/skills/get`;
 }

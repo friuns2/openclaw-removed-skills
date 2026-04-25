@@ -67,7 +67,7 @@ node scripts/visualize.mjs <image> '[]' preview.png \
 生成最终预览，用户确认，然后调用技能：
 
 ```bash
-echo '{"input0":{"image":"photo.jpg","tripwire":{...}}}' | \
+echo '{"input0":{"image":"photo.jpg","tripwire":{"id":"1","name":"line","kind":"TripWire","points":[p1_x,p1_y,p2_x,p2_y,p3_x,p3_y,p4_x,p4_y],"direction":"Forward"}}}' | \
   node scripts/invoke.mjs ep-xxxx-yyyy
 ```
 

@@ -2,7 +2,7 @@
  * types.mjs — Yijian type constants, classification, serialization & deserialization.
  *
  * Centralizes all type-related logic previously scattered across invoke.mjs
- * and skill-writer.mjs.
+ * and intent-invoke.mjs.
  */
 
 import fs from 'fs';
@@ -283,10 +283,12 @@ function buildImageValue(userValue) {
 
   // (3) String path or base64 (existing logic)
   let imageData, imageWidth = 0, imageHeight = 0;
+  let filePath = null;
   if (typeof userValue === 'string') {
     if (isBase64(userValue)) {
       imageData = userValue;
     } else {
+      filePath = userValue;
       const img = readImageFile(userValue);
       imageData = img.base64;
       imageWidth = img.width;
@@ -298,8 +300,8 @@ function buildImageValue(userValue) {
 
   return JSON.stringify({
     imageData,
-    imageId: '0',
-    sourceId: '',
+    imageId: filePath ? fileHashId(filePath) : '0',
+    sourceId: filePath ? fileHashId(filePath) : '',
     imageWidth,
     imageHeight,
     timestamp: Date.now(),
@@ -504,7 +506,34 @@ export function parseOutputs(outputs) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. SKILL.md generation helpers
+// 5. Image data URI helpers
+// ---------------------------------------------------------------------------
+
+const MIME_MAP = {
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+  '.png': 'image/png', '.gif': 'image/gif',
+  '.webp': 'image/webp', '.bmp': 'image/bmp',
+};
+
+/**
+ * Convert a local file path to a base64 data URI.
+ */
+export function imageToDataUri(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  const mime = MIME_MAP[ext] || 'image/jpeg';
+  const data = fs.readFileSync(filePath);
+  return `data:${mime};base64,${data.toString('base64')}`;
+}
+
+/**
+ * Check if a string looks like a local file path (not a URL or data URI).
+ */
+export function isLocalFilePath(str) {
+  return str && !str.startsWith('http://') && !str.startsWith('https://') && !str.startsWith('data:');
+}
+
+// ---------------------------------------------------------------------------
+// 6. SKILL.md generation helpers
 // ---------------------------------------------------------------------------
 
 /**
