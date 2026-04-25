@@ -1,11 +1,17 @@
 {
   "owner": "gate-exchange",
   "slug": "gate-exchange-affiliate",
-  "displayName": "Gate Exchange Affiliate",
+  "displayName": "Gate Exchange Affiliate Program Skill",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773451941728,
-    "commit": "https://github.com/openclaw/skills/commit/06a73b3c8b05242e05127cd2b5dcd8a0972a4646"
+    "version": "1.0.5",
+    "publishedAt": 1775642335579,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773451941728,
+      "commit": "https://github.com/openclaw/skills/commit/06a73b3c8b05242e05127cd2b5dcd8a0972a4646"
+    }
+  ]
 }

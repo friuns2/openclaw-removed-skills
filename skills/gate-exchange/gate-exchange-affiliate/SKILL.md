@@ -1,8 +1,24 @@
 ---
 name: gate-exchange-affiliate
-version: "2026.3.13"
-updated: "2026-03-13"
-description: "Gate Exchange affiliate program data query and management skill. Use this skill when users ask about their affiliate/partner commission, trading volume, net fees, customer count, trading users, or want to apply for the affiliate program. Supports queries for up to 180 days (API limited to 30 days per request, agent should split longer queries). IMPORTANT: user_id parameter in APIs refers to 'trader' not 'commission receiver' - avoid using unless explicitly specified. Aggregated data from API lists should be calculated using custom scripts, not simple summation. CRITICAL TIME CONSTRAINT: All query times are calculated based on user's system current date in UTC+8 timezone. For relative time descriptions (e.g., 'last 7 days', 'last 30 days', 'this week', 'last month'), calculate start date by subtracting days from current date, then convert both start and end dates to UTC+8 00:00:00 and 23:59:59 respectively, then convert to Unix timestamps. NEVER use future timestamps as query conditions. When timestamps are needed, obtain them via system functions, never generate manually. The 'to' parameter must always be less than or equal to the current Unix timestamp. Trigger phrases include 'my affiliate data', 'commission this week', 'partner earnings', 'team performance', 'customer trading volume', 'rebate income', 'apply for affiliate'."
+version: "2026.4.8-1"
+updated: "2026-04-08"
+description: "Gate partner affiliate data and application skill. Use when the user asks about partner commissions, referral volume, or applying for the affiliate program. Triggers on 'my affiliate data', 'partner earnings', 'apply for affiliate', 'commission'."
+required_credentials:
+  - gate_api_key
+  - gate_api_secret
+required_env_vars:
+  - GATE_API_KEY
+  - GATE_API_SECRET
+required_permissions:
+  - Rebate:Read
+metadata:
+  openclaw:
+    requires:
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+    primaryEnv: GATE_API_KEY
+    homepage: https://github.com/gate/gate-skills
 ---
 
 # Gate Exchange Affiliate Program Assistant
@@ -11,17 +27,62 @@ Query and manage Gate Exchange affiliate/partner program data, including commiss
 
 ## General Rules
 
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read `./references/gate-runtime-rules.md`
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_rebate_get_partner_application_recent
+- cex_rebate_get_partner_eligibility
+- cex_rebate_partner_commissions_history
+- cex_rebate_partner_sub_list
+- cex_rebate_partner_transaction_history
+
+### Authentication
+- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- API Key Required: Yes
+- Permissions: Rebate:Read
+- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
+- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+
+### Installation Check
+- Required: Gate (main)
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's affiliate workflow.
+
+- `SKILL.md` keeps routing and reporting policy.
+- `references/mcp.md` is the authoritative MCP execution layer for eligibility/application/commission query flow and degraded handling.
 
 ## Important Notice
 
 - **Role**: This skill uses Partner APIs only. The term "affiliate" in user queries refers to Partner role.
 - **Time Limit**: API supports maximum 30 days per request. For queries >30 days (up to 180 days), agent must split into multiple 30-day segments.
-- **Authentication**: Requires `X-Gate-User-Id` header with partner privileges.
+- **Authentication**: Partner APIs still run through the local Gate MCP session. Any required partner headers (including `X-Gate-User-Id`) are supplied by that session, not pasted by the user.
 - **CRITICAL - user_id Parameter**: In both `commission_history` and `transaction_history` APIs, the `user_id` parameter filters by "trader/trading user" NOT "commission receiver". Only use this parameter when explicitly querying a specific trader's contribution. For general commission queries, DO NOT use user_id parameter.
 - **Data Aggregation**: When calculating totals from API response lists, use custom aggregation logic based on business rules. DO NOT simply sum all values as this may lead to incorrect results due to data structure and business logic considerations.
-- **⚠️ CRITICAL - Time Constraint**: All query times are calculated based on the user's system current date in UTC+8 timezone. For relative time descriptions like "last 7 days", "last 30 days", "this week", "last month", etc., calculate the start date by subtracting the requested days from the current date, then convert both start and end dates to UTC+8 00:00:00 and 23:59:59 respectively, then convert these times to Unix timestamps. **NEVER use future timestamps as query conditions**. The `to` parameter must always be ≤ current timestamp. If user specifies a future date, reject the query and explain that only historical data is available.
+
+### Query time and timezone (UTC+8)
+
+All query windows use the user's **current calendar date** in **UTC+8**. For relative phrases ("last 7 days", "last 30 days", "this week", "last month"): compute the start date by subtracting the requested span from today, convert start and end to UTC+8 00:00:00 and 23:59:59 respectively, then to Unix timestamps. **NEVER** use future timestamps as query bounds. The `to` parameter must always be ≤ current Unix time. If the user specifies a future date, reject the query and explain that only historical data is available.
 
 ## Available APIs (Partner Only)
 
@@ -30,6 +91,8 @@ Read and follow the shared runtime rules before proceeding:
 | `GET /rebate/partner/transaction_history` | Get referred users' trading records | ≤30 days per request |
 | `GET /rebate/partner/commission_history` | Get referred users' commission records | ≤30 days per request |
 | `GET /rebate/partner/sub_list` | Get subordinate list (for customer count) | No time parameter |
+| `GET /rebate/partner/eligibility` | Check if user is eligible to apply for partner | No time parameter |
+| `GET /rebate/partner/applications/recent` | Get user's recent partner application record (last 30 days) | No time parameter |
 
 **Note**: Agency APIs (`/rebate/agency/*`) are deprecated and not used in this skill.
 
@@ -50,6 +113,14 @@ Read and follow the shared runtime rules before proceeding:
   - Time period boundaries
 - Raw summation may lead to incorrect results due to data structure complexities
 
+## Safety Rules
+
+- **Query times (UTC+8)**: Follow **Important Notice → Query time and timezone (UTC+8)** for relative ranges, day boundaries, and Unix conversion. Never use future timestamps; `to` must be ≤ current Unix time; reject user-specified future dates.
+- **user_id usage**: Use the `user_id` parameter only when the user explicitly asks about a specific trader's contribution (e.g. "UID 123456's volume"). Do not use `user_id` for "my commission" or "my earnings"—those are the partner's own totals across all referred users.
+- **Data scope**: Query only data for the authenticated partner. Do not attempt to access other partners' data or to infer data outside the API responses.
+- **Aggregation**: Do not sum list fields blindly. Use documented aggregation rules and respect asset types, deduplication, and period boundaries to avoid incorrect totals.
+- **Sub-accounts**: If the API indicates the account is a sub-account or returns a sub_account eligibility block, direct the user to use the main account for partner data or application.
+
 ## Core Metrics
 
 1. **Commission Amount**: Total rebate earnings from `commission_history`
@@ -58,14 +129,22 @@ Read and follow the shared runtime rules before proceeding:
 4. **Customer Count**: Total subordinates from `sub_list`
 5. **Trading Users**: Unique user count from `transaction_history`
 
-## Workflow
+## Domain Knowledge
 
+- **Partner (affiliate)**: In this skill, "affiliate" and "partner" refer to the same role: a user who refers others to trade on Gate Exchange and earns rebate (commission) from referred users' trading activity. Only Partner APIs are used; Agency APIs are deprecated.
+- **Commission (rebate)**: Commission is the rebate paid to the partner from trading fees generated by referred users. It is reported per transaction or per period via commission history. Amounts may be in different assets (e.g. USDT); aggregation must follow business rules and asset handling.
+- **Trading volume and net fees**: These come from referred users' trading activity (spot, futures, etc.). Transaction history returns per-trade records; volume and fees must be aggregated with proper logic—do not naively sum list fields.
+- **Subordinates**: Users referred by the partner. The subordinate list returns them with types: Sub-agent (1), Indirect customer (2), Direct customer (3). Customer count is the total number of subordinates; trading users is the count of unique users with trading activity in the requested period.
+- **Eligibility**: Whether the current user can apply for the partner program. Checked via the eligibility API; the response includes `eligible` and, when not eligible, `block_reasons` and `block_reason_codes` (e.g. sub_account, already_agent, kyc_incomplete).
+- **Application status**: The user's recent partner application (if any) within the last 30 days, including audit status (pending / approved / rejected), returned by the applications/recent API.
+
+## Workflow
 ### Step 1: Parse User Query
 
 Identify the query type and extract parameters.
 
 Key data to extract:
-- `query_type`: overview | time_specific | metric_specific | user_specific | team_report | application
+- `query_type`: overview | time_specific | metric_specific | user_specific | team_report | application | application_eligibility | application_status
 - `time_range`: default 7 days or user-specified period
 - `metric`: commission | volume | fees | customers | trading_users (if metric-specific)
 - `user_id`: specific user ID (if user-specific query)
@@ -83,6 +162,8 @@ Key data to extract:
 
 Based on query type, call the appropriate Partner APIs.
 
+When MCP is configured with Gate rebate tools, call the corresponding MCP tools by name (e.g. Call `cex_rebate_partner_transaction_history`, Call `cex_rebate_partner_commissions_history`, Call `cex_rebate_partner_sub_list`, Call `cex_rebate_get_partner_eligibility`, Call `cex_rebate_get_partner_application_recent`) with the parameters described in API Parameter Reference. When MCP is not available, use the API paths below.
+
 **CRITICAL REMINDER**: 
 - DO NOT use `user_id` parameter unless explicitly querying a specific trader's contribution
 - The `user_id` in API responses represents the TRADER, not the commission receiver
@@ -99,11 +180,18 @@ For metric-specific queries:
 For user-specific queries:
 - Call APIs with `user_id` parameter (this shows that specific trader's contribution)
 
+For application-related queries:
+- "Can I apply?" / "Am I eligible?" → Call `GET /rebate/partner/eligibility` (returns eligible, block_reasons, block_reason_codes)
+- "My application status" / "Recent application" / "Application result" → Call `GET /rebate/partner/applications/recent` (returns last 30 days application record with audit_status, apply_msg, etc.)
+- Generic "how to apply" → Optionally call eligibility first, then return application steps and portal link
+
 Key data to extract:
 - `transactions`: array of trading records
 - `commissions`: array of commission records
 - `subordinates`: array of team members
 - `total_count`: total records for pagination
+- `eligibility`: { eligible, block_reasons, block_reason_codes } (for application_eligibility)
+- `application_recent`: application record or empty (for application_status)
 
 ### Step 4: Handle Pagination
 
@@ -142,7 +230,9 @@ Generate the appropriate response based on query type using the templates.
 | Query type = metric_specific | ✅ | Call only required API(s) for the metric |
 | Query type = user_specific | ✅ | Add user_id filter to API calls (NOTE: user_id = trader, not receiver) |
 | Query type = team_report | ✅ | Call all APIs, generate comprehensive report |
-| Query type = application | ✅ | Return application guidance without API calls |
+| Query type = application | ✅ | Return application guidance; optionally call eligibility or applications/recent when user asks "can I apply?" or "my application status?" |
+| Query type = application_eligibility | ✅ | Call GET /rebate/partner/eligibility, return eligible status and block_reasons |
+| Query type = application_status | ✅ | Call GET /rebate/partner/applications/recent, return recent application record and audit_status |
 | Time range ≤30 days | ✅ | Single API call per endpoint |
 | Time range >30 days and ≤180 days | ✅ | Split into multiple 30-day segments |
 | Time range >180 days | ❌ | Return error "Only supports queries within last 180 days" |
@@ -314,9 +404,32 @@ UID {user_id} contribution (last 7 days):
 
 ### Case 6: Affiliate Application Guidance
 
-**Triggers**: "apply for affiliate", "become a partner", "join affiliate program"
+**Triggers**: "apply for affiliate", "become a partner", "join affiliate program", "can I apply?", "am I eligible?", "my application status", "recent application", "application result"
 
-**Output** (No API call needed):
+**When to call APIs**:
+- User asks "can I apply?" or "am I eligible?" → Call `GET /rebate/partner/eligibility`. If eligible, return application steps; if not, return block_reasons and guidance.
+- User asks "my application status" or "recent application" → Call `GET /rebate/partner/applications/recent`. Return audit_status (0=pending, 1=approved, 2=rejected), apply_msg, and jump_url.
+- User only asks "how to apply" → Optionally call eligibility first, then return steps and portal.
+
+**Eligibility response template** (after calling eligibility API):
+```
+Eligibility check: {eligible ? "You are eligible to apply." : "You are not eligible at this time."}
+{If not eligible:}
+Block reasons: {block_reasons}
+Please address the above before applying.
+
+Application Portal: https://www.gate.com/referral/affiliate
+```
+
+**Application status template** (after calling applications/recent API):
+```
+Your recent partner application (last 30 days):
+Status: {audit_status: 0=Pending, 1=Approved, 2=Rejected}
+{apply_msg}
+{jump_url if provided}
+```
+
+**Generic guidance** (no API or after API response):
 ```
 You can apply to become a Gate Exchange affiliate and earn commission from referred users' trading.
 
@@ -430,6 +543,35 @@ Response: {
 Type: 1=Sub-agent, 2=Indirect customer, 3=Direct customer
 ```
 
+### eligibility
+```
+GET /rebate/partner/eligibility
+Parameters: none (uses authenticated user)
+
+Response: {
+  data: {
+    eligible: boolean,
+    block_reasons: string[],
+    block_reason_codes: string[]
+  }
+}
+block_reason_codes may include: user_not_exist, user_blacked, sub_account, already_agent, kyc_incomplete, in_agent_tree, ch_code_conflict
+```
+
+### applications/recent
+```
+GET /rebate/partner/applications/recent
+Parameters: none (returns current user's recent application in last 30 days)
+
+Response: {
+  data: {
+    id, uid, audit_status, apply_msg, create_timest, update_timest,
+    proof_url, jump_url, proof_images_url_list, ...
+  } or empty
+}
+audit_status: 0=Pending, 1=Approved, 2=Rejected
+```
+
 ## Pagination Strategy
 
 For complete data retrieval when total > limit:
@@ -483,16 +625,6 @@ while True:
 - Convert string amounts to numbers for calculation
 - Display with appropriate precision (USDT: 2 decimals, BTC: 8 decimals)
 - Add thousand separators for large numbers
-
-## MCP Dependencies
-
-This skill requires the following MCP tools to be installed:
-- `gate-mcp` with rebate/partner endpoints enabled
-
-If not installed, prompt user to install via:
-```bash
-npm install -g gate-mcp
-```
 
 ## Validation Examples
 
