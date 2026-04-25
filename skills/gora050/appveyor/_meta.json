@@ -3,11 +3,16 @@
   "slug": "appveyor",
   "displayName": "Appveyor",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163906442,
-    "commit": "https://github.com/openclaw/skills/commit/a8e9e7113e118e634c8edf2898b7c3960bf10027"
+    "version": "1.0.3",
+    "publishedAt": 1776816185663,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163906442,
+      "commit": "https://github.com/openclaw/skills/commit/a8e9e7113e118e634c8edf2898b7c3960bf10027"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773468148173,
