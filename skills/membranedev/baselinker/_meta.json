@@ -3,11 +3,16 @@
   "slug": "baselinker",
   "displayName": "Baselinker",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164115255,
-    "commit": "https://github.com/openclaw/skills/commit/a2dcb4316e47fc586c8b5c85518e01fa217129ce"
+    "version": "1.0.3",
+    "publishedAt": 1776830551563,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164115255,
+      "commit": "https://github.com/openclaw/skills/commit/a2dcb4316e47fc586c8b5c85518e01fa217129ce"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773612145359,
