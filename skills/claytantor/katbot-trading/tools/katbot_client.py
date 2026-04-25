@@ -10,6 +10,8 @@ Features:
 - Portfolio management (CRUD, tokens, timeseries, chain info)
 - Agent management (CRUD, assignment, invitations)
 - Recommendation workflow (request, poll, execute, response)
+- Research workflow (run, poll, results, apply)
+- Market Intelligence (trending, sentiment, whale flow/activity, token intelligence)
 - Trade execution and position closing
 - Conversation history management
 - User and subscription info
@@ -1034,6 +1036,246 @@ def get_plans() -> list:
 
 
 # ============================================================================
+# RESEARCH
+# ============================================================================
+
+
+def run_research(token: str, portfolio_id: int,
+                 symbol: str = None,
+                 time_horizon: str = None,
+                 risk_profile: str = None) -> dict:
+    """Initiate a research run for a portfolio (async, returns ticket).
+
+    Args:
+        token: JWT access token
+        portfolio_id: Portfolio ID
+        symbol: Optional token symbol to focus research on (e.g., "BTC")
+        time_horizon: Optional time horizon ("short", "medium", "long")
+        risk_profile: Optional risk profile ("low", "medium", "high")
+
+    Returns:
+        ResearchTicketResponse dict with ticket_id and status
+    """
+    payload = {}
+    if symbol is not None:
+        payload["symbol"] = symbol
+    if time_horizon is not None:
+        payload["time_horizon"] = time_horizon
+    if risk_profile is not None:
+        payload["risk_profile"] = risk_profile
+    r = requests.post(f"{BASE_URL}/portfolio/{portfolio_id}/research/run",
+                      json=payload, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def poll_research(token: str, portfolio_id: int, ticket_id: str,
+                  max_wait: int = 120) -> dict:
+    """Poll until a research task is ready or timeout.
+
+    Returns:
+        Dict with ticket_id, status, done, result, error
+    """
+    deadline = time.time() + max_wait
+    while time.time() < deadline:
+        r = requests.get(f"{BASE_URL}/portfolio/{portfolio_id}/research/poll/{ticket_id}",
+                         headers=_auth(token))
+        r.raise_for_status()
+        data = r.json()
+        if data.get("done") or data.get("status") in ("COMPLETED", "complete", "FAILED"):
+            return data
+        time.sleep(3)
+    raise TimeoutError(f"Research not ready after {max_wait}s")
+
+
+def list_research_results(token: str, portfolio_id: int) -> list:
+    """List non-expired research results for a portfolio.
+
+    Returns:
+        List of research result dicts
+    """
+    r = requests.get(f"{BASE_URL}/portfolio/{portfolio_id}/research/results",
+                     headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_research_result(token: str, portfolio_id: int, result_id: int) -> dict:
+    """Get a specific research result.
+
+    Returns:
+        Research result dict
+    """
+    r = requests.get(f"{BASE_URL}/portfolio/{portfolio_id}/research/results/{result_id}",
+                     headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def delete_research_result(token: str, portfolio_id: int, result_id: int) -> dict:
+    """Delete a specific research result.
+
+    Returns:
+        Dict with success status
+    """
+    r = requests.delete(f"{BASE_URL}/portfolio/{portfolio_id}/research/results/{result_id}",
+                        headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def apply_research_result(token: str, portfolio_id: int, result_id: int) -> dict:
+    """Apply a research result's token selection to the portfolio.
+
+    WARNING: This mutates portfolio.tokens_selected. Always obtain explicit
+    user confirmation ("Apply this research result to your portfolio token
+    selection?") before calling this function.
+
+    Returns:
+        Dict with success status and updated token selection
+    """
+    r = requests.post(
+        f"{BASE_URL}/portfolio/{portfolio_id}/research/results/{result_id}/apply",
+        json={}, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def list_research_configs(token: str, agent_id: int) -> list:
+    """List research configurations for an agent.
+
+    Returns:
+        List of research config dicts
+    """
+    r = requests.get(f"{BASE_URL}/agents/{agent_id}/research/config",
+                     headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_research_config(token: str, agent_id: int, config_id: int) -> dict:
+    """Get a specific research configuration for an agent."""
+    r = requests.get(f"{BASE_URL}/agents/{agent_id}/research/config/{config_id}",
+                     headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def create_research_config(token: str, agent_id: int, payload: dict) -> dict:
+    """Create a research configuration for an agent."""
+    r = requests.post(f"{BASE_URL}/agents/{agent_id}/research/config",
+                      json=payload, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def update_research_config(token: str, agent_id: int, config_id: int,
+                            payload: dict) -> dict:
+    """Update a research configuration for an agent."""
+    r = requests.put(f"{BASE_URL}/agents/{agent_id}/research/config/{config_id}",
+                     json=payload, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def delete_research_config(token: str, agent_id: int, config_id: int) -> dict:
+    """Delete a research configuration for an agent."""
+    r = requests.delete(f"{BASE_URL}/agents/{agent_id}/research/config/{config_id}",
+                        headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+# ============================================================================
+# MARKET INTELLIGENCE
+# ============================================================================
+
+
+def get_trending_tokens(token: str, **params) -> list:
+    """Get trending tokens by article volume.
+
+    Returns:
+        List of trending token dicts with symbol, article_volume, etc.
+    """
+    r = requests.get(f"{BASE_URL}/market-intelligence/trending",
+                     params=params, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_intelligence_articles(token: str, **params) -> list:
+    """Get LLM-enriched news articles with sentiment scores.
+
+    Returns:
+        List of article dicts with headline, sentiment, symbol, etc.
+    """
+    r = requests.get(f"{BASE_URL}/market-intelligence/articles",
+                     params=params, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_aggregated_sentiment(token: str, **params) -> list:
+    """Get aggregated token sentiment scores.
+
+    Returns:
+        List of sentiment dicts with symbol, score, direction, etc.
+    """
+    r = requests.get(f"{BASE_URL}/market-intelligence/sentiment",
+                     params=params, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_token_sentiment(token: str, symbol: str) -> dict:
+    """Get detailed sentiment for a specific token symbol.
+
+    Returns:
+        Sentiment dict with score, direction, article_count, etc.
+    """
+    r = requests.get(f"{BASE_URL}/market-intelligence/sentiment/{symbol}",
+                     headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_whale_flow(token: str, **params) -> list:
+    """Get whale position flow per token.
+
+    Returns:
+        List of whale flow dicts with symbol, net_flow_usd, direction, etc.
+    """
+    r = requests.get(f"{BASE_URL}/market-intelligence/whale-flow",
+                     params=params, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_whale_activity(token: str, **params) -> list:
+    """Get individual whale activity events.
+
+    Returns:
+        List of whale activity event dicts
+    """
+    r = requests.get(f"{BASE_URL}/market-intelligence/whale-activity",
+                     params=params, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+def get_token_intelligence(token: str, **params) -> list:
+    """Get composite intelligence signals (news + whale) per token.
+
+    Returns:
+        List of token intelligence dicts
+    """
+    r = requests.get(f"{BASE_URL}/market-intelligence/token-intelligence",
+                     params=params, headers=_auth(token))
+    r.raise_for_status()
+    return r.json()
+
+
+# ============================================================================
 # CLI entry point
 # ============================================================================
 
@@ -1072,6 +1314,23 @@ def main():
         print("  plans                   List subscription plans")
         print("  tokens                  Get available trading tokens")
         print("  chain-info              Get portfolio chain info")
+        print("")
+        print("Research:")
+        print("  run-research [--symbol SYM] [--time-horizon short|medium|long] [--risk-profile low|medium|high]")
+        print("  poll-research <ticket_id>")
+        print("  list-research-results")
+        print("  get-research-result <result_id>")
+        print("  delete-research-result <result_id>")
+        print("  apply-research-result <result_id>")
+        print("  list-research-configs <agent_id>")
+        print("")
+        print("Market Intelligence:")
+        print("  trending [--limit N]")
+        print("  articles [--limit N]")
+        print("  sentiment [--symbol SYM]")
+        print("  whale-flow [--symbol SYM]")
+        print("  whale-activity [--symbol SYM]")
+        print("  token-intelligence [--symbol SYM]")
         sys.exit(1)
 
     action = sys.argv[1]
@@ -1229,6 +1488,149 @@ def main():
             print("ERROR: PORTFOLIO_ID must be set")
             sys.exit(1)
         result = get_portfolio_chain_info(token, int(portfolio_id))
+        print(json.dumps(result, indent=2, default=str))
+
+    # --- Research ---
+
+    elif action == "run-research":
+        if not portfolio_id:
+            print("ERROR: PORTFOLIO_ID must be set")
+            sys.exit(1)
+        symbol_arg = None
+        time_horizon_arg = None
+        risk_profile_arg = None
+        i = 2
+        while i < len(sys.argv):
+            if sys.argv[i] == "--symbol" and i + 1 < len(sys.argv):
+                symbol_arg = sys.argv[i + 1]; i += 2
+            elif sys.argv[i] == "--time-horizon" and i + 1 < len(sys.argv):
+                time_horizon_arg = sys.argv[i + 1]; i += 2
+            elif sys.argv[i] == "--risk-profile" and i + 1 < len(sys.argv):
+                risk_profile_arg = sys.argv[i + 1]; i += 2
+            else:
+                i += 1
+        result = run_research(token, int(portfolio_id),
+                              symbol=symbol_arg,
+                              time_horizon=time_horizon_arg,
+                              risk_profile=risk_profile_arg)
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "poll-research":
+        if not portfolio_id:
+            print("ERROR: PORTFOLIO_ID must be set")
+            sys.exit(1)
+        ticket_id = sys.argv[2] if len(sys.argv) > 2 else None
+        if not ticket_id:
+            print("ERROR: ticket_id required")
+            sys.exit(1)
+        result = poll_research(token, int(portfolio_id), ticket_id)
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "list-research-results":
+        if not portfolio_id:
+            print("ERROR: PORTFOLIO_ID must be set")
+            sys.exit(1)
+        result = list_research_results(token, int(portfolio_id))
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "get-research-result":
+        if not portfolio_id:
+            print("ERROR: PORTFOLIO_ID must be set")
+            sys.exit(1)
+        result_id = sys.argv[2] if len(sys.argv) > 2 else None
+        if not result_id:
+            print("ERROR: result_id required")
+            sys.exit(1)
+        result = get_research_result(token, int(portfolio_id), int(result_id))
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "delete-research-result":
+        if not portfolio_id:
+            print("ERROR: PORTFOLIO_ID must be set")
+            sys.exit(1)
+        result_id = sys.argv[2] if len(sys.argv) > 2 else None
+        if not result_id:
+            print("ERROR: result_id required")
+            sys.exit(1)
+        result = delete_research_result(token, int(portfolio_id), int(result_id))
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "apply-research-result":
+        if not portfolio_id:
+            print("ERROR: PORTFOLIO_ID must be set")
+            sys.exit(1)
+        result_id = sys.argv[2] if len(sys.argv) > 2 else None
+        if not result_id:
+            print("ERROR: result_id required")
+            sys.exit(1)
+        result = apply_research_result(token, int(portfolio_id), int(result_id))
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "list-research-configs":
+        agent_id = sys.argv[2] if len(sys.argv) > 2 else None
+        if not agent_id:
+            print("ERROR: agent_id required")
+            sys.exit(1)
+        result = list_research_configs(token, int(agent_id))
+        print(json.dumps(result, indent=2, default=str))
+
+    # --- Market Intelligence ---
+
+    elif action == "trending":
+        params = {}
+        if "--limit" in sys.argv:
+            idx = sys.argv.index("--limit")
+            if idx + 1 < len(sys.argv):
+                params["limit"] = int(sys.argv[idx + 1])
+        result = get_trending_tokens(token, **params)
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "articles":
+        params = {}
+        if "--limit" in sys.argv:
+            idx = sys.argv.index("--limit")
+            if idx + 1 < len(sys.argv):
+                params["limit"] = int(sys.argv[idx + 1])
+        result = get_intelligence_articles(token, **params)
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "sentiment":
+        symbol_arg = None
+        if "--symbol" in sys.argv:
+            idx = sys.argv.index("--symbol")
+            if idx + 1 < len(sys.argv):
+                symbol_arg = sys.argv[idx + 1]
+        if symbol_arg:
+            result = get_token_sentiment(token, symbol_arg)
+        else:
+            result = get_aggregated_sentiment(token)
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "whale-flow":
+        params = {}
+        if "--symbol" in sys.argv:
+            idx = sys.argv.index("--symbol")
+            if idx + 1 < len(sys.argv):
+                params["symbol"] = sys.argv[idx + 1]
+        result = get_whale_flow(token, **params)
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "whale-activity":
+        params = {}
+        if "--symbol" in sys.argv:
+            idx = sys.argv.index("--symbol")
+            if idx + 1 < len(sys.argv):
+                params["symbol"] = sys.argv[idx + 1]
+        result = get_whale_activity(token, **params)
+        print(json.dumps(result, indent=2, default=str))
+
+    elif action == "token-intelligence":
+        params = {}
+        if "--symbol" in sys.argv:
+            idx = sys.argv.index("--symbol")
+            if idx + 1 < len(sys.argv):
+                params["symbol"] = sys.argv[idx + 1]
+        result = get_token_intelligence(token, **params)
         print(json.dumps(result, indent=2, default=str))
 
     else:

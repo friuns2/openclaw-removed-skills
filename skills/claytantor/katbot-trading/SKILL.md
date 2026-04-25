@@ -1,7 +1,7 @@
 ---
 name: katbot-trading
-version: 0.3.1
-description: Live crypto trading on Hyperliquid via Katbot.ai. Includes BMI market analysis, token selection, and AI-powered trade execution.
+version: 0.5.0
+description: Live crypto trading on Hyperliquid via Katbot.ai. Signal-triggered research → recommendation → execution workflow with Market Intelligence, research, and configurable signal monitoring.
 # Note: Homepage URL removed to avoid GitHub API rate limit errors during publish
 metadata:
   {
@@ -17,7 +17,7 @@ metadata:
 
 # Katbot Trading Skill
 
-This skill teaches the agent how to use the Katbot.ai API to manage a Hyperliquid trading portfolio.
+This skill teaches the agent how to use the Katbot.ai API to manage a Hyperliquid trading portfolio through a signal-driven research pipeline.
 
 ## Portfolio Types
 
@@ -26,18 +26,24 @@ This skill teaches the agent how to use the Katbot.ai API to manage a Hyperliqui
 | `HL_PAPER` | Paper trading on Hyperliquid (no real funds). Formerly called `PAPER`. |
 | `HYPERLIQUID` | Live trading on Hyperliquid (agent key required, builder fee must be approved). |
 
+## Workflow
+
+```
+Setup → Configure Signal Triggers → Signal fires → Market Intel enrichment
+     → Research → (user confirms apply?) → Recommendation → (user confirms) → Execution → Monitor
+```
+
 ## Capabilities
 
-1. **Market Analysis**: Check the BTC Momentum Index (BMI) and 24h gainers/losers.
-    - `btc_momentum.py`: Calculates the BMI (BTC Momentum Index) based on trend, MACD, body, volume, and RSI. Returns a signal (BULLISH, BEARISH, NEUTRAL).
-    - `bmi_alert.py`: Runs `btc_momentum.py` and sends a Telegram alert if the market direction has changed. Uses `portfolio_tokens.json` for custom token tracking.
-2. **Token Selection**: Automatically pick the best tokens for the current market direction.
-3. **Recommendations**: Get AI-powered trade setups (Entry, TP, SL, Leverage). **Requires a primary agent assigned to the portfolio.**
-4. **Execution**: Execute and close trades on Hyperliquid with user confirmation.
-5. **Portfolio Tracking**: Monitor open positions, uPnL, balances, timeseries, and chain info.
-6. **Agent Management**: Create, configure, and assign AI agents to portfolios.
-7. **Conversation History**: View and clear agent conversation history per portfolio.
-8. **Subscription & Plans**: Check feature usage limits and available plans.
+1. **Signal Triggers**: Configurable 10-minute-cadence monitor over Katbot Market Intelligence. Fires on clear Momentum, Volume-Breakout, Whale-Activity, or Trending signals and auto-starts the research→recommendation workflow.
+2. **Market Intelligence**: Read trending tokens, sentiment, whale flow/activity, and composite token intelligence from `/market-intelligence/*`. Used by the signal trigger and as enrichment context for recommendations.
+3. **Research**: Run Katbot AI research tasks (momentum, volume, whale activity, etc.) and reuse non-expired results to seed recommendations.
+4. **Recommendations**: Get AI-powered trade setups (Entry, TP, SL, Leverage). **Requires a primary agent assigned to the portfolio.**
+5. **Execution**: Execute and close trades on Hyperliquid with user confirmation.
+6. **Portfolio Tracking**: Monitor open positions, uPnL, balances, timeseries, and chain info.
+7. **Agent Management**: Create, configure, and assign AI agents to portfolios.
+8. **Conversation History**: View and clear agent conversation history per portfolio.
+9. **Subscription & Plans**: Check feature usage limits and available plans.
 
 ## Tools
 
@@ -47,24 +53,203 @@ Dependencies are listed in `{baseDir}/requirements.txt`.
 
 - `ensure_env.sh`: **Run before any tool.** Checks if dependencies are installed for the current skill version and re-installs if needed. Safe to call every time — it exits immediately if already up to date.
 - `katbot_onboard.py`: **First-time setup wizard.** Authenticates via SIWE using your Wallet Key, creates/selects a portfolio, and saves credentials locally to the secure identity directory.
-- `katbot_client.py`: Core API client. Handles authentication, token refresh, portfolio management, recommendations, trade execution, and chat. Also usable as a CLI script.
-- `katbot_workflow.py`: End-to-end trading workflow (BMI -> token selection -> recommendation). Imports `katbot_client` and `token_selector` — requires `PYTHONPATH={baseDir}/tools`.
-- `token_selector.py`: Momentum-based token selection via CoinGecko.
-- `btc_momentum.py`: Calculates BTC Momentum Index (BMI).
-- `bmi_alert.py`: Telegram alerting workflow for BMI changes.
-
-### BMI Analysis Tool Usage
-
-The BMI (BTC Momentum Index) is a proprietary indicator used to determine market bias.
-
-- **Check BMI**: `PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/btc_momentum.py --json`
-- **Send BMI via openclaw**: `OPENCLAW_NOTIFY_CHANNEL=<channel> OPENCLAW_NOTIFY_TARGET=<target> PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/btc_momentum.py --send`
-- **Run Alert Workflow**: `OPENCLAW_NOTIFY_CHANNEL=<channel> OPENCLAW_NOTIFY_TARGET=<target> PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/bmi_alert.py` (sends an alert if market direction changed)
-- If `OPENCLAW_NOTIFY_CHANNEL` or `OPENCLAW_NOTIFY_TARGET` is not set, the `--send` flag and `bmi_alert.py` will print the message to stdout instead of sending it.
-
-The `bmi_alert.py` script reads `~/.openclaw/workspace/portfolio_tokens.json` to include specific token performance in the alert message.
+- `katbot_trigger_setup.py`: **Signal trigger configuration wizard.** Run after onboarding to configure which market-intelligence signal types (Momentum, Volume Breakout, Whale Activity, Trending) should fire the research→recommendation workflow. Can be re-run anytime to reconfigure.
+- `katbot_signal_trigger.py`: **10-minute cadence tick runner.** Evaluates configured signals and fires alerts + workflow when a signal is clear. Run via cron or openclaw schedule.
+- `katbot_client.py`: Core API client. Handles authentication, portfolio management, research, market intelligence, recommendations, and trade execution. Also usable as a CLI script.
+- `katbot_workflow.py`: Signal-driven research → recommendation workflow. Accepts signal context and orchestrates market-intel enrichment, research run/reuse, and recommendation request.
 
 > **Note for contributors**: The `scripts/` directory contains only publish tooling (`publish.sh`, `publish.py`, etc.). Do NOT add copies of tool scripts there — all trading logic lives solely in `{baseDir}/tools/`.
+
+## Signal Triggers
+
+Signal triggers replace manual market analysis. They run on a 10-minute cadence and evaluate four signal types using Katbot Market Intelligence data.
+
+### Setup
+
+```bash
+# Run once after onboarding (or any time to reconfigure)
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_trigger_setup.py
+```
+
+The wizard will:
+1. Confirm portfolio and primary agent.
+2. Ask which signal types to enable (Momentum, Volume Breakout, Whale Activity, Trending).
+3. Set thresholds for each enabled signal.
+4. Ask for alert channel/target.
+5. Write `~/.openclaw/workspace/katbot_signal_trigger.json` (mode 600).
+6. Print a ready-to-paste cron line.
+
+### Signal Types
+
+| Signal | Source | Fires when |
+|--------|--------|-----------|
+| **Momentum** | `/market-intelligence/sentiment` | Sentiment delta for ≥ N tokens crosses threshold |
+| **Volume Breakout** | `/market-intelligence/trending` | Article-volume Z-score ≥ threshold |
+| **Whale Activity** | `/market-intelligence/whale-flow` | Whale net-flow magnitude ≥ threshold USD |
+| **Trending** | `/market-intelligence/trending` | New token with article volume ≥ threshold not in portfolio |
+
+### Trigger Config Schema
+
+`~/.openclaw/workspace/katbot_signal_trigger.json`:
+
+```json
+{
+  "version": 1,
+  "portfolio_id": 123,
+  "agent_id": 45,
+  "notify": { "channel": "telegram", "target": "..." },
+  "signals": {
+    "momentum":        { "enabled": true,  "threshold_abs": 0.6, "min_tokens": 2 },
+    "volume_breakout": { "enabled": true,  "z_score_threshold": 2.0 },
+    "whale_activity":  { "enabled": true,  "min_net_flow_usd": 500000 },
+    "trending":        { "enabled": true,  "min_article_volume": 10 }
+  },
+  "auto_start_workflow": true,
+  "auto_execute_trade":  false
+}
+```
+
+### Running the Trigger
+
+```bash
+# Dry run — prints what would fire, no alerts or workflow
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_signal_trigger.py --dry-run
+
+# Force fire (bypasses dedup — for testing)
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_signal_trigger.py --force
+
+# Normal run
+bash {baseDir}/tools/ensure_env.sh {baseDir}
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_signal_trigger.py
+```
+
+### Suggested Cron Line (10-minute cadence)
+
+```
+*/10 * * * * bash {baseDir}/tools/ensure_env.sh {baseDir} && PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_signal_trigger.py >> /tmp/katbot_trigger.log 2>&1
+```
+
+Replace `{baseDir}` with the absolute path to the skill directory.
+
+## Market Intelligence `[local only]`
+
+Read-only signal feeds from Katbot. Synchronous GETs — no ticket/polling required. These calls degrade gracefully: a failure must never block the trading pipeline.
+
+```python
+# Trending tokens by article volume
+trending = get_trending_tokens(token)
+trending = get_trending_tokens(token, limit=20)
+
+# LLM-enriched news with sentiment
+articles = get_intelligence_articles(token, limit=10)
+
+# Aggregated sentiment across tokens
+sentiment_list = get_aggregated_sentiment(token)
+
+# Detailed sentiment for one token
+btc_sentiment = get_token_sentiment(token, "BTC")
+
+# Whale position flow per token
+whale_flow = get_whale_flow(token)
+whale_flow = get_whale_flow(token, symbol="ETH")
+
+# Individual whale activity events
+whale_events = get_whale_activity(token)
+
+# Composite intelligence (news + whale)
+intelligence = get_token_intelligence(token)
+intelligence = get_token_intelligence(token, symbol="SOL")
+```
+
+### Market Intelligence CLI
+
+```bash
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py trending [--limit N]
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py articles [--limit N]
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py sentiment [--symbol BTC]
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py whale-flow [--symbol ETH]
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py whale-activity [--symbol SOL]
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py token-intelligence [--symbol BTC]
+```
+
+## Research `[local only except run_research]`
+
+Research tasks are agent-driven analyses. Results expire — always prefer reusing a non-expired result over running a new one unnecessarily.
+
+> `apply_research_result` mutates `portfolio.tokens_selected`. **Always ask the user before calling it.**
+
+```python
+# Run a new research task (async)
+ticket = run_research(token, portfolio_id,
+    symbol="BTC",           # Optional: focus on a specific token
+    time_horizon="medium",  # Optional: "short", "medium", "long"
+    risk_profile="medium"   # Optional: "low", "medium", "high"
+)
+# ticket = {"ticket_id": "...", "status": "PENDING"}
+
+# Poll for completion (up to 120s)
+result = poll_research(token, portfolio_id, ticket["ticket_id"], max_wait=120)
+# result = {"ticket_id": "...", "status": "COMPLETED"|"FAILED", "done": True, "result": {...}}
+
+# List non-expired results
+results = list_research_results(token, portfolio_id)
+
+# Get one result
+result = get_research_result(token, portfolio_id, result_id)
+
+# Delete a result
+result = delete_research_result(token, portfolio_id, result_id)
+
+# Apply token selection to portfolio — REQUIRES EXPLICIT USER CONFIRMATION
+result = apply_research_result(token, portfolio_id, result_id)
+# Returns: {"success": True, "tokens_selected": [...], ...}
+
+# Research configuration (per-agent)
+configs = list_research_configs(token, agent_id)
+config  = get_research_config(token, agent_id, config_id)
+config  = create_research_config(token, agent_id, payload)
+config  = update_research_config(token, agent_id, config_id, payload)
+result  = delete_research_config(token, agent_id, config_id)
+```
+
+### Research CLI
+
+```bash
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py run-research [--symbol BTC] [--time-horizon short|medium|long] [--risk-profile low|medium|high]
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py poll-research <ticket_id>
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py list-research-results
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py get-research-result <result_id>
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py delete-research-result <result_id>
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py apply-research-result <result_id>
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py list-research-configs <agent_id>
+```
+
+## Workflow Tool Usage
+
+The workflow runs the full pipeline from a signal context:
+
+```bash
+# Manual run (no signal trigger)
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_workflow.py \
+  --signal-type manual \
+  --tokens BTC,ETH \
+  --rationale "Manual analysis run"
+
+# With risk and horizon settings
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_workflow.py \
+  --signal-type whale_activity \
+  --tokens SOL \
+  --risk-profile medium \
+  --time-horizon short
+
+# Skip enrichment (faster, less context)
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_workflow.py \
+  --signal-type manual --no-enrich
+
+# Always run fresh research (ignore existing results)
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_workflow.py \
+  --signal-type manual --no-reuse-research
+```
 
 ## Environment Variables
 
@@ -79,8 +264,8 @@ The `bmi_alert.py` script reads `~/.openclaw/workspace/portfolio_tokens.json` to
 | `KATBOT_BASE_URL` | Optional override | API base URL. Default: `https://api.katbot.ai` |
 | `KATBOT_IDENTITY_DIR` | Optional override | Path to identity files directory. Default: `~/.openclaw/workspace/katbot-identity` |
 | `CHAIN_ID` | Optional override | EVM chain ID. Default: `42161` (Arbitrum) |
-| `OPENCLAW_NOTIFY_CHANNEL` | Required for alerting | The openclaw channel name for `btc_momentum.py --send` and `bmi_alert.py` (e.g. `telegram`, `slack`, `discord`). If unset, both tools print to stdout and skip the send. |
-| `OPENCLAW_NOTIFY_TARGET` | Required for alerting | The target ID within the channel (e.g. a chat ID or user handle). Must be set together with `OPENCLAW_NOTIFY_CHANNEL`. |
+| `OPENCLAW_NOTIFY_CHANNEL` | Required for alerting | The openclaw channel name for signal trigger alerts (e.g. `telegram`, `slack`, `discord`). If unset, alerts print to stdout. The trigger wizard stores this in `katbot_signal_trigger.json` so cron invocations don't need it in the shell. |
+| `OPENCLAW_NOTIFY_TARGET` | Required for alerting | The target ID within the channel (e.g. a chat ID or user handle). Must be set together with `OPENCLAW_NOTIFY_CHANNEL`. Stored in trigger config. |
 
 ### `.env` File Loader — CLI/Development Use Only
 
@@ -107,7 +292,14 @@ All persistent credentials are stored in `KATBOT_IDENTITY_DIR` (default: `~/.ope
 | `katbot_token.json` | 600 | `access_token`, `refresh_token` |
 | `katbot_secrets.json` | 600 | `agent_private_key` |
 
-`katbot_client.py` reads all three files automatically. The agent key is loaded from `katbot_secrets.json` if `KATBOT_HL_AGENT_PRIVATE_KEY` is not set in the environment.
+The trigger config lives outside `KATBOT_IDENTITY_DIR` by design (it holds no secrets):
+
+| File | Mode | Contents |
+|------|------|----------|
+| `~/.openclaw/workspace/katbot_signal_trigger.json` | 600 | portfolio/agent IDs, notify config, signal thresholds |
+| `~/.openclaw/workspace/memory/katbot_signal_state.json` | 644 | last-fire timestamps per signal+token (auto-managed by trigger) |
+
+`katbot_client.py` reads all three identity files automatically. The agent key is loaded from `katbot_secrets.json` if `KATBOT_HL_AGENT_PRIVATE_KEY` is not set in the environment.
 
 **Security properties of identity files:**
 - `katbot_token.json` and `katbot_secrets.json` are written with mode 600 (owner read/write only).
@@ -333,7 +525,8 @@ PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py update-portf
 ## Usage Rules
 
 - **ALWAYS** present the Credential Transmission Notice and obtain user acknowledgement before the first onboarding or trading operation in any session.
-- **ALWAYS** check the BMI before suggesting a new trade.
+- **ALWAYS** check for a non-expired research result (or run one) before calling `request_recommendation` for a new trade idea. Include the research result summary / ID (and market-intelligence signals that triggered it) in the recommendation message.
+- **ALWAYS** explicitly ask the user ("Apply this research result to your portfolio token selection?") before calling `apply_research_result`. Never auto-apply — it mutates `portfolio.tokens_selected`.
 - **NEVER** execute a trade without explicit user confirmation (e.g., "Confirm execution of LONG AAVE?").
 - **NEVER** log, print, or reveal any private key or token value in the chat.
 - **ALWAYS** report the risk/reward ratio and leverage for any recommendation.
@@ -341,6 +534,8 @@ PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_client.py update-portf
 - **ALWAYS** verify a primary agent is assigned to the portfolio before calling `request_recommendation`. If the API returns HTTP 422 ("No primary agent assigned"), guide the user to create an agent and call `assign_agent()` first.
 - **NEVER** use the old portfolio type `"PAPER"` — it has been renamed to `"HL_PAPER"`. Always use `"HL_PAPER"` for paper trading.
 - **NEVER** execute live trades on a mainnet HYPERLIQUID portfolio unless `builder_fee_approved` is `True` in the portfolio info. If it is `False`, inform the user they must complete the builder fee approval step.
+- **NEVER** enable `auto_execute_trade: true` in `katbot_signal_trigger.json` without a clear, informed user choice — it causes unattended trade execution.
+- **NEVER** block the trigger or workflow on a failed market-intelligence call — log a warning and proceed. Market-intel feeds enrich but do not gate the pipeline.
 - **NEVER** pre-set `WALLET_PRIVATE_KEY` in the environment. It is an emergency re-auth key only. If the agent detects it already set in the environment outside of an active onboarding/re-auth session, warn the user and suggest unsetting it.
 - **NEVER** create a `katbot_client.env` file containing `WALLET_PRIVATE_KEY` or `KATBOT_HL_AGENT_PRIVATE_KEY`. The `.env` loader will not inject private keys into the process, but placing them in such a file is still a bad practice that stores secrets on disk unnecessarily.
 - **NEVER** suggest exporting any private key to a shell profile or persistent environment file.
@@ -370,16 +565,19 @@ bash {baseDir}/tools/ensure_env.sh {baseDir}
 
 # 2. Run onboarding wizard (interactive)
 python3 {baseDir}/tools/katbot_onboard.py
+
+# 3. Configure signal triggers (interactive)
+PYTHONPATH={baseDir}/tools python3 {baseDir}/tools/katbot_trigger_setup.py
 ```
 
-The wizard will:
+The onboarding wizard will:
 1. Prompt for `WALLET_PRIVATE_KEY` (hidden input — never stored to disk).
 2. Authenticate with api.katbot.ai via SIWE.
 3. List existing portfolios or create a new Hyperliquid one.
 4. Save `KATBOT_HL_AGENT_PRIVATE_KEY`, `katbot_config.json`, and `katbot_token.json` to `~/.openclaw/workspace/katbot-identity/`.
 5. Print instructions for authorizing the agent wallet on Hyperliquid.
 
-After onboarding, the skill runs autonomously using the saved credentials. `WALLET_PRIVATE_KEY` is no longer needed unless the session fully expires.
+After onboarding, run the trigger setup wizard to configure which signal types should fire the workflow.
 
 ## Upgrade
 
