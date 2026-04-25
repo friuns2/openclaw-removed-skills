@@ -3,11 +3,16 @@
   "slug": "polymarket-real-estate-trader",
   "displayName": "Polymarket Real Estate Trader",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775333560401,
-    "commit": "https://github.com/openclaw/skills/commit/3efc0caab9b35eb0ad8fb29580b0d44c6f821997"
+    "version": "0.0.2",
+    "publishedAt": 1776513551058,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775333560401,
+      "commit": "https://github.com/openclaw/skills/commit/3efc0caab9b35eb0ad8fb29580b0d44c6f821997"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773781893613,
