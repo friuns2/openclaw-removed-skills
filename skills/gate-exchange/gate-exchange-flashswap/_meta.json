@@ -1,11 +1,17 @@
 {
   "owner": "gate-exchange",
   "slug": "gate-exchange-flashswap",
-  "displayName": "Gate Exchange FlashSwap",
+  "displayName": "Gate Flash Swap Skill",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773452089021,
-    "commit": "https://github.com/openclaw/skills/commit/a57f7585d83f5257c148c734f10ed298d8b7f74b"
+    "version": "1.0.2",
+    "publishedAt": 1775115214723,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773452089021,
+      "commit": "https://github.com/openclaw/skills/commit/a57f7585d83f5257c148c734f10ed298d8b7f74b"
+    }
+  ]
 }
