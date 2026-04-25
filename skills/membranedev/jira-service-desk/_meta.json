@@ -3,11 +3,16 @@
   "slug": "jira-service-desk",
   "displayName": "Jira Service Desk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162623204,
-    "commit": "https://github.com/openclaw/skills/commit/34e17b7185a51947fb9003c16a7f658f756cbb3f"
+    "version": "1.0.3",
+    "publishedAt": 1776780168317,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162623204,
+      "commit": "https://github.com/openclaw/skills/commit/34e17b7185a51947fb9003c16a7f658f756cbb3f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772866959898,
