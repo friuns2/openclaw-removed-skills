@@ -3,11 +3,16 @@
   "slug": "google-docs-integration",
   "displayName": "Google Docs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161782808,
-    "commit": "https://github.com/openclaw/skills/commit/3c7de6b88288f9e0d5c1c195de51a08e36a3852f"
+    "version": "1.0.3",
+    "publishedAt": 1776776603328,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161782808,
+      "commit": "https://github.com/openclaw/skills/commit/3c7de6b88288f9e0d5c1c195de51a08e36a3852f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772766150121,
