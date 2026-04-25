@@ -3,11 +3,16 @@
   "slug": "zephyr-scale",
   "displayName": "Zephyr Scale",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162672378,
-    "commit": "https://github.com/openclaw/skills/commit/73d0aa7350ed4fc31fe3a3eaa13dd52bd506bb06"
+    "version": "1.0.3",
+    "publishedAt": 1776780250693,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162672378,
+      "commit": "https://github.com/openclaw/skills/commit/73d0aa7350ed4fc31fe3a3eaa13dd52bd506bb06"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772888623761,
