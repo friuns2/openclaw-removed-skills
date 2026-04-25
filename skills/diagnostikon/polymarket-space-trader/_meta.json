@@ -3,11 +3,16 @@
   "slug": "polymarket-space-trader",
   "displayName": "Polymarket Space Trader",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775317344290,
-    "commit": "https://github.com/openclaw/skills/commit/ac1acba9a1bbe4e68b32bca0ac852a5e2d237d41"
+    "version": "0.0.2",
+    "publishedAt": 1776513578045,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775317344290,
+      "commit": "https://github.com/openclaw/skills/commit/ac1acba9a1bbe4e68b32bca0ac852a5e2d237d41"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773781000432,
