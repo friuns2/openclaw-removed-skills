@@ -3,11 +3,16 @@
   "slug": "calcom-integration",
   "displayName": "Calcom",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162754309,
-    "commit": "https://github.com/openclaw/skills/commit/c3b602acdf99edb5cf12060e8e9b14327d3aa46a"
+    "version": "1.0.3",
+    "publishedAt": 1776783754413,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162754309,
+      "commit": "https://github.com/openclaw/skills/commit/c3b602acdf99edb5cf12060e8e9b14327d3aa46a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772935350604,
