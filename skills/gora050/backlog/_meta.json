@@ -3,11 +3,16 @@
   "slug": "backlog",
   "displayName": "Backlog",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163054291,
-    "commit": "https://github.com/openclaw/skills/commit/88c5546eb8fff5cc39ceaa393060cb58abad0f33"
+    "version": "1.0.3",
+    "publishedAt": 1776787372611,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163054291,
+      "commit": "https://github.com/openclaw/skills/commit/88c5546eb8fff5cc39ceaa393060cb58abad0f33"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773093792017,
