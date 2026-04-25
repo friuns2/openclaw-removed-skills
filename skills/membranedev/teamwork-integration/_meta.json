@@ -3,11 +3,16 @@
   "slug": "teamwork-integration",
   "displayName": "Teamwork",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161809225,
-    "commit": "https://github.com/openclaw/skills/commit/0310f6ba6d5cd46fdece1db963e9c002ddcba39c"
+    "version": "1.0.3",
+    "publishedAt": 1776776648161,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161809225,
+      "commit": "https://github.com/openclaw/skills/commit/0310f6ba6d5cd46fdece1db963e9c002ddcba39c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772780598057,
