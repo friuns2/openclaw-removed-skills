@@ -3,11 +3,16 @@
   "slug": "wix",
   "displayName": "Wix",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162619120,
-    "commit": "https://github.com/openclaw/skills/commit/72ffe6ce06d62fcabeb64b9cbc4cbd4ce8e25155"
+    "version": "1.0.3",
+    "publishedAt": 1776780159254,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162619120,
+      "commit": "https://github.com/openclaw/skills/commit/72ffe6ce06d62fcabeb64b9cbc4cbd4ce8e25155"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772866950928,
