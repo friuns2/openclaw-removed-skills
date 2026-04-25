@@ -1,7 +1,7 @@
 {
   "name": "elm",
-  "version": "1.3.0",
-  "description": "饿了么决策 Skill - 帮你判断红包是不是真省钱，这一单到底该不该下",
+  "version": "2.0.1",
+  "description": "饿了么下单 Skill - 自然语言下单、用户自助登录后按地址搜商品、优惠优化后加购物车",
   "main": "SKILL.md",
   "keywords": [
     "elm",
@@ -12,7 +12,8 @@
     "delivery",
     "coupon",
     "hongbao",
-    "refund",
+    "cart",
+    "budget",
     "openclaw-skill"
   ],
   "author": "openclaw",

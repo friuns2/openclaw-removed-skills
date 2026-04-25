@@ -1,8 +1,8 @@
 {
   "name": "elm",
-  "version": "1.3.0",
-  "description": "饿了么决策助手 - 帮你判断红包是不是真省钱，这一单到底该不该下",
-  "keywords": ["elm", "eleme", "饿了么", "waimai", "takeout", "delivery", "coupon", "refund", "hongbao"],
+  "version": "2.0.1",
+  "description": "饿了么下单助手 - 自然语言输入需求，用户自助登录后按地址搜商品，优惠优化后加购物车",
+  "keywords": ["elm", "eleme", "饿了么", "waimai", "takeout", "delivery", "coupon", "hongbao", "cart", "budget"],
   "author": "openclaw",
   "license": "MIT"
 }

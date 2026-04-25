@@ -3,11 +3,16 @@
   "slug": "elm",
   "displayName": "elm",
   "latest": {
-    "version": "1.3.0",
-    "publishedAt": 1774952532451,
-    "commit": "https://github.com/openclaw/skills/commit/160f119c431dc1573a58e5cd5e8424fe07c3d393"
+    "version": "2.0.1",
+    "publishedAt": 1776905175930,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.0",
+      "publishedAt": 1774952532451,
+      "commit": "https://github.com/openclaw/skills/commit/160f119c431dc1573a58e5cd5e8424fe07c3d393"
+    },
     {
       "version": "1.2.0",
       "publishedAt": 1773579120608,
