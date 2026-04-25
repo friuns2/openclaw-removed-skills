@@ -3,11 +3,16 @@
   "slug": "salesmate",
   "displayName": "Salesmate",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162871492,
-    "commit": "https://github.com/openclaw/skills/commit/42f310b0ddb8a50a34ca4e4e7631123b01e97765"
+    "version": "1.0.3",
+    "publishedAt": 1776783986487,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162871492,
+      "commit": "https://github.com/openclaw/skills/commit/42f310b0ddb8a50a34ca4e4e7631123b01e97765"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772982171260,
