@@ -20,6 +20,7 @@ This Skill provides a command-line tool for web search using the `ddgs` Python p
 - **News Search**: Dedicated news content search
 - **Multiple Output Formats**: Text or JSON format
 - **Flexible Configuration**: Region, time limits, and safe search level
+- **Proxy Support**: HTTP/HTTPS/SOCKS5 proxy via CLI args or environment variables
 
 ## Installation
 
@@ -77,9 +78,23 @@ uv run scripts/ddgs_search.py "breaking news" --timelimit d
 | `--safesearch` | `-s` | Safe search (on/moderate/off) | `moderate` |
 | `--timelimit` | `-t` | Time limit (d/w/m/y) | - |
 | `--backend` | `-b` | Search backend (auto/html/lite) | `auto` |
+| `--proxy` | `-p` | Proxy server (http/https/socks5) | - |
 | `--news` | - | Search news | - |
 | `--json` | `-j` | JSON format output | - |
 | `--verbose` | `-v` | Show detailed information | - |
+
+### Proxy Configuration
+
+Proxy settings are resolved in the following priority order:
+1. **Command line**: `--proxy` / `-p`
+2. **Environment variable**: `HTTP_PROXY` or `http_proxy`
+3. **Environment variable**: `DDGS_PROXY`
+
+**Proxy format examples:**
+- `http://proxy.example.com:8080`
+- `http://user:pass@proxy.example.com:8080`
+- `socks5://127.0.0.1:9150` (Tor Browser)
+- `socks5h://user:password@geo.iproyal.com:32325`
 
 ### Region Code Examples
 
@@ -176,6 +191,21 @@ uv run scripts/ddgs_search.py "机器学习教程" -r cn-zh -n 8
 uv run scripts/ddgs_search.py "python tips" --json | jq '.[0].href'
 ```
 
+### Example 5: Using Proxy
+
+```bash
+# Via command line argument
+uv run scripts/ddgs_search.py "query" --proxy http://1.2.3.4:8080
+
+# Via HTTP_PROXY environment variable
+export HTTP_PROXY="http://proxy.example.com:8080"
+uv run scripts/ddgs_search.py "query"
+
+# Via DDGS_PROXY environment variable
+export DDGS_PROXY="socks5://127.0.0.1:9150"
+uv run scripts/ddgs_search.py "query"
+```
+
 ## FAQ
 
 ### uv Not Installed
@@ -203,7 +233,14 @@ uv run scripts/ddgs_search.py "query"
 
 - Check network connection
 - Try changing the `--backend` parameter (auto/html/lite)
-- Some regions may require a proxy
+- Some regions may require a proxy (see [Proxy Configuration](#proxy-configuration))
+
+### Proxy Not Working
+
+- Verify proxy format: `http://host:port` or `socks5://host:port`
+- Check if authentication is required: `http://user:pass@host:port`
+- Ensure the proxy server is accessible from your network
+- Try using `HTTP_PROXY` environment variable instead of command line argument
 
 ### Rate Limiting
 

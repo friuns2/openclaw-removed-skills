@@ -10,6 +10,7 @@ DuckDuckGo Search CLI Tool
 
 import argparse
 import json
+import os
 import sys
 from typing import Optional
 
@@ -22,6 +23,35 @@ except ImportError:
     sys.exit(1)
 
 
+def get_proxy(cli_proxy: Optional[str] = None) -> Optional[str]:
+    """
+    按优先级获取代理设置:
+    1. 命令行参数
+    2. 环境变量 HTTP_PROXY
+    3. 环境变量 DDGS_PROXY
+
+    Args:
+        cli_proxy: 命令行传入的代理地址
+
+    Returns:
+        代理地址字符串或 None
+    """
+    if cli_proxy:
+        return cli_proxy
+
+    # 检查 HTTP_PROXY (requests 库标准环境变量)
+    http_proxy = os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy")
+    if http_proxy:
+        return http_proxy
+
+    # 检查 DDGS_PROXY (ddgs 库专用环境变量)
+    ddgs_proxy = os.environ.get("DDGS_PROXY")
+    if ddgs_proxy:
+        return ddgs_proxy
+
+    return None
+
+
 def search_web(
     query: str,
     max_results: int = 10,
@@ -29,6 +59,7 @@ def search_web(
     safesearch: str = "moderate",
     timelimit: Optional[str] = None,
     backend: str = "auto",
+    proxy: Optional[str] = None,
 ) -> list:
     """
     执行DuckDuckGo网络搜索
@@ -40,11 +71,12 @@ def search_web(
         safesearch: 安全搜索级别 (on/moderate/off)
         timelimit: 时间限制 (d/w/m/y 或 None)
         backend: 搜索后端 (auto/html/lite)
+        proxy: 代理服务器地址
 
     Returns:
         搜索结果列表
     """
-    ddgs = DDGS()
+    ddgs = DDGS(proxy=proxy)
     results = ddgs.text(
         query,
         region=region,
@@ -62,6 +94,7 @@ def search_news(
     region: str = "wt-wt",
     safesearch: str = "moderate",
     timelimit: Optional[str] = None,
+    proxy: Optional[str] = None,
 ) -> list:
     """
     执行DuckDuckGo新闻搜索
@@ -72,11 +105,12 @@ def search_news(
         region: 地区代码
         safesearch: 安全搜索级别
         timelimit: 时间限制
+        proxy: 代理服务器地址
 
     Returns:
         新闻结果列表
     """
-    ddgs = DDGS()
+    ddgs = DDGS(proxy=proxy)
     results = ddgs.news(
         query,
         region=region,
@@ -121,6 +155,7 @@ def main():
   uv run ddgs_search.py "sports" --timelimit d         # 今日结果
   uv run ddgs_search.py "politics" --news              # 搜索新闻
   uv run ddgs_search.py "query" --json                 # JSON格式输出
+  uv run ddgs_search.py "query" --proxy http://1.2.3.4:8080   # 使用代理
         """,
     )
 
@@ -157,8 +192,15 @@ def main():
     parser.add_argument("--news", action="store_true", help="搜索新闻 (默认搜索网页)")
     parser.add_argument("-j", "--json", action="store_true", help="JSON格式输出")
     parser.add_argument("-v", "--verbose", action="store_true", help="显示详细信息")
+    parser.add_argument(
+        "-p",
+        "--proxy",
+        help="代理服务器地址 (默认优先级: 命令行参数 > HTTP_PROXY环境变量 > DDGS_PROXY环境变量)",
+    )
 
     args = parser.parse_args()
+
+    proxy = get_proxy(args.proxy)
 
     try:
         if args.news:
@@ -168,6 +210,7 @@ def main():
                 region=args.region,
                 safesearch=args.safesearch,
                 timelimit=args.timelimit,
+                proxy=proxy,
             )
             search_type = "新闻"
         else:
@@ -178,6 +221,7 @@ def main():
                 safesearch=args.safesearch,
                 timelimit=args.timelimit,
                 backend=args.backend,
+                proxy=proxy,
             )
             search_type = "网页"
 
