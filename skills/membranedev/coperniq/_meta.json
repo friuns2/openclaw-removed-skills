@@ -3,11 +3,16 @@
   "slug": "coperniq",
   "displayName": "Coperniq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162763371,
-    "commit": "https://github.com/openclaw/skills/commit/21966285048dabea622449b0dd6f9dbd8823e2aa"
+    "version": "1.0.3",
+    "publishedAt": 1776783769885,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162763371,
+      "commit": "https://github.com/openclaw/skills/commit/21966285048dabea622449b0dd6f9dbd8823e2aa"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772938933958,
