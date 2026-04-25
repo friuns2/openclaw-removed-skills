@@ -3,11 +3,16 @@
   "slug": "okta",
   "displayName": "Okta",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162433488,
-    "commit": "https://github.com/openclaw/skills/commit/95526aa11dbd8be33cfb5b20c7d23629145224b9"
+    "version": "1.0.3",
+    "publishedAt": 1776773123668,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162433488,
+      "commit": "https://github.com/openclaw/skills/commit/95526aa11dbd8be33cfb5b20c7d23629145224b9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772719348433,
