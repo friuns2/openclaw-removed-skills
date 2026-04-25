@@ -3,11 +3,16 @@
   "slug": "figma-integration",
   "displayName": "Figma",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162875992,
-    "commit": "https://github.com/openclaw/skills/commit/aeb15dd389b24efbde5ae1225deae975a0f71cd8"
+    "version": "1.0.3",
+    "publishedAt": 1776783996125,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162875992,
+      "commit": "https://github.com/openclaw/skills/commit/aeb15dd389b24efbde5ae1225deae975a0f71cd8"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775162873843,
