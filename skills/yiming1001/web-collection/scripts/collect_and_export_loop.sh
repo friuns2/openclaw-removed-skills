@@ -60,6 +60,9 @@ die() {
   exit 1
 }
 
+ADMIN_TOKEN=""
+AUTH_ARGS=()
+
 require_bin() {
   local b="$1"
   if ! command -v "$b" >/dev/null 2>&1; then
@@ -93,30 +96,53 @@ json_validate() {
   node -e 'JSON.parse(process.argv[1]);' "$json" >/dev/null
 }
 
+resolve_admin_token() {
+  if [[ -n "${WEB_COLLECTION_ADMIN_TOKEN:-}" ]]; then
+    printf '%s' "$WEB_COLLECTION_ADMIN_TOKEN"
+    return 0
+  fi
+
+  local token_file="${HOME}/.meixi-connector/bridge-admin-token.txt"
+  if [[ -f "$token_file" ]]; then
+    tr -d '\r\n' <"$token_file"
+  fi
+}
+
+build_auth_args() {
+  AUTH_ARGS=()
+  ADMIN_TOKEN="$(resolve_admin_token || true)"
+  if [[ -n "$ADMIN_TOKEN" ]]; then
+    AUTH_ARGS=(-H "x-connector-admin-token: $ADMIN_TOKEN")
+    log "using connector admin token for local bridge requests"
+  else
+    log "local bridge admin token not found; requests will be sent without auth header"
+  fi
+}
+
 api_get() {
   local path="$1"
-  curl -sS "$BASE_URL$path"
+  curl -sS "${AUTH_ARGS[@]}" "$BASE_URL$path"
 }
 
 api_post_json() {
   local path="$1"
   local body="$2"
-  curl -sS -X POST "$BASE_URL$path" -H 'Content-Type: application/json' -d "$body"
+  curl -sS -X POST "${AUTH_ARGS[@]}" "$BASE_URL$path" -H 'Content-Type: application/json' -d "$body"
 }
 
 api_post_empty() {
   local path="$1"
-  curl -sS -X POST "$BASE_URL$path"
+  curl -sS -X POST "${AUTH_ARGS[@]}" "$BASE_URL$path"
 }
 
 api_post_reset() {
   local reason="${1:-桥接状态已重置}"
-  curl -sS -X POST "$BASE_URL/api/reset" -H 'Content-Type: application/json' \
+  curl -sS -X POST "${AUTH_ARGS[@]}" "$BASE_URL/api/reset" -H 'Content-Type: application/json' \
     -d "{\"reason\":\"$reason\"}"
 }
 
 fetch_status_safe() {
-  curl -fsS --max-time 2 "$BASE_URL/api/status"
+  curl -fsS --max-time 2 "${AUTH_ARGS[@]}" "$BASE_URL/api/status"
 }
 
 ensure_bridge() {
@@ -415,6 +441,7 @@ done
 
 require_bin curl
 require_bin node
+build_auth_args
 
 if ! is_int "$POLL_SEC"; then die "--poll-sec must be integer"; fi
 if ! is_int "$TIMEOUT_SEC"; then die "--timeout-sec must be integer"; fi

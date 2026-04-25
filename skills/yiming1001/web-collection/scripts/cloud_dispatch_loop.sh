@@ -271,18 +271,18 @@ while :; do
     command_state_json="$(find_command_state "$commands_json" "$command_id")"
   fi
 
-  found="$(json_get_string "$command_state_json" 'found')"
+  found="$(json_get_string "$command_state_json" 'data?.found')"
   if [[ "$found" == "true" ]]; then
-    status="$(json_get_string "$command_state_json" 'status')"
+    status="$(json_get_string "$command_state_json" 'data?.status')"
     case "$status" in
       completed|success|succeeded)
         log "cloud command completed commandId=$command_id"
-        json_get_string "$command_state_json" 'command'
+        json_get_string "$command_state_json" 'data?.command'
         printf '\n'
         exit 0
         ;;
       error|failed|failure|cancelled|canceled|stopped)
-        json_get_string "$command_state_json" 'command'
+        json_get_string "$command_state_json" 'data?.command'
         printf '\n'
         die "cloud command finished with terminal status=$status commandId=$command_id"
         ;;

@@ -53,13 +53,13 @@ Fallback:
 Helper script:
 
 ```bash
-{baseDir}/scripts/export_preference.sh show
-{baseDir}/scripts/export_preference.sh check
-{baseDir}/scripts/export_preference.sh apply-recommended
-{baseDir}/scripts/export_preference.sh set-key defaultConnectionMode cloud
-{baseDir}/scripts/export_preference.sh set-key defaultCloudDeviceId desktop-local-smoke-fix
-{baseDir}/scripts/export_preference.sh set-key defaultCloudToken <user_api_key>
-{baseDir}/scripts/export_preference.sh set-key defaultExportMode csv
+bash {baseDir}/scripts/export_preference.sh show
+bash {baseDir}/scripts/export_preference.sh check
+bash {baseDir}/scripts/export_preference.sh apply-recommended
+bash {baseDir}/scripts/export_preference.sh set-key defaultConnectionMode cloud
+bash {baseDir}/scripts/export_preference.sh set-key defaultCloudDeviceId desktop-local-smoke-fix
+bash {baseDir}/scripts/export_preference.sh set-key defaultCloudToken <user_api_key>
+bash {baseDir}/scripts/export_preference.sh set-key defaultExportMode csv
 ```
 
 Required defaults:
@@ -99,7 +99,7 @@ On first use:
 5. If the user chooses `推荐配置`, run:
 
 ```bash
-{baseDir}/scripts/export_preference.sh apply-recommended
+bash {baseDir}/scripts/export_preference.sh apply-recommended
 ```
 
 6. If the user chooses `自己配置`, ask for all four values in one message, not one by one.

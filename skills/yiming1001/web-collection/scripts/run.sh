@@ -254,14 +254,20 @@ resolve_export_pref_script() {
   printf '%s\n' "$SKILL_DIR/scripts/export_preference.sh"
 }
 
+require_helper_script() {
+  local path="${1:-}"
+  local label="${2:-helper}"
+  [[ -f "$path" ]] || die "missing ${label} script file: $path"
+}
+
 resolve_preference_value() {
   local key="${1:-}"
   local pref_script
   pref_script="$(resolve_export_pref_script)"
-  if [[ ! -x "$pref_script" ]]; then
+  if [[ ! -f "$pref_script" ]]; then
     return 0
   fi
-  "$pref_script" get "$key" || true
+  bash "$pref_script" get "$key" || true
 }
 
 apply_export_target() {
@@ -316,15 +322,13 @@ preferences_are_effectively_complete() {
 ensure_required_preferences() {
   local pref_script
   pref_script="$(resolve_export_pref_script)"
-  if [[ ! -x "$pref_script" ]]; then
-    die "missing preference helper: $pref_script"
-  fi
+  require_helper_script "$pref_script" "preference helper"
 
   if preferences_are_effectively_complete; then
     return 0
   fi
 
-  if "$pref_script" check >/dev/null 2>&1; then
+  if bash "$pref_script" check >/dev/null 2>&1; then
     return 0
   fi
 
@@ -580,9 +584,9 @@ process.stdout.write(JSON.stringify(config));
 run_preflight_check() {
   local preflight_script config_json
   preflight_script="$SKILL_DIR/scripts/preflight_check.sh"
-  [[ -x "$preflight_script" ]] || die "missing preflight helper: $preflight_script"
+  require_helper_script "$preflight_script" "preflight helper"
   config_json="$(build_preflight_config_json)"
-  "$preflight_script" \
+  bash "$preflight_script" \
     --config-json "$config_json" \
     --mode "$CONNECTION_MODE" \
     --format json \

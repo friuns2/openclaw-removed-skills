@@ -36,6 +36,12 @@ die() {
   exit 1
 }
 
+require_helper_script() {
+  local path="${1:-}"
+  local label="${2:-helper}"
+  [[ -f "$path" ]] || die "missing ${label} script file: $path"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --config-json)
@@ -201,12 +207,12 @@ for (const key of order) {
 
   while IFS=$'\t' read -r key value; do
     [[ -n "$key" && -n "$value" ]] || continue
-    "$PREFERENCE_SCRIPT" set-key "$key" "$value" >/dev/null
+    bash "$PREFERENCE_SCRIPT" set-key "$key" "$value" >/dev/null
   done <<<"$rows"
 }
 
 if [[ "$WRITE_PREFERENCES" == "true" ]]; then
-  [[ -x "$PREFERENCE_SCRIPT" ]] || die "missing preference helper: $PREFERENCE_SCRIPT"
+  require_helper_script "$PREFERENCE_SCRIPT" "preference helper"
   write_preferences_from_config "$NORMALIZED_CONFIG"
 fi
 
@@ -222,7 +228,7 @@ const skillDir = process.argv[3];
 
 const getPref = (key) => {
   try {
-    return execFileSync(process.env.PREF_SCRIPT, ["get", key], {
+    return execFileSync("bash", [process.env.PREF_SCRIPT, "get", key], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
@@ -307,7 +313,7 @@ const binChecks = Object.fromEntries(
 );
 
 process.stdout.write(JSON.stringify({
-  ready: Object.values(scriptChecks).every((item) => item.exists && item.executable)
+  ready: Object.values(scriptChecks).every((item) => item.exists)
     && Object.values(binChecks).every((item) => item.ok)
     && missingDefaults.length === 0,
   needsUserDefaults: missingDefaults.length > 0,

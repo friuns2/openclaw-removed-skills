@@ -3,11 +3,16 @@
   "slug": "web-collection",
   "displayName": "web-collection",
   "latest": {
-    "version": "1.2.4-beta.1",
-    "publishedAt": 1776336594324,
-    "commit": "https://github.com/openclaw/skills/commit/917a073eda61eb439199469bb55dcec4bb00a115"
+    "version": "1.2.6",
+    "publishedAt": 1776845150752,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.4-beta.1",
+      "publishedAt": 1776336594324,
+      "commit": "https://github.com/openclaw/skills/commit/917a073eda61eb439199469bb55dcec4bb00a115"
+    },
     {
       "version": "1.2.1",
       "publishedAt": 1775655811826,
