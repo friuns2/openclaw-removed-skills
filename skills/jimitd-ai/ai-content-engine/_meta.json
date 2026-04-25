@@ -3,11 +3,16 @@
   "slug": "ai-content-engine",
   "displayName": "AI Content Engine",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1773749199129,
-    "commit": "https://github.com/openclaw/skills/commit/167395c98c1e58239c8948bae9a368f65f224939"
+    "version": "1.0.9",
+    "publishedAt": 1776814063472,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1773749199129,
+      "commit": "https://github.com/openclaw/skills/commit/167395c98c1e58239c8948bae9a368f65f224939"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1773502426311,

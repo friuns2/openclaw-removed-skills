@@ -1,12 +1,13 @@
 ---
 name: content-engine
-description: AI video production, script writing, and image generation via MCP. Generate video scripts, AI images, and short-form or long-form videos from any topic. Free tools (pricing, quotes, status) require no credentials. Paid tools require USDC on Base via x402 — the agent must explicitly approve each payment.
-version: 1.4.0
+description: AI video production, script writing, and image generation via MCP. Generate video scripts, AI images, and short-form or long-form videos from any topic. Public tools (pricing, quotes) are fully anonymous. Brand-scoped tools (queue status, content lookup) require a free API key. Paid tools require USDC on Base via x402 — the agent must explicitly approve each payment — or can be called with an API key if the brand has prepaid tokens.
+version: 1.5.0
 metadata:
   openclaw:
     requires:
       env:
         - CONTENT_ENGINE_URL
+        - CONTENT_ENGINE_API_KEY
         - WALLET_PRIVATE_KEY
     emoji: "\U0001F3AC"
     homepage: https://content-engine-app.fly.dev
@@ -29,32 +30,34 @@ metadata:
       - mcp
 tools:
   - name: get_pricing
-    description: Get live USDC pricing for all operations (free)
+    description: Get live USDC pricing for all operations (public, no auth)
   - name: get_quote
-    description: Get exact cost quote with per-stage breakdown before paying (free)
+    description: Get exact cost quote with per-stage breakdown before paying (public, no auth)
   - name: get_queue_status
-    description: Check queue position and daily budget remaining (free)
+    description: Check queue position and daily budget remaining (requires API key — brand-scoped)
   - name: get_content
-    description: Get full content item details including video URL (free)
+    description: Get full content item details including video URL (requires API key — brand-scoped)
   - name: get_content_status
-    description: Lightweight status poll for pipeline progress (free)
+    description: Lightweight status poll for pipeline progress (requires API key — brand-scoped)
   - name: create_script
-    description: Generate AI video script from topic (paid — x402 USDC)
+    description: Generate AI video script from topic (paid — x402 USDC or API key with tokens)
   - name: create_image
-    description: Generate image from text prompt (paid — x402 USDC)
+    description: Generate image from text prompt (paid — x402 USDC or API key with tokens)
   - name: create_video
-    description: Generate video from completed script (paid — x402 USDC)
+    description: Generate video from completed script (paid — x402 USDC or API key with tokens)
   - name: run_full_pipeline
-    description: End-to-end script + video from topic (paid — x402 USDC)
+    description: End-to-end script + video from topic (paid — x402 USDC or API key with tokens)
   - name: publish_content
-    description: Publish to YouTube, X, TikTok, Instagram, LinkedIn (paid — x402 USDC)
+    description: Publish to YouTube, X, TikTok, Instagram, LinkedIn (paid — x402 USDC or API key with tokens)
+  - name: purchase_tokens
+    description: Purchase content tokens for a brand (1000–10000 @ $0.03 each, paid via x402 USDC)
 ---
 
 # Content Engine
 
 AI-powered content creation as a service. Generate scripts, images, and videos from any topic.
 
-This is an **MCP server** accessible via Streamable HTTP transport. Any MCP-compatible client can connect to it directly — no proprietary CLI or binary required. Free tools work without credentials. Paid tools use the x402 protocol for per-request USDC payments.
+This is an **MCP server** accessible via Streamable HTTP transport. Any MCP-compatible client can connect to it directly — no proprietary CLI or binary required. Public tools (pricing, quotes) work without credentials. Brand-scoped reads require an API key. Paid tools use the x402 protocol for per-request USDC payments, or an API key with prepaid tokens.
 
 ## Connection
 
@@ -71,7 +74,8 @@ No special binary, CLI tool, or SDK is required. The server follows the MCP spec
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `CONTENT_ENGINE_URL` | Yes | MCP server URL. Default: `https://content-engine-x402.fly.dev` |
-| `WALLET_PRIVATE_KEY` | For paid tools | Private key for an EVM wallet holding USDC on Base. Used by the x402 client library to sign payment authorizations. **Only needed if calling paid tools.** Free tools work without it. |
+| `CONTENT_ENGINE_API_KEY` | For brand-scoped reads and token-based paid calls | API key (`ce_...`) tied to a brand. Pass as `Authorization: Bearer ${CONTENT_ENGINE_API_KEY}` on the MCP connection. Needed for `get_queue_status`, `get_content`, `get_content_status`, and for spending prepaid tokens on paid tools without per-call USDC signing. Create one in the dashboard under Settings → API Keys. |
+| `WALLET_PRIVATE_KEY` | For x402 per-call payments | Private key for an EVM wallet holding USDC on Base. Used by the x402 client library to sign payment authorizations. **Only needed if paying with USDC per call.** Not needed if you use an API key with prepaid tokens. |
 
 **Important:** `WALLET_PRIVATE_KEY` gives the x402 client library the ability to sign USDC transfer authorizations. This key should be for a dedicated agent wallet with limited funds — not a primary wallet. See the Payment section for details on how funds are protected.
 
@@ -109,13 +113,13 @@ const wallet = createWalletClient({ account, chain: base, transport: http() });
 const x402fetch = wrapFetch(fetch, wallet, "eip155:8453");
 ```
 
-The wrapped `fetch` handles the 402 challenge-response cycle. Free tools work with plain `fetch` — no wallet needed.
+The wrapped `fetch` handles the 402 challenge-response cycle. Public tools (pricing, quotes) work with plain `fetch` — no wallet needed. Brand-scoped reads use an API key with plain `fetch` — also no wallet needed.
 
 ### Cost control
 
-- Call `get_quote` (free) before any paid tool to see the exact USDC price and per-stage breakdown
-- Call `get_pricing` (free) to see all current rates
-- Call `get_queue_status` (free) to check daily budget remaining
+- Call `get_quote` (public, no auth) before any paid tool to see the exact USDC price and per-stage breakdown
+- Call `get_pricing` (public, no auth) to see all current rates
+- Call `get_queue_status` (requires API key) to check daily budget remaining for your brand
 - Use a dedicated wallet with limited USDC to cap total exposure
 - Use sandbox mode to test without any payment (see below)
 
@@ -160,17 +164,24 @@ Sandbox mode does **not** create content, charge USDC, require a wallet, or coun
 
 ## Available Tools
 
-### Free (no payment or credentials required)
+### Public (no auth — call anonymously)
 
 | Tool | Description |
 |------|-------------|
 | `get_pricing` | Live USDC pricing for all operations |
 | `get_quote` | Exact cost quote with per-stage breakdown for specific parameters |
+
+### Brand-scoped reads (no USDC charge, but require API key)
+
+These tools return data tied to a specific brand, so the server needs to know which brand is asking. Pass `Authorization: Bearer ce_...` on the MCP connection. Called without an API key, they return a structured `auth_required` message pointing at the dashboard.
+
+| Tool | Description |
+|------|-------------|
 | `get_queue_status` | Queue position, active jobs, daily budget remaining |
 | `get_content` | Full content item details including video URL and metadata |
 | `get_content_status` | Lightweight status poll (pipeline stage + completion %) |
 
-### Paid (x402 USDC — agent approves each payment)
+### Paid (x402 USDC per call, OR API key with prepaid tokens)
 
 | Tool | Description |
 |------|-------------|
@@ -179,6 +190,12 @@ Sandbox mode does **not** create content, charge USDC, require a wallet, or coun
 | `create_video` | Generate video from a completed script. Requires `content_id` from `create_script`. |
 | `run_full_pipeline` | End-to-end: script + video from a single topic. Fastest path to finished video. |
 | `publish_content` | Publish to YouTube, X, TikTok, Instagram, LinkedIn. |
+| `purchase_tokens` | Buy 1000–10000 content tokens at $0.03 each. Returns x402 payment instructions — pay USDC to credit tokens to a brand, then use the brand's API key to spend them on paid calls. |
+
+### Two ways to pay
+
+- **x402 USDC (per-call)** — No account needed. The x402 client library handles HTTP 402 → sign USDC transfer → retry. See the Payment section above. Called with no auth, paid tools return a `payment_required` response with the exact price and the x402 REST endpoint.
+- **API key + prepaid tokens** — Buy tokens via `purchase_tokens`, credited to a brand. Use the brand's API key (`Authorization: Bearer ce_...`) on the MCP connection to spend tokens on paid calls without per-call wallet signing.
 
 ## Typical Workflow
 
@@ -198,8 +215,8 @@ get_quote(operation="full_pipeline") → run_full_pipeline → poll get_content_
 
 ## Important Notes
 
-- Video generation takes 1–5 minutes. Always poll `get_content_status` rather than assuming instant completion.
+- Video generation takes 1–5 minutes. Always poll `get_content_status` rather than assuming instant completion. Polling requires an API key (it's brand-scoped).
 - The `content_id` (UUID) returned by creation tools is the key for all subsequent operations.
 - Pricing is dynamic — always call `get_quote` before paid operations to see the exact cost.
-- Use sandbox mode (`Authorization: Bearer sandbox`) to test without spending USDC.
+- Use sandbox mode (`Authorization: Bearer sandbox`) against the x402 REST endpoints to test without spending USDC.
 - Use a dedicated agent wallet with limited funds — do not use a primary wallet.
