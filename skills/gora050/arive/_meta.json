@@ -3,11 +3,16 @@
   "slug": "arive",
   "displayName": "Arive",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162892538,
-    "commit": "https://github.com/openclaw/skills/commit/ab9a78e349b642d6c75f8f319e39f90d485057d2"
+    "version": "1.0.3",
+    "publishedAt": 1776784025017,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162892538,
+      "commit": "https://github.com/openclaw/skills/commit/ab9a78e349b642d6c75f8f319e39f90d485057d2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772992960742,
