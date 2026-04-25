@@ -3,11 +3,16 @@
   "slug": "clinical-trail",
   "displayName": "NoahAI clinical-trial query",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1775203596359,
-    "commit": "https://github.com/openclaw/skills/commit/431dec6c6221cdeab42fbe8ce8e533fd0c7f803c"
+    "version": "1.0.8",
+    "publishedAt": 1776611535551,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1775203596359,
+      "commit": "https://github.com/openclaw/skills/commit/431dec6c6221cdeab42fbe8ce8e533fd0c7f803c"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774508658357,

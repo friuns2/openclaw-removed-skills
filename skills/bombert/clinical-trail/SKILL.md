@@ -28,10 +28,9 @@ Identify the following entity types from the user's question:
 | `phase` | `List[str]` | Trial phase(s)                    | `["Preclinical", "I", "II", "III", "IV", "Others"]`                                  |
 | `target` | `dict` | Biological target(s)              | `{"logic": "or", "data": ["PD-1", "VEGF"]}`               |
 | `drug_name` | `dict` | Drug name(s)                      | `{"logic": "or", "data": ["pembrolizumab"]}`              |
-| `drug_modality` | `dict` | Drug modality / type              | `{"logic": "or", "data": ["antibody", "small molecule"]}` |
-| `drug_feature` | `dict` | Drug feature(s)                   | `{"logic": "or", "data": ["bispecific"]}`                 |
+| `drug_modality` | `dict` | Drug modality  | `{"logic": "or", "data": ["Vaccine", "mRNA"]}` |
+| `drug_feature` | `dict` | Drug feature(s) | `{"logic": "or", "data": ["Biologic", "Non-NME"]}`                 |
 | `location` | `dict` | Trial location(s)                 | `{"logic": "or", "data": ["China", "United States", "Japan"]}`               |
-| `route_of_administration` | `dict` | Route of administration           | `{"logic": "or", "data": ["IV", "oral"]}`                 |
 | `has_result_summary` | `bool` | Only trials with result summaries | `true`                                                    |
 | `official_data` | `bool` | Only official data sources        | `false`                                                   |
 | `page_num` | `int` | Page index (0-based)              | `0`                                                       |
@@ -50,6 +49,25 @@ Identify the following entity types from the user's question:
 - `target`, `drug_name`, `drug_modality`, `drug_feature`, `location`, `route_of_administration` → `dict` with `logic` and `data`
 - Default to `page_num: 0, page_size: 10` unless the user specifies otherwise
 - Prefer English keywords (the database is indexed in English); translate non-English terms
+- `drug_modality` must use exact strings from this set:
+
+  ```json
+  [
+    "Steroids", "Vaccine", "Antisense RNA", "Antibody-Drug Conjugates, ADCs", "Unknown", "Protein Degrader",
+    "Monoclonal Antibodies", "mRNA", "Others", "Cell-based Therapies", "Imaging Agents", "Gene Therapy",
+    "miRNA", "Polypeptide", "Recombinant Proteins", "Small Molecule", "siRNA/RNAi", "Trispecific Antibodies",
+    "Polyclonal Antibodies", "Bi-specific Antibodies", "Glycoconjugates", "Radiopharmaceutical",
+    "Nucleic Acid-based", "Carbohydrates"
+  ]
+  ```
+- `drug_feature` must use exact strings from this set:
+
+  ```json
+  [
+    "505b2", "Bacterial Product", "Biologic", "Biosimilar", "Device", "Fixed-Dose Combination", "Immuno-Oncology",
+    "New Molecular Entity (NME)", "Non-NME", "Precision Medicine", "Reformulation", "Specialty Drug", "Viral"
+  ]
+  ```
 
 ## Step 2: Execute the Query
 
@@ -68,7 +86,7 @@ Add `--raw` to receive the unformatted JSON response.
 ## Step 3: Interpret Results
 
 The response contains:
-- `page_size` — total number of matching trials
+- `total_count` — total number of matching trials
 - `results` — current page of results, each with NCT ID, title, phase, status, indication, drugs, sponsor, etc.
 
 If results exceed 100, prompt the user to narrow the query. If no results are returned, apply the fallback strategies below before giving up.
@@ -185,7 +203,7 @@ Any step hits HTTP 429?
 ```json
 {
   "target": {"logic": "or", "data": ["PD-1"]},
-  "drug_modality": {"logic": "or", "data": ["antibody"]},
+  "drug_modality": {"logic": "or", "data": ["Monoclonal Antibodies"]},
   "indication": ["lung cancer"],
   "phase": ["III"],
   "has_result_summary": true,
@@ -214,7 +232,7 @@ Any step hits HTTP 429?
 {
   "company": ["Roche"],
   "location": {"logic": "or", "data": ["China"]},
-  "drug_feature": {"logic": "or", "data": ["bispecific"]},
+  "drug_modality": {"logic": "or", "data": ["Bi-specific Antibodies"]},
   "page_num": 0,
   "page_size": 10
 }
@@ -227,8 +245,7 @@ Any step hits HTTP 429?
 ```json
 {
   "target": {"logic": "or", "data": ["KRAS G12C"]},
-  "drug_modality": {"logic": "or", "data": ["small molecule"]},
-  "route_of_administration": {"logic": "or", "data": ["oral"]},
+  "drug_modality": {"logic": "or", "data": ["Small Molecule"]},
   "indication": ["colorectal cancer"],
   "page_num": 0,
   "page_size": 10

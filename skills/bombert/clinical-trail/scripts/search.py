@@ -139,10 +139,10 @@ def format_json(data, indent=0):
 def format_results(data: dict) -> str:
     """Format the API response into human-readable text."""
     lines = []
-    total = data.get("page_size", "unknown")
+    total = data.get("total_count", "unknown")
     trials = data.get("results", [])
 
-    lines.append(f"=== Results: {total}(page_size) trial(s) matched ===\n")
+    lines.append(f"=== Results: {total} trial(s) matched ===\n")
     if not trials:
         lines.append("No clinical trials found matching your query.")
         return "\n".join(lines)
@@ -164,8 +164,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # PD-1 antibody trials in lung cancer, Phase 3, with results
-  python scripts/search.py --params '{"target": {"logic": "or", "data": ["PD-1"]}, "indication": ["lung cancer"], "phase": ["III"], "has_result_summary": true}'
+  # PD-1 monoclonal antibody trials in lung cancer, Phase 3, with results
+  python scripts/search.py --params '{"target": {"logic": "or", "data": ["PD-1"]}, "drug_modality": {"logic": "or", "data": ["Monoclonal Antibodies"]}, "indication": ["lung cancer"], "phase": ["III"], "has_result_summary": true}'
+
+  # Search by drug modality (e.g. Small Molecule)
+  python scripts/search.py --params '{"drug_modality": {"logic": "or", "data": ["Small Molecule"]}, "indication": ["colorectal cancer"]}'
+
+  # Search by drug feature (e.g. Biologic)
+  python scripts/search.py --params '{"drug_feature": {"logic": "or", "data": ["Biologic"]}, "page_size": 20}'
 
   # Query by NCT ID
   python scripts/search.py --params '{"nctid": ["NCT04280783"]}'
