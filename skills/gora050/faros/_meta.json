@@ -3,11 +3,16 @@
   "slug": "faros",
   "displayName": "Faros",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163842161,
-    "commit": "https://github.com/openclaw/skills/commit/f5fc01eb2651993928878146808c1042692d96cc"
+    "version": "1.0.3",
+    "publishedAt": 1776812786921,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163842161,
+      "commit": "https://github.com/openclaw/skills/commit/f5fc01eb2651993928878146808c1042692d96cc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773460935697,
