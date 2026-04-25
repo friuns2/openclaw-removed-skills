@@ -3,11 +3,16 @@
   "slug": "polymarket-nordic-trader",
   "displayName": "Polymarket Nordic Trader",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775317304025,
-    "commit": "https://github.com/openclaw/skills/commit/170ba9ad8871107098856cb0cad63754c6728887"
+    "version": "0.0.2",
+    "publishedAt": 1776513538290,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775317304025,
+      "commit": "https://github.com/openclaw/skills/commit/170ba9ad8871107098856cb0cad63754c6728887"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773780777678,
