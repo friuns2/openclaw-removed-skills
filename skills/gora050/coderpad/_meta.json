@@ -3,11 +3,16 @@
   "slug": "coderpad",
   "displayName": "Coderpad",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163692426,
-    "commit": "https://github.com/openclaw/skills/commit/ef47f550e6bc5ce9f60fbcc6a24cc7e7a2f9b613"
+    "version": "1.0.3",
+    "publishedAt": 1776805690834,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163692426,
+      "commit": "https://github.com/openclaw/skills/commit/ef47f550e6bc5ce9f60fbcc6a24cc7e7a2f9b613"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773370979949,
