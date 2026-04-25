@@ -3,11 +3,16 @@
   "slug": "assembla",
   "displayName": "Assembla",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162991210,
-    "commit": "https://github.com/openclaw/skills/commit/e9e50475a1cf3c1884a659a2deacb94215cb5c14"
+    "version": "1.0.3",
+    "publishedAt": 1776784159179,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162991210,
+      "commit": "https://github.com/openclaw/skills/commit/e9e50475a1cf3c1884a659a2deacb94215cb5c14"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773088960200,
