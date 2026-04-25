@@ -1,7 +1,2 @@
-# Auto-Coding Skill Dependencies
-
-# Optional: Web search (pip install ddgs)
-# ddgs>=2.0.0
-
-# Testing
-pytest>=7.0.0
+dashscope>=1.0.0
+duckduckgo-search>=4.0.0

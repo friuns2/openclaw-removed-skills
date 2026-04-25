@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-04-01T04:17:54.080097",
+  "tasks": [
+    {
+      "id": "T1",
+      "name": "快速脚本",
+      "description": "创建一个 Python 脚本，统计当前目录下所有 .py 文件的行数",
+      "complexity": "simple"
+    },
+    {
+      "id": "T2",
+      "name": "数据处理",
+      "description": "创建一个函数，读取 CSV 文件，计算每列的平均值、最大值、最小值",
+      "complexity": "medium"
+    },
+    {
+      "id": "T3",
+      "name": "API 客户端",
+      "description": "创建一个 HTTP API 客户端类，支持 GET/POST 请求、超时控制、错误重试",
+      "complexity": "complex"
+    }
+  ],
+  "models": [
+    {
+      "id": "minimax",
+      "name": "MiniMax-M2.7",
+      "model": "MiniMax-M2.7",
+      "provider": "minimax",
+      "api_base": "https://api.minimaxi.com/anthropic"
+    },
+    {
+      "id": "qwen",
+      "name": "Qwen3.5-Plus",
+      "model": "qwen3.5-plus",
+      "provider": "dashscope",
+      "api_base": "https://coding.dashscope.aliyuncs.com/v1"
+    }
+  ],
+  "results": [
+    {
+      "task_id": "T1",
+      "task_name": "快速脚本",
+      "complexity": "simple",
+      "models": {}
+    },
+    {
+      "task_id": "T2",
+      "task_name": "数据处理",
+      "complexity": "medium",
+      "models": {}
+    },
+    {
+      "task_id": "T3",
+      "task_name": "API 客户端",
+      "complexity": "complex",
+      "models": {}
+    }
+  ],
+  "summary": []
+}

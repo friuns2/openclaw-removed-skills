@@ -1,75 +1,60 @@
 {
   "name": "auto-coding",
-  "version": "3.2.0",
-  "description": "自主完善的编程系统 - 多模型交叉验证、自动测试、能力补充",
-  "author": "Claw Soft Team",
-  "license": "MIT",
-  "keywords": [
-    "auto-coding",
-    "multi-model",
-    "cross-validation",
-    "autonomous",
-    "testing",
-    "openclaw"
+  "version": "2.1.1",
+  "description": "Auto-Coding - 自主编程系统，具备自我反思能力，测试→反思→修复循环，达到交付标准",
+  "author": "Krislu + nanobot",
+  "license": "Internal",
+  "tags": ["coding", "automation", "self-reflection", "quality", "delivery"],
+  "triggers": [
+    "/auto-coding\\s+(.+)",
+    "/coding\\s+(.+)",
+    "帮我创建一个 (.+)",
+    "帮我开发一个 (.+)",
+    "这个功能怎么实现(.+)",
+    "我需要写一个 (.+)"
   ],
-  "engines": {
-    "openclaw": ">=2025.1.0"
-  },
+  "examples": [
+    "/auto-coding 创建一个批量重命名文件的脚本",
+    "/auto-coding mode thorough 创建一个天气查询 Web 应用",
+    "帮我开发一个天气查询 Web 应用",
+    "这个功能怎么实现？我需要给 EC Dashboard 添加实例健康检查"
+  ],
+  "dependencies": [
+    "ddgs (optional, for web search)"
+  ],
   "files": [
     "SKILL.md",
-    "skill.py",
-    "auto_coding_worker.py",
-    "cross_model_validator.py",
-    "task_decomposer.py",
-    "security.py",
-    "task_manager.py",
-    "agent_controller.py",
-    "self_reflection.py",
-    "__init__.py",
-    "prompts/",
-    "tests/"
+    "README.md",
+    "USAGE.md",
+    "worker.py",
+    "self_reflect.py",
+    "delivery_check.py",
+    "__init__.py"
   ],
-  "main": "skill.py",
+  "entry_point": "worker.py",
   "config": {
-    "triggers": ["/auto-coding", "/autonomous-coding"],
-    "userInvocable": true,
-    "envVars": {
-      "AUTO_CODING_ALLOWED_PATHS": {
-        "description": "允许的基础路径（逗号分隔）",
-        "default": "~/.enhance-claw,/tmp/auto-coding-projects"
-      },
-      "AUTO_CODING_MAX_INPUT_LENGTH": {
-        "description": "最大输入长度",
-        "default": "10000"
-      },
-      "AUTO_CODING_PROJECTS_DIR": {
-        "description": "项目目录",
-        "default": "/tmp/auto-coding-projects"
-      },
-      "MAX_ITERATIONS": {
-        "description": "最大迭代次数",
-        "default": "50"
-      },
-      "AUTO_CODING_MODEL_IMPLEMENTER": {
-        "description": "实现代码的模型ID",
-        "default": "default-implementer"
-      },
-      "AUTO_CODING_MODEL_REVIEWER": {
-        "description": "审查代码的模型ID",
-        "default": "default-reviewer"
-      },
-      "AUTO_CODING_MODEL_TESTER": {
-        "description": "设计测试的模型ID",
-        "default": "default-tester"
-      },
-      "AUTO_CODING_MODEL_FIXER": {
-        "description": "修复问题的模型ID",
-        "default": "default-fixer"
-      },
-      "AUTO_CODING_MODELS_CONFIG": {
-        "description": "模型配置文件路径（可选）",
-        "default": ""
-      }
+    "default_mode": "standard",
+    "default_reflect_depth": "deep",
+    "max_iterations": 5,
+    "delivery_standards": {
+      "runs_without_error": true,
+      "has_basic_tests": true,
+      "has_documentation": true,
+      "has_error_handling": true,
+      "security_check_passed": true
+    }
+  },
+  "changelog": {
+    "1.0.0": {
+      "date": "2026-03-15",
+      "changes": [
+        "初始版本",
+        "核心工作流实现 (worker.py)",
+        "自我反思模块 (self_reflect.py)",
+        "交付标准检查 (delivery_check.py)",
+        "提示词模板 (prompts/)",
+        "测试套件 (tests/)"
+      ]
     }
   }
 }

@@ -1,242 +1,178 @@
 ---
 name: auto-coding
-description: 智能自主编码系统 - 八步循环流程，多 Agent 协作完成从需求到代码的完整开发
-user-invocable: true
+description: 自主编程系统 - 需求拆解、分析需求、找方法、自我反思、迭代优化，达到交付标准
+metadata: {"nanobot":{"emoji":"🤖","requires":{"bins":["python","pip"]},"install":[{"id":"dashscope","kind":"pip","package":"dashscope","label":"Install DashScope LLM SDK"},{"id":"ddgs","kind":"pip","package":"duckduckgo-search","label":"Install DuckDuckGo Search (optional)"}]}}
 ---
 
-# Auto-Coding Skill v1.1.0 - 八步循环流程（上下文管理增强版）
+# Auto-Coding Skill 🤖
 
-## 📋 概述
+> **版本**: 2.1.1 (深度分析 + 交付检查)
 
-### 什么是 Auto-Coding？
-
-**Auto-Coding** 是一个智能自主编码系统，通过多 Agent 协作完成从需求到代码的完整开发流程。
-
-**核心理念**: 不是任务分发器，而是自我完善的智能编程系统。它利用 OpenClaw 的多子 Agent 进程，进行设计→分解→编码→测试→反思→优化→验证→输出，分不同角色的 Prompt 实现多维度的自我审查和自我优化，提升代码可执行率。适合复杂项目，但会消耗更多的 Token，应谨慎使用。
-
-**推荐使用**: Claw RoundTable 先进行多 Agent 项目研讨和方案完善，然后将结论送入 Auto-Coding 进行编码，效果更好。
-
-### 致谢
-
-**Agent 人格**: 借鉴了 [Agency-Agent](https://github.com/zhayujie/agency-agent) 关于程序员的部分，特此致敬。
+**自主编程系统** - 不是简单的代码生成，而是具备**需求拆解**、**深度分析**和**自我反思**能力的智能编程系统。
 
 ---
 
-## 🔄 八步循环流程
+## 🆕 v2.1.0 新增：交付标准检查 ✅
 
-```
-设计 → 分解 → 编码 → 测试 ←→ 反思 ←→ 优化
-                              ↓
-                          验证 → 输出
-```
+在代码交付前进行 8 项严格检查：
+- ✅ 语法检查、安全检查、文档完整性
+- ✅ 错误处理、基本测试、功能完整性
+- ✅ TODO 检查、代码风格
 
-### 步骤说明
+## 🆕 v2.0.0 新增：深度分析模块 🔍
 
-| 步骤 | 名称 | 说明 |
-|------|------|------|
-| 1 | 设计 (Design) | 技术方案设计和架构 |
-| 2 | 分解 (Decomposition) | 任务拆解和依赖管理 |
-| 3 | 编码 (Coding) | 代码实现 |
-| 4 | 测试 (Testing) | 功能测试 |
-| 5 | 反思 (Reflection) | 代码审查和反思 |
-| 6 | 优化 (Optimization) | 改进和修复 |
-| 7 | 验证 (Verification) | 最终验证 |
-| 8 | 输出 (Output) | 交付物生成 |
+引入**深度分析模块** (`deep_analysis.py`)：
+- ✅ 根因分析 (Root Cause Analysis)
+- ✅ 模式识别 (Pattern Recognition)
+- ✅ 多维度验证 (Multi-dimensional Verification)
 
-**迭代逻辑**: 测试→反思→优化 形成迭代循环（最多 3 次）
+## 🆕 v1.3.0 新增：需求拆解器 🎯
 
----
+智能判断任务复杂度，动态调整执行流程：
 
-## 🚀 使用方式
-
-### 基本用法
-
-```
-帮我创建一个待办应用
-```
-
-### 带任务列表
-
-```
-创建一个待办应用，任务包括：
-1. 创建项目结构
-2. 实现 HTML 框架
-3. 实现 CSS 样式
-4. 实现 JS 功能
-5. 测试功能
-```
-
-### 与 RoundTable 配合
-
-```
-# 1. 先使用 RoundTable 研讨方案
-/rt 讨论一下待办应用的技术方案
-
-# 2. 然后将结论送入 Auto-Coding
-帮我创建一个待办应用（使用 RoundTable 讨论的技术方案）
-```
+| 任务类型 | 复杂度 | 耗时 |
+|----------|--------|------|
+| 简单任务 | 1-3/10 | ~15 秒 |
+| 中等任务 | 4-6/10 | ~60 秒 |
+| 复杂任务 | 7-10/10 | ~180 秒 |
 
 ---
 
-## 💡 与 RoundTable 的关系
+## 核心能力
 
-**Auto-Coding 和 RoundTable 是两个独立的 Skill**，但可以配合使用：
-
-| Skill | 用途 | 输出 |
-|------|------|------|
-| **RoundTable** | 多 Agent 研讨和方案完善 | 技术方案、行动计划 |
-| **Auto-Coding** | 自主编码实现 | 源代码、测试报告 |
-
-### 推荐工作流
-
-```
-RoundTable（研讨方案） → Auto-Coding（编码实现）
-```
-
-### 使用建议
-
-1. **复杂项目**: 先用 RoundTable 研讨方案，再用 Auto-Coding 实现
-2. **简单项目**: 直接使用 Auto-Coding
-3. **代码审查**: Auto-Coding 完成后，可用 RoundTable 审查代码
+1. **需求拆解** - 分析任务复杂度，生成执行计划
+2. **分析需求** - 识别领域、技能要求、潜在挑战
+3. **找方法** - 搜索文档、工具、最佳实践
+4. **实现代码** - 生成可运行的代码
+5. **测试验证** - 运行测试确保代码工作
+6. **深度分析** - 根因分析、模式识别 (v2.0+)
+7. **自我反思** - 识别问题并改进（关键！）
+8. **交付检查** - 8 项标准严格把关 (v2.1+)
 
 ---
 
-## ⚠️ 注意事项
+## 使用方式
 
-### 推荐使用场景
+### 通过 nanobot 命令
 
-✅ **适合**:
-- 复杂项目开发（多任务依赖）
-- 技术方案设计和实现
-- 代码审查和优化
-- 测试用例生成
-- RoundTable 研讨后的编码实现
-
-❌ **不适合**:
-- 简单单文件修改
-- 需要立即回答的问题
-- 纯咨询类问题
-- Token 预算有限的场景
-
-### Token 消耗
-
-**Auto-Coding 会消耗较多 Token**，因为：
-- 多 Agent 协作（8 个步骤，每个步骤调用不同 Agent）
-- 迭代循环（测试→反思→优化，最多 3 次）
-- 完整的自我审查和优化流程
-
-**建议**: 对于简单任务，直接使用普通对话；对于复杂项目，先使用 RoundTable 研讨方案，再使用 Auto-Coding 实现。
-
----
-
-## 📁 输出
-
-### 交付物
-
-- 📦 源代码
-- 📄 README 文档
-- 📊 测试报告
-- 📖 部署指南
-
-### 项目位置
-
-```
-/tmp/auto-coding-projects/<项目名>/
+```bash
+/auto-coding 创建一个批量重命名文件的脚本
 ```
 
----
-
-## 🔒 安全说明
-
-### 数据流向
-
-**Auto-Coding 的数据处理**:
-
-1. **本地处理**: 所有代码生成在本地完成
-2. **模型调用**: 通过 OpenClaw 的 `sessions_spawn` 调用子 Agent
-3. **Prompt 内容**: 包含需求描述、任务说明、Agent 人格 Prompt
-4. **输出内容**: 代码、测试报告、文档等保存在 `/tmp/auto-coding-projects/`
-
-**数据安全**:
-- ✅ 不存储 API Key、密码等敏感信息
-- ✅ 不读取用户个人文件
-- ✅ 只读取编程相关的 Agent 人格（engineering/design/testing/product）
-- ✅ 项目文件保存在临时目录，手动清理
-
-### 权限说明
-
-**Auto-Coding 的权限**:
-- ✅ 读取：agency-agents-zh 中的编程相关 Agent 人格
-- ✅ 写入：`/tmp/auto-coding-projects/<项目名>/`
-- ✅ 调用：OpenClaw 的 `sessions_spawn` 工具
-
-**不执行的权限**:
-- ❌ 不修改系统文件
-- ❌ 不读取其他技能配置
-- ❌ 不访问网络（除模型调用外）
-- ❌ 不执行 shell 命令（通过安全沙箱）
-
----
-
-## 🔧 配置
-
-### 基本配置
+### 通过 Python API
 
 ```python
-AutoCodingWorkflow(
-    requirements: str,           # 需求描述（必需）
-    tasks: List[Dict] = None,    # 任务列表（可选）
-    project_dir: str = None,     # 项目目录（可选，默认/tmp）
-    timeout_minutes: int = 30,   # 超时时间（可选，默认 30 分钟）
-    user_models: List[Dict] = None  # 自定义模型（可选）
-)
+from worker import AutoCodingWorker, WorkMode
+
+worker = AutoCodingWorker(mode=WorkMode.STANDARD)
+result = await worker.run("创建一个批量重命名文件的脚本")
+
+print(f"成功：{result.success}")
+print(f"代码：{result.final_code}")
+print(f"迭代：{result.iterations}")
 ```
 
-### 自定义模型
+---
 
+## 工作模式
+
+| 模式 | 说明 | 适用场景 |
+|------|------|----------|
+| `quick` | 快速模式，跳过测试和反思 | 简单脚本、单文件任务 |
+| `standard` | 标准模式，完整流程 | 大多数任务 |
+| `deep` | 深度模式，多次反思迭代 | 复杂功能、需要优化的代码 |
+
+---
+
+### 常见场景
+
+**创建脚本**:
+```
+/auto-coding 创建一个 Python 脚本来处理 CSV 文件
+/auto-coding 帮我写一个批量下载图片的脚本
+```
+
+**开发应用**:
+```
+/auto-coding 开发一个 Flask API 服务
+/auto-coding 创建一个 React 组件
+```
+
+**功能实现**:
+```
+这个功能怎么实现？我需要给项目添加日志功能
+我需要写一个函数来验证邮箱格式
+```
+
+---
+
+## 文件结构
+
+```
+auto-coding/
+├── SKILL.md              # 技能定义（本文件）
+├── README.md             # 详细文档
+├── USAGE.md              # 使用指南
+├── DECOMPOSER_DESIGN.md  # 需求拆解器设计文档
+├── decomposer.py         # 需求拆解器 (v1.3.0 新增)
+├── worker.py             # 核心工作流引擎
+├── self_reflect.py       # 自我反思模块
+├── delivery_check.py     # 交付标准检查
+├── llm_client.py         # LLM 调用客户端（复用 nanobot 配置）
+├── prompts/              # 提示词模板
+└── tests/                # 测试套件
+```
+
+---
+
+## 依赖
+
+- Python 3.10+
+- dashscope (阿里云通义千问)
+- duckduckgo-search (可选，用于搜索)
+
+---
+
+## 配置
+
+### LLM 配置
+
+复用 nanobot 的 LLM 配置（从 `~/.nanobot/config.json` 读取）
+
+### 工作空间
+
+默认：`~/.nanobot/workspace`
+
+可以通过参数指定：
 ```python
-user_models = [
-    {'id': 'bailian/glm-5', 'tags': ['engineering']},
-    {'id': 'bailian/kimi-k2.5', 'tags': ['design']},
-]
+worker = AutoCodingWorker(workspace="/path/to/workspace")
 ```
 
 ---
 
-## 📊 安全评分
+## 交付标准
 
-**安全评分**: 97/100 ⭐⭐⭐⭐⭐
+代码必须通过以下检查才能交付：
 
-- ✅ 输入验证
-- ✅ 命令注入防护
-- ✅ 文件安全
-- ✅ 数据安全
-- ✅ 并发安全
-- ✅ 资源管理
-
----
-
-## 📝 版本历史
-
-| 版本 | 日期 | 说明 |
-|------|------|------|
-| v1.0.0 | 2026-03-14 | 初始版本 |
-| v1.0.1 | 2026-03-19 | P0 修复（并发安全） |
-| v1.0.2 | 2026-03-19 | P1 修复（导入/日志） |
-| v1.0.3 | 2026-03-19 | P1 修复（超时/死锁） |
-| v1.0.4 | 2026-03-19 | 依赖管理器集成 |
-| v1.0.5 | 2026-03-19 | 完整版（模型+Soul+Sessions_Spawn） |
-| **v1.0.6** | **2026-03-19** | **八步流程版（设计→分解→编码→测试→反思→优化→验证→输出）** |
+- [ ] 运行无错误
+- [ ] 有基本测试
+- [ ] 有文档说明
+- [ ] 有错误处理
+- [ ] 通过安全检查
 
 ---
 
-## 📞 技术支持
+## 版本历史
 
-- **作者**: Krislu <krislu666@foxmail.com>
-- **文档**: 参见 README-FULL.md
-- **安全报告**: 参见 SECURITY-AUDIT.md
-- **部署说明**: 参见 DEPLOYMENT.md
+- **v1.3.0** - 新增需求拆解器，智能判断复杂度
+- **v1.2.0** - 新增自我反思模块
+- **v1.1.0** - 新增交付检查
+- **v1.0.0** - 初始版本
 
 ---
 
-*Auto-Coding Skill - Krislu <krislu666@foxmail.com>*
+## 相关文档
+
+- [README.md](README.md) - 详细文档
+- [USAGE.md](USAGE.md) - 使用指南
+- [DECOMPOSER_DESIGN.md](DECOMPOSER_DESIGN.md) - 需求拆解器设计

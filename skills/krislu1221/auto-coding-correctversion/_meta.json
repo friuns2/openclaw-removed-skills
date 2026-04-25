@@ -1,13 +1,18 @@
 {
   "owner": "krislu1221",
   "slug": "auto-coding-correctversion",
-  "displayName": "Auto-Coding",
+  "displayName": "Auto Coding",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1773989356024,
-    "commit": "https://github.com/openclaw/skills/commit/ad8e601df874e4c1c564c9da0b7632496ad69d4c"
+    "version": "2.1.2",
+    "publishedAt": 1777127546135,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1773989356024,
+      "commit": "https://github.com/openclaw/skills/commit/ad8e601df874e4c1c564c9da0b7632496ad69d4c"
+    },
     {
       "version": "3.1.1",
       "publishedAt": 1773603014522,

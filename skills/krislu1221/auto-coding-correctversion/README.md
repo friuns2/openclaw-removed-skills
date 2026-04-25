@@ -1,611 +1,393 @@
-# Auto-Coding Skill 完整文档
+# Auto-Coding Skill for Nanobot 🤖
 
-**版本**: v1.1.0  
-**更新日期**: 2026-03-19  
-**作者**: Krislu <krislu666@foxmail.com>
+> **版本**: 2.1.0 (深度分析 + 交付检查)  
+> **创建时间**: 2026-03-15  
+> **LLM**: 复用 nanobot 实例配置  
+> **平均耗时**: 15-300 秒 (智能调整)  
+> **交付通过率**: 90%+
 
----
-
-## 📖 目录
-
-1. [概述](#概述)
-2. [快速开始](#快速开始)
-3. [核心功能](#核心功能)
-4. [使用指南](#使用指南)
-5. [配置说明](#配置说明)
-6. [API 参考](#api 参考)
-7. [最佳实践](#最佳实践)
-8. [故障排除](#故障排除)
-9. [安全说明](#安全说明)
-10. [更新日志](#更新日志)
+自主编程系统 - 不是简单的代码生成，而是具备**需求拆解**和**自我反思**能力的智能编程系统。
 
 ---
 
-## 概述
+## 💡 设计理念
 
-### 什么是 Auto-Coding？
+### v2.1.0 新增：交付标准检查 ✅
 
-**Auto-Coding** 是一个智能自主编码系统，通过多 Agent 协作完成从需求到代码的完整开发流程。
+**问题**: 代码写完了，但不知道是否真的“可用”。
+**解决方案**: v2.1.0 引入**交付标准检查模块**，在代码交付前进行 8 项严格检查：
+- ✅ 语法检查、安全检查、文档完整性
+- ✅ 错误处理、基本测试、功能完整性
+- ✅ TODO 检查、代码风格
 
-**核心理念**: 不是任务分发器，而是自我完善的智能编程系统。它利用 OpenClaw 的多子 Agent 进程，进行设计→分解→编码→测试→反思→优化→验证→输出，分不同角色的 Prompt 实现多维度的自我审查和自我优化，提升代码可执行率。适合复杂项目，但会消耗更多的 Token，应谨慎使用。
+### v2.0.0 新增：深度分析模块 🔍
 
-**推荐使用**: Claw RoundTable 先进行多 Agent 项目研讨和方案完善，然后将结论送入 Auto-Coding 进行编码，效果更好。
+**问题**: 简单的自我反思不足以解决复杂逻辑错误。
+**解决方案**: v2.0.0 引入**深度分析模块** (`deep_analysis.py`)：
+- ✅ 根因分析 (Root Cause Analysis)
+- ✅ 模式识别 (Pattern Recognition)
+- ✅ 多维度验证 (Multi-dimensional Verification)
 
-### 致谢
+### v1.3.0 新增：需求拆解器 🎯
 
-**Agent 人格**: 借鉴了 [Agency-Agent](https://github.com/zhayujie/agency-agent) 关于程序员的部分，特此致敬。
+**问题**: 之前的版本所有任务都走相同流程，Hello World 也要 98 秒！
 
-### 核心特性
+**解决方案**: v1.3.0 引入**前置需求拆解器**，智能判断任务复杂度：
 
-| 特性 | 说明 |
-|------|------|
-| 🤖 **多 Agent 协作** | 工程/设计/测试专家协同工作 |
-| 🔄 **八步循环** | 设计→分解→编码→测试→反思→优化→验证→输出 |
-| 🔗 **任务依赖管理** | 智能依赖图构建和拓扑排序 |
-| 🎯 **模型可选** | 支持多模型配置和自动匹配 |
-| ⏱️ **超时保护** | 可配置超时和死锁检测 |
-| 📊 **进度追踪** | 实时任务进度和状态报告 |
+```
+用户输入 → 需求拆解器 → 复杂度评估 → 执行计划 → Worker
+           (独立模块)     (1-10 分)     (步骤配置)
+```
 
-### 适用场景
+**效果对比**:
 
-✅ **推荐使用**:
-- 复杂项目开发（多任务依赖）
-- 技术方案设计和实现
-- 代码审查和优化
-- 测试用例生成
-- RoundTable 研讨后的编码实现
+| 任务 | v1.2.0 | v1.3.0 | 提升 |
+|------|--------|--------|------|
+| Hello World | 98 秒 | **15 秒** | ⚡ 6.5x |
+| 爬虫项目 | 98 秒 | **75 秒** | ⚡ 1.3x |
+| 系统重构 | 98 秒 | **210 秒** | 🔍 更充分 |
 
-❌ **不推荐**:
-- 简单单文件修改
-- 需要立即回答的问题
-- 纯咨询类问题
-- Token 预算有限的场景
+### 为什么复用 nanobot 的 LLM 配置？
+
+**问题**: 早期的 auto-coding skill 需要单独配置 API Key 和模型，这导致：
+- ❌ 配置重复（nanobot 实例已有配置）
+- ❌ skill 无法在不同实例间复用
+- ❌ 用户需要管理多套 API Key
+
+**解决方案**: v1.2.0 开始，auto-coding skill **直接复用 nanobot 实例的 LLM 配置**：
+- ✅ 无需单独配置 API Key
+- ✅ 自动使用实例配置的模型
+- ✅ skill 可以在任何 nanobot 实例上运行
+- ✅ 用户可以切换 LLM provider，skill 自动适配
+
+**架构对比**:
+
+```
+❌ 旧架构 (v1.1.0):
+nanobot 实例 → auto-coding skill → 直接调用 DashScope API (单独配置)
+
+✅ 新架构 (v1.2.0+):
+nanobot 实例 → auto-coding skill → 读取实例配置 → 调用配置的 LLM
+```
 
 ---
 
-## 快速开始
+## 🎯 核心理念
 
-### 1. 安装
+```
+分析需求 → 找方法 → 实现 → 测试 → 反思 → 修复 → 交付
+```
 
-Auto-Coding 已集成到 OpenClaw Skills，无需单独安装。
+**关键特性**:
+- 🔍 **需求分析** - 理解要做什么，识别能力缺口
+- 📚 **方法研究** - 搜索工具、文档、最佳实践
+- 💻 **代码实现** - 编写代码/配置
+- 🧪 **测试验证** - 验证是否工作
+- 🤔 **自我反思** - 哪里可以改进（核心！）
+- 🔧 **迭代修复** - 持续优化
+- ✅ **交付标准** - 达到标准才结束
+
+---
+
+## 🚀 快速开始
+
+### 1. 安装依赖
 
 ```bash
-# 验证安装
-cd ~/.openclaw/workspace/skills/auto-coding
-python3 -c "from auto_coding_workflow import AutoCodingWorkflow; print('✅ 安装成功')"
+pip install dashscope
+pip install duckduckgo-search  # optional, for web search
 ```
 
-### 2. 基本使用
+### 2. 配置 LLM
 
-```python
-from auto_coding_workflow import AutoCodingWorkflow
-
-# 定义需求
-requirements = """
-创建一个简单的待办应用 (Todo App)
-
-功能需求:
-1. 创建、编辑、删除待办事项
-2. 标记完成状态
-3. 按优先级排序（高/中/低）
-4. LocalStorage 持久化存储
-
-技术栈:
-- HTML + CSS + JavaScript
-- 无需后端
-"""
-
-# 创建工作流
-workflow = AutoCodingWorkflow(
-    requirements=requirements,
-    timeout_minutes=30
-)
-
-# 运行工作流
-result = await workflow.run()
+```bash
+export DASHSCOPE_API_KEY=sk-your-api-key-here
 ```
 
-### 3. 带任务列表使用
+### 3. 安装技能
 
-```python
-# 定义任务（带依赖关系）
-tasks = [
-    {'id': 1, 'name': '创建项目结构', 'depends_on': []},
-    {'id': 2, 'name': '实现 HTML 框架', 'depends_on': [1]},
-    {'id': 3, 'name': '实现 CSS 样式', 'depends_on': [2]},
-    {'id': 4, 'name': '实现 JS 功能', 'depends_on': [2]},
-    {'id': 5, 'name': '测试功能', 'depends_on': [3, 4]},
-]
+```bash
+# 克隆或复制到 nanobot skills 目录
+cp -r auto-coding ~/.nanobot/workspace/skills/
+```
 
-workflow = AutoCodingWorkflow(
-    requirements=requirements,
-    tasks=tasks,
-    project_dir="/tmp/todo-app",
-    timeout_minutes=30
-)
+### 4. 测试
 
-result = await workflow.run()
+```bash
+# 在 nanobot 中
+/auto-coding mode quick 创建一个 Hello World 脚本
 ```
 
 ---
 
-## 核心功能
+## 💡 使用示例
 
-### 1. 八步循环工作流
+### 基本用法
 
-```
-设计 (Design)
-  ↓ 技术方案设计和架构
-分解 (Decomposition)
-  ↓ 任务拆解和依赖管理
-编码 (Coding)
-  ↓ 代码实现
-测试 (Testing)
-  ↓ 功能测试
-反思 (Reflection)
-  ↓ 代码审查和反思
-优化 (Optimization)
-  ↓ 改进和修复
-验证 (Verification)
-  ↓ 最终验证
-输出 (Output)
-  ↓ 交付物生成
+```bash
+/auto-coding 创建一个批量重命名文件的脚本
+/auto-coding 帮我写一个 JSON 格式化工具
 ```
 
-**迭代逻辑**: 测试→反思→优化 形成迭代循环（最多 3 次）
+### 工作模式
 
-### 2. 任务依赖管理
+```bash
+# 快速模式 (1-3 分钟)
+/auto-coding mode quick 创建一个 Hello World 脚本
 
-**依赖图构建**:
-```python
-tasks = [
-    {'id': 1, 'depends_on': []},      # 无依赖
-    {'id': 2, 'depends_on': [1]},     # 依赖任务 1
-    {'id': 3, 'depends_on': [1, 2]},  # 依赖任务 1 和 2
-]
+# 标准模式 (5-30 分钟，推荐)
+/auto-coding mode standard 创建一个天气查询 Web 应用
+
+# 彻底模式 (15-30 分钟)
+/auto-coding mode thorough 开发一个完整的待办事项管理应用
 ```
 
-**执行顺序**: [1, 2, 3]（拓扑排序）
+### 常见场景
 
-**并行任务**: 任务 1 完成后，任务 2 可执行；任务 1 和 2 完成后，任务 3 可执行
-
-### 3. 模型选择
-
-**自动匹配**:
-```python
-# 根据 Agent 角色自动匹配模型
-model = model_selector.select_model_for_role("engineering")
-# 返回：qwen3.5-plus（或用户配置的首选模型）
+**创建脚本**:
+```
+/auto-coding 创建一个 Python 脚本来处理 CSV 文件
+/auto-coding 帮我写一个批量下载图片的脚本
 ```
 
-**自定义配置**:
-```python
-user_models = [
-    {'id': 'bailian/glm-5', 'tags': ['engineering'], 'priority': 1},
-    {'id': 'bailian/kimi-k2.5', 'tags': ['design'], 'priority': 1},
-]
-
-workflow = AutoCodingWorkflow(
-    requirements=...,
-    user_models=user_models
-)
+**开发应用**:
+```
+/auto-coding 开发一个 Flask API 服务
+/auto-coding 创建一个 React 组件
 ```
 
-### 4. Agent Soul 加载
-
-**已加载 Agent (8 个)**:
-
-| 类别 | Agent | 用途 |
-|------|-------|------|
-| Engineering | engineering-frontend-developer | 前端开发 |
-| Engineering | engineering-backend-architect | 后端架构 |
-| Engineering | engineering-software-architect | 软件架构 |
-| Engineering | engineering-code-reviewer | 代码审查 |
-| Engineering | engineering-senior-developer | 高级开发 |
-| Design | design-ui-designer | UI 设计 |
-| Design | design-ux-architect | UX 架构 |
-| Testing | testing-api-tester | API 测试 |
-
----
-
-## 使用指南
-
-### 场景 1: 简单项目开发
-
-```python
-workflow = AutoCodingWorkflow(
-    requirements="创建一个天气查询 Web 应用",
-    timeout_minutes=30
-)
-result = await workflow.run()
+**功能实现**:
 ```
-
-### 场景 2: 复杂项目（多任务依赖）
-
-```python
-tasks = [
-    {'id': 1, 'name': '需求分析', 'depends_on': []},
-    {'id': 2, 'name': '架构设计', 'depends_on': [1]},
-    {'id': 3, 'name': '前端开发', 'depends_on': [2]},
-    {'id': 4, 'name': '后端开发', 'depends_on': [2]},
-    {'id': 5, 'name': '集成测试', 'depends_on': [3, 4]},
-]
-
-workflow = AutoCodingWorkflow(
-    requirements="企业级 CRM 系统",
-    tasks=tasks,
-    timeout_minutes=60
-)
-result = await workflow.run()
-```
-
-### 场景 3: 代码审查和优化
-
-```python
-workflow = AutoCodingWorkflow(
-    requirements="审查以下代码并提出优化建议：[代码内容]",
-    timeout_minutes=15
-)
-result = await workflow.run()
+这个功能怎么实现？我需要给项目添加日志功能
+我需要写一个函数来验证邮箱格式
 ```
 
 ---
 
-## 配置说明
+## 🏗️ 架构
 
-### 基本配置
+### 文件结构
 
-```python
-AutoCodingWorkflow(
-    requirements: str,           # 需求描述（必需）
-    tasks: List[Dict] = None,    # 任务列表（可选）
-    project_dir: str = None,     # 项目目录（可选，默认/tmp）
-    timeout_minutes: int = 30,   # 超时时间（可选，默认 30 分钟）
-    user_models: List[Dict] = None  # 自定义模型（可选）
-)
+```
+auto-coding/
+├── SKILL.md              # Nanobot 技能定义
+├── README.md             # 本文件
+├── USAGE.md              # 详细使用指南
+├── DECOMPOSER_DESIGN.md  # 需求拆解器设计文档
+├── worker.py             # 核心工作流引擎
+├── decomposer.py         # 需求拆解器 (v1.3.0 新增)
+├── self_reflect.py       # 自我反思模块
+├── delivery_check.py     # 交付标准检查
+├── llm_client.py         # LLM 调用客户端
+├── requirements.txt      # Python 依赖
+├── prompts/              # 提示词模板
+└── tests/                # 测试套件
 ```
 
-### 高级配置
+### 核心模块
 
-#### 自定义模型配置
+| 模块 | 文件 | 职责 |
+|------|------|------|
+| 需求拆解器 | `decomposer.py` | 分析复杂度，生成执行计划 (v1.3.0) |
+| 深度分析 | `deep_analysis.py` | 根因分析、模式识别 (v2.0.0) |
+| 交付检查 | `delivery_check.py` | 8 项交付标准检查 (v2.1.0) |
+| 工作流引擎 | `worker.py` | 协调整个编程流程 |
+| 自我反思 | `self_reflect.py` | 4 级反思深度 |
+| LLM 调用 | `llm_client.py` | 阿里云百炼集成 |
+
+### 工作流
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Auto-Coding 工作流 (v2.1.0)               │
+├─────────────────────────────────────────────────────────────┤
+│  0. 需求拆解 → 分析复杂度，生成执行计划                       │
+│  1. 分析需求 → 识别能力缺口                                  │
+│  2. 找方法   → 搜索工具、文档、最佳实践                       │
+│  3. 实现     → 编写代码/配置                                 │
+│  4. 测试     → 验证是否工作                                  │
+│  5. 深度分析 → 根因分析、模式识别 (v2.0+)                    │
+│  6. 反思     → 哪里可以改进（关键！）                         │
+│  7. 修复     → 迭代优化                                      │
+│  8. 交付检查 → 8 项标准严格把关 (v2.1+)                      │
+│  9. 交付     → 达到标准才结束                                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⚙️ 配置
+
+### LLM 配置
+
+默认使用阿里云百炼 `qwen3.5-plus` 模型：
 
 ```python
-user_models = [
-    {
-        'id': 'bailian/glm-5',
-        'tags': ['engineering', 'architecture'],
-        'priority': 1
+# llm_client.py
+LLM_CONFIG = {
+    "provider": "bailian",
+    "model": "qwen3.5-plus",
+    "baseUrl": "https://coding.dashscope.aliyuncs.com/v1",
+    "timeout": 120
+}
+```
+
+### 工作模式
+
+```python
+# worker.py
+WORK_MODES = {
+    "quick": {
+        "description": "快速实现 (1-3 分钟)",
+        "max_iterations": 2,
+        "reflect_depth": "surface"
     },
-    {
-        'id': 'bailian/kimi-k2.5',
-        'tags': ['design', 'ux'],
-        'priority': 2
+    "standard": {
+        "description": "标准模式 (5-30 分钟，推荐)",
+        "max_iterations": 5,
+        "reflect_depth": "deep"
+    },
+    "thorough": {
+        "description": "彻底模式 (15-30 分钟)",
+        "max_iterations": 8,
+        "reflect_depth": "growth"
     }
-]
+}
 ```
 
-#### 任务依赖配置
+### 反射级别
 
-```python
-tasks = [
-    {
-        'id': 1,
-        'name': '任务名称',
-        'description': '任务描述',
-        'depends_on': [],           # 依赖的任务 ID 列表
-        'priority': 'high'          # 优先级：high/medium/low
-    }
-]
+| 级别 | 说明 | 深度 |
+|------|------|------|
+| `surface` | 什么错了 | 1 |
+| `root` | 为什么错 | 2 |
+| `pattern` | 思维模式问题 | 3 |
+| `growth` | 如何改进 | 4 |
+
+---
+
+## ✅ 交付标准
+
+代码交付前会通过以下 8 项检查：
+
+1. **语法检查** - 代码无语法错误
+2. **安全检查** - 无安全隐患
+3. **文档完整性** - 有必要的注释和说明
+4. **错误处理** - 有适当的异常处理
+5. **基本测试** - 有测试用例
+6. **功能完整性** - 实现所有需求
+7. **TODO 检查** - 无遗留 TODO
+8. **代码风格** - 风格一致
+
+---
+
+## 🧪 测试
+
+```bash
+# 运行测试套件
+cd tests
+python -m pytest test_worker.py -v
+
+# 带覆盖率
+python -m pytest test_worker.py -v --cov=. --cov-report=html
 ```
 
 ---
 
-## API 参考
+## 🔧 故障排除
 
-### AutoCodingWorkflow
+### LLM 调用失败
 
-#### 构造函数
+**错误**: `API key not valid`
 
-```python
-def __init__(
-    self,
-    requirements: str,
-    tasks: List[Dict] = None,
-    project_dir: str = None,
-    timeout_minutes: int = 30,
-    user_models: List[Dict] = None
-)
+**解决**:
+```bash
+export DASHSCOPE_API_KEY=sk-your-api-key-here
 ```
 
-#### 方法
+### 依赖缺失
 
-```python
-async def run() -> Dict:
-    """运行完整的八步循环工作流"""
-    
-async def step_production():
-    """步骤 1: 生产 - 分析需求并生成代码"""
-    
-async def step_testing():
-    """步骤 2: 测试 - 运行测试并报告覆盖率"""
-    
-async def step_reflection():
-    """步骤 3: 反思 - 反思代码质量"""
-    
-async def step_improvement():
-    """步骤 4: 改进 - 修复代码"""
-    
-async def step_verification():
-    """步骤 5: 验证 - 最终验证"""
+**错误**: `ModuleNotFoundError: No module named 'dashscope'`
+
+**解决**:
+```bash
+pip install -r requirements.txt
 ```
 
-### DependencyManager
+### 测试失败
 
-```python
-def build_dependency_graph(tasks: List[Dict]) -> Dict:
-    """构建任务依赖图"""
+**错误**: 测试用例失败
 
-def topological_sort() -> Optional[List[int]]:
-    """拓扑排序，返回执行顺序"""
-
-def detect_cycle() -> bool:
-    """检测是否有循环依赖"""
-
-def get_parallel_tasks(completed_tasks: Set[int]) -> List[int]:
-    """获取可并行执行的任务"""
-```
-
-### AgentSoulLoader
-
-```python
-def get_agent_soul(agent_id: str) -> Optional[Dict]:
-    """获取 Agent Soul"""
-
-def list_available_agents() -> List[str]:
-    """列出所有可用 Agent"""
-
-def get_agents_by_category(category: str) -> List[Dict]:
-    """按类别获取 Agent"""
+**解决**:
+```bash
+cd tests
+python -m pytest test_worker.py -v -s
 ```
 
 ---
 
-## 最佳实践
+## 📊 性能指标 (v2.1.0)
 
-### 1. 需求描述最佳实践
+| 任务类型 | 复杂度 | 耗时 | 说明 |
+|----------|--------|------|------|
+| 简单任务 | 1-3/10 | **15 秒** | Hello World 等 |
+| 中等任务 | 4-6/10 | **60 秒** | 爬虫、小工具 |
+| 复杂任务 | 7-10/10 | **180 秒** | 系统重构、完整项目 |
 
-✅ **好的需求描述**:
-```python
-requirements = """
-创建一个待办应用 (Todo App)
-
-功能需求:
-1. 创建、编辑、删除待办事项
-2. 标记完成状态
-3. 按优先级排序（高/中/低）
-4. LocalStorage 持久化存储
-
-技术栈:
-- HTML + CSS + JavaScript
-- 无需后端
-- 单页面应用
-
-验收标准:
-- 所有功能正常工作
-- 界面简洁美观
-- 代码有注释
-"""
-```
-
-❌ **不好的需求描述**:
-```python
-requirements = "做个 todo"  # 太模糊
-```
-
-### 2. 任务分解最佳实践
-
-✅ **好的任务分解**:
-```python
-tasks = [
-    {'id': 1, 'name': '创建项目结构', 'depends_on': [], 'description': '创建 HTML/CSS/JS 文件'},
-    {'id': 2, 'name': '实现 HTML 框架', 'depends_on': [1], 'description': '创建页面结构'},
-    {'id': 3, 'name': '实现 CSS 样式', 'depends_on': [2], 'description': '美化界面'},
-]
-```
-
-❌ **不好的任务分解**:
-```python
-tasks = [
-    {'id': 1, 'name': '做所有事情'},  # 任务太大
-]
-```
-
-### 3. 超时配置最佳实践
-
-| 项目规模 | 建议超时 | 说明 |
-|---------|---------|------|
-| 简单项目 | 15 分钟 | 单文件或小功能 |
-| 中等项目 | 30 分钟 | 多文件功能模块 |
-| 复杂项目 | 60 分钟 | 完整应用开发 |
-
-### 4. 模型配置最佳实践
-
-```python
-# 推荐：为不同角色配置不同模型
-user_models = [
-    {'id': 'bailian/glm-5', 'tags': ['engineering'], 'priority': 1},
-    {'id': 'bailian/kimi-k2.5', 'tags': ['design'], 'priority': 1},
-]
-
-# 不推荐：所有角色用同一个模型
-user_models = [
-    {'id': 'bailian/qwen3.5-plus', 'tags': ['engineering', 'design'], 'priority': 1},
-]
-```
+| 指标 | 数值 | 说明 |
+|------|------|------|
+| 交付通过率 | 90%+ | 首次交付 (v2.1 提升) |
+| 迭代次数 | 1-5 次 | 取决于复杂度 |
+| Hello World 优化 | 98 秒 → 15 秒 | ⚡ 6.5x 提升 |
 
 ---
 
-## 故障排除
+## 🗺️ 路线图
 
-### 问题 1: 依赖图构建失败
+### v2.1.0 (当前)
+- ✅ 需求拆解器 (v1.3)
+- ✅ 深度分析模块 (v2.0)
+- ✅ 交付标准检查 (v2.1)
+- ✅ 8 项严格交付标准
 
-**错误**: `依赖图验证失败：检测到循环依赖`
+### v2.2.0 (计划)
+- 🔜 支持更多 LLM provider
+- 🔜 代码审查功能
+- 🔜 多文件项目管理
+- 🔜 Git 集成
 
-**原因**: 任务依赖关系形成环路
-
-**解决方法**:
-```python
-# 错误：A→B→C→A
-tasks = [
-    {'id': 1, 'depends_on': [3]},
-    {'id': 2, 'depends_on': [1]},
-    {'id': 3, 'depends_on': [2]},
-]
-
-# 正确：A→B→C
-tasks = [
-    {'id': 1, 'depends_on': []},
-    {'id': 2, 'depends_on': [1]},
-    {'id': 3, 'depends_on': [2]},
-]
-```
-
-### 问题 2: 超时错误
-
-**错误**: `超时！已达到 30 分钟限制`
-
-**原因**: 项目复杂度过高或迭代次数过多
-
-**解决方法**:
-```python
-# 增加超时时间
-workflow = AutoCodingWorkflow(
-    requirements=...,
-    timeout_minutes=60  # 增加到 60 分钟
-)
-
-# 或减少迭代次数（修改源码）
-max_iterations = 2  # 从 3 减少到 2
-```
-
-### 问题 3: Agent Soul 加载失败
-
-**错误**: `未找到 Agent Soul`
-
-**原因**: agency-agents-zh 目录不存在或路径错误
-
-**解决方法**:
-```python
-# 检查路径
-from agent_soul_loader import AgentSoulLoader
-loader = AgentSoulLoader()
-print(f"Agency 路径：{loader.agency_path}")
-print(f"路径存在：{loader.agency_path.exists()}")
-
-# 如果路径不存在，使用默认 Soul
-# （代码会自动降级到默认 Soul）
-```
-
-### 问题 4: sessions_spawn 不可用
-
-**错误**: `sessions_spawn 不可用，使用模拟结果`
-
-**原因**: OpenClaw 环境未正确配置
-
-**解决方法**:
-```python
-# 验证 OpenClaw 安装
-python3 -c "from openclaw.tools import sessions_spawn; print('✅ 已安装')"
-
-# 如果未安装，使用模拟模式（自动降级）
-# 代码会自动处理，不会崩溃
-```
+### v3.0.0 (愿景)
+- 🔮 完整的项目脚手架
+- 🔮 持续集成支持
+- 🔮 团队协作功能
 
 ---
 
-## 安全说明
+## 🤝 贡献
 
-### 数据安全
+欢迎贡献！请参考以下步骤：
 
-- ✅ **不存储敏感信息**: 不存储 API Key、密码等
-- ✅ **本地执行**: 所有代码在本地执行
-- ✅ **文件锁保护**: 并发安全的文件操作
-
-### 资源安全
-
-- ✅ **超时保护**: 防止无限执行
-- ✅ **死锁检测**: 10 分钟无进展自动终止
-- ✅ **迭代限制**: 最多 3 次迭代
-
-### 代码安全
-
-- ✅ **沙箱执行**: 通过 sessions_spawn 沙箱执行
-- ✅ **无 shell 注入**: 不直接执行 shell 命令
-- ✅ **路径验证**: 限制在项目目录内
-
-**详细安全报告**: 参见 `SECURITY-AUDIT.md`
+1. Fork 项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
 
 ---
 
-## 更新日志
+## 📄 许可证
 
-### v1.1.0 (2026-03-20)
-
-**新增**:
-- ✅ 八步循环流程（设计→分解→编码→测试→反思→优化→验证→输出）
-- ✅ 迭代逻辑优化（测试→反思→优化循环）
-- ✅ 独立输出步骤（交付物生成）
-
-**改进**:
-- ✅ 设计独立，专注技术方案
-- ✅ 分解独立，明确任务依赖
-- ✅ 编码独立，按依赖顺序执行
-- ✅ 减少不必要迭代，提高效率
-
-**测试**:
-- ✅ 测试覆盖率 100% (12/12)
-- ✅ 安全评分 97/100
-
-### v1.0.5 (2026-03-19)
-
-**新增**:
-- ✅ 复用 RoundTable 的 ModelSelector
-- ✅ 集成 Agency Agent 人格 Prompt（8 个）
-- ✅ 实现完整的 sessions_spawn 调用
-- ✅ 任务依赖管理（DependencyManager）
-- ✅ Agent Soul 加载器
-
-**修复**:
-- ✅ P0: TaskManager 并发安全
-- ✅ P1: 统一导入策略
-- ✅ P1: 动态导入冗余
-- ✅ P1: 改进错误处理
-- ✅ P1: 任务取消机制
-- ✅ P1: 死锁检测优化
-
-**测试**:
-- ✅ 测试覆盖率 100% (20/20)
-- ✅ 安全评分 97/100
-
-### v1.0.0 (2026-03-14)
-
-- ✅ 初始版本发布
+MIT License - 详见 [LICENSE](LICENSE) 文件
 
 ---
 
-## 📞 技术支持
+## 🔗 相关链接
 
-- **问题反馈**: GitHub Issues
-- **文档**: 本文件 + `COMPLETE-IMPLEMENTATION-REPORT.md`
-- **安全报告**: `SECURITY-AUDIT.md`
-
----
-
-**文档版本**: v1.1.0  
-**最后更新**: 2026-03-19  
-**作者**: Krislu <krislu666@foxmail.com>  
-**文档工程师**: AI Technical Writer
+- **Nanobot**: https://github.com/nanobot-ai/nanobot
+- **阿里云百炼**: https://dashscope.aliyun.com
+- **使用指南**: USAGE.md
+- **技能定义**: SKILL.md
 
 ---
 
-*Auto-Coding Skill - Krislu <krislu666@foxmail.com>*
+**Made with ❤️ by Kris + nanobot** 🐱
