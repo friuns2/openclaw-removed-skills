@@ -3,11 +3,16 @@
   "slug": "ahrefs-integration",
   "displayName": "Ahrefs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163326807,
-    "commit": "https://github.com/openclaw/skills/commit/f3a8c4f12dbde177b3c6def845e2a95332c42cd9"
+    "version": "1.0.3",
+    "publishedAt": 1776798243234,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163326807,
+      "commit": "https://github.com/openclaw/skills/commit/f3a8c4f12dbde177b3c6def845e2a95332c42cd9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773262953493,
