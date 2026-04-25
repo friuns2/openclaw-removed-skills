@@ -3,11 +3,16 @@
   "slug": "isolved",
   "displayName": "Isolved",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162648063,
-    "commit": "https://github.com/openclaw/skills/commit/1ae30e6247c8ae59f7299128fd389ff2d280cd82"
+    "version": "1.0.3",
+    "publishedAt": 1776780211643,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162648063,
+      "commit": "https://github.com/openclaw/skills/commit/1ae30e6247c8ae59f7299128fd389ff2d280cd82"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772877746027,
