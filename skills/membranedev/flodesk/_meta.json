@@ -3,11 +3,16 @@
   "slug": "flodesk",
   "displayName": "Flodesk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163584076,
-    "commit": "https://github.com/openclaw/skills/commit/e323995b1092923329a15b34fb9a84b049b56cce"
+    "version": "1.0.3",
+    "publishedAt": 1776805465682,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163584076,
+      "commit": "https://github.com/openclaw/skills/commit/e323995b1092923329a15b34fb9a84b049b56cce"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773352947760,
