@@ -3,11 +3,16 @@
   "slug": "volvo-aemp",
   "displayName": "Volvo Aemp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163850385,
-    "commit": "https://github.com/openclaw/skills/commit/242c8e110f9b578057009beffa736a1c8be970cf"
+    "version": "1.0.3",
+    "publishedAt": 1776812801958,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163850385,
+      "commit": "https://github.com/openclaw/skills/commit/242c8e110f9b578057009beffa736a1c8be970cf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773460948185,
