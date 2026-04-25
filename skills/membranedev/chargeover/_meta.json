@@ -3,11 +3,16 @@
   "slug": "chargeover",
   "displayName": "Chargeover",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164368807,
-    "commit": "https://github.com/openclaw/skills/commit/dfba837555fae71d17addddf6b684f8312a9ce07"
+    "version": "1.0.3",
+    "publishedAt": 1776837749799,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164368807,
+      "commit": "https://github.com/openclaw/skills/commit/dfba837555fae71d17addddf6b684f8312a9ce07"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773709351416,
