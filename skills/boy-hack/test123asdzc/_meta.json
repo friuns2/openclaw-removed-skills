@@ -3,11 +3,16 @@
   "slug": "test123asdzc",
   "displayName": "test123asdzc",
   "latest": {
-    "version": "1.1.4",
-    "publishedAt": 1775705936228,
-    "commit": "https://github.com/openclaw/skills/commit/de3c90fdf27838098723a0f24d6e2ff24fce9f41"
+    "version": "1.1.6",
+    "publishedAt": 1776932421757,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.4",
+      "publishedAt": 1775705936228,
+      "commit": "https://github.com/openclaw/skills/commit/de3c90fdf27838098723a0f24d6e2ff24fce9f41"
+    },
     {
       "version": "1.0.13",
       "publishedAt": 1774236553222,
