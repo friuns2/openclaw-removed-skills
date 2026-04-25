@@ -3,11 +3,16 @@
   "slug": "deel",
   "displayName": "Deel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161800429,
-    "commit": "https://github.com/openclaw/skills/commit/a267b0d41daaa75333c22918bc17cd227a39885f"
+    "version": "1.0.3",
+    "publishedAt": 1776776630561,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161800429,
+      "commit": "https://github.com/openclaw/skills/commit/a267b0d41daaa75333c22918bc17cd227a39885f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772780557276,
