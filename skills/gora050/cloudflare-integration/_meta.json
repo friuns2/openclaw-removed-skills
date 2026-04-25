@@ -3,11 +3,16 @@
   "slug": "cloudflare-integration",
   "displayName": "Cloudflare",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163612382,
-    "commit": "https://github.com/openclaw/skills/commit/f2015383ce02edb0d547948e9b549b540aad4d26"
+    "version": "1.0.3",
+    "publishedAt": 1776805539394,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163612382,
+      "commit": "https://github.com/openclaw/skills/commit/f2015383ce02edb0d547948e9b549b540aad4d26"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773352995799,
