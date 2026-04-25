@@ -3,11 +3,16 @@
   "slug": "microsoft-power-bi",
   "displayName": "Microsoft Power Bi",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775162655113,
-    "commit": "https://github.com/openclaw/skills/commit/f17e2d3d4f49c63bd6eda5d0ff98ae8aa0a9c2f6"
+    "version": "1.0.4",
+    "publishedAt": 1776780227668,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775162655113,
+      "commit": "https://github.com/openclaw/skills/commit/f17e2d3d4f49c63bd6eda5d0ff98ae8aa0a9c2f6"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1772888573712,
