@@ -3,11 +3,16 @@
   "slug": "nethunt-crm",
   "displayName": "Nethunt Crm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164124307,
-    "commit": "https://github.com/openclaw/skills/commit/4a01bd1a54b8c1604e898803c1cd12cb47bdf1e8"
+    "version": "1.0.3",
+    "publishedAt": 1776830566333,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164124307,
+      "commit": "https://github.com/openclaw/skills/commit/4a01bd1a54b8c1604e898803c1cd12cb47bdf1e8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773615744792,
