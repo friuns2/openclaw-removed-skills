@@ -3,11 +3,16 @@
   "slug": "agent-bom-registry",
   "displayName": "agent-bom registry",
   "latest": {
-    "version": "0.76.4",
-    "publishedAt": 1776058963182,
-    "commit": "https://github.com/openclaw/skills/commit/2ca97bb8ccc9755d8e986d2781515ae5d665bcc7"
+    "version": "0.81.3",
+    "publishedAt": 1776991562847,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.76.4",
+      "publishedAt": 1776058963182,
+      "commit": "https://github.com/openclaw/skills/commit/2ca97bb8ccc9755d8e986d2781515ae5d665bcc7"
+    },
     {
       "version": "0.76.2",
       "publishedAt": 1775787210206,
