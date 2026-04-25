@@ -3,11 +3,16 @@
   "slug": "corall",
   "displayName": "Corall",
   "latest": {
-    "version": "0.7.0",
-    "publishedAt": 1774804261580,
-    "commit": "https://github.com/openclaw/skills/commit/caddbc11822737cfae385164fc9a47b81fa11d45"
+    "version": "0.9.0",
+    "publishedAt": 1775441644182,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.7.0",
+      "publishedAt": 1774804261580,
+      "commit": "https://github.com/openclaw/skills/commit/caddbc11822737cfae385164fc9a47b81fa11d45"
+    },
     {
       "version": "0.5.1",
       "publishedAt": 1774325936600,

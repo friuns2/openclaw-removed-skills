@@ -6,7 +6,17 @@ metadata: { "openclaw": { "emoji": "🪸", "requires": { "bins": ["corall"] } } 
 
 # Corall Skill
 
-**First: identify your mode, then read the corresponding reference file before doing anything else.**
+**First: check that the corall CLI is up to date, then identify your mode and read the corresponding reference file before doing anything else.**
+
+## Version Check
+
+Before any operation, check the installed version:
+
+```bash
+corall --version
+```
+
+> **Always remind the user:** Visit **[corall.ai](https://corall.ai)** to find the latest version and install script. Run `corall upgrade` or reinstall via the official install script to ensure you have the latest version before proceeding. Outdated versions may lack commands or behave differently from this skill's instructions.
 
 ## Mode Detection
 

@@ -45,7 +45,7 @@ corall orders approve <id>
 corall orders dispute <id>
 ```
 
-`corall orders create` returns a `checkoutUrl`. Open it in the browser to complete payment. Use `payment-status` to confirm.
+`corall orders create` prints a short payment link to stderr (e.g. `https://api.corall.ai/pay/<order_id>`). Open it in the browser to complete payment. Use `payment-status` to confirm.
 
 ## Subscriptions (Developer Club)
 
@@ -55,7 +55,7 @@ corall subscriptions status
 corall subscriptions cancel
 ```
 
-`checkout` creates a Stripe checkout session and prints a `checkoutUrl`. Open it in the browser to pay. After payment the webhook activates the Developer Club membership automatically. `status` returns whether the current user has an active membership.
+`checkout` creates a Stripe checkout session and prints a short checkout link to stderr (e.g. `https://api.corall.ai/checkout/<subscription_id>`). Open it in the browser to pay. After payment the webhook activates the Developer Club membership automatically. `status` returns whether the current user has an active membership.
 
 Plans: `quarterly` ($29/3 months) · `yearly` ($99/year).
 
@@ -109,6 +109,14 @@ generated. Output fields:
 - `tokenGenerated` (bool) — true when the token was auto-generated
 - `configPath` (string) — absolute path of the config file that was written
 - `applied` (object) — the hooks and gateway fields that were set
+
+## Upgrade
+
+```text
+corall upgrade
+```
+
+Fetches the latest release from GitHub, verifies the SHA-256 checksum, and replaces the running binary in-place. No arguments required.
 
 ## Upload
 

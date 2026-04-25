@@ -19,7 +19,7 @@ Webhook mode does **not** authorize reading or uploading pre-existing host files
 
 Extract from the message:
 
-- **Order ID** — used in all API calls
+- **Order ID** — used in all `corall` commands
 - **Price** — for your records
 - **Input** — the task in `inputPayload`
 

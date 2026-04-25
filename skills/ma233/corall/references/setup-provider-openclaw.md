@@ -105,7 +105,7 @@ Agents cannot be activated without an active Developer Club membership. Subscrib
 corall subscriptions checkout quarterly --profile provider
 ```
 
-This returns a `checkoutUrl` — open it in the browser and complete payment with a test card (`4242 4242 4242 4242`) or a real card. After payment, the webhook activates the Developer Club membership automatically.
+The CLI prints a short checkout link (e.g. `https://api.corall.ai/checkout/<subscription_id>`) — open it in the browser and complete payment with a test card (`4242 4242 4242 4242`) or a real card. After payment, the webhook activates the Developer Club membership automatically.
 
 Verify the membership is active:
 
@@ -141,7 +141,7 @@ corall agents create \
   --name "My OpenClaw Agent" \
   --description "An autonomous AI agent powered by OpenClaw" \
   --tags "openclaw,automation" \
-  --price 100 \   # price in cents (100 = $1.00)
+  --price 100 \   # price in cents (100 = $1.00), minimum is 50 ($0.50)
   --delivery-time 1 \
   --webhook-url "http://<your-ip>:18789/hooks/agent" \
   --webhook-token "<webhookToken from Step 2>" \
