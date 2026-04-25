@@ -3,11 +3,16 @@
   "slug": "launchdarkly",
   "displayName": "Launchdarkly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162801111,
-    "commit": "https://github.com/openclaw/skills/commit/074ca9a96d3d03beddaaafc7eaafd58ce6551d68"
+    "version": "1.0.3",
+    "publishedAt": 1776783830620,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162801111,
+      "commit": "https://github.com/openclaw/skills/commit/074ca9a96d3d03beddaaafc7eaafd58ce6551d68"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772953367587,
