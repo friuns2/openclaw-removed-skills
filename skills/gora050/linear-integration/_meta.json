@@ -3,11 +3,16 @@
   "slug": "linear-integration",
   "displayName": "Linear",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162429573,
-    "commit": "https://github.com/openclaw/skills/commit/c781ceb1997265f1196e56625b0fb1b8b4f4853f"
+    "version": "1.0.3",
+    "publishedAt": 1776773115954,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162429573,
+      "commit": "https://github.com/openclaw/skills/commit/c781ceb1997265f1196e56625b0fb1b8b4f4853f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772719343075,
