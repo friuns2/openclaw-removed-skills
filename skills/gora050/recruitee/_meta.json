@@ -3,11 +3,16 @@
   "slug": "recruitee",
   "displayName": "Recruitee",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162529158,
-    "commit": "https://github.com/openclaw/skills/commit/9ae8054c62ca8de211cf73e534a67b09ce7119c8"
+    "version": "1.0.3",
+    "publishedAt": 1776776809963,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162529158,
+      "commit": "https://github.com/openclaw/skills/commit/9ae8054c62ca8de211cf73e534a67b09ce7119c8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772812954886,
