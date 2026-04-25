@@ -3,11 +3,16 @@
   "slug": "microsoft-onenote",
   "displayName": "Microsoft Onenote",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163207000,
-    "commit": "https://github.com/openclaw/skills/commit/ef5e41c8778ada738f839fedc26ba81bca940fa1"
+    "version": "1.0.3",
+    "publishedAt": 1776791190261,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163207000,
+      "commit": "https://github.com/openclaw/skills/commit/ef5e41c8778ada738f839fedc26ba81bca940fa1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773180197498,
