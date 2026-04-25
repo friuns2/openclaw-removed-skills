@@ -1,13 +1,18 @@
 {
   "owner": "kaisersong",
   "slug": "kai-report-creator",
-  "displayName": "Kai Report Creator",
+  "displayName": "Report Creator",
   "latest": {
-    "version": "1.13.0",
-    "publishedAt": 1776091945647,
-    "commit": "https://github.com/openclaw/skills/commit/14874f49ebc654a004580d68a7fa9b65fee21eae"
+    "version": "1.21.0",
+    "publishedAt": 1777115751473,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.13.0",
+      "publishedAt": 1776091945647,
+      "commit": "https://github.com/openclaw/skills/commit/14874f49ebc654a004580d68a7fa9b65fee21eae"
+    },
     {
       "version": "1.9.0",
       "publishedAt": 1775490734881,

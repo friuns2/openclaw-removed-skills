@@ -39,12 +39,12 @@ def test_readmes_expose_review_mode_consistently():
     readme_zh = read("README.zh-CN.md")
 
     assert "/report --review" in readme_en
-    assert "8-checkpoint" in readme_en
+    assert "13-checkpoint" in readme_en
     assert "silent final review" in readme_en
     assert "review-report-template.md" in readme_en
 
     assert "/report --review" in readme_zh
-    assert "8 项检查点" in readme_zh
+    assert "13 项检查点" in readme_zh
     assert "静默终审" in readme_zh
     assert "review-report-template.md" in readme_zh
 

@@ -3,7 +3,6 @@ import importlib.util
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import sync_playwright
 
 REPO_ROOT = Path(__file__).parent.parent
 SCRIPTS_DIR = REPO_ROOT / "scripts"
@@ -27,6 +26,11 @@ def export_image_mod():
 
 @pytest.fixture(scope="session")
 def browser_instance():
+    if importlib.util.find_spec("playwright") is None:
+        pytest.skip("playwright is not installed")
+
+    from playwright.sync_api import sync_playwright
+
     with sync_playwright() as pw:
         b = pw.chromium.launch()
         yield b

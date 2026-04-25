@@ -8,7 +8,7 @@ Use this template when presenting a report-review result to the user after `--re
 **Target file:** `[path/to/report.html]`
 **Review mode:** `--review` | `--generate (silent final review)` | `manual demo`
 **Language:** `zh` | `en`
-**Review scope:** `8-checkpoint review system`
+**Review scope:** `13-checkpoint review system`
 
 ## Summary
 

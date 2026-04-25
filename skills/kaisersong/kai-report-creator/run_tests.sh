@@ -21,9 +21,14 @@ if [ "${1-}" = "--fast" ]; then
   python3 -m pytest \
     tests/test_export_config.py \
     tests/test_color_system_docs.py \
+    tests/test_html_shell_contract.py \
     tests/test_review_docs.py \
     tests/test_doc_sync.py \
-    tests/test_theme_screenshot_assets.py
+    tests/test_shell_metadata.py \
+    tests/test_theme_screenshot_assets.py \
+    tests/test_context_isolation.py \
+    tests/test_late_context_eval.py \
+    tests/test_verify_release.py
 else
   echo "Mode: full suite (unit + Playwright)"
   python3 -m pytest tests/ "$@"

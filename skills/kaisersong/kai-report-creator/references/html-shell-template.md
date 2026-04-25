@@ -4,16 +4,16 @@ When generating the final HTML report, produce a complete self-contained HTML fi
 
     <!DOCTYPE html>
     <!-- kai-report-creator v[version] -->
-    <html lang="[lang]">
+    <html lang="[lang]" data-template="kai-report-creator" data-version="[version]" data-theme="[theme]">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="generator" content="kai-report-creator [theme-display] v[version]">
+      <meta name="ir-hash" content="sha256:[ir-hash]">
       <title>[title]</title>
 
       <!-- CDN libraries (add only what's needed; omit if --bundle, inline instead) -->
-      <!-- If any :::chart blocks present AND using Chart.js: -->
-      <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script> -->
-      <!-- If any :::chart blocks present AND using ECharts: -->
+      <!-- If any :::chart blocks present: -->
       <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script> -->
       <!-- If any :::code blocks present: -->
       <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css"> -->
@@ -81,10 +81,58 @@ When generating the final HTML report, produce a complete self-contained HTML fi
         .callout--warning { background: #FFFBEB; border-color: #F59E0B; }
         .callout--danger { background: #FEF2F2; border-color: #EF4444; }
         .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .05rem; }
-        .callout-body { flex: 1; min-width: 0; line-height: 1.6; font-size: .93rem; }
+        .callout-body { flex: 1; min-width: 0; line-height: 1.6; font-size: .93rem; color: #1F2937; }
+        /* Callout icon color — ensure contrast on light backgrounds regardless of theme */
+        .callout--note .callout-icon { color: #3B82F6; }
+        .callout--tip .callout-icon { color: #22C55E; }
+        .callout--warning .callout-icon { color: #F59E0B; }
+        .callout--danger .callout-icon { color: #EF4444; }
 
         /* Semantic highlight extraction — from design-quality.md §6 */
         .highlight-sentence { font-size: 1.15rem; font-weight: 700; color: var(--primary); border-left: 3px solid var(--primary); padding-left: 1rem; margin: 1.5rem 0; line-height: 1.5; }
+        .lead-block {
+          margin: 1.1rem 0 1rem;
+          padding: 1rem 1.15rem;
+          border-left: 4px solid var(--primary);
+          border-radius: 16px;
+          background: rgba(255,255,255,.72);
+          font-size: 1.02rem;
+          line-height: 1.72;
+          max-width: 60rem;
+        }
+        .section-quote {
+          margin: 1rem 0;
+          padding: 1rem 1.15rem;
+          border-radius: 18px;
+          background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(0,0,0,.03));
+          border: 1px solid var(--border);
+          font-family: var(--font-display);
+          font-size: 1.18rem;
+          line-height: 1.58;
+        }
+        .action-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: .8rem;
+          margin: 1rem 0;
+        }
+        .action-card {
+          padding: 1rem;
+          border-radius: 18px;
+          border: 1px solid var(--border);
+          background: rgba(255,255,255,.78);
+        }
+        .action-card strong {
+          display: block;
+          margin-bottom: .45rem;
+          color: var(--primary);
+        }
+        .action-card p {
+          margin: 0;
+          font-size: .92rem;
+          line-height: 1.62;
+          color: var(--text-muted);
+        }
 
         /* Timeline */
         .timeline { position: relative; padding-left: 2rem; margin: 1.1rem 0; }
@@ -122,11 +170,14 @@ When generating the final HTML report, produce a complete self-contained HTML fi
         /* Animations — all easing uses cubic-bezier(0.22,1,0.36,1) (ease-out-expo). Never use bounce (overshoot >1) or elastic (spring oscillation) easing — they read as dated and tacky. */
         .fade-in-up { opacity: 0; transform: translateY(18px); transition: opacity .5s cubic-bezier(0.22,1,0.36,1), transform .5s cubic-bezier(0.22,1,0.36,1); }
         .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+        .print-exporting .fade-in-up { opacity: 1 !important; transform: none !important; transition: none !important; }
         body.no-animations .fade-in-up { opacity: 1; transform: none; transition: none; }
         .kpi-grid.stagger-ready .kpi-card { opacity: 0; transform: translateY(20px) scale(0.95); transition: opacity .45s cubic-bezier(0.34,1.56,0.64,1), transform .45s cubic-bezier(0.34,1.56,0.64,1); }
         .kpi-grid.stagger-ready .kpi-card.visible { opacity: 1; transform: none; }
+        .print-exporting .kpi-grid .kpi-card { opacity: 1 !important; transform: none !important; transition: none !important; }
         .timeline.stagger-ready .timeline-item { opacity: 0; transform: translateX(-12px); transition: opacity .4s cubic-bezier(0.22,1,0.36,1), transform .4s cubic-bezier(0.22,1,0.36,1); }
         .timeline.stagger-ready .timeline-item.visible { opacity: 1; transform: none; }
+        .print-exporting .timeline .timeline-item { opacity: 1 !important; transform: none !important; transition: none !important; }
         body.no-animations .kpi-grid .kpi-card,
         body.no-animations .timeline .timeline-item { opacity: 1 !important; transform: none !important; transition: none !important; }
 
@@ -149,6 +200,10 @@ When generating the final HTML report, produce a complete self-contained HTML fi
         @page { size: A4; margin: 1.5cm; }
         @media print {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          html, body {
+            background: var(--print-bg-color, var(--report-bg, var(--bg, #ffffff))) !important;
+            color: var(--report-text, var(--text, #111111)) !important;
+          }
           .toc-toggle, .toc-sidebar, .edit-hotzone, .edit-toggle, .export-btn, .export-menu { display: none !important; }
           h2 { break-after: avoid; }
           .kpi-grid, .kpi-card, .callout, .timeline, .timeline-item,
@@ -232,7 +287,7 @@ When generating the final HTML report, produce a complete self-contained HTML fi
         }
         /* Left panel */
         .sc-left {
-          flex: 0 0 44%; display: flex; flex-direction: column;
+          flex: 0 0 46%; display: flex; flex-direction: column;
           padding: 1.8rem 2rem 1.6rem;
           background: var(--primary); color: #fff;
         }
@@ -241,18 +296,29 @@ When generating the final HTML report, produce a complete self-contained HTML fi
           opacity: .5; margin-bottom: .55rem; display: flex; align-items: center; gap: .45rem;
         }
         .sc-label::before { content: ''; display: inline-block; width: 20px; height: 1px; background: currentColor; }
-        .sc-title {
-          font-size: 3.6rem; font-weight: 900; line-height: .96; letter-spacing: -.04em;
-          text-transform: uppercase; margin-bottom: .8rem; word-break: break-word;
+        /* poster title should dominate the card */
+        .sc-title-main {
+          font-size: clamp(3.45rem, 6.9vw, 5.25rem);
+          font-weight: 900;
+          line-height: .92;
+          letter-spacing: -.05em;
+          margin-bottom: .35rem;
+          word-break: break-word;
         }
-        .sc-abstract { font-size: .78rem; line-height: 1.6; opacity: .8; flex: 1; }
-        .sc-bottom { margin-top: 1rem; display: flex; flex-direction: column; gap: .3rem; }
-        .sc-byline { font-size: .6rem; opacity: .45; letter-spacing: .04em; }
-        .sc-tags { display: flex; flex-wrap: wrap; gap: .22rem; }
-        .sc-tag {
-          font-size: .56rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-          border: 1px solid rgba(255,255,255,.35); border-radius: 2px;
-          padding: .13rem .48rem; color: rgba(255,255,255,.8);
+        .sc-title-sub {
+          font-size: 1.08rem;
+          line-height: 1.5;
+          color: rgba(255,255,255,.88);
+          margin-bottom: .9rem;
+          max-width: 82%;
+        }
+        .sc-note {
+          margin-top: auto;
+          padding-top: 1.4rem;
+          width: 72%;
+          font-size: .84rem;
+          line-height: 1.68;
+          opacity: .9;
         }
         /* Right panel */
         .sc-right {
@@ -281,6 +347,11 @@ When generating the final HTML report, produce a complete self-contained HTML fi
           transition: background .15s;
         }
         .sc-close:hover { background: rgba(255,255,255,.28); }
+        @media (max-width: 900px) {
+          .action-grid { grid-template-columns: 1fr; }
+          .sc-card { flex-direction: column; width: min(92vw, 640px); }
+          .sc-right { border-left: none; border-top: 1px solid var(--border); }
+        }
         @media print { .sc-overlay, .card-mode-btn { display: none !important; } }
       </style>
     </head>
@@ -294,6 +365,9 @@ When generating the final HTML report, produce a complete self-contained HTML fi
         "author": "[author or empty string]",
         "date": "[date]",
         "abstract": "[abstract from frontmatter, or auto-generate a 1-sentence summary of the report content]",
+        "poster_title": "[optional stronger summary-card title; opt-in only when the core judgment should read like a poster headline]",
+        "poster_subtitle": "[optional subtitle shown below the poster title; only used when poster_title is present]",
+        "poster_note": "[optional one-sentence closing line for the left panel; falls back to a short sentence from abstract]",
         "sections": ["[heading of section 1]", "[heading of section 2]", "..."],
         "kpis": [
           {"label": "[label]", "value": "[display value]", "trend": "[trend text or empty]"}
@@ -309,7 +383,7 @@ When generating the final HTML report, produce a complete self-contained HTML fi
       <!-- lang:en labels: "↓ Export" / "🖨 Print / PDF" / "🖥 Save PNG (Desktop)" / "📱 Save PNG (Mobile)" / "💬 IM Image" -->
       <!-- lang:zh labels: "↓ 导出"  / "🖨 打印 / PDF"  / "🖥 保存图片（桌面）"    / "📱 保存图片（手机）"  / "💬 IM 分享长图"   -->
       <div class="export-menu" id="export-menu">
-        <button class="export-item" onclick="window.print()">[🖨 Print / PDF|🖨 打印 / PDF]</button>
+        <button class="export-item" id="export-print">[🖨 Print / PDF|🖨 打印 / PDF]</button>
         <button class="export-item" id="export-png-desktop">[🖥 Save PNG (Desktop)|🖥 保存图片（桌面）]</button>
         <button class="export-item" id="export-png-mobile">[📱 Save PNG (Mobile)|📱 保存图片（手机）]</button>
         <button class="export-item" id="export-im-share">[💬 IM Image|💬 IM 长图]</button>
@@ -337,6 +411,7 @@ When generating the final HTML report, produce a complete self-contained HTML fi
             <h1>[title]</h1>
             <button class="card-mode-btn" id="card-mode-btn" title="[Summary card|摘要卡片]">[⊞ Summary|⊞ 摘要卡]</button>
           </div>
+          [if abstract: <p class="report-subtitle">[abstract]</p>]
           [if author or date: <p class="report-meta">[author] · [date]</p>]
 
           <!-- Summary card overlay (always present) — left+right panels injected by buildCard() -->
@@ -356,7 +431,13 @@ When generating the final HTML report, produce a complete self-contained HTML fi
 
           [All rendered section content here]
 
-          <div class="report-footer">By kai-report-creator v[version]</div>
+          <!-- Visible footer (deterministic shell metadata only; do not add debug hashes, source notes, or extra prose) -->
+          <div class="report-footer">kai-report-creator v[version] [theme]</div>
+
+          <!-- Invisible watermark (must match the visible footer exactly) -->
+          <div style="display:none;visibility:hidden;opacity:0;font-size:0;line-height:0;height:0;overflow:hidden;" aria-hidden="true" data-watermark="kai-report-creator v[version] [theme]">
+            kai-report-creator v[version] [theme]
+          </div>
 
         </div>
       </div>
@@ -510,18 +591,20 @@ When generating the final HTML report, produce a complete self-contained HTML fi
       </script>
 
       <script>
-        // Export: Print/PDF via window.print(); images via html2canvas (preloaded on page open)
+        // Export: Print/PDF via prepared print mode; images via html2canvas (preloaded on page open)
         // Desktop PNG : full-page, adaptive scale (2× short / 1.5× long pages), PNG
         // Mobile PNG  : .report-wrapper 750px wide (iPhone 2× Retina), JPEG 92%
         // IM Share    : .report-wrapper 800px wide (WeChat/Feishu/DingTalk), JPEG 92%
         (function() {
           const exportBtn  = document.getElementById('export-btn');
           const exportMenu = document.getElementById('export-menu');
+          const printBtn   = document.getElementById('export-print');
           const pngDesktop = document.getElementById('export-png-desktop');
           const pngMobile  = document.getElementById('export-png-mobile');
           const pngIM      = document.getElementById('export-im-share');
           if (!exportBtn || !exportMenu) return;
           const LABEL = exportBtn.textContent;
+          const PRINT_MODE_CLASS = 'print-exporting';
 
           exportBtn.addEventListener('click', e => { e.stopPropagation(); exportMenu.classList.toggle('open'); });
           document.addEventListener('click', e => {
@@ -544,6 +627,18 @@ When generating the final HTML report, produce a complete self-contained HTML fi
           loadLib(); /* fire immediately */
 
           function restore() { exportBtn.style.visibility = ''; exportBtn.textContent = LABEL; }
+          function preparePrintExport() {
+            exportMenu.classList.remove('open');
+            exportBtn.style.visibility = 'hidden';
+            exportBtn.textContent = '…';
+            document.documentElement.classList.add(PRINT_MODE_CLASS);
+            document.documentElement.style.setProperty('--print-bg-color', exportBackgroundColor());
+          }
+          function cleanupPrintExport() {
+            document.documentElement.classList.remove(PRINT_MODE_CLASS);
+            document.documentElement.style.removeProperty('--print-bg-color');
+            restore();
+          }
           function filename(suffix, ext) {
             const d = new Date(), pad = n => String(n).padStart(2,'0');
             const date = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
@@ -594,6 +689,16 @@ When generating the final HTML report, produce a complete self-contained HTML fi
               saveBlob(c, fname, jpeg);
             }));
           }
+          window.addEventListener('afterprint', cleanupPrintExport);
+
+          printBtn && printBtn.addEventListener('click', () => {
+            preparePrintExport();
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                window.print();
+              });
+            });
+          });
 
           pngDesktop && pngDesktop.addEventListener('click', () => {
             const H = document.documentElement.scrollHeight;
@@ -633,25 +738,43 @@ When generating the final HTML report, produce a complete self-contained HTML fi
           const closeBtn = document.getElementById('sc-close');
           if (!btn || !overlay) return;
 
+          function splitPosterTitle(d) {
+            const explicitTitle = (d.poster_title || '').trim();
+            const explicitSubtitle = (d.poster_subtitle || '').trim();
+            const raw = (d.title || '').trim();
+            return { main: explicitTitle || raw, sub: explicitTitle ? explicitSubtitle : '' };
+          }
+
+          function summaryCardLabel() {
+            const lang = (document.documentElement.lang || '').toLowerCase();
+            return lang.startsWith('zh') ? '报告摘要' : 'Report Summary';
+          }
+
+          function posterNoteText(d) {
+            const explicit = (d.poster_note || '').trim();
+            if (explicit) return explicit;
+            const raw = (d.abstract || '').trim();
+            if (!raw) return '';
+            const sentence = raw.match(/^(.{0,72}?[。！？!?]|.{0,120})/)?.[1]?.trim() || raw;
+            return sentence.length > 72 ? sentence.slice(0, 72).trim() + '…' : sentence;
+          }
+
           function buildCard() {
             try {
               const d = JSON.parse(document.getElementById('report-summary').textContent);
-              const metaParts = [d.author, d.date].filter(Boolean);
+              const poster = splitPosterTitle(d);
+              const note = posterNoteText(d);
 
-              // Left panel: large uppercase title + abstract + rectangular tags at bottom
-              const tagsHtml = (d.sections || []).map(s => `<span class="sc-tag">${s}</span>`).join('');
+              // Left panel: poster title hierarchy + one short closing sentence near the bottom.
               const leftHtml = `
                 <div class="sc-left">
-                  <div class="sc-label">REPORT</div>
-                  <div class="sc-title">${d.title || ''}</div>
-                  ${d.abstract ? `<div class="sc-abstract">${d.abstract}</div>` : ''}
-                  <div class="sc-bottom">
-                    ${metaParts.length ? `<div class="sc-byline">${metaParts.join(' · ')}</div>` : ''}
-                    ${tagsHtml ? `<div class="sc-tags">${tagsHtml}</div>` : ''}
-                  </div>
+                  <div class="sc-label">${summaryCardLabel()}</div>
+                  <div class="sc-title-main">${poster.main || ''}</div>
+                  ${poster.sub ? `<div class="sc-title-sub">${poster.sub}</div>` : ''}
+                  ${note ? `<div class="sc-note">${note}</div>` : ''}
                 </div>`;
 
-              // Right panel: compact KPI rows + section summaries from data-summary attributes
+              // Right panel: compact KPI rows + section summaries only. Keep the card poster-like.
               const kpiRowsHtml = (d.kpis || []).slice(0, 6).map(k => `
                 <div class="sc-kpi-row">
                   <div class="sc-kpi-row-l">${k.label || ''}</div>
@@ -660,7 +783,8 @@ When generating the final HTML report, produce a complete self-contained HTML fi
               const sectionSummaries = Array.from(
                 document.querySelectorAll('section[data-section]')
               ).map(s => ({ name: s.dataset.section || '', text: s.dataset.summary || '' }))
-               .filter(s => s.name);
+               .filter(s => s.name)
+               .slice(0, 3);
               const summariesHtml = sectionSummaries.map(s => `
                 <div class="sc-sum-item">
                   <div class="sc-sum-name">${s.name}</div>

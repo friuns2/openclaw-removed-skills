@@ -27,6 +27,9 @@ Click any screenshot to open the live demo:
 <td align="center"><a href="https://kaisersong.github.io/kai-report-creator/templates/en/data-story.html"><img src="templates/screenshots/data-story.png" width="360" alt="data-story"/><br/><b>data-story</b></a><br/><sub>Annual Reports · Growth</sub></td>
 <td align="center"><a href="https://kaisersong.github.io/kai-report-creator/templates/en/newspaper.html"><img src="templates/screenshots/newspaper.png" width="360" alt="newspaper"/><br/><b>newspaper</b></a><br/><sub>Editorial · Industry Analysis</sub></td>
 </tr>
+<tr>
+<td align="center"><a href="https://kaisersong.github.io/kai-report-creator/templates/en/regular-lumen.html"><img src="templates/screenshots/regular-lumen.png" width="360" alt="regular-lumen"/><br/><b>regular-lumen</b></a><br/><sub>Periodic Reports · Weekly/Daily/Monthly</sub></td>
+</tr>
 </table>
 
 Preview all themes: `/report --themes` → opens `report-themes-preview.html`
@@ -53,7 +56,19 @@ report-creator solves this with **rules in the skill, assets in files**:
 
 This is progressive disclosure applied to AI context: **reveal information at the moment it's needed, not before.**
 
-### 2. Silicon-Carbon Collaboration Design
+### 2. Capability Growth Must Reduce Context Load
+
+When adding a new capability, the first question is not "what else can we stuff into context?" It is "can we reduce prompt/context burden on the generation path?"
+
+report-creator should prefer three moves:
+
+- **Thin routing in `SKILL.md`.** Keep the skill file as a router plus contract boundary. Load only the files needed for the selected path. Do not drag long planning conversations directly into the render phase.
+- **Structured compression over raw prose.** Prefer `.report.md`, `BRIEF.json`-style briefs, explicit contracts, and routing metadata over more prompt paragraphs. If information matters repeatedly, give it a field, a schema, or a deterministic transform.
+- **Move quality checks off the hot path.** If a new quality mechanism increases generation-time cognitive load, it belongs in guard validation, post-render review, or evals instead of the prompt chain.
+
+This is not minimalism for its own sake. It is reliability work. Prompt bloat makes routing fuzzy, hides the real contract, and causes the model to drop constraints exactly when rendering needs precision.
+
+### 3. Silicon-Carbon Collaboration Design
 
 report-creator is designed for human-AI collaboration at both input and output ends.
 
@@ -91,15 +106,15 @@ An AI agent reads Layer 1 for a 3-second overview, drills to Layer 2 for section
 
 **Progressive disclosure for both species:** IR reveals structure to humans; HTML reveals data to machines. The same principle applied twice — once for carbon-based readers, once for silicon-based ones.
 
-### 3. Visual Rhythm as Cognitive Pacing
+### 4. Visual Rhythm as Cognitive Pacing
 
 Reports that work follow a rhythm: **prose sets context, components deliver data, prose interprets it**.
 
-The skill enforces this: never 3+ consecutive prose-only sections. Every 4–5 sections must include a visual anchor — KPI grid, chart, or diagram. Dense prose fatigues; data without context loses. Alternation creates flow.
+The skill enforces this: never 3+ consecutive prose-only sections. Every 4–5 sections must include a visual anchor chosen for the content type — callout, timeline, diagram, KPI grid, or chart. Dense prose fatigues; data without context loses. Alternation creates flow.
 
 This is why IR's component syntax (`:::tag ... :::`) is visually obvious: authors scan IR files and see data-heavy sections immediately.
 
-### 4. Reports Are Asynchronous Decision Support
+### 5. Reports Are Asynchronous Decision Support
 
 Slides have a presenter. Reports don't. A report must survive first contact with a busy reader who skims the opening, scans headings, glances at data, and decides in under a minute whether to continue.
 
@@ -112,7 +127,7 @@ This constraint drives product design:
 
 **Rule of thumb:** A generated report should reduce reader effort. If a stakeholder can understand the point, evidence, and next action from a fast skim, the report works.
 
-### 5. Design Quality Baseline: Against AI Slop
+### 6. Design Quality Baseline: Against AI Slop
 
 The enemy: instantly recognizable AI output — uniform borders, primary color flooding everything, 3-column KPI grids regardless of count, template-sounding headings.
 
@@ -135,17 +150,81 @@ The enemy: instantly recognizable AI output — uniform borders, primary color f
 
 **Pre-output check:** *"If you told someone 'an AI wrote this', would they believe it? If yes — find the most generic-looking part and redesign it."*
 
+### 7. Contract Enforcement Before Render
+
+v1.20.0's guard validation pipeline introduces a new principle: **intercept invalid IR before rendering, not repair after.**
+
+```
+IR → Guard (validate + downgrade) → Renderer → HTML
+              ↑
+              Block invalid input
+```
+
+Three sub-principles:
+
+| Principle | Implementation | Meaning |
+|-----------|----------------|---------|
+| **Zero-Drift Resolution** | Guard and renderer share the same `resolve_report_class` logic | Validation and rendering never diverge |
+| **Graceful Degradation** | Invalid components auto-downgrade (kpi→callout, chart→table, timeline→list) | Don't fail outright; fall back to safe substitute |
+| **Traceability** | `<meta name="ir-hash">` embeds IR hash in HTML | Output is traceable to source IR |
+
+**Why it matters:**
+- Earlier `--review` was post-hoc repair; guard is pre-hoc interception
+- Prevents invalid IR from entering the render pipeline and producing unpredictable output
+- Zero-drift ensures guard's judgment and renderer's behavior stay aligned
+
+### 8. Eval as Quality Boundary, Not Quality Score
+
+v1.15.0's eval workflow embodies this principle: **evals define boundaries, not scores.**
+
+```
+compression → ir_contract → async_readability → render_integrity
+     ↓             ↓              ↓                  ↓
+   Source→IR     IR Spec        Reading UX          HTML Integrity
+```
+
+| Layer | What it checks | Where to fix |
+|-------|----------------|--------------|
+| compression | report_class, audience, decision_goal declared | SKILL.md |
+| ir_contract | timeline is real time, kpi is short value, chart schema legal | rendering-rules.md + contract_checks.py |
+| async_readability | BLUF, heading stack, takeaway after data | review-checklist.md |
+| render_integrity | shell IDs, report-summary JSON, no `:::` leak | html-shell-template.md |
+
+**Failure Map rule:** Every real production failure → one new eval case. Not post-hoc discussion about "feels wrong", but direct pointer to the layer that needs fixing.
+
+**Rubric design:** Output structured JSON (verdict + scores + findings), not fuzzy scores. Downstream agents can parse and auto-repair.
+
+### 9. Contract Checks as Programmable Guardrails
+
+`contract_checks.py` makes IR spec executable:
+
+```python
+# Timeline must be real dates
+DATE_PATTERNS = [YYYY-MM-DD, YYYY-MM, Q1-4 YYYY, Day N, Week N]
+
+# KPI value must be shorter than 8 CJK chars or 3 English words
+def is_short_kpi_value(value): ...
+
+# Placeholder pattern recognition
+PLACEHOLDER_RE = r"\[(INSERT VALUE|数据待填写)\]"
+```
+
+**Design principles:**
+- Spec declared in SKILL.md, validated in contract_checks.py
+- Guard calls contract_checks, zero drift
+- Every component has `auto_downgrade_target`: safe fallback path when invalid
+
 ---
 
 ## Install
 
 ### Claude Code
 
-Tell Claude: "Install https://github.com/kaisersong/report-creator"
+Tell Claude: "Install https://github.com/kaisersong/kai-report-creator"
 
 Or manually:
 ```bash
-git clone https://github.com/kaisersong/report-creator ~/.claude/skills/report-creator
+git clone https://github.com/kaisersong/kai-report-creator ~/.claude/skills/kai-report-creator
 ```
 
 Restart Claude Code. Use as `/report`.
@@ -157,7 +236,7 @@ Restart Claude Code. Use as `/report`.
 clawhub install kai-report-creator
 
 # Or manually
-git clone https://github.com/kaisersong/report-creator ~/.openclaw/skills/report-creator
+git clone https://github.com/kaisersong/kai-report-creator ~/.openclaw/skills/kai-report-creator
 ```
 
 ---
@@ -200,7 +279,7 @@ git clone https://github.com/kaisersong/report-creator ~/.openclaw/skills/report
 
 ### Review Mode
 
-Run `--review` to improve existing reports with 8 checkpoints:
+Run `--review` to improve existing reports with 13 checkpoints:
 
 ```
 /report --review market-analysis.html
@@ -212,11 +291,20 @@ Run `--review` to improve existing reports with 8 checkpoints:
 3. Apply AI-advised rules when confidence is high
 4. Save refined HTML back to file
 
+If you want a structured change summary after review, use `references/review-report-template.md`.
+
 **One-pass automatic refinement** — not interactive approval.
 
-`--generate` also runs this checklist as a **silent final pass** before writing HTML.
+`--generate` also runs this checklist as a **silent final review** before writing HTML.
 
-**8 Checkpoints:**
+This review flow is the built-in **13-checkpoint review system**.
+
+**13 Checkpoints:**
+- KPI value length
+- Badge coverage
+- Summary card poster hierarchy
+- Timeline content validity
+- Export menu completeness
 - BLUF opening (Bottom Line Up Front)
 - Heading stack logic
 - Anti-template section headings
@@ -228,19 +316,52 @@ Run `--review` to improve existing reports with 8 checkpoints:
 
 ---
 
+## Eval Workflow
+
+This repo now includes a small, repo-contained eval harness focused on **async reading quality**, not slide-style presenter flow.
+
+Run it with:
+
+```bash
+python scripts/run-report-evals.py --root . --packet-dir .tmp/eval-packets
+```
+
+What it does:
+
+- Runs deterministic checks for `compression`, `ir_contract`, and `render_integrity`
+- Emits rubric-ready JSON packets for `async_readability` instead of hiding quality behind vibes
+- Uses repo-contained cases from `evals/report-cases.csv`
+
+Key files:
+
+- `evals/report-cases.csv` — living case set
+- `evals/rubric.schema.json` — structured grader output contract
+- `evals/failure-map.md` — where to fix each layer when a case fails
+- `evals/cases/*` — source + IR artifacts for each case
+
+For complex reports, keep these IR frontmatter fields so evals can measure compression quality directly: `report_class`, `audience`, `decision_goal`, `must_include`, `must_avoid`.
+
+Maintainers can run the full release verification chain from one entry point:
+
+```bash
+python scripts/verify-release.py --root .
+```
+
+---
+
 ## Features
 
 ### Core
 
 - **Zero dependencies** — single `.html` file, works offline with `--bundle`
-- **6 built-in themes** — corporate-blue, minimal, dark-tech, dark-board, data-story, newspaper
-- **9 component types** — KPIs, charts, tables, timelines, diagrams, code blocks, callouts, images, lists
-- **Report Review System** — 8-checkpoint automatic refinement
+- **7 built-in themes** — corporate-blue, minimal, dark-tech, dark-board, data-story, newspaper, weekly-frost
+- **9 component types** — KPIs, charts (ECharts), tables, timelines, diagrams, code blocks, callouts, images, lists
+- **Report Review System** — 13-checkpoint automatic refinement
 - **AI-readable output** — 3-layer machine-readable structure for downstream agents
 
 ### Interaction
 
-- **Summary card overlay** — `⊞ Summary` button shows title, abstract, KPIs, section chips
+- **Summary card overlay** — `⊞ Summary` button opens a poster-style title card with abstract, KPIs, and section summaries
 - **Built-in export** — Print/PDF, PNG (Desktop), PNG (Mobile) via ↓ Export button
 - **Mobile responsive** — adapts to any screen size
 - **Bilingual** — full zh/en support with auto-detection
@@ -264,6 +385,8 @@ Run `--review` to improve existing reports with 8 checkpoints:
 | **dark-board** | Dashboard style | Architecture, metrics dashboards |
 | **data-story** | Narrative-driven | Annual reports, growth stories |
 | **newspaper** | Editorial | Industry analysis, newsletters |
+| **regular-lumen** | Poster-style, warm-toned | Periodic work reports (日报/周报/月报 · 本周期复盘 + 下周期规划) · Kami-style reading experience |
+| **fangsong** | Traditional Chinese, warm brown | Formal reports with FangSong typography (标题衬线仿宋 + 正文非衬线仿宋) |
 
 ### corporate-blue
 
@@ -311,8 +434,13 @@ abstract: "Q3 revenue grew 12% YoY with record new customer acquisition."
 **Component blocks:**
 ```
 :::kpi
-- Revenue: $2.45M ↑12%
-- New Clients: 183 ↑8%
+items:
+  - label: Revenue
+    value: $2.45M
+    delta: ↑12%
+  - label: New Clients
+    value: 183
+    delta: ↑8%
 :::
 
 :::chart type=line title="Monthly Revenue"
@@ -331,6 +459,8 @@ datasets:
 Key insight goes here.
 :::
 ```
+
+Badges remain optional HTML chips for scanability; they are not standalone IR tags. Timelines are strict chronological components and should use explicit time tokens such as `2024-10-15` or `Q4 2024`.
 
 ---
 
@@ -414,14 +544,38 @@ For offline bundles with `--bundle`: internet connection needed once to inline C
 
 | Platform | Version | Install path |
 |----------|---------|--------------|
-| Claude Code | any | `~/.claude/skills/report-creator/` |
-| OpenClaw | ≥ 0.9 | `~/.openclaw/skills/report-creator/` |
+| Claude Code | any | `~/.claude/skills/kai-report-creator/` |
+| OpenClaw | ≥ 0.9 | `~/.openclaw/skills/kai-report-creator/` |
 
 ---
 
 ## Version History
 
-**v1.9.0** — Report Review System: `--review` with 8 checkpoints; silent final review in `--generate`; L0/L1 quality layering.
+**v1.21.0** — Late-context isolation and release hardening: require `--generate` to extract exactly one IR block from context, add context isolation helpers plus late-context eval runner, expand release verification and fast-test coverage, normalize footer/watermark shell metadata, and tighten bilingual doc-sync guardrails.
+
+**v1.20.1** — Design philosophy expansion: added §6 (Contract Enforcement Before Render), §7 (Eval as Quality Boundary), §8 (Contract Checks as Programmable Guardrails) documenting the guard pipeline and eval workflow principles.
+
+**v1.20.0** — Guard validation pipeline: Python guard (`scripts/guard_validate.py`) runs before HTML rendering with zero-drift report_class resolution, auto-downgrade invalid blocks (kpi→callout, chart→table, timeline→list, diagram→callout), IR hash embedding in `<meta name="ir-hash">` for traceability, and guard integration tests.
+
+**v1.18.0** — Theme routing fixed for work reports: priority-ordered keyword matching now correctly routes weekly/daily/monthly reports to `regular-lumen` (first priority) and generic work progress reports to `corporate-blue` (fallback), instead of misrouting to dark-tech/dark-board due to overlapping keywords like "项目/进展/状态".
+
+**v1.17.1** — Resolve ClawHub version conflict (merge ClawHub v1.16.1 updates).
+
+**v1.17.0** — Merge ClawHub v1.16.1 updates + add watermark feature.
+
+**v1.16.0** — Minimal Kami borrowing, fully landed: add hard `anti-patterns.md` and `diagram-decision-rules.md`, introduce silent `spec-loading-matrix.md` plus optional `archetype` routing hints, add maintainer-side `scripts/verify-release.py`, and raise the Windows release suite to 134 passing tests.
+
+**v1.15.0** — IR contract hardening and eval foundation: split failures into `invalid_syntax` / `invalid_semantics` / `contract_conflict`, formalize `kpi` / `chart` / `timeline` / `diagram` schemas, demote `badge` to optional enhancement, add repo-contained eval cases plus `run-report-evals.py`, fix install paths to `kai-report-creator`, and bring the Windows release suite to 125 passing tests.
+
+**v1.14.2** — Export menu completeness enforced in the standard generate flow: require print/desktop/mobile/IM export entries plus JS bindings during pre-write shell validation and silent final review; add shell contract coverage so reports no longer regress to partial export menus.
+
+**v1.14.1** — Print/PDF export fix: preserve report background and force animated KPI/data blocks visible during print export; add print export regression coverage.
+
+**v1.14.0** — ECharts standard: unified all charts on ECharts (was Chart.js), added bar/line/radar/pie ECharts templates, grid bottom rule for rotated labels, line data integrity rule, 14 new chart rendering contract tests.
+
+**v1.13.0** — L2 HTML shell structure validation: 10 mandatory elements check in SKILL.md pre-write, design-quality.md §8, 30 new HTML shell contract tests (BUG-001 fix).
+
+**v1.9.0** — Report Review System: `--review` with 13 checkpoints; silent final review in `--generate`; L0/L1 quality layering.
 
 **v1.8.3** — KPI overflow fix: `.kpi-suffix` for long units; rendering rules updated.
 
@@ -435,7 +589,7 @@ For offline bundles with `--bundle`: internet connection needed once to inline C
 
 **v1.5.0** — Design Quality Baseline: 90/8/2 color law, KPI grid rules, content-tone calibration.
 
-**v1.4.0** — Summary card overlay with KPIs and section chips.
+**v1.4.0** — Summary card overlay with poster entry card behavior and KPI/section summaries.
 
 **v1.3.0** — Zero-dependency animations: staggered KPI bounce, timeline slide-in.
 

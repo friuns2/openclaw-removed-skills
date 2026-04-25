@@ -16,10 +16,13 @@ Directories starting with `_` in `themes/` are ignored (example/template directo
 ## CSS Assembly Order (Built-in Themes)
 
 For built-in themes, assemble CSS in `<style>` in this order:
-1. Read `templates/themes/[theme-name].css` — embed everything **before** `/* === POST-SHARED OVERRIDE */`
-2. Read `templates/themes/shared.css` — embed in full
-3. From `[theme-name].css` — embed everything **after** `/* === POST-SHARED OVERRIDE */` (if present)
-4. If `theme_overrides` is set in frontmatter, append `:root { ... }` override block last
+1. Read `templates/themes/[theme-name].css` — **split at `/* === POST-SHARED OVERRIDE */` marker**
+2. Embed everything **before** the marker (variables + base styles)
+3. Embed `templates/themes/shared.css` in full
+4. From `[theme-name].css` — embed everything **after** the marker (overrides + enhancements)
+5. If `theme_overrides` is set in frontmatter, append `:root { ... }` override block last
+
+**Critical:** Do NOT load the entire theme file in one block. The POST-SHARED section must load AFTER shared.css to properly override shared defaults.
 
 ## CSS Assembly Order (Custom Themes)
 
@@ -34,8 +37,8 @@ Using `minimal` as the base ensures all shared components render correctly even 
 
 ## Built-in Theme Names
 
-`corporate-blue`, `minimal`, `dark-tech`, `dark-board`, `data-story`, `newspaper`
+`corporate-blue`, `minimal`, `dark-tech`, `dark-board`, `data-story`, `newspaper`, `regular-lumen`
 
-**Themes with POST-SHARED OVERRIDE sections:** `dark-board`, `data-story`, `newspaper`
+**Themes with POST-SHARED OVERRIDE sections:** `dark-board`, `data-story`, `newspaper`, `regular-lumen`
 
 **Special code block note:** `dark-tech` and `dark-board` use `github-dark.min.css` instead of `github.min.css` for highlight.js.

@@ -52,18 +52,31 @@ def test_doc_sync_checker_passes_for_valid_fixture():
             "references/review-report-template.md\n"
             "silent final review pass\n"
             "one-pass automatic refinement\n"
+            "no file given\n"  # v4 guardrails: context-backed generate prose
+            "IR from context\n"  # v4 guardrails: IR-from-context routing
+            "report_class: mixed\n"  # v4 guardrails: optional report_class prose
+            "extract exactly one valid IR block from context\n"
+            "Never render the surrounding conversation.\n"
+            "Load reference files minimally\n"
+            "load only the references that materially help the current render path\n"
+            "Thin Routing Over Prompt Growth\n"
+            "Contracts and Gates Beat Prompt Soup\n"
         ),
         readme_en=(
             "/report --review\n"
-            "8-checkpoint review system\n"
+            "13-checkpoint review system\n"
             "silent final review\n"
             "review-report-template.md\n"
+            "Capability Growth Must Reduce Context Load\n"
+            "Move quality checks off the hot path.\n"
         ),
         readme_zh=(
             "/report --review\n"
-            "8 项检查点\n"
+            "13 项检查点\n"
             "静默终审\n"
             "review-report-template.md\n"
+            "能力增长先减少上下文负担\n"
+            "质量机制后移\n"
         ),
         checklist=(
             "### 1.1 BLUF Opening\n"

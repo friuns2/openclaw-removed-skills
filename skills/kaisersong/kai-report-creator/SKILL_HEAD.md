@@ -1,7 +1,7 @@
 ---
 name: kai-report-creator
 description: 生成零依赖 HTML 报告 — 6 套主题，9 种组件，三层 AI 可读结构。适用于商业报告、数据看板、研究文档、KPI 仪表盘等。
-version: 1.9.0
+version: 1.21.0
 user-invocable: true
 metadata: {"openclaw": {"emoji": "📊"}}
 ---
@@ -14,7 +14,7 @@ metadata: {"openclaw": {"emoji": "📊"}}
 
 - **6 套内置主题** — corporate-blue、minimal、dark-tech、dark-board、data-story、newspaper
 - **9 种组件类型** — KPI、图表、表格、时间线、流程图、代码块、标注、图片、列表
-- **Report Review 系统** — 8 项检查点自动优化
+- **Report Review 系统** — 13 项检查点自动优化
 - **AI 可读输出** — 三层机器可读结构
 - **移动端自适应**
 
@@ -22,7 +22,7 @@ metadata: {"openclaw": {"emoji": "📊"}}
 
 ## 安装
 
-**Claude Code:** 告诉 Claude「安装 https://github.com/kaisersong/report-creator」
+**Claude Code:** 告诉 Claude「安装 https://github.com/kaisersong/kai-report-creator」
 
 **OpenClaw:** `clawhub install kai-report-creator`
 
