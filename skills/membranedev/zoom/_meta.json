@@ -3,11 +3,16 @@
   "slug": "zoom",
   "displayName": "Zoom",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161657360,
-    "commit": "https://github.com/openclaw/skills/commit/34aa62a8ece1bc4c8c164954dd1bc9b934f27080"
+    "version": "1.0.3",
+    "publishedAt": 1776772953028,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161657360,
+      "commit": "https://github.com/openclaw/skills/commit/34aa62a8ece1bc4c8c164954dd1bc9b934f27080"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772690532447,
