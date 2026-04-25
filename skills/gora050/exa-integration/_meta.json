@@ -3,11 +3,16 @@
   "slug": "exa-integration",
   "displayName": "Exa",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162734630,
-    "commit": "https://github.com/openclaw/skills/commit/e7dcc02a61d21f7aa5f18115361b53e97a77c8a9"
+    "version": "1.0.3",
+    "publishedAt": 1776780365136,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162734630,
+      "commit": "https://github.com/openclaw/skills/commit/e7dcc02a61d21f7aa5f18115361b53e97a77c8a9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772910186318,
