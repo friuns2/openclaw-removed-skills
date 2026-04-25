@@ -2,75 +2,91 @@
 
 ## When to check auth
 
-The agent MUST verify an active session before:
+Require auth before:
+- destructive actions
+- package installs or system changes
+- sending third-party messages/emails
+- mutating external APIs
 
-1. **Destructive actions** — deleting files, clearing data, dropping databases
-2. **System configuration** — installing packages, modifying system files, changing rules
-3. **External impact** — sending emails/messages to third parties, posting to social media, making payments, calling external APIs that mutate state
+Read-only work does not need auth.
 
-Read-only operations (searching, listing, reading files, fetching data) do NOT require auth.
+## Session-scoped pattern
 
-## How to check auth (Node.js)
+Always pass the current channel/session key.
+
+Examples:
+- `telegram:6314900956`
+- `discord:channel:1488653811185881133`
+- `global`
+
+Node example:
 
 ```javascript
 const http = require('http');
 
-function checkAuth() {
+function checkAuth(sessionKey) {
   return new Promise((resolve) => {
-    http.get('http://127.0.0.1:8456/status', (res) => {
+    http.get(`http://127.0.0.1:8456/status?session=${encodeURIComponent(sessionKey)}`, (res) => {
       let body = '';
-      res.on('data', d => body += d);
+      res.on('data', (d) => { body += d; });
       res.on('end', () => {
         try {
-          const { hasSession } = JSON.parse(body);
-          resolve(hasSession === true);
-        } catch { resolve(false); }
+          resolve(JSON.parse(body));
+        } catch {
+          resolve({ hasSession: false });
+        }
       });
-    }).on('error', () => resolve(false));
+    }).on('error', () => resolve({ hasSession: false }));
   });
 }
+```
 
-// Usage
-async function sensitiveAction() {
-  const authed = await checkAuth();
-  if (!authed) {
-    throw new Error('⚠️ Autenticação necessária. Acesse https://<hostname>/auth para autenticar.');
-  }
-  // ... proceed with action
+Behavior:
+1. call `/status?session=<sessionKey>`
+2. if `hasSession: true` -> proceed
+3. if `hasSession: false` -> refuse and send `https://<host>/auth?session=<sessionKey>`
+
+## Secure secret collection pattern
+
+Use this instead of asking for secrets in chat.
+
+1. `request_secret(...)`
+2. send returned URL to the user
+3. poll `retrieve_secret({ token })`
+4. once retrieved, use the values and do not echo them back into chat
+
+Example request:
+
+```json
+{
+  "label": "SMTP credentials",
+  "fields": [
+    {"name": "username", "label": "Username", "type": "text"},
+    {"name": "password", "label": "Password", "type": "password"}
+  ],
+  "session_key": "telegram:6314900956"
 }
 ```
 
-## How to check auth (shell/exec)
+Semantics:
+- user submits via HTTPS browser form
+- values stay in auth-server memory only
+- `retrieve_secret` returns them once
+- first successful retrieval consumes them
+- no secret needs to appear in chat history
+
+## Shell check example
 
 ```bash
-SESSION=$(curl -s http://127.0.0.1:8456/status | python3 -c "import sys,json; print(json.load(sys.stdin)['hasSession'])")
-if [ "$SESSION" != "True" ]; then
-  echo "⚠️ Authentication required. Visit https://<hostname>/auth"
-  exit 1
-fi
+SESSION_KEY='telegram:6314900956'
+STATUS=$(curl -s "http://127.0.0.1:8456/status?session=$(python3 - <<'PY'
+import urllib.parse
+print(urllib.parse.quote('telegram:6314900956', safe=''))
+PY
+)")
 ```
 
-## Agent Behavior Pattern
+## Rule
 
-When a sensitive action is requested:
-
-1. Check `http://127.0.0.1:8456/status`
-2. If `hasSession: true` → proceed normally
-3. If `hasSession: false` → refuse the action and tell the user:
-   > "⚠️ Ação sensível bloqueada. Autentique-se em `https://<hostname>/auth` e tente novamente."
-
-Do NOT silently skip the action or proceed anyway.
-
-## Sensitive vs Safe Examples
-
-| Action | Requires auth? |
-|--------|----------------|
-| `ls`, `cat`, `grep` | ❌ No |
-| `rm`, `rmdir`, `truncate` | ✅ Yes |
-| `apt install`, `npm install -g` | ✅ Yes |
-| `sudo systemctl` changes | ✅ Yes |
-| `git push`, `gh pr create` | ✅ Yes |
-| `message send` (to 3rd parties) | ✅ Yes |
-| `web_fetch`, `web_search` | ❌ No |
-| `read`, `memory_search` | ❌ No |
-| `write`, `edit` (local workspace) | Depends — use judgment |
+Do not proceed with sensitive work if the relevant session key is not authenticated.
+Do not ask the user to paste secrets into chat when `request_secret` is available.

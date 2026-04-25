@@ -3,9 +3,15 @@
   "slug": "max-auth",
   "displayName": "Max Auth",
   "latest": {
-    "version": "2.1.0",
-    "publishedAt": 1772821117552,
-    "commit": "https://github.com/openclaw/skills/commit/7a0a5bc9e5a4491ff4dc54e4149a9828c02eb8f9"
+    "version": "2.2.0",
+    "publishedAt": 1776817410889,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.1.0",
+      "publishedAt": 1772821117552,
+      "commit": "https://github.com/openclaw/skills/commit/7a0a5bc9e5a4491ff4dc54e4149a9828c02eb8f9"
+    }
+  ]
 }

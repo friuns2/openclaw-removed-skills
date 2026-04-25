@@ -1,96 +1,174 @@
-# Max Auth - OpenClaw Security Plugin
+# Max Auth - Setup & API Reference
 
 ## Overview
 
-Max Auth adds a biometric/password authentication gate to OpenClaw sensitive actions. Before destructive, configuration, or external-impact actions, the agent checks for an active session. If none exists, it refuses and prompts the user to authenticate at the dashboard.
+Max Auth runs as a local HTTP server on `127.0.0.1:8456` by default. Put HTTPS in front of it for browser/WebAuthn flows.
 
-**Architecture:**
-- Node.js HTTP server (`auth-server.js`) runs locally on port 8456
-- Served over Tailscale HTTPS at `https://<hostname>/auth`
-- Sessions last 2 hours; passkeys (WebAuthn) or master password accepted
+Architecture:
 
-## Setup
-
-### 1. Deploy the server
-
-```bash
-mkdir -p ~/.max-auth
-cp assets/auth-server.js ~/.max-auth/
-cp assets/setup-tailscale.sh ~/.max-auth/
-cp assets/package.json ~/.max-auth/
-cd ~/.max-auth && npm install
-node auth-server.js set-password 'your_strong_password'
+```text
+Browser -> HTTPS reverse proxy -> http://127.0.0.1:8456
+Agent   -> http://127.0.0.1:8456 (direct local calls)
 ```
 
-### 2. Install as systemd service
+The browser UI is localized in Portuguese, English, and Spanish.
+
+## Installation
 
 ```bash
-sudo tee /etc/systemd/system/max-auth.service > /dev/null << EOF
+mkdir -p ~/.max-auth && cd ~/.max-auth
+cp <skill-path>/assets/auth-server.js .
+cp <skill-path>/assets/package.json .
+npm install
+node auth-server.js set-password 'your_strong_password'
+node auth-server.js
+```
+
+## systemd example
+
+```bash
+sudo tee /etc/systemd/system/max-auth.service > /dev/null <<'EOF'
 [Unit]
 Description=Max Auth Server
 After=network.target
 
 [Service]
 Type=simple
-User=$USER
-WorkingDirectory=$HOME/.max-auth
-ExecStart=/usr/bin/node $HOME/.max-auth/auth-server.js
+User=%i
+WorkingDirectory=/home/%i/.max-auth
+ExecStart=/usr/bin/node /home/%i/.max-auth/auth-server.js
 Restart=always
 RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
 EOF
-sudo systemctl daemon-reload && sudo systemctl enable --now max-auth
 ```
 
-### 3. Expose via Tailscale
+Adjust to your environment before enabling.
+
+## Reverse proxy examples
+
+Tailscale serve:
 
 ```bash
 sudo tailscale serve --set-path=/auth --bg http://127.0.0.1:8456
 ```
 
-### 4. Register a passkey
+Caddy:
 
-Visit `https://<your-tailscale-hostname>/auth`, log in with your master password, then click "+ Register new passkey". Confirm your master password and use Touch ID / Face ID.
-
-## Integration with OpenClaw Agent
-
-See `references/integration.md` for full agent integration guide.
-
-**Quick reference — check auth before sensitive actions:**
-
-```javascript
-const { checkAuthStatus } = require('/home/ubuntu/.max-auth/auth-server.js');
-if (!checkAuthStatus()) throw new Error('⚠️ Authentication required. Visit https://<hostname>/auth to log in.');
+```caddy
+example.com {
+  reverse_proxy /auth* 127.0.0.1:8456
+}
 ```
 
-Or via HTTP:
+nginx:
 
-```bash
-curl -s http://127.0.0.1:8456/status
-# Returns: {"hasPassword":true,"hasSession":true,"sessionExpiresAt":...}
+```nginx
+location /auth {
+  proxy_pass http://127.0.0.1:8456;
+  proxy_set_header Host $host;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+}
 ```
 
-## API Reference
+## Session-scoped auth API
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `GET /auth/status` | GET | Public status (session active?) |
-| `GET /auth` | GET | Dashboard UI |
-| `POST /auth/login` | POST | Password login → `{token}` |
-| `POST /auth/logout` | POST | Clear session |
-| `GET /auth/verify` | GET | Verify Bearer token |
-| `POST /auth/passkey/reg-options` | POST | Get WebAuthn reg options (requires session + password) |
-| `POST /auth/passkey/reg-verify` | POST | Complete passkey registration |
-| `GET /auth/passkey/auth-options` | GET | Get WebAuthn auth options |
-| `POST /auth/passkey/auth-verify` | POST | Complete passkey auth → `{token}` |
-| `POST /auth/passkey/delete` | POST | Remove a passkey |
+### GET /auth/status?session=<sessionKey>
 
-## CLI Commands
+Response example:
 
-```bash
-node auth-server.js                          # Start server
-node auth-server.js set-password 'password'  # Set master password
-node auth-server.js status                   # Show status
+```json
+{
+  "hasPassword": true,
+  "hasSession": false,
+  "sessionExpiresAt": null,
+  "source": null,
+  "requestedSessionKey": "telegram:6314900956",
+  "resolvedSessionKey": "telegram:6314900956",
+  "grant": null
+}
 ```
+
+### POST /auth/login
+
+Request:
+
+```json
+{
+  "password": "...",
+  "sessionKey": "telegram:6314900956"
+}
+```
+
+### POST /auth/logout
+
+Request:
+
+```json
+{
+  "sessionKey": "telegram:6314900956"
+}
+```
+
+### GET /auth/verify?session=<sessionKey>
+
+Send bearer token in `Authorization: Bearer ...`.
+
+## Secret form API
+
+### POST /auth/secrets/create
+
+Request:
+
+```json
+{
+  "label": "Twilio credentials",
+  "fields": [
+    {"name": "account_sid", "label": "Account SID", "type": "text"},
+    {"name": "auth_token", "label": "Auth Token", "type": "password"}
+  ],
+  "session_key": "telegram:6314900956",
+  "expires_in_minutes": 30
+}
+```
+
+Response:
+
+```json
+{
+  "ok": true,
+  "token": "...",
+  "url": "https://your-host/auth/secrets/<token>",
+  "expires_at": 1776817421732
+}
+```
+
+### GET /auth/secrets/<token>
+Renders the one-time browser form.
+
+### POST /auth/secrets/<token>/submit
+Submits values from the browser form.
+
+### GET /auth/secrets/<token>/poll
+Polling semantics:
+- `202 {"submitted": false}` while waiting
+- `200 {"submitted": true, "values": {...}}` once submitted
+- consumes/deletes the values on first successful retrieval
+- `404/410` if expired or already consumed
+
+## OpenClaw plugin tools
+
+- `check_auth({ sessionKey })`
+- `require_auth({ action, sessionKey })`
+- `request_secret({ label, fields, session_key?, expires_in_minutes? })`
+- `retrieve_secret({ token })`
+
+## Security notes
+
+- auth server binds to localhost only
+- browser access must come through HTTPS
+- secret form values are memory-only
+- secret retrieval is one-time
+- session auth is independent per session key

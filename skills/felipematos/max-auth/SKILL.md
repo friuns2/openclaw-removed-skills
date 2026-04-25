@@ -1,40 +1,89 @@
 ---
 name: max-auth
-description: Security authentication gate for OpenClaw sensitive actions. Deploys a local Node.js auth server with biometric passkeys (WebAuthn/Touch ID/Face ID) and master password. Exposes a dashboard via Tailscale HTTPS. Use when: (1) setting up authentication for sensitive agent actions, (2) checking if user is authenticated before destructive/external operations, (3) registering or managing passkeys, (4) integrating auth into OpenClaw workflows. Sensitive actions = delete files, install packages, send messages to 3rd parties, call mutating APIs.
+description: Security authentication gate for OpenClaw sensitive actions. Deploys a local Node.js auth server with biometric passkeys (WebAuthn/Touch ID/Face ID) and master password. Supports session-scoped auth per channel/session key, secure one-time secret submission URLs, and a browser UI in Portuguese, English, and Spanish.
 ---
 
 # Max Auth
 
-Biometric + password authentication server for OpenClaw. Runs at `http://127.0.0.1:8456`, exposed via Tailscale at `https://<hostname>/auth`.
+A lightweight self-hosted authentication server for OpenClaw. It protects sensitive agent actions with biometric passkeys and a master password, supports independent auth per session/channel, and can collect secrets via one-time HTTPS forms so credentials never need to appear in chat.
+
+## Features
+
+- 🔑 Biometric passkeys via WebAuthn
+- 🔐 Master password using PBKDF2 + salt
+- ⏱ 2-hour session tokens
+- 🔒 Session-scoped auth per `sessionKey` (`telegram:6314900956`, `discord:channel:123`, etc.)
+- 🔗 Delegated grants between sessions
+- 🧾 Audit log at `~/.max-auth/audit.log`
+- 🌍 Browser UI localized in Portuguese, English, and Spanish
+- 🕳️ One-time secure secret forms (`request_secret` / `retrieve_secret`)
+- 🔌 OpenClaw plugin tools: `check_auth`, `require_auth`, `request_secret`, `retrieve_secret`
+
+## Requirements
+
+- Node.js 18+
+- HTTPS reverse proxy in front of the local auth server for WebAuthn browser flows
 
 ## Quick Setup
 
 ```bash
-mkdir -p ~/.max-auth
-cp <skill>/assets/auth-server.js ~/.max-auth/
-cp <skill>/assets/package.json ~/.max-auth/
-cd ~/.max-auth && npm install
-node auth-server.js set-password 'your_password'
+mkdir -p ~/.max-auth && cd ~/.max-auth
+cp <skill-path>/assets/auth-server.js .
+cp <skill-path>/assets/package.json .
+npm install
+
+node auth-server.js set-password 'your_strong_password'
+node auth-server.js
 ```
 
-Install as systemd service + Tailscale serve — see `references/api.md` for full instructions.
+By default the server runs on `127.0.0.1:8456`.
+Use `references/api.md` for systemd, proxying, and HTTP API details.
 
-## Checking Auth Before Sensitive Actions
+## Session-scoped auth
+
+Each channel/session has its own auth state.
+
+Examples:
+- `telegram:6314900956`
+- `discord:channel:1488653811185881133`
+- `global`
+
+Typical check:
 
 ```bash
-# Shell
-STATUS=$(curl -s http://127.0.0.1:8456/status)
-HAS_SESSION=$(echo $STATUS | python3 -c "import sys,json; print(json.load(sys.stdin)['hasSession'])")
-[ "$HAS_SESSION" = "True" ] || { echo "⚠️ Auth required: https://<hostname>/auth"; exit 1; }
+curl -s "http://127.0.0.1:8456/status?session=telegram%3A6314900956"
 ```
 
-**Sensitive actions requiring auth:** delete files, install packages, system config changes, sending messages/emails to third parties, external API mutations.
+If auth is missing, direct the user to:
 
-**Safe without auth:** read, search, list, web_fetch, memory_search.
+```text
+https://your-host/auth?session=telegram%3A6314900956
+```
 
-When auth is missing, refuse the action and tell the user: "⚠️ Autenticação necessária. Acesse `https://<hostname>/auth`."
+## Secure secret handoff
+
+Use this when the user needs to give a password/token/API key without leaking it into chat.
+
+Flow:
+1. Agent calls `request_secret` with a label + field definitions
+2. User opens the returned HTTPS URL and submits the form in the browser
+3. Agent polls with `retrieve_secret`
+4. Values are returned once and then consumed/deleted from memory
+
+The values are stored in memory only, expire automatically, and are not written to the chat transcript.
+
+## When to require auth
+
+Require auth before:
+- deleting files/data
+- package installs
+- system configuration changes
+- sending messages/emails to third parties
+- mutating external APIs
+
+Do not require auth for ordinary read/search/list/fetch operations.
 
 ## References
 
-- **Full API + setup**: `references/api.md`
-- **Agent integration patterns**: `references/integration.md`
+- `references/api.md` — setup + HTTP API
+- `references/integration.md` — agent integration patterns

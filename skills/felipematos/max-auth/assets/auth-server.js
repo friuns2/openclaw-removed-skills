@@ -6,7 +6,7 @@
  * - 2h session tokens
  * - Rate limiting (5 attempts / 15min)
  * - Audit trail
- * - i18n: pt-BR / en (browser-detected)
+ * - i18n: pt-BR / en / es (browser-detected)
  */
 
 const http = require('http');
@@ -34,6 +34,7 @@ const AUDIT_FILE = path.join(CONFIG_DIR, 'audit.log');
 const RATE_LIMIT_FILE = path.join(CONFIG_DIR, '.rate-limit');
 const PASSKEYS_FILE = path.join(CONFIG_DIR, '.passkeys');
 const WEBAUTHN_CHALLENGE_FILE = path.join(CONFIG_DIR, '.webauthn-challenge');
+const GRANTS_FILE = path.join(CONFIG_DIR, '.grants');
 
 const RP_NAME = 'Max Auth';
 
@@ -85,6 +86,40 @@ const STRINGS = {
     setup_first: 'Set master password first via CLI:',
     delete_ok: 'Deleted',
     password_section: 'Master password',
+  },
+  es: {
+    title: 'Max Auth',
+    authenticated: (min) => `✅ Autenticado — la sesión vence en ${min} min`,
+    auth_required: '🔒 Autenticación requerida',
+    session_section: 'Sesión',
+    logout: 'Cerrar sesión',
+    passkeys_section: (n) => `Passkeys registradas (${n})`,
+    no_passkeys: 'Aún no hay passkeys.',
+    add_passkey: '+ Registrar nueva passkey',
+    passkey_name_placeholder: 'Nombre de la passkey (ej. iPhone, MacBook)',
+    confirm_register: 'Confirmar y registrar',
+    cancel: 'Cancelar',
+    confirm_pwd_for_reg: 'Confirma la contraseña maestra para registrar la passkey',
+    pwd_placeholder: 'Contraseña maestra',
+    login_btn: 'Iniciar sesión con contraseña',
+    login_with_passkey: '🔑 Entrar con passkey / biometría',
+    or: '— o —',
+    blocked: (min) => `Demasiados intentos. Intenta de nuevo en ${min} min.`,
+    verifying: 'Verificando...',
+    waiting_bio: 'Esperando biometría...',
+    authenticated_ok: '✅ ¡Autenticado!',
+    error_prefix: 'Error: ',
+    wrong_pwd: 'Contraseña incorrecta',
+    not_authenticated: 'No autenticado',
+    challenge_expired: 'El challenge expiró; actualiza la página e inténtalo de nuevo',
+    passkey_not_found: 'Passkey no encontrada',
+    verify_failed: 'La verificación falló',
+    bio_failed: 'La verificación biométrica falló',
+    reg_ok: '✅ ¡Passkey registrada!',
+    remove_passkey_confirm: '¿Eliminar esta passkey?',
+    setup_first: 'Primero define la contraseña maestra por CLI:',
+    delete_ok: 'Eliminada',
+    password_section: 'Contraseña maestra',
   },
   pt: {
     title: 'Max Auth',
@@ -142,6 +177,23 @@ function verifyPassword(password, storedHash, salt) {
 }
 
 function generateToken() { return crypto.randomBytes(32).toString('hex'); }
+
+function canonicalSessionKey(sessionKey = 'global') {
+  const raw = String(sessionKey || 'global');
+  const discord = raw.match(/discord:channel:\d+/);
+  if (discord) return discord[0];
+  const telegram = raw.match(/telegram:\d+/);
+  if (telegram) return telegram[0];
+  const whatsapp = raw.match(/whatsapp:[^:]+/);
+  if (whatsapp) return whatsapp[0];
+  return raw;
+}
+
+function inheritedSessionKeys(sessionKey = 'global') {
+  const raw = String(sessionKey || 'global');
+  const keys = new Set([raw, canonicalSessionKey(raw)]);
+  return [...keys].filter(Boolean);
+}
 
 // ========== Rate Limiting ==========
 
@@ -214,6 +266,66 @@ function getSession() {
 function isValidSession(token) { const s = getSession(); return s && s.token === token; }
 function clearSession() { if (fs.existsSync(SESSION_FILE)) { fs.unlinkSync(SESSION_FILE); log('✓ Session cleared'); } }
 
+// ========== Delegated Grants ==========
+
+function getGrants() {
+  try {
+    if (fs.existsSync(GRANTS_FILE)) {
+      const grants = JSON.parse(fs.readFileSync(GRANTS_FILE, 'utf8'));
+      return Array.isArray(grants) ? grants : [];
+    }
+  } catch {}
+  return [];
+}
+
+function saveGrants(grants) {
+  fs.writeFileSync(GRANTS_FILE, JSON.stringify(grants, null, 2), { mode: 0o600 });
+}
+
+function pruneExpiredGrants(grants = getGrants()) {
+  const now = Date.now();
+  const filtered = grants.filter((g) => !g.expiresAt || g.expiresAt > now);
+  if (filtered.length !== grants.length) saveGrants(filtered);
+  return filtered;
+}
+
+function createGrant({ parentSessionKey = 'global', childSessionKey, label = 'loop/cron grant', expiresInHours = 168, createdByIp = 'unknown' }) {
+  ensureConfigDir();
+  const grants = pruneExpiredGrants();
+  const expiresAt = Date.now() + (Number(expiresInHours) * 60 * 60 * 1000);
+  const grant = {
+    id: generateToken(),
+    parentSessionKey: canonicalSessionKey(parentSessionKey),
+    childSessionKey: String(childSessionKey),
+    canonicalChildSessionKey: canonicalSessionKey(childSessionKey),
+    label,
+    createdAt: Date.now(),
+    createdByIp,
+    expiresAt,
+  };
+  grants.push(grant);
+  saveGrants(grants);
+  return grant;
+}
+
+function canIssueGrant(parentSessionKey = 'global') {
+  const status = resolveAuthStatus(parentSessionKey);
+  return status.hasSession === true;
+}
+
+function getGrantStatus(sessionKey = 'global') {
+  const raw = String(sessionKey || 'global');
+  const canonical = canonicalSessionKey(raw);
+  const grants = pruneExpiredGrants();
+  const hasDerivedPrefix = raw !== canonical;
+  const match = grants.find((g) => {
+    if (g.childSessionKey === raw) return true;
+    if (hasDerivedPrefix && g.canonicalChildSessionKey === canonical) return true;
+    return false;
+  });
+  return match || null;
+}
+
 // ========== Audit ==========
 
 function auditLog(action, ip, success, details = {}) {
@@ -254,6 +366,168 @@ function readBody(req) {
   });
 }
 
+function resolveAuthStatus(sessionKey = 'global') {
+  const session = getSession();
+  if (session) {
+    return { hasSession: true, expiresAt: session.expiresAt, source: 'session', sessionKey: canonicalSessionKey(sessionKey) };
+  }
+  const grant = getGrantStatus(sessionKey);
+  if (grant) {
+    return { hasSession: true, expiresAt: grant.expiresAt, source: 'grant', sessionKey: grant.childSessionKey, grant };
+  }
+  return { hasSession: false, expiresAt: null, source: null, sessionKey: canonicalSessionKey(sessionKey) };
+}
+
+
+// ========== Secrets (request_secret / retrieve_secret) ==========
+
+const secretForms = new Map();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, entry] of secretForms.entries()) {
+    if (entry.expiresAt < now) secretForms.delete(token);
+  }
+}, 5 * 60 * 1000).unref();
+
+function buildSecretFormPage(token, entry) {
+  const expiresIn = Math.max(0, Math.round((entry.expiresAt - Date.now()) / 60000));
+  const fieldsJson = JSON.stringify(entry.fields);
+  const labelJson = JSON.stringify(entry.label);
+  const submitUrl = '/auth/secrets/' + token + '/submit';
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Secure Form — Max Auth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 50px auto; padding: 20px; background: #0f0f0f; color: #fff; }
+    h1 { font-size: 1.4em; margin-bottom: 0.2em; }
+    .card { background: #1a1a1a; border-radius: 12px; padding: 24px; }
+    label { display: block; font-size: 13px; font-weight: 600; color: #9ca3af; margin-bottom: 4px; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+    input[type=text], input[type=password], textarea { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 8px; background: #0f0f0f; color: #fff; font-size: 16px; }
+    textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+    button { width: 100%; padding: 12px; border: none; border-radius: 8px; color: #fff; font-size: 16px; cursor: pointer; margin-top: 20px; background: #2563eb; }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .msg { margin-top: 12px; font-size: 14px; display: none; padding: 10px; border-radius: 8px; }
+    .error-msg { color: #f87171; background: #1f0f0f; }
+    .success-msg { color: #4ade80; background: #0f1f0f; }
+    .expires { font-size: 12px; color: #4b5563; margin-top: 8px; }
+    .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔒 <span id="formLabel"></span></h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div id="fields"></div>
+    <button id="submitBtn" onclick="submitForm()"></button>
+    <div id="msg" class="msg"></div>
+    <p class="expires" id="expiresNote"></p>
+  </div>
+  <script>
+    var navLang = (navigator.language || '').toLowerCase();
+    var lang = navLang.startsWith('pt') ? 'pt' : navLang.startsWith('es') ? 'es' : 'en';
+    var T = {
+      en: { subtitle: 'Enter the requested information securely. One-time use only.', submit: 'Submit securely', success: '\u2705 Submitted! You may close this tab.', expires: function(n) { return 'This link expires in ~' + n + ' minutes.'; } },
+      es: { subtitle: 'Introduce la información solicitada de forma segura. Este formulario es de un solo uso.', submit: 'Enviar de forma segura', success: '\u2705 ¡Enviado! Ya puedes cerrar esta pestaña.', expires: function(n) { return 'Este enlace vence en ~' + n + ' minutos.'; } },
+      pt: { subtitle: 'Insira as informações solicitadas. Este formulário é de uso único.', submit: 'Enviar com segurança', success: '\u2705 Enviado! Pode fechar esta aba.', expires: function(n) { return 'Este link expira em ~' + n + ' minutos.'; } }
+    }[lang];
+    var fields = ${fieldsJson};
+    var label = ${labelJson};
+    var expiresIn = ${expiresIn};
+    var submitUrl = '${submitUrl}';
+    document.getElementById('formLabel').textContent = label;
+    document.getElementById('subtitle').textContent = T.subtitle;
+    document.getElementById('submitBtn').textContent = T.submit;
+    document.getElementById('expiresNote').textContent = T.expires(expiresIn);
+    var container = document.getElementById('fields');
+    fields.forEach(function(f) {
+      var lbl = document.createElement('label');
+      lbl.textContent = f.label || f.name;
+      container.appendChild(lbl);
+      var input;
+      if (f.type === 'textarea') {
+        input = document.createElement('textarea');
+      } else {
+        input = document.createElement('input');
+        input.type = f.type === 'password' ? 'password' : 'text';
+      }
+      input.id = 'field_' + f.name;
+      input.name = f.name;
+      container.appendChild(input);
+    });
+    async function submitForm() {
+      var btn = document.getElementById('submitBtn');
+      var msgEl = document.getElementById('msg');
+      btn.disabled = true;
+      var values = {};
+      fields.forEach(function(f) {
+        var el = document.getElementById('field_' + f.name);
+        values[f.name] = el ? el.value : '';
+      });
+      try {
+        var r = await fetch(submitUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) });
+        var d = await r.json();
+        if (d.ok) {
+          msgEl.textContent = T.success;
+          msgEl.className = 'msg success-msg';
+          msgEl.style.display = 'block';
+          btn.style.display = 'none';
+          container.querySelectorAll('input, textarea').forEach(function(el) { el.value = ''; el.disabled = true; });
+        } else {
+          msgEl.textContent = d.error || 'Error';
+          msgEl.className = 'msg error-msg';
+          msgEl.style.display = 'block';
+          btn.disabled = false;
+        }
+      } catch(e) {
+        msgEl.textContent = e.message;
+        msgEl.className = 'msg error-msg';
+        msgEl.style.display = 'block';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>`;
+}
+
+function buildSecretAlreadySubmittedPage() {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Max Auth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 50px auto; padding: 20px; background: #0f0f0f; color: #fff; text-align: center; }
+    .card { background: #1a1a1a; border-radius: 12px; padding: 32px; }
+    h2 { color: #4ade80; }
+    p { color: #9ca3af; font-size: 14px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>✅ Submitted</h2>
+    <p id="msg"></p>
+  </div>
+  <script>
+    var navLang = (navigator.language || '').toLowerCase();
+    var lang = navLang.startsWith('pt') ? 'pt' : navLang.startsWith('es') ? 'es' : 'en';
+    document.getElementById('msg').textContent = lang === 'pt'
+      ? 'Este formulário já foi preenchido. Pode fechar esta aba.'
+      : lang === 'es'
+      ? 'Este formulario ya fue enviado. Ya puedes cerrar esta pestaña.'
+      : 'This form has already been submitted. You may close this tab.';
+  </script>
+</body>
+</html>`;
+}
+
 function handleRequest(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
@@ -267,9 +541,109 @@ function handleRequest(req, res) {
 
   // ---- Status ----
   if (p === '/auth/status' || p === '/status') {
-    const session = getSession();
-    sendJSON(res, 200, { hasPassword: hasPassword(), hasSession: !!session, sessionExpiresAt: session?.expiresAt || null });
+    const requestedSessionKey = url.searchParams.get('session') || 'global';
+    const status = resolveAuthStatus(requestedSessionKey);
+    sendJSON(res, 200, {
+      hasPassword: hasPassword(),
+      hasSession: status.hasSession,
+      sessionExpiresAt: status.expiresAt || null,
+      source: status.source,
+      requestedSessionKey,
+      resolvedSessionKey: status.sessionKey,
+      grant: status.grant || null,
+    });
     return;
+  }
+
+  // ---- Delegated Grants ----
+  if ((p === '/auth/grants' || p === '/grants') && req.method === 'POST') {
+    readBody(req).then(({ parentSessionKey = 'global', childSessionKey, label = 'loop/cron grant', expiresInHours = 168 }) => {
+      if (!childSessionKey) { sendJSON(res, 400, { error: 'childSessionKey is required' }); return; }
+      if (!canIssueGrant(parentSessionKey)) {
+        auditLog('grant-create', ip, false, { parentSessionKey: canonicalSessionKey(parentSessionKey), childSessionKey, label, reason: 'parent_not_authenticated' });
+        sendJSON(res, 401, { error: `Parent session \"${canonicalSessionKey(parentSessionKey)}\" is not authenticated` });
+        return;
+      }
+      const grant = createGrant({ parentSessionKey, childSessionKey, label, expiresInHours, createdByIp: ip });
+      auditLog('grant-create', ip, true, { parentSessionKey: canonicalSessionKey(parentSessionKey), childSessionKey, label, expiresInHours });
+      sendJSON(res, 201, { success: true, grant });
+    }).catch(() => sendJSON(res, 400, { error: 'Invalid request' }));
+    return;
+  }
+
+  // ---- Secrets ----
+  if ((p === '/auth/secrets' || p === '/secrets' || p === '/auth/secrets/create' || p === '/secrets/create') && req.method === 'POST') {
+    readBody(req).then(({ label, fields, sessionKey, session_key, expires_in_minutes }) => {
+      if (!label || !Array.isArray(fields) || fields.length === 0) {
+        sendJSON(res, 400, { error: 'label and fields are required' }); return;
+      }
+      const expireMin = Math.min(Math.max(Number(expires_in_minutes) || 30, 1), 1440);
+      const token = generateToken();
+      const entry = {
+        token,
+        label: String(label),
+        fields: fields.map(f => ({ name: String(f.name), label: String(f.label || f.name), type: ['password','textarea'].includes(f.type) ? f.type : 'text' })),
+        sessionKey: sessionKey || session_key || null,
+        expiresAt: Date.now() + expireMin * 60 * 1000,
+        submitted: false,
+        values: null,
+        consumed: false,
+      };
+      secretForms.set(token, entry);
+      const url = 'https://' + RP_ID + '/auth/secrets/' + token;
+      log('Secret form created token=' + token.slice(0,8) + '... label="' + label + '"');
+      sendJSON(res, 201, { ok: true, token, url, expires_at: entry.expiresAt });
+    }).catch(() => sendJSON(res, 400, { error: 'Invalid request' }));
+    return;
+  }
+
+  {
+    const secretGetMatch = p.match(/^\/(?:auth\/)?secrets\/([a-f0-9]{64})$/);
+    if (secretGetMatch && req.method === 'GET') {
+      const token = secretGetMatch[1];
+      const entry = secretForms.get(token);
+      if (!entry) { sendHTML(res, 404, '<h2>Not found or expired</h2>'); return; }
+      if (Date.now() > entry.expiresAt) { secretForms.delete(token); sendHTML(res, 410, '<h2>This link has expired</h2>'); return; }
+      if (entry.submitted || entry.consumed) { sendHTML(res, 200, buildSecretAlreadySubmittedPage()); return; }
+      sendHTML(res, 200, buildSecretFormPage(token, entry));
+      return;
+    }
+  }
+
+  {
+    const secretSubmitMatch = p.match(/^\/(?:auth\/)?secrets\/([a-f0-9]{64})\/submit$/);
+    if (secretSubmitMatch && req.method === 'POST') {
+      const token = secretSubmitMatch[1];
+      const entry = secretForms.get(token);
+      if (!entry) { sendJSON(res, 404, { error: 'Not found or expired' }); return; }
+      if (Date.now() > entry.expiresAt) { secretForms.delete(token); sendJSON(res, 410, { error: 'This link has expired' }); return; }
+      if (entry.submitted || entry.consumed) { sendJSON(res, 409, { error: 'Already submitted' }); return; }
+      readBody(req).then((values) => {
+        entry.submitted = true;
+        entry.values = values;
+        log('Secret form submitted token=' + token.slice(0,8) + '...');
+        sendJSON(res, 200, { ok: true });
+      }).catch(() => sendJSON(res, 400, { error: 'Invalid request' }));
+      return;
+    }
+  }
+
+  {
+    const secretPollMatch = p.match(/^\/(?:auth\/)?secrets\/([a-f0-9]{64})\/poll$/);
+    if (secretPollMatch && req.method === 'GET') {
+      const token = secretPollMatch[1];
+      const entry = secretForms.get(token);
+      if (!entry) { sendJSON(res, 404, { error: 'Token not found, expired, or already consumed' }); return; }
+      if (Date.now() > entry.expiresAt) { secretForms.delete(token); sendJSON(res, 410, { error: 'Token has expired' }); return; }
+      if (entry.consumed) { sendJSON(res, 404, { error: 'Token has already been consumed' }); return; }
+      if (!entry.submitted) { sendJSON(res, 202, { submitted: false }); return; }
+      const values = entry.values;
+      entry.consumed = true;
+      secretForms.delete(token);
+      log('Secret retrieved and consumed token=' + token.slice(0,8) + '...');
+      sendJSON(res, 200, { submitted: true, values });
+      return;
+    }
   }
 
   // ---- Dashboard ----
@@ -355,7 +729,8 @@ function handleRequest(req, res) {
 
   <script>
     // ---- i18n ----
-    const lang = navigator.language?.startsWith('pt') ? 'pt' : 'en';
+    const navLang = (navigator.language || '').toLowerCase();
+    const lang = navLang.startsWith('pt') ? 'pt' : navLang.startsWith('es') ? 'es' : 'en';
     const T = {
       en: {
         status_auth: (min) => \`✅ Authenticated — expires in \${min} min\`,
@@ -394,6 +769,25 @@ function handleRequest(req, res) {
         verifying: 'Verificando…', waiting_bio: 'Aguardando biometria…',
         ok_auth: '✅ Autenticado!', ok_reg: '✅ Passkey cadastrada!',
         remove_confirm: 'Remover esta passkey?',
+      },
+      es: {
+        status_auth: (min) => \`✅ Autenticado — vence en \${min} min\`,
+        status_req: '🔒 Autenticación requerida',
+        sec_session: 'Sesión', logout: 'Cerrar sesión',
+        sec_passkeys: (n) => \`Passkeys registradas (\${n})\`,
+        no_passkeys: 'Aún no hay passkeys.',
+        add_passkey: '+ Registrar nueva passkey',
+        pk_name_ph: 'Nombre de la passkey (ej. iPhone, MacBook)',
+        confirm_reg: 'Confirmar y registrar', cancel: 'Cancelar',
+        sec_confirm_pwd: 'Confirma la contraseña maestra',
+        pwd_ph: 'Contraseña maestra', login_btn: 'Iniciar sesión con contraseña',
+        passkey_btn: '🔑 Entrar con passkey / biometría',
+        divOr: '— o —',
+        blocked: (min) => \`Bloqueado. Inténtalo de nuevo en \${min} min.\`,
+        sec_pwd: 'Contraseña maestra', noPwd: 'Primero define la contraseña maestra por CLI:',
+        verifying: 'Verificando…', waiting_bio: 'Esperando biometría…',
+        ok_auth: '✅ ¡Autenticado!', ok_reg: '✅ ¡Passkey registrada!',
+        remove_confirm: '¿Eliminar esta passkey?',
       }
     }[lang];
 
@@ -422,11 +816,40 @@ function handleRequest(req, res) {
     }
     applyStrings();
 
-    const base = window.location.pathname.replace(/\\/$/, '').replace(/\\/auth$/, '') + '/auth';
+        const _p = window.location.pathname; const base = (_p.endsWith('/auth') ? _p.slice(0,-5) : _p.endsWith('/') ? _p.slice(0,-1) : _p) + '/auth';
+
+    // ---- If already authenticated: auto-redirect to returnUrl with token ----
+    (function() {
+      const sessionToken = ${session ? JSON.stringify(session.token) : 'null'};
+      if (sessionToken) {
+        const params = new URLSearchParams(window.location.search);
+        const returnUrl = params.get('returnUrl');
+        if (returnUrl) {
+          const dest = new URL(decodeURIComponent(returnUrl));
+          dest.searchParams.set('max_auth_token', sessionToken);
+          window.location.href = dest.toString();
+          return;
+        }
+      }
+    })();
 
     function showMsg(text, type = 'error') {
       const el = $('msg');
       el.textContent = text; el.className = 'msg ' + type; el.style.display = 'block';
+    }
+
+    // ---- Post-login: set cookie + redirect ----
+    function handleLoginSuccess(token) {
+      const params = new URLSearchParams(window.location.search);
+      const returnUrl = params.get('returnUrl');
+      if (returnUrl) {
+        // Pass token via query param so the target proxy can set the cookie server-side
+        const dest = new URL(decodeURIComponent(returnUrl));
+        dest.searchParams.set('max_auth_token', token);
+        window.location.href = dest.toString();
+      } else {
+        setTimeout(() => location.reload(), 500);
+      }
     }
 
     // ---- Login ----
@@ -436,7 +859,7 @@ function handleRequest(req, res) {
       try {
         const r = await fetch(base + '/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pwd }) });
         const d = await r.json();
-        if (d.success) { showMsg(T.ok_auth, 'success'); setTimeout(() => location.reload(), 700); }
+        if (d.success) { showMsg(T.ok_auth, 'success'); setTimeout(() => handleLoginSuccess(d.token), 500); }
         else showMsg(d.error || '');
       } catch(e) { showMsg(e.message); }
     }
@@ -449,7 +872,12 @@ function handleRequest(req, res) {
     }
 
     // ---- Passkey Login ----
-    async function doPasskeyLogin() {
+    let passkeyLoginInFlight = false;
+    let passkeyAutoTriggered = false;
+
+    async function doPasskeyLogin({ auto = false } = {}) {
+      if (passkeyLoginInFlight) return;
+      passkeyLoginInFlight = true;
       showMsg(T.waiting_bio, 'info');
       try {
         const options = await (await fetch(base + '/passkey/auth-options')).json();
@@ -457,6 +885,10 @@ function handleRequest(req, res) {
         options.challenge = b64ToBuffer(options.challenge);
         options.allowCredentials = (options.allowCredentials || []).map(c => ({ ...c, id: b64ToBuffer(c.id) }));
         const assertion = await navigator.credentials.get({ publicKey: options });
+        if (!assertion) {
+          if (!auto) showMsg('');
+          return;
+        }
         const r = await fetch(base + '/passkey/auth-verify', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -470,9 +902,15 @@ function handleRequest(req, res) {
           })
         });
         const d = await r.json();
-        if (d.success) { showMsg(T.ok_auth, 'success'); setTimeout(() => location.reload(), 700); }
+        if (d.success) { showMsg(T.ok_auth, 'success'); setTimeout(() => handleLoginSuccess(d.token), 500); }
         else showMsg(d.error || '');
-      } catch(e) { showMsg(e.message); }
+      } catch(e) {
+        const message = e?.message || '';
+        const isAbort = e?.name === 'AbortError' || e?.name === 'NotAllowedError';
+        if (!auto || !isAbort) showMsg(message || '');
+      } finally {
+        passkeyLoginInFlight = false;
+      }
     }
 
     // ---- Passkey Register ----
@@ -535,6 +973,15 @@ function handleRequest(req, res) {
     function bufToB64(buf) {
       return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=/g,'');
     }
+
+    // ---- Auto-login with passkey ----
+    window.addEventListener('DOMContentLoaded', () => {
+      const hasPasskeyLogin = !!$('btnPasskeyLogin');
+      const hasPasswordLogin = !!$('btnLogin');
+      if (!hasPasskeyLogin || !hasPasswordLogin || passkeyAutoTriggered) return;
+      passkeyAutoTriggered = true;
+      setTimeout(() => doPasskeyLogin({ auto: true }), 500);
+    });
   </script>
 </body>
 </html>`;
@@ -641,7 +1088,11 @@ function handleRequest(req, res) {
   if (p === '/auth/passkey/auth-options' || p === '/passkey/auth-options') {
     (async () => {
       try {
-        const passkeys = getPasskeys();
+        const passkeys = getPasskeys().slice().sort((a, b) => {
+          const aLast = new Date(a.lastUsedAt || a.createdAt || 0).getTime();
+          const bLast = new Date(b.lastUsedAt || b.createdAt || 0).getTime();
+          return bLast - aLast;
+        });
         const options = await generateAuthenticationOptions({
           rpID: RP_ID,
           allowCredentials: passkeys.map(pk => ({ id: pk.credentialID, type: 'public-key' })),
@@ -670,6 +1121,7 @@ function handleRequest(req, res) {
         clearChallenge();
         if (verification.verified) {
           passkey.counter = verification.authenticationInfo.newCounter;
+          passkey.lastUsedAt = new Date().toISOString();
           savePasskeys(passkeys);
           const token = createSession(ip);
           auditLog('passkey-login', ip, true);
@@ -692,6 +1144,83 @@ function handleRequest(req, res) {
       savePasskeys(passkeys);
       auditLog('passkey-delete', ip, true, { id });
       sendJSON(res, 200, { success: true });
+    }).catch(() => sendJSON(res, 400, { error: 'Invalid request' }));
+    return;
+  }
+
+
+  // ---- Secrets: POST /secrets/create ----
+  if ((p === '/auth/secrets/create' || p === '/secrets/create') && req.method === 'POST') {
+    readBody(req).then(({ label, fields, session_key, expires_in_minutes }) => {
+      if (!label || !Array.isArray(fields) || fields.length === 0) {
+        sendJSON(res, 400, { error: 'label and fields are required' }); return;
+      }
+      const expireMin = Math.min(Math.max(Number(expires_in_minutes) || 30, 1), 1440);
+      const token = generateToken();
+      const entry = {
+        token,
+        label: String(label),
+        fields: fields.map(f => ({ name: String(f.name), label: String(f.label || f.name), type: ['password','textarea'].includes(f.type) ? f.type : 'text' })),
+        session_key: session_key || null,
+        expiresAt: Date.now() + expireMin * 60 * 1000,
+        submitted: false,
+        values: null,
+        consumed: false,
+      };
+      secretForms.set(token, entry);
+      log('Secret form created token=' + token.slice(0,8) + '... label="' + label + '" expires_in=' + expireMin + 'min');
+      const url = 'https://' + RP_ID + '/auth/secrets/' + token;
+      sendJSON(res, 200, { ok: true, token, url });
+    }).catch(() => sendJSON(res, 400, { error: 'Invalid request' }));
+    return;
+  }
+
+  // ---- Secrets: GET /secrets/:token (serve HTML form) ----
+  {
+    const secretGetMatch = p.match(/^\/(?:auth\/)?secrets\/([a-f0-9]{64})$/);
+    if (secretGetMatch && req.method === 'GET') {
+      const token = secretGetMatch[1];
+      const entry = secretForms.get(token);
+      if (!entry) { sendHTML(res, 404, '<h2>Not found or expired</h2>'); return; }
+      if (Date.now() > entry.expiresAt) { secretForms.delete(token); sendHTML(res, 410, '<h2>This link has expired</h2>'); return; }
+      if (entry.submitted || entry.consumed) { sendHTML(res, 200, buildSecretAlreadySubmittedPage()); return; }
+      sendHTML(res, 200, buildSecretFormPage(token, entry));
+      return;
+    }
+  }
+
+  // ---- Secrets: POST /secrets/:token/submit ----
+  {
+    const secretSubmitMatch = p.match(/^\/(?:auth\/)?secrets\/([a-f0-9]{64})\/submit$/);
+    if (secretSubmitMatch && req.method === 'POST') {
+      const token = secretSubmitMatch[1];
+      const entry = secretForms.get(token);
+      if (!entry) { sendJSON(res, 404, { error: 'Not found or expired' }); return; }
+      if (Date.now() > entry.expiresAt) { secretForms.delete(token); sendJSON(res, 410, { error: 'This link has expired' }); return; }
+      if (entry.submitted || entry.consumed) { sendJSON(res, 409, { error: 'Already submitted' }); return; }
+      readBody(req).then((values) => {
+        entry.submitted = true;
+        entry.values = values;
+        log('Secret form submitted token=' + token.slice(0,8) + '...');
+        sendJSON(res, 200, { ok: true });
+      }).catch(() => sendJSON(res, 400, { error: 'Invalid request' }));
+      return;
+    }
+  }
+
+  // ---- Secrets: POST /secrets/retrieve ----
+  if ((p === '/auth/secrets/retrieve' || p === '/secrets/retrieve') && req.method === 'POST') {
+    readBody(req).then(({ token }) => {
+      if (!token) { sendJSON(res, 400, { error: 'token is required' }); return; }
+      const entry = secretForms.get(token);
+      if (!entry) { sendJSON(res, 404, { error: 'Token not found, expired, or already consumed' }); return; }
+      if (Date.now() > entry.expiresAt) { secretForms.delete(token); sendJSON(res, 410, { error: 'Token has expired' }); return; }
+      if (entry.consumed) { sendJSON(res, 404, { error: 'Token has already been consumed' }); return; }
+      if (!entry.submitted) { sendJSON(res, 200, { submitted: false }); return; }
+      const values = entry.values;
+      secretForms.delete(token);
+      log('Secret retrieved and consumed token=' + token.slice(0,8) + '...');
+      sendJSON(res, 200, { submitted: true, values });
     }).catch(() => sendJSON(res, 400, { error: 'Invalid request' }));
     return;
   }
