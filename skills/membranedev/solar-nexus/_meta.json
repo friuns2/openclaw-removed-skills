@@ -3,11 +3,16 @@
   "slug": "solar-nexus",
   "displayName": "Solar Nexus",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162822638,
-    "commit": "https://github.com/openclaw/skills/commit/85740a95fdefa999deba87a6744291aa50acdedd"
+    "version": "1.0.3",
+    "publishedAt": 1776783871874,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162822638,
+      "commit": "https://github.com/openclaw/skills/commit/85740a95fdefa999deba87a6744291aa50acdedd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772967748106,
