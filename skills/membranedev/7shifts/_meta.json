@@ -3,11 +3,16 @@
   "slug": "7shifts",
   "displayName": "7Shifts",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162818312,
-    "commit": "https://github.com/openclaw/skills/commit/f657a97813f4dd2afdb982ab7a8222bb5b7642d0"
+    "version": "1.0.3",
+    "publishedAt": 1776783864159,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162818312,
+      "commit": "https://github.com/openclaw/skills/commit/f657a97813f4dd2afdb982ab7a8222bb5b7642d0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772967738792,
