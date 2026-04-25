@@ -3,11 +3,16 @@
   "slug": "neon-integration",
   "displayName": "Neon",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163915006,
-    "commit": "https://github.com/openclaw/skills/commit/f90a850f86e0e491447e01879d204c4d0f64ce94"
+    "version": "1.0.3",
+    "publishedAt": 1776823344402,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163915006,
+      "commit": "https://github.com/openclaw/skills/commit/f90a850f86e0e491447e01879d204c4d0f64ce94"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773525735917,
