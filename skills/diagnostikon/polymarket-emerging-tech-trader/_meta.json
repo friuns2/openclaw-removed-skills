@@ -3,11 +3,16 @@
   "slug": "polymarket-emerging-tech-trader",
   "displayName": "Polymarket Emerging Tech Trader",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775317125834,
-    "commit": "https://github.com/openclaw/skills/commit/27807f040ff1858c91f25dbdafd0843c09d1489f"
+    "version": "0.0.2",
+    "publishedAt": 1776513309533,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775317125834,
+      "commit": "https://github.com/openclaw/skills/commit/27807f040ff1858c91f25dbdafd0843c09d1489f"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773779816364,

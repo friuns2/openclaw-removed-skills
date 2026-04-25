@@ -70,5 +70,6 @@
       "label": "Max open positions",
       "type": "number"
     }
-  ]
+  ],
+  "version": "0.0.2"
 }
