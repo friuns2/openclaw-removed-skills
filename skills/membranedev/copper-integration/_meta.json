@@ -3,11 +3,16 @@
   "slug": "copper-integration",
   "displayName": "Copper",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161670416,
-    "commit": "https://github.com/openclaw/skills/commit/430aa50333f6f5e28b4579e1f6a502067bf7a50e"
+    "version": "1.0.3",
+    "publishedAt": 1776772978472,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161670416,
+      "commit": "https://github.com/openclaw/skills/commit/430aa50333f6f5e28b4579e1f6a502067bf7a50e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772690554845,
