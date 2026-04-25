@@ -6,57 +6,118 @@ set -euo pipefail
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 echo "Source: $SRC"
 
-TARGETS=(
-  "$HOME/.claude/skills/last30days"
-  "$HOME/.claude/skills/last30daysCROSS"
+COMMON_TARGETS=(
+  # Claude Code plugin cache: marketplace installs overwrite on update,
+  # but local development needs the cache kept in sync with the repo.
+  # Do NOT add ~/.claude/skills/last30days - it creates a duplicate
+  # /last30days-3 in the slash command menu alongside the plugin version.
+  "$HOME/.claude/plugins/cache/last30days-skill-private/last30days-3/3.0.1"
+  "$HOME/.claude/plugins/cache/last30days-skill-private/last30days-3-nogem/3.0.0-nogem"
   "$HOME/.agents/skills/last30days"
   "$HOME/.codex/skills/last30days"
 )
+OPENCLAW_TARGET="$HOME/.openclaw/skills/last30days"
 
-for t in "${TARGETS[@]}"; do
+sync_target() {
+  local target="$1"
+  local skill_md="$2"
+
   echo ""
-  echo "--- Syncing to $t ---"
-  mkdir -p "$t/scripts/lib"
+  echo "--- Syncing to $target ---"
+  mkdir -p "$target/scripts/lib"
 
-  # SKILL.md — CROSS gets patched frontmatter + skill root, others get verbatim copy
-  if [[ "$t" == *"last30daysCROSS"* ]]; then
-    sed \
-      -e 's/^name: last30days$/name: last30daysCROSS/' \
-      -e 's/^version: "2\.1"/version: "2.2-cross"/' \
-      -e "s|^description: .*|description: \"TEST BUILD with outcome-aware Polymarket scoring + cross-source linking. Research a topic from the last 30 days. Sources: Reddit, X, YouTube, Hacker News, Polymarket, web.\"|" \
-      -e "s/^argument-hint: .*/argument-hint: 'last30daysCROSS AI video tools'/" \
-      -e 's|"\$HOME/.claude/skills/last30days"|"$HOME/.claude/skills/last30daysCROSS" \\\n  "$HOME/.claude/skills/last30days"|' \
-      "$SRC/SKILL.md" > "$t/SKILL.md"
-  else
-    cp "$SRC/SKILL.md" "$t/"
+  cp "$skill_md" "$target/SKILL.md"
+
+  rsync -a \
+    "$SRC/scripts/last30days.py" \
+    "$SRC/scripts/watchlist.py" \
+    "$SRC/scripts/briefing.py" \
+    "$SRC/scripts/store.py" \
+    "$target/scripts/"
+  rsync -a "$SRC/scripts/lib/"*.py "$target/scripts/lib/"
+
+  # The OpenClaw variant lives in the private repo only. Skip cleanly when
+  # running this script from the public repo where variants/open does not exist.
+  if [ -d "$SRC/variants/open" ]; then
+    mkdir -p "$target/variants/open/references"
+    rsync -a "$SRC/variants/open/" "$target/variants/open/"
   fi
 
-  # Main script + lib modules (rsync handles identical files gracefully)
-  rsync -a "$SRC/scripts/last30days.py" "$t/scripts/"
-  rsync -a "$SRC/scripts/lib/"*.py "$t/scripts/lib/"
-
-  # Vendor directory (bird-search CLI)
   if [ -d "$SRC/scripts/lib/vendor" ]; then
-    rsync -a "$SRC/scripts/lib/vendor" "$t/scripts/lib/"
+    rsync -a "$SRC/scripts/lib/vendor" "$target/scripts/lib/"
   fi
 
-  # Fixtures
   if [ -d "$SRC/fixtures" ]; then
-    mkdir -p "$t/fixtures"
-    rsync -a "$SRC/fixtures/" "$t/fixtures/"
+    mkdir -p "$target/fixtures"
+    rsync -a "$SRC/fixtures/" "$target/fixtures/"
   fi
 
-  # Count and report
-  mod_count=$(ls "$t/scripts/lib/"*.py 2>/dev/null | wc -l | tr -d ' ')
+  mod_count=$(ls "$target/scripts/lib/"*.py 2>/dev/null | wc -l | tr -d ' ')
   echo "  Copied $mod_count modules"
 
-  # Verify imports
-  if (cd "$t/scripts" && python3 -c "from lib import youtube_yt, bird_x, render, ui; print('  Import check: OK')" 2>&1); then
+  if (
+    cd "$target/scripts" &&
+    python3 -c "import briefing, store, watchlist; from lib import youtube_yt, bird_x, render, ui; print('  Import check: OK')"
+  ); then
     true
   else
     echo "  Import check FAILED"
   fi
+}
+
+for t in "${COMMON_TARGETS[@]}"; do
+  sync_target "$t" "$SRC/SKILL.md"
 done
+
+# Hermes sync: deploy to Hermes skills directory if it exists
+HERMES_TARGET="$HOME/.hermes/skills/research/last30days"
+if [ -d "$HOME/.hermes/skills/research" ]; then
+  echo ""
+  echo "--- Syncing to Hermes ---"
+  mkdir -p "$HERMES_TARGET/scripts/lib"
+  
+  cp "$SRC/SKILL.md" "$HERMES_TARGET/SKILL.md"
+  
+  rsync -a \
+    "$SRC/scripts/last30days.py" \
+    "$SRC/scripts/watchlist.py" \
+    "$SRC/scripts/briefing.py" \
+    "$SRC/scripts/store.py" \
+    "$HERMES_TARGET/scripts/"
+  rsync -a "$SRC/scripts/lib/"*.py "$HERMES_TARGET/scripts/lib/"
+  
+  if [ -d "$SRC/scripts/lib/vendor" ]; then
+    rsync -a "$SRC/scripts/lib/vendor" "$HERMES_TARGET/scripts/lib/"
+  fi
+  
+  if [ -d "$SRC/fixtures" ]; then
+    mkdir -p "$HERMES_TARGET/fixtures"
+    rsync -a "$SRC/fixtures/" "$HERMES_TARGET/fixtures/"
+  fi
+  
+  mod_count=$(ls "$HERMES_TARGET/scripts/lib/"*.py 2>/dev/null | wc -l | tr -d ' ')
+  echo "  Copied $mod_count modules to Hermes"
+  
+  if (
+    cd "$HERMES_TARGET/scripts" &&
+    python3 -c "import briefing, store, watchlist; from lib import youtube_yt, bird_x, render, ui; print('  Import check: OK')"
+  ); then
+    true
+  else
+    echo "  Import check FAILED"
+  fi
+fi
+
+# OpenClaw sync only runs when the private-repo OpenClaw variant is present
+# in the source tree. The public repo does not ship variants/open (the variant
+# is sanitized via strip_for_openclaw.py and published separately from
+# last30days-skill-private).
+if [ -d "$SRC/variants/open" ]; then
+  sync_target "$OPENCLAW_TARGET" "$SRC/variants/open/SKILL.md"
+else
+  echo ""
+  echo "Skipping OpenClaw target (no variants/open in this repo)"
+fi
 
 echo ""
 echo "Sync complete."

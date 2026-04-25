@@ -168,8 +168,7 @@ class RetrievalBundle:
 
     def add_items(self, label: str, source: str, items: list[SourceItem]) -> None:
         """Atomically append items to both items_by_source_and_query and items_by_source."""
-        existing = self.items_by_source_and_query.get((label, source), [])
-        self.items_by_source_and_query[(label, source)] = existing + items
+        self.items_by_source_and_query.setdefault((label, source), []).extend(items)
         self.items_by_source.setdefault(source, []).extend(items)
 
 

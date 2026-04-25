@@ -50,7 +50,7 @@ def set_credentials(auth_token: Optional[str], ct0: Optional[str]):
 
 
 def _has_injected_credentials() -> bool:
-    """Return True when both X credentials were injected from config."""
+    """Return True when both X session cookies were injected from config."""
     return bool(_credentials.get('AUTH_TOKEN') and _credentials.get('CT0'))
 
 
@@ -63,6 +63,9 @@ def _subprocess_env() -> Dict[str, str]:
     """Build env dict for Node subprocesses, merging injected credentials."""
     env = os.environ.copy()
     env.update(_credentials)
+    # Hard-disable browser-cookie fallback so normal pipeline runs never hit
+    # Safari/Chrome Keychain prompts during source detection or search.
+    env["BIRD_DISABLE_BROWSER_COOKIES"] = "1"
     return env
 
 
@@ -174,6 +177,8 @@ def _run_bird_search(query: str, count: int, timeout: int) -> Dict[str, Any]:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             preexec_fn=preexec,
             env=_subprocess_env(),
         )
@@ -210,7 +215,10 @@ def _run_bird_search(query: str, count: int, timeout: int) -> Dict[str, Any]:
         if not output:
             return {"items": []}
 
-        return json.loads(output)
+        parsed = json.loads(output)
+        if isinstance(parsed, list):
+            return {"items": parsed}
+        return parsed
 
     except json.JSONDecodeError as e:
         return {"error": f"Invalid JSON response: {e}", "items": []}
@@ -306,10 +314,9 @@ def search_handles(
     Returns:
         List of raw item dicts (same format as parse_bird_response output).
     """
-    all_items = []
     core_topic = _extract_core_subject(topic) if topic else None
 
-    for handle in handles:
+    def _search_one_handle(handle: str) -> List[Dict[str, Any]]:
         handle = handle.lstrip("@")
         if core_topic:
             query = f"from:{handle} {core_topic} since:{from_date}"
@@ -331,6 +338,8 @@ def search_handles(
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 preexec_fn=preexec,
                 env=_subprocess_env(),
             )
@@ -344,24 +353,32 @@ def search_handles(
                     proc.kill()
                 proc.wait(timeout=5)
                 _log(f"Handle search timed out for @{handle}")
-                continue
+                return []
 
             if proc.returncode != 0:
                 _log(f"Handle search failed for @{handle}: {(stderr or '').strip()}")
-                continue
+                return []
 
             output = (stdout or "").strip()
             if not output:
-                continue
+                return []
 
             response = json.loads(output)
-            items = parse_bird_response(response, query=core_topic)
-            all_items.extend(items)
+            return parse_bird_response(response, query=core_topic)
 
         except json.JSONDecodeError:
             _log(f"Invalid JSON from handle search for @{handle}")
         except (OSError, subprocess.SubprocessError) as e:
             _log(f"Handle search error for @{handle}: {e}")
+        return []
+
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    all_items: List[Dict[str, Any]] = []
+    with ThreadPoolExecutor(max_workers=min(5, len(handles))) as executor:
+        futures = {executor.submit(_search_one_handle, h): h for h in handles}
+        for future in as_completed(futures):
+            all_items.extend(future.result())
 
     return all_items
 
@@ -447,7 +464,7 @@ def parse_bird_response(response: Dict[str, Any], query: str = "") -> List[Dict[
             "url": url,
             "author_handle": author_handle.lstrip("@"),
             "date": date,
-            "engagement": engagement,
+            "engagement": engagement if any(v is not None for v in engagement.values()) else None,
             "why_relevant": "",  # Bird doesn't provide relevance explanations
             "relevance": _compute_relevance(query, str(tweet.get("text", ""))) if query else 0.7,
         }
