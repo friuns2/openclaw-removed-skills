@@ -3,11 +3,16 @@
   "slug": "gusto-integration",
   "displayName": "Gusto",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161653096,
-    "commit": "https://github.com/openclaw/skills/commit/df9f0c761eea922c181b17ea916504bb1f741335"
+    "version": "1.0.3",
+    "publishedAt": 1776772944481,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161653096,
+      "commit": "https://github.com/openclaw/skills/commit/df9f0c761eea922c181b17ea916504bb1f741335"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772676150518,
