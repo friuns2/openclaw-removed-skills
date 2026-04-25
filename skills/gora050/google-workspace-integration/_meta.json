@@ -3,11 +3,16 @@
   "slug": "google-workspace-integration",
   "displayName": "Google Workspace",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162475431,
-    "commit": "https://github.com/openclaw/skills/commit/585b7c143a23cb6f418f26ba8c6020efa8379757"
+    "version": "1.0.3",
+    "publishedAt": 1776773200501,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162475431,
+      "commit": "https://github.com/openclaw/skills/commit/585b7c143a23cb6f418f26ba8c6020efa8379757"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772730178709,
