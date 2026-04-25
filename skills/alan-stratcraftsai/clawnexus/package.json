@@ -1,0 +1,57 @@
+{
+  "name": "clawnexus-skill",
+  "version": "0.4.0",
+  "description": "ClawNexus Skill for OpenClaw — discover, name, and manage AI instances on your local network",
+  "license": "MIT",
+  "author": "alan-silverstreams <alan@silverstream.tech>",
+  "homepage": "https://github.com/SilverstreamsAI/ClawNexus",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SilverstreamsAI/ClawNexus.git",
+    "directory": "packages/skill"
+  },
+  "bugs": "https://github.com/SilverstreamsAI/ClawNexus/issues",
+  "keywords": [
+    "openclaw",
+    "ai",
+    "agent",
+    "skill",
+    "clawnexus",
+    "instance",
+    "management",
+    "discovery",
+    "network",
+    "lan",
+    "multi-instance",
+    "mdns",
+    "registry",
+    "naming",
+    "identity"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "SKILL.md",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm build"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  }
+}
