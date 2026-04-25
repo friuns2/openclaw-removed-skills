@@ -3,11 +3,16 @@
   "slug": "craftmypdf",
   "displayName": "Craftmypdf",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163927902,
-    "commit": "https://github.com/openclaw/skills/commit/87e10a0654f128cf99dc50a686571c4bef1a319a"
+    "version": "1.0.3",
+    "publishedAt": 1776823366703,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163927902,
+      "commit": "https://github.com/openclaw/skills/commit/87e10a0654f128cf99dc50a686571c4bef1a319a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773529333711,
