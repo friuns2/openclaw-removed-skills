@@ -1,11 +1,17 @@
 {
   "owner": "elvismusli",
   "slug": "openclaw-aicfo-agent",
-  "displayName": "AICFO Agent Access",
+  "displayName": "Openclaw Aicfo Agent",
   "latest": {
-    "version": "0.1.2",
-    "publishedAt": 1773404173590,
-    "commit": "https://github.com/openclaw/skills/commit/9781125cc7443103a9bf18cb9b1eb6d87ce62f6b"
+    "version": "0.1.8",
+    "publishedAt": 1777108057432,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.2",
+      "publishedAt": 1773404173590,
+      "commit": "https://github.com/openclaw/skills/commit/9781125cc7443103a9bf18cb9b1eb6d87ce62f6b"
+    }
+  ]
 }

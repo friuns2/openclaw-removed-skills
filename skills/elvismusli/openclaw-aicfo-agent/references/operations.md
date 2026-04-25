@@ -13,6 +13,8 @@ Optional:
 export AICFO_COMPANY_ID="<company-id>"
 ```
 
+For `company_id`, prefer the UUID from `session.companyAccess.companies[].id`. If an agent only has a human-facing reference, the API accepts the company slug or exact company name as a fallback.
+
 ## Bootstrap
 
 ```bash
@@ -101,4 +103,20 @@ node bin/openclaw-aicfo-adapter.mjs connector \
 ```bash
 node bin/openclaw-aicfo-adapter.mjs documents \
   '{"company_id":"<company-id>","limit":20,"status":"processing"}'
+```
+
+## Document Questions
+
+List pending clarification questions that the document pipeline needs before final routing/review:
+
+```bash
+node bin/openclaw-aicfo-adapter.mjs document-questions \
+  '{"company_id":"<company-id>","limit":20}'
+```
+
+Answer questions for one document and optionally reprocess:
+
+```bash
+node bin/openclaw-aicfo-adapter.mjs answer-document-questions \
+  '{"company_id":"<company-id>","documentId":"<document-id>","answers":{"source":"Uploaded by external agent from Google Drive folder X","business_context":"Monthly vendor invoice batch"},"reprocess":true}'
 ```

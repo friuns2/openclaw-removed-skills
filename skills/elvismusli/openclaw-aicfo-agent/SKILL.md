@@ -1,7 +1,7 @@
 ---
 name: openclaw-aicfo-agent
 description: Use when OpenClaw needs to access AICFO through one bearer API key. Covers agent-session introspection, company selection, app-level MCP usage, connector actions, Company-DB entity/file reads, and the local `bin/openclaw-aicfo-adapter.mjs` bridge.
-metadata: {"openclaw":{"skillKey":"openclaw-aicfo-agent","homepage":"https://aiceo.city","primaryEnv":"AICFO_API_KEY","emoji":"briefcase","requires":{"anyBins":["node"]}}}
+metadata: {"openclaw":{"skillKey":"openclaw-aicfo-agent","homepage":"https://aiceo.city","primaryEnv":"AICFO_API_KEY","emoji":"briefcase","requires":{"env":["AICFO_API_KEY"],"anyBins":["node"]}}}
 ---
 
 # OpenClaw AICFO Agent
@@ -21,6 +21,8 @@ Primary surfaces:
 - `GET /api/company/entity`
 - `GET /api/company/file`
 - `GET /api/documents`
+- `GET /api/documents/questions`
+- `POST /api/documents/:id/clarifications`
 
 Canonical references:
 
@@ -36,12 +38,16 @@ Canonical references:
 3. Resolve company scope:
    - use `implicitCompanyId` if present
    - otherwise choose a company from `companyAccess.companies`
+   - pass the company UUID when available; the API also accepts slug or exact company name as `company_id`
 4. Run business operations through the adapter:
    - dashboard
    - query/search
    - get-entity
    - get-file
    - connector
+   - documents
+   - document-questions
+   - answer-document-questions
 
 ## Workflow
 
@@ -56,7 +62,7 @@ Read:
 - `requiresCompanySelection`
 - accessible companies
 
-If there is no implicit company, require OpenClaw to pass `company_id` on every operation.
+If there is no implicit company, require OpenClaw to pass `company_id` on every operation. Prefer the UUID from `companyAccess.companies[].id`; slug or exact company name are accepted as fallbacks.
 
 ### 2. Prefer the published adapter
 
@@ -92,6 +98,8 @@ Typical adapter calls:
 - `connectors`
 - `connector`
 - `documents`
+- `document-questions`
+- `answer-document-questions`
 
 The published skill package is self-contained and should run on a machine that only has Node and the installed skill files.
 
@@ -99,8 +107,10 @@ The published skill package is self-contained and should run on a machine that o
 
 - Treat `/api/agent/connectors` as the canonical machine connector surface.
 - Treat `/api/connectors/hub` as legacy Slack/Jira compatibility only.
-- Prefer `company_id` from session introspection instead of guessing.
+- Prefer `company_id` from session introspection instead of guessing. Use slug or exact company name only when the UUID is not available.
 - If a key lacks `documents.write`, do not trigger Google Drive imports or document deletes.
+- If a key uploads or imports documents, check `document-questions` before assuming processing is complete.
+- Answer clarification requests with `answer-document-questions` and include provenance/source notes when available.
 - If a key lacks a connector-use scope, do not attempt that provider action.
 - Do not assume browser-managed integrations can be onboarded by OpenClaw.
 

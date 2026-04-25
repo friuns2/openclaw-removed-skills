@@ -2,17 +2,19 @@
 
 function usage() {
   console.log(`Usage:
-  node scripts/openclaw-aicfo-adapter.mjs session
-  node scripts/openclaw-aicfo-adapter.mjs tools
-  node scripts/openclaw-aicfo-adapter.mjs companies
-  node scripts/openclaw-aicfo-adapter.mjs dashboard [jsonInput]
-  node scripts/openclaw-aicfo-adapter.mjs query [jsonInput]
-  node scripts/openclaw-aicfo-adapter.mjs search [jsonInput]
-  node scripts/openclaw-aicfo-adapter.mjs get-entity [jsonInput]
-  node scripts/openclaw-aicfo-adapter.mjs get-file [jsonInput]
-  node scripts/openclaw-aicfo-adapter.mjs connectors [jsonInput]
-  node scripts/openclaw-aicfo-adapter.mjs connector [jsonInput]
-  node scripts/openclaw-aicfo-adapter.mjs documents [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs session
+  node bin/openclaw-aicfo-adapter.mjs tools
+  node bin/openclaw-aicfo-adapter.mjs companies
+  node bin/openclaw-aicfo-adapter.mjs dashboard [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs query [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs search [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs get-entity [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs get-file [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs connectors [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs connector [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs documents [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs document-questions [jsonInput]
+  node bin/openclaw-aicfo-adapter.mjs answer-document-questions [jsonInput]
 
 Named options:
   --url <baseUrl>
@@ -83,6 +85,231 @@ function resolveCompanyId(input, named) {
   return typeof candidate === "string" && candidate.trim().length > 0
     ? candidate.trim()
     : null;
+}
+
+function resolveSummaryView(input) {
+  return input.view === "full" || input.view === "summary" ? input.view : "summary";
+}
+
+function resolveQueryLimit(input) {
+  return Number.isFinite(input.limit) ? input.limit : 6;
+}
+
+function resolveSearchLimit(input) {
+  return Number.isFinite(input.limit) ? input.limit : 5;
+}
+
+function resolveDocumentsLimit(input) {
+  return Number.isFinite(input.limit) ? input.limit : 10;
+}
+
+function resolveFilePreviewChars(input) {
+  const candidate = input.max_chars ?? input.maxChars;
+  return Number.isFinite(candidate) ? candidate : 4000;
+}
+
+function truncateText(text, maxChars = 1600) {
+  if (typeof text !== "string") return String(text ?? "");
+  if (text.length <= maxChars) return text;
+  return `${text.slice(0, Math.max(0, maxChars - 1))}…`;
+}
+
+function compactEntity(item) {
+  if (!item || typeof item !== "object") return item;
+  return {
+    id: item.id,
+    qualifiedId: item.qualifiedId ?? item.qualified_id,
+    type: item.type,
+    domain: item.domain,
+    title: item.title,
+    filePath: item.filePath ?? item.file_path,
+    periodLabel: item.periodLabel ?? item.period_label,
+    managerialSummary:
+      typeof item.managerialSummary === "string"
+        ? truncateText(item.managerialSummary, 220)
+        : undefined,
+    requiresReview: item.requiresReview ?? item.requires_review,
+    reviewPending: item.reviewPending ?? item.review_pending,
+  };
+}
+
+function compactDocument(item) {
+  if (!item || typeof item !== "object") return item;
+  return {
+    id: item.id,
+    fileName: item.fileName,
+    fileType: item.fileType,
+    status: item.status,
+    documentType: item.documentType,
+    reportingPeriod: item.reportingPeriod,
+    reviewRequired: item.reviewRequired,
+    clarificationPendingCount: item.clarificationPendingCount,
+    createdAt: item.createdAt,
+  };
+}
+
+function compactConnector(item) {
+  if (!item || typeof item !== "object") return item;
+  return {
+    id: item.id,
+    provider: item.provider,
+    status: item.status,
+    lastSyncAt: item.lastSyncAt,
+    lastError:
+      typeof item.lastError === "string" ? truncateText(item.lastError, 140) : item.lastError,
+    capabilities: Array.isArray(item.capabilities) ? item.capabilities : undefined,
+  };
+}
+
+function compactDashboard(body) {
+  if (!body || typeof body !== "object") return body;
+  const dashboard = body.dashboard && typeof body.dashboard === "object" ? body.dashboard : null;
+  return {
+    company: body.company,
+    dashboard: dashboard
+      ? {
+          managementSummary:
+            typeof dashboard.managementSummary === "string"
+              ? truncateText(dashboard.managementSummary, 700)
+              : dashboard.managementSummary,
+          documentCount: dashboard.documentCount,
+          connectors: Array.isArray(dashboard.connectors)
+            ? dashboard.connectors.slice(0, 8).map(compactConnector)
+            : [],
+        }
+      : body.dashboard,
+  };
+}
+
+function compactConnectors(body, input) {
+  if (!body || typeof body !== "object") return body;
+  const includeCatalog = input.full === true || input.include_catalog === true;
+  return {
+    company: body.company,
+    connectors: Array.isArray(body.connectors) ? body.connectors.map(compactConnector) : [],
+    connectorCount: Array.isArray(body.connectors) ? body.connectors.length : 0,
+    catalogCount: Array.isArray(body.catalog) ? body.catalog.length : undefined,
+    hubCatalogCount: Array.isArray(body.hubCatalog) ? body.hubCatalog.length : undefined,
+    ...(includeCatalog
+      ? {
+          catalog: body.catalog,
+          hubCatalog: body.hubCatalog,
+        }
+      : {}),
+  };
+}
+
+function compactQueryLike(body) {
+  if (Array.isArray(body)) {
+    return {
+      count: body.length,
+      results: body.slice(0, 5).map(compactEntity),
+    };
+  }
+  if (body && typeof body === "object" && Array.isArray(body.results)) {
+    return {
+      count: typeof body.count === "number" ? body.count : body.results.length,
+      query: body.query,
+      domain: body.domain,
+      retrievalMode: body.retrievalMode,
+      results: body.results.slice(0, 5).map(compactEntity),
+    };
+  }
+  return body;
+}
+
+function compactDocuments(body) {
+  if (!Array.isArray(body)) return body;
+  return {
+    count: body.length,
+    documents: body.slice(0, 10).map(compactDocument),
+  };
+}
+
+function compactDocumentQuestions(body) {
+  if (!body || typeof body !== "object" || !Array.isArray(body.items)) return body;
+  return {
+    capability: body.capability,
+    summary: body.summary,
+    endpoints: body.endpoints,
+    answerContract: body.answerContract,
+    items: body.items.slice(0, 10).map((item) => ({
+      documentId: item.documentId,
+      fileName: item.fileName,
+      status: item.status,
+      questionCount: item.questionCount,
+      sourceContext: item.sourceContext,
+      uploadProvenance: item.uploadProvenance,
+      questions: Array.isArray(item.questions)
+        ? item.questions.map((question) => ({
+            key: question.key,
+            label: question.label,
+            prompt: question.prompt,
+            type: question.type,
+            required: question.required,
+            options: question.options,
+          }))
+        : [],
+      questionsUrl: item.questionsUrl,
+    })),
+  };
+}
+
+function compactGetEntity(body) {
+  return compactEntity(body);
+}
+
+function compactGetFile(result) {
+  const body = result?.body;
+  if (typeof body === "string") {
+    return {
+      path: result.path,
+      contentType: result.contentType,
+      contentDisposition: result.contentDisposition,
+      body: truncateText(body, 1800),
+    };
+  }
+  if (!body || typeof body !== "object") return result;
+  return {
+    path: result.path,
+    contentType: result.contentType,
+    contentDisposition: result.contentDisposition,
+    body: {
+      ...body,
+      content: typeof body.content === "string" ? truncateText(body.content, 1800) : body.content,
+    },
+  };
+}
+
+function compactCommandResult(command, body, input, transportMeta) {
+  if (input.raw === true || input.full === true) {
+    return body;
+  }
+
+  switch (command) {
+    case "dashboard":
+      return compactDashboard(body);
+    case "query":
+    case "search":
+      return compactQueryLike(body);
+    case "get-entity":
+      return compactGetEntity(body);
+    case "connectors":
+      return compactConnectors(body, input);
+    case "documents":
+      return compactDocuments(body);
+    case "document-questions":
+      return compactDocumentQuestions(body);
+    case "get-file":
+      return compactGetFile({
+        path: input.path,
+        contentType: transportMeta?.contentType,
+        contentDisposition: transportMeta?.contentDisposition,
+        body,
+      });
+    default:
+      return body;
+  }
 }
 
 function buildHeaders({ apiKey, companyId, contentType } = {}) {
@@ -206,6 +433,16 @@ const TOOL_SPECS = [
     surface: "REST",
     description: "List company documents with limit and offset.",
   },
+  {
+    name: "document-questions",
+    surface: "REST",
+    description: "List pending Document Questions for uploaded documents and the answer contract.",
+  },
+  {
+    name: "answer-document-questions",
+    surface: "REST",
+    description: "Answer Document Questions for one document. Input: { documentId, answers, reprocess?, saveTemplate?, applyToSimilar? }.",
+  },
 ];
 
 const { positional, named } = parseArgs(process.argv.slice(2));
@@ -261,7 +498,7 @@ switch (command) {
       companyId,
       path: "/api/agent/dashboard",
     });
-    console.log(JSON.stringify(result.body, null, 2));
+    console.log(JSON.stringify(compactCommandResult(command, result.body, input), null, 2));
     process.exit(0);
 
   case "query":
@@ -275,12 +512,12 @@ switch (command) {
         type: input.type,
         status: input.status,
         documentId: input.documentId,
-        limit: input.limit,
+        limit: resolveQueryLimit(input),
         offset: input.offset,
-        view: input.view,
+        view: resolveSummaryView(input),
       },
     });
-    console.log(JSON.stringify(result.body, null, 2));
+    console.log(JSON.stringify(compactCommandResult(command, result.body, input), null, 2));
     process.exit(0);
 
   case "search":
@@ -291,11 +528,11 @@ switch (command) {
       path: "/api/company/search",
       query: {
         q: input.query,
-        limit: input.limit,
-        view: input.view,
+        limit: resolveSearchLimit(input),
+        view: resolveSummaryView(input),
       },
     });
-    console.log(JSON.stringify(result.body, null, 2));
+    console.log(JSON.stringify(compactCommandResult(command, result.body, input), null, 2));
     process.exit(0);
 
   case "get-entity":
@@ -308,9 +545,10 @@ switch (command) {
         qualified_id: input.qualified_id ?? input.qualifiedId,
         domain: input.domain,
         id: input.id,
+        view: resolveSummaryView(input),
       },
     });
-    console.log(JSON.stringify(result.body, null, 2));
+    console.log(JSON.stringify(compactCommandResult(command, result.body, input), null, 2));
     process.exit(0);
 
   case "get-file":
@@ -322,16 +560,16 @@ switch (command) {
       query: {
         path: input.path,
         download: input.download ? "1" : undefined,
+        full: input.full ? "1" : undefined,
+        maxChars: input.full ? undefined : resolveFilePreviewChars(input),
       },
     });
     console.log(
       JSON.stringify(
-        {
-          path: input.path,
+        compactCommandResult(command, result.body, input, {
           contentType: result.contentType,
           contentDisposition: result.contentDisposition,
-          body: result.body,
-        },
+        }),
         null,
         2,
       ),
@@ -345,7 +583,7 @@ switch (command) {
       companyId,
       path: "/api/agent/connectors",
     });
-    console.log(JSON.stringify(result.body, null, 2));
+    console.log(JSON.stringify(compactCommandResult(command, result.body, input), null, 2));
     process.exit(0);
 
   case "connector":
@@ -371,12 +609,48 @@ switch (command) {
       companyId,
       path: "/api/documents",
       query: {
-        limit: input.limit,
+        limit: resolveDocumentsLimit(input),
         offset: input.offset,
+      },
+    });
+    console.log(JSON.stringify(compactCommandResult(command, result.body, input), null, 2));
+    process.exit(0);
+
+  case "document-questions":
+    result = await request({
+      appUrl,
+      apiKey,
+      companyId,
+      path: "/api/documents/questions",
+      query: {
+        limit: resolveDocumentsLimit(input),
+      },
+    });
+    console.log(JSON.stringify(compactCommandResult(command, result.body, input), null, 2));
+    process.exit(0);
+
+  case "answer-document-questions": {
+    const documentId = input.documentId ?? input.document_id;
+    if (typeof documentId !== "string" || documentId.trim().length === 0) {
+      console.error("Missing documentId");
+      process.exit(1);
+    }
+    result = await request({
+      appUrl,
+      apiKey,
+      companyId,
+      path: `/api/documents/${encodeURIComponent(documentId.trim())}/clarifications`,
+      method: "POST",
+      jsonBody: {
+        answers: input.answers ?? {},
+        reprocess: input.reprocess,
+        saveTemplate: input.saveTemplate ?? input.save_template,
+        applyToSimilar: input.applyToSimilar ?? input.apply_to_similar,
       },
     });
     console.log(JSON.stringify(result.body, null, 2));
     process.exit(0);
+  }
 
   default:
     console.error(`Unknown command: ${command}`);
