@@ -3,11 +3,16 @@
   "slug": "headless-testing",
   "displayName": "Headless Testing",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163330976,
-    "commit": "https://github.com/openclaw/skills/commit/0beec75b6f04acf239139a401c65d2923d5de699"
+    "version": "1.0.3",
+    "publishedAt": 1776798252298,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163330976,
+      "commit": "https://github.com/openclaw/skills/commit/0beec75b6f04acf239139a401c65d2923d5de699"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773262959851,
