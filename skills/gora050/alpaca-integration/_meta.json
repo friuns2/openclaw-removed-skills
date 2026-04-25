@@ -3,11 +3,16 @@
   "slug": "alpaca-integration",
   "displayName": "Alpaca",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163644135,
-    "commit": "https://github.com/openclaw/skills/commit/5534e42c9a7554eb671da8c76520f23b57ba38b6"
+    "version": "1.0.3",
+    "publishedAt": 1776805593032,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163644135,
+      "commit": "https://github.com/openclaw/skills/commit/5534e42c9a7554eb671da8c76520f23b57ba38b6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773360161141,
