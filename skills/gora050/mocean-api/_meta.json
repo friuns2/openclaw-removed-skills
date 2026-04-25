@@ -3,11 +3,16 @@
   "slug": "mocean-api",
   "displayName": "Mocean Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163259517,
-    "commit": "https://github.com/openclaw/skills/commit/cf2ad40f758d30de78e589ac76cc75131e40eee4"
+    "version": "1.0.3",
+    "publishedAt": 1776794599539,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163259517,
+      "commit": "https://github.com/openclaw/skills/commit/cf2ad40f758d30de78e589ac76cc75131e40eee4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773187374724,
