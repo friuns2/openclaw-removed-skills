@@ -3,11 +3,16 @@
   "slug": "seedance-video-gen",
   "displayName": "Seedance Video",
   "latest": {
-    "version": "0.1.3",
-    "publishedAt": 1775968718648,
-    "commit": "https://github.com/openclaw/skills/commit/6ba70fbeb50ec7a3f38d77df96307652efc047ab"
+    "version": "1.0.1",
+    "publishedAt": 1776571381106,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.3",
+      "publishedAt": 1775968718648,
+      "commit": "https://github.com/openclaw/skills/commit/6ba70fbeb50ec7a3f38d77df96307652efc047ab"
+    },
     {
       "version": "0.1.2",
       "publishedAt": 1775787822872,
