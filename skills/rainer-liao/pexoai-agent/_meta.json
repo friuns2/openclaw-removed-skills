@@ -1,13 +1,18 @@
 {
   "owner": "rainer-liao",
   "slug": "pexoai-agent",
-  "displayName": "Pexoclawskill",
+  "displayName": "Pexo AI Video Agent",
   "latest": {
-    "version": "0.3.4",
-    "publishedAt": 1773926359168,
-    "commit": "https://github.com/openclaw/skills/commit/2234da84cb4582d4e6a0fc3632e13c96e794df35"
+    "version": "0.3.10",
+    "publishedAt": 1775735866960,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.3.4",
+      "publishedAt": 1773926359168,
+      "commit": "https://github.com/openclaw/skills/commit/2234da84cb4582d4e6a0fc3632e13c96e794df35"
+    },
     {
       "version": "0.2.5",
       "publishedAt": 1773323666445,
