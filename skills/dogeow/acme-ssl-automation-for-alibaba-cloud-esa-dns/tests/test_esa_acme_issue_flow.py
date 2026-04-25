@@ -1,6 +1,7 @@
 import contextlib
 import importlib.util
 import io
+import urllib.error
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -22,6 +23,32 @@ def build_acme_output(challenges):
 class FlowTests(unittest.TestCase):
     def setUp(self):
         MODULE._REGION = None
+
+    def test_esa_req_retries_connection_reset_then_succeeds(self):
+        calls = {"count": 0}
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self):
+                return b'{"ok": true}'
+
+        def fake_urlopen(req, timeout=60):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError("[Errno 104] Connection reset by peer")
+            return FakeResponse()
+
+        with patch.object(MODULE.urllib.request, "urlopen", side_effect=fake_urlopen), \
+             patch.object(MODULE.time, "sleep"):
+            result = MODULE.esa_req({"ak": "ak", "sk": "sk"}, "ListSites", "GET", region="cn-hangzhou")
+
+        self.assertEqual(result, {"ok": True})
+        self.assertEqual(calls["count"], 2)
 
     def test_main_success_runs_full_dns_and_install_flow(self):
         created = []

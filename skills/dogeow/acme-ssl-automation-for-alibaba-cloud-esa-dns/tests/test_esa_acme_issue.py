@@ -86,6 +86,7 @@ class CommandBuildTests(unittest.TestCase):
                 "--renew",
                 "-d",
                 "example.com",
+                "--ecc",
                 "--yes-I-know-dns-manual-mode-enough-go-ahead-please",
                 "--keylength",
                 "ec-256",
@@ -109,6 +110,7 @@ class ArgParseTests(unittest.TestCase):
                 "ALIBABACLOUD_ACCESS_KEY_ID": "ak",
                 "ALIBABACLOUD_ACCESS_KEY_SECRET": "sk",
                 "ALIBABACLOUD_SECURITY_TOKEN": "sts",
+                "ALIBABACLOUD_ESA_REGION": "ap-southeast-1",
             },
             clear=False,
         ):
@@ -116,6 +118,24 @@ class ArgParseTests(unittest.TestCase):
         self.assertEqual(args.ak, "ak")
         self.assertEqual(args.sk, "sk")
         self.assertEqual(args.sts_token, "sts")
+        self.assertEqual(args.region, "ap-southeast-1")
+
+
+class EsaRegionTests(unittest.TestCase):
+    def test_discover_regions_falls_back_to_candidates_when_describe_regions_missing(self):
+        client = {"region": "ap-southeast-1"}
+        with patch.object(MODULE, "esa_req", side_effect=RuntimeError("ESA API HTTP 404: InvalidAction.NotFound")):
+            regions = MODULE._discover_esa_regions(client, preferred_region="ap-southeast-7")
+        self.assertEqual(regions[0:3], ["ap-southeast-7", "ap-southeast-1", "cn-hangzhou"])
+        self.assertIn("eu-central-1", regions)
+
+    def test_resolve_site_context_passes_region_hint_into_auto_detection(self):
+        with patch.object(MODULE, "make_acs_client", side_effect=["probe-client", "active-client"]) as make_client_mock, \
+             patch.object(MODULE, "auto_detect_region", return_value=("ap-southeast-1", "site-1", "dogeow.com")) as auto_detect_mock:
+            client, site_id, zone = MODULE.resolve_site_context("ak", "sk", None, "dogeow.com", region="ap-southeast-7")
+        self.assertEqual((client, site_id, zone), ("active-client", "site-1", "dogeow.com"))
+        auto_detect_mock.assert_called_once_with("probe-client", "dogeow.com", preferred_region="ap-southeast-7")
+        self.assertEqual(make_client_mock.call_args_list[0].args, ("ak", "sk", "ap-southeast-7"))
 
 
 class CommandTests(unittest.TestCase):

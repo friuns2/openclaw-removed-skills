@@ -73,10 +73,44 @@ python3 scripts/esa_acme_issue.py -d '*.example.com' --lang zh
 ## 默认行为
 
 - 默认不安装证书到 Nginx；如需安装请显式传 `--install-cert`
-- `--dns-timeout` 默认 `600`
-- 可选 IPv4/IPv6 记录管理：`--ensure-a-record host=ip`（含权威 NS 传播验证）
-- 覆盖保护：除非提供 `--confirm-overwrite`，否则不会覆盖已有 A 记录值
+- `--dns-timeout` 默认 600 秒
+- 区域自动发现为尽力而为；如果 ESA 不支持 `DescribeRegions`，请传 `--region` 作为站点探测提示，脚本会继续探测内置候选区域
+- 可选 IPv4/IPv6 记录管理：`--ensure-a-record host=ip`（会校验权威 NS 生效）
+
 - 如果使用 `--install-cert`，请在可控 Linux 主机上执行，并确保当前用户有权限写入目标证书路径并重载 Nginx
+
+## 安装自动续期 cron
+
+使用 `scripts/install_cron.sh` 可以一键安装 root 持有的环境文件、wrapper 脚本和 cron 任务。
+
+示例：
+
+```bash
+sudo bash scripts/install_cron.sh \
+  --wrapper-name dogeow \
+  --domains "dogeow.com,*.dogeow.com" \
+  --ak 你的AK \
+  --sk 你的SK \
+  --region cn-hangzhou \
+  --with-nginx-reload
+```
+
+它会创建：
+- `/root/.config/` 下的 env 文件
+- `/usr/local/sbin/` 下的 wrapper 脚本
+- 写日志到 `/var/log/` 的 cron 任务
+
+你也可以通过 `--schedule` 自定义 cron 表达式，例如：
+
+```bash
+sudo bash scripts/install_cron.sh \
+  --domains "example.com,*.example.com" \
+  --ak 你的AK \
+  --sk 你的SK \
+  --schedule "17 3 * * 0"
+```
+
+如果希望续期后由 acme.sh 安装证书到 nginx 管理路径，请传 `--cert-path`、`--key-path`，以及可选的 `--reload-cmd`。
 
 示例：
 
