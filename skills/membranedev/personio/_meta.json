@@ -3,11 +3,16 @@
   "slug": "personio",
   "displayName": "Personio",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775161804537,
-    "commit": "https://github.com/openclaw/skills/commit/d306dc7af9b03a3d8109f51e1cf94dbeb37db96e"
+    "version": "1.0.4",
+    "publishedAt": 1776776637433,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775161804537,
+      "commit": "https://github.com/openclaw/skills/commit/d306dc7af9b03a3d8109f51e1cf94dbeb37db96e"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1772780590808,
