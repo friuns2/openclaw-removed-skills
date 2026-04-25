@@ -3,11 +3,16 @@
   "slug": "trello-integration",
   "displayName": "Trello",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775161679854,
-    "commit": "https://github.com/openclaw/skills/commit/1322ec6e8f350112a56bfb0ecd020d5d17e2b0ff"
+    "version": "1.0.3",
+    "publishedAt": 1776772993620,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775161679854,
+      "commit": "https://github.com/openclaw/skills/commit/1322ec6e8f350112a56bfb0ecd020d5d17e2b0ff"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772694142700,
