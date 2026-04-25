@@ -3,11 +3,16 @@
   "slug": "order-desk",
   "displayName": "Order Desk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163462381,
-    "commit": "https://github.com/openclaw/skills/commit/d6a04f50e5ad870017bef3357005598c5b7cf166"
+    "version": "1.0.3",
+    "publishedAt": 1776805349245,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163462381,
+      "commit": "https://github.com/openclaw/skills/commit/d6a04f50e5ad870017bef3357005598c5b7cf166"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773288129709,
