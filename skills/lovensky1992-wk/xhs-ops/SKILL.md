@@ -179,6 +179,23 @@ description: >
 
 **定稿后必须执行**：对照 `references/anti-ai-checklist.md` 逐条检查，降 AI 味 + 注入灵魂。
 
+### §4.3 图卡系列规划（多图笔记必做）
+
+文案定稿后、配图前，必须完成图卡系列规划。流程见 `references/content-analysis.md` 的 §6§7。
+
+**流程摘要**：
+1. **内容分析** → 内容分类、受众画像、Hook 评估、传播触发点、视觉机会映射
+2. **三策略大纲**（可选） → 默认出 A+B 两个差异化方案，老板选定
+3. **预设选择** → 根据 `references/presets.md` 的信号匹配表自动推荐
+4. **Swipe Flow 设计** → 每张图的位置、布局、内容、图间钩子（见 `references/swipe-flow.md`）
+5. **生成配图** → 结构化 Prompt 组装 + Reference Image Chain（见 `references/illustration-prompts.md`）
+
+**关键原则**：
+- 配色覆盖可只换颜色不换风格（见 `references/presets.md` 配色覆盖节）
+- 第一张图不带 ref，后续所有图以第一张为 ref 锚点（保证视觉一致性）
+- 每张图的 prompt 先存 `prompts/NN-{type}-{slug}.md` 再生成
+- 新增 mindmap 和 quadrant 两种布局（见 `references/layouts.md`）
+
 ### §4.5 五维内容自检（定稿后必做）
 
 Anti-AI checklist 通过后，再过一遍内容质量自检。任何一项 ❌ 必须修改。

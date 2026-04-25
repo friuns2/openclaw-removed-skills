@@ -59,6 +59,8 @@
 | `list` | 垂直列举 | 4-7 条 | 排行榜、清单、步骤指南 |
 | `comparison` | 左右对比 | 2 组 | before/after、优劣对比、产品PK |
 | `flow` | 节点+箭头 | 3-6 步 | 流程、时间线、工作流 |
+| `mindmap` | 中心放射 | 4-8 分支 | 概念图、知识脉络、话题总览 |
+| `quadrant` | 四宫格/2×2 | 4 区块 | SWOT分析、优先级矩阵、分类对比 |
 
 ---
 
@@ -151,6 +153,36 @@
 > Top-to-bottom (or left-to-right) flow with connected nodes, directional arrows between steps, numbered stages, clear progression indicators.
 
 **典型用法**：操作教程、工作流展示、决策路径
+
+---
+
+### mindmap（脑图/放射型）
+
+```
+结构：中心主题节点，向外放射 4-8 个分支，支持子分支
+视觉：有机曲线连接，层级通过大小/颜色区分
+文字：中心 = 主题（3-5字），分支 = 子主题（2-4字），叶节点 = 关键词
+```
+
+**Prompt 关键词**：
+> Central topic node with radial branches outward, organic curved connections, hierarchical sub-branches, each branch with a distinct color from the palette.
+
+**典型用法**：概念图、知识脉络、头脑风暴结果、话题全景
+
+---
+
+### quadrant（四象限型）
+
+```
+结构：2×2 网格，每个象限独立内容区，中心可选标记交叉轴
+视觉：四个象限用不同色块区分，轴标签清晰
+文字：每象限 = 类型标签（2-3字）+ 2-4 条内容
+```
+
+**Prompt 关键词**：
+> Four-quadrant grid (2×2), clear axis labels at center cross, each quadrant with distinct background color, organized content within each section.
+
+**典型用法**：SWOT 分析、优先级矩阵（紧急/重要）、四象限分类、对比归类
 
 ---
 

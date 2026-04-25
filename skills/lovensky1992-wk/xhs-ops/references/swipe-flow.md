@@ -118,12 +118,19 @@ Ending: 结论 + "你站哪边？"
 | 主色调 | 一个主色始终不变 |
 | 背景 | 统一底色 |
 | 文字风格 | 统一字体方向和大小层级 |
+| 角色设计 | 如有反复出现的卡通人物/吉祥物，必须一致 |
 
 允许变化的：每页的布局（Cover 用 sparse，Core 用 dense 等）、具体内容。
 
-### 风格锚点
+### Reference Image Chain（首选）
 
-生成第一张图后，记录其视觉特征。后续图片 prompt 末尾附加：
+**第一张图不带 ref，后续所有图以第一张为 ref。** 这是保证角色设计、配色渲染、插画风格跨系列一致的最有效方法。
+
+具体操作见 `illustration-prompts.md` 的“图片 Ref 锚点”和“文本锚点”部分。
+
+### 风格锚点（文本保底）
+
+当生图工具不支持 ref 参数时，生成第一张图后立即将视觉特征记录到 `prompts/00-anchor.md`。后续每张 prompt 末尾附加：
 
 ```
 Maintain visual consistency with the first image in this series:
@@ -131,4 +138,5 @@ Maintain visual consistency with the first image in this series:
 - Same color palette: [主色] + [辅助色] + [背景色]
 - Same typography approach
 - Same level of detail and whitespace
+- Same character design if recurring characters appear
 ```
