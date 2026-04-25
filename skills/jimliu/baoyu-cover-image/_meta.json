@@ -3,11 +3,16 @@
   "slug": "baoyu-cover-image",
   "displayName": "Baoyu Cover Image",
   "latest": {
-    "version": "1.103.1",
-    "publishedAt": 1776096863848,
-    "commit": "https://github.com/openclaw/skills/commit/d188059aea59ad8b9317f6cdb8826113365079da"
+    "version": "1.103.2",
+    "publishedAt": 1776808883508,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.103.1",
+      "publishedAt": 1776096863848,
+      "commit": "https://github.com/openclaw/skills/commit/d188059aea59ad8b9317f6cdb8826113365079da"
+    },
     {
       "version": "1.60.3",
       "publishedAt": 1775751967973,
