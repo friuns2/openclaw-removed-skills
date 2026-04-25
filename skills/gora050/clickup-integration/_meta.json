@@ -3,11 +3,16 @@
   "slug": "clickup-integration",
   "displayName": "Clickup",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162381634,
-    "commit": "https://github.com/openclaw/skills/commit/63fa0ca34801038d461caa938eeeb11e279405c1"
+    "version": "1.0.3",
+    "publishedAt": 1776772032874,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162381634,
+      "commit": "https://github.com/openclaw/skills/commit/63fa0ca34801038d461caa938eeeb11e279405c1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772640161238,
