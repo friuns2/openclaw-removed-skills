@@ -3,11 +3,16 @@
   "slug": "datarobot",
   "displayName": "Datarobot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775163276656,
-    "commit": "https://github.com/openclaw/skills/commit/86e6905fec838c6483df76ba0bf67b5526bce676"
+    "version": "1.0.3",
+    "publishedAt": 1776798131659,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775163276656,
+      "commit": "https://github.com/openclaw/skills/commit/86e6905fec838c6483df76ba0bf67b5526bce676"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773190934000,
