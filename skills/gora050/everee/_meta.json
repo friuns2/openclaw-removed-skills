@@ -3,11 +3,16 @@
   "slug": "everee",
   "displayName": "Everee",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775162696369,
-    "commit": "https://github.com/openclaw/skills/commit/e92ea8bfad2373ad38b9a7e737e8c14de19ca8d8"
+    "version": "1.0.3",
+    "publishedAt": 1776780298168,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775162696369,
+      "commit": "https://github.com/openclaw/skills/commit/e92ea8bfad2373ad38b9a7e737e8c14de19ca8d8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1772902943302,
