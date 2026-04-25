@@ -3,11 +3,16 @@
   "slug": "investoday-finance-data",
   "displayName": "InvestToday Finance Data",
   "latest": {
-    "version": "1.6.1",
-    "publishedAt": 1776160696466,
-    "commit": "https://github.com/openclaw/skills/commit/339173d541f325606444b040e12972377f210250"
+    "version": "1.8.4",
+    "publishedAt": 1777019875877,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.6.1",
+      "publishedAt": 1776160696466,
+      "commit": "https://github.com/openclaw/skills/commit/339173d541f325606444b040e12972377f210250"
+    },
     {
       "version": "1.5.0",
       "publishedAt": 1775223703883,
