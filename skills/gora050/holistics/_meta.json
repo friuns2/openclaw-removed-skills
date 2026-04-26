@@ -3,11 +3,16 @@
   "slug": "holistics",
   "displayName": "Holistics",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165769187,
-    "commit": "https://github.com/openclaw/skills/commit/5f3a0994470821e5ed259ad2a8c74453b6f7d200"
+    "version": "1.0.3",
+    "publishedAt": 1776893142869,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165769187,
+      "commit": "https://github.com/openclaw/skills/commit/5f3a0994470821e5ed259ad2a8c74453b6f7d200"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774101816478,
