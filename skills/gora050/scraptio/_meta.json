@@ -3,11 +3,16 @@
   "slug": "scraptio",
   "displayName": "Scraptio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166923699,
-    "commit": "https://github.com/openclaw/skills/commit/6bcde2ca89520a73546b5fb47c3469a9d86af7be"
+    "version": "1.0.3",
+    "publishedAt": 1776860598762,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166923699,
+      "commit": "https://github.com/openclaw/skills/commit/6bcde2ca89520a73546b5fb47c3469a9d86af7be"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774325038486,
