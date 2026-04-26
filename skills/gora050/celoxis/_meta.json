@@ -3,11 +3,16 @@
   "slug": "celoxis",
   "displayName": "Celoxis",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165407458,
-    "commit": "https://github.com/openclaw/skills/commit/fae1fbc038769566db4e302ad3b74a0c9fd8f1fb"
+    "version": "1.0.3",
+    "publishedAt": 1776859338671,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165407458,
+      "commit": "https://github.com/openclaw/skills/commit/fae1fbc038769566db4e302ad3b74a0c9fd8f1fb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774022625689,
