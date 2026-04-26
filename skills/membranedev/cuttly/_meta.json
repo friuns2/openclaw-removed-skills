@@ -3,11 +3,16 @@
   "slug": "cuttly",
   "displayName": "Cuttly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164832732,
-    "commit": "https://github.com/openclaw/skills/commit/3bcfea6e634054334efa69e356f947911525a5c6"
+    "version": "1.0.3",
+    "publishedAt": 1776845605794,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164832732,
+      "commit": "https://github.com/openclaw/skills/commit/3bcfea6e634054334efa69e356f947911525a5c6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773907340762,
