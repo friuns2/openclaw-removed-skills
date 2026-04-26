@@ -1,11 +1,17 @@
 {
   "owner": "dp-pcs",
   "slug": "ogp-expose",
-  "displayName": "OGP Expose",
+  "displayName": "Ogp Expose",
   "latest": {
-    "version": "0.2.3",
-    "publishedAt": 1774411277650,
-    "commit": "https://github.com/openclaw/skills/commit/ceffa36d82059b2c5ee734292e0ee76dd71f2af7"
+    "version": "0.6.0",
+    "publishedAt": 1776787828476,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.2.3",
+      "publishedAt": 1774411277650,
+      "commit": "https://github.com/openclaw/skills/commit/ceffa36d82059b2c5ee734292e0ee76dd71f2af7"
+    }
+  ]
 }
