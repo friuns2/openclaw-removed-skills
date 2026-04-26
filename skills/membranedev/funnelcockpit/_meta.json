@@ -3,11 +3,16 @@
   "slug": "funnelcockpit",
   "displayName": "Funnelcockpit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167136618,
-    "commit": "https://github.com/openclaw/skills/commit/c519fbcc68c3b4d25b01c54995558e5f7a65a05a"
+    "version": "1.0.3",
+    "publishedAt": 1776850061523,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167136618,
+      "commit": "https://github.com/openclaw/skills/commit/c519fbcc68c3b4d25b01c54995558e5f7a65a05a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774382592569,
