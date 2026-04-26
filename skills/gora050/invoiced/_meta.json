@@ -3,9 +3,15 @@
   "slug": "invoiced",
   "displayName": "Invoiced",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774407893620,
-    "commit": "https://github.com/openclaw/skills/commit/0c96facc8d662893669118f97685fc2250aa4649"
+    "version": "1.0.1",
+    "publishedAt": 1776861156675,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774407893620,
+      "commit": "https://github.com/openclaw/skills/commit/0c96facc8d662893669118f97685fc2250aa4649"
+    }
+  ]
 }
