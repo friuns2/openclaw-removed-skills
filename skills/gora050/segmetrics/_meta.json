@@ -3,11 +3,16 @@
   "slug": "segmetrics",
   "displayName": "Segmetrics",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166449112,
-    "commit": "https://github.com/openclaw/skills/commit/70f283310215dcaba116a679c9855b09b0378457"
+    "version": "1.0.3",
+    "publishedAt": 1776860194995,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166449112,
+      "commit": "https://github.com/openclaw/skills/commit/70f283310215dcaba116a679c9855b09b0378457"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774224240078,
