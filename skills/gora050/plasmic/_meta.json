@@ -3,11 +3,16 @@
   "slug": "plasmic",
   "displayName": "Plasmic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164974193,
-    "commit": "https://github.com/openclaw/skills/commit/92e0a6cce633b44efa5313a4474b161af42b78e8"
+    "version": "1.0.3",
+    "publishedAt": 1776858876627,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164974193,
+      "commit": "https://github.com/openclaw/skills/commit/92e0a6cce633b44efa5313a4474b161af42b78e8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773936197818,
