@@ -3,11 +3,16 @@
   "slug": "commercehq",
   "displayName": "Commercehq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165956684,
-    "commit": "https://github.com/openclaw/skills/commit/506a562f72128f764d0a39a9e5d887e33a70fe31"
+    "version": "1.0.3",
+    "publishedAt": 1776862795160,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165956684,
+      "commit": "https://github.com/openclaw/skills/commit/506a562f72128f764d0a39a9e5d887e33a70fe31"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774127039162,
