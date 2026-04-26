@@ -3,11 +3,16 @@
   "slug": "paykickstart",
   "displayName": "Paykickstart",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166213898,
-    "commit": "https://github.com/openclaw/skills/commit/a14935179e100a1e4f4ce4082fa11006f441bdc4"
+    "version": "1.0.3",
+    "publishedAt": 1776848356106,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166213898,
+      "commit": "https://github.com/openclaw/skills/commit/a14935179e100a1e4f4ce4082fa11006f441bdc4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774184574798,
