@@ -3,11 +3,16 @@
   "slug": "snapchat-marketing",
   "displayName": "Snapchat Marketing",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167629405,
-    "commit": "https://github.com/openclaw/skills/commit/97c7f1981cbb0f641c1f41863569f666081a4281"
+    "version": "1.0.3",
+    "publishedAt": 1776861623972,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167629405,
+      "commit": "https://github.com/openclaw/skills/commit/97c7f1981cbb0f641c1f41863569f666081a4281"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479866582,
