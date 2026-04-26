@@ -3,11 +3,16 @@
   "slug": "explanation-docs",
   "displayName": "Explanation Docs",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775852545005,
-    "commit": "https://github.com/openclaw/skills/commit/9e27e9c8f68f61e087b7fa8c13f44472a13a735d"
+    "version": "1.0.2",
+    "publishedAt": 1776831054539,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775852545005,
+      "commit": "https://github.com/openclaw/skills/commit/9e27e9c8f68f61e087b7fa8c13f44472a13a735d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774060200171,
