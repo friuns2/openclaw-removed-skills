@@ -1,0 +1,11 @@
+{
+  "owner": "pcs-bot",
+  "slug": "pcs-collect-fees",
+  "displayName": "Collect Fees",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1774320263603,
+    "commit": null
+  },
+  "history": []
+}
