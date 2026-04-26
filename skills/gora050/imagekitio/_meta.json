@@ -3,11 +3,16 @@
   "slug": "imagekitio",
   "displayName": "Imagekitio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165943052,
-    "commit": "https://github.com/openclaw/skills/commit/43cf12329c8620290f60eeaddbae611b50c44d40"
+    "version": "1.0.3",
+    "publishedAt": 1776862769009,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165943052,
+      "commit": "https://github.com/openclaw/skills/commit/43cf12329c8620290f60eeaddbae611b50c44d40"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774127017199,
