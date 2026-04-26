@@ -3,11 +3,16 @@
   "slug": "exhibitday",
   "displayName": "Exhibitday",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164597319,
-    "commit": "https://github.com/openclaw/skills/commit/0009a1431f4a07dc6e1c02a92f88eed05b7bd5ed"
+    "version": "1.0.3",
+    "publishedAt": 1776858477899,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164597319,
+      "commit": "https://github.com/openclaw/skills/commit/0009a1431f4a07dc6e1c02a92f88eed05b7bd5ed"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773802972430,
