@@ -3,11 +3,16 @@
   "slug": "smartproxy",
   "displayName": "Smartproxy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167320872,
-    "commit": "https://github.com/openclaw/skills/commit/25c54741ff0e9066cf322f3d60510ae1aa604050"
+    "version": "1.0.3",
+    "publishedAt": 1776861129818,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167320872,
+      "commit": "https://github.com/openclaw/skills/commit/25c54741ff0e9066cf322f3d60510ae1aa604050"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774407850752,
