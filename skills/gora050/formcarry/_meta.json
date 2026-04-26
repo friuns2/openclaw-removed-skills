@@ -3,11 +3,16 @@
   "slug": "formcarry",
   "displayName": "Formcarry",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166775060,
-    "commit": "https://github.com/openclaw/skills/commit/69049f84b9828dac66fd15a78685debcae5bf641"
+    "version": "1.0.3",
+    "publishedAt": 1776860425978,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166775060,
+      "commit": "https://github.com/openclaw/skills/commit/69049f84b9828dac66fd15a78685debcae5bf641"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774307050365,
