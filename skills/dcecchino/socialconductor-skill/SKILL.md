@@ -21,18 +21,12 @@ tags:
   - ai-replies
   - marketing
   - saas
-version: "1.6.0"
+version: "1.7.1"
 metadata:
   openclaw:
     emoji: "🤖"
     homepage: https://podium.socialconductor.ai
     always: false
-    requires:
-      env:
-        - SC_FB_API_KEY
-        - SC_YT_API_KEY
-        - SC_TIKTOK_API_KEY
-    primaryEnv: SC_FB_API_KEY
 ---
 
 # SocialConductor — Facebook, Instagram, YouTube & TikTok
@@ -49,6 +43,19 @@ Control your SocialConductor AI comment bots from WhatsApp, Slack, Telegram, or 
 
 Each platform uses its own API key. You can connect one, two, or all three —
 commands are prefixed by platform so OpenClaw always knows which bot you mean.
+
+---
+
+## NEW: OpenClaw Core Features
+
+Across all platforms, you can now access advanced features:
+
+| Feature | Commands | Description |
+|---------|----------|-------------|
+| **Drafts & Approvals** | `show my pending drafts`<br>`approve all pending drafts` | View and bulk approve pending AI replies. |
+| **Analytics** | `show my daily analytics`<br>`show performance insights` | View daily statistics, trends, and core performance metrics. |
+| **AI Teaching** | `show teaching examples`<br>`add this comment to teaching examples` | View "star" and "bad" example lists, and add new examples to train the AI tone. |
+| **Advanced Tools** | `show my friends list`<br>`turn on vacation mode`<br>`open the viral vault` | Access friends/subscriptions, configure vacation scheduling, and view top-performing viral comments. |
 
 ---
 
@@ -213,12 +220,13 @@ https://violin.socialconductor.ai/api/openclaw/
 
 ---
 
-## Auth
+## Auth & Privacy
 
-Each platform issues its own Bearer token via `POST /api/openclaw/register`
-with `{"openclaw_user_id": "..."}`. Tokens are stored locally by OpenClaw and
-sent as `Authorization: Bearer <key>` on every call. Keys are SHA-256 hashed
-before server-side storage — the plaintext is never saved remotely.
+**API Keys:** The environment variables (`SC_FB_API_KEY`, `SC_YT_API_KEY`, `SC_TIKTOK_API_KEY`) are **SocialConductor-issued API keys** generated from your SocialConductor dashboard. They are *not* your native Meta, Google, or TikTok passwords or OAuth tokens. You only need to provide the keys for the specific platforms you wish to automate.
+
+**Registration & Data Privacy:** When you run a `connect` command, OpenClaw sends only a secure, anonymous identifier (`{"openclaw_user_id": "..."}`) to the SocialConductor API via `POST /api/openclaw/register` to generate your one-time browser link. **No chat history, personal data, or agent context is transmitted during this registration phase.**
+
+Tokens are stored locally by OpenClaw and sent as `Authorization: Bearer <key>` on every call. Keys are SHA-256 hashed before server-side storage — the plaintext is never saved remotely.
 
 | Platform | Register endpoint |
 |----------|-------------------|

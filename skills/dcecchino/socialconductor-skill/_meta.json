@@ -3,11 +3,16 @@
   "slug": "socialconductor-skill",
   "displayName": "Socialconductor Skill",
   "latest": {
-    "version": "1.6.0",
-    "publishedAt": 1775052267305,
-    "commit": "https://github.com/openclaw/skills/commit/24efb668e28b532d33934ff2177a03b2de70b7b3"
+    "version": "1.7.1",
+    "publishedAt": 1777162827605,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.6.0",
+      "publishedAt": 1775052267305,
+      "commit": "https://github.com/openclaw/skills/commit/24efb668e28b532d33934ff2177a03b2de70b7b3"
+    },
     {
       "version": "1.4.0",
       "publishedAt": 1773805790073,
