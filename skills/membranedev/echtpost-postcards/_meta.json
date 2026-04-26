@@ -3,11 +3,16 @@
   "slug": "echtpost-postcards",
   "displayName": "Echtpost Postcards",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164758339,
-    "commit": "https://github.com/openclaw/skills/commit/e8e29d054dda4e0e13228a77cd59be20bf3e14f3"
+    "version": "1.0.3",
+    "publishedAt": 1776845456979,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164758339,
+      "commit": "https://github.com/openclaw/skills/commit/e8e29d054dda4e0e13228a77cd59be20bf3e14f3"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775164756526,
