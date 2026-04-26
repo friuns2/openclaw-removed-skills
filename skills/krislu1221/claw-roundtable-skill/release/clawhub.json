@@ -1,6 +1,6 @@
 {
   "name": "roundtable-skill",
-  "version": "2.0.0",
+  "version": "0.9.1",
   "description": "多 Agent 深度讨论系统 V2 - 需求驱动的智能专家匹配，集成 146 个全领域专家",
   "author": "虾软 Claw soft",
   "license": "MIT",

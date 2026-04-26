@@ -18,7 +18,7 @@ import asyncio
 from datetime import datetime
 from typing import Optional, Dict, List
 
-from requirement_analyzer import expert_pool
+from requirement_analyzer import EXPERT_PROFILES
 
 
 class RoundTableNotifier:
@@ -144,11 +144,7 @@ class RoundTableNotifier:
         """V2 发送开始通知"""
         self.start_time = datetime.now()
         
-        expert_names = []
-        for e in experts:
-            agent = expert_pool.get_agent(e)
-            if agent:
-                expert_names.append(agent.name)
+        expert_names = [EXPERT_PROFILES[e].name for e in experts if e in EXPERT_PROFILES]
         
         message = f"""
 🚀 **RoundTable V2 已启动**
