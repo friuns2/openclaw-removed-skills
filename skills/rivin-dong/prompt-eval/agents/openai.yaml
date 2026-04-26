@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt Eval"
+  short_description: "Evaluate and iterate prompts with scored tests"
+  default_prompt: "Use $prompt-eval to benchmark this prompt and produce a validated prompt_a_final."

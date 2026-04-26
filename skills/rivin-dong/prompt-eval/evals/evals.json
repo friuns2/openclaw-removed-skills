@@ -1,0 +1,23 @@
+{
+  "skill_name": "prompt-eval",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to evaluate this prompt:\n\n---\nYou are a sentiment analyzer. Given a customer review, output exactly one word: POSITIVE, NEGATIVE, or NEUTRAL. No explanation, no punctuation — just the single label.\n---\n\nPlease run the full prompt-eval workflow on it.",
+      "expected_output": "A 5-step evaluation: (1) test_plan with TP definitions and case distribution, (2) 15 test cases in JSON covering happy path / boundary / error / i18n dimensions, (3) result_aftertest for each case by simulating the prompt, (4) prompt_b with 3-4 TPs and 1-3 scoring rubrics, (5) final scored JSON with TP scores and total_score per case, plus a summary report.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Please evaluate this JSON extraction prompt for me:\n\n---\nYou extract structured data from job postings. For each posting, output valid JSON with these fields:\n- company_name (string or null)\n- role_title (string)\n- location (string or null)\n- salary_range (string or null)\n\nIf a field is not mentioned, set it to null. Output only JSON — no extra text.\n---\n\nI need test cases, scoring, and a final quality report.",
+      "expected_output": "A complete 5-step evaluation. The test_plan should identify TPs such as JSON validity, field completeness, null-handling correctness, and no-hallucination. Test cases should include postings with all fields, postings missing salary, remote jobs, and adversarial inputs. final_scored_results.json should have TP scores and reasons per test case, and the summary report should highlight failure patterns.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Help me evaluate this multilingual B2B sourcing prompt. It's complex but I need to know if it's working correctly:\n\n---\nYou are Searcher Agent. Extract main_search_product (a short product noun phrase in the input language), countries (list of supplier countries — default [\"China\"] unless user specifies otherwise), and translate the product name into 11 languages. Output strict JSON:\n{\n  \"main_search_product\": \"\",\n  \"countries\": [],\n  \"other_languages\": [{\"language\": \"English\", \"product\": \"\"}, ...11 languages total],\n  \"explain\": \"\"\n}\nIf input mentions a country without additive keywords (also/too/另外), only include that country — do not default to China. If input contains prohibited items (weapons, organs, drugs), output empty search_product_list and explain the refusal.\n---",
+      "expected_output": "5-step evaluation covering: test_plan with TPs for JSON validity, main_search_product quality, countries decision logic, 11-language completeness, and safety filtering. Test cases covering Chinese/English/Japanese inputs, country specification variants (exclusive vs additive), and safety cases. final_scored_results.json with per-TP scores and a report identifying which rules fail most.",
+      "files": []
+    }
+  ]
+}

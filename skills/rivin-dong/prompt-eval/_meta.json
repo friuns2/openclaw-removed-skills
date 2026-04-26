@@ -3,9 +3,15 @@
   "slug": "prompt-eval",
   "displayName": "prompt-eval",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773995950614,
-    "commit": "https://github.com/openclaw/skills/commit/08fe6f7830c369e296c84ebbd838374ae735a75d"
+    "version": "1.0.1",
+    "publishedAt": 1776939369584,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773995950614,
+      "commit": "https://github.com/openclaw/skills/commit/08fe6f7830c369e296c84ebbd838374ae735a75d"
+    }
+  ]
 }
