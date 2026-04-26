@@ -3,11 +3,16 @@
   "slug": "fogbugz",
   "displayName": "Fogbugz",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164789644,
-    "commit": "https://github.com/openclaw/skills/commit/cdee7c136073101e5ef010e875babc4b6d9852ba"
+    "version": "1.0.3",
+    "publishedAt": 1776845511771,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164789644,
+      "commit": "https://github.com/openclaw/skills/commit/cdee7c136073101e5ef010e875babc4b6d9852ba"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773900147110,
