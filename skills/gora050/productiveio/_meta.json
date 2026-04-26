@@ -3,11 +3,16 @@
   "slug": "productiveio",
   "displayName": "Productiveio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165657722,
-    "commit": "https://github.com/openclaw/skills/commit/90672c52109580c7a6d6fd06e67ab2aef4858f8b"
+    "version": "1.0.3",
+    "publishedAt": 1776859680750,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165657722,
+      "commit": "https://github.com/openclaw/skills/commit/90672c52109580c7a6d6fd06e67ab2aef4858f8b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058648073,
