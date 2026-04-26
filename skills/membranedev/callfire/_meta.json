@@ -3,11 +3,16 @@
   "slug": "callfire",
   "displayName": "Callfire",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166549671,
-    "commit": "https://github.com/openclaw/skills/commit/b1a29a7676ece1103d9fdc43dcb86cedd61a4043"
+    "version": "1.0.3",
+    "publishedAt": 1776848871045,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166549671,
+      "commit": "https://github.com/openclaw/skills/commit/b1a29a7676ece1103d9fdc43dcb86cedd61a4043"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774234939925,
