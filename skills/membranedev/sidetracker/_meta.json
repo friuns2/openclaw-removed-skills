@@ -3,11 +3,16 @@
   "slug": "sidetracker",
   "displayName": "Sidetracker",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166017054,
-    "commit": "https://github.com/openclaw/skills/commit/8464220d44799af9e1c248bfd68c3987438c0674"
+    "version": "1.0.3",
+    "publishedAt": 1776847905932,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166017054,
+      "commit": "https://github.com/openclaw/skills/commit/8464220d44799af9e1c248bfd68c3987438c0674"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774137785385,
