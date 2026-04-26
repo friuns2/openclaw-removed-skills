@@ -3,11 +3,16 @@
   "slug": "elorus",
   "displayName": "Elorus",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167392968,
-    "commit": "https://github.com/openclaw/skills/commit/888741151ce2bb2831574a1c23df8540d78928e8"
+    "version": "1.0.3",
+    "publishedAt": 1776861282205,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167392968,
+      "commit": "https://github.com/openclaw/skills/commit/888741151ce2bb2831574a1c23df8540d78928e8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774429417623,
