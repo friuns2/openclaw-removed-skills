@@ -3,11 +3,16 @@
   "slug": "verimi",
   "displayName": "Verimi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166640932,
-    "commit": "https://github.com/openclaw/skills/commit/06dc2017f1a1f4d17c6f3d0873119742480649c0"
+    "version": "1.0.3",
+    "publishedAt": 1776884903386,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166640932,
+      "commit": "https://github.com/openclaw/skills/commit/06dc2017f1a1f4d17c6f3d0873119742480649c0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774293774626,
