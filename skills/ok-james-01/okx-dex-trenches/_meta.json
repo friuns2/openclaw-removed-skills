@@ -3,11 +3,16 @@
   "slug": "okx-dex-trenches",
   "displayName": "Okx Dex Trenches",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776333438619,
-    "commit": "https://github.com/openclaw/skills/commit/f9baa637ebb9df2403a0de0b38beaaeaa0829f96"
+    "version": "2.4.0",
+    "publishedAt": 1776778903299,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776333438619,
+      "commit": "https://github.com/openclaw/skills/commit/f9baa637ebb9df2403a0de0b38beaaeaa0829f96"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775722987057,
