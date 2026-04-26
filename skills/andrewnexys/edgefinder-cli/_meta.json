@@ -3,9 +3,15 @@
   "slug": "edgefinder-cli",
   "displayName": "Edgefinder Cli",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1774489480689,
-    "commit": "https://github.com/openclaw/skills/commit/c0afa1c5db4057d7a10d831d4b4305407aa7717f"
+    "version": "0.1.2",
+    "publishedAt": 1776915119124,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1774489480689,
+      "commit": "https://github.com/openclaw/skills/commit/c0afa1c5db4057d7a10d831d4b4305407aa7717f"
+    }
+  ]
 }
