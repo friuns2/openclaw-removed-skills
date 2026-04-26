@@ -3,11 +3,16 @@
   "slug": "credit-repair-cloud",
   "displayName": "Credit Repair Cloud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165337662,
-    "commit": "https://github.com/openclaw/skills/commit/129981bf082e8f118c9f7792a24eec95c8c405d6"
+    "version": "1.0.3",
+    "publishedAt": 1776846756140,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165337662,
+      "commit": "https://github.com/openclaw/skills/commit/129981bf082e8f118c9f7792a24eec95c8c405d6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774015360423,
