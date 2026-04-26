@@ -3,11 +3,16 @@
   "slug": "feedier",
   "displayName": "Feedier",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166718392,
-    "commit": "https://github.com/openclaw/skills/commit/6c103bd4953a6405ec3627ed1aeeaaa6190d2253"
+    "version": "1.0.3",
+    "publishedAt": 1776860329682,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166718392,
+      "commit": "https://github.com/openclaw/skills/commit/6c103bd4953a6405ec3627ed1aeeaaa6190d2253"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774299836917,
