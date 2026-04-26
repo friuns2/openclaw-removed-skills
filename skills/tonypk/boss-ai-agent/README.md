@@ -1,8 +1,8 @@
 ---
 name: boss-ai-agent
 title: "Boss AI Agent"
-version: "6.4.0"
-description: "Boss AI Agent — your AI management advisor. 16 mentor philosophies, 9 culture packs, C-Suite board simulation, execution intelligence engine, memory-driven AI recommendation engine, bidirectional Notion/Sheets sync. Works instantly after install. Connect MCP via CLI (stdio) or HTTP for full team automation: 33 MCP tools, auto check-ins, tracking, KPI metrics, task management, risk signals, incentive scoring, memory-driven AI recommendations, data sync to Notion/Sheets, 23+ platform messaging. v6.2: CLI (stdio) MCP transport — run locally with one API key, no HTTP auth needed. v6.1: Memory engine feeds employee behavioral patterns into recommendations."
+version: "9.0.0"
+description: "Boss AI Agent — AI management advisor and team operations middleware. Use this skill whenever the user needs management advice, leadership guidance, or team operations help. 16 mentor philosophies, 9 culture packs, C-Suite board simulation, continuous learning. Works offline as advisor or connected to manageaibrain.com MCP for full 33-tool automation."
 user-invocable: true
 emoji: "🤖"
 homepage: "https://manageaibrain.com"
@@ -68,6 +68,8 @@ clawhub install boss-ai-agent
 **Option A: CLI (stdio) — Recommended**
 
 Add to your MCP config (Claude Code `settings.json`, Hermes Agent config, etc.):
+
+> **Security**: Replace the placeholder key below with your real API key. Never commit real API keys to version control — use environment variables or a secrets manager instead.
 
 ```json
 {

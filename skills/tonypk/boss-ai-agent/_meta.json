@@ -1,13 +1,18 @@
 {
   "owner": "tonypk",
   "slug": "boss-ai-agent",
-  "displayName": "Openclaw Skill",
+  "displayName": "Boss AI Agent",
   "latest": {
-    "version": "6.4.0",
-    "publishedAt": 1776158074823,
-    "commit": "https://github.com/openclaw/skills/commit/8ec5d1e508b9e7db965fa87e013a144a0ad27fde"
+    "version": "9.0.0",
+    "publishedAt": 1776696327216,
+    "commit": null
   },
   "history": [
+    {
+      "version": "6.4.0",
+      "publishedAt": 1776158074823,
+      "commit": "https://github.com/openclaw/skills/commit/8ec5d1e508b9e7db965fa87e013a144a0ad27fde"
+    },
     {
       "version": "6.2.0",
       "publishedAt": 1774589066873,
