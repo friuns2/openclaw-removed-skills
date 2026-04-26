@@ -3,11 +3,16 @@
   "slug": "drimify",
   "displayName": "Drimify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166736152,
-    "commit": "https://github.com/openclaw/skills/commit/c4d8fceaecf68ca421badc0514172ea87b9d0e78"
+    "version": "1.0.3",
+    "publishedAt": 1776860360553,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166736152,
+      "commit": "https://github.com/openclaw/skills/commit/c4d8fceaecf68ca421badc0514172ea87b9d0e78"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774299870779,
