@@ -1,18 +1,19 @@
 ---
 name: dahua-cloud-open-device-image-analysis
-description: Analyze images captured from Dahua IoT cameras using Dahua Cloud AI. Complete workflow: capture → analyze with large model API.
-type: executable
-required_env:
-  - DAHUA_CLOUD_PRODUCT_ID
-  - DAHUA_CLOUD_AK
-  - DAHUA_CLOUD_SK
-secrets:
-  - DAHUA_CLOUD_SK
-primary_credential: DAHUA_CLOUD_SK
+description: 基于大华云开发者平台的 IoT 设备图像分析技能。支持对 Dahua IoT 设备进行抓拍，并调用大模型进行图片分析。可识别监控画面中的人、车辆、物体等，支持安全帽、口罩、烟雾、火焰等检测及摔倒、入侵等行为识别。适用于设备图像分析、安全生产、异常看护、连锁巡检、企业安全管理等场景。
+metadata: {"openclaw":{"requires":{"env":["DAHUA_CLOUD_PRODUCT_ID","DAHUA_CLOUD_AK","DAHUA_CLOUD_SK"]},"primaryEnv":"DAHUA_CLOUD_SK","install":[{"id":"requests","kind":"python","package":"requests","label":"Install Python requests"}]}}
+tags:
+  - 大华云
+  - 图像分析
+  - 安防监控
+  - 设备抓拍
+  - 图片分析
+  - device-image-analysis
+  - dahua-iot
+  - dahua-cloud-open
+  - AI 图片分析
 paths:
   - captured_images/
-dependencies:
-  - requests
 ---
 
 # Dahua AI Device Image Analysis
@@ -90,19 +91,21 @@ dependencies:
 
 **适合熟悉命令行的用户！**
 
-**Windows PowerShell:**
+**Windows PowerShell (推荐 - 用户级别):**
 ```powershell
 [Environment]::SetEnvironmentVariable("DAHUA_CLOUD_PRODUCT_ID", "your_app_id", "User")
 [Environment]::SetEnvironmentVariable("DAHUA_CLOUD_AK", "your_access_key", "User")
 [Environment]::SetEnvironmentVariable("DAHUA_CLOUD_SK", "your_secret_key", "User")
 ```
 
-**Linux/Mac:**
+**Linux/Mac (当前会话临时):**
 ```bash
 export DAHUA_CLOUD_PRODUCT_ID='your_app_id'
 export DAHUA_CLOUD_AK='your_access_key'
 export DAHUA_CLOUD_SK='your_secret_key'
 ```
+
+**⚠️ 安全建议**: 避免将凭证写入 `~/.bashrc`、`~/.zshrc` 等启动文件进行长期存储，以防凭证泄露。建议优先使用 Windows 用户环境变量或临时的当前会话导出方式。
 
 ---
 

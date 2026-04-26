@@ -3,9 +3,15 @@
   "slug": "dahua-cloud-open-device-image-analysis",
   "displayName": "Dahua Cloud Open Device Image Analysis",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1773826436810,
-    "commit": "https://github.com/openclaw/skills/commit/db9ea684130162f8e1ed65083613344e2d2b8fee"
+    "version": "1.0.5",
+    "publishedAt": 1774753166861,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1773826436810,
+      "commit": "https://github.com/openclaw/skills/commit/db9ea684130162f8e1ed65083613344e2d2b8fee"
+    }
+  ]
 }
