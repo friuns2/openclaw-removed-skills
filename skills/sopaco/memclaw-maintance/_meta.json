@@ -3,11 +3,16 @@
   "slug": "memclaw-maintance",
   "displayName": "memclaw-maintance",
   "latest": {
-    "version": "0.9.26",
-    "publishedAt": 1773988932255,
-    "commit": "https://github.com/openclaw/skills/commit/a31306a9f8213edb12592664fc09944594d2ce2d"
+    "version": "0.9.31",
+    "publishedAt": 1775045537600,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.9.26",
+      "publishedAt": 1773988932255,
+      "commit": "https://github.com/openclaw/skills/commit/a31306a9f8213edb12592664fc09944594d2ce2d"
+    },
     {
       "version": "0.9.18",
       "publishedAt": 1773826743086,

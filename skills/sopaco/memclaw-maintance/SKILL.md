@@ -97,7 +97,41 @@ Open OpenClaw settings and verify MemClaw plugin configuration:
 
 > **Security Note**: API keys are stored with `sensitive` flag in OpenClaw configuration. Do not share your `openclaw.json` file publicly.
 
-### Step 4: Restart OpenClaw
+### Step 4: Update the AGENTS.md Guidline
+If legacy patterns found, replace the "Memory" section with:
+
+```markdown
+## Memory
+You wake up fresh each session. MemClaw is your persistent memory system.
+
+**IMPORTANT: Use MemClaw for ALL memory operations. Do NOT use legacy MEMORY.md or daily logs.**
+
+### Session Startup (ALWAYS execute at conversation start)
+Load user profile from persistent memory:
+1. Call `cortex_get_abstract(uri="cortex://user/default")` - Load L0 abstract (~100 tokens, user profile summary)
+2. Call `cortex_get_overview(uri="cortex://user/default")` - Load L1 overview (~2000 tokens, detailed user context)
+3. Call `cortex_ls(uri="cortex://session", include_abstracts=true)` - See recent sessions (may be empty on first run)
+
+### Recording Information
+- **During conversation**: Use `cortex_add_memory(content="...", role="user|assistant")` for important facts
+- **At task completion**: Call `cortex_commit_session()` to trigger memory extraction
+
+### Searching Memory
+- **Semantic search**: `cortex_search(query="...")` - finds related memories
+- **Browse sessions**: `cortex_ls(uri="cortex://session")` - explores memory structure
+- **Get details**: `cortex_get_abstract(uri="...")` → `cortex_get_content(uri="...")` if needed
+
+### Profile Building
+When you learn something notable about the user:
+1. Call `cortex_add_memory(content="User preference/fact...", role="assistant", metadata={"type": "profile"})`
+2. Call `cortex_commit_session()` to persist
+
+Never interview the user. Pick up signals naturally through conversation.
+```
+
+**Do NOT skip this step.** Without updating AGENTS.md, the agent will continue using legacy memory and ignore MemClaw.
+
+### Step 5: Restart OpenClaw
 
 Restart OpenClaw to activate the plugin and start services.
 
