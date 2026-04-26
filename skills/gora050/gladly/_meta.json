@@ -3,11 +3,16 @@
   "slug": "gladly",
   "displayName": "Gladly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166594826,
-    "commit": "https://github.com/openclaw/skills/commit/ae40c7777d53bfb4429ae1038f14c454284becf8"
+    "version": "1.0.3",
+    "publishedAt": 1776870710249,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166594826,
+      "commit": "https://github.com/openclaw/skills/commit/ae40c7777d53bfb4429ae1038f14c454284becf8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774245849712,
