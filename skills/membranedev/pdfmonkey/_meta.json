@@ -3,11 +3,16 @@
   "slug": "pdfmonkey",
   "displayName": "Pdfmonkey",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166000986,
-    "commit": "https://github.com/openclaw/skills/commit/339dba53158fbb36da38c3374551e0abcd4aead4"
+    "version": "1.0.3",
+    "publishedAt": 1776847807633,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166000986,
+      "commit": "https://github.com/openclaw/skills/commit/339dba53158fbb36da38c3374551e0abcd4aead4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774137752662,
