@@ -3,11 +3,16 @@
   "slug": "sourceforge",
   "displayName": "Sourceforge",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165977241,
-    "commit": "https://github.com/openclaw/skills/commit/84d00e51cc09b5fc220abd70573dc9f4f45c5bba"
+    "version": "1.0.3",
+    "publishedAt": 1776859909703,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165977241,
+      "commit": "https://github.com/openclaw/skills/commit/84d00e51cc09b5fc220abd70573dc9f4f45c5bba"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774130688751,
