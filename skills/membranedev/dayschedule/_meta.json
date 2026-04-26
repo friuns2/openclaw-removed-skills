@@ -3,11 +3,16 @@
   "slug": "dayschedule",
   "displayName": "Dayschedule",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167584226,
-    "commit": "https://github.com/openclaw/skills/commit/342fd200c7d74a1f5592e47dff8adf4c7e36e8a9"
+    "version": "1.0.3",
+    "publishedAt": 1776851203051,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167584226,
+      "commit": "https://github.com/openclaw/skills/commit/342fd200c7d74a1f5592e47dff8adf4c7e36e8a9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774476151757,
