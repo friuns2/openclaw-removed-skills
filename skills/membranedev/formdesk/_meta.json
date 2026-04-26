@@ -3,11 +3,16 @@
   "slug": "formdesk",
   "displayName": "Formdesk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167301545,
-    "commit": "https://github.com/openclaw/skills/commit/fa1a9bdffebb220078a63c519c08aebeffab9e02"
+    "version": "1.0.3",
+    "publishedAt": 1776850366555,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167301545,
+      "commit": "https://github.com/openclaw/skills/commit/fa1a9bdffebb220078a63c519c08aebeffab9e02"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774407763161,
