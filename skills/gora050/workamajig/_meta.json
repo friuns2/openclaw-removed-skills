@@ -3,11 +3,16 @@
   "slug": "workamajig",
   "displayName": "Workamajig",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166538307,
-    "commit": "https://github.com/openclaw/skills/commit/6192b6c9aff83e71c538b28e18a6d92e57b576cc"
+    "version": "1.0.3",
+    "publishedAt": 1776863702806,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166538307,
+      "commit": "https://github.com/openclaw/skills/commit/6192b6c9aff83e71c538b28e18a6d92e57b576cc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774231497084,
