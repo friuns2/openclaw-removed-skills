@@ -3,11 +3,16 @@
   "slug": "storyblok",
   "displayName": "Storyblok",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165545236,
-    "commit": "https://github.com/openclaw/skills/commit/d95b6a04990160b0de3ddf4e03bed0e90a8e01b0"
+    "version": "1.0.3",
+    "publishedAt": 1776859564332,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165545236,
+      "commit": "https://github.com/openclaw/skills/commit/d95b6a04990160b0de3ddf4e03bed0e90a8e01b0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774044311785,
