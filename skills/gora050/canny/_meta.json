@@ -3,11 +3,16 @@
   "slug": "canny",
   "displayName": "Canny",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165834278,
-    "commit": "https://github.com/openclaw/skills/commit/82b525356135a23616b5b9fdc6b0de8c12877bbb"
+    "version": "1.0.3",
+    "publishedAt": 1776862547929,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165834278,
+      "commit": "https://github.com/openclaw/skills/commit/82b525356135a23616b5b9fdc6b0de8c12877bbb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774108980818,
