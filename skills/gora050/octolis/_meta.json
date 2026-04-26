@@ -3,11 +3,16 @@
   "slug": "octolis",
   "displayName": "Octolis",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166602798,
-    "commit": "https://github.com/openclaw/skills/commit/4d11457963828ee643b7020b6d5e25e37a468db9"
+    "version": "1.0.3",
+    "publishedAt": 1776898865529,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166602798,
+      "commit": "https://github.com/openclaw/skills/commit/4d11457963828ee643b7020b6d5e25e37a468db9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774253030827,
