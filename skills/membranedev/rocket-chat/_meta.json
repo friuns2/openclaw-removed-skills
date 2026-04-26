@@ -3,11 +3,16 @@
   "slug": "rocket-chat",
   "displayName": "Rocket Chat",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167597128,
-    "commit": "https://github.com/openclaw/skills/commit/350f490379fc181ce62e31473c438aae3debd900"
+    "version": "1.0.3",
+    "publishedAt": 1776851223532,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167597128,
+      "commit": "https://github.com/openclaw/skills/commit/350f490379fc181ce62e31473c438aae3debd900"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479762370,
