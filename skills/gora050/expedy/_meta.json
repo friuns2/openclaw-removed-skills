@@ -3,11 +3,16 @@
   "slug": "expedy",
   "displayName": "Expedy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164483268,
-    "commit": "https://github.com/openclaw/skills/commit/3c0f8d0884c49b0cab3203011133a1c8c2dd3025"
+    "version": "1.0.3",
+    "publishedAt": 1776837988678,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164483268,
+      "commit": "https://github.com/openclaw/skills/commit/3c0f8d0884c49b0cab3203011133a1c8c2dd3025"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773727396142,
