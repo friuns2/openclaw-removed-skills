@@ -3,11 +3,16 @@
   "slug": "passcreator",
   "displayName": "Passcreator",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164986500,
-    "commit": "https://github.com/openclaw/skills/commit/b5ec586166ba31720391db9cd9a71694ba6afc40"
+    "version": "1.0.3",
+    "publishedAt": 1776858901314,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164986500,
+      "commit": "https://github.com/openclaw/skills/commit/b5ec586166ba31720391db9cd9a71694ba6afc40"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773936221857,
