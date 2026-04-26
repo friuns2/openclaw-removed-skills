@@ -3,11 +3,16 @@
   "slug": "spydra",
   "displayName": "Spydra",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166945243,
-    "commit": "https://github.com/openclaw/skills/commit/b3e4cfbf5890b10eb6229c91d60864d6f9a867f0"
+    "version": "1.0.3",
+    "publishedAt": 1776860636611,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166945243,
+      "commit": "https://github.com/openclaw/skills/commit/b3e4cfbf5890b10eb6229c91d60864d6f9a867f0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774325080253,
