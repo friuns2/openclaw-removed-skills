@@ -3,9 +3,15 @@
   "slug": "card-components",
   "displayName": "card",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1773827369236,
-    "commit": "https://github.com/openclaw/skills/commit/45bddbf53a21a5405182679f04bbe4716be505bb"
+    "version": "1.1.1",
+    "publishedAt": 1774786709874,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1773827369236,
+      "commit": "https://github.com/openclaw/skills/commit/45bddbf53a21a5405182679f04bbe4716be505bb"
+    }
+  ]
 }
