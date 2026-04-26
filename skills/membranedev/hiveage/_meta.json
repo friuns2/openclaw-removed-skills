@@ -3,11 +3,16 @@
   "slug": "hiveage",
   "displayName": "Hiveage",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166673030,
-    "commit": "https://github.com/openclaw/skills/commit/85383972f9a9f308be1028272197f05188bea811"
+    "version": "1.0.3",
+    "publishedAt": 1776848954029,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166673030,
+      "commit": "https://github.com/openclaw/skills/commit/85383972f9a9f308be1028272197f05188bea811"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774296140640,
