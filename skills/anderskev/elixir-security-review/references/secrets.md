@@ -1,132 +1,21 @@
-# Secret Management
+# Secrets and configuration
 
-## Never Hardcode Secrets
+## What to verify in review
 
-```elixir
-# CRITICAL - secrets in source code
-defmodule MyApp.API do
-  @api_key "sk_live_abc123"  # Committed to git!
+1. **No literals in application code** — API keys, tokens, database URLs, and private keys must not appear as string literals in `.ex` files shipped to production.
 
-  def call do
-    HTTPClient.get(url, headers: [{"Authorization", @api_key}])
-  end
-end
-```
+2. **Runtime configuration** — Prefer `config/runtime.exs` (or release-time env) for values that differ per environment. `Application.get_env/2` should read secrets supplied via environment or secret stores, not checked-in files.
 
-## Use Environment Variables
+3. **Committed config** — `config/*.exs` may set non-secret defaults; deployment secrets belong in env vars or external secret managers, not in git history.
 
-### Runtime Configuration
+4. **`.env` and similar** — Ensure `.env*` is in `.gitignore` when used locally; never commit files that contain real credentials.
 
-```elixir
-# config/runtime.exs
-import Config
+## Useful checks
 
-config :my_app,
-  api_key: System.fetch_env!("API_KEY"),
-  database_url: System.fetch_env!("DATABASE_URL")
-```
+- Search for common patterns: `api_key`, `secret`, `password`, `BEGIN PRIVATE KEY`, connection strings with embedded credentials.
+- Confirm `Mix.env()` does not accidentally enable dev-only shortcuts that log or return secrets in production paths.
 
-### Application Config
+## Valid patterns (do not flag without evidence)
 
-```elixir
-# In code
-def api_key do
-  Application.fetch_env!(:my_app, :api_key)
-end
-```
-
-### System.get_env at Runtime
-
-```elixir
-# For values that might change
-def feature_flag do
-  System.get_env("FEATURE_ENABLED", "false") == "true"
-end
-```
-
-## Config File Security
-
-### Never Commit Secrets
-
-```elixir
-# config/dev.exs - OK, no real secrets
-config :my_app, api_key: "dev_test_key"
-
-# config/prod.exs - NO secrets here!
-config :my_app, api_key: System.get_env("API_KEY")
-
-# config/runtime.exs - secrets loaded at runtime
-import Config
-
-if config_env() == :prod do
-  config :my_app,
-    api_key: System.fetch_env!("API_KEY")
-end
-```
-
-### .gitignore
-
-```gitignore
-# Ignore secret files
-config/*.secret.exs
-.env
-*.pem
-*.key
-```
-
-## Secret Rotation
-
-### Support Multiple Keys
-
-```elixir
-defmodule MyApp.Crypto do
-  def current_key_id, do: System.get_env("CURRENT_KEY_ID", "1")
-
-  def keys do
-    %{
-      "1" => System.fetch_env!("ENCRYPTION_KEY_1"),
-      "2" => System.get_env("ENCRYPTION_KEY_2")
-    }
-  end
-
-  def encrypt(data) do
-    key_id = current_key_id()
-    encrypted = do_encrypt(data, keys()[key_id])
-    {key_id, encrypted}
-  end
-
-  def decrypt({key_id, encrypted}) do
-    do_decrypt(encrypted, keys()[key_id])
-  end
-end
-```
-
-## Logging
-
-### Never Log Secrets
-
-```elixir
-# BAD
-Logger.info("Connecting with key: #{api_key}")
-
-# GOOD
-Logger.info("Connecting to API")
-
-# GOOD - redact in inspect
-defmodule APIClient do
-  defstruct [:url, :api_key]
-
-  defimpl Inspect do
-    def inspect(%{url: url}, _opts) do
-      "#APIClient<url: #{url}, api_key: [REDACTED]>"
-    end
-  end
-end
-```
-
-## Review Questions
-
-1. Are any secrets hardcoded in source files?
-2. Are secrets loaded from environment at runtime?
-3. Are secret files excluded from git?
-4. Are secrets redacted from logs?
+- Placeholders like `System.get_env("DATABASE_URL")` with documentation that ops sets the var.
+- Test fixtures with obviously fake credentials in `test/support` only.
