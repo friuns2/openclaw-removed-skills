@@ -3,11 +3,16 @@
   "slug": "process-street",
   "displayName": "Process Street",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167334786,
-    "commit": "https://github.com/openclaw/skills/commit/65af4e9120d1ee3d2d2ef7e8a76d0f798add1b6b"
+    "version": "1.0.3",
+    "publishedAt": 1776850605578,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167334786,
+      "commit": "https://github.com/openclaw/skills/commit/65af4e9120d1ee3d2d2ef7e8a76d0f798add1b6b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774414965248,
