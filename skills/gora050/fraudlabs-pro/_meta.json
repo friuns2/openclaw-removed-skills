@@ -3,11 +3,16 @@
   "slug": "fraudlabs-pro",
   "displayName": "Fraudlabs Pro",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165072645,
-    "commit": "https://github.com/openclaw/skills/commit/5db3f58e8678574b10dc238471def7b397ab5c57"
+    "version": "1.0.3",
+    "publishedAt": 1776859047140,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165072645,
+      "commit": "https://github.com/openclaw/skills/commit/5db3f58e8678574b10dc238471def7b397ab5c57"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773954192547,
