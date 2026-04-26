@@ -3,11 +3,16 @@
   "slug": "canonry",
   "displayName": "Canonry Setup",
   "latest": {
-    "version": "2.4.5+8a53bbf",
-    "publishedAt": 1776812501771,
-    "commit": "https://github.com/openclaw/skills/commit/7f175d30a26abb4d4a7de960d5276a3014a038ff"
+    "version": "2.4.6+4b5b772",
+    "publishedAt": 1777149668840,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.4.5+8a53bbf",
+      "publishedAt": 1776812501771,
+      "commit": "https://github.com/openclaw/skills/commit/7f175d30a26abb4d4a7de960d5276a3014a038ff"
+    },
     {
       "version": "2.0.0+8732623",
       "publishedAt": 1776550513200,
