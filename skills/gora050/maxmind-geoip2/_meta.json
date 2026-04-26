@@ -3,11 +3,16 @@
   "slug": "maxmind-geoip2",
   "displayName": "Maxmind Geoip2",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167312415,
-    "commit": "https://github.com/openclaw/skills/commit/ee8ad70e187283e95c98b3a5dd53fc070a2d40d9"
+    "version": "1.0.3",
+    "publishedAt": 1776861099421,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167312415,
+      "commit": "https://github.com/openclaw/skills/commit/ee8ad70e187283e95c98b3a5dd53fc070a2d40d9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774407830616,
