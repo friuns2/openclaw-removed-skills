@@ -3,11 +3,16 @@
   "slug": "quickemailverification",
   "displayName": "Quickemailverification",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164673705,
-    "commit": "https://github.com/openclaw/skills/commit/dc25ff2b3bb84f96e52f80deff8e526a4abb9c8e"
+    "version": "1.0.3",
+    "publishedAt": 1776845284494,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164673705,
+      "commit": "https://github.com/openclaw/skills/commit/dc25ff2b3bb84f96e52f80deff8e526a4abb9c8e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773817378609,
