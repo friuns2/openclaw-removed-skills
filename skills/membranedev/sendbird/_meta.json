@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "sendbird",
+  "displayName": "Sendbird",
+  "latest": {
+    "version": "1.0.3",
+    "publishedAt": 1776845375218,
+    "commit": null
+  },
+  "history": []
+}
