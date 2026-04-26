@@ -3,11 +3,16 @@
   "slug": "shippo-integration",
   "displayName": "Shippo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167418491,
-    "commit": "https://github.com/openclaw/skills/commit/72586fe2a3586972b8407d5a3aea51ec74e39ced"
+    "version": "1.0.3",
+    "publishedAt": 1776861363818,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167418491,
+      "commit": "https://github.com/openclaw/skills/commit/72586fe2a3586972b8407d5a3aea51ec74e39ced"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774433007911,
