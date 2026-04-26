@@ -3,11 +3,16 @@
   "slug": "octoparse",
   "displayName": "Octoparse",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166598689,
-    "commit": "https://github.com/openclaw/skills/commit/91f374fb728be84ea1c4782c5196526b92482eee"
+    "version": "1.0.3",
+    "publishedAt": 1776898845756,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166598689,
+      "commit": "https://github.com/openclaw/skills/commit/91f374fb728be84ea1c4782c5196526b92482eee"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774253023169,
