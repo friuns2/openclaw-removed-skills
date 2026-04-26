@@ -3,11 +3,16 @@
   "slug": "marketstack",
   "displayName": "Marketstack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165221019,
-    "commit": "https://github.com/openclaw/skills/commit/06c0f47aa1b496c95de367a9b012cb0fcfddc3e6"
+    "version": "1.0.3",
+    "publishedAt": 1776846590947,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165221019,
+      "commit": "https://github.com/openclaw/skills/commit/06c0f47aa1b496c95de367a9b012cb0fcfddc3e6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773972160737,
