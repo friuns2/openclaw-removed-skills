@@ -3,11 +3,16 @@
   "slug": "1crm",
   "displayName": "1Crm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166135162,
-    "commit": "https://github.com/openclaw/skills/commit/5567548035377480e2637fcc57b94cabf9b5cef8"
+    "version": "1.0.3",
+    "publishedAt": 1776892143306,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166135162,
+      "commit": "https://github.com/openclaw/skills/commit/5567548035377480e2637fcc57b94cabf9b5cef8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774159393782,
