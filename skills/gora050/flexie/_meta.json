@@ -3,11 +3,16 @@
   "slug": "flexie",
   "displayName": "Flexie",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165905519,
-    "commit": "https://github.com/openclaw/skills/commit/6ce9bc5c3b5a4b584de76688360e053a94ad3adf"
+    "version": "1.0.3",
+    "publishedAt": 1776862233370,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165905519,
+      "commit": "https://github.com/openclaw/skills/commit/6ce9bc5c3b5a4b584de76688360e053a94ad3adf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774119811831,
