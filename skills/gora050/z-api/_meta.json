@@ -3,11 +3,16 @@
   "slug": "z-api",
   "displayName": "Z Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166525539,
-    "commit": "https://github.com/openclaw/skills/commit/6a7f6c51e8ca316797917f066dfef5e8513e5b38"
+    "version": "1.0.3",
+    "publishedAt": 1776863677091,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166525539,
+      "commit": "https://github.com/openclaw/skills/commit/6a7f6c51e8ca316797917f066dfef5e8513e5b38"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774231473247,
