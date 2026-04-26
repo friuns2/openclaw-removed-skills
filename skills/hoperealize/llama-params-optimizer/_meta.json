@@ -3,9 +3,15 @@
   "slug": "llama-params-optimizer",
   "displayName": "Llama Params Optimizer",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1777178782265,
-    "commit": "https://github.com/openclaw/skills/commit/bef711ae41135ec31ce14e1fd2952a71eef94be6"
+    "version": "1.2.0",
+    "publishedAt": 1777179688890,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1777178782265,
+      "commit": "https://github.com/openclaw/skills/commit/bef711ae41135ec31ce14e1fd2952a71eef94be6"
+    }
+  ]
 }
