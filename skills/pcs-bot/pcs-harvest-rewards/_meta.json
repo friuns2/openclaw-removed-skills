@@ -1,0 +1,11 @@
+{
+  "owner": "pcs-bot",
+  "slug": "pcs-harvest-rewards",
+  "displayName": "Harvest Rewards",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1774320277199,
+    "commit": null
+  },
+  "history": []
+}
