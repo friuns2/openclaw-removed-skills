@@ -3,11 +3,16 @@
   "slug": "newsapi",
   "displayName": "Newsapi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165142604,
-    "commit": "https://github.com/openclaw/skills/commit/b7b81b362ae1724107db6a886e01a0ce55b54a63"
+    "version": "1.0.3",
+    "publishedAt": 1776859156834,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165142604,
+      "commit": "https://github.com/openclaw/skills/commit/b7b81b362ae1724107db6a886e01a0ce55b54a63"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773961434412,
