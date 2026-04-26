@@ -3,9 +3,15 @@
   "slug": "trust-badges-generator",
   "displayName": "trust-badges-generator",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773827364060,
-    "commit": "https://github.com/openclaw/skills/commit/bbbad4771fe4bee1f0bb4d53c6b24bf1bf7d192f"
+    "version": "1.0.1",
+    "publishedAt": 1774786705541,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773827364060,
+      "commit": "https://github.com/openclaw/skills/commit/bbbad4771fe4bee1f0bb4d53c6b24bf1bf7d192f"
+    }
+  ]
 }
