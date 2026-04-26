@@ -3,11 +3,16 @@
   "slug": "hygraph",
   "displayName": "Hygraph",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167401641,
-    "commit": "https://github.com/openclaw/skills/commit/d63f36c112b1c86f7f07b56f088841dcceaf8d85"
+    "version": "1.0.3",
+    "publishedAt": 1776861333489,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167401641,
+      "commit": "https://github.com/openclaw/skills/commit/d63f36c112b1c86f7f07b56f088841dcceaf8d85"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774429433520,
