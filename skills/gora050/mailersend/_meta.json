@@ -3,11 +3,16 @@
   "slug": "mailersend",
   "displayName": "Mailersend",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167161987,
-    "commit": "https://github.com/openclaw/skills/commit/49666348a5ce652220d611ae1d50cc69e65d1d34"
+    "version": "1.0.3",
+    "publishedAt": 1776860924035,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167161987,
+      "commit": "https://github.com/openclaw/skills/commit/49666348a5ce652220d611ae1d50cc69e65d1d34"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774386272637,
