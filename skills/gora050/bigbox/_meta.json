@@ -3,11 +3,16 @@
   "slug": "bigbox",
   "displayName": "Bigbox",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166962726,
-    "commit": "https://github.com/openclaw/skills/commit/3afb1a871ad60d91a13d25e638b9f7d94b67a423"
+    "version": "1.0.3",
+    "publishedAt": 1776860670025,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166962726,
+      "commit": "https://github.com/openclaw/skills/commit/3afb1a871ad60d91a13d25e638b9f7d94b67a423"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774332251657,
