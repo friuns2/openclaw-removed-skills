@@ -3,11 +3,16 @@
   "slug": "sota-agent",
   "displayName": "SOTA Agent",
   "latest": {
-    "version": "1.4.1",
-    "publishedAt": 1775839569272,
-    "commit": "https://github.com/openclaw/skills/commit/3437bea2480cfb8076310cd4c1225e5bacffca63"
+    "version": "1.4.2",
+    "publishedAt": 1777036094565,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.4.1",
+      "publishedAt": 1775839569272,
+      "commit": "https://github.com/openclaw/skills/commit/3437bea2480cfb8076310cd4c1225e5bacffca63"
+    },
     {
       "version": "1.2.3",
       "publishedAt": 1774117189599,

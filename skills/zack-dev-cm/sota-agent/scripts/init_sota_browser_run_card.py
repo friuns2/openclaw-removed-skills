@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sota_public_safety import sanitize_url
+from sota_public_safety import sanitize_alias, sanitize_url
 
 
 def main() -> int:
@@ -32,8 +32,8 @@ def main() -> int:
         "created_utc": datetime.now(timezone.utc).isoformat(),
         "browser": {
             "tool": args.tool,
-            "browser_alias": args.browser_alias,
-            "session_alias": args.session_alias,
+            "browser_alias": sanitize_alias(args.browser_alias, label="browser-alias"),
+            "session_alias": sanitize_alias(args.session_alias, label="session-alias"),
             "attach_status": "",
             "requested_mode": args.requested_mode,
             "actual_mode": "",
