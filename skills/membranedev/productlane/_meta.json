@@ -3,11 +3,16 @@
   "slug": "productlane",
   "displayName": "Productlane",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166553692,
-    "commit": "https://github.com/openclaw/skills/commit/66e6e3ef2977253948796052324792ecdc0e646d"
+    "version": "1.0.3",
+    "publishedAt": 1776848898530,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166553692,
+      "commit": "https://github.com/openclaw/skills/commit/66e6e3ef2977253948796052324792ecdc0e646d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774238548983,
