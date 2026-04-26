@@ -3,11 +3,16 @@
   "slug": "reward-sciences",
   "displayName": "Reward Sciences",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164694325,
-    "commit": "https://github.com/openclaw/skills/commit/494739b18f909f64cfb789af2190eaa57ffb0d8f"
+    "version": "1.0.3",
+    "publishedAt": 1776858578327,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164694325,
+      "commit": "https://github.com/openclaw/skills/commit/494739b18f909f64cfb789af2190eaa57ffb0d8f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773817451607,
