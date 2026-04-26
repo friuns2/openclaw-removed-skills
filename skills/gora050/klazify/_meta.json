@@ -3,11 +3,16 @@
   "slug": "klazify",
   "displayName": "Klazify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164685131,
-    "commit": "https://github.com/openclaw/skills/commit/fdb3e13e0579272c7fe37ea536197aa7c6430a7f"
+    "version": "1.0.3",
+    "publishedAt": 1776858560589,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164685131,
+      "commit": "https://github.com/openclaw/skills/commit/fdb3e13e0579272c7fe37ea536197aa7c6430a7f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773817431542,
