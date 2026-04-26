@@ -3,11 +3,16 @@
   "slug": "kingsumo",
   "displayName": "Kingsumo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167054038,
-    "commit": "https://github.com/openclaw/skills/commit/ef349927ee86fd85265efb849d1764c092e0264e"
+    "version": "1.0.3",
+    "publishedAt": 1776860827604,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167054038,
+      "commit": "https://github.com/openclaw/skills/commit/ef349927ee86fd85265efb849d1764c092e0264e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774346656384,
