@@ -3,11 +3,16 @@
   "slug": "outseta",
   "displayName": "Outseta",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167397379,
-    "commit": "https://github.com/openclaw/skills/commit/4f7df1b28e1ce84247a5b3d336fbe580c4ee8bef"
+    "version": "1.0.3",
+    "publishedAt": 1776861291032,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167397379,
+      "commit": "https://github.com/openclaw/skills/commit/4f7df1b28e1ce84247a5b3d336fbe580c4ee8bef"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774429424880,
