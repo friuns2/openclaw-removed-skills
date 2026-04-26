@@ -1,9 +1,9 @@
 ---
-name: goat-self-improving-lite
-description: Lightweight experience-capture and behavior-hardening for Goat. Use when the user explicitly gives corrective feedback, says to remember or avoid something, approves a new operating rule, points out a repeated mistake, or asks Goat to improve itself without adding high token overhead. This skill records only high-value lessons, promotes durable rules into MEMORY.md, and avoids verbose self-reflection loops.
+name: lessonloop
+description: Lightweight experience-capture and behavior-hardening for Goat. Use when the user explicitly gives corrective feedback, says to remember or avoid something, approves a new operating rule, points out a repeated mistake, or asks Goat to improve itself without adding high token overhead. This skill records only high-value lessons, promotes durable rules into MEMORY.md when justified, and avoids verbose self-reflection loops.
 ---
 
-# Goat Self Improving Lite
+# LessonLoop
 
 ## Overview
 
@@ -104,6 +104,7 @@ Keep only in daily memory when it is:
 ## Resources
 
 ### scripts/
+- `scripts/apply_lesson.py` writes a compact lesson to daily memory and logs a structured LessonLoop event in one step
 - `scripts/capture_lesson.py` appends a compact lesson to the canonical daily memory file
 - `scripts/log_lesson_event.py` writes structured LessonLoop event logs for evaluation and reporting
 - `scripts/lessonloop_report.py` summarizes recent LessonLoop activity and outputs a compact report

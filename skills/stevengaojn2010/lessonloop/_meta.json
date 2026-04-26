@@ -3,9 +3,15 @@
   "slug": "lessonloop",
   "displayName": "LessonLoop",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774166318429,
-    "commit": "https://github.com/openclaw/skills/commit/869fff18a351a1ef074a476a2e93e7d940c8567b"
+    "version": "0.1.1",
+    "publishedAt": 1776700389012,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774166318429,
+      "commit": "https://github.com/openclaw/skills/commit/869fff18a351a1ef074a476a2e93e7d940c8567b"
+    }
+  ]
 }

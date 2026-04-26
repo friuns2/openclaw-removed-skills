@@ -2,7 +2,7 @@
 
 A lightweight self-improvement skill for OpenClaw agents.
 
-Originally built as `goat-self-improving-lite`, this project is being positioned as **LessonLoop**.
+This project is **LessonLoop**.
 
 ## What it does
 
@@ -33,6 +33,7 @@ LessonLoop uses a lighter design:
 
 ## Included scripts
 
+- `scripts/apply_lesson.py` — write a compact lesson to daily memory and log the event in one step
 - `scripts/capture_lesson.py` — append a compact lesson to daily memory
 - `scripts/lesson_gate.py` — decide whether a lesson needs escalation
 - `scripts/log_lesson_event.py` — record structured LessonLoop events for evaluation
@@ -68,4 +69,4 @@ It is already runnable and useful, but still needs real-world observation around
 
 ## License
 
-TBD
+MIT-0
