@@ -3,11 +3,16 @@
   "slug": "hume",
   "displayName": "Hume",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165789901,
-    "commit": "https://github.com/openclaw/skills/commit/7536b5437c895f794250e56da362cf42487f8dcc"
+    "version": "1.0.3",
+    "publishedAt": 1776893184563,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165789901,
+      "commit": "https://github.com/openclaw/skills/commit/7536b5437c895f794250e56da362cf42487f8dcc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774101859896,
