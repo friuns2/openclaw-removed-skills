@@ -3,11 +3,16 @@
   "slug": "rydoo",
   "displayName": "Rydoo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166616167,
-    "commit": "https://github.com/openclaw/skills/commit/9efcd412dce2f8053259ede0d8858729ad222580"
+    "version": "1.0.3",
+    "publishedAt": 1776898889171,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166616167,
+      "commit": "https://github.com/openclaw/skills/commit/9efcd412dce2f8053259ede0d8858729ad222580"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774253059022,
