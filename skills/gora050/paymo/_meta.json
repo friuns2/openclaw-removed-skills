@@ -3,11 +3,16 @@
   "slug": "paymo",
   "displayName": "Paymo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167564087,
-    "commit": "https://github.com/openclaw/skills/commit/8429bc9ee56b7dedc0d888216728c8189d1d30f1"
+    "version": "1.0.3",
+    "publishedAt": 1776861553886,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167564087,
+      "commit": "https://github.com/openclaw/skills/commit/8429bc9ee56b7dedc0d888216728c8189d1d30f1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774472689005,
