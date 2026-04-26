@@ -3,11 +3,16 @@
   "slug": "lota-football",
   "displayName": "Lota Football",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1774176405691,
-    "commit": "https://github.com/openclaw/skills/commit/316b5b8633c39100d5fe30a80cebd1520e4ad9d9"
+    "version": "2.0.2",
+    "publishedAt": 1777002852262,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1774176405691,
+      "commit": "https://github.com/openclaw/skills/commit/316b5b8633c39100d5fe30a80cebd1520e4ad9d9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774169774143,
