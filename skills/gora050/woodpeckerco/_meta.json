@@ -3,11 +3,16 @@
   "slug": "woodpeckerco",
   "displayName": "Woodpeckerco",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166649170,
-    "commit": "https://github.com/openclaw/skills/commit/d9f986e89ca9dcae9282e7bfe6caf6440b4bf7c3"
+    "version": "1.0.3",
+    "publishedAt": 1776884922892,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166649170,
+      "commit": "https://github.com/openclaw/skills/commit/d9f986e89ca9dcae9282e7bfe6caf6440b4bf7c3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774293798903,
