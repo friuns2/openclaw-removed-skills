@@ -3,11 +3,16 @@
   "slug": "engage",
   "displayName": "Engage",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166497261,
-    "commit": "https://github.com/openclaw/skills/commit/58497e6f2087792a519599e1f276f2203ca8fa04"
+    "version": "1.0.3",
+    "publishedAt": 1776848640694,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166497261,
+      "commit": "https://github.com/openclaw/skills/commit/58497e6f2087792a519599e1f276f2203ca8fa04"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774227773685,
