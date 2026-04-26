@@ -3,11 +3,16 @@
   "slug": "highrise",
   "displayName": "Highrise",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165293121,
-    "commit": "https://github.com/openclaw/skills/commit/3a2db74863ad2fbde767280a5fc7d65c0a304bf9"
+    "version": "1.0.3",
+    "publishedAt": 1776859218875,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165293121,
+      "commit": "https://github.com/openclaw/skills/commit/3a2db74863ad2fbde767280a5fc7d65c0a304bf9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773993817325,
