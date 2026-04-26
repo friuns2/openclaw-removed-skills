@@ -1,11 +1,17 @@
 {
   "owner": "kukuxnd",
   "slug": "kuuila-game",
-  "displayName": "Kuuila互动游戏框架",
+  "displayName": "Kuuila Game",
   "latest": {
-    "version": "3.1.0",
-    "publishedAt": 1774053766201,
-    "commit": "https://github.com/openclaw/skills/commit/abbc14219d2223ddbfd1929eca2b24e8ccc75e7d"
+    "version": "3.2.0",
+    "publishedAt": 1776852543911,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "3.1.0",
+      "publishedAt": 1774053766201,
+      "commit": "https://github.com/openclaw/skills/commit/abbc14219d2223ddbfd1929eca2b24e8ccc75e7d"
+    }
+  ]
 }
