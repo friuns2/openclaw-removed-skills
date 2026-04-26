@@ -3,11 +3,16 @@
   "slug": "icypeas",
   "displayName": "Icypeas",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165112239,
-    "commit": "https://github.com/openclaw/skills/commit/af72c7acdd8e1cec1006ef230414494e8fa3e9e8"
+    "version": "1.0.3",
+    "publishedAt": 1776859105507,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165112239,
+      "commit": "https://github.com/openclaw/skills/commit/af72c7acdd8e1cec1006ef230414494e8fa3e9e8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773961381370,
