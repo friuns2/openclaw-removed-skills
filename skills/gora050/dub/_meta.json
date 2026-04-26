@@ -3,11 +3,16 @@
   "slug": "dub",
   "displayName": "Dub",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166766211,
-    "commit": "https://github.com/openclaw/skills/commit/edca3b033b718228266cfd6f54744076dd7f8b66"
+    "version": "1.0.3",
+    "publishedAt": 1776860411110,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166766211,
+      "commit": "https://github.com/openclaw/skills/commit/edca3b033b718228266cfd6f54744076dd7f8b66"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774307032587,
