@@ -3,11 +3,16 @@
   "slug": "knowbe4",
   "displayName": "Knowbe4",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165515412,
-    "commit": "https://github.com/openclaw/skills/commit/c75bca03ff1c88e0dae7bb8c1e3f92a8050c5692"
+    "version": "1.0.3",
+    "publishedAt": 1776859525426,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165515412,
+      "commit": "https://github.com/openclaw/skills/commit/c75bca03ff1c88e0dae7bb8c1e3f92a8050c5692"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774040645337,
