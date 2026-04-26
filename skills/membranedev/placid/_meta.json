@@ -3,11 +3,16 @@
   "slug": "placid",
   "displayName": "Placid",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165342220,
-    "commit": "https://github.com/openclaw/skills/commit/f26ca178016db5008c529273e5142665d9292b45"
+    "version": "1.0.3",
+    "publishedAt": 1776846763419,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165342220,
+      "commit": "https://github.com/openclaw/skills/commit/f26ca178016db5008c529273e5142665d9292b45"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775165340293,
