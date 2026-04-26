@@ -3,11 +3,16 @@
   "slug": "sendoso",
   "displayName": "Sendoso",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166827707,
-    "commit": "https://github.com/openclaw/skills/commit/398e29c6f08c466a13493a77633773bc0d6d6923"
+    "version": "1.0.3",
+    "publishedAt": 1776860475028,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166827707,
+      "commit": "https://github.com/openclaw/skills/commit/398e29c6f08c466a13493a77633773bc0d6d6923"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774314281326,
