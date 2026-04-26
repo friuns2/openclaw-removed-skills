@@ -3,11 +3,16 @@
   "slug": "barcode-lookup",
   "displayName": "Barcode Lookup",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167074322,
-    "commit": "https://github.com/openclaw/skills/commit/74d03a7e855234a3278f66e4796ec7c323df781c"
+    "version": "1.0.3",
+    "publishedAt": 1776860867098,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167074322,
+      "commit": "https://github.com/openclaw/skills/commit/74d03a7e855234a3278f66e4796ec7c323df781c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774350234033,
