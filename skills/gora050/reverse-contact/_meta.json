@@ -3,11 +3,16 @@
   "slug": "reverse-contact",
   "displayName": "Reverse Contact",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164869062,
-    "commit": "https://github.com/openclaw/skills/commit/628a8f1ee6f7bb84583819e2852d4bbd56b4ad7e"
+    "version": "1.0.3",
+    "publishedAt": 1776858683600,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164869062,
+      "commit": "https://github.com/openclaw/skills/commit/628a8f1ee6f7bb84583819e2852d4bbd56b4ad7e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773907410782,
