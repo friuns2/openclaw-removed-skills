@@ -3,11 +3,16 @@
   "slug": "gocanvas",
   "displayName": "Gocanvas",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165441959,
-    "commit": "https://github.com/openclaw/skills/commit/442dc726d0f677c760c4a10889ef26e7229b9c04"
+    "version": "1.0.3",
+    "publishedAt": 1776859391123,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165441959,
+      "commit": "https://github.com/openclaw/skills/commit/442dc726d0f677c760c4a10889ef26e7229b9c04"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774026238963,
