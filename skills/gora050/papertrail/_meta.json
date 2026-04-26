@@ -3,9 +3,15 @@
   "slug": "papertrail",
   "displayName": "Papertrail",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774415034937,
-    "commit": "https://github.com/openclaw/skills/commit/8420e6195c766a4095c3001710bc58b5ab57a742"
+    "version": "1.0.1",
+    "publishedAt": 1776861169599,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774415034937,
+      "commit": "https://github.com/openclaw/skills/commit/8420e6195c766a4095c3001710bc58b5ab57a742"
+    }
+  ]
 }
