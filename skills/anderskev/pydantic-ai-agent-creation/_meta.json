@@ -3,9 +3,15 @@
   "slug": "pydantic-ai-agent-creation",
   "displayName": "Pydantic Ai Agent Creation",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773981936541,
-    "commit": "https://github.com/openclaw/skills/commit/99f54ab1899932ca78c30a6c0cf2a4c0df59780f"
+    "version": "1.0.1",
+    "publishedAt": 1776830964236,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773981936541,
+      "commit": "https://github.com/openclaw/skills/commit/99f54ab1899932ca78c30a6c0cf2a4c0df59780f"
+    }
+  ]
 }
