@@ -3,11 +3,16 @@
   "slug": "dynatrace-api",
   "displayName": "Dynatrace Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166867124,
-    "commit": "https://github.com/openclaw/skills/commit/d0cc50afcd2d2f97e1f95b8ad1c402c280d3cca0"
+    "version": "1.0.3",
+    "publishedAt": 1776860525580,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166867124,
+      "commit": "https://github.com/openclaw/skills/commit/d0cc50afcd2d2f97e1f95b8ad1c402c280d3cca0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774321418218,
