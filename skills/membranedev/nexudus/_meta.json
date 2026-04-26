@@ -3,11 +3,16 @@
   "slug": "nexudus",
   "displayName": "Nexudus",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165814357,
-    "commit": "https://github.com/openclaw/skills/commit/5476de58da5c4141062bd44085459841aa032293"
+    "version": "1.0.3",
+    "publishedAt": 1776847744880,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165814357,
+      "commit": "https://github.com/openclaw/skills/commit/5476de58da5c4141062bd44085459841aa032293"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774105362067,
