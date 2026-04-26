@@ -3,11 +3,16 @@
   "slug": "shopwaive",
   "displayName": "Shopwaive",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165961099,
-    "commit": "https://github.com/openclaw/skills/commit/84af581d2847fcccf1f0adf20c108480707cb77d"
+    "version": "1.0.3",
+    "publishedAt": 1776862802751,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165961099,
+      "commit": "https://github.com/openclaw/skills/commit/84af581d2847fcccf1f0adf20c108480707cb77d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774127046881,
