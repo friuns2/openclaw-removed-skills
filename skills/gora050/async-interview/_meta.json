@@ -3,11 +3,16 @@
   "slug": "async-interview",
   "displayName": "Async Interview",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165399129,
-    "commit": "https://github.com/openclaw/skills/commit/54dbab7e187e18a214786127ba12d440c2d83e6a"
+    "version": "1.0.3",
+    "publishedAt": 1776859331972,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165399129,
+      "commit": "https://github.com/openclaw/skills/commit/54dbab7e187e18a214786127ba12d440c2d83e6a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774022611038,
