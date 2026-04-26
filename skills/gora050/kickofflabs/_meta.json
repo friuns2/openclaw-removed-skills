@@ -3,11 +3,16 @@
   "slug": "kickofflabs",
   "displayName": "Kickofflabs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165921979,
-    "commit": "https://github.com/openclaw/skills/commit/133c63f6835468ab8dc747f5a186c970adde85e3"
+    "version": "1.0.3",
+    "publishedAt": 1776862284290,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165921979,
+      "commit": "https://github.com/openclaw/skills/commit/133c63f6835468ab8dc747f5a186c970adde85e3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774119855723,
