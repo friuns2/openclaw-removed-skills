@@ -3,11 +3,16 @@
   "slug": "loyaltylion",
   "displayName": "Loyaltylion",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164930889,
-    "commit": "https://github.com/openclaw/skills/commit/75704c7eeba6f9e4bd620c64b84d8ce781c565c4"
+    "version": "1.0.3",
+    "publishedAt": 1776858798202,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164930889,
+      "commit": "https://github.com/openclaw/skills/commit/75704c7eeba6f9e4bd620c64b84d8ce781c565c4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773932571321,
