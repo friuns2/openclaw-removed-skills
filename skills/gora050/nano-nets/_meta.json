@@ -3,11 +3,16 @@
   "slug": "nano-nets",
   "displayName": "Nano Nets",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165357872,
-    "commit": "https://github.com/openclaw/skills/commit/581ff8d25d62336fe404078665ed7e558483c4ca"
+    "version": "1.0.3",
+    "publishedAt": 1776859252734,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165357872,
+      "commit": "https://github.com/openclaw/skills/commit/581ff8d25d62336fe404078665ed7e558483c4ca"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774015427720,
