@@ -3,11 +3,16 @@
   "slug": "paddle-integration",
   "displayName": "Paddle",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165810132,
-    "commit": "https://github.com/openclaw/skills/commit/bfc70480d8fd522b1a459946fc622b3084126e52"
+    "version": "1.0.3",
+    "publishedAt": 1776847737881,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165810132,
+      "commit": "https://github.com/openclaw/skills/commit/bfc70480d8fd522b1a459946fc622b3084126e52"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774105357196,
