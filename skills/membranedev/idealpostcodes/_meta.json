@@ -3,11 +3,16 @@
   "slug": "idealpostcodes",
   "displayName": "Idealpostcodes",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164798113,
-    "commit": "https://github.com/openclaw/skills/commit/32a015c626a12de920a9f056fe394a25fb7e0e88"
+    "version": "1.0.3",
+    "publishedAt": 1776845527499,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164798113,
+      "commit": "https://github.com/openclaw/skills/commit/32a015c626a12de920a9f056fe394a25fb7e0e88"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773900156844,
