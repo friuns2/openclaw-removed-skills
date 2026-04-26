@@ -3,11 +3,16 @@
   "slug": "adr-writing",
   "displayName": "Adr Writing",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966667160,
-    "commit": "https://github.com/openclaw/skills/commit/ca3cbeaaef9614e5e67fe5e8104cbf1bbafaa34b"
+    "version": "1.0.2",
+    "publishedAt": 1776830990205,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966667160,
+      "commit": "https://github.com/openclaw/skills/commit/ca3cbeaaef9614e5e67fe5e8104cbf1bbafaa34b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773992804784,
