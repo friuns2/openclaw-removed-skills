@@ -3,11 +3,16 @@
   "slug": "teamdeck",
   "displayName": "Teamdeck",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167414626,
-    "commit": "https://github.com/openclaw/skills/commit/fd45a53488b3f9933b3644fa7c294a9eb1c57c41"
+    "version": "1.0.3",
+    "publishedAt": 1776861355723,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167414626,
+      "commit": "https://github.com/openclaw/skills/commit/fd45a53488b3f9933b3644fa7c294a9eb1c57c41"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774429460466,
