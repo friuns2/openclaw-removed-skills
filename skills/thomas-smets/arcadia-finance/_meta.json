@@ -3,11 +3,16 @@
   "slug": "arcadia-finance",
   "displayName": "Arcadia Finance",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1774026788107,
-    "commit": "https://github.com/openclaw/skills/commit/d67d6945d10c769dc6abf0ce66b2235caeb98fbd"
+    "version": "1.1.2",
+    "publishedAt": 1776924167889,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1774026788107,
+      "commit": "https://github.com/openclaw/skills/commit/d67d6945d10c769dc6abf0ce66b2235caeb98fbd"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1773838810511,
