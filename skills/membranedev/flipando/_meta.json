@@ -3,11 +3,16 @@
   "slug": "flipando",
   "displayName": "Flipando",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165162059,
-    "commit": "https://github.com/openclaw/skills/commit/86713d94d3c45603e216a4938da61df46eba00a8"
+    "version": "1.0.3",
+    "publishedAt": 1776846497159,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165162059,
+      "commit": "https://github.com/openclaw/skills/commit/86713d94d3c45603e216a4938da61df46eba00a8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773964961883,
