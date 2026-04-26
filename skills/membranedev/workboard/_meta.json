@@ -3,11 +3,16 @@
   "slug": "workboard",
   "displayName": "Workboard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167588427,
-    "commit": "https://github.com/openclaw/skills/commit/cd0d98358803e0a427610cfd84f72aedec0e580d"
+    "version": "1.0.3",
+    "publishedAt": 1776851210766,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167588427,
+      "commit": "https://github.com/openclaw/skills/commit/cd0d98358803e0a427610cfd84f72aedec0e580d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479748628,
