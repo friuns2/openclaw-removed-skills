@@ -3,11 +3,16 @@
   "slug": "pangolinfo-amazon-scraper",
   "displayName": "Pangolinfo Amazon Scraper: Products + Keywords + Reviews + Categories",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1775639733911,
-    "commit": "https://github.com/openclaw/skills/commit/5c8a6145801cb5141b4df6a1ac3532bece81951b"
+    "version": "2.0.1",
+    "publishedAt": 1776938502430,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1775639733911,
+      "commit": "https://github.com/openclaw/skills/commit/5c8a6145801cb5141b4df6a1ac3532bece81951b"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1774527269520,

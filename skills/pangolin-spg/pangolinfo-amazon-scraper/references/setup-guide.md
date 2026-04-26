@@ -4,9 +4,9 @@ When authentication fails (error code `MISSING_ENV`), walk the user through setu
 
 ## Step 1: Explain
 
-> To use this skill, you need a Pangolin API account for Amazon product data.
+> To use this skill, you need a Pangolinfo API account for Amazon product data.
 >
-> 使用本技能需要 Pangolin API 账号，用于获取亚马逊商品数据。
+> 使用本技能需要 Pangolinfo API 账号，用于获取亚马逊商品数据。
 
 ## Step 2: Register
 
@@ -20,20 +20,20 @@ When authentication fails (error code `MISSING_ENV`), walk the user through setu
 
 **API key (recommended):**
 ```bash
-export PANGOLIN_API_KEY="<api_key>"
-python3 scripts/pangolin.py --auth-only
+export PANGOLINFO_API_KEY="<api_key>"
+python3 scripts/pangolinfo.py --auth-only
 ```
 
 **Email + password:**
 ```bash
-export PANGOLIN_EMAIL="user@example.com"
-export PANGOLIN_PASSWORD="their-password"
-python3 scripts/pangolin.py --auth-only
+export PANGOLINFO_EMAIL="user@example.com"
+export PANGOLINFO_PASSWORD="their-password"
+python3 scripts/pangolinfo.py --auth-only
 ```
 
 **Optional caching (user must opt in):**
 ```bash
-python3 scripts/pangolin.py --auth-only --cache-key
+python3 scripts/pangolinfo.py --auth-only --cache-key
 ```
 
 ## Step 4: Confirm

@@ -1,6 +1,6 @@
 # Error Codes and Troubleshooting
 
-## Pangolin API Error Codes
+## Pangolinfo API Error Codes
 
 | Code | Meaning | Resolution |
 |------|---------|------------|
@@ -20,7 +20,7 @@
 
 - Tokens are **permanent** (don't expire unless account deactivated)
 - Error code `1004` triggers automatic token refresh
-- Resolution order: `PANGOLIN_API_KEY` env > `~/.pangolin_api_key` cache > fresh login
+- Resolution order: `PANGOLINFO_API_KEY` env > `~/.pangolinfo_api_key` cache > fresh login
 
 ## Credit Costs
 
@@ -36,7 +36,7 @@ Credits consumed on success (code 0) only.
 
 ## Common Issues
 
-**"No authentication credentials" error** -- Set `PANGOLIN_API_KEY` env var.
+**"No authentication credentials" error** -- Set `PANGOLINFO_API_KEY` env var.
 
 **Empty results** -- Check ASIN/keyword spelling, try different region.
 
