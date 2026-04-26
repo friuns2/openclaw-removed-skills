@@ -3,11 +3,16 @@
   "slug": "crove",
   "displayName": "Crove",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165880715,
-    "commit": "https://github.com/openclaw/skills/commit/23ffe9bdf76f93eedbd6b70d16c464ab2be7d75b"
+    "version": "1.0.3",
+    "publishedAt": 1776859798606,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165880715,
+      "commit": "https://github.com/openclaw/skills/commit/23ffe9bdf76f93eedbd6b70d16c464ab2be7d75b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774112629819,
