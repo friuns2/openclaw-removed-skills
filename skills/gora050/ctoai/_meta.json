@@ -3,11 +3,16 @@
   "slug": "ctoai",
   "displayName": "Ctoai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166152057,
-    "commit": "https://github.com/openclaw/skills/commit/438340febaa64570a91c72d24f32b663f9f03b6e"
+    "version": "1.0.3",
+    "publishedAt": 1776892190567,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166152057,
+      "commit": "https://github.com/openclaw/skills/commit/438340febaa64570a91c72d24f32b663f9f03b6e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774159442673,
