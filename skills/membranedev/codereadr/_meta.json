@@ -3,11 +3,16 @@
   "slug": "codereadr",
   "displayName": "Codereadr",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165573599,
-    "commit": "https://github.com/openclaw/skills/commit/a9d0aeec2d4d2803f717eab16ceb3caabf180d0c"
+    "version": "1.0.3",
+    "publishedAt": 1776847377251,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165573599,
+      "commit": "https://github.com/openclaw/skills/commit/a9d0aeec2d4d2803f717eab16ceb3caabf180d0c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051374686,
