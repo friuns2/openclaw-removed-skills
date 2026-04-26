@@ -3,11 +3,16 @@
   "slug": "mumara",
   "displayName": "Mumara",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167186521,
-    "commit": "https://github.com/openclaw/skills/commit/f88d89da6a0d21379a6bf31b8ead6ba81dcd1a3b"
+    "version": "1.0.3",
+    "publishedAt": 1776850076334,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167186521,
+      "commit": "https://github.com/openclaw/skills/commit/f88d89da6a0d21379a6bf31b8ead6ba81dcd1a3b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774389758471,
