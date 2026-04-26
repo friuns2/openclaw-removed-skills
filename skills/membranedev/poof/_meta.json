@@ -3,11 +3,16 @@
   "slug": "poof",
   "displayName": "Poof",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166197084,
-    "commit": "https://github.com/openclaw/skills/commit/c68471879361ed22c897fe1703ad905843491107"
+    "version": "1.0.3",
+    "publishedAt": 1776848256398,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166197084,
+      "commit": "https://github.com/openclaw/skills/commit/c68471879361ed22c897fe1703ad905843491107"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774184552949,
