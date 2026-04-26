@@ -3,11 +3,16 @@
   "slug": "droxy",
   "displayName": "Droxy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165153804,
-    "commit": "https://github.com/openclaw/skills/commit/608970e5a6582fbd956457378df6d877051f7e3a"
+    "version": "1.0.3",
+    "publishedAt": 1776846485625,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165153804,
+      "commit": "https://github.com/openclaw/skills/commit/608970e5a6582fbd956457378df6d877051f7e3a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773964944957,
