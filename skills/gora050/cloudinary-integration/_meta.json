@@ -3,11 +3,16 @@
   "slug": "cloudinary-integration",
   "displayName": "Cloudinary",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165884717,
-    "commit": "https://github.com/openclaw/skills/commit/db5714ca83291d166669f60d8664860248ae8b58"
+    "version": "1.0.3",
+    "publishedAt": 1776859805781,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165884717,
+      "commit": "https://github.com/openclaw/skills/commit/db5714ca83291d166669f60d8664860248ae8b58"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774112638220,
