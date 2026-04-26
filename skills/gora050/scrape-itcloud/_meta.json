@@ -3,11 +3,16 @@
   "slug": "scrape-itcloud",
   "displayName": "Scrape Itcloud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166034202,
-    "commit": "https://github.com/openclaw/skills/commit/85396bab2b461204ea56adda8672d9a28175a0ce"
+    "version": "1.0.3",
+    "publishedAt": 1776859848774,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166034202,
+      "commit": "https://github.com/openclaw/skills/commit/85396bab2b461204ea56adda8672d9a28175a0ce"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774137853697,
