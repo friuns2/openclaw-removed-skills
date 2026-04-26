@@ -3,11 +3,16 @@
   "slug": "meetingpulse",
   "displayName": "Meetingpulse",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165871827,
-    "commit": "https://github.com/openclaw/skills/commit/c17a6407cecafb9d0133b8dc8b71af47050f441f"
+    "version": "1.0.3",
+    "publishedAt": 1776859783410,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165871827,
+      "commit": "https://github.com/openclaw/skills/commit/c17a6407cecafb9d0133b8dc8b71af47050f441f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774112611491,
