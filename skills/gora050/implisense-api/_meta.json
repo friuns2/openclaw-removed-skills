@@ -3,11 +3,16 @@
   "slug": "implisense-api",
   "displayName": "Implisense Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166753287,
-    "commit": "https://github.com/openclaw/skills/commit/8bec4cc189ce477330b80754d7cc0fdceb9f0871"
+    "version": "1.0.3",
+    "publishedAt": 1776860382202,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166753287,
+      "commit": "https://github.com/openclaw/skills/commit/8bec4cc189ce477330b80754d7cc0fdceb9f0871"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774307012407,
