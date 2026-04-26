@@ -3,11 +3,16 @@
   "slug": "scrapingbee",
   "displayName": "Scrapingbee",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166971484,
-    "commit": "https://github.com/openclaw/skills/commit/5d7e974f3327a0b2107608100d768a07c2208a52"
+    "version": "1.0.3",
+    "publishedAt": 1776860686189,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166971484,
+      "commit": "https://github.com/openclaw/skills/commit/5d7e974f3327a0b2107608100d768a07c2208a52"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774332266158,
