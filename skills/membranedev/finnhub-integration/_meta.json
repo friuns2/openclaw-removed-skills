@@ -3,11 +3,16 @@
   "slug": "finnhub-integration",
   "displayName": "Finnhub",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166697792,
-    "commit": "https://github.com/openclaw/skills/commit/463bc79d543674a20fa859632885210eedabd85f"
+    "version": "1.0.3",
+    "publishedAt": 1776849005089,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166697792,
+      "commit": "https://github.com/openclaw/skills/commit/463bc79d543674a20fa859632885210eedabd85f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774299759152,
