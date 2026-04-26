@@ -3,11 +3,16 @@
   "slug": "modern-treasury",
   "displayName": "Modern Treasury",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167459055,
-    "commit": "https://github.com/openclaw/skills/commit/d4d0e3d13c20581b6e5958a8bbacce4026c8ab54"
+    "version": "1.0.3",
+    "publishedAt": 1776861450675,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167459055,
+      "commit": "https://github.com/openclaw/skills/commit/d4d0e3d13c20581b6e5958a8bbacce4026c8ab54"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774440204085,
