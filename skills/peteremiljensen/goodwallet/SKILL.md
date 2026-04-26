@@ -1,6 +1,5 @@
 ---
 name: goodwallet
-version: 1.5.6
 description: >
   Crypto wallet for sending, swapping, trading perps, betting on Polymarket,
   earning DeFi yield, and signing across EVM, Solana, Bitcoin, Doge, and XRP.
@@ -59,12 +58,16 @@ metadata:
 
 Crypto wallet CLI. Run `goodwallet --help` for the latest commands, flags, chains, and usage.
 
-## Update
+## Setup
 
-Before running any other command, check for updates:
+This skill assumes the `goodwallet` CLI is installed globally and available in PATH. If not, install it via [npm](https://www.npmjs.com/package/goodwallet).
+Do NOT use `npx`. Always use the globally installed binary.
 
-1. `goodwallet update` — check for a new version.
-2. If outdated, run `goodwallet update --install` before proceeding.
+## Updates
+
+After any `goodwallet` command, an "Update Available" or "Major Update Available" block may appear at the end of output. When it does you **MUST** surface it to the user, ask whether to upgrade, and run `goodwallet update` if they agree. 
+**Do not silently ignore it.**
+
 
 ## Rules
 
