@@ -3,11 +3,16 @@
   "slug": "livechat",
   "displayName": "Livechat",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167049948,
-    "commit": "https://github.com/openclaw/skills/commit/919058c38ba05e21559d34c82735c8a6ebd9b74d"
+    "version": "1.0.3",
+    "publishedAt": 1776860819526,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167049948,
+      "commit": "https://github.com/openclaw/skills/commit/919058c38ba05e21559d34c82735c8a6ebd9b74d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774346648259,
