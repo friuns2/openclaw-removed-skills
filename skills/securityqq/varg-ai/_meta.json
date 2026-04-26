@@ -3,11 +3,16 @@
   "slug": "varg-ai",
   "displayName": "Varg Ai",
   "latest": {
-    "version": "2.0.5",
-    "publishedAt": 1774768465913,
-    "commit": "https://github.com/openclaw/skills/commit/9237ca15a04c29d7ec395f6c82718ade09621672"
+    "version": "2.0.6",
+    "publishedAt": 1776965065829,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.0.5",
+      "publishedAt": 1774768465913,
+      "commit": "https://github.com/openclaw/skills/commit/9237ca15a04c29d7ec395f6c82718ade09621672"
+    },
     {
       "version": "2.0.0",
       "publishedAt": 1773868045354,
