@@ -3,11 +3,16 @@
   "slug": "emelia",
   "displayName": "Emelia",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164487699,
-    "commit": "https://github.com/openclaw/skills/commit/da10c29dceaccf681d1b922ca8be877ce2cdc2e4"
+    "version": "1.0.3",
+    "publishedAt": 1776837997773,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164487699,
+      "commit": "https://github.com/openclaw/skills/commit/da10c29dceaccf681d1b922ca8be877ce2cdc2e4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773727400407,
