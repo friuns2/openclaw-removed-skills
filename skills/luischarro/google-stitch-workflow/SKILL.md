@@ -1,6 +1,6 @@
 ---
 name: google-stitch-workflow
-version: 1.4.0
+version: 1.4.2
 description: Use when working with Google Stitch through a disciplined MCP-first workflow. Prefer this skill for project inspection, controlled screen generation and editing, prompt structuring, and failure recovery.
 ---
 
@@ -62,7 +62,9 @@ Important nuance:
 
 ## Quick operating rules
 
+- **rewrite before acting** — before any `generate`, `edit`, or `variants` call, rewrite the user request into a stronger design prompt or a tighter edit intent
 - **inspect before editing** — always inspect the project and target screen first; verify whether the screen is actually generated content (if `htmlCode` exists, it's more likely editable)
+- **pick the operation class first** — decide whether this pass is `generate`, `edit`, or `variants`; do not blur exploration, refinement, and branching in one move
 - **work one screen at a time** — one short generation followed by controlled edits; keep one screen as the unit of iteration
 - **keep prompts short, explicit, and preservation-oriented** — start with the smallest prompt that can produce a useful screen
 - **review the visual result before the next major step** — review screenshots or visual artifacts immediately after each generate/edit; ask the user to choose using a human description, not an opaque screen ID
@@ -71,6 +73,7 @@ Important nuance:
 - **act as creative director** — Stitch is the designer, you provide the direction
 - **define what must NOT change** — the single most important iteration rule: tell Stitch what to keep, not just what to change
 - **hub-first for multi-screen projects** — generate a hub screen first, derive all other screens via edit, never fresh generate siblings
+- **report state after every pass** — after each generate/edit/variants step, report the project id, screen id, artifact location if any, a short design judgment, and the next recommended move
 - **treat wrapper enhancements as optional** — not part of the Stitch MCP contract
 
 ## Complete process order
@@ -87,6 +90,12 @@ This is the recommended sequence from blank canvas to accepted design:
 8. **Export/code** → Only after the direction is clearly accepted
 
 **Before step 1, create a feature matrix.** Map which features appear on which screen. Only start generating once the coverage is clear — this makes every generate/edit call a deliberate execution step, not a discovery. Three focused screens you've thought through beat ten screens you discover issues with during generation.
+
+At the start of each pass, choose one operation class on purpose:
+
+- `generate` for a new canonical screen
+- `edit` for a focused improvement to an existing screen
+- `variants` for controlled branching from a base direction
 
 Skip steps and you'll iterate more later. Follow them and each step builds on the last.
 
@@ -134,6 +143,15 @@ Stitch auto-generates a design system for every project. Treat it as the DNA of 
 
 Stitch generates a **DESIGN.md** tab covering creative direction, color hierarchy with roles, typography rationale, elevation, components, and dos/don'ts. This is what drives the design system.
 
+Treat `DESIGN.md` as a two-layer artifact:
+
+- a token layer with the concrete values the system depends on
+- a prose layer with the reasoning for what those values are supposed to do
+
+Keep those two layers aligned. If the rationale and the token values drift apart, the design system stops being reliable for both Stitch and coding agents.
+
+Think of tokens as **named design decisions**, not loose variables. `primary` is not just a hex slot; it is the role for the main ink of the product. `body-main` is not just a size; it is the role for default reading copy. The current value fills that role, but the role is the durable part.
+
 **What you can do with DESIGN.md:**
 
 - edit it directly in Stitch to course-correct
@@ -155,20 +173,41 @@ This is the single most portable artifact in your Stitch workflow. Invest time i
 
 **Creating a custom DESIGN.md outside Stitch:**
 
-1. Get the design.md template from Google's official Stitch skills repo (optimized for Stitch's workflow)
-2. Provide the template + your style description to any LLM (Claude, Gemini, etc.)
-3. The agent generates a structured design.md following the template
-4. In Stitch: Design Systems → Create New → paste the generated design.md → Save
-5. Stitch visualizes the design system immediately — colors, fonts, spacing all rendered
-6. Generate screens using this custom design system as the base
+1. Write a minimal design-system brief first: visual posture, intended mood, main user job, and 3-5 things the UI must not resemble.
+2. Turn that brief into a compact `DESIGN.md` with:
+   - YAML front matter for the durable tokens: color roles, typography, radius, spacing, and only the stable component rules
+   - markdown sections for the why: overview, colors, typography, layout, components, and do's/don'ts
+3. Keep the token layer concrete. Keep the prose layer directional. Do not mix them.
+4. Define the baseline role anchors clearly:
+   - `primary` for the main ink and core text emphasis
+   - `neutral` for the canvas and emotionally neutral surfaces
+5. In component rules, prefer references to roles over hardcoded raw values. A button should usually point at `primary`, `tertiary`, `on-primary`, or another named role instead of embedding a literal color directly.
+6. Keep the Components section conservative. Encode the stable reusable rules, not every temporary visual exception.
+7. In Stitch: Design Systems → Create New → paste the finished `DESIGN.md` → Save
+8. Stitch visualizes the design system immediately — colors, fonts, spacing all rendered
+9. Generate screens using this custom design system as the base
 
 This pattern is useful when you've already brainstormed design direction with a coding agent and want to transfer that direction into Stitch.
+
+If the copied `DESIGN.md` will become a real project artifact outside Stitch,
+validate it before treating it as authoritative:
+
+```bash
+npx @google/design.md lint DESIGN.md
+npx @google/design.md diff DESIGN-before.md DESIGN-after.md
+```
+
+Use `lint` as part of the normal edit loop, not just as a final gate: read the current design system, make the change, lint it, fix the findings, then re-check. Use `diff` before and after meaningful revisions to catch token drift or accidental regressions in the design system itself.
 
 **Importing from an existing website:**
 
 Beyond pasting a URL for style hints in a prompt, you can import a website's design as a formal design.md file via the design systems panel: provide the URL and Stitch crawls the site, extracting style and typography into a structured design system. This gives you an editable, portable design foundation rather than a one-off style hint.
 
 #### Color hierarchy (not just a palette)
+
+Colors have jobs based on visual weight and importance. Reach for the role first, then the value that currently fills it. That keeps the design system semantic instead of turning it into a bag of swatches.
+
+`Primary` and `neutral` are the anchor roles. In practice, `primary` usually carries the reading ink and strong emphasis, while `neutral` carries the background and surface system.
 
 Colors have jobs based on visual weight and importance:
 
@@ -317,7 +356,7 @@ This pattern works better than listing features without spatial context.
 
 ### Adjective-driven mood language
 
-Stitch relies on **adjectives to identify mood** rather than exact structural descriptions. "Warm, inviting, premium" works better than "rounded corners, 16px padding, serif font." The Enhanced Prompt skill from Google's official repo transforms vague prompts into Stitch-optimized prompts using this principle.
+Stitch relies on **adjectives to identify mood** rather than exact structural descriptions. "Warm, inviting, premium" works better than "rounded corners, 16px padding, serif font." When prompting, prefer mood and intent language first, then add structure afterward.
 
 ### URL-based style extraction
 

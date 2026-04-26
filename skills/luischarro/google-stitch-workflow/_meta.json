@@ -3,11 +3,16 @@
   "slug": "google-stitch-workflow",
   "displayName": "Google Stitch Workflow",
   "latest": {
-    "version": "1.4.0",
-    "publishedAt": 1776502306763,
-    "commit": "https://github.com/openclaw/skills/commit/00cedf0a05ec0dddc11ad2453454ba70051c4d79"
+    "version": "1.4.2",
+    "publishedAt": 1776924751463,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.4.0",
+      "publishedAt": 1776502306763,
+      "commit": "https://github.com/openclaw/skills/commit/00cedf0a05ec0dddc11ad2453454ba70051c4d79"
+    },
     {
       "version": "1.2.0",
       "publishedAt": 1775052896240,

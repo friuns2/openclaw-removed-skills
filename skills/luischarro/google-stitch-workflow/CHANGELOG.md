@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.2
+
+- Expands the `DESIGN.md` guidance to treat tokens as named design roles/decisions rather than loose variables.
+- Clarifies the two-layer `DESIGN.md` model: concrete token values plus prose rationale that must stay aligned.
+- Adds stronger guidance for baseline role anchors (`primary`, `neutral`), role-referenced component rules, and using lint/diff as a normal validation loop.
+- Makes the top-level Stitch workflow stricter: rewrite prompts before action, choose `generate` vs `edit` vs `variants` explicitly, and report state after every pass.
+- Adds a maintainer-facing `publish/RELEASE_RULES.md` so future sessions can follow the same ClawHub release policy without relying on prior chat context.
+
+## 1.4.1
+
+- Refines the `DESIGN.md` guidance so custom design-system creation starts from a brief and a compact token-plus-rationale artifact instead of pointing to another repo.
+- Tightens mood-language guidance to keep the public bundle self-contained and free of external skill references.
+
 ## 1.3.0
 
 - Major expansion: creative direction framework, design system as DNA, and complete process order.

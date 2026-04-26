@@ -50,7 +50,7 @@ This folder is a self-contained ClawHub skill bundle.
 Typical command from the repo root:
 
 ```bash
-clawhub publish ./publish/google-stitch-workflow --slug google-stitch-workflow --name "Google Stitch Workflow" --version 1.2.0 --tags latest
+clawhub skill publish ./publish/google-stitch-workflow --slug google-stitch-workflow --name "Google Stitch Workflow" --version 1.4.2 --tags latest
 ```
 
 ## License

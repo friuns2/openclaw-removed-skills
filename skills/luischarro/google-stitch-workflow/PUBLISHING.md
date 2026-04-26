@@ -1,9 +1,11 @@
 # Publishing
 
+Read [`../RELEASE_RULES.md`](../RELEASE_RULES.md) before changing versions or publishing.
+
 ## Pre-publish checklist
 
 - confirm the slug: `google-stitch-workflow`
-- confirm the release version: `1.2.0`
+- confirm the release version: `1.4.2`
 - confirm `SKILL.md` is self-contained enough for public readers
 - confirm supporting files are intentional and minimal
 - confirm you are comfortable publishing under the included MIT License
@@ -15,14 +17,14 @@ From this repo's `publish/` directory:
 ```bash
 cd publish
 clawhub login
-clawhub publish ./google-stitch-workflow --slug google-stitch-workflow --name "Google Stitch Workflow" --version 1.2.0 --tags latest --changelog "Add greenfield-app guidance: use accepted Stitch exports as translation seeds instead of rebuilding from screenshots."
+clawhub skill publish ./google-stitch-workflow --slug google-stitch-workflow --name "Google Stitch Workflow" --version 1.4.2 --tags latest --changelog "Expand DESIGN.md semantics and tighten the Stitch operating model around prompt rewriting, operation choice, and pass reporting."
 ```
 
 Or, from the repo root without changing directories:
 
 ```bash
 clawhub login
-clawhub publish ./publish/google-stitch-workflow --slug google-stitch-workflow --name "Google Stitch Workflow" --version 1.2.0 --tags latest --changelog "Add greenfield-app guidance: use accepted Stitch exports as translation seeds instead of rebuilding from screenshots."
+clawhub skill publish ./publish/google-stitch-workflow --slug google-stitch-workflow --name "Google Stitch Workflow" --version 1.4.2 --tags latest --changelog "Expand DESIGN.md semantics and tighten the Stitch operating model around prompt rewriting, operation choice, and pass reporting."
 ```
 
 ## Verify
