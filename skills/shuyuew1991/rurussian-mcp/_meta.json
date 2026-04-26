@@ -3,11 +3,16 @@
   "slug": "rurussian-mcp",
   "displayName": "RuRussian MCP",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1774930626714,
-    "commit": "https://github.com/openclaw/skills/commit/a08b08175b0ed9bf296d9cd8afe65d44b0b298ff"
+    "version": "2.0.0",
+    "publishedAt": 1776599345592,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1774930626714,
+      "commit": "https://github.com/openclaw/skills/commit/a08b08175b0ed9bf296d9cd8afe65d44b0b298ff"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1774495492760,

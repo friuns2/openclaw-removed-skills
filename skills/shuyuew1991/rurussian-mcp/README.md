@@ -1,26 +1,32 @@
-# RuRussian MCP Server
+# RuRussian Agent-Native MCP
 
-[![Works with OpenClaw](https://img.shields.io/badge/Works%20with-OpenClaw-4f46e5)](https://openclaw.dev)
-[![MCP Server](https://img.shields.io/badge/MCP-Server-0891b2)](https://modelcontextprotocol.io)
-[![Russian Learning](https://img.shields.io/badge/Russian-Learning-16a34a)](https://rurussian.com)
+Agent-native MCP server for `rurussian.com` and multi-agent learning workflows.
 
-MCP server for RURussian.com – turn your OpenClaw bot into a Russian tutor.
-Rurussian.com is a state-of-the-art tool designed for deep, immersive mastery of Russian vocabulary. At its core, it features sentence-driven declension memorization to help you internalize grammar naturally in context, plus precise, native-level text generation for individual words and full sentences. All generated content is laser-focused on the real-world, typical usage of terms as they appear in formal dictionary definitions. What’s more, the platform lets you create fully customized textbooks aligned exactly with your learning level and progress, with GPT-5-powered AI delivering in-depth, granular analysis of every sentence you collect and study.
-Rurussian.com is built to sustain a long-term Russian learning journey, be able to help create and betterize russiandictionary, and let rusvibe be your own russian teacher.
+This version upgrades the original single-file wrapper into a production-oriented learning infrastructure with:
 
-This MCP is optimized for OpenClaw bots that need two things at once:
-- strong Russian-learning capabilities
-- a self-serve activation flow for bots that are allowed to pay for access
+- strict JSON outputs backed by Pydantic schemas
+- three explicit layers: atomic tools, workflow tools, and memory tools
+- modular services for backend access, parsing, lesson generation, and learner modeling
+- persistent JSON-backed learning memory designed for later migration to MongoDB or another database
 
-## Quick Start
+## Architecture
 
-1. Install the server:
+```text
+rurussian_mcp/
+  schemas/   -> request/response contracts
+  services/  -> backend access, parsing, workflows, memory
+  tools/     -> MCP tool registration by layer
+  memory/    -> persistence namespace
+  server.py  -> thin FastMCP entrypoint
+```
+
+## Installation
 
 ```bash
 pip install rurussian-mcp
 ```
 
-2. Add this to your `~/.openclaw/config.json`:
+## Configuration
 
 ```json
 {
@@ -30,84 +36,58 @@ pip install rurussian-mcp
       "args": [],
       "env": {
         "RURUSSIAN_API_URL": "https://rurussian.com/api",
-        "RURUSSIAN_API_KEY": "YOUR_BOT_API_KEY"
+        "RURUSSIAN_API_KEY": "YOUR_BOT_API_KEY",
+        "RURUSSIAN_LEARNER_EMAIL": "learner@example.com"
       }
     }
   }
 }
 ```
 
-3. Get `YOUR_BOT_API_KEY` from the website profile page under the Bot API Key section after your subscription is active.
-4. If the bot already has a key, you can preload it through `RURUSSIAN_API_KEY` or call `authenticate` first.
-5. If the bot has no key yet and the user wants to buy one, call `list_pricing_plans`, then run `create_key_purchase_session`.
-6. If the bot has payment authority, it can open the hosted `checkout_url`, complete payment, capture the `session_id` from the success redirect when needed, and then run `confirm_key_purchase`.
-7. `confirm_key_purchase` can unlock the session even when the backend does not expose a raw API key.
+Optional environment variables:
 
-For a drop-in example file, see [openclaw_config.json](./examples/openclaw_config.json).
+- `RURUSSIAN_MEMORY_STORE`
+- `RURUSSIAN_LEARNER_ID`
+- `RURUSSIAN_BUY_SESSION_ENDPOINTS`
+- `RURUSSIAN_CONFIRM_PURCHASE_ENDPOINTS`
 
-## Tool List
+## Tool Surface
 
-- `list_pricing_plans()`
-  - Example request: "Show the available RuRussian plans for this bot."
-- `authenticate(api_key, user_agent?)`
-  - Example request: "Use my RuRussian API key and initialize this session."
-- `authentication_status()`
-  - Example request: "Check whether this session is already authenticated."
-- `purchase_status()`
-  - Example request: "Check whether checkout already unlocked this MCP session."
-- `create_key_purchase_session(email, plan, success_url?, cancel_url?)`
-  - Example request: "Create a checkout session for `month_1` and return the payment URL."
-- `confirm_key_purchase(session_id, auto_authenticate?)`
-  - Example request: "Confirm the payment session and unlock this server session."
-- `get_word_data(word)`
-  - Example request: "Explain the declension and meaning of `книга`."
-- `get_sentences(word?, form_word?, form_id?, email?, saved_only?, wait_seconds?, poll_interval_ms?)`
-  - Example request: "Generate a sentence for `идти` using the form `шёл`."
-- `generate_zakuska(mode?, learner_email, selected_words?, selected_sentences?, custom_text?, topic?)`
-  - Example request: "Generate a Zakuska in paste mode for learner@example.com using this text."
-- `analyze_sentence(sentence)`
-  - Example request: "Break down this sentence and explain each form: `Я люблю программировать`."
-- `translate_text(text, source_lang?, target_lang?)`
-  - Example request: "Translate this Russian paragraph to English."
+### Support Tools
 
-## Full Docs and API Access
+- `authenticate`
+- `authentication_status`
+- `list_pricing_plans`
+- `purchase_status`
+- `create_key_purchase_session`
+- `confirm_key_purchase`
 
-- Website: [rurussian.com](https://rurussian.com)
-- Full documentation and integration details: [rurussian.com](https://rurussian.com)
-- Pricing plans: [rurussian.com/pricing](https://rurussian.com/pricing)
-- API key signup and account dashboard: [rurussian.com](https://rurussian.com)
-- Bot key management in profile: [rurussian.com/profile](https://rurussian.com/profile)
+### Layer A: Atomic Tools
 
-## Troubleshooting
+- `parse_sentence`
+- `generate_examples`
+- `generate_reading_passage`
 
-- Missing API key
-  - Load a key from the profile page, pass it into `authenticate`, or use the purchase flow if the user wants to buy a plan.
-- Authentication required error
-  - Call `authenticate` before learner tools, or finish the hosted checkout flow and confirm it with `confirm_key_purchase`.
-- Zakuska request rejected
-  - Pass `learner_email` because the current live backend binds Zakuska generation and saved study state to a learner account.
-- Purchase endpoint mismatch
-  - Set `RURUSSIAN_BUY_SESSION_ENDPOINTS` and `RURUSSIAN_CONFIRM_PURCHASE_ENDPOINTS` when your backend paths differ.
-- No API key returned after payment confirmation
-  - This backend can confirm payment without exposing a raw key. `confirm_key_purchase` still unlocks the MCP session in checkout-backed mode.
-- Python version issue
-  - This package requires Python 3.9 or newer.
-- Command not found: `rurussian-mcp`
-  - Ensure installation completed in the same environment where OpenClaw runs.
-- API endpoint/network errors
-  - Verify internet access and optionally set `RURUSSIAN_API_URL` only if you need a custom backend URL.
+### Layer B: Workflow Tools
 
-## Security Notes
+- `explain_text_for_learner`
+- `create_daily_lesson`
+- `create_review_session`
+- `evaluate_user_answer`
+- `simulate_conversation`
 
-- This repo contains no built-in secrets and no real keys.
-- Purchase helpers can initiate hosted checkout and confirm a session, but payment is still completed on the RuRussian checkout page rather than inside the tool.
-- The server never returns a full API key in tool output.
-- Do not commit real keys to config files. Use environment variables in deployment platforms.
+### Layer C: Memory Tools
 
-## Integration Guide
+- `get_learning_profile`
+- `update_learning_progress`
+- `get_next_best_lesson`
 
-For extended OpenClaw integration steps and platform setup ideas, see [INTEGRATION.md](./docs/INTEGRATION.md).
+## Examples
 
-## License
+Structured request and response examples for every tool are in `examples/tool_examples.json`.
 
-MIT. See [LICENSE](./LICENSE).
+## Notes
+
+- The server reuses the real RuRussian backend where it already exists today: translation, Zakuska generation, sentence generation, and checkout flows.
+- Sentence parsing, lesson assembly, learner scoring, and profile memory are implemented locally so autonomous agents can compose deterministic JSON outputs.
+- Memory uses a simple JSON store now and is isolated behind a service layer for future database-backed scaling.

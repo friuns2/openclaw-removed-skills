@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rurussian-mcp"
-version = "1.0.7"
-description = "MCP server for rurussian.com with OpenClaw-ready Russian learning, Rusvibe flows, and hosted checkout"
+version = "2.0.0"
+description = "Agent-native MCP server for rurussian.com with layered learning tools, structured JSON schemas, and persistent learner memory"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
@@ -15,7 +15,8 @@ authors = [
 dependencies = [
     "mcp>=1.0.0",
     "httpx",
-    "pydantic"
+    "pydantic",
+    "pymorphy3"
 ]
 
 [project.urls]
@@ -26,5 +27,5 @@ Documentation = "https://github.com/shuyueW1991/rurussian-mcp#readme"
 [project.scripts]
 rurussian-mcp = "rurussian_mcp.server:main"
 
-[tool.setuptools]
-packages = ["rurussian_mcp"]
+[tool.setuptools.packages.find]
+include = ["rurussian_mcp*"]
