@@ -3,11 +3,16 @@
   "slug": "lx-agent-optimizer",
   "displayName": "LX Agent Optimizer",
   "latest": {
-    "version": "1.3.0",
-    "publishedAt": 1775009475573,
-    "commit": "https://github.com/openclaw/skills/commit/60201c1f7cc57089e3fee1471077df82af4a9cdd"
+    "version": "1.4.0",
+    "publishedAt": 1776605477719,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.0",
+      "publishedAt": 1775009475573,
+      "commit": "https://github.com/openclaw/skills/commit/60201c1f7cc57089e3fee1471077df82af4a9cdd"
+    },
     {
       "version": "1.1.1",
       "publishedAt": 1774501754129,

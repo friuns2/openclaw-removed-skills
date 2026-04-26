@@ -1,7 +1,7 @@
 ---
 name: lx-agent-optimizer
 slug: lx-agent-optimizer
-version: 1.3.0
+version: 1.3.1
 description: |
   A battle-tested agent self-improvement system built by a non-coder from weeks of real-world usage with OpenClaw.
   No fluff, no theory — every rule here was learned from something that actually broke.
@@ -91,6 +91,7 @@ These were learned the hard way:
 | **Script-first cron** | Embed logic in `.py` files, not in cron message prompts |
 | **Silent on success** | Only alert on anomalies, errors, or changes |
 | **Channel health checks → real-time probe, not stale logs** | Historical cron errors may be old; verify current channel state before alerting or auto-remediating |
+| **Cron alerts → classify error type before paging user** | Delivery failure, task logic failure, and node failure need different handling; don't treat them as the same outage |
 | **Reminder source mapping → check both cron and HEARTBEAT.md** | Some reminders live in cron jobs, others live in heartbeat rules; disabling one side is not enough |
 | **Success once ≠ learned** | A task is only truly learned after the verified path is written into external memory (`TOOLS.md`, improvement log, or long-term memory) |
 
@@ -107,6 +108,7 @@ These were learned the hard way:
 | Sports data (no API key) | ESPN public API | sofascore (403), official site (SPA) |
 | Apple Calendar today events | Run `python3 /Users/paolo/.openclaw/workspace/skills/calendar-morning/scripts/today_events.py` on Paolo's Mac mini; under the hood it uses `/usr/bin/osascript` + Calendar.app | Re-guessing the tool, calendar names, or prompting from scratch |
 | Telegram channel health check | Send a **silent real-time probe** via `message` tool and only remediate/alert on actual send failure | Scanning historical cron `lastError` / `deliveryStatus` and assuming the channel is currently down |
+| Cron anomaly triage | First classify as **delivery failure / task failure / node failure**, then decide whether to alert, retry, or remediate | Treating every `consecutiveErrors > 0` as the same kind of outage |
 | Reminder disable audit | Check **both** cron jobs and `HEARTBEAT.md` before saying a reminder is removed | Looking only at cron list and missing heartbeat-driven reminders |
 
 ---
@@ -166,6 +168,7 @@ Heartbeat = **control plane only** (cheap).
 
 ✅ Good heartbeat tasks:
 - Check cron consecutiveErrors
+- **Classify cron errors by type** (delivery / task / node) before deciding whether to alert
 - Check if Telegram channel is down
 - Quick calendar scan
 
@@ -178,6 +181,8 @@ Heartbeat = **control plane only** (cheap).
 HEARTBEAT_OK  ← 99% of the time
 Alert only when: errors > 0, channel down, something changed
 ```
+
+**Important:** heartbeat may use cron error state to spot anomalies, but **must not auto-remediate Telegram/channel issues from stale cron history alone**. Use cron state to detect "something looks wrong," then verify with a live probe before fallback alerts or recovery actions.
 
 ---
 
@@ -222,6 +227,77 @@ Before shipping any cron job:
 
 - `references/behavior-learning.md` — improvement log format and weekly cycle
 - `references/proactive-patterns.md` — when to act, when to stay quiet
-- `references/cron-discipline.md` — script-first cron patterns
+- `references/cron-discipline.md` — script-first cron patterns, error classification, and channel-health rules
 - `references/cost-control.md` — token cost reduction playbook
 - `scripts/token_report.py` — weekly token usage report script
+
+---
+
+## Hermes-Inspired Extensions（v1.4）
+
+三个从 Hermes Agent 框架借鉴的自进化机制，补充原有四大支柱。
+
+### 5. 📋 Skill Awareness（技能感知层）
+
+Agent 应该主动知道自己有什么能力，而不是靠记忆猜。
+
+**每周扫描机制：**
+```bash
+ls /Users/paolo/.openclaw/workspace/skills/
+```
+扫描后更新 `memory/skill-registry.md`，格式：
+```markdown
+# Skill Registry（更新日期：YYYY-MM-DD）
+- skill-name: 一句话描述，适用场景
+```
+
+**触发规则：**
+- 每周一自检一次，有新 Skill 时更新
+- 接到任务前先查 `skill-registry.md`，判断是否有现成 Skill 可用
+- 优先复用已验证的 Skill，不要重新摸索相同路径
+
+---
+
+### 6. 🔁 Memory Recall Gate（记忆召回门控）
+
+在处理较复杂任务前，先主动搜索记忆库，复用已有成功路径。
+
+**执行流程：**
+```
+接到任务
+  ↓
+memory_search（关键词：任务类型 + 工具名）
+  ↓
+命中成功路径？
+  ├── 是 → 直接复用，记录为"路径复用"
+  └── 否 → 重新执行，执行完后记录路径到 TOOLS.md 或 improvement_log.md
+```
+
+**规则：**
+- 命中率低（连续 3 次同类任务都没命中记忆）→ 说明记忆库记录不足，补录
+- 禁止"凭印象试错"：有相似历史路径一定先查，再动手
+- 验证路径写入格式：`TOOLS.md | 已验证工具路径` 表格
+
+---
+
+### 7. 📊 Task Quality Signal（任务质量反馈）
+
+每次执行较复杂任务后，记录结果质量，形成可追踪的成功率数据。
+
+**记录格式**（追加到 `improvement_log.md`）：
+```markdown
+## Task Signal（YYYY-MM-DD）
+- 任务：[任务简述]
+- 结果：✅ 成功 / ⚠️ 部分成功 / ❌ 失败
+- 是否重试：否 / 是（N次）
+- 关键路径：[用了什么工具/命令]
+- 教训（失败时）：[一句话]
+```
+
+**什么算"较复杂任务"：**
+- 调用超过 2 个工具
+- 涉及文件写入 / cron 变更 / 外部 API
+- 用户明确说"帮我做XX"
+
+**周报中汇报：**
+> 本周任务信号：共 N 次，成功率 X%，重试 Y 次，最高频失败点：Z

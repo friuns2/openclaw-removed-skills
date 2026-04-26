@@ -80,6 +80,18 @@ json.dump({"last_id": new_id}, open(state_path, "w"))
 - Never send "everything is fine" messages
 - Success = silence
 
+## Cron error classification
+
+When a cron shows `consecutiveErrors > 0`, **do not assume the root cause immediately**. Classify first:
+
+| Type | Typical signal | Meaning | Default action |
+|------|----------------|---------|----------------|
+| **Delivery failure** | `Message failed`, `sendMessage failed`, `not-delivered`, `deliveryStatus = unknown` | The job logic may have succeeded, but message delivery failed | Verify current channel health with a **live probe** before fallback alerts or remediation |
+| **Task failure** | script exception, parse failure, bad prompt/tool call, non-zero exit | The workflow itself broke | Alert user briefly if user-facing job; fix logic/script path |
+| **Node failure** | `Nodes failed`, remote host unavailable, permission/runtime error on node | The remote machine or node bridge failed | Alert user only if task matters now; retry later or repair node path |
+
+**Rule:** delivery failure ≠ task failure. A report may already exist even when the final send step failed.
+
 ## Channel health check pattern
 
 For "is channel X alive?" cron tasks, always use a **real-time probe**, never stale log scanning:
@@ -98,9 +110,20 @@ Scan cron job lastError / deliveryStatus history
 
 **Why it matters:** Historical cron errors may be days old. A channel that failed yesterday might be healthy now. Real-time probe catches the ground truth.
 
+**Heartbeat add-on rule:** if heartbeat notices Telegram-related cron errors, treat that as an anomaly hint only. Before sending DingTalk fallback or triggering recovery, run a live Telegram probe first whenever the environment allows it.
+
 ## Reminder disable: what to check
 
 When the user asks to remove or disable a reminder/feature:
 1. Check `cron list` for matching job names
 2. **Also** check `HEARTBEAT.md` — some features live there, not in cron jobs
 3. Confirm both sides are cleaned up before responding "done"
+
+## Heartbeat cron-scan rule
+
+Heartbeat is allowed to scan cron state for anomalies, but should follow this sequence:
+1. Spot jobs with `consecutiveErrors > 0`
+2. Classify them as **delivery / task / node**
+3. Only escalate the ones that matter now
+4. For channel-related delivery failures, **verify with a live probe before saying the channel is down**
+5. Report only the current actionable conclusion, not a dump of historical run noise
