@@ -3,11 +3,16 @@
   "slug": "realphonevalidation",
   "displayName": "Realphonevalidation",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167601467,
-    "commit": "https://github.com/openclaw/skills/commit/9afa9501c375cc9bb797acf3f1dee5c1971f8a43"
+    "version": "1.0.3",
+    "publishedAt": 1776851228658,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167601467,
+      "commit": "https://github.com/openclaw/skills/commit/9afa9501c375cc9bb797acf3f1dee5c1971f8a43"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479770258,
