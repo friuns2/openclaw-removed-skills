@@ -3,11 +3,16 @@
   "slug": "nicereply",
   "displayName": "Nicereply",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167608179,
-    "commit": "https://github.com/openclaw/skills/commit/98b811c35937b2c1f8643031c20134bc46bfb35b"
+    "version": "1.0.3",
+    "publishedAt": 1776861517676,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167608179,
+      "commit": "https://github.com/openclaw/skills/commit/98b811c35937b2c1f8643031c20134bc46bfb35b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479826927,
