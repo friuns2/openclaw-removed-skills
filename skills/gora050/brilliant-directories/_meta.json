@@ -3,11 +3,16 @@
   "slug": "brilliant-directories",
   "displayName": "Brilliant Directories",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775166831967,
-    "commit": "https://github.com/openclaw/skills/commit/41b3025bc659d695861eb368681a1c62c4f0beaa"
+    "version": "1.0.4",
+    "publishedAt": 1776860483945,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775166831967,
+      "commit": "https://github.com/openclaw/skills/commit/41b3025bc659d695861eb368681a1c62c4f0beaa"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774314307855,
