@@ -1,7 +1,7 @@
 ---
 name: mzu-news-briefing
 description: "Multi-source AI/Tech news aggregator with intelligent daily briefings. Covers AI, technology, finance, and world events — with hot/cold ranking and source attribution. Supports Twitter/X (bird CLI) or Grok API."
-version: 1.1.3
+version: 1.1.4
 tags:
   - news
   - ai
@@ -367,15 +367,15 @@ web_search("Nasdaq OR S&P 500 AI stocks", date_after="YYYY-MM-DD")
 
 ---
 
-## 信息源优先级
+## 信息源质量分级
 
-1. X / Twitter — 大厂官方第一时间
-2. Reuters / BBC — 突发硬事实
-3. Hacker News — 技术社区热度
-4. 36Kr / 机器之心 / 量子位 — 中文专业
-5. The Verge / Wired / TechCrunch — 产品与行业
-6. MIT Tech Review — 研究与深度
-7. 周报 / Newsletter — 策划内容
+| 等级 | 来源 | 说明 |
+|------|------|------|
+| 🟢 权威/官方 | OpenAI Blog、Anthropic 官网、Google Blog、Reuters、BBC | 官方公告，直接使用 |
+| 🟡 专业媒体 | TechCrunch、Ars Technica、36氪、机器之心、The Verge | 记者核实，可信 |
+| 🔵 社区/UGC | Hacker News、Reddit/r/ML、GitHub Trending | 反映真实热度，需交叉验证 |
+| 🟠 投资分析 | Motley Fool、The Fool、Seeking Alpha、Business Insider | **观点/预测为主，不是新闻事实**，降级处理 |
+| 🔴 聚合/SEO | 未具名的 News 聚合站、内容农场 | 摘要≠正文，不作主链 |
 
 ---
 
@@ -387,6 +387,8 @@ web_search("Nasdaq OR S&P 500 AI stocks", date_after="YYYY-MM-DD")
 ❌ **只根据搜索摘要就进入简报** → 未验证内容导致今日 GPT-5.4 假新闻事故
 ❌ 只搜 3 次 → 覆盖率不到 30%
 ❌ 信任 SEO 聚合页/内容农场的摘要 → 页面可能为空，摘要≠正文
+❌ **把投资分析网站当新闻源** → Motley Fool、The Fool、Seeking Alpha 等网站的标题常含观点性表述（"Huge News"、"Why X Matters"、"Is X Good?"），这类内容是分析观点而非新闻事实 → 降级处理或丢弃
+❌ **把预期/预测当新闻** → "即将发布"、"预计"、"目标 Q2" 等表述不是已发生的事实，需标注为"行业动态"或"跟进"而非高热度新闻
 
 ✅ 每条搜索都必须携带 `date_after: "YYYY-MM-DD"`（今天的前一天）
 ✅ 至少 8 次搜索
