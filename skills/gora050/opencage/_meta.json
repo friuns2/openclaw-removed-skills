@@ -3,11 +3,16 @@
   "slug": "opencage",
   "displayName": "Opencage",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166297215,
-    "commit": "https://github.com/openclaw/skills/commit/e9fab789b4ab88c09f015d1643fc43e93e21294a"
+    "version": "1.0.3",
+    "publishedAt": 1776863411273,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166297215,
+      "commit": "https://github.com/openclaw/skills/commit/e9fab789b4ab88c09f015d1643fc43e93e21294a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774195425040,
