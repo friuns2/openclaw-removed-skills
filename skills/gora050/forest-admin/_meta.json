@@ -3,11 +3,16 @@
   "slug": "forest-admin",
   "displayName": "Forest Admin",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166182114,
-    "commit": "https://github.com/openclaw/skills/commit/e7c19fd2516dd5eeeca5b91371c66ec4cf67c98e"
+    "version": "1.0.3",
+    "publishedAt": 1776866837840,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166182114,
+      "commit": "https://github.com/openclaw/skills/commit/e7c19fd2516dd5eeeca5b91371c66ec4cf67c98e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774173828177,
