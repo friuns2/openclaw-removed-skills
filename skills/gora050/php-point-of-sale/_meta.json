@@ -3,11 +3,16 @@
   "slug": "php-point-of-sale",
   "displayName": "Php Point Of Sale",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165502776,
-    "commit": "https://github.com/openclaw/skills/commit/eacef05b90168f98b5934b1c00c4759a236df0b9"
+    "version": "1.0.3",
+    "publishedAt": 1776859493933,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165502776,
+      "commit": "https://github.com/openclaw/skills/commit/eacef05b90168f98b5934b1c00c4759a236df0b9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774040619829,
