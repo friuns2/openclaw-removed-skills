@@ -3,11 +3,16 @@
   "slug": "veracode",
   "displayName": "Veracode",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167097629,
-    "commit": "https://github.com/openclaw/skills/commit/fb3c3158c652f089752c5e1c2d2d17a1537ff5f7"
+    "version": "1.0.3",
+    "publishedAt": 1776892967496,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167097629,
+      "commit": "https://github.com/openclaw/skills/commit/fb3c3158c652f089752c5e1c2d2d17a1537ff5f7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774380209379,
