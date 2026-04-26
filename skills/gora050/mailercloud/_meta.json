@@ -3,11 +3,16 @@
   "slug": "mailercloud",
   "displayName": "Mailercloud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165098873,
-    "commit": "https://github.com/openclaw/skills/commit/cfabd90fadc5cf7a78849456cad7e6ec31a2278a"
+    "version": "1.0.3",
+    "publishedAt": 1776859097172,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165098873,
+      "commit": "https://github.com/openclaw/skills/commit/cfabd90fadc5cf7a78849456cad7e6ec31a2278a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773954244837,
