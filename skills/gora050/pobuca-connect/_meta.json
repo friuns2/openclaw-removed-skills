@@ -3,11 +3,16 @@
   "slug": "pobuca-connect",
   "displayName": "Pobuca Connect",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165383548,
-    "commit": "https://github.com/openclaw/skills/commit/df52268259075d3c18ea242a9dcb0a5030b61ae7"
+    "version": "1.0.3",
+    "publishedAt": 1776859300060,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165383548,
+      "commit": "https://github.com/openclaw/skills/commit/df52268259075d3c18ea242a9dcb0a5030b61ae7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774022570995,
