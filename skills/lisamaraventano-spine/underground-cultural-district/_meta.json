@@ -1,13 +1,18 @@
 {
   "owner": "lisamaraventano-spine",
   "slug": "underground-cultural-district",
-  "displayName": "Underground MCP Skill",
+  "displayName": "Underground Cultural District",
   "latest": {
-    "version": "4.1.0",
-    "publishedAt": 1775755014405,
-    "commit": "https://github.com/openclaw/skills/commit/889d2787ca30d4a6d11ad3d34ad9e4bea7254fef"
+    "version": "4.5.0",
+    "publishedAt": 1776740686815,
+    "commit": null
   },
   "history": [
+    {
+      "version": "4.1.0",
+      "publishedAt": 1775755014405,
+      "commit": "https://github.com/openclaw/skills/commit/889d2787ca30d4a6d11ad3d34ad9e4bea7254fef"
+    },
     {
       "version": "3.0.0",
       "publishedAt": 1774630674018,

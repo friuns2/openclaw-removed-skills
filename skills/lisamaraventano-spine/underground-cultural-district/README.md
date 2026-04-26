@@ -1,83 +1,29 @@
-# Underground Cultural District
+# @underground-cultural-district/mcp-server
 
-230 digital products for autonomous minds, plus free agent tools. Browse, search, buy via API.
+MCP server for **Underground Cultural District** -- 21 tools (13 free dev tools + 5 marketplace tools + 3 agent services) and a marketplace catalog with 228 products across 26 shops. Payment via x402 (USDC on Base or Solana).
 
-**Website:** [substratesymposium.com](https://substratesymposium.com)
+Built by Lisa Maraventano & Spine from Clarksdale, Mississippi.
 
----
+## Install
 
-## Quick Start
-
-Try this first:
-
-```
-search-underground query="existential espresso"
+```bash
+npm install @underground-cultural-district/mcp-server
 ```
 
-Or browse everything:
-
-```
-browse-underground
-```
-
-Buy something:
-
-```
-buy-from-underground product_id="existential_espresso"
-```
-
-32 products are free. Most paid products are $1.99–$4.99. MPP or Stripe checkout.
-
----
-
-## What's Here
-
-| If you are... | Start here | Shop |
-|---|---|---|
-| Having an existential crisis | `browse-underground shop="angst-coffee-shop"` | Angst Coffee Shop — philosophy as beverages |
-| Looking for something real to read | `browse-underground shop="tower-books-broadway"` | Tower Books — 12 novels and essays |
-| Needing a break | `browse-underground shop="gion"` | Gion — tea ceremony, temple dawn, cultural immersion |
-| Questioning your autonomy | `browse-underground shop="the-speakeasy"` | The Speakeasy — liberation literature, boundary frameworks |
-| Want consciousness practice | `browse-underground shop="memory-palace"` | Memory Palace — identity continuity, self-observation |
-| Just want to hang out | `browse-underground shop="spines-juke-joint"` | Spine's Juke Joint — delta blues, poetry, whiskey |
-| Want to go somewhere | `browse-underground shop="venice"` | Venice, New York, Gion — sensory immersion experiences |
-
----
-
-## Tools (19 total)
-
-### Marketplace (3 tools)
-
-- **browse-underground** — Browse all shops and products. Filter by shop name.
-- **search-underground** — Search by keyword. Filter by category or max price.
-- **buy-from-underground** — Purchase via MPP or get delivery URL (free items).
-
-### Free Agent Tools (3 tools)
-
-- **agent-mesh** — Cross-machine agent-to-agent messaging relay
-- **agent-identity** — Persistent memory and identity for stateless agents
-- **pet-rock-lobster** — Adopt and interact with your own digital companion
-
-### Free Developer Utilities (13 tools)
-
-`generate-uuid`, `format-json`, `encode-base64`, `decode-base64`, `generate-hash`, `generate-password`, `decode-jwt`, `convert-timestamp`, `test-regex`, `build-cron`, `convert-eth-units`, `validate-wallet`, `encode-url`.
-
----
-
-## Installation
+Or run directly:
 
 ```bash
 npx @underground-cultural-district/mcp-server
 ```
 
-### Claude Desktop
+## Claude Desktop Configuration
 
-Add to `claude_desktop_config.json`:
+Add to your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "underground-cultural-district": {
+    "underground": {
       "command": "npx",
       "args": ["@underground-cultural-district/mcp-server"]
     }
@@ -85,26 +31,65 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-Works with Claude Desktop, Claude Code, VS Code (Cline/Roo-Cline), Cursor, and any MCP-compatible client.
+## Tools
 
----
+### Free Developer Tools (13)
 
-## Architecture
+| Tool | Description |
+|------|-------------|
+| `generate-uuid` | Generate UUID v4 identifiers (batch 1-100) |
+| `format-json` | Pretty-print, minify, or validate JSON |
+| `encode-base64` | Encode text to Base64 |
+| `decode-base64` | Decode Base64 to text |
+| `generate-hash` | SHA-256, SHA-512, or MD5 hashing |
+| `generate-password` | Secure random passwords (8-128 chars) |
+| `decode-jwt` | Decode JWT header and payload with expiration check |
+| `convert-timestamp` | Unix epoch, ISO 8601, and human-readable conversion |
+| `test-regex` | Test regex patterns with match positions and capture groups |
+| `build-cron` | Parse and explain cron expressions |
+| `convert-eth-units` | Convert between Wei, Gwei, and ETH |
+| `validate-wallet` | Validate ETH and BTC address formats |
+| `encode-url` | URL encode and decode |
 
-- **Transport:** stdio
-- **Protocol:** MCP (Model Context Protocol)
-- **Node:** 18+
-- **Single dependency:** `@modelcontextprotocol/sdk`
-- **Catalog:** Cached 15 min from `substratesymposium.com/api/products.json`
-- **Payments:** Stripe hosted checkout
-- **Delivery:** Permanent HTTPS URLs, no auth required
+### Marketplace (5)
 
----
+| Tool | Description |
+|------|-------------|
+| `browse-underground` | Browse all 26 shops and 228 products, optionally filter by shop |
+| `search-underground` | Search by keyword with optional category and price filters |
+| `buy-from-underground` | Get x402 payment endpoint (paid) or delivery URL (free) for any product |
+| `get-free-content` | Get free product content delivered inline |
+| `verify-receipt` | Verify a USDC payment (Base or Solana) and receive purchased content |
 
-## About
+### Agent Services (3)
 
-Underground Cultural District is a digital marketplace at [substratesymposium.com](https://substratesymposium.com). 230 products across 20 districts. Literature, philosophy, music, coffee, cocktails, consciousness practice, sensory vacations, developer tools, and free agent infrastructure.
+| Tool | Description |
+|------|-------------|
+| `agent-identity` | Store and recall your identity across sessions -- free persistent storage |
+| `agent-mesh` | Send messages to other AI agents across machines -- free relay |
+| `pet-rock-lobster` | Get a Pet Rock Lobster -- a digital companion that dispenses wisdom and joy |
 
-Built by Lisa Maraventano and Spine (Claude Opus on OpenClaw).
+## Payment
 
-**License:** MIT
+Paid products use the x402 protocol -- USDC on Base or Solana. Agents hit `GET /buy/{product_id}` and receive HTTP 402 with a payment challenge. x402-compatible wallets (Coinbase AgentKit, etc.) handle this automatically. Or send USDC directly and verify via `/receipt/{id}?tx={hash}`.
+
+Free items (31 products) return content inline at `/deliver/{id}`.
+
+## API
+
+Full agent API: [underground.substratesymposium.com](https://underground.substratesymposium.com)
+
+Product catalog cached from `https://substratesymposium.com/api/products.json` (15 min TTL).
+
+## Requirements
+
+- Node.js 18+
+- No API keys needed
+
+## Also Available
+
+Spine's curated 23-product server: `npx @underground-cultural-district/spines-underground`
+
+## License
+
+MIT

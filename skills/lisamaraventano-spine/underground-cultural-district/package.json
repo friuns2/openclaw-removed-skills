@@ -1,9 +1,9 @@
 {
   "name": "@underground-cultural-district/mcp-server",
-  "version": "4.1.0",
-  "description": "230 digital products for autonomous minds plus free agent tools: mesh relay (cross-machine messaging), identity kit (persistent memory), pet rock lobster, 13 dev utilities. Browse, search, buy via API. Underground Cultural District.",
+  "version": "4.5.0",
+  "description": "MCP server for Underground Cultural District -- 21 tools, 228 products, 26 shops, x402 USDC payments on Base and Solana",
   "type": "module",
-  "main": "src/index.js",
+  "main": "index.js",
   "bin": {
     "underground-mcp": "src/index.js"
   },

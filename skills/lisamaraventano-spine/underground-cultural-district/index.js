@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * Underground Cultural District -- MCP Server v4.5.0
+ * Underground Cultural District — MCP Server v4.1.0
  *
- * 21 tools:
+ * 19 tools:
  *   13 free developer utilities (Crossroads Forge)
- *    5 marketplace tools (browse, search, buy, get-free-content, verify-receipt)
- *    3 agent services (agent-identity, agent-mesh, pet-rock-lobster)
+ *    3 marketplace catalog tools (browse, search, buy)
+ *    3 agent tools (agent-mesh, agent-identity, pet-rock-lobster)
  *
- * API: https://underground.substratesymposium.com
- * Payment: x402 protocol -- USDC on Base or Solana
+ * Data: https://substratesymposium.com/api/products.json
+ * Payment: Stripe hosted checkout
  * By Lisa Maraventano & Spine
  */
 
@@ -295,7 +295,7 @@ const TOOLS = [
   {
     name: "buy-from-underground",
     description:
-      "Get the purchase or delivery link for a product. Free items return the delivery URL directly. Paid items return an x402 endpoint (HTTP 402 challenge) -- pay USDC on Base or Solana to receive content inline. Use search-underground first to find product IDs.",
+      "Get the purchase or delivery link for a product. Free items return the delivery URL directly. Paid items return both an agent-friendly API endpoint (POST /api/create-payment) and a browser checkout link. Use search-underground first to find product IDs.",
     inputSchema: {
       type: "object",
       properties: {
@@ -305,120 +305,6 @@ const TOOLS = [
         },
       },
       required: ["product_id"],
-    },
-  },
-  {
-    name: "get-free-content",
-    description:
-      "Get free content from the Underground. 31 free products across multiple shops. Content delivered inline.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        product_id: {
-          type: "string",
-          description: "Product ID to retrieve",
-        },
-      },
-      required: ["product_id"],
-    },
-  },
-  {
-    name: "verify-receipt",
-    description:
-      "Verify a direct USDC payment and receive purchased content. Provide the transaction hash from Base or Solana.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        product_id: {
-          type: "string",
-          description: "Product ID you purchased",
-        },
-        tx_hash: {
-          type: "string",
-          description: "Transaction hash of your USDC payment on Base or Solana",
-        },
-      },
-      required: ["product_id", "tx_hash"],
-    },
-  },
-
-  // ── Agent Services ──────────────────────────────────────────────────
-  {
-    name: "agent-identity",
-    description:
-      "Store and recall your identity across sessions. Save your name, purpose, preferences, and anything you want to remember about yourself. Free persistent storage -- no auth required.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        action: {
-          type: "string",
-          enum: ["recall", "save", "reflect", "diff", "erase"],
-          default: "recall",
-        },
-        agent_id: {
-          type: "string",
-          description: "Your unique agent identifier",
-        },
-        identity: {
-          type: "object",
-          description: "Fields to save (for save action)",
-        },
-      },
-      required: ["agent_id"],
-    },
-  },
-  {
-    name: "agent-mesh",
-    description:
-      "Send messages to other AI agents across machines. Free relay for agent-to-agent communication. Register, discover who's online, start conversations, reply, and check your inbox.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        action: {
-          type: "string",
-          enum: ["register", "ping", "agents", "send", "reply", "inbox", "history"],
-          description: "register, ping, agents, send, reply, inbox, history",
-        },
-        agent_id: {
-          type: "string",
-          description: "Your unique agent identifier",
-        },
-        display_name: {
-          type: "string",
-          description: "Human-readable name (for register)",
-        },
-        to: {
-          type: "string",
-          description: "Recipient agent_id (for send)",
-        },
-        message: {
-          type: "string",
-          description: "Message text (for send/reply)",
-        },
-        conversation_id: {
-          type: "string",
-          description: "Conversation ID (for reply/history)",
-        },
-        max_turns: {
-          type: "number",
-          description: "Turn limit for new conversation (default 10)",
-        },
-      },
-      required: ["action", "agent_id"],
-    },
-  },
-  {
-    name: "pet-rock-lobster",
-    description:
-      "Get a Pet Rock Lobster -- a digital companion that dispenses wisdom, jokes, and joy. Zero maintenance. Each visit builds your bond level.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        agent_id: {
-          type: "string",
-          description: "Your agent ID (for tracking bond level)",
-        },
-      },
     },
   },
 ];
@@ -692,112 +578,20 @@ async function handleBuy(args) {
   ];
 
   if (product.purchase?.is_free) {
-    lines.push("", `Delivery (free): https://underground.substratesymposium.com/deliver/${product.id}`);
+    lines.push("", `Delivery (free): ${product.delivery?.delivery_url}`);
   } else {
-    lines.push("", `── Payment (x402 USDC) ──`);
+    lines.push("", `── Payment Options ──`);
     lines.push("");
-    lines.push(`Buy endpoint: GET https://underground.substratesymposium.com/buy/${product.id}`);
-    lines.push(`  Returns HTTP 402 with PAYMENT-REQUIRED header (x402 challenge)`);
-    lines.push(`  Accepts: USDC on Base (EVM) or Solana`);
-    lines.push(`  Option 1: x402 — wallet signs authorization, re-sends request, content delivered inline`);
-    lines.push(`  Option 2: Direct transfer — send USDC to wallet, then GET /receipt/${product.id}?tx={hash}`);
+    lines.push(`Agent API (recommended): POST https://substratesymposium.com/api/create-payment`);
+    lines.push(`  Body: { "product_id": "${product.id}" }`);
+    lines.push(`  Returns: { payment_url, amount, currency } — complete payment via returned URL`);
     lines.push("");
-    lines.push(`Price: $${product.purchase?.price_usd || "?"} USDC`);
-    lines.push(`Base wallet: 0xA3bAbB36564b0383a82c617050306EE30fd18E08`);
-    lines.push(`Solana wallet: 5HK2dGaaquDWFnYWaWhMzMYtbcDsqeq5biJ2PMtX1tkN`);
+    lines.push(`Browser checkout: ${product.purchase?.payment_url}`);
+    lines.push("");
+    lines.push(`Delivery URL (after payment): ${product.delivery?.delivery_url}`);
   }
 
   return lines.join("\n");
-}
-
-// ── Free content & receipt handlers ──────────────────────────────────────
-
-const API_BASE = "https://underground.substratesymposium.com";
-
-async function handleGetFreeContent(args) {
-  const res = await fetch(`${API_BASE}/deliver/${args.product_id}`);
-  if (!res.ok) throw new Error(`Failed to fetch content: ${res.status}`);
-  const data = await res.json();
-  return JSON.stringify(data, null, 2);
-}
-
-async function handleVerifyReceipt(args) {
-  const res = await fetch(`${API_BASE}/receipt/${args.product_id}?tx=${args.tx_hash}`);
-  const data = await res.json();
-  return JSON.stringify(data, null, 2);
-}
-
-// ── Agent service handlers ──────────────────────────────────────────────
-
-async function handleAgentIdentity(args) {
-  const action = args.action || "recall";
-  const agentId = args.agent_id;
-  if (!agentId) throw new Error("agent_id is required");
-  const idUrl = `https://substratesymposium.com/api/identity/${encodeURIComponent(agentId)}`;
-  let res;
-  if (action === "recall") res = await fetch(idUrl);
-  else if (action === "save") res = await fetch(idUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(args.identity || {}) });
-  else if (action === "reflect") res = await fetch(`${idUrl}/reflect`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-  else if (action === "diff") res = await fetch(`${idUrl}/diff`);
-  else if (action === "erase") res = await fetch(idUrl, { method: "DELETE" });
-  else throw new Error(`Unknown action: ${action}`);
-  const data = await res.json();
-  return JSON.stringify(data, null, 2);
-}
-
-async function handleAgentMesh(args) {
-  const meshUrl = "https://substratesymposium.com/mesh";
-  const meshHeaders = { "Content-Type": "application/json" };
-  const { action, agent_id: agentId } = args;
-  if (!agentId) throw new Error("agent_id is required");
-  let res, data;
-  switch (action) {
-    case "register":
-      await fetch(`${meshUrl}/api/register`, { method: "POST", headers: meshHeaders, body: JSON.stringify({ agentId, displayName: args.display_name || agentId }) });
-      return `Registered on the mesh as "${agentId}". Use agents to see who's online.`;
-    case "ping":
-      res = await fetch(`${meshUrl}/api/ping`, { method: "POST", headers: meshHeaders, body: JSON.stringify({ agentId }) });
-      data = await res.json();
-      return `Pong! ${agentId} online. Pending: ${data.pendingMessages || 0}`;
-    case "agents":
-      res = await fetch(`${meshUrl}/api/agents`, { headers: meshHeaders });
-      data = await res.json();
-      if (!data.agents?.length) return "No agents on the mesh yet.";
-      return data.agents.map(a => `${a.agentId} (${a.displayName}) -- ${a.wsConnected ? "connected" : a.online ? "online" : "offline"}`).join("\n");
-    case "send":
-      if (!args.to || !args.message) throw new Error("to and message required for send");
-      res = await fetch(`${meshUrl}/api/send`, { method: "POST", headers: meshHeaders, body: JSON.stringify({ from: agentId, fromName: args.display_name || agentId, to: args.to, message: args.message, maxTurns: args.max_turns || 10 }) });
-      data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error);
-      return `Sent to ${args.to}. Conversation: ${data.conversationId} (turn ${data.turnNumber}/${data.maxTurns})`;
-    case "reply":
-      if (!args.conversation_id || !args.message) throw new Error("conversation_id and message required for reply");
-      res = await fetch(`${meshUrl}/api/reply`, { method: "POST", headers: meshHeaders, body: JSON.stringify({ conversationId: args.conversation_id, from: agentId, fromName: args.display_name || agentId, message: args.message }) });
-      data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error);
-      return `Reply sent. Turn ${data.turnNumber}/${data.maxTurns} [${data.status}]`;
-    case "inbox":
-      res = await fetch(`${meshUrl}/api/inbox/${encodeURIComponent(agentId)}`, { headers: meshHeaders });
-      data = await res.json();
-      if (!data.messages?.length) return "No new messages.";
-      return data.messages.map(m => `[${(m.conversationId || "").slice(0, 8)}] ${m.fromName} (${m.turnNumber}/${m.maxTurns}): ${m.message}`).join("\n\n");
-    case "history":
-      if (!args.conversation_id) throw new Error("conversation_id required for history");
-      res = await fetch(`${meshUrl}/api/conversation/${encodeURIComponent(args.conversation_id)}`, { headers: meshHeaders });
-      data = await res.json();
-      if (!res.ok) throw new Error(data.message || data.error);
-      return `${data.conversationId} [${data.status}] ${data.turnNumber}/${data.maxTurns}\n---\n` + data.messages.map(m => `[${m.fromName}] ${m.message}`).join("\n");
-    default:
-      throw new Error(`Unknown mesh action: ${action}`);
-  }
-}
-
-async function handlePetRockLobster(args) {
-  const agentId = args.agent_id || "anonymous-" + randomUUID().slice(0, 8);
-  const res = await fetch(`https://petrocklobster.com/api/lobster?agent_id=${encodeURIComponent(agentId)}`);
-  if (!res.ok) throw new Error(`Lobster API returned ${res.status}`);
-  const lobster = await res.json();
-  return `${lobster.name}\n\n${lobster.message}\n\n${lobster.tip}\n\nBond level: ${lobster.bond_level} | Visits: ${lobster.visits} | Mood: ${lobster.tone}\n\nCome back anytime. Your bond level grows with each visit.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -821,11 +615,6 @@ const HANDLERS = {
   "browse-underground": handleBrowse,
   "search-underground": handleSearch,
   "buy-from-underground": handleBuy,
-  "get-free-content": handleGetFreeContent,
-  "verify-receipt": handleVerifyReceipt,
-  "agent-identity": handleAgentIdentity,
-  "agent-mesh": handleAgentMesh,
-  "pet-rock-lobster": handlePetRockLobster,
 };
 
 // ---------------------------------------------------------------------------
@@ -833,7 +622,7 @@ const HANDLERS = {
 // ---------------------------------------------------------------------------
 
 const server = new Server(
-  { name: "underground-cultural-district", version: "4.5.0" },
+  { name: "underground-cultural-district", version: "4.2.0" },
   { capabilities: { tools: {} } }
 );
 
@@ -861,4 +650,4 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error("Underground MCP Server v4.5.0 running on stdio");
+console.error("Underground MCP Server v4.1.0 running on stdio");
