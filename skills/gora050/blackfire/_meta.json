@@ -3,11 +3,16 @@
   "slug": "blackfire",
   "displayName": "Blackfire",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165781571,
-    "commit": "https://github.com/openclaw/skills/commit/86bf56af5ee53b31499b208e21b93c8ffceba797"
+    "version": "1.0.3",
+    "publishedAt": 1776893165493,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165781571,
+      "commit": "https://github.com/openclaw/skills/commit/86bf56af5ee53b31499b208e21b93c8ffceba797"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774101841625,
