@@ -3,11 +3,16 @@
   "slug": "askyourpdf",
   "displayName": "Askyourpdf",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164451944,
-    "commit": "https://github.com/openclaw/skills/commit/30cac144e07c8ef69d5cd35ba56c6e40dea53de3"
+    "version": "1.0.3",
+    "publishedAt": 1776837938229,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164451944,
+      "commit": "https://github.com/openclaw/skills/commit/30cac144e07c8ef69d5cd35ba56c6e40dea53de3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773720182290,
