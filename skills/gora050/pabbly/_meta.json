@@ -3,11 +3,16 @@
   "slug": "pabbly",
   "displayName": "Pabbly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166529831,
-    "commit": "https://github.com/openclaw/skills/commit/aec0a4f350a34be289b5ebe5c2ddc19b662759ac"
+    "version": "1.0.3",
+    "publishedAt": 1776863684813,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166529831,
+      "commit": "https://github.com/openclaw/skills/commit/aec0a4f350a34be289b5ebe5c2ddc19b662759ac"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774231481693,
