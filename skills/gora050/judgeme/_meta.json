@@ -3,11 +3,16 @@
   "slug": "judgeme",
   "displayName": "Judgeme",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164891801,
-    "commit": "https://github.com/openclaw/skills/commit/05e796b24ad76adb5a98fbfc8323370cbd4d7104"
+    "version": "1.0.3",
+    "publishedAt": 1776858723561,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164891801,
+      "commit": "https://github.com/openclaw/skills/commit/05e796b24ad76adb5a98fbfc8323370cbd4d7104"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773914586875,
