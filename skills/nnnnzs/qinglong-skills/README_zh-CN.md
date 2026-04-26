@@ -45,7 +45,7 @@
 **方式 A：通过 ClawHub 安装（推荐）**
 
 ```bash
-clawhub install qinglong
+clawhub install qinglong-skills
 ```
 
 **方式 B：通过 npx 安装**

@@ -1,11 +1,17 @@
 {
   "owner": "nnnnzs",
   "slug": "qinglong-skills",
-  "displayName": "QingLong Panel",
+  "displayName": "Qinglong Skills",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1774337340000,
-    "commit": "https://github.com/openclaw/skills/commit/95a8d993ac35b344928d663fff66153d71e2bac4"
+    "version": "1.0.2",
+    "publishedAt": 1777015707238,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1774337340000,
+      "commit": "https://github.com/openclaw/skills/commit/95a8d993ac35b344928d663fff66153d71e2bac4"
+    }
+  ]
 }

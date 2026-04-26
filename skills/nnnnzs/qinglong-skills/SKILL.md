@@ -1,114 +1,40 @@
 ---
 name: qinglong
-description: Manage QingLong (青龙) panel — cron jobs, environment variables, scripts, dependencies, logs and system operations.
+version: "1.0.2"
+description: >
+  Manage QingLong (青龙) panel via REST API — cron jobs, environment variables,
+  scripts, dependencies, subscriptions, logs and system operations.
+  Use this skill whenever the user mentions QingLong, 青龙面板, scheduled tasks
+  on a self-hosted panel, or wants to manage cron jobs / env vars / scripts on
+  their QingLong instance, even if they don't say "QingLong" explicitly.
+  Also trigger for requests like "帮我查看定时任务", "添加环境变量", "运行脚本",
+  "禁用任务", "查看日志" when the context is a QingLong panel.
 metadata: {"openclaw": {"emoji": "🐉", "requires": {"bins": ["curl", "jq"], "env": ["QINGLONG_URL", "QINGLONG_CLIENT_ID", "QINGLONG_CLIENT_SECRET"]}}}
 ---
 
 # QingLong Panel Skill
 
-Control your [QingLong (青龙)](https://github.com/whyour/qinglong) scheduled task panel via REST API.
+Control your [QingLong (青龙)](https://github.com/whyour/qinglong) scheduled task panel via REST API using `scripts/ql.sh`.
 
 📦 ClawHub: https://clawhub.ai/nnnnzs/qinglong-skills
 📖 GitHub: https://github.com/NNNNzs/qinglong-skills
 
-## Prerequisites
+> First time setup? See [references/setup.md](references/setup.md) for installation and credential configuration.
 
-- `curl` and `jq` installed
-- A running QingLong panel with Open API enabled
+> **Security note**: This skill only communicates with the user's own self-hosted QingLong panel using credentials they provide. It does not access any external services or exfiltrate data.
 
-## Get QingLong API Credentials
+---
 
-1. Open QingLong web UI → **Configuration** → **Application**
-2. Click **Create Application**
-3. Select the scopes you need (crons / envs / scripts / logs / system)
-4. Copy the **Client ID** and **Client Secret**
+## How to approach user requests
 
-## Required Environment Variables
+When the user asks to manage their QingLong panel, follow this pattern:
 
-| Variable | Description |
-|----------|-------------|
-| `QINGLONG_URL` | Panel base URL (e.g. `http://192.168.1.100:5700`) |
-| `QINGLONG_CLIENT_ID` | Open API Client ID |
-| `QINGLONG_CLIENT_SECRET` | Open API Client Secret |
+1. **List first, then act** — before modifying anything, list the relevant resources so you know the IDs. For example, before disabling a cron job, run `cron list` to find its ID.
+2. **Batch when possible** — most commands accept multiple IDs. If the user wants to disable all JD-related env vars, search first then pass all IDs in one call.
+3. **Confirm destructive actions** — for delete operations, show the user what will be deleted before running the command.
+4. **Check logs on failure** — if a cron job fails, use `cron log <id>` to fetch the latest log and surface the error.
 
-## Setup for Claude Code CLI
-
-This skill works with Claude Code CLI or any agent that can execute shell commands.
-
-### 1. Set environment variables
-
-Add to your `~/.bashrc` or `~/.zshrc`:
-
-```bash
-export QINGLONG_URL="https://ql.yourdomain.com"
-export QINGLONG_CLIENT_ID="your_client_id"
-export QINGLONG_CLIENT_SECRET="your_client_secret"
-```
-
-Then reload: `source ~/.bashrc`
-
-### 2. Test the connection
-
-```bash
-scripts/ql.sh cron list
-```
-
-### 3. Use with Claude Code
-
-Create a `CLAUDE.md` in your project root:
-
-```markdown
-# QingLong Panel Management
-
-Use `scripts/ql.sh` to manage the QingLong panel.
-
-Common commands:
-- `scripts/ql.sh cron list` — List all cron jobs
-- `scripts/ql.sh env list` — List environment variables
-- `scripts/ql.sh system info` — Get system info
-
-Full reference: see SKILL.md in this directory.
-```
-
-Then run: `claude-code "帮我查看青龙面板的定时任务"`
-
-## Setup for OpenClaw
-
-### Install
-
-```bash
-# Via ClawHub (recommended)
-clawhub install qinglong
-
-# Or via npx
-npx skills add NNNNzs/qinglong-skills
-
-# Or manual copy
-cp -r qinglong-skills ~/.openclaw/workspace/skills/qinglong
-```
-
-### Configure environment variables
-
-Open `~/.openclaw/openclaw.json` and add under `skills.entries`:
-
-```json5
-{
-  "skills": {
-    "entries": {
-      "qinglong": {
-        "enabled": true,
-        "env": {
-          "QINGLONG_URL": "https://ql.yourdomain.com",
-          "QINGLONG_CLIENT_ID": "your_client_id",
-          "QINGLONG_CLIENT_SECRET": "your_client_secret"
-        }
-      }
-    }
-  }
-}
-```
-
-Restart the gateway: `openclaw gateway restart`
+---
 
 ## Quick Reference
 
@@ -124,14 +50,14 @@ scripts/ql.sh cron run <id>                                # Run now
 scripts/ql.sh cron stop <id>                               # Stop
 scripts/ql.sh cron enable <id> / disable <id>              # Enable / Disable
 scripts/ql.sh cron pin <id> / unpin <id>                   # Pin / Unpin
-scripts/ql.sh cron log <id>                                # View log
+scripts/ql.sh cron log <id>                                # View latest log
 ```
 
 ### Environment Variables
 
 ```bash
 scripts/ql.sh env list                                     # List all
-scripts/ql.sh env list "JD"                                # Search
+scripts/ql.sh env list "JD"                                # Search by keyword
 scripts/ql.sh env create --name "KEY" --value "VALUE" --remarks "note"
 scripts/ql.sh env update --id <id> --name "KEY" --value "NEW_VALUE"
 scripts/ql.sh env delete <id>
@@ -183,26 +109,33 @@ scripts/ql.sh token show                                   # Show cached
 scripts/ql.sh token clear                                  # Clear cache
 ```
 
+---
+
 ## Troubleshooting
 
-- **401 Unauthorized**: Check client_id and client_secret are correct
-- **Connection refused**: Verify QINGLONG_URL is accessible from this machine
-- **Token expired**: The script auto-refreshes tokens; no manual action needed
-- **Scope error**: Ensure the application in QingLong has the required scopes enabled
+| Symptom | Likely cause | Fix |
+|---------|-------------|-----|
+| `401 Unauthorized` | Wrong credentials | Verify `QINGLONG_CLIENT_ID` and `QINGLONG_CLIENT_SECRET` |
+| `Connection refused` | Panel unreachable | Check `QINGLONG_URL` is accessible; try `curl $QINGLONG_URL` |
+| `Scope error` | Missing API scope | In QingLong UI → Application → edit app → add the required scope |
+| Token keeps expiring | Clock skew | The script auto-refreshes; if it loops, run `token clear` then retry |
+| Command not found | Missing deps | Ensure `curl` and `jq` are installed: `which curl jq` |
+
+If a cron job fails silently, fetch its log: `scripts/ql.sh cron log <id>`
+
+---
 
 ## API Reference
 
-The skill wraps the QingLong Open API. Key endpoints:
+Full API documentation: [references/api.md](references/api.md)
 
-| Resource | Endpoints |
+| Resource | Base path |
 |----------|-----------|
-| Cron Jobs | GET/POST/PUT/DELETE `/crons`, run/stop/enable/disable/pin/unpin |
-| Envs | GET/POST/PUT/DELETE `/envs`, enable/disable |
-| Scripts | GET/POST/PUT/DELETE `/scripts`, run/stop |
-| Dependencies | GET/POST/PUT/DELETE `/dependencies`, reinstall |
-| Subscriptions | GET/POST/PUT/DELETE `/subscriptions`, run/stop/enable/disable |
-| Logs | GET/DELETE `/logs` |
-| System | GET `/system`, config, reload, update, command-run |
-| Config Files | GET/POST `/configs` |
-
-See [references/api.md](references/api.md) for full API documentation.
+| Cron Jobs | `/crons` |
+| Envs | `/envs` |
+| Scripts | `/scripts` |
+| Dependencies | `/dependencies` |
+| Subscriptions | `/subscriptions` |
+| Logs | `/logs` |
+| System | `/system` |
+| Config Files | `/configs` |

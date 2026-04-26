@@ -45,7 +45,7 @@ OpenClaw / Claude Code skill for controlling [QingLong (青龙)](https://github.
 **Option A: Via ClawHub (recommended)**
 
 ```bash
-clawhub install qinglong
+clawhub install qinglong-skills
 ```
 
 **Option B: Via npx**
