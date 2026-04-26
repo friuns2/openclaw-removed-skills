@@ -3,11 +3,16 @@
   "slug": "ipinfoio",
   "displayName": "Ipinfoio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166558042,
-    "commit": "https://github.com/openclaw/skills/commit/364c3d3b8a1f0274ccb69851cc64d41e7d69de01"
+    "version": "1.0.3",
+    "publishedAt": 1776848905516,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166558042,
+      "commit": "https://github.com/openclaw/skills/commit/364c3d3b8a1f0274ccb69851cc64d41e7d69de01"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774238553187,
