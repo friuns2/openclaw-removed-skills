@@ -3,11 +3,16 @@
   "slug": "iauditor-by-safetyculture",
   "displayName": "Iauditor By Safetyculture",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167066344,
-    "commit": "https://github.com/openclaw/skills/commit/d18e595e85ee54034d894be85c617db8c7a9ad63"
+    "version": "1.0.3",
+    "publishedAt": 1776860852047,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167066344,
+      "commit": "https://github.com/openclaw/skills/commit/d18e595e85ee54034d894be85c617db8c7a9ad63"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774350218476,
