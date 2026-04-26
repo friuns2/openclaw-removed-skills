@@ -3,11 +3,16 @@
   "slug": "nasdaq-data-link",
   "displayName": "Nasdaq Data Link",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167641852,
-    "commit": "https://github.com/openclaw/skills/commit/2659fd2f9dfba3e814defc083f7a55f15a200f87"
+    "version": "1.0.3",
+    "publishedAt": 1776861647600,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167641852,
+      "commit": "https://github.com/openclaw/skills/commit/2659fd2f9dfba3e814defc083f7a55f15a200f87"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774487056366,
