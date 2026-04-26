@@ -3,11 +3,16 @@
   "slug": "cobalt",
   "displayName": "Cobalt",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166484893,
-    "commit": "https://github.com/openclaw/skills/commit/a19a9e17007c4129797606e49e28b397da36df59"
+    "version": "1.0.3",
+    "publishedAt": 1776848573158,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166484893,
+      "commit": "https://github.com/openclaw/skills/commit/a19a9e17007c4129797606e49e28b397da36df59"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774227756446,
