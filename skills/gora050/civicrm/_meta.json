@@ -3,11 +3,16 @@
   "slug": "civicrm",
   "displayName": "Civicrm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167441582,
-    "commit": "https://github.com/openclaw/skills/commit/c20fefe23aeb7fb41764c3a0d9a6bb601667eac4"
+    "version": "1.0.3",
+    "publishedAt": 1776861413468,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167441582,
+      "commit": "https://github.com/openclaw/skills/commit/c20fefe23aeb7fb41764c3a0d9a6bb601667eac4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774433053048,
