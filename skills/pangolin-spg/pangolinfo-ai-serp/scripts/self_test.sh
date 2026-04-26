@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PANGOLIN="$SCRIPT_DIR/pangolin.py"
+PANGOLINFO="$SCRIPT_DIR/pangolinfo.py"
 
-# Cross-platform Python detection
 if python3 --version >/dev/null 2>&1; then
   PYTHON="python3"
 else
@@ -26,28 +25,40 @@ run_test() {
   fi
 }
 
-echo "=== Pangolinfo AI SERP Self-Test ==="
+echo "=== Pangolinfo Amazon Scraper Self-Test ==="
 
-# --- Auth tests (no credits consumed) ---
+# --- Auth tests (free) ---
 echo "Auth tests:"
-run_test "auth-check" $PYTHON "$PANGOLIN" --auth-only
+run_test "auth-check" $PYTHON "$PANGOLINFO" --auth-only
 
-# --- Input validation tests (no credits consumed) ---
+# --- Input validation tests (free, no API calls) ---
 echo "Input validation tests:"
 
-run_test "missing-query" bash -c "! $PYTHON \"$PANGOLIN\" 2>/dev/null"
-run_test "follow-up-in-serp" bash -c "! $PYTHON \"$PANGOLIN\" --q test --mode serp --follow-up q 2>/dev/null"
-run_test "region-in-ai-mode" bash -c "! $PYTHON \"$PANGOLIN\" --q test --mode ai-mode --region us 2>/dev/null"
-run_test "invalid-region" bash -c "! $PYTHON \"$PANGOLIN\" --q test --mode serp --region xx 2>/dev/null"
-run_test "invalid-num-zero" bash -c "! $PYTHON \"$PANGOLIN\" --q test --num 0 2>/dev/null"
+run_test "missing-input" bash -c "! $PYTHON \"$PANGOLINFO\" --mode amazon 2>/dev/null"
+run_test "invalid-pages" bash -c "! $PYTHON \"$PANGOLINFO\" --content B0TEST12345 --mode review --pages 0 2>/dev/null"
+run_test "invalid-site" bash -c "! $PYTHON \"$PANGOLINFO\" --content test --site amz_zz 2>/dev/null"
+run_test "invalid-parser" bash -c "! $PYTHON \"$PANGOLINFO\" --content test --parser badParser 2>/dev/null"
+run_test "invalid-format" bash -c "! $PYTHON \"$PANGOLINFO\" --content test --format xml 2>/dev/null"
 
-# --- Live API tests (consumes credits) ---
+# --- ASIN detection test (free, no API call) ---
+echo "ASIN normalization tests:"
+run_test "asin-uppercase" bash -c "$PYTHON -c \"
+import sys; sys.path.insert(0, '$SCRIPT_DIR')
+from pangolinfo import normalize_asin, is_asin
+assert is_asin('B0DYTF8L2W'), 'Should detect ASIN'
+assert normalize_asin('b0dytf8l2w') == 'B0DYTF8L2W', 'Should uppercase'
+assert not is_asin('A1B2C3D4E5'), 'Seller ID should NOT be detected as ASIN'
+assert not is_asin('1234567890'), 'Node ID should NOT be detected as ASIN'
+print('All assertions passed')
+\""
+
+# --- Live API tests (cost credits) ---
 if [ "${RUN_LIVE_TESTS:-0}" = "1" ]; then
   echo "Live API tests (credits will be consumed):"
 
-  run_test "serp-query" bash -c "$PYTHON \"$PANGOLIN\" --q openclaw --mode serp 2>/dev/null | $PYTHON -c \"import sys,json; d=json.load(sys.stdin); assert d['success']==True; print(f'Got {d.get(\\\"results_num\\\",0)} results')\""
+  run_test "keyword-search" bash -c "$PYTHON \"$PANGOLINFO\" --q 'wireless mouse' --site amz_us 2>/dev/null | $PYTHON -c \"import sys,json; d=json.load(sys.stdin); assert d['success']==True; print(f'Got {d.get(\\\"results_count\\\",0)} results')\""
 
-  run_test "ai-mode-query" bash -c "$PYTHON \"$PANGOLIN\" --q 'what is python' 2>/dev/null | $PYTHON -c \"import sys,json; d=json.load(sys.stdin); assert d['success']==True\""
+  run_test "asin-lookup" bash -c "$PYTHON \"$PANGOLINFO\" --asin B0DYTF8L2W --site amz_us 2>/dev/null | $PYTHON -c \"import sys,json; d=json.load(sys.stdin); assert d['success']==True\""
 else
   echo "Live API tests: SKIPPED (set RUN_LIVE_TESTS=1 to enable -- consumes credits)"
 fi

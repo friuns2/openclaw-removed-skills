@@ -1,65 +1,45 @@
 # Error Codes and Troubleshooting
 
-## Pangolin API Error Codes
+## Pangolinfo API Error Codes
 
 | Code | Meaning | Resolution |
 |------|---------|------------|
 | 0 | Success | No action needed |
-| 1001 | Parameter is empty | Check required fields |
-| 1002 | Invalid parameter | Verify request format |
-| 1004 | Invalid token | Auto-retried by script. If persistent, re-authenticate. |
-| 1009 | Invalid parser name | Check `--mode` value |
-| 2001 | Insufficient credits | Top up at [pangolinfo.com](https://pangolinfo.com/?referrer=clawhub_serp) |
-| 2005 | No active plan | Subscribe at [pangolinfo.com](https://pangolinfo.com/?referrer=clawhub_serp) |
-| 2007 | Account expired | Renew at [pangolinfo.com](https://pangolinfo.com/?referrer=clawhub_serp) |
+| 1004 | Invalid token | Auto-retried by script |
+| 1009 | Invalid parser name | Check `--parser` value |
+| 2001 | Insufficient credits | Top up at [pangolinfo.com](https://pangolinfo.com/?referrer=clawhub_amz) |
+| 2005 | No active plan | Subscribe at [pangolinfo.com](https://pangolinfo.com/?referrer=clawhub_amz) |
+| 2007 | Account expired | Renew at [pangolinfo.com](https://pangolinfo.com/?referrer=clawhub_amz) |
 | 2009 | Usage limit reached | Wait for next billing cycle or contact support |
 | 2010 | Bill day not configured | Contact support |
 | 4029 | Rate limited | Reduce request frequency |
-| 10000 | Task execution failed | Retry. Check query format. |
-| 10001 | Task execution failed | Retry. Likely a temporary server issue. |
+| 10000 | Task execution failed | Retry. Check query/URL format. |
+| 10001 | Task execution failed | Retry. Likely transient. |
 
 ## Authentication
 
-### Token Lifecycle
-
-- Tokens are **permanent** and do not expire
-- A token becomes invalid only if the account is deactivated
+- Tokens are **permanent** (don't expire unless account deactivated)
 - Error code `1004` triggers automatic token refresh
-
-### Token Resolution Order
-
-1. `PANGOLIN_API_KEY` environment variable
-2. Cached API key at `~/.pangolin_api_key` (if the file exists from a prior `--cache-key` run)
-3. Fresh login using `PANGOLIN_EMAIL` + `PANGOLIN_PASSWORD`
-
-### Auth Endpoint
-
-```
-POST https://scrapeapi.pangolinfo.com/api/v1/auth
-Body: {"email": "<email>", "password": "<password>"}
-Response: {"code": 0, "message": "ok", "data": "<token>"}
-```
+- Resolution order: `PANGOLINFO_API_KEY` env > `~/.pangolinfo_api_key` cache > fresh login
 
 ## Credit Costs
 
-| Mode | Credits per request |
-|------|---------------------|
-| AI Mode (`googleAiSearch`) | 2 |
-| SERP (`googleSearch`) | 2 |
-| SERP Plus (`googleSearchPlus`) | 1 |
+| Operation | Credits |
+|---|---|
+| Amazon scrape (json) | 1 |
+| Amazon scrape (rawHtml/markdown) | 0.75 |
+| Follow Seller | 1 |
+| Variant ASIN | 1 |
+| Review page | 5 per page |
 
-Credits are only consumed on successful requests (code 0).
+Credits consumed on success (code 0) only.
 
 ## Common Issues
 
-**"No authentication credentials" error**
-Set environment variables: `export PANGOLIN_API_KEY=...`
+**"No authentication credentials" error** -- Set `PANGOLINFO_API_KEY` env var.
 
-**Empty AI overview in response**
-Not all queries trigger an AI overview. Try a more informational query.
+**Empty results** -- Check ASIN/keyword spelling, try different region.
 
-**Timeout or network errors**
-The script retries 3 times with exponential backoff. Check your network connection.
+**Timeout errors** -- Script retries 3x with exponential backoff. Check network.
 
-**Screenshot URL not returned**
-Ensure `--screenshot` flag is passed.
+**Reviews returning empty** -- Not all products have reviews. Try `--filter-star all_stars`.

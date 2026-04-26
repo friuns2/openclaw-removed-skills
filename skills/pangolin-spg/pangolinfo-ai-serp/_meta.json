@@ -3,11 +3,16 @@
   "slug": "pangolinfo-ai-serp",
   "displayName": "Pangolinfo AI SERP: AI Mode Output + AI Overviews",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1775639647770,
-    "commit": "https://github.com/openclaw/skills/commit/8d53af2925ee5b8c7836487504e22509b1a78bd3"
+    "version": "2.0.1",
+    "publishedAt": 1776938473485,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1775639647770,
+      "commit": "https://github.com/openclaw/skills/commit/8d53af2925ee5b8c7836487504e22509b1a78bd3"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1774525957989,
