@@ -3,11 +3,16 @@
   "slug": "questionpro",
   "displayName": "Questionpro",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164771102,
-    "commit": "https://github.com/openclaw/skills/commit/5d6b1b42335c9b6186c0a96812bc7cc4d5eaeba1"
+    "version": "1.0.3",
+    "publishedAt": 1776845481459,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164771102,
+      "commit": "https://github.com/openclaw/skills/commit/5d6b1b42335c9b6186c0a96812bc7cc4d5eaeba1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773885753252,
