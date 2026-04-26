@@ -3,11 +3,16 @@
   "slug": "samsara",
   "displayName": "Samsara",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166954470,
-    "commit": "https://github.com/openclaw/skills/commit/1abfbfc9d3120d395a7b25c5cb83e5f5b3005290"
+    "version": "1.0.3",
+    "publishedAt": 1776860653270,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166954470,
+      "commit": "https://github.com/openclaw/skills/commit/1abfbfc9d3120d395a7b25c5cb83e5f5b3005290"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774332232197,
