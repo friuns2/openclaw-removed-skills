@@ -3,11 +3,16 @@
   "slug": "processplan",
   "displayName": "Processplan",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165952040,
-    "commit": "https://github.com/openclaw/skills/commit/0e05acac268b5f5edd885ee186adcd2f429463ad"
+    "version": "1.0.3",
+    "publishedAt": 1776862785975,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165952040,
+      "commit": "https://github.com/openclaw/skills/commit/0e05acac268b5f5edd885ee186adcd2f429463ad"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774127031239,
