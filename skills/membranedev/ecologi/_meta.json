@@ -3,11 +3,16 @@
   "slug": "ecologi",
   "displayName": "Ecologi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165736742,
-    "commit": "https://github.com/openclaw/skills/commit/951a6292d44e1b0074c98aa0bd3c66f08ef626e4"
+    "version": "1.0.3",
+    "publishedAt": 1776847650538,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165736742,
+      "commit": "https://github.com/openclaw/skills/commit/951a6292d44e1b0074c98aa0bd3c66f08ef626e4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774087361304,
