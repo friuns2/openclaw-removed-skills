@@ -3,11 +3,16 @@
   "slug": "akismet",
   "displayName": "Akismet",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165269743,
-    "commit": "https://github.com/openclaw/skills/commit/519964fe5fc0f512aab164e3a3e929121f0cc1a1"
+    "version": "1.0.3",
+    "publishedAt": 1776846634972,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165269743,
+      "commit": "https://github.com/openclaw/skills/commit/519964fe5fc0f512aab164e3a3e929121f0cc1a1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773993754217,
