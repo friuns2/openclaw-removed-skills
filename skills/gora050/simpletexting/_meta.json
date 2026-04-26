@@ -3,11 +3,16 @@
   "slug": "simpletexting",
   "displayName": "Simpletexting",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166992190,
-    "commit": "https://github.com/openclaw/skills/commit/1a0581bc8346f4d6f86ebf1be050aa5b08f149f6"
+    "version": "1.0.3",
+    "publishedAt": 1776860727080,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166992190,
+      "commit": "https://github.com/openclaw/skills/commit/1a0581bc8346f4d6f86ebf1be050aa5b08f149f6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774339405406,
