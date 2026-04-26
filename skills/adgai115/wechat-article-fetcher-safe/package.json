@@ -1,11 +1,10 @@
 {
   "name": "wechat-article-fetcher-safe",
-  "version": "1.1.0",
-  "description": "使用 Puppeteer 本地抓取微信公众号文章的安全版 OpenClaw Skill",
+  "version": "2.0.0",
+  "description": "使用 Puppeteer + Chrome 本地提取微信公众号文章内容的 OpenClaw Skill",
   "main": "fetch-wechat-article.js",
   "scripts": {
-    "fetch": "node fetch-wechat-article.js",
-    "test": "node tests/run-tests.js"
+    "fetch": "node fetch-wechat-article.js"
   },
   "keywords": [
     "wechat",
@@ -14,21 +13,18 @@
     "openclaw",
     "skill",
     "puppeteer",
-    "crawler",
     "privacy-safe"
   ],
-  "author": "潜助",
-  "license": "MIT",
+  "author": "@Adgai115",
+  "license": "MIT-0",
   "dependencies": {
-    "puppeteer-core": "^24.37.5",
-    "tesseract.js": "^7.0.0"
+    "puppeteer-core": "^24.37.5"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Adgai115/Skill-Library",
-    "directory": "wechat-article-fetcher-safe"
+    "url": "https://github.com/Adgai115/wechat-article-fetcher-safe"
   }
 }
