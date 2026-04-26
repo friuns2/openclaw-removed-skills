@@ -203,8 +203,8 @@ function fmtCnyPerTonFromUsd(usd, unit, fxRate, withRaw = false) {
   const cny = usdToCnyPerTon(usd, unit, fxRate);
   if (cny == null) return null;
   return withRaw
-    ? `CNY ${fmtNum(cny)}/t（USD ${fmtNum(usd, unit === 'USD/lb' ? 3 : 0)}${unit === 'USD/lb' ? '/lb' : '/t'}）`
-    : `CNY ${fmtNum(cny)}/t`;
+    ? `CNY ${fmtNum(cny)}/吨（USD ${fmtNum(usd, unit === 'USD/lb' ? 3 : 0)}${unit === 'USD/lb' ? '/lb' : '/t'}）`
+    : `CNY ${fmtNum(cny)}/吨`;
 }
 
 function calcBasis(prices, fx, key) {
@@ -254,7 +254,7 @@ function buildReport(d, prevState = null) {
     const cuEmoji = emoji(usdDir ?? cu.cnyChange);
     let line = `${cuEmoji} 銅（Cu）`;
     if (cu.usd != null) line += `${fmtCnyPerTonFromUsd(cu.usd, 'USD/lb', fxRate, true) || '—'} ${fmtPct(cu.usdChangePct)} [COMEX]`;
-    if (cu.cny != null) line += `  |  CNY ${fmtNum(cu.cny)}/t ${fmtChange(cu.cnyChange)} [長江]`;
+    if (cu.cny != null) line += `  |  CNY ${fmtNum(cu.cny)}/吨 ${fmtChange(cu.cnyChange)} [長江]`;
     lines.push(line);
   }
 
@@ -264,7 +264,7 @@ function buildReport(d, prevState = null) {
     const znEmoji = emoji(zn.usdChangePct ?? zn.cnyChange);
     let line = `${znEmoji} 鋅（Zn）`;
     if (zn.usd != null) line += `${fmtCnyPerTonFromUsd(zn.usd, 'USD/t', fxRate, true) || '—'} ${fmtPct(zn.usdChangePct)} [LME Cash]`;
-    if (zn.cny != null) line += `  |  CNY ${fmtNum(zn.cny)}/t ${fmtChange(zn.cnyChange)} [長江]`;
+    if (zn.cny != null) line += `  |  CNY ${fmtNum(zn.cny)}/吨 ${fmtChange(zn.cnyChange)} [長江]`;
     lines.push(line);
   }
 
@@ -274,7 +274,7 @@ function buildReport(d, prevState = null) {
     const niEmoji = emoji(ni.usdChangePct ?? ni.cnyChange);
     let line = `${niEmoji} 鎳（Ni）`;
     if (ni.usd != null) line += `${fmtCnyPerTonFromUsd(ni.usd, 'USD/t', fxRate, true) || '—'} ${fmtPct(ni.usdChangePct)} [LME Cash]`;
-    if (ni.cny != null) line += `  |  CNY ${fmtNum(ni.cny)}/t ${fmtChange(ni.cnyChange)} [長江]`;
+    if (ni.cny != null) line += `  |  CNY ${fmtNum(ni.cny)}/吨 ${fmtChange(ni.cnyChange)} [長江]`;
     lines.push(line);
   }
 
@@ -287,7 +287,7 @@ function buildReport(d, prevState = null) {
       line += `${fmtCnyPerTonFromUsd(co.usd, 'USD/t', fxRate, true) || '—'}`;
       if (co.usdDataDate && co.usdDataDate !== d.date) line += ` (${co.usdDataDate})`;
     }
-    if (co.cny != null) line += `  |  CNY ${fmtNum(co.cny)}/t ${fmtChange(co.cnyChange)} [長江]`;
+    if (co.cny != null) line += `  |  CNY ${fmtNum(co.cny)}/吨 ${fmtChange(co.cnyChange)} [長江]`;
     lines.push(line);
   }
 
@@ -297,14 +297,14 @@ function buildReport(d, prevState = null) {
     const biEmoji = emoji(bi.cnyChangePct ?? 0);
     let line = `${biEmoji} 鉍（Bi）`;
     if (bi.usd != null) line += `${fmtCnyPerTonFromUsd(bi.usd, 'USD/t', fxRate, true) || '—'}`;
-    if (bi.cny != null) line += `  |  CNY ${fmtNum(bi.cny)}/t ${fmtChange(bi.cnyChange)} [SMM]`;
+    if (bi.cny != null) line += `  |  CNY ${fmtNum(bi.cny)}/吨 ${fmtChange(bi.cnyChange)} [SMM]`;
     lines.push(line);
   }
 
   // 镁
   const mg = p.magnesium;
   if (mg?.cny != null) {
-    lines.push(`${emoji(mg.cnyChange)} 鎂（Mg）CNY ${fmtNum(mg.cny)}/t ${fmtChange(mg.cnyChange)} [CCMN]`);
+    lines.push(`${emoji(mg.cnyChange)} 鎂（Mg）CNY ${fmtNum(mg.cny)}/吨 ${fmtChange(mg.cnyChange)} [CCMN]`);
   } else {
     lines.push('⚪ 鎂（Mg）暫無數據');
   }
@@ -312,9 +312,9 @@ function buildReport(d, prevState = null) {
   // 铜期货结构
   if (fwd) {
     lines.push('');
-    const spot = fwd.spot ? `${fwd.spot.expiry} USD ${fmtNum(fwd.spot.price, 3)}/lb` : '—';
-    const near = fwd.near ? `${fwd.near.expiry} USD ${fmtNum(fwd.near.price, 3)}/lb` : '—';
-    const far  = fwd.far  ? `${fwd.far.expiry}  USD ${fmtNum(fwd.far.price, 3)}/lb` : '—';
+    const spot = fwd.spot ? `${fwd.spot.expiry} ${fmtCnyPerTonFromUsd(fwd.spot.price, 'USD/lb', fxRate, true) || '—'}` : '—';
+    const near = fwd.near ? `${fwd.near.expiry} ${fmtCnyPerTonFromUsd(fwd.near.price, 'USD/lb', fxRate, true) || '—'}` : '—';
+    const far  = fwd.far  ? `${fwd.far.expiry} ${fmtCnyPerTonFromUsd(fwd.far.price, 'USD/lb', fxRate, true) || '—'}` : '—';
     lines.push(`📐 銅期貨結構：${spot} → ${near} → ${far}`);
     // 判断近端结构
     if (fwd.spot && fwd.near) {
@@ -351,26 +351,29 @@ function buildReport(d, prevState = null) {
   lines.push('━━━ 三、技術面 ━━━');
   if (cu?.usd != null) {
     const cuPrice = cu.usd;
-    const support = (cuPrice * 0.97).toFixed(3);
-    const resist  = fwd?.far ? fmtNum(fwd.far.price, 3) : (cuPrice * 1.02).toFixed(3);
-    lines.push(`• 銅 COMEX：現報 USD ${fmtNum(cuPrice, 3)}/lb，支撐 ~USD ${support}，阻力參考遠月 USD ${resist}`);
+    const support = cuPrice * 0.97;
+    const resist  = fwd?.far ? fwd.far.price : (cuPrice * 1.02);
+    const cuNowCny = fmtCnyPerTonFromUsd(cuPrice, 'USD/lb', fxRate, true) || '—';
+    const supportCny = fmtCnyPerTonFromUsd(support, 'USD/lb', fxRate, true) || '—';
+    const resistCny = fmtCnyPerTonFromUsd(resist, 'USD/lb', fxRate, true) || '—';
+    lines.push(`• 銅 COMEX：現報 ${cuNowCny}，支撐 ~${supportCny}，阻力參考遠月 ${resistCny}`);
   }
   if (zn?.usd != null) {
     const znTrend = (zn.usdChangePct ?? 0) < -1 ? '短線偏弱，關注支撐' : '橫盤整理，方向待確認';
-    lines.push(`• 鋅 LME：USD ${fmtNum(zn.usd)}/t，${znTrend}`);
+    lines.push(`• 鋅 LME：${fmtCnyPerTonFromUsd(zn.usd, 'USD/t', fxRate, true) || '—'}，${znTrend}`);
   }
   if (ni?.usd != null) {
     const niTrend = (ni.usdChangePct ?? 0) < -1 ? '下跌通道，暫勿追多' : '區間震盪，等待突破';
-    lines.push(`• 鎳 LME：USD ${fmtNum(ni.usd)}/t，${niTrend}`);
+    lines.push(`• 鎳 LME：${fmtCnyPerTonFromUsd(ni.usd, 'USD/t', fxRate, true) || '—'}，${niTrend}`);
   }
   if (co?.cny != null) {
-    lines.push(`• 鈷 CNY：¥${fmtNum(co.cny)}/t，${(co.cnyChange ?? 0) === 0 ? '橫盤，缺乏主導驅動' : ((co.cnyChange ?? 0) > 0 ? '小幅反彈，底部待確認' : '繼續尋底，謹慎')}`);
+    lines.push(`• 鈷 CNY：${fmtNum(co.cny)}/吨，${(co.cnyChange ?? 0) === 0 ? '橫盤，缺乏主導驅動' : ((co.cnyChange ?? 0) > 0 ? '小幅反彈，底部待確認' : '繼續尋底，謹慎')}`);
   }
   if (bi?.cny != null) {
-    lines.push(`• 鉍 CNY：¥${fmtNum(bi.cny)}/t，波動偏小，流動性受限`);
+    lines.push(`• 鉍 CNY：${fmtNum(bi.cny)}/吨，波動偏小，流動性受限`);
   }
   if (mg?.cny != null) {
-    lines.push(`• 鎂 CNY：¥${fmtNum(mg.cny)}/t，${(mg.cnyChange ?? 0) === 0 ? '價格平穩，供需均衡' : ((mg.cnyChange ?? 0) > 0 ? '小幅走高，能源成本驅動' : '回落，關注需求端跟進')}`);
+    lines.push(`• 鎂 CNY：${fmtNum(mg.cny)}/吨，${(mg.cnyChange ?? 0) === 0 ? '價格平穩，供需均衡' : ((mg.cnyChange ?? 0) > 0 ? '小幅走高，能源成本驅動' : '回落，關注需求端跟進')}`);
   }
   lines.push('');
 
@@ -397,7 +400,7 @@ function buildReport(d, prevState = null) {
     const row = importParity[key];
     if (!row) return `${label}：數據暫缺（外盤或內盤或匯率缺失）`;
     const pnlEmoji = row.pnl > 200 ? '🟢' : (row.pnl < -200 ? '🔴' : '🔵');
-    return `${pnlEmoji} ${label}：外盤 $${fmtNum(row.usd)}/t → 到岸 ¥${fmtNum(row.landed)}/t（含費¥${fmtNum(row.fee)}） | 內盤 ¥${fmtNum(row.domestic)}/t → 盈虧 ${row.pnl >= 0 ? '+' : ''}${fmtNum(row.pnl)}/t（${row.status}）`;
+    return `${pnlEmoji} ${label}：外盤折算 CNY ${fmtNum(row.usd * row.fx)}/吨（USD ${fmtNum(row.usd)}/t） → 到岸 CNY ${fmtNum(row.landed)}/吨（含費 CNY ${fmtNum(row.fee)}/吨） | 內盤 CNY ${fmtNum(row.domestic)}/吨 → 盈虧 ${row.pnl >= 0 ? '+' : ''}${fmtNum(row.pnl)}/吨（${row.status}）`;
   }
   lines.push(importLine('nickel', '鎳 Ni'));
   lines.push(importLine('copper', '銅 Cu'));
@@ -600,18 +603,20 @@ function buildReport(d, prevState = null) {
     const farSpread  = fwd.far.price - fwd.spot.price;
     if (nearSpread < 0 && farSpread > 0) {
       fwdText = `銅期貨曲線呈「近端 Backwardation、遠端 Contango」V 型結構`
-        + `（現月 ${fmtNum(fwd.spot.price, 3)} → ${fwd.near.expiry} ${fmtNum(fwd.near.price, 3)} → ${fwd.far.expiry} ${fmtNum(fwd.far.price, 3)} 美元/磅）。`
+        + `（現月 ${fmtCnyPerTonFromUsd(fwd.spot.price, 'USD/lb', fxRate, true)} → ${fwd.near.expiry} ${fmtCnyPerTonFromUsd(fwd.near.price, 'USD/lb', fxRate, true)} → ${fwd.far.expiry} ${fmtCnyPerTonFromUsd(fwd.far.price, 'USD/lb', fxRate, true)}）。`
         + '近端偏緊反映當前現貨需求仍具支撐，但遠端升水有限，市場對中長期需求擴張持謹慎態度。';
     } else if (nearSpread < 0) {
-      fwdText = `銅期貨近端 Backwardation（${fmtNum(Math.abs(nearSpread), 3)}/lb），現貨緊缺預期主導，短線多頭佔優。`;
+      fwdText = `銅期貨近端 Backwardation（價差約 ${fmtCnyPerTonFromUsd(Math.abs(nearSpread), 'USD/lb', fxRate, true)}），現貨緊缺預期主導，短線多頭佔優。`;
     } else {
-      fwdText = `銅期貨呈 Contango 結構（近月升水 ${fmtNum(nearSpread, 3)}/lb），現貨壓力存在，需警惕近月合約換倉成本。`;
+      fwdText = `銅期貨呈 Contango 結構（近月升水約 ${fmtCnyPerTonFromUsd(nearSpread, 'USD/lb', fxRate, true)}），現貨壓力存在，需警惕近月合約換倉成本。`;
     }
     // 高盛目标对比
     if (cu?.usd != null) {
       const cuPerTonne = cu.usd * 2204.62;
+      const cuPerTonneCny = fxRate != null ? cuPerTonne * fxRate : null;
       if (cuPerTonne > 11000) {
-        fwdText += `\n   ⚠️ 當前銅價折噸約 ${fmtNum(cuPerTonne)} 美元，顯著高於高盛 2026/27 目標上限（11,000 美元/噸），估值偏貴風險需關注。`;
+        const targetCny = fxRate != null ? `約 CNY ${fmtNum(11000 * fxRate)}/吨，` : '';
+        fwdText += `\n   ⚠️ 當前銅價折算約 ${cuPerTonneCny != null ? `CNY ${fmtNum(cuPerTonneCny)}/吨` : 'CNY 匯率暫缺'}（USD ${fmtNum(cuPerTonne)}/t），顯著高於高盛 2026/27 目標上限（${targetCny}USD 11,000/t），估值偏貴風險需關注。`;
       }
     }
   } else {
@@ -652,12 +657,16 @@ function buildReport(d, prevState = null) {
   if (cu?.usd != null) {
     const cuP = cu.usd;
     const cuPerTonne = cuP * 2204.62;
+    const reeval = fmtCnyPerTonFromUsd(cuP * 0.96, 'USD/lb', fxRate, true) || '—';
+    const support = fmtCnyPerTonFromUsd(cuP * 0.97, 'USD/lb', fxRate, true) || '—';
+    const resist = fmtCnyPerTonFromUsd(cuP * 1.02, 'USD/lb', fxRate, true) || '—';
     if (inv.copper?.change > 0 && cuPerTonne > 11000) {
-      lines.push(`• 銅：累庫疊加高估值（折噸約 ${fmtNum(cuPerTonne)} 美元，高於高盛上限 11,000），建議觀望；回落至 USD ${fmtNum(cuP * 0.96, 3)}/lb 區域可重新評估。`);
+      const spotCny = fxRate != null ? `CNY ${fmtNum(cuPerTonne * fxRate)}/吨` : 'CNY 匯率暫缺';
+      lines.push(`• 銅：累庫疊加高估值（折噸約 ${spotCny}，USD ${fmtNum(cuPerTonne)}/t，高於高盛上限 USD 11,000/t），建議觀望；回落至 ${reeval} 區域可重新評估。`);
     } else if (fwd?.spot && fwd?.near && fwd.near.price < fwd.spot.price) {
-      lines.push(`• 銅：近端偏緊支撐短線，多頭思路不變，USD ${fmtNum(cuP * 0.97, 3)}/lb 為關鍵支撐，破位止損。`);
+      lines.push(`• 銅：近端偏緊支撐短線，多頭思路不變，${support} 為關鍵支撐，破位止損。`);
     } else {
-      lines.push(`• 銅：趨勢偏多，USD ${fmtNum(cuP * 0.97, 3)}/lb 逢回可關注，上方阻力 USD ${fmtNum(cuP * 1.02, 3)}/lb。`);
+      lines.push(`• 銅：趨勢偏多，${support} 逢回可關注，上方阻力 ${resist}。`);
     }
   } else {
     lines.push('• 銅：價格數據缺失，暫觀望。');
@@ -667,8 +676,8 @@ function buildReport(d, prevState = null) {
   if (zn?.cny != null) {
     const znC = inv.zinc?.change ?? 0;
     lines.push(znC < 0
-      ? `• 鋅：去庫格局持續，供應偏緊支撐底部，CNY ${fmtNum(zn.cny - 500)} 附近逢低可關注，上方壓力 CNY ${fmtNum(zn.cny + 500)}。`
-      : `• 鋅：庫存中性，CNY ${fmtNum(zn.cny)} 區間震盪，輕倉觀望，方向明確後跟進。`);
+      ? `• 鋅：去庫格局持續，供應偏緊支撐底部，CNY ${fmtNum(zn.cny - 500)}/吨 附近逢低可關注，上方壓力 CNY ${fmtNum(zn.cny + 500)}/吨。`
+      : `• 鋅：庫存中性，CNY ${fmtNum(zn.cny)}/吨 區間震盪，輕倉觀望，方向明確後跟進。`);
   } else {
     lines.push('• 鋅：價格數據缺失，暫觀望。');
   }
@@ -677,11 +686,11 @@ function buildReport(d, prevState = null) {
   if (ni?.cny != null) {
     const niDir = ni.cnyChange ?? 0;
     if (niDir < -200) {
-      lines.push(`• 鎳：CNY ${fmtNum(ni.cny)}/t 持續走弱，機構多空博弈激烈，建議暫觀望，不宜重倉追空。`);
+      lines.push(`• 鎳：CNY ${fmtNum(ni.cny)}/吨 持續走弱，機構多空博弈激烈，建議暫觀望，不宜重倉追空。`);
     } else if (niDir > 200) {
-      lines.push(`• 鎳：CNY ${fmtNum(ni.cny)}/t 反彈，需觀察能否持續，可輕倉試多，嚴格止損。`);
+      lines.push(`• 鎳：CNY ${fmtNum(ni.cny)}/吨 反彈，需觀察能否持續，可輕倉試多，嚴格止損。`);
     } else {
-      lines.push(`• 鎳：CNY ${fmtNum(ni.cny)}/t 橫盤整理，等待不銹鋼需求與新能源鏈回暖信號，暫觀望。`);
+      lines.push(`• 鎳：CNY ${fmtNum(ni.cny)}/吨 橫盤整理，等待不銹鋼需求與新能源鏈回暖信號，暫觀望。`);
     }
   } else {
     lines.push('• 鎳：價格數據缺失，暫觀望。');
@@ -691,11 +700,11 @@ function buildReport(d, prevState = null) {
   if (co?.cny != null) {
     const coDir = co.cnyChange ?? 0;
     if (coDir > 0) {
-      lines.push(`• 鈷：CNY ${fmtNum(co.cny)}/t 小幅回升，新能源電池需求預期驅動，謹慎追多，等量能確認。`);
+      lines.push(`• 鈷：CNY ${fmtNum(co.cny)}/吨 小幅回升，新能源電池需求預期驅動，謹慎追多，等量能確認。`);
     } else if (coDir < 0) {
-      lines.push(`• 鈷：CNY ${fmtNum(co.cny)}/t 繼續承壓，供應過剩格局未改，觀望為主。`);
+      lines.push(`• 鈷：CNY ${fmtNum(co.cny)}/吨 繼續承壓，供應過剩格局未改，觀望為主。`);
     } else {
-      lines.push(`• 鈷：CNY ${fmtNum(co.cny)}/t 橫盤，供需再平衡進程緩慢，暫觀望。`);
+      lines.push(`• 鈷：CNY ${fmtNum(co.cny)}/吨 橫盤，供需再平衡進程緩慢，暫觀望。`);
     }
   } else {
     lines.push('• 鈷：價格數據缺失，暫觀望。');
@@ -705,11 +714,11 @@ function buildReport(d, prevState = null) {
   if (bi?.cny != null) {
     const biDir = bi.cnyChange ?? 0;
     if (Math.abs(biDir) < 1000) {
-      lines.push(`• 鉍：CNY ${fmtNum(bi.cny)}/t 窄幅震盪，市場流動性偏低，不建議短線操作。`);
+      lines.push(`• 鉍：CNY ${fmtNum(bi.cny)}/吨 窄幅震盪，市場流動性偏低，不建議短線操作。`);
     } else if (biDir > 0) {
-      lines.push(`• 鉍：CNY ${fmtNum(bi.cny)}/t 上行，半導體/醫藥需求帶動，可輕倉跟多。`);
+      lines.push(`• 鉍：CNY ${fmtNum(bi.cny)}/吨 上行，半導體/醫藥需求帶動，可輕倉跟多。`);
     } else {
-      lines.push(`• 鉍：CNY ${fmtNum(bi.cny)}/t 回落，關注 CNY ${fmtNum(bi.cny * 0.95)} 支撐。`);
+      lines.push(`• 鉍：CNY ${fmtNum(bi.cny)}/吨 回落，關注 CNY ${fmtNum(bi.cny * 0.95)}/吨 支撐。`);
     }
   } else {
     lines.push('• 鉍：價格數據缺失，暫觀望。');
@@ -719,11 +728,11 @@ function buildReport(d, prevState = null) {
   if (mg?.cny != null) {
     const mgDir = mg.cnyChange ?? 0;
     if (mgDir > 0) {
-      lines.push(`• 鎂：CNY ${fmtNum(mg.cny)}/t 上漲，汽車輕量化需求支撐，可關注趨勢多頭機會。`);
+      lines.push(`• 鎂：CNY ${fmtNum(mg.cny)}/吨 上漲，汽車輕量化需求支撐，可關注趨勢多頭機會。`);
     } else if (mgDir < 0) {
-      lines.push(`• 鎂：CNY ${fmtNum(mg.cny)}/t 回落，能源成本下降但需求端偏弱，暫觀望。`);
+      lines.push(`• 鎂：CNY ${fmtNum(mg.cny)}/吨 回落，能源成本下降但需求端偏弱，暫觀望。`);
     } else {
-      lines.push(`• 鎂：CNY ${fmtNum(mg.cny)}/t 平穩，供需均衡，暫觀望。`);
+      lines.push(`• 鎂：CNY ${fmtNum(mg.cny)}/吨 平穩，供需均衡，暫觀望。`);
     }
   } else {
     lines.push('• 鎂：價格數據缺失，暫觀望。');
