@@ -3,11 +3,16 @@
   "slug": "pixiebrix",
   "displayName": "Pixiebrix",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165173568,
-    "commit": "https://github.com/openclaw/skills/commit/c0ccf7dc71f38d0e10e7756852d925325205f01a"
+    "version": "1.0.3",
+    "publishedAt": 1776859164204,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165173568,
+      "commit": "https://github.com/openclaw/skills/commit/c0ccf7dc71f38d0e10e7756852d925325205f01a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773965005256,
