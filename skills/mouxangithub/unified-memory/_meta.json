@@ -1,13 +1,18 @@
 {
   "owner": "mouxangithub",
   "slug": "unified-memory",
-  "displayName": "Unified Memory",
+  "displayName": "Unified Memory V5",
   "latest": {
-    "version": "1.5.1",
-    "publishedAt": 1774258703664,
-    "commit": "https://github.com/openclaw/skills/commit/f840e18c4964e83a1ffbcc90d336c2ecebfc6563"
+    "version": "5.3.0",
+    "publishedAt": 1776736025044,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.1",
+      "publishedAt": 1774258703664,
+      "commit": "https://github.com/openclaw/skills/commit/f840e18c4964e83a1ffbcc90d336c2ecebfc6563"
+    },
     {
       "version": "0.5.0",
       "publishedAt": 1773962078585,
