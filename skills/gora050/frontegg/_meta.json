@@ -3,11 +3,16 @@
   "slug": "frontegg",
   "displayName": "Frontegg",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165716947,
-    "commit": "https://github.com/openclaw/skills/commit/fff7813aea28b42318f12ffb0c51113cc2b46158"
+    "version": "1.0.3",
+    "publishedAt": 1776893483409,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165716947,
+      "commit": "https://github.com/openclaw/skills/commit/fff7813aea28b42318f12ffb0c51113cc2b46158"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774080233712,
