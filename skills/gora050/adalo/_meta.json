@@ -3,11 +3,16 @@
   "slug": "adalo",
   "displayName": "Adalo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165989788,
-    "commit": "https://github.com/openclaw/skills/commit/05ac6a0a2b4fd0fb4771541a0b4ed86b142e3678"
+    "version": "1.0.3",
+    "publishedAt": 1776859933753,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165989788,
+      "commit": "https://github.com/openclaw/skills/commit/05ac6a0a2b4fd0fb4771541a0b4ed86b142e3678"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774130713560,
