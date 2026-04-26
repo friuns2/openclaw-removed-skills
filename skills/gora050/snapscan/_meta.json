@@ -3,11 +3,16 @@
   "slug": "snapscan",
   "displayName": "Snapscan",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165712688,
-    "commit": "https://github.com/openclaw/skills/commit/f50a2a45dbcac6e73f5aebf2c2608463e4e610d8"
+    "version": "1.0.3",
+    "publishedAt": 1776893475537,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165712688,
+      "commit": "https://github.com/openclaw/skills/commit/f50a2a45dbcac6e73f5aebf2c2608463e4e610d8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774080224672,
