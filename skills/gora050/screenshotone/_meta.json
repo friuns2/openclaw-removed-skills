@@ -3,11 +3,16 @@
   "slug": "screenshotone",
   "displayName": "Screenshotone",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165181815,
-    "commit": "https://github.com/openclaw/skills/commit/559ef4e64d6854d69a9c3f1afa57d7e308a07c8f"
+    "version": "1.0.3",
+    "publishedAt": 1776859179002,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165181815,
+      "commit": "https://github.com/openclaw/skills/commit/559ef4e64d6854d69a9c3f1afa57d7e308a07c8f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773965021387,
