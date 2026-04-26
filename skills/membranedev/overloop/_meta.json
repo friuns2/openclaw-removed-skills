@@ -3,11 +3,16 @@
   "slug": "overloop",
   "displayName": "Overloop",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167190461,
-    "commit": "https://github.com/openclaw/skills/commit/1b6f2b0f844edfc9c17a72e6ef6bd16c57f62884"
+    "version": "1.0.3",
+    "publishedAt": 1776850082519,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167190461,
+      "commit": "https://github.com/openclaw/skills/commit/1b6f2b0f844edfc9c17a72e6ef6bd16c57f62884"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774389764550,
