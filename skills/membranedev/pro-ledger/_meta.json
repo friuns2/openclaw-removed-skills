@@ -3,11 +3,16 @@
   "slug": "pro-ledger",
   "displayName": "Pro Ledger",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167297400,
-    "commit": "https://github.com/openclaw/skills/commit/fe9efb2e694b5e3479b939739c3e0616f84c7c80"
+    "version": "1.0.3",
+    "publishedAt": 1776850358891,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167297400,
+      "commit": "https://github.com/openclaw/skills/commit/fe9efb2e694b5e3479b939739c3e0616f84c7c80"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774407757743,
