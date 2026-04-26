@@ -3,11 +3,16 @@
   "slug": "make-integration",
   "displayName": "Make",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167083224,
-    "commit": "https://github.com/openclaw/skills/commit/1138c88aae16a00a97581ce6a101daca64647f9a"
+    "version": "1.0.3",
+    "publishedAt": 1776892942761,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167083224,
+      "commit": "https://github.com/openclaw/skills/commit/1138c88aae16a00a97581ce6a101daca64647f9a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774380153577,
