@@ -3,9 +3,15 @@
   "slug": "walletchan",
   "displayName": "WalletChan",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773850366544,
-    "commit": "https://github.com/openclaw/skills/commit/2b701260f1ad1f605f468ff716e08b847dc128b8"
+    "version": "1.0.2",
+    "publishedAt": 1776936815737,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773850366544,
+      "commit": "https://github.com/openclaw/skills/commit/2b701260f1ad1f605f468ff716e08b847dc128b8"
+    }
+  ]
 }
