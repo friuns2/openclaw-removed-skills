@@ -3,11 +3,16 @@
   "slug": "laposta",
   "displayName": "Laposta",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167663001,
-    "commit": "https://github.com/openclaw/skills/commit/c3034a412e7908e269fb3e83bcfdbc956fdaa75c"
+    "version": "1.0.3",
+    "publishedAt": 1776861694031,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167663001,
+      "commit": "https://github.com/openclaw/skills/commit/c3034a412e7908e269fb3e83bcfdbc956fdaa75c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774487408793,
