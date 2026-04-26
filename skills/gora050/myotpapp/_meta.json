@@ -3,11 +3,16 @@
   "slug": "myotpapp",
   "displayName": "Myotpapp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164935129,
-    "commit": "https://github.com/openclaw/skills/commit/d9e760daa9d51d300b828cf4456087381a44de62"
+    "version": "1.0.3",
+    "publishedAt": 1776858805974,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164935129,
+      "commit": "https://github.com/openclaw/skills/commit/d9e760daa9d51d300b828cf4456087381a44de62"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773932576696,
