@@ -3,11 +3,16 @@
   "slug": "image-parser",
   "displayName": "Image Parser",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1775365031883,
-    "commit": "https://github.com/openclaw/skills/commit/5487803f3c9c76436633fc7bfb31d4ed15fc9aa8"
+    "version": "0.1.2",
+    "publishedAt": 1776777411378,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1775365031883,
+      "commit": "https://github.com/openclaw/skills/commit/5487803f3c9c76436633fc7bfb31d4ed15fc9aa8"
+    },
     {
       "version": "0.1.0",
       "publishedAt": 1774253549164,
