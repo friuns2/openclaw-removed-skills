@@ -3,11 +3,16 @@
   "slug": "hugging-face-integration",
   "displayName": "Hugging Face",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167467342,
-    "commit": "https://github.com/openclaw/skills/commit/7a9e24653223cc20f6a72706a7740f2ca739cb64"
+    "version": "1.0.3",
+    "publishedAt": 1776861468336,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167467342,
+      "commit": "https://github.com/openclaw/skills/commit/7a9e24653223cc20f6a72706a7740f2ca739cb64"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774440222837,
