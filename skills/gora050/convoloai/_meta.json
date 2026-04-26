@@ -3,11 +3,16 @@
   "slug": "convoloai",
   "displayName": "Convoloai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164944395,
-    "commit": "https://github.com/openclaw/skills/commit/2149d1460dfa6217352cffe4c2edbb41ffac38a0"
+    "version": "1.0.3",
+    "publishedAt": 1776858823418,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164944395,
+      "commit": "https://github.com/openclaw/skills/commit/2149d1460dfa6217352cffe4c2edbb41ffac38a0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773932590409,
