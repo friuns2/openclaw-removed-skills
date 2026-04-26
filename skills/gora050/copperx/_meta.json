@@ -3,11 +3,16 @@
   "slug": "copperx",
   "displayName": "Copperx",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166038296,
-    "commit": "https://github.com/openclaw/skills/commit/142621b5ad982c36ad8ffc417c0a38a80e62a268"
+    "version": "1.0.3",
+    "publishedAt": 1776859856675,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166038296,
+      "commit": "https://github.com/openclaw/skills/commit/142621b5ad982c36ad8ffc417c0a38a80e62a268"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774137864877,
