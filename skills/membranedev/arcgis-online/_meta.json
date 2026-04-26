@@ -3,11 +3,16 @@
   "slug": "arcgis-online",
   "displayName": "Arcgis Online",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165741330,
-    "commit": "https://github.com/openclaw/skills/commit/1413c450305d66fb7f23e1d58a245ad31822fffc"
+    "version": "1.0.3",
+    "publishedAt": 1776847660109,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165741330,
+      "commit": "https://github.com/openclaw/skills/commit/1413c450305d66fb7f23e1d58a245ad31822fffc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774087367458,
