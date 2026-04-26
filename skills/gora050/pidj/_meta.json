@@ -3,11 +3,16 @@
   "slug": "pidj",
   "displayName": "Pidj",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167170793,
-    "commit": "https://github.com/openclaw/skills/commit/f8349154a636e81d5bc11e2b817400c94156c8fa"
+    "version": "1.0.3",
+    "publishedAt": 1776860948880,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167170793,
+      "commit": "https://github.com/openclaw/skills/commit/f8349154a636e81d5bc11e2b817400c94156c8fa"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774386297778,
