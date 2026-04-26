@@ -3,11 +3,16 @@
   "slug": "encharge",
   "displayName": "Encharge",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166818987,
-    "commit": "https://github.com/openclaw/skills/commit/93bfc5c9c51368471bb49af06cb605157d5b2930"
+    "version": "1.0.3",
+    "publishedAt": 1776860457212,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166818987,
+      "commit": "https://github.com/openclaw/skills/commit/93bfc5c9c51368471bb49af06cb605157d5b2930"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774314261000,
