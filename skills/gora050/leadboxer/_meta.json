@@ -3,11 +3,16 @@
   "slug": "leadboxer",
   "displayName": "Leadboxer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167029426,
-    "commit": "https://github.com/openclaw/skills/commit/e3947027f36a5e100809584a668f8f8e6b45004e"
+    "version": "1.0.3",
+    "publishedAt": 1776860788001,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167029426,
+      "commit": "https://github.com/openclaw/skills/commit/e3947027f36a5e100809584a668f8f8e6b45004e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774346607525,
