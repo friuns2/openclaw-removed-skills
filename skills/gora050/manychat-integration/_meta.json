@@ -3,11 +3,16 @@
   "slug": "manychat-integration",
   "displayName": "Manychat",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164965344,
-    "commit": "https://github.com/openclaw/skills/commit/7874301dd3b25103f4b85266f76ae79e77467314"
+    "version": "1.0.3",
+    "publishedAt": 1776858860558,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164965344,
+      "commit": "https://github.com/openclaw/skills/commit/7874301dd3b25103f4b85266f76ae79e77467314"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773936184695,
