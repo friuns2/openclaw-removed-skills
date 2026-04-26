@@ -3,11 +3,16 @@
   "slug": "e-conomic",
   "displayName": "E Conomic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165593211,
-    "commit": "https://github.com/openclaw/skills/commit/b2bc74798472963b4d6154d354d0b99165c3e2fa"
+    "version": "1.0.3",
+    "publishedAt": 1776859620260,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165593211,
+      "commit": "https://github.com/openclaw/skills/commit/b2bc74798472963b4d6154d354d0b99165c3e2fa"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051457307,
