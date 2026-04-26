@@ -3,11 +3,16 @@
   "slug": "kontentai",
   "displayName": "Kontentai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167616517,
-    "commit": "https://github.com/openclaw/skills/commit/91bc52a04953001260a92a8c49dc5a957ef172ba"
+    "version": "1.0.3",
+    "publishedAt": 1776861596701,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167616517,
+      "commit": "https://github.com/openclaw/skills/commit/91bc52a04953001260a92a8c49dc5a957ef172ba"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479844591,
