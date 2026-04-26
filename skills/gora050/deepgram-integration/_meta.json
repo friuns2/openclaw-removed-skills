@@ -3,11 +3,16 @@
   "slug": "deepgram-integration",
   "displayName": "Deepgram",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166023541,
-    "commit": "https://github.com/openclaw/skills/commit/71d4bd5ff94f52bb30f52610171c38c81e3e90e8"
+    "version": "1.0.3",
+    "publishedAt": 1776859829176,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166023541,
+      "commit": "https://github.com/openclaw/skills/commit/71d4bd5ff94f52bb30f52610171c38c81e3e90e8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774137836474,
