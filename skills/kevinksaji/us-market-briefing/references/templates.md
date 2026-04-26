@@ -65,12 +65,12 @@ US POST-MARKET RECAP
 **Top 5 Gains**
 
 **<Ticker>**
-• <move + one-line driver> [🔗](<article-url>)
+• <percent move from structured movers source> | <one-line driver from best available article or company release> [🔗](<article-url-or-movers-url>)
 
 **Top 5 Losses**
 
 **<Ticker>**
-• <move + one-line driver> [🔗](<article-url>)
+• <percent move from structured movers source> | <one-line driver from best available article or company release> [🔗](<article-url-or-movers-url>)
 
 ---
 

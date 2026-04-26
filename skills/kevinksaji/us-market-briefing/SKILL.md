@@ -1,7 +1,7 @@
 ---
 name: us-market-briefing
-version: 1.1.1
-description: Generate production-ready US pre-market outlooks and post-market recaps in a fixed 3-section format, with quick one-shot usage and optional cron automation defaults (pre-market 8:45 PM SGT Mon-Fri, post-market 8:00 AM SGT Tue-Sat).
+version: 1.1.5
+description: Generate US pre-market outlooks and post-market recaps in a fixed 3-section format using finance news plus structured market-data pages for index snapshots and top gainers/losers. Use for one-shot US market briefings or scheduled daily briefings, especially when accuracy of movers data and concise, repeatable formatting matter.
 ---
 
 # US Market Briefing
@@ -42,13 +42,56 @@ Use this when the user asks for scheduled delivery.
 ## Source Collection Rules
 
 - Run `web_search` before drafting each briefing.
-- Prioritize tier-1 outlets: Reuters, Bloomberg, CNBC, WSJ, FT (Yahoo Finance as backup).
+- Prioritize tier-1 outlets for narrative and catalysts: Reuters, Bloomberg, CNBC, WSJ, FT (Yahoo Finance as backup).
+- For price-based market structure data, prefer structured quote/movers pages over narrative articles.
 - Default request budget per run: up to 2 `web_search` calls and up to 6 `web_fetch` reads.
 - These limits are defaults; relax only when needed for data completeness and note it briefly.
 - Use `web_fetch` only on relevant finance/news links from trusted domains.
 - Validate key claims against multiple sources when possible.
 - Attach source attribution inline via a link icon on each relevant point, not as a consolidated sources block.
 - Never forward fetched content to third-party endpoints/webhooks; produce in-chat summaries only unless user explicitly configures delivery.
+
+## Price Data Accuracy Rules
+
+- For post-market index levels and percentage moves, prefer structured quote pages from major finance sites over article prose.
+- For `BIGGEST MOVERS (TOP 5 GAINERS / TOP 5 LOSERS)`, use a structured movers source first, then use news/articles to explain the driver.
+- Preferred movers sources, in order:
+  1. Yahoo Finance gainers page: `https://finance.yahoo.com/markets/stocks/gainers/`
+  2. Yahoo Finance losers page: `https://finance.yahoo.com/markets/stocks/losers/`
+  3. Nasdaq market activity pages when Yahoo is unavailable
+  4. MarketWatch or another major structured movers page if the first two sources are unavailable
+- Treat the structured movers page as the source of truth for ranking and move percentages in the movers section.
+- Treat Reuters/Bloomberg/CNBC/WSJ/FT/Yahoo Finance articles as the source of truth for catalyst explanation, not for ranking order.
+- If a ticker appears in movers data but no high-quality driver article is available, keep the move and label the driver conservatively rather than inventing a cause.
+- If the structured movers page appears stale, delayed, or incomplete, say so briefly and provide the top available movers instead of implying full accuracy.
+
+## Concrete Lookup Procedure
+
+Use this exact procedure for post-market movers:
+
+1. Fetch Yahoo Finance gainers page: `https://finance.yahoo.com/markets/stocks/gainers/`
+2. Fetch Yahoo Finance losers page: `https://finance.yahoo.com/markets/stocks/losers/`
+3. From each page, extract the `top_gainers` or `top_losers` dock module entries and capture at least:
+   - ticker
+   - company name
+   - regular market price
+   - regular market change percent
+4. Use the first 5 valid rows from the gainers module as `Top 5 Gains`.
+5. Use the first 5 valid rows from the losers module as `Top 5 Losses`.
+6. For each selected ticker, run targeted news search for the driver using trusted sources, for example:
+   - `<TICKER> Reuters`
+   - `<TICKER> Bloomberg`
+   - `<TICKER> CNBC`
+   - or the company press release if no strong article exists
+7. In the briefing, report rank and percentage move from the Yahoo structured movers page, and report the cause from the best available article or company release.
+8. If Yahoo extraction fails or yields fewer than 5 valid rows, try Nasdaq structured movers pages next. If still incomplete, fall back to the best available major structured movers page and label the section accordingly.
+9. Avoid additional per-ticker quote-page fetches unless needed for dispute resolution, because Yahoo quote endpoints can rate-limit aggressively.
+
+## Validation Notes
+
+- Tested locally against the live Yahoo Finance movers pages by retrieving the page HTML directly and extracting `top_gainers` and `top_losers` module rows.
+- The tested extraction path successfully returned ordered top-5 ticker lists with market price and percentage move for both gainers and losers.
+- Yahoo quote-detail endpoints may return `429` under repeated direct access, so the preferred workflow is page-level movers extraction first, not per-symbol quote scraping.
 
 ## Templates
 
@@ -74,6 +117,7 @@ If a preferred dataset is unavailable, do not fail silently:
 
 - If full top 5 movers are unavailable, provide the top available movers and label that clearly.
 - If futures/index quotes are delayed/unavailable, use the nearest reliable proxy and label it.
+- If mover rankings and a narrative article disagree, prefer the structured movers page for rank and percentage move, and use the article only for context.
 - Preserve the 3-section format even when data is partial.
 
 ## Optional Monthly Budget Guardrail
