@@ -3,11 +3,16 @@
   "slug": "tokio-async-code-review",
   "displayName": "Tokio Async Code Review",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966776922,
-    "commit": "https://github.com/openclaw/skills/commit/6e325d56dea5820a9b56596b737fb83a41f2be0f"
+    "version": "1.0.2",
+    "publishedAt": 1776831388756,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966776922,
+      "commit": "https://github.com/openclaw/skills/commit/6e325d56dea5820a9b56596b737fb83a41f2be0f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774641983056,
