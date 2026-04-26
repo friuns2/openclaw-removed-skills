@@ -3,11 +3,16 @@
   "slug": "retriever",
   "displayName": "Retriever",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166478108,
-    "commit": "https://github.com/openclaw/skills/commit/a18985adba646ba41ee6332f252a298c6c4a1d3c"
+    "version": "1.0.3",
+    "publishedAt": 1776860307073,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166478108,
+      "commit": "https://github.com/openclaw/skills/commit/a18985adba646ba41ee6332f252a298c6c4a1d3c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774224316228,
