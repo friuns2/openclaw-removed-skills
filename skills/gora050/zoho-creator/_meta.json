@@ -3,11 +3,16 @@
   "slug": "zoho-creator",
   "displayName": "Zoho Creator",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167555282,
-    "commit": "https://github.com/openclaw/skills/commit/97086bd2704c84f8a14209ca1471910a0cfb798b"
+    "version": "1.0.3",
+    "publishedAt": 1776861535248,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167555282,
+      "commit": "https://github.com/openclaw/skills/commit/97086bd2704c84f8a14209ca1471910a0cfb798b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774472667122,
