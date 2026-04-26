@@ -3,11 +3,16 @@
   "slug": "google-cloud-vision",
   "displayName": "Google Cloud Vision",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167000547,
-    "commit": "https://github.com/openclaw/skills/commit/73cf79e85f7d7bcfc7eeb7d044331977a0de3855"
+    "version": "1.0.3",
+    "publishedAt": 1776860741776,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167000547,
+      "commit": "https://github.com/openclaw/skills/commit/73cf79e85f7d7bcfc7eeb7d044331977a0de3855"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774339420272,
