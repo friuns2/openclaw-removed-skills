@@ -3,11 +3,16 @@
   "slug": "survser",
   "displayName": "Survser",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165909344,
-    "commit": "https://github.com/openclaw/skills/commit/03f6ba7d2e9c5024828f0b6a9a5093582a292c66"
+    "version": "1.0.3",
+    "publishedAt": 1776862240580,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165909344,
+      "commit": "https://github.com/openclaw/skills/commit/03f6ba7d2e9c5024828f0b6a9a5093582a292c66"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774119818738,
