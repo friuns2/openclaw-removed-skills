@@ -3,11 +3,16 @@
   "slug": "myphoner",
   "displayName": "Myphoner",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165867621,
-    "commit": "https://github.com/openclaw/skills/commit/95920ad0f81cee2bdb250d44d0ceb8912e531bdf"
+    "version": "1.0.3",
+    "publishedAt": 1776859776195,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165867621,
+      "commit": "https://github.com/openclaw/skills/commit/95920ad0f81cee2bdb250d44d0ceb8912e531bdf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774112604389,
