@@ -3,11 +3,16 @@
   "slug": "bilflo",
   "displayName": "Bilflo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166056669,
-    "commit": "https://github.com/openclaw/skills/commit/72c4a580548a77ee5cc0cb07cce03148d4c0b681"
+    "version": "1.0.3",
+    "publishedAt": 1776859940817,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166056669,
+      "commit": "https://github.com/openclaw/skills/commit/72c4a580548a77ee5cc0cb07cce03148d4c0b681"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774137913143,
