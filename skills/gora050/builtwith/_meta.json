@@ -3,11 +3,16 @@
   "slug": "builtwith",
   "displayName": "Builtwith",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165965315,
-    "commit": "https://github.com/openclaw/skills/commit/85bcfd7d5334f682dab9969ad3e9d92eefccb727"
+    "version": "1.0.3",
+    "publishedAt": 1776859871293,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165965315,
+      "commit": "https://github.com/openclaw/skills/commit/85bcfd7d5334f682dab9969ad3e9d92eefccb727"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774130665720,
