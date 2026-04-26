@@ -3,11 +3,16 @@
   "slug": "mamo-business",
   "displayName": "Mamo Business",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165488758,
-    "commit": "https://github.com/openclaw/skills/commit/93f5e6765c75017c0281715e37d2d0c28675593b"
+    "version": "1.0.3",
+    "publishedAt": 1776859477422,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165488758,
+      "commit": "https://github.com/openclaw/skills/commit/93f5e6765c75017c0281715e37d2d0c28675593b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774040596908,
