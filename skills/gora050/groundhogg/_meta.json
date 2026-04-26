@@ -3,11 +3,16 @@
   "slug": "groundhogg",
   "displayName": "Groundhogg",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166164264,
-    "commit": "https://github.com/openclaw/skills/commit/1425758efd5773ab2bc032a6367f1eaa887e5bee"
+    "version": "1.0.3",
+    "publishedAt": 1776860039535,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166164264,
+      "commit": "https://github.com/openclaw/skills/commit/1425758efd5773ab2bc032a6367f1eaa887e5bee"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774166628131,
