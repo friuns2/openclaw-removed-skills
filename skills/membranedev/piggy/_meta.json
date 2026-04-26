@@ -3,11 +3,16 @@
   "slug": "piggy",
   "displayName": "Piggy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164621842,
-    "commit": "https://github.com/openclaw/skills/commit/f216f6679261c3250ac389c5bba782931128262e"
+    "version": "1.0.3",
+    "publishedAt": 1776845166164,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164621842,
+      "commit": "https://github.com/openclaw/skills/commit/f216f6679261c3250ac389c5bba782931128262e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773806547787,
