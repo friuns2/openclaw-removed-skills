@@ -3,11 +3,16 @@
   "slug": "data247",
   "displayName": "Data247",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164856284,
-    "commit": "https://github.com/openclaw/skills/commit/f8746368dd5465abf9c26c347f5fdb2f15fd2b77"
+    "version": "1.0.3",
+    "publishedAt": 1776858661353,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164856284,
+      "commit": "https://github.com/openclaw/skills/commit/f8746368dd5465abf9c26c347f5fdb2f15fd2b77"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773907395182,
