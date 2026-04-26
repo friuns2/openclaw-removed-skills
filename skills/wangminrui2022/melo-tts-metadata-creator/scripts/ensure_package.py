@@ -22,10 +22,24 @@ import os
 import importlib.metadata
 from packaging import version as pkg_version
 from logger_manager import LoggerManager
+logger = LoggerManager.setup_logger(logger_name="melo-tts-metadata-creator")
+
+def fix_setuptools_for_legacy_packages():
+    """专门为老项目（使用 pkg_resources 的 setup.py）修复 setuptools 版本"""
+    logger.info("🔧 正在修复 setuptools 版本（兼容旧 GitHub 包构建）...")
+    try:
+        subprocess.check_call([
+            sys.executable, "-m", "pip", "install",
+            "--quiet", "--force-reinstall", "setuptools<=81.2.0", "wheel"
+        ])
+        logger.info("✅ setuptools 已切换到兼容版本 (<=81.2.0)")
+    except Exception as e:
+        logger.info(f"⚠️ setuptools 修复失败: {e}（可忽略，继续尝试安装）")
+
+# ==================== 在文件最开头调用 ====================
+fix_setuptools_for_legacy_packages()
 import pkg_resources  # 用于更鲁棒的版本比较
 from config import SKILL_ROOT
-
-logger = LoggerManager.setup_logger(logger_name="melo-tts-metadata-creator")
 
 """
 参数,类型,默认值,说明
@@ -119,11 +133,22 @@ def _install_package(spec: str, check_name: str, fallback_zip: str = None):
         spec,
         "--quiet"
     ]
-    
-    # git+、http、zip 等特殊安装方式不使用清华镜像，避免冲突
-    if any(keyword in spec for keyword in ["git+", "://", ".zip", ".whl"]):
+
+    # git+、http、.zip、.whl 等特殊安装方式不使用清华镜像，避免源冲突或构建问题
+    if any(keyword in spec.lower() for keyword in ["git+", "://", ".zip", ".whl"]):
+        # 过滤掉所有 -i 和 tuna 镜像参数
         cmd = [c for c in cmd if c != "-i" and not str(c).startswith("https://pypi.tuna")]
+        
+        # 额外建议：为这类包添加常见构建修复参数（强烈推荐加上）
+        extra_flags = ["--no-build-isolation", "--no-deps", "--use-pep517"]
+        # 插入到合适位置（通常在 install 之后）
+        try:
+            install_idx = cmd.index("install")
+            cmd[install_idx+1:install_idx+1] = extra_flags
+        except ValueError:
+            cmd.extend(extra_flags)
     else:
+        # 普通包使用清华镜像加速
         cmd.extend(["-i", "https://pypi.tuna.tsinghua.edu.cn/simple"])
 
     try:
