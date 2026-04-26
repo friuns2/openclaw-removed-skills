@@ -1,13 +1,18 @@
 {
   "owner": "dp-pcs",
   "slug": "ogp-project",
-  "displayName": "ogp-project",
+  "displayName": "Ogp Project",
   "latest": {
-    "version": "2.2.0",
-    "publishedAt": 1775772726761,
-    "commit": "https://github.com/openclaw/skills/commit/041439c1851f47c0fcc7147fd26a282ea8441fc6"
+    "version": "0.6.0",
+    "publishedAt": 1776787839765,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.0",
+      "publishedAt": 1775772726761,
+      "commit": "https://github.com/openclaw/skills/commit/041439c1851f47c0fcc7147fd26a282ea8441fc6"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1775065141839,
