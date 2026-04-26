@@ -3,11 +3,16 @@
   "slug": "avochato",
   "displayName": "Avochato",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165973291,
-    "commit": "https://github.com/openclaw/skills/commit/17118682c7cf12336825cfc9052d99f8f90ab458"
+    "version": "1.0.3",
+    "publishedAt": 1776859893296,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165973291,
+      "commit": "https://github.com/openclaw/skills/commit/17118682c7cf12336825cfc9052d99f8f90ab458"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774130679805,
