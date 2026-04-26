@@ -3,11 +3,16 @@
   "slug": "eventee",
   "displayName": "Eventee",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165411864,
-    "commit": "https://github.com/openclaw/skills/commit/de4d99acc6cb3f9f7f35bf853e3a3dcf38125bd4"
+    "version": "1.0.3",
+    "publishedAt": 1776859346104,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165411864,
+      "commit": "https://github.com/openclaw/skills/commit/de4d99acc6cb3f9f7f35bf853e3a3dcf38125bd4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774022632300,
