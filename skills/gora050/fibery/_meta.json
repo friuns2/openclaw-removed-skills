@@ -3,11 +3,16 @@
   "slug": "fibery",
   "displayName": "Fibery",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167645767,
-    "commit": "https://github.com/openclaw/skills/commit/65ae9542cf93b868ff77d9b646d2c001fd25dfab"
+    "version": "1.0.3",
+    "publishedAt": 1776861658968,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167645767,
+      "commit": "https://github.com/openclaw/skills/commit/65ae9542cf93b868ff77d9b646d2c001fd25dfab"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774487132421,
