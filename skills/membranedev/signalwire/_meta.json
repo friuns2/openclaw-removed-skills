@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "signalwire",
+  "displayName": "Signalwire",
+  "latest": {
+    "version": "1.0.3",
+    "publishedAt": 1776845405607,
+    "commit": null
+  },
+  "history": []
+}
