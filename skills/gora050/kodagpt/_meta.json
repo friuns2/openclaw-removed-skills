@@ -3,11 +3,16 @@
   "slug": "kodagpt",
   "displayName": "Kodagpt",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165938891,
-    "commit": "https://github.com/openclaw/skills/commit/d2e735db55e51185d8c2c481c76d34132bfa6992"
+    "version": "1.0.3",
+    "publishedAt": 1776862758270,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165938891,
+      "commit": "https://github.com/openclaw/skills/commit/d2e735db55e51185d8c2c481c76d34132bfa6992"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774127004296,
