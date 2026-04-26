@@ -3,11 +3,16 @@
   "slug": "graphlinq",
   "displayName": "Graphlinq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166645235,
-    "commit": "https://github.com/openclaw/skills/commit/3a2b79a64b1bb93538a4e758c7630346131691a1"
+    "version": "1.0.3",
+    "publishedAt": 1776884911115,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166645235,
+      "commit": "https://github.com/openclaw/skills/commit/3a2b79a64b1bb93538a4e758c7630346131691a1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774293782105,
