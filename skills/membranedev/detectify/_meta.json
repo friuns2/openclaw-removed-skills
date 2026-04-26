@@ -3,11 +3,16 @@
   "slug": "detectify",
   "displayName": "Detectify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166012852,
-    "commit": "https://github.com/openclaw/skills/commit/ca4ce9eae63d63ff32dd8e932259b5a34e89444d"
+    "version": "1.0.3",
+    "publishedAt": 1776847896823,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166012852,
+      "commit": "https://github.com/openclaw/skills/commit/ca4ce9eae63d63ff32dd8e932259b5a34e89444d"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775166011112,
