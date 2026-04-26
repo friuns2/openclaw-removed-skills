@@ -3,11 +3,16 @@
   "slug": "printautopilot",
   "displayName": "Printautopilot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165757061,
-    "commit": "https://github.com/openclaw/skills/commit/951280ae2be2b0b65f18b79a3c94197edb9c70f6"
+    "version": "1.0.3",
+    "publishedAt": 1776859744164,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165757061,
+      "commit": "https://github.com/openclaw/skills/commit/951280ae2be2b0b65f18b79a3c94197edb9c70f6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774087424864,
