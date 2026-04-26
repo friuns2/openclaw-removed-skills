@@ -3,11 +3,16 @@
   "slug": "placetel",
   "displayName": "Placetel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166681535,
-    "commit": "https://github.com/openclaw/skills/commit/93e446b72c1536230decd68f6e068038c900f05a"
+    "version": "1.0.3",
+    "publishedAt": 1776848969001,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166681535,
+      "commit": "https://github.com/openclaw/skills/commit/93e446b72c1536230decd68f6e068038c900f05a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774296146174,
