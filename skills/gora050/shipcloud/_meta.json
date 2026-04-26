@@ -3,11 +3,16 @@
   "slug": "shipcloud",
   "displayName": "Shipcloud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166285454,
-    "commit": "https://github.com/openclaw/skills/commit/7f6f60cc7e03987f6c16d6b22791f1f2785757c5"
+    "version": "1.0.3",
+    "publishedAt": 1776863361857,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166285454,
+      "commit": "https://github.com/openclaw/skills/commit/7f6f60cc7e03987f6c16d6b22791f1f2785757c5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774195384556,
