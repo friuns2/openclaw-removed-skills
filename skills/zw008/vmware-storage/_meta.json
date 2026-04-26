@@ -3,11 +3,16 @@
   "slug": "vmware-storage",
   "displayName": "Vmware Storage",
   "latest": {
-    "version": "1.5.12",
-    "publishedAt": 1776420323119,
-    "commit": "https://github.com/openclaw/skills/commit/2a2cc90c1854660cd8e34983afaeec0ecffb2b54"
+    "version": "1.5.14",
+    "publishedAt": 1776774036484,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.12",
+      "publishedAt": 1776420323119,
+      "commit": "https://github.com/openclaw/skills/commit/2a2cc90c1854660cd8e34983afaeec0ecffb2b54"
+    },
     {
       "version": "1.4.9",
       "publishedAt": 1775914346157,
