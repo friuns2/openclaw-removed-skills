@@ -3,11 +3,16 @@
   "slug": "heygen",
   "displayName": "Heygen",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167244516,
-    "commit": "https://github.com/openclaw/skills/commit/93382c520fafce010dcd8baedb16db8dc4de985e"
+    "version": "1.0.3",
+    "publishedAt": 1776861018166,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167244516,
+      "commit": "https://github.com/openclaw/skills/commit/93382c520fafce010dcd8baedb16db8dc4de985e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774400663391,
