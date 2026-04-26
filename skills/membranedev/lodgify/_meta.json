@@ -3,11 +3,16 @@
   "slug": "lodgify",
   "displayName": "Lodgify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166807681,
-    "commit": "https://github.com/openclaw/skills/commit/c929172fff3f1299bcd60621aaf20843edbaaf84"
+    "version": "1.0.3",
+    "publishedAt": 1776849286454,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166807681,
+      "commit": "https://github.com/openclaw/skills/commit/c929172fff3f1299bcd60621aaf20843edbaaf84"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774314187592,
