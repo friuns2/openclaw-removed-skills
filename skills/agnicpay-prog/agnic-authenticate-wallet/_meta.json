@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "agnic-authenticate-wallet",
-  "displayName": "AgnicPay x402 wallet authentication",
+  "displayName": "Agnic Authenticate Wallet (x402)",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773761883010,
-    "commit": "https://github.com/openclaw/skills/commit/62d52a614b770cb04fe4502c854f20402199fc25"
+    "version": "2.0.2",
+    "publishedAt": 1776954012556,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773761883010,
+      "commit": "https://github.com/openclaw/skills/commit/62d52a614b770cb04fe4502c854f20402199fc25"
+    }
+  ]
 }
