@@ -1,14 +1,14 @@
 {
-  "version": "1.2.0",
-  "lastUpdated": "2026-03-27T13:40:00",
-  "description": "分层回忆系统配置 - 自动7天 + 手动全量/自定义天数",
+  "version": "1.2.2",
+  "lastUpdated": "2026-04-25T18:00:00",
+  "description": "分层回忆系统配置 - 自动7天 + 手动全量/自定义天数 + slim index",
   "defaultLayers": ["L0", "L1", "L2", "L3"],
   "recentDays": 7,
   "maxTokensPerLayer": {
     "L0": 4000,
     "L1": 10000,
     "L2": 5000,
-    "L3": 1000
+    "L3": 3000
   },
   "deepRecallBudget": 50000,
   "autoLoadOnNewSession": true,

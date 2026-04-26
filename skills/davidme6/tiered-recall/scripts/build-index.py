@@ -72,27 +72,10 @@ def classify_topic(text: str) -> list[str]:
     return topics
 
 
-def summarize_section(lines: list[str], max_length: int = 10) -> str:
-    """生成极致摘要（10字以内，用于区分同标题条目）"""
-    # 提取第一个有意义的行
-    for line in lines[:10]:
-        line = line.strip()
-        # 跳过空行、表格、分隔线、代码块
-        if not line or line.startswith("|") or line.startswith("---") or line.startswith("```") or line.startswith("#"):
-            continue
-        # 提取关键词：去掉常见前缀
-        for prefix in ["- ", "* ", "1. ", "2. ", "3. ", "### ", "**", "【", "（"]:
-            if line.startswith(prefix):
-                line = line[len(prefix):]
-        # 截取前10个有效字符
-        return line[:max_length].replace("**", "").replace("【", "").replace("】", "")
-    return ""
-
-
 def build_index(memory_dir: Path, output_dir: Path):
-    """构建记忆索引（精简版，只保留定位信息）"""
+    """构建记忆索引（slim index，只保留定位信息）"""
     index = {
-        "v": "1.0.1",  # 版本（缩写）
+        "v": "1.2.2",  # 版本（缩写）
         "t": datetime.now().isoformat(),  # 时间（缩写）
         "topics": defaultdict(list),
     }
@@ -115,13 +98,11 @@ def build_index(memory_dir: Path, output_dir: Path):
             topics = classify_topic(section["title"] + " " + " ".join(section["content_lines"][:5]))
             
             for topic in topics:
-                # 索引格式：文件名+行号+标题+极致摘要（10字内）
-                summary = summarize_section(section["content_lines"])
+                # slim index：只保留定位和标题，不存摘要文本，避免token膨胀
                 index["topics"][topic].append({
                     "f": file.name,  # 文件名
                     "l": f"{section['start_line']}-{section['end_line']}",  # 行号
                     "t": section["title"][:50],  # 章节标题（限制50字符）
-                    "s": summary,  # 极致摘要（10字内）
                 })
     
     # 转换 defaultdict 为普通 dict
