@@ -3,11 +3,16 @@
   "slug": "speechace",
   "displayName": "Speechace",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165549379,
-    "commit": "https://github.com/openclaw/skills/commit/5045811781d6663af757e43a2099e2c3e591879f"
+    "version": "1.0.3",
+    "publishedAt": 1776859573986,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165549379,
+      "commit": "https://github.com/openclaw/skills/commit/5045811781d6663af757e43a2099e2c3e591879f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774044320185,
