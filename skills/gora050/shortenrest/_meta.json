@@ -3,11 +3,16 @@
   "slug": "shortenrest",
   "displayName": "Shortenrest",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166762035,
-    "commit": "https://github.com/openclaw/skills/commit/82987cba9d306d10e41688f16822348b9d75ac94"
+    "version": "1.0.3",
+    "publishedAt": 1776860404106,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166762035,
+      "commit": "https://github.com/openclaw/skills/commit/82987cba9d306d10e41688f16822348b9d75ac94"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774307025722,
