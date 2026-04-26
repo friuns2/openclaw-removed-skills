@@ -3,11 +3,16 @@
   "slug": "coupontools",
   "displayName": "Coupontools",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166814777,
-    "commit": "https://github.com/openclaw/skills/commit/833a1b83a15cf10edb16b68e62a03d722b607e9f"
+    "version": "1.0.3",
+    "publishedAt": 1776860446941,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166814777,
+      "commit": "https://github.com/openclaw/skills/commit/833a1b83a15cf10edb16b68e62a03d722b607e9f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774314251052,
