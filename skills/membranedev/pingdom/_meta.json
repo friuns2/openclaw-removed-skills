@@ -3,11 +3,16 @@
   "slug": "pingdom",
   "displayName": "Pingdom",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164802547,
-    "commit": "https://github.com/openclaw/skills/commit/df500f9990bb501d3879fd2b9d8e0e483a49d25e"
+    "version": "1.0.3",
+    "publishedAt": 1776845536002,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164802547,
+      "commit": "https://github.com/openclaw/skills/commit/df500f9990bb501d3879fd2b9d8e0e483a49d25e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773900161524,
