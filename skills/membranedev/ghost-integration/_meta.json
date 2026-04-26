@@ -3,11 +3,16 @@
   "slug": "ghost-integration",
   "displayName": "Ghost",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166799422,
-    "commit": "https://github.com/openclaw/skills/commit/9684c6b5017c97eaacfb3eb4937c26be95807020"
+    "version": "1.0.3",
+    "publishedAt": 1776849271854,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166799422,
+      "commit": "https://github.com/openclaw/skills/commit/9684c6b5017c97eaacfb3eb4937c26be95807020"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774314172727,
