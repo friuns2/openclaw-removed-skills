@@ -3,11 +3,16 @@
   "slug": "cookie-information",
   "displayName": "Cookie Information",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166586345,
-    "commit": "https://github.com/openclaw/skills/commit/f18227c8b97ac8a3276e978843e683989a0253ee"
+    "version": "1.0.3",
+    "publishedAt": 1776870694097,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166586345,
+      "commit": "https://github.com/openclaw/skills/commit/f18227c8b97ac8a3276e978843e683989a0253ee"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774245828950,
