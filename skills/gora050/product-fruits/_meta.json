@@ -3,11 +3,16 @@
   "slug": "product-fruits",
   "displayName": "Product Fruits",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166169026,
-    "commit": "https://github.com/openclaw/skills/commit/b6aba7c07e4c6f37e32e27b1b1d710fab4b407d2"
+    "version": "1.0.3",
+    "publishedAt": 1776860047187,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166169026,
+      "commit": "https://github.com/openclaw/skills/commit/b6aba7c07e4c6f37e32e27b1b1d710fab4b407d2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774166634368,
