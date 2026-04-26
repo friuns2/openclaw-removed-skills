@@ -3,11 +3,16 @@
   "slug": "acymailing",
   "displayName": "Acymailing",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164952643,
-    "commit": "https://github.com/openclaw/skills/commit/174e770d776792890b1774301d809603f3d281a9"
+    "version": "1.0.3",
+    "publishedAt": 1776858838030,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164952643,
+      "commit": "https://github.com/openclaw/skills/commit/174e770d776792890b1774301d809603f3d281a9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773932609523,
