@@ -3,11 +3,16 @@
   "slug": "amazon-advertising",
   "displayName": "Amazon Advertising",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165484678,
-    "commit": "https://github.com/openclaw/skills/commit/81ab56f81611e4bb8cc77dea598c02c84f6aadf6"
+    "version": "1.0.3",
+    "publishedAt": 1776859469376,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165484678,
+      "commit": "https://github.com/openclaw/skills/commit/81ab56f81611e4bb8cc77dea598c02c84f6aadf6"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775165482963,
