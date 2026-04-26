@@ -3,11 +3,16 @@
   "slug": "senta",
   "displayName": "Senta",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166908159,
-    "commit": "https://github.com/openclaw/skills/commit/0153e372d0b5eff69345f66d7673ea0caa60e37e"
+    "version": "1.0.3",
+    "publishedAt": 1776849520725,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166908159,
+      "commit": "https://github.com/openclaw/skills/commit/0153e372d0b5eff69345f66d7673ea0caa60e37e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774324975349,
