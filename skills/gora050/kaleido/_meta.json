@@ -3,11 +3,16 @@
   "slug": "kaleido",
   "displayName": "Kaleido",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165584974,
-    "commit": "https://github.com/openclaw/skills/commit/3d795333b6c5babb7c913358941bb3e71f3d3687"
+    "version": "1.0.3",
+    "publishedAt": 1776859606279,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165584974,
+      "commit": "https://github.com/openclaw/skills/commit/3d795333b6c5babb7c913358941bb3e71f3d3687"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051426926,
