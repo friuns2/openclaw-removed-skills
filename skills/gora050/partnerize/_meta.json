@@ -3,11 +3,16 @@
   "slug": "partnerize",
   "displayName": "Partnerize",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167166461,
-    "commit": "https://github.com/openclaw/skills/commit/5e4132d55278cfb468b8feea6ebf61f3b516e322"
+    "version": "1.0.3",
+    "publishedAt": 1776860931904,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167166461,
+      "commit": "https://github.com/openclaw/skills/commit/5e4132d55278cfb468b8feea6ebf61f3b516e322"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774386279218,
