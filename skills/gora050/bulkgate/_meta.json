@@ -3,11 +3,16 @@
   "slug": "bulkgate",
   "displayName": "Bulkgate",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165610062,
-    "commit": "https://github.com/openclaw/skills/commit/344b9a1bc9559c84c4bf163a3b01877102c79395"
+    "version": "1.0.3",
+    "publishedAt": 1776859642309,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165610062,
+      "commit": "https://github.com/openclaw/skills/commit/344b9a1bc9559c84c4bf163a3b01877102c79395"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051508285,
