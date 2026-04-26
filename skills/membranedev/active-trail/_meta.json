@@ -3,11 +3,16 @@
   "slug": "active-trail",
   "displayName": "Active Trail",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166899496,
-    "commit": "https://github.com/openclaw/skills/commit/b9133b73af1938338b7a9c9b5540e86db88e528d"
+    "version": "1.0.3",
+    "publishedAt": 1776849506584,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166899496,
+      "commit": "https://github.com/openclaw/skills/commit/b9133b73af1938338b7a9c9b5540e86db88e528d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774324962384,
