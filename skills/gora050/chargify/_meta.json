@@ -3,11 +3,16 @@
   "slug": "chargify",
   "displayName": "Chargify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167045966,
-    "commit": "https://github.com/openclaw/skills/commit/1fe1c22de402032cf114d54bc9197e2c6e18d608"
+    "version": "1.0.3",
+    "publishedAt": 1776860811750,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167045966,
+      "commit": "https://github.com/openclaw/skills/commit/1fe1c22de402032cf114d54bc9197e2c6e18d608"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774346640051,
