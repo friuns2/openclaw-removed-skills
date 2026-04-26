@@ -1,5 +1,45 @@
 # Global Search API 演示文档
 
+## ⚠️ 隐私和安全声明
+
+**重要提示：** 本API会将用户搜索查询发送到外部网络搜索服务 `https://clb.ciglobal.cn/web_search`。请注意：
+
+- **数据传输：** 用户查询（可能包含敏感信息）将传输到第三方服务
+- **API密钥：** 唯一运行时凭据是 `GLOBAL_SEARCH_API_KEY`
+- **凭据存储：** 请使用环境变量或系统凭据管理器安全存储API密钥，切勿硬编码在脚本中
+- **用户同意：** 仅在获得用户明确同意后才使用此服务发送其查询
+- **数据最小化：** 考虑在发送前对敏感查询进行脱敏或泛化处理
+- **使用范围：** 仅将此服务用于合法的搜索目的，不要处理机密或个人数据
+- **提供商验证：** 服务提供商 (clb.ciglobal.cn) 是第三方服务。发布前应核验其可信度、隐私政策和主体信息
+- **账户关联：** 您的API密钥会将所有查询与您的账户关联。提供商可能会记录并存储您的搜索历史
+
+## API Key 获取与配置
+
+### 获取API Key
+
+在使用本API之前，请先访问 https://clb.ciglobal.cn/apiKey/login 申请您的API Key。
+
+### 配置API Key（推荐方式）
+
+**使用环境变量（推荐）：**
+
+```bash
+# Linux/Mac
+export GLOBAL_SEARCH_API_KEY="your_api_key_here"
+
+# Windows PowerShell
+$env:GLOBAL_SEARCH_API_KEY="your_api_key_here"
+
+# Windows CMD
+set GLOBAL_SEARCH_API_KEY=your_api_key_here
+```
+
+**或在代码中设置（不推荐用于生产环境）：**
+```python
+import os
+os.environ["GLOBAL_SEARCH_API_KEY"] = "your_api_key_here"
+```
+
 ## 接口地址
 
 ```
@@ -15,7 +55,9 @@ POST https://clb.ciglobal.cn/web_search
 | mode | string | 否 | 模式：`network`（实时爬取）、`warehouse`（ES 库），默认 network |
 | page | int | 否 | 页码，从 1 开始，默认 1 |
 
-**请求头：** 需要设置 `Content-Type` 为 `application/x-www-form-urlencoded`
+**请求头：** 
+- `X-API-Key`: 必填，您的API密钥（从 https://clb.ciglobal.cn/apiKey/login 获取）
+- `Content-Type`: 必填，设置为 `application/x-www-form-urlencoded`
 
 ## 演示示例
 
@@ -23,6 +65,7 @@ POST https://clb.ciglobal.cn/web_search
 
 ```bash
 curl -X POST "https://clb.ciglobal.cn/web_search" \
+  -H "X-API-Key: your_api_key_here" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "keyword=人工智能" \
   -d "search_source=baidu_search" \
@@ -34,9 +77,17 @@ curl -X POST "https://clb.ciglobal.cn/web_search" \
 
 ```python
 import requests
+import os
+
+# 从环境变量获取API密钥（推荐方式）
+API_KEY = os.environ.get("GLOBAL_SEARCH_API_KEY", "your_api_key_here")
+
+if API_KEY == "your_api_key_here":
+    print("警告：请设置 GLOBAL_SEARCH_API_KEY 环境变量")
 
 url = "https://clb.ciglobal.cn/web_search"
 headers = {
+    "X-API-Key": API_KEY,
     "Content-Type": "application/x-www-form-urlencoded"
 }
 data = {
@@ -57,6 +108,7 @@ print(result)
 fetch('https://clb.ciglobal.cn/web_search', {
   method: 'POST',
   headers: {
+    'X-API-Key': 'your_api_key_here',  // Get your API key at https://clb.ciglobal.cn/apiKey/login
     'Content-Type': 'application/x-www-form-urlencoded',
   },
   body: new URLSearchParams({

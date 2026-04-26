@@ -3,11 +3,16 @@
   "slug": "global-search",
   "displayName": "global-search",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1776049143669,
-    "commit": "https://github.com/openclaw/skills/commit/4c57e9134f550bbda86cf13e7eb415f6e6649581"
+    "version": "1.1.9",
+    "publishedAt": 1776761018015,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1776049143669,
+      "commit": "https://github.com/openclaw/skills/commit/4c57e9134f550bbda86cf13e7eb415f6e6649581"
+    },
     {
       "version": "1.0.17",
       "publishedAt": 1775106701372,
