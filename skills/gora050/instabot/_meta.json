@@ -3,11 +3,16 @@
   "slug": "instabot",
   "displayName": "Instabot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165085726,
-    "commit": "https://github.com/openclaw/skills/commit/929eb6f82e42efdffc72b6e9670eed4779057ab0"
+    "version": "1.0.3",
+    "publishedAt": 1776859074244,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165085726,
+      "commit": "https://github.com/openclaw/skills/commit/929eb6f82e42efdffc72b6e9670eed4779057ab0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773954218686,
