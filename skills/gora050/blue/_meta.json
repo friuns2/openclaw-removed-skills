@@ -3,11 +3,16 @@
   "slug": "blue",
   "displayName": "Blue",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165029235,
-    "commit": "https://github.com/openclaw/skills/commit/e91e7accae171dbe5182b7d53a49db59f8185ad8"
+    "version": "1.0.3",
+    "publishedAt": 1776858971184,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165029235,
+      "commit": "https://github.com/openclaw/skills/commit/e91e7accae171dbe5182b7d53a49db59f8185ad8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773943438238,
