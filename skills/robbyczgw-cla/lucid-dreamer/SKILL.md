@@ -1,8 +1,8 @@
 ---
 name: lucid-dreamer
-version: 0.7.6
+version: 0.7.8
 description: "Nightly AI memory reasoning system. Lucid runs every night while you sleep — it reads your daily notes and memory files, detects stale facts, unresolved todos, recurring problems, forgotten decisions, and can optionally perform aggressive cleanup and contradiction detection. Includes optional session debrief for quick end-of-day memory capture. Zero dependencies, no database, no embeddings. Just a cron job and markdown files. Use when you want your AI agent to automatically maintain and improve its long-term memory over time. Triggers on \"memory dreamer\", \"nightly memory review\", \"lucid\", \"auto memory\", \"memory cleanup\", \"memory hygiene\"."
-metadata: {"openclaw":{"requires":{"bins":["git","date","python3"],"env":{"CLAWD_DIR":"optional — workspace path, defaults to cwd"},"note":"Set CLAWD_DIR to your workspace. Auto-apply is opt-in and disabled by default. python3 required for trend detection."}}}
+metadata: {"openclaw":{"requires":{"bins":["git","date","python3"],"note":"Set CLAWD_DIR to your workspace path before running. Auto-apply and aggressive cleanup are disabled by default. python3 required for trend detection."}}}
 ---
 
 # Lucid Dreamer 🧠
