@@ -3,11 +3,16 @@
   "slug": "weiqi-sgf",
   "displayName": "围棋打谱工具",
   "latest": {
-    "version": "2.0.1",
-    "publishedAt": 1775698719955,
-    "commit": "https://github.com/openclaw/skills/commit/21e87559bad12a8272d76d37ed1f3367966a3221"
+    "version": "2.0.2",
+    "publishedAt": 1776858175696,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.0.1",
+      "publishedAt": 1775698719955,
+      "commit": "https://github.com/openclaw/skills/commit/21e87559bad12a8272d76d37ed1f3367966a3221"
+    },
     {
       "version": "1.3.1",
       "publishedAt": 1775128742244,

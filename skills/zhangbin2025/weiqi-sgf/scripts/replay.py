@@ -32,7 +32,7 @@ def load_template():
         return f.read()
 
 
-def generate_html(tree, game_info, output_path, input_base_name='棋谱'):
+def generate_html(tree, game_info, output_path, input_base_name='棋谱', start_move=0):
     """生成HTML打谱网页"""
     
     # 加载模板
@@ -77,6 +77,7 @@ def generate_html(tree, game_info, output_path, input_base_name='棋谱'):
     html_content = html_content.replace('{{BLACK_NAME}}', black_name + (' ' + black_rank if black_rank else ''))
     html_content = html_content.replace('{{WHITE_NAME}}', white_name + (' ' + white_rank if white_rank else ''))
     html_content = html_content.replace('{{DOWNLOAD_FILENAME}}', html.escape(input_base_name) + '.sgf')
+    html_content = html_content.replace('{{DEFAULT_MOVE}}', str(start_move))
     
     # 写入文件
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -91,8 +92,12 @@ def main():
     if len(sys.argv) < 2:
         print("用法: python3 replay.py input.sgf [output.html]")
         print("       python3 replay.py input.sgf --output-dir /path/to/dir")
+        print("       python3 replay.py input.sgf --start-move 50")
+        print("       python3 replay.py input.sgf --start-move last")
         print("示例: python3 replay.py game.sgf")
         print("       python3 replay.py game.sgf -o /tmp/myviewer")
+        print("       python3 replay.py game.sgf --start-move 100  # 默认跳转到第100手")
+        print("       python3 replay.py game.sgf --start-move last # 跳转到最后一手")
         sys.exit(1)
 
     input_file = sys.argv[1]
@@ -100,6 +105,7 @@ def main():
     # 解析参数
     output_file = None
     output_dir = None
+    start_move = 0
 
     i = 2
     while i < len(sys.argv):
@@ -109,6 +115,24 @@ def main():
                 i += 2
             else:
                 print("❌ 错误: --output-dir 需要指定目录路径")
+                sys.exit(1)
+        elif sys.argv[i] == '--start-move':
+            if i + 1 < len(sys.argv):
+                move_arg = sys.argv[i + 1]
+                if move_arg.lower() == 'last':
+                    start_move = -1  # 特殊标记，表示最后一手
+                else:
+                    try:
+                        start_move = int(move_arg)
+                        if start_move < 0:
+                            print("❌ 错误: --start-move 必须是非负整数")
+                            sys.exit(1)
+                    except ValueError:
+                        print("❌ 错误: --start-move 必须是整数或 'last'")
+                        sys.exit(1)
+                i += 2
+            else:
+                print("❌ 错误: --start-move 需要指定手数")
                 sys.exit(1)
         elif not output_file:
             output_file = sys.argv[i]
@@ -175,7 +199,12 @@ def main():
     input_base_name = os.path.splitext(os.path.basename(input_file))[0]
 
     # 生成HTML
-    generate_html(tree, game_info, output_path, input_base_name)
+    generate_html(tree, game_info, output_path, input_base_name, start_move)
+    
+    if start_move > 0:
+        print(f"   默认跳转: 第 {start_move} 手")
+    elif start_move == -1:
+        print(f"   默认跳转: 最后一手")
 
     print(f"\n✅ 生成完成: {output_path}")
 
