@@ -3,11 +3,16 @@
   "slug": "plecto",
   "displayName": "Plecto",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166770852,
-    "commit": "https://github.com/openclaw/skills/commit/c49459b69be0ed38fd286d09a4d2d32d917e80cb"
+    "version": "1.0.3",
+    "publishedAt": 1776860418759,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166770852,
+      "commit": "https://github.com/openclaw/skills/commit/c49459b69be0ed38fd286d09a4d2d32d917e80cb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774307039992,
