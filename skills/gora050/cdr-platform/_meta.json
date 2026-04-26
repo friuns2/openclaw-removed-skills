@@ -3,11 +3,16 @@
   "slug": "cdr-platform",
   "displayName": "Cdr Platform",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165519579,
-    "commit": "https://github.com/openclaw/skills/commit/c82ce3f453315f7f97d3fda2ab5f417aba2ee990"
+    "version": "1.0.3",
+    "publishedAt": 1776859532864,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165519579,
+      "commit": "https://github.com/openclaw/skills/commit/c82ce3f453315f7f97d3fda2ab5f417aba2ee990"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774044263331,
