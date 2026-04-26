@@ -3,11 +3,16 @@
   "slug": "maestra",
   "displayName": "Maestra",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165629813,
-    "commit": "https://github.com/openclaw/skills/commit/254ce8bfc6a0c8b6024aa48db08c5c86a7763e14"
+    "version": "1.0.3",
+    "publishedAt": 1776847492999,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165629813,
+      "commit": "https://github.com/openclaw/skills/commit/254ce8bfc6a0c8b6024aa48db08c5c86a7763e14"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058564721,
