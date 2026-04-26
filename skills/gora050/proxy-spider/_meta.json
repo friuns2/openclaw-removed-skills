@@ -3,11 +3,16 @@
   "slug": "proxy-spider",
   "displayName": "Proxy Spider",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167410461,
-    "commit": "https://github.com/openclaw/skills/commit/e7884102d3611647bf632d584b76283ab8eacd3c"
+    "version": "1.0.3",
+    "publishedAt": 1776861348068,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167410461,
+      "commit": "https://github.com/openclaw/skills/commit/e7884102d3611647bf632d584b76283ab8eacd3c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774429452620,
