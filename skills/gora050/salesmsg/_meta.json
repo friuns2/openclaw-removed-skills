@@ -3,11 +3,16 @@
   "slug": "salesmsg",
   "displayName": "Salesmsg",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164496213,
-    "commit": "https://github.com/openclaw/skills/commit/f94793584c064281606a60d88158fbd066029b8b"
+    "version": "1.0.3",
+    "publishedAt": 1776838013059,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164496213,
+      "commit": "https://github.com/openclaw/skills/commit/f94793584c064281606a60d88158fbd066029b8b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773727417898,
