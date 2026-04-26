@@ -3,11 +3,16 @@
   "slug": "fullstory",
   "displayName": "Fullstory",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166932076,
-    "commit": "https://github.com/openclaw/skills/commit/00e0c0a232d9664ccee90ec56d62a082442bfa5a"
+    "version": "1.0.3",
+    "publishedAt": 1776860613908,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166932076,
+      "commit": "https://github.com/openclaw/skills/commit/00e0c0a232d9664ccee90ec56d62a082442bfa5a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774325058246,
