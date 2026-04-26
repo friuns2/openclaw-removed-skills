@@ -3,11 +3,16 @@
   "slug": "deputy",
   "displayName": "Deputy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166851817,
-    "commit": "https://github.com/openclaw/skills/commit/e6c2008eeaba6ef8a36c5016c05c41241f7281ab"
+    "version": "1.0.3",
+    "publishedAt": 1776849400346,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166851817,
+      "commit": "https://github.com/openclaw/skills/commit/e6c2008eeaba6ef8a36c5016c05c41241f7281ab"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774321351006,
