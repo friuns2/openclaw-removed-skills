@@ -3,11 +3,16 @@
   "slug": "newscatcher",
   "displayName": "Newscatcher",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166915081,
-    "commit": "https://github.com/openclaw/skills/commit/6e09633b7b7cb44de2117a3412db9a609b1ee6e2"
+    "version": "1.0.3",
+    "publishedAt": 1776860579507,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166915081,
+      "commit": "https://github.com/openclaw/skills/commit/6e09633b7b7cb44de2117a3412db9a609b1ee6e2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774325024465,
