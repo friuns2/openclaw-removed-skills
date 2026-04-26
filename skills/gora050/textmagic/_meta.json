@@ -3,11 +3,16 @@
   "slug": "textmagic",
   "displayName": "Textmagic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165309795,
-    "commit": "https://github.com/openclaw/skills/commit/b4052576425da2cbd1e9787993127265daed2418"
+    "version": "1.0.3",
+    "publishedAt": 1776865160092,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165309795,
+      "commit": "https://github.com/openclaw/skills/commit/b4052576425da2cbd1e9787993127265daed2418"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774000976082,
