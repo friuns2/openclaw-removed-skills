@@ -3,11 +3,16 @@
   "slug": "swell",
   "displayName": "Swell",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167559638,
-    "commit": "https://github.com/openclaw/skills/commit/a057b913355529859cd1f109825b161048ca0649"
+    "version": "1.0.3",
+    "publishedAt": 1776861542513,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167559638,
+      "commit": "https://github.com/openclaw/skills/commit/a057b913355529859cd1f109825b161048ca0649"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774472682133,
