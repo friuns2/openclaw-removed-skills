@@ -3,11 +3,16 @@
   "slug": "marketplacer",
   "displayName": "Marketplacer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165842733,
-    "commit": "https://github.com/openclaw/skills/commit/469a6c5da8e30564ca72686dc3f261ce645008d2"
+    "version": "1.0.3",
+    "publishedAt": 1776862573803,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165842733,
+      "commit": "https://github.com/openclaw/skills/commit/469a6c5da8e30564ca72686dc3f261ce645008d2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774109003864,
