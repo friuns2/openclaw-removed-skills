@@ -3,11 +3,16 @@
   "slug": "convenia",
   "displayName": "Convenia",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167479760,
-    "commit": "https://github.com/openclaw/skills/commit/f67b5702b3c3c230119f9997f1622c4121924796"
+    "version": "1.0.3",
+    "publishedAt": 1776861493721,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167479760,
+      "commit": "https://github.com/openclaw/skills/commit/f67b5702b3c3c230119f9997f1622c4121924796"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774440262360,
