@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "agnic-check-balance",
-  "displayName": "AgnicPay x402 Wallet check balance",
+  "displayName": "Agnic Check Balance (x402)",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773763282517,
-    "commit": "https://github.com/openclaw/skills/commit/391035ab62c1a63f6a237a8d5bfa8e339d879b09"
+    "version": "2.0.2",
+    "publishedAt": 1776953910093,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773763282517,
+      "commit": "https://github.com/openclaw/skills/commit/391035ab62c1a63f6a237a8d5bfa8e339d879b09"
+    }
+  ]
 }
