@@ -3,11 +3,16 @@
   "slug": "benchmark-email",
   "displayName": "Benchmark Email",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167342926,
-    "commit": "https://github.com/openclaw/skills/commit/19bc56650bdbdb668e5023769443e5d24188b2b7"
+    "version": "1.0.3",
+    "publishedAt": 1776850619610,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167342926,
+      "commit": "https://github.com/openclaw/skills/commit/19bc56650bdbdb668e5023769443e5d24188b2b7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774414975172,
