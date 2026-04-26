@@ -3,11 +3,16 @@
   "slug": "repliq",
   "displayName": "Repliq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164957084,
-    "commit": "https://github.com/openclaw/skills/commit/1b618f10d6ef8c0f46f0f20b48c64ab1a9c76fe5"
+    "version": "1.0.3",
+    "publishedAt": 1776858845714,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164957084,
+      "commit": "https://github.com/openclaw/skills/commit/1b618f10d6ef8c0f46f0f20b48c64ab1a9c76fe5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773932615573,
