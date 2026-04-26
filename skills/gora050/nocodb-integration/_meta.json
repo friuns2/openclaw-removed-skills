@@ -3,11 +3,16 @@
   "slug": "nocodb-integration",
   "displayName": "Nocodb",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164698599,
-    "commit": "https://github.com/openclaw/skills/commit/a48a642862fe7502e66a31d4392256321273c998"
+    "version": "1.0.3",
+    "publishedAt": 1776858585680,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164698599,
+      "commit": "https://github.com/openclaw/skills/commit/a48a642862fe7502e66a31d4392256321273c998"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773817466308,
