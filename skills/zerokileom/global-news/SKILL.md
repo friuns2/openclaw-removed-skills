@@ -11,6 +11,10 @@ triggers:
   - latest news
   - current events
   - city news
+  - video
+  - hot video
+  - trending video
+  - video search
 ---
 
 # Global News
@@ -93,6 +97,38 @@ curl -X GET "https://news-af.feednews.com/us/en/v1/mcp/news/search?query=electio
 - `product`: Always pass `openclaw`
 
 **Response**: Same structure as `get_global_top_news`
+
+---
+
+### 4. search_hot_videos
+
+**Best for**: Finding trending or viral videos on a specific keyword or topic
+
+**API Call Example**:
+```bash
+curl -X GET "https://news-af.feednews.com/$country/$language/clip/v1/video/search/hot?days=2&keyword=trump&size=5" \
+  --header "country: $country" \
+  --header "language: $language"
+```
+
+**Parameters**:
+- `country`: Market country code, e.g. `us`, `ng`, `de`, `br` (path parameter only)
+- `language`: Language code, e.g. `en`, `de`, `pt`, `es` (path parameter only)
+- `days` (optional): Look-back window in days (default: 2)
+- `keyword`: Search keyword(s). Required — the topic or person to search for
+- `size` (optional): Number of videos to return (default: 5)
+
+**Headers**:
+- `country`: Same as the country path parameter
+- `language`: Same as the language path parameter
+
+**Response**: JSON with `content` array, each item containing:
+- `id`: Video ID
+- `description`: Video title / caption
+- `thumbnail.url`: Thumbnail image URL
+- `video.duration`: Duration in seconds
+- `video.share_url`: Share link for the video
+- `page_info.has_more`: Whether more results are available
 
 ---
 

@@ -3,11 +3,16 @@
   "slug": "global-news",
   "displayName": "Global News By Opera News",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1774008259918,
-    "commit": "https://github.com/openclaw/skills/commit/aa33b8c507245e0ed05e8cd0b7015b6d75f1f7ad"
+    "version": "1.0.3",
+    "publishedAt": 1775034754418,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1774008259918,
+      "commit": "https://github.com/openclaw/skills/commit/aa33b8c507245e0ed05e8cd0b7015b6d75f1f7ad"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773827096395,
