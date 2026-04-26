@@ -3,11 +3,16 @@
   "slug": "noticeable",
   "displayName": "Noticeable",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166949533,
-    "commit": "https://github.com/openclaw/skills/commit/a30f0c395848670410fc2ca3156567e6d32450ce"
+    "version": "1.0.3",
+    "publishedAt": 1776860645587,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166949533,
+      "commit": "https://github.com/openclaw/skills/commit/a30f0c395848670410fc2ca3156567e6d32450ce"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774332213355,
