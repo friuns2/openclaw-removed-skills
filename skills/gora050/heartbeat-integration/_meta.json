@@ -3,11 +3,16 @@
   "slug": "heartbeat-integration",
   "displayName": "Heartbeat",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166958698,
-    "commit": "https://github.com/openclaw/skills/commit/82a64ca28d71f8a05050bfc8cca4f92bafa3b2d0"
+    "version": "1.0.3",
+    "publishedAt": 1776860662618,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166958698,
+      "commit": "https://github.com/openclaw/skills/commit/82a64ca28d71f8a05050bfc8cca4f92bafa3b2d0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774332243685,
