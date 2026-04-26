@@ -3,11 +3,16 @@
   "slug": "faraday",
   "displayName": "Faraday",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166702749,
-    "commit": "https://github.com/openclaw/skills/commit/8bf56e82b3c78eabdee9e7c63edce941609c73c0"
+    "version": "1.0.3",
+    "publishedAt": 1776849017975,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166702749,
+      "commit": "https://github.com/openclaw/skills/commit/8bf56e82b3c78eabdee9e7c63edce941609c73c0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774299764700,
