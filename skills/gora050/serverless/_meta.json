@@ -3,11 +3,16 @@
   "slug": "serverless",
   "displayName": "Serverless",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166590703,
-    "commit": "https://github.com/openclaw/skills/commit/d7ae88b43ccf674eae1273f691dccf50bd8fdfff"
+    "version": "1.0.3",
+    "publishedAt": 1776870701886,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166590703,
+      "commit": "https://github.com/openclaw/skills/commit/d7ae88b43ccf674eae1273f691dccf50bd8fdfff"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774245840424,
