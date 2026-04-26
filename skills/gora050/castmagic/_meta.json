@@ -3,9 +3,15 @@
   "slug": "castmagic",
   "displayName": "Castmagic",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774425777990,
-    "commit": "https://github.com/openclaw/skills/commit/51370ca37ba289b009254a7c1f011fd9389f8872"
+    "version": "1.0.1",
+    "publishedAt": 1776861208173,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774425777990,
+      "commit": "https://github.com/openclaw/skills/commit/51370ca37ba289b009254a7c1f011fd9389f8872"
+    }
+  ]
 }
