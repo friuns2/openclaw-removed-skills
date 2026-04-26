@@ -3,11 +3,16 @@
   "slug": "mailcoach",
   "displayName": "Mailcoach",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165948041,
-    "commit": "https://github.com/openclaw/skills/commit/656f4fc58b0fc93660f51317d2a685b79df9afb2"
+    "version": "1.0.3",
+    "publishedAt": 1776862776430,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165948041,
+      "commit": "https://github.com/openclaw/skills/commit/656f4fc58b0fc93660f51317d2a685b79df9afb2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774127023962,
