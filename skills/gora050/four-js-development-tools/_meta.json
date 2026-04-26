@@ -3,11 +3,16 @@
   "slug": "four-js-development-tools",
   "displayName": "Four Js Development Tools",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166665881,
-    "commit": "https://github.com/openclaw/skills/commit/ef6c03eb30bbaac53f07203176d1117346196ecd"
+    "version": "1.0.3",
+    "publishedAt": 1776884956604,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166665881,
+      "commit": "https://github.com/openclaw/skills/commit/ef6c03eb30bbaac53f07203176d1117346196ecd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774293837019,
