@@ -3,11 +3,16 @@
   "slug": "statuscake",
   "displayName": "Statuscake",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165016253,
-    "commit": "https://github.com/openclaw/skills/commit/23e6eab74879813293fd231696f6d0ba54f72c27"
+    "version": "1.0.3",
+    "publishedAt": 1776858947276,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165016253,
+      "commit": "https://github.com/openclaw/skills/commit/23e6eab74879813293fd231696f6d0ba54f72c27"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773943411589,
