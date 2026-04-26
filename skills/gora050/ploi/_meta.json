@@ -3,11 +3,16 @@
   "slug": "ploi",
   "displayName": "Ploi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165694881,
-    "commit": "https://github.com/openclaw/skills/commit/a3500b75eefc374698f8418b0a073014196a4b86"
+    "version": "1.0.3",
+    "publishedAt": 1776865778468,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165694881,
+      "commit": "https://github.com/openclaw/skills/commit/a3500b75eefc374698f8418b0a073014196a4b86"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774073027706,
