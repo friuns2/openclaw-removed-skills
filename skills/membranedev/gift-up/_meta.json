@@ -3,11 +3,16 @@
   "slug": "gift-up",
   "displayName": "Gift Up",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166545377,
-    "commit": "https://github.com/openclaw/skills/commit/cc36f701b5781d5c4157e7a535803308adbe13d1"
+    "version": "1.0.3",
+    "publishedAt": 1776848723099,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166545377,
+      "commit": "https://github.com/openclaw/skills/commit/cc36f701b5781d5c4157e7a535803308adbe13d1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774234937059,
