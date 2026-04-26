@@ -3,11 +3,16 @@
   "slug": "chargeblast",
   "displayName": "Chargeblast",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166281163,
-    "commit": "https://github.com/openclaw/skills/commit/de1d9eab3984f94941dfb17a82a8f62120ad300c"
+    "version": "1.0.3",
+    "publishedAt": 1776863351321,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166281163,
+      "commit": "https://github.com/openclaw/skills/commit/de1d9eab3984f94941dfb17a82a8f62120ad300c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774195378003,
