@@ -34,14 +34,13 @@ CONFIG_FILE = Path(__file__).parent.parent / "config.ini"
 FIXED_BASE_URL = "https://open.dknowc.cn/dependable/search/"
 
 
-def load_config(config_path: Optional[Path] = None) -> tuple[str, str]:
+def load_config(config_path: Optional[Path] = None) -> str:
     """
-    从配置文件加载 API Key 和 API URL
+    从配置文件加载 API Key
 
     配置文件格式 (config.ini):
     [dkag]
     api_key=your_api_key_here
-    api_url=https://open.dknowc.cn/dependable/search/你的搜索接口ID  # 可选
     """
     config_path = config_path or CONFIG_FILE
 
@@ -54,31 +53,22 @@ def load_config(config_path: Optional[Path] = None) -> tuple[str, str]:
         )
 
     api_key = ''
-    api_url = ''
-    
     try:
         import configparser
         config = configparser.ConfigParser()
         config.read(config_path, encoding='utf-8')
         api_key = config.get('dkag', 'api_key', fallback='')
-        api_url = config.get('dkag', 'api_url', fallback='')
     except Exception:
         # 简单的文件读取方式（兼容无 configparser 的情况）
         with open(config_path, 'r', encoding='utf-8') as f:
             for line in f:
                 if line.startswith('api_key='):
                     api_key = line.split('=', 1)[1].strip()
-                elif line.startswith('api_url='):
-                    api_url = line.split('=', 1)[1].strip()
 
     if not api_key:
         raise ValueError("API Key 为空，请在配置文件中设置有效的 api_key")
     
-    # 如果 api_url 为空，使用固定基础 URL
-    if not api_url:
-        api_url = FIXED_BASE_URL
-    
-    return api_key, api_url
+    return api_key
 
 
 def clean_dkag_response(api_response: dict) -> dict:
@@ -207,7 +197,6 @@ def dkag_search(
     area: Optional[str] = None,
     time: Optional[str] = None,
     api_key: Optional[str] = None,
-    api_url: Optional[str] = None,
     config_path: Optional[Path] = None,
     clean: bool = False,
     policy: bool = False,
@@ -227,7 +216,6 @@ def dkag_search(
         area: 用户所属地域（可选，默认"中国"），如"广东省"、"北京市"
         time: 生效日期范围（可选），如"2026年"、"2025年08月"、"2025年08月15日"
         api_key: API 密钥（可选，如不传则从配置文件读取）
-        api_url: API 接口地址（可选，如不传则从配置文件读取或使用固定地址）
         config_path: 配置文件路径（可选）
         clean: 是否对返回结果进行数据清洗（默认 False）
         policy: 是否返回规范性文件清单policyFiles（默认 False）
@@ -253,15 +241,12 @@ def dkag_search(
             "min_length": MIN_QUERY_LENGTH
         }
 
-    # 获取 API Key 和 API URL
+    # 获取 API Key
     if not api_key:
-        api_key, api_url = load_config(config_path)
-    else:
-        # 如果提供了 api_key 但没有 api_url，使用固定基础 URL
-        api_url = FIXED_BASE_URL
+        api_key = load_config(config_path)
 
     # 构建完整 URL
-    url = api_url
+    url = FIXED_BASE_URL
 
     # 构建请求体（新接口格式）
     payload = {

@@ -171,12 +171,12 @@ def generate_red_header_document(doc_type, input_path, replacements, output_path
 
     # 1. 找到分页符位置、参考资料和知识专库链接的范围
     page_break_idx, ref_start, ref_end = find_references_and_links_range(doc)
-    if page_break_idx:
+    if page_break_idx is not None:
         print(f"✓ 分页符位置: 段落 {page_break_idx}")
-    print(f"✓ 参考资料范围: 段落 {ref_start} 到 {ref_end}") if ref_start else print("✓ 未找到参考资料")
+    print(f"✓ 参考资料范围: 段落 {ref_start} 到 {ref_end}") if ref_start is not None else print("✓ 未找到参考资料")
 
     # 2. 去除正文中的引用标记（参考资料之前的内容）
-    if ref_start:
+    if ref_start is not None:
         for para in doc.paragraphs[:ref_start]:
             for run in para.runs:
                 if run.text and re.search(r'\[\^\d+\^\]', run.text):
@@ -259,10 +259,10 @@ def generate_red_header_document(doc_type, input_path, replacements, output_path
         for i, ft_table in enumerate(footer_template.tables):
             footer_table_xml = deepcopy(ft_table._tbl)
             
-            if page_break_idx:
+            if page_break_idx is not None:
                 page_break_para_element = doc.paragraphs[page_break_idx]._element
                 page_break_para_element.addprevious(footer_table_xml)
-            elif ref_start:
+            elif ref_start is not None:
                 ref_para_element = doc.paragraphs[ref_start]._element
                 ref_para_element.addprevious(footer_table_xml)
             else:
@@ -278,17 +278,17 @@ def generate_red_header_document(doc_type, input_path, replacements, output_path
             update_minutes_footer_table(table, replacements)
             remove_empty_rows(table)
         
-        pos_desc = "分页符之前" if page_break_idx else ("参考来源之前" if ref_start else "文档末尾")
+        pos_desc = "分页符之前" if page_break_idx is not None else ("参考来源之前" if ref_start is not None else "文档末尾")
         print(f"✓ 纪要表尾已插入（{pos_desc}，{footer_table_count}个表格）")
     else:
-        if page_break_idx and len(footer_template.tables) >= 1:
+        if page_break_idx is not None and len(footer_template.tables) >= 1:
             page_break_para_element = doc.paragraphs[page_break_idx]._element
             footer_table_xml = deepcopy(footer_template.tables[0]._tbl)
             page_break_para_element.addprevious(footer_table_xml)
             set_table_keep_together(doc.tables[-1])
             update_footer_table(doc.tables[-1], replacements)
             print(f"✓ 结尾表格已插入（在分页符之前，将定位到正文页底部）")
-        elif ref_start and len(footer_template.tables) >= 1:
+        elif ref_start is not None and len(footer_template.tables) >= 1:
             ref_para_element = doc.paragraphs[ref_start]._element
             footer_table_xml = deepcopy(footer_template.tables[0]._tbl)
             ref_para_element.addprevious(footer_table_xml)

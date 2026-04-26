@@ -1,5 +1,34 @@
 # 更新日志
 
+## [2.6.2] - 2026-04-22
+
+### 稳定性与规则一致性修复
+
+#### 一、`template_generator.py` 索引边界修复（index=0）
+
+- 将 `if page_break_idx`、`if ref_start` 等布尔判断统一改为 `is not None`
+- 修复分页符/参考资料索引为 `0` 时的误判问题
+- 同步修复表尾插入分支与位置描述分支判断
+
+#### 二、`SKILL.md` 链接规则冲突修复
+
+- 明确规则为：正文中禁止链接样式
+- `【知识专库链接】` 区必须保留原始 `https://` URL（每行一个）
+
+#### 三、输出目录口径统一（文档侧）
+
+- `SKILL.md` 的命令示例和输出说明统一为
+  `~/.openclaw/data/official-docs/output/`
+- 与脚本默认输出目录保持一致
+
+#### 四、搜索配置简化（public 版保持用户自配 key）
+
+- `dkag_search.py` 移除 `api_url` 读取与参数逻辑（固定地址调用）
+- 保持 `api_key` 由用户在 `config.ini` 自行配置
+- `README.md` 同步修正为“仅需配置 `api_key`”
+
+---
+
 ## [2.6.1] - 2026-04-09
 
 ### 搜索 API Key 更新
@@ -634,4 +663,3 @@ def add_fullwidth_space_if_needed(text):
 - 辅助判断： is_attachment_line(), is_signing_entity(), is_contact_info(), is_recipient()
 - 输入处理： validate_input(), fix_reference_format()
 - 文档创建： create_document(), main()
-

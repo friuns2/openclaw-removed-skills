@@ -28,13 +28,24 @@ pip3 install python-docx
 
 ### 2. 配置搜索（可选但推荐）
 
-复制配置模板并填写：
+在 Skill 根目录手动创建 `config.ini`：
 
 ```bash
-cp config.ini.example config.ini
+cat > config.ini << 'EOF'
+[dkag]
+# 深知可信搜索接口配置
+# 接口地址: https://open.dknowc.cn/dependable/search/
+# 请求方式: POST
+
+# API 密钥（从 MAAS 平台获取）
+api_key=你的API Key
+
+# 注意：现在只需要配置 API Key，不需要配置 appid
+# 接口使用固定地址，无需额外配置
+EOF
 ```
 
-编辑 `config.ini`：
+或手动新建文件并填写：
 
 ```ini
 [dkag]
@@ -65,7 +76,7 @@ api_key=你的API Key
 
 1. 访问 MAAS 平台注册账号
 2. 在控制台创建 API Key
-3. 填入 `config.ini` 的 `api_key` 和 `api_url` 字段
+3. 填入 `config.ini` 的 `api_key` 字段
 
 ## 目录结构
 
@@ -74,7 +85,7 @@ official-doc-writer/
 ├── SKILL.md              # Skill 核心逻辑（AI 执行流程）
 ├── config/
 │   ├── format.json       # 排版格式配置（国标默认值）
-│   └── config.ini.example  # 搜索 API 配置模板
+├── config.ini            # 搜索 API 配置（用户手动创建，不随 skill 发布）
 ├── scripts/
 │   ├── dkag_search.py    # 深知可信搜索接口
 │   ├── format_document.py    # 公文排版脚本（普通格式）

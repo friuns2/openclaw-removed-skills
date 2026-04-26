@@ -353,7 +353,8 @@ https://yun.dknowc.cn/wlcb/ShenZhi-policy/#/knowledgebase/?id=XXX
 普通文本               → 仿宋_GB2312，三号
 ```
 
-**禁止使用列表、粗体、斜体、代码块、引用、分割线、链接。** 详见 `reference/output_guide.md` 第一节。
+**禁止在正文中使用列表、粗体、斜体、代码块、引用、分割线、链接。**  
+**但【知识专库链接】区必须保留原始 `https://` URL（每行一个，作为附录信息，不算正文链接样式）。** 详见 `reference/output_guide.md` 第一节。
 
 **命令：**
 
@@ -361,13 +362,13 @@ https://yun.dknowc.cn/wlcb/ShenZhi-policy/#/knowledgebase/?id=XXX
 ```bash
 python3 scripts/format_document.py \
   --text "公文内容..." \
-  --output ~/.openclaw/workspace/output/文件名.docx
+  --output ~/.openclaw/data/official-docs/output/文件名.docx
 ```
 
 红头文件（仅用户明确要求时）：
 ```bash
 python3 scripts/template_generator.py 通知 \
-  --input ~/.openclaw/workspace/output/关于XXX的通知.docx \
+  --input ~/.openclaw/data/official-docs/output/关于XXX的通知.docx \
   --org "发文机关" \
   --doc-number "发文字号"
 ```
@@ -380,6 +381,6 @@ python3 scripts/template_generator.py 通知 \
 
 ## 步骤13：输出
 
-脚本执行成功后返回文件完整路径，文件存储在 `~/.openclaw/workspace/output/` 目录。
+脚本执行成功后返回文件完整路径，文件存储在 `~/.openclaw/data/official-docs/output/` 目录。
 
 **Skill的任务到此结束，后续交付由小龙虾根据channel处理。**
