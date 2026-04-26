@@ -3,11 +3,16 @@
   "slug": "kommo",
   "displayName": "Kommo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167113320,
-    "commit": "https://github.com/openclaw/skills/commit/10858c8fd1717dd4398588d80d8b3c899ff81c98"
+    "version": "1.0.3",
+    "publishedAt": 1776893021907,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167113320,
+      "commit": "https://github.com/openclaw/skills/commit/10858c8fd1717dd4398588d80d8b3c899ff81c98"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774380258537,
