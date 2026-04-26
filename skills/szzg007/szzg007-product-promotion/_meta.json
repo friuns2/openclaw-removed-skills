@@ -1,11 +1,17 @@
 {
   "owner": "szzg007",
   "slug": "szzg007-product-promotion",
-  "displayName": "Product Promotion Email Generator",
+  "displayName": "SZZG007 Product Promotion",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773747639852,
-    "commit": "https://github.com/openclaw/skills/commit/aadb3770c7dd8ec3cafb8db90649343f2b495044"
+    "version": "1.0.1",
+    "publishedAt": 1776155556857,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773747639852,
+      "commit": "https://github.com/openclaw/skills/commit/aadb3770c7dd8ec3cafb8db90649343f2b495044"
+    }
+  ]
 }
