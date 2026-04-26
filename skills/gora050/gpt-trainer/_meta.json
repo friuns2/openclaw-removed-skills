@@ -3,11 +3,16 @@
   "slug": "gpt-trainer",
   "displayName": "Gpt Trainer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165020634,
-    "commit": "https://github.com/openclaw/skills/commit/c0bb6ac054f644ad1b665f6ec1b606f2487cde12"
+    "version": "1.0.3",
+    "publishedAt": 1776858955237,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165020634,
+      "commit": "https://github.com/openclaw/skills/commit/c0bb6ac054f644ad1b665f6ec1b606f2487cde12"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773943418795,
