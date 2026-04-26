@@ -3,11 +3,16 @@
   "slug": "linqs",
   "displayName": "Linqs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165391543,
-    "commit": "https://github.com/openclaw/skills/commit/435b9d8cc04ca787049e1201f0d3cf6aef3f6774"
+    "version": "1.0.3",
+    "publishedAt": 1776859316579,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165391543,
+      "commit": "https://github.com/openclaw/skills/commit/435b9d8cc04ca787049e1201f0d3cf6aef3f6774"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774022590158,
