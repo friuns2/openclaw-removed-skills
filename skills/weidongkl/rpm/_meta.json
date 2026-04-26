@@ -1,13 +1,18 @@
 {
   "owner": "weidongkl",
   "slug": "rpm",
-  "displayName": "Rpm",
+  "displayName": "RPM Package Management",
   "latest": {
-    "version": "3.1.0",
-    "publishedAt": 1776387179569,
-    "commit": "https://github.com/openclaw/skills/commit/908a811004b77a5e03322e67e4ff504b21f62cec"
+    "version": "4.0.0",
+    "publishedAt": 1777017182733,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.1.0",
+      "publishedAt": 1776387179569,
+      "commit": "https://github.com/openclaw/skills/commit/908a811004b77a5e03322e67e4ff504b21f62cec"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774229004794,
