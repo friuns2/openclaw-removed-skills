@@ -3,11 +3,16 @@
   "slug": "judopay",
   "displayName": "Judopay",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166661847,
-    "commit": "https://github.com/openclaw/skills/commit/43159ac5bbbfc9960efc79740663d45985632fb5"
+    "version": "1.0.3",
+    "publishedAt": 1776884949054,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166661847,
+      "commit": "https://github.com/openclaw/skills/commit/43159ac5bbbfc9960efc79740663d45985632fb5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774293829945,
