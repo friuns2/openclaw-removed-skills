@@ -3,11 +3,16 @@
   "slug": "edapp",
   "displayName": "Edapp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167143974,
-    "commit": "https://github.com/openclaw/skills/commit/42653797b03489b248cea2d9aa43a30f3706a568"
+    "version": "1.0.3",
+    "publishedAt": 1776860893809,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167143974,
+      "commit": "https://github.com/openclaw/skills/commit/42653797b03489b248cea2d9aa43a30f3706a568"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774386241940,
