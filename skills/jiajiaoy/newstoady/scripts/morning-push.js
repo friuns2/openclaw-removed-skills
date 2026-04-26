@@ -46,18 +46,26 @@ if (lang === 'zh') {
 
 处理要求：
 - 去重后选取 10 条，覆盖不同领域（重要/财经/国际/科技/社会各至少 1 条）
-- 每条含：标题、来源媒体、发布时间、2句摘要
+- 第1条为【头条】：重要性最高的单条新闻，含标题、来源、时间、3-4句详细摘要、影响分析
+- 其余9条为常规条目：标题、来源媒体、发布时间、2句摘要
+- 财经类每条额外标注影响评级：📈 利好 / 📉 利空 / ➡️ 中性
 - 按领域分组，每条标注话题标签
 - 有争议内容保持中立，标注多方视角
+- 统计总条数和预估阅读时长（每条约30秒）
 
 输出格式：
-📰 今日早报 · ${dateStr}
+📰 今日早报 · ${dateStr} | 10条 · 阅读约5分钟
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 头条
+[头条新闻 — 标题加粗，3-4句详细摘要，含影响分析]
+
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 🔴 重要
 [新闻条目]
 
-💰 财经
+💰 财经  （每条含 📈/📉/➡️ 评级）
 [新闻条目]
 
 🌍 国际
@@ -92,18 +100,26 @@ Sources (in priority order):
 
 Requirements:
 - After deduplication, select 10 stories covering different categories
-- Each entry: headline, source, publish time, 2-sentence summary
+- Story #1 is the [Lead Story]: highest-importance single item, with headline, source, time, 3-4 sentence detailed summary, and impact analysis
+- Remaining 9 are standard entries: headline, source, publish time, 2-sentence summary
+- Finance entries must include an impact tag: 📈 bullish / 📉 bearish / ➡️ neutral
 - Group by category, tag each story
 - Present disputed topics neutrally with multiple perspectives
+- Count total stories and estimate reading time (~30 sec per story)
 
 Output format:
-📰 Morning Briefing · ${dateStr}
+📰 Morning Briefing · ${dateStr} | 10 stories · ~5 min read
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 Lead Story
+[Top story — bold headline, 3-4 sentence detailed summary with impact analysis]
+
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 🔴 Top Stories
 [entries]
 
-💰 Finance
+💰 Finance  (each with 📈/📉/➡️ rating)
 [entries]
 
 🌍 International

@@ -1,13 +1,18 @@
 {
   "owner": "jiajiaoy",
   "slug": "newstoady",
-  "displayName": "News Today",
+  "displayName": "NewsToday",
   "latest": {
-    "version": "2.0.3",
-    "publishedAt": 1775034390067,
-    "commit": "https://github.com/openclaw/skills/commit/3abba37db2c8d15a6e1e0e5dbdddd780ec562c82"
+    "version": "2.1.0",
+    "publishedAt": 1776837406531,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.0.3",
+      "publishedAt": 1775034390067,
+      "commit": "https://github.com/openclaw/skills/commit/3abba37db2c8d15a6e1e0e5dbdddd780ec562c82"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1774876090191,
