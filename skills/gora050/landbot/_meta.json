@@ -3,11 +3,16 @@
   "slug": "landbot",
   "displayName": "Landbot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165185942,
-    "commit": "https://github.com/openclaw/skills/commit/bfef046b929097fb70076b26941e2b08e9e08559"
+    "version": "1.0.3",
+    "publishedAt": 1776859188854,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165185942,
+      "commit": "https://github.com/openclaw/skills/commit/bfef046b929097fb70076b26941e2b08e9e08559"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773965028932,
