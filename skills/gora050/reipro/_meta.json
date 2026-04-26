@@ -3,11 +3,16 @@
   "slug": "reipro",
   "displayName": "Reipro",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166987210,
-    "commit": "https://github.com/openclaw/skills/commit/7ab33c9eb813930085a7e46b78d78c56003983d7"
+    "version": "1.0.3",
+    "publishedAt": 1776860719282,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166987210,
+      "commit": "https://github.com/openclaw/skills/commit/7ab33c9eb813930085a7e46b78d78c56003983d7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774335835423,
