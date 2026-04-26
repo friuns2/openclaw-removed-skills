@@ -3,11 +3,16 @@
   "slug": "resource-guru",
   "displayName": "Resource Guru",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164883255,
-    "commit": "https://github.com/openclaw/skills/commit/c4019a4b010519a2cf111f3d9beb36f90d645c29"
+    "version": "1.0.3",
+    "publishedAt": 1776858706710,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164883255,
+      "commit": "https://github.com/openclaw/skills/commit/c4019a4b010519a2cf111f3d9beb36f90d645c29"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773914575120,
