@@ -3,11 +3,16 @@
   "slug": "detrack",
   "displayName": "Detrack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167020885,
-    "commit": "https://github.com/openclaw/skills/commit/1b6b9391224bd6bf04ec1ed51c01ea6735079b76"
+    "version": "1.0.3",
+    "publishedAt": 1776860780631,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167020885,
+      "commit": "https://github.com/openclaw/skills/commit/1b6b9391224bd6bf04ec1ed51c01ea6735079b76"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774339470800,
