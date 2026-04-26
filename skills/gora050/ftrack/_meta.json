@@ -3,11 +3,16 @@
   "slug": "ftrack",
   "displayName": "Ftrack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167475134,
-    "commit": "https://github.com/openclaw/skills/commit/d0576c9a4ce3b44276230e75d1b1bcf7d8252896"
+    "version": "1.0.3",
+    "publishedAt": 1776861484248,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167475134,
+      "commit": "https://github.com/openclaw/skills/commit/d0576c9a4ce3b44276230e75d1b1bcf7d8252896"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774440254887,
