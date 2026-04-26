@@ -3,9 +3,15 @@
   "slug": "deepagents-code-review",
   "displayName": "Deepagents Code Review",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773973978599,
-    "commit": "https://github.com/openclaw/skills/commit/8dce67f4dfeb4b0c23c2960e0082f86fbcf73ef9"
+    "version": "1.0.1",
+    "publishedAt": 1776830949906,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773973978599,
+      "commit": "https://github.com/openclaw/skills/commit/8dce67f4dfeb4b0c23c2960e0082f86fbcf73ef9"
+    }
+  ]
 }

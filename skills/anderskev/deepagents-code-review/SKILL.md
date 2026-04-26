@@ -7,6 +7,17 @@ description: Reviews Deep Agents code for bugs, anti-patterns, and improvements.
 
 When reviewing Deep Agents code, check for these categories of issues.
 
+## Review gates (evidence-bound)
+
+Run these steps in order before and while you write findings. Skipping a step is a failed review.
+
+1. **Locate** — Enumerate call sites in scope (`create_deep_agent`, `CompiledSubAgent`, `CompositeBackend`, custom `backend=`, `interrupt_on`, `checkpointer`, `store`). **Pass:** You list each relevant **file path** and **line number** (or a grep/search result that proves where the code lives).
+2. **Anchor** — For each suspected issue, tie it to **quoted or line-referenced code** from those files, not to imports or names alone. **Pass:** Every finding includes **evidence** (`path:line` plus a short quote or “absent parameter” note showing the gap).
+3. **Classify** — Map each anchored issue to one category below (Critical → Performance) and a severity. **Pass:** The category label matches what the cited code actually does or omits.
+4. **Runtime claims** — If you say something will error, fail at runtime, or leak data, **Pass:** The cited snippet shows the exact API combo (e.g. `interrupt_on` set with no `checkpointer` in the same construction path), or you state **uncertain** and what would confirm it.
+
+If you cannot satisfy step 1, stop and say what file or search is missing instead of inferring issues from memory.
+
 ## Critical Issues
 
 ### 1. Missing Checkpointer with interrupt_on
@@ -462,37 +473,4 @@ agent = create_deep_agent(
 
 ## Code Review Checklist
 
-### Configuration
-- [ ] Checkpointer provided if using `interrupt_on`
-- [ ] Store provided if using `StoreBackend`
-- [ ] Thread ID provided in config when using checkpointer
-- [ ] Backend appropriate for use case (ephemeral vs persistent)
-
-### Backends
-- [ ] FilesystemBackend scoped to safe `root_dir`
-- [ ] StoreBackend has corresponding `store` parameter
-- [ ] CompositeBackend routes don't shadow each other unintentionally
-- [ ] Not expecting persistence from StateBackend across threads
-
-### Subagents
-- [ ] All required fields present (name, description, system_prompt, tools)
-- [ ] Unique subagent names
-- [ ] CompiledSubAgent has compatible state schema
-- [ ] Subagents used for complex tasks, not trivial operations
-
-### Middleware
-- [ ] Custom middleware added after built-in stack (expected behavior)
-- [ ] Tools have descriptive docstrings
-- [ ] Not mutating request/response objects
-
-### System Prompt
-- [ ] Not duplicating built-in tool instructions
-- [ ] Not contradicting framework defaults
-- [ ] Stopping criteria defined for open-ended tasks
-- [ ] Parallelization guidance for independent tasks
-
-### Performance
-- [ ] Large files routed to appropriate backend
-- [ ] Production uses persistent checkpointer
-- [ ] Recursion/iteration limits considered
-- [ ] Independent subagents parallelized
+See [`references/checklist.md`](references/checklist.md) for the full per-area checklist (Configuration, Backends, Subagents, Middleware, System Prompt, Performance). Run it after the **Review gates** and the numbered issue catalogue above.
