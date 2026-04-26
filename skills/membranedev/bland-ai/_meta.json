@@ -3,11 +3,16 @@
   "slug": "bland-ai",
   "displayName": "Bland Ai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166693721,
-    "commit": "https://github.com/openclaw/skills/commit/5c202944c9d91f2e3ccf0d07850083d66d1a8e8c"
+    "version": "1.0.3",
+    "publishedAt": 1776848998355,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166693721,
+      "commit": "https://github.com/openclaw/skills/commit/5c202944c9d91f2e3ccf0d07850083d66d1a8e8c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774299752017,
