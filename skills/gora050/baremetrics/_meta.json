@@ -3,11 +3,16 @@
   "slug": "baremetrics",
   "displayName": "Baremetrics",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165653408,
-    "commit": "https://github.com/openclaw/skills/commit/5c0aea7a5b4046e471775384c1588602fd895f3b"
+    "version": "1.0.3",
+    "publishedAt": 1776859672486,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165653408,
+      "commit": "https://github.com/openclaw/skills/commit/5c0aea7a5b4046e471775384c1588602fd895f3b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058641187,
