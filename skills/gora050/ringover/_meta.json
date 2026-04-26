@@ -3,11 +3,16 @@
   "slug": "ringover",
   "displayName": "Ringover",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167261621,
-    "commit": "https://github.com/openclaw/skills/commit/ac75628a5955970fc02dc24a13e0a33ec2767fba"
+    "version": "1.0.3",
+    "publishedAt": 1776861067383,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167261621,
+      "commit": "https://github.com/openclaw/skills/commit/ac75628a5955970fc02dc24a13e0a33ec2767fba"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774400716702,
