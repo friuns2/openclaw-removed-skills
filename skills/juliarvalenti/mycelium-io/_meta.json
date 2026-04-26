@@ -3,11 +3,16 @@
   "slug": "mycelium-io",
   "displayName": "Mycelium",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776375525473,
-    "commit": "https://github.com/openclaw/skills/commit/ff2b13f9c53b95d7185684cf5045aef9f27e2aa1"
+    "version": "1.0.4",
+    "publishedAt": 1777072258184,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776375525473,
+      "commit": "https://github.com/openclaw/skills/commit/ff2b13f9c53b95d7185684cf5045aef9f27e2aa1"
+    },
     {
       "version": "0.1.83",
       "publishedAt": 1775691158100,
