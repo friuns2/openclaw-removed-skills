@@ -3,11 +3,16 @@
   "slug": "sitespeakai",
   "displayName": "Sitespeakai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167427434,
-    "commit": "https://github.com/openclaw/skills/commit/bb6749a17615314f2b0f33767920541c5dd051a7"
+    "version": "1.0.3",
+    "publishedAt": 1776861385233,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167427434,
+      "commit": "https://github.com/openclaw/skills/commit/bb6749a17615314f2b0f33767920541c5dd051a7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774433025176,
