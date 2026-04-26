@@ -3,9 +3,15 @@
   "slug": "smartengage",
   "displayName": "Smartengage",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774425788059,
-    "commit": "https://github.com/openclaw/skills/commit/0650019127dc1537b2e12c112f5cb23b360f0d12"
+    "version": "1.0.1",
+    "publishedAt": 1776861217400,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774425788059,
+      "commit": "https://github.com/openclaw/skills/commit/0650019127dc1537b2e12c112f5cb23b360f0d12"
+    }
+  ]
 }
