@@ -3,11 +3,16 @@
   "slug": "docparser",
   "displayName": "Docparser",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165105893,
-    "commit": "https://github.com/openclaw/skills/commit/c0995071ababd4ad9c7b08726c77fbbf8c1c255e"
+    "version": "1.0.3",
+    "publishedAt": 1776846380562,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165105893,
+      "commit": "https://github.com/openclaw/skills/commit/c0995071ababd4ad9c7b08726c77fbbf8c1c255e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773961347420,
