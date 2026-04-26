@@ -3,11 +3,16 @@
   "slug": "qntrl",
   "displayName": "Qntrl",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165666371,
-    "commit": "https://github.com/openclaw/skills/commit/7275e00a57058fefda6e412727268d3ff8cf7013"
+    "version": "1.0.3",
+    "publishedAt": 1776859703156,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165666371,
+      "commit": "https://github.com/openclaw/skills/commit/7275e00a57058fefda6e412727268d3ff8cf7013"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058661737,
