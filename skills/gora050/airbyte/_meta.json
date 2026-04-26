@@ -3,11 +3,16 @@
   "slug": "airbyte",
   "displayName": "Airbyte",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167671494,
-    "commit": "https://github.com/openclaw/skills/commit/6b747808aa9feb98b37a7f9258dbb3504771b8d0"
+    "version": "1.0.3",
+    "publishedAt": 1776861701616,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167671494,
+      "commit": "https://github.com/openclaw/skills/commit/6b747808aa9feb98b37a7f9258dbb3504771b8d0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774487552744,
