@@ -3,11 +3,16 @@
   "slug": "clipcat",
   "displayName": "Clipcat - TikTok Video Replication",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1775963441416,
-    "commit": "https://github.com/openclaw/skills/commit/c5ee94e70168b39f54822d435d69239e2398454a"
+    "version": "1.0.6",
+    "publishedAt": 1777015140628,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1775963441416,
+      "commit": "https://github.com/openclaw/skills/commit/c5ee94e70168b39f54822d435d69239e2398454a"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1774427198853,

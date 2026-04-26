@@ -16,7 +16,7 @@ metadata:
               "kind": "download",
               "os": ["darwin"],
               "arch": ["arm64"],
-              "url": "https://static.clipcat.ai/public/cli/v1.0.6/clipcat_darwin_arm64.tar.gz",
+              "url": "https://static.clipcat.ai/public/cli/v1.0.7/clipcat_darwin_arm64.tar.gz",
               "archive": "tar.gz",
               "bins": ["clipcat"],
               "label": "Install Clipcat CLI (macOS Apple Silicon)",
@@ -26,7 +26,7 @@ metadata:
               "kind": "download",
               "os": ["darwin"],
               "arch": ["x64"],
-              "url": "https://static.clipcat.ai/public/cli/v1.0.6/clipcat_darwin_amd64.tar.gz",
+              "url": "https://static.clipcat.ai/public/cli/v1.0.7/clipcat_darwin_amd64.tar.gz",
               "archive": "tar.gz",
               "bins": ["clipcat"],
               "label": "Install Clipcat CLI (macOS Intel)",
@@ -36,7 +36,7 @@ metadata:
               "kind": "download",
               "os": ["linux"],
               "arch": ["x64"],
-              "url": "https://static.clipcat.ai/public/cli/v1.0.6/clipcat_linux_amd64.tar.gz",
+              "url": "https://static.clipcat.ai/public/cli/v1.0.7/clipcat_linux_amd64.tar.gz",
               "archive": "tar.gz",
               "bins": ["clipcat"],
               "label": "Install Clipcat CLI (Linux x86_64)",
@@ -46,7 +46,7 @@ metadata:
               "kind": "download",
               "os": ["linux"],
               "arch": ["arm64"],
-              "url": "https://static.clipcat.ai/public/cli/v1.0.6/clipcat_linux_arm64.tar.gz",
+              "url": "https://static.clipcat.ai/public/cli/v1.0.7/clipcat_linux_arm64.tar.gz",
               "archive": "tar.gz",
               "bins": ["clipcat"],
               "label": "Install Clipcat CLI (Linux arm64)",
@@ -56,7 +56,7 @@ metadata:
               "kind": "download",
               "os": ["win32"],
               "arch": ["x64"],
-              "url": "https://static.clipcat.ai/public/cli/v1.0.6/clipcat_windows_amd64.zip",
+              "url": "https://static.clipcat.ai/public/cli/v1.0.7/clipcat_windows_amd64.zip",
               "archive": "zip",
               "bins": ["clipcat.exe"],
               "label": "Install Clipcat CLI (Windows x86_64)",
@@ -94,7 +94,7 @@ clipcat config --api-key <your-key>
 - Get TikTok Shop product details and reviews
 - Replicate viral videos with your product
 - Generate product videos from images
-- Generate AI images from text prompts (with optional reference images)
+- Generate AI images from text prompts using GPT Image 2 (with optional reference images)
 - Analyze videos (script, scenes, music)
 - Download TikTok/Douyin videos
 - Query async task status
@@ -108,19 +108,19 @@ clipcat config --api-key <your-key>
 
 ## Choosing the right command
 
-- `search` — find viral TikTok videos by keyword
-- `search_items` — search TikTok Shop products by keyword; returns market insights, competitor shops, and product intelligence
-- `product_detail` — get product info by ID or URL
-- `product_comment` — get product reviews
-- `replicate` — replicate a viral video with your product images (auto-detects URL type)
-- `product_video` — generate video from product images only (no reference video)
-- `image` — generate an AI image from a text prompt; optionally supply up to 5 reference images via `--image` (local file) or `--image-url` (URL)
+- `search` — find viral TikTok videos by keyword; supports `--region`, `--sort-by relevance|likes`, `--time-range any|day|week|month|quarter|half_year`, `--require-shop`
+- `search_items` — search TikTok Shop products by keyword; returns market insights, competitor shops, and product intelligence; supports `--region`, `--offset`, `--page-token` for pagination
+- `product_detail` — get product info by `--input <ID or URL>`; supports `--region`
+- `product_comment` — get product reviews by `--input <ID or URL>`; supports `--region`, `--sort-rule`, `--filter-type`, `--filter-value`
+- `replicate` — replicate a viral video with your product images (auto-detects URL type); images via `--image` (local) or `--image-url` (URL); local files and URLs can be mixed; supports `--model`, `--duration`, `--size`, `--lang`, `--resolution`, `--character-id`
+- `product_video` — generate video from product images only (no reference video); images via `--image` (local) or `--image-url` (URL); local files and URLs can be mixed
+- `image` — generate an AI image from a text prompt using **GPT Image 2** model; optionally supply up to 5 reference images via `--image` (local file) or `--image-url` (URL). Use `--aspect-ratio` to pick `1:1` (default) / `16:9` / `9:16`
 - `list_images` — list image generation tasks from server; supports `--status` / `--limit` / `--page` filters
-- `breakdown` — analyze a video (script, scenes, music)
-- `download` — download TikTok/Douyin video (returns signed URL)
-- `user_videos` — get a TikTok user's video list with analytics (plays, likes, shares, comments, e-commerce cart data)
-- `query_task` — check status of an async task
-- `list_tasks` — list recent tasks from server
+- `breakdown` — analyze a video (script, scenes, music); returns cached result immediately if previously analyzed
+- `download` — download TikTok/Douyin video (returns signed URL); cached results return immediately
+- `user_videos` — get a TikTok user's video list with analytics (plays, likes, shares, comments, e-commerce cart data); `--unique-id` required; pass `--sec-user-id` to skip ID resolution and speed up response; supports `--max-cursor` pagination and `--sort-type 0|1`
+- `query_task` — check status of a task by ID and type (`--type replicate | product | breakdown | download | image`). Omit `--task-id` to resume the latest local task.
+- `list_tasks` — list recent **video-related** tasks from server (`--type` required: `replicate | product | breakdown | download`). Image tasks use `list_images`.
 
 ## replicate: URL type auto-detection
 
@@ -133,13 +133,14 @@ Always inform the user about the extra credit before running with a social URL.
 
 ## Async task rules
 
-`replicate`, `product_video`, `image`, and `breakdown` are async. After submission:
+`replicate`, `product_video`, `image`, and `breakdown` are async. All four
+**submit and return immediately** with a task ID — they never block.
 
 1. Task ID is saved locally to `~/.clipcat/tasks.json` automatically.
-2. Use `--poll <seconds>` to wait inline (e.g. `--poll 600` = wait up to 10 min).
-3. If poll times out, the CLI prints a resume command — save it.
-4. Use `clipcat query_task` (no args) to resume the **latest** local task.
-5. Use `clipcat list_tasks` to see all tasks from the server.
+2. Poll with `clipcat query_task --task-id <id> --type <type> --poll <seconds>`
+   (e.g. `--poll 600` = wait up to 10 min). Omit `--task-id` to resume the latest.
+3. If poll times out, re-run `query_task` later.
+4. Use `clipcat list_tasks --type <replicate|product|breakdown|download>` to see tasks of a given type from the server.
 
 ## query_task: auto-resume
 
@@ -147,13 +148,17 @@ Always inform the user about the extra credit before running with a social URL.
 
 ## Available models
 
-| Model ID         | Duration    | Resolution |
-| ---------------- | ----------- | ---------- |
-| `sora2`          | 10s, 15s    | 720p       |
-| `sora2_official` | 4s, 8s, 12s | 720p       |
-| `veo3.1fast`     | 8s,16s,24s  | 720p, 4K   |
+| Model ID         | Duration     | Resolution |
+| ---------------- | ------------ | ---------- |
+| `sora2`          | 10s, 15s     | 720p       |
+| `sora2_official` | 4s, 8s, 12s  | 720p       |
+| `veo3.1fast`     | 8s, 16s, 24s | 720p, 4K   |
 
 Always check `clipcat replicate -h` for the current model list.
+
+## Supported languages (`--lang`)
+
+`en` `zh` `fr` `de` `ms` `vi` `th` `ja` `ko` `id` `fil` `es`
 
 ## Good agent behavior
 
