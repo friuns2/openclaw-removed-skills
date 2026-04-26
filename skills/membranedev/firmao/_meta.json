@@ -3,11 +3,16 @@
   "slug": "firmao",
   "displayName": "Firmao",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167289429,
-    "commit": "https://github.com/openclaw/skills/commit/355308ae44305171b4cfcd9a0ad3a8923dee976d"
+    "version": "1.0.3",
+    "publishedAt": 1776850345123,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167289429,
+      "commit": "https://github.com/openclaw/skills/commit/355308ae44305171b4cfcd9a0ad3a8923dee976d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774404167755,
