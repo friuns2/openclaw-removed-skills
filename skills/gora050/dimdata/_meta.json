@@ -3,11 +3,16 @@
   "slug": "dimdata",
   "displayName": "Dimdata",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166508294,
-    "commit": "https://github.com/openclaw/skills/commit/6dc4b580740bad267badf315a3d85071e37925c5"
+    "version": "1.0.3",
+    "publishedAt": 1776863620803,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166508294,
+      "commit": "https://github.com/openclaw/skills/commit/6dc4b580740bad267badf315a3d85071e37925c5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774231442758,
