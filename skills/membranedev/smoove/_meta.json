@@ -3,11 +3,16 @@
   "slug": "smoove",
   "displayName": "Smoove",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165149319,
-    "commit": "https://github.com/openclaw/skills/commit/b9d2159a9d3d955870b26ccd6bf8399d44a6268c"
+    "version": "1.0.3",
+    "publishedAt": 1776846478298,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165149319,
+      "commit": "https://github.com/openclaw/skills/commit/b9d2159a9d3d955870b26ccd6bf8399d44a6268c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773964939590,
