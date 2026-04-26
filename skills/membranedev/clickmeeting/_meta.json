@@ -3,11 +3,16 @@
   "slug": "clickmeeting",
   "displayName": "Clickmeeting",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166201383,
-    "commit": "https://github.com/openclaw/skills/commit/5eca269ffda5980d7dec416175262b733defb536"
+    "version": "1.0.3",
+    "publishedAt": 1776848263651,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166201383,
+      "commit": "https://github.com/openclaw/skills/commit/5eca269ffda5980d7dec416175262b733defb536"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774184558161,
