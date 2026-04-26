@@ -3,11 +3,16 @@
   "slug": "action-builder",
   "displayName": "Action Builder",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167070253,
-    "commit": "https://github.com/openclaw/skills/commit/9ae82b532dccaa58c83354d3483436530e2d587f"
+    "version": "1.0.3",
+    "publishedAt": 1776860859336,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167070253,
+      "commit": "https://github.com/openclaw/skills/commit/9ae82b532dccaa58c83354d3483436530e2d587f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774350225256,
