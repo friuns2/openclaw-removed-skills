@@ -3,11 +3,16 @@
   "slug": "axesso-data-service-amazon",
   "displayName": "Axesso Data Service Amazon",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165333076,
-    "commit": "https://github.com/openclaw/skills/commit/0321f0ce9939b7e486170a2f6f039948d5c7b3ee"
+    "version": "1.0.3",
+    "publishedAt": 1776846748475,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165333076,
+      "commit": "https://github.com/openclaw/skills/commit/0321f0ce9939b7e486170a2f6f039948d5c7b3ee"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774015353092,
