@@ -3,11 +3,16 @@
   "slug": "crisp-integration",
   "displayName": "Crisp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166462245,
-    "commit": "https://github.com/openclaw/skills/commit/b090fdce14772034dc733180da87129e64a82449"
+    "version": "1.0.3",
+    "publishedAt": 1776860274743,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166462245,
+      "commit": "https://github.com/openclaw/skills/commit/b090fdce14772034dc733180da87129e64a82449"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774224272267,
