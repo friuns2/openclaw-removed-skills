@@ -3,11 +3,16 @@
   "slug": "biztera",
   "displayName": "Biztera",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164990461,
-    "commit": "https://github.com/openclaw/skills/commit/a6a957e4110bd3b5e59b916ccde98e59373f121e"
+    "version": "1.0.3",
+    "publishedAt": 1776858908989,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164990461,
+      "commit": "https://github.com/openclaw/skills/commit/a6a957e4110bd3b5e59b916ccde98e59373f121e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773936228432,
