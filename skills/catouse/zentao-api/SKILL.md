@@ -1,6 +1,11 @@
 ---
 name: zentao-api
 description: 调用禅道（ZenTao）RESTful API v2.0 完成用户请求，覆盖项目集、产品、项目、执行、需求（Story/Epic/Requirement）、Bug、任务、测试用例、测试单、产品计划、版本、发布、反馈、工单、应用、用户、文件等 20 个模块的增删改查及状态流转操作。当用户提到禅道、zentao、查询项目进展、获取 Bug 列表、更新需求状态、创建任务等项目管理相关操作时使用本技能。
+metadata:
+  author: Sun Hao <sunhao@chandao.com>
+  repository: https://github.com/easysoft/zentao-skills.git
+  keywords: [zentao, 禅道, api, project-management]
+  version: 1.0.4
 ---
 
 # 禅道 API v2.0
@@ -97,7 +102,23 @@ curl -s "$ZENTAO_URL/api.php/v2/projects/{projectID}/executions?browseType=doing
 ```bash
 curl -s -X POST "$ZENTAO_URL/api.php/v2/stories" \
   -H "token: $ZENTAO_TOKEN" -H "Content-Type: application/json" \
-  -d '{"productID": 1, "title": "需求标题", "pri": 3, "assignedTo": "admin", "spec": "需求描述"}'
+  -d '{"productID": 1, "title": "需求标题", "grade": 1, "pri": 3, "assignedTo": "admin", "spec": "需求描述"}'
+```
+
+### 创建业务需求（Epic）
+
+```bash
+curl -s -X POST "$ZENTAO_URL/api.php/v2/epics" \
+  -H "token: $ZENTAO_TOKEN" -H "Content-Type: application/json" \
+  -d '{"productID": 1, "title": "业务需求标题", "grade": 1, "pri": 3, "reviewer": ["admin"]}'
+```
+
+### 创建用户需求（Requirement）
+
+```bash
+curl -s -X POST "$ZENTAO_URL/api.php/v2/requirements" \
+  -H "token: $ZENTAO_TOKEN" -H "Content-Type: application/json" \
+  -d '{"productID": 1, "title": "用户需求标题", "parent": 1001, "grade": 1, "pri": 3, "reviewer": ["admin"]}'
 ```
 
 ### 创建 Bug（必填：productID, title, openedBuild）
@@ -192,6 +213,7 @@ curl -s -X PUT "$ZENTAO_URL/api.php/v2/stories/{storyID}/close" \
 ## 注意事项
 
 - URL 中的 `{id}` 需替换为实际 ID；不知道 ID 时先调列表接口获取
+- **创建 Epic / Requirement / Story 时，建议始终显式传 `grade`，不要依赖接口默认值。** 已有用户反馈某些禅道实例在未传 `grade` 时会把需求层级写成 `0`，导致界面中 BR / UR / SR 标签显示异常。
 - **PUT 编辑接口**：先 GET 详情获取当前完整数据，再将用户修改的字段覆盖进去一并提交
 - **状态流转操作** (resolve/close/activate/start/finish/change) 通常有独立的必填字段，不需要先 GET 详情
 - 写操作前向用户确认，用户明确要求不确认则直接执行

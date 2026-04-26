@@ -3,11 +3,16 @@
   "slug": "zentao-api",
   "displayName": "Zentao API Skills（禅道 API 技能）",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1774438019769,
-    "commit": "https://github.com/openclaw/skills/commit/7f3621c158eed496da2bc2bb473cfbf0b705cd3f"
+    "version": "1.0.4",
+    "publishedAt": 1776593981379,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1774438019769,
+      "commit": "https://github.com/openclaw/skills/commit/7f3621c158eed496da2bc2bb473cfbf0b705cd3f"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773839368213,
