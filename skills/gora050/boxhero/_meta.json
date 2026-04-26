@@ -3,11 +3,16 @@
   "slug": "boxhero",
   "displayName": "Boxhero",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165994009,
-    "commit": "https://github.com/openclaw/skills/commit/e78d45052336a48f4f828c06e0caf825734676b0"
+    "version": "1.0.3",
+    "publishedAt": 1776859948124,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165994009,
+      "commit": "https://github.com/openclaw/skills/commit/e78d45052336a48f4f828c06e0caf825734676b0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774130724357,
