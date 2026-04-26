@@ -3,11 +3,16 @@
   "slug": "memberspotio",
   "displayName": "Memberspotio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165366491,
-    "commit": "https://github.com/openclaw/skills/commit/4044c927b1105c511812c90a3e953ab9afbf9af5"
+    "version": "1.0.3",
+    "publishedAt": 1776859268262,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165366491,
+      "commit": "https://github.com/openclaw/skills/commit/4044c927b1105c511812c90a3e953ab9afbf9af5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774015447070,
