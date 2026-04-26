@@ -3,11 +3,16 @@
   "slug": "servicem8",
   "displayName": "Servicem8",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164836920,
-    "commit": "https://github.com/openclaw/skills/commit/ad53e68af3ca6c3edc9407726fa0a37cc831cb9f"
+    "version": "1.0.3",
+    "publishedAt": 1776845612972,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164836920,
+      "commit": "https://github.com/openclaw/skills/commit/ad53e68af3ca6c3edc9407726fa0a37cc831cb9f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773907345170,
