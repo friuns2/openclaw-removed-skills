@@ -3,11 +3,16 @@
   "slug": "chatfuel",
   "displayName": "Chatfuel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165189819,
-    "commit": "https://github.com/openclaw/skills/commit/5ed7f9196b7c501e02088d1ce2bb11b1ce7f4b22"
+    "version": "1.0.3",
+    "publishedAt": 1776861301431,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165189819,
+      "commit": "https://github.com/openclaw/skills/commit/5ed7f9196b7c501e02088d1ce2bb11b1ce7f4b22"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775165188095,
