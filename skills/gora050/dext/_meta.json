@@ -3,11 +3,16 @@
   "slug": "dext",
   "displayName": "Dext",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165580612,
-    "commit": "https://github.com/openclaw/skills/commit/66c1a0f5f5fe34225eba11aaf08c0b2253f860b3"
+    "version": "1.0.3",
+    "publishedAt": 1776859597407,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165580612,
+      "commit": "https://github.com/openclaw/skills/commit/66c1a0f5f5fe34225eba11aaf08c0b2253f860b3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051420266,
