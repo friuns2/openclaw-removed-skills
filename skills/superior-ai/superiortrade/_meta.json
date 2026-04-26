@@ -1,13 +1,18 @@
 {
   "owner": "superior-ai",
   "slug": "superiortrade",
-  "displayName": "Superior Trade Api Skills",
+  "displayName": "Clawhub Publish Superiortrade",
   "latest": {
-    "version": "3.0.8",
-    "publishedAt": 1774531317083,
-    "commit": "https://github.com/openclaw/skills/commit/e78474f50cbd47a569d1b931c9c623f1e9d4f561"
+    "version": "4.1.0",
+    "publishedAt": 1776848722238,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.0.8",
+      "publishedAt": 1774531317083,
+      "commit": "https://github.com/openclaw/skills/commit/e78474f50cbd47a569d1b931c9c623f1e9d4f561"
+    },
     {
       "version": "3.0.7",
       "publishedAt": 1774530022814,
