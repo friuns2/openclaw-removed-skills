@@ -3,11 +3,16 @@
   "slug": "abyssale",
   "displayName": "Abyssale",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165621174,
-    "commit": "https://github.com/openclaw/skills/commit/a8923b82e1888f830e7ebcabb013527836a722c0"
+    "version": "1.0.3",
+    "publishedAt": 1776847477603,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165621174,
+      "commit": "https://github.com/openclaw/skills/commit/a8923b82e1888f830e7ebcabb013527836a722c0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058548812,
