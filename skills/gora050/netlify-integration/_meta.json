@@ -3,11 +3,16 @@
   "slug": "netlify-integration",
   "displayName": "Netlify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166892746,
-    "commit": "https://github.com/openclaw/skills/commit/070df2d7e90931da18c2898d0a332523720c8d00"
+    "version": "1.0.3",
+    "publishedAt": 1776860571310,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166892746,
+      "commit": "https://github.com/openclaw/skills/commit/070df2d7e90931da18c2898d0a332523720c8d00"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774321467862,
