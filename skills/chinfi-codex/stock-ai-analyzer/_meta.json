@@ -1,11 +1,17 @@
 {
   "owner": "chinfi-codex",
   "slug": "stock-ai-analyzer",
-  "displayName": "Stock AI Analyzer",
+  "displayName": "Stock Ai Analyzer",
   "latest": {
-    "version": "2.2.1",
-    "publishedAt": 1773800643432,
-    "commit": "https://github.com/openclaw/skills/commit/c4b29efe76de58be46d071f1d3f99accfe7d9beb"
+    "version": "2.2.2",
+    "publishedAt": 1777006914429,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.2.1",
+      "publishedAt": 1773800643432,
+      "commit": "https://github.com/openclaw/skills/commit/c4b29efe76de58be46d071f1d3f99accfe7d9beb"
+    }
+  ]
 }

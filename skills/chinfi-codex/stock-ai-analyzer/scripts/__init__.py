@@ -1,1 +1,1 @@
-# Stock AI Analyzer
+# Data fetching helpers for stock-ai-analyzer.
