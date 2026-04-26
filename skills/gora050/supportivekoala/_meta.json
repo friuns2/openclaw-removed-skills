@@ -3,11 +3,16 @@
   "slug": "supportivekoala",
   "displayName": "Supportivekoala",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164878584,
-    "commit": "https://github.com/openclaw/skills/commit/b8dadf9fab699eec0a965b878f87267e45b99747"
+    "version": "1.0.3",
+    "publishedAt": 1776858699290,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164878584,
+      "commit": "https://github.com/openclaw/skills/commit/b8dadf9fab699eec0a965b878f87267e45b99747"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773914567753,
