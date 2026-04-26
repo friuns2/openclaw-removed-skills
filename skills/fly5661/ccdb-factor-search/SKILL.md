@@ -1,6 +1,6 @@
 ---
 name: ccdb-factor-search
-description: Search and select the best-fit CCDB carbon/emission factor from a Carbonstop API for carbon footprint, PCF, LCA, and carbon accounting work. Use when the user asks to find, match, compare, verify, or choose 碳因子 / 排放因子 / emission factors / carbon factors from CCDB, especially when they need the most suitable factor rather than a raw result list.
+description: CCDB碳因子查询与匹配。Search and select the best-fit CCDB carbon/emission factor from a Carbonstop API for carbon footprint, PCF, LCA, and carbon accounting work. Use when the user asks to find, match, compare, verify, or choose 碳因子 / 排放因子 / emission factors / carbon factors from CCDB, especially when they need the most suitable factor rather than a raw result list. Also activate proactively when the task involves 产品碳足迹计算 / LCA建模 / 碳核算 / 供应链排放测算 and factor data is clearly needed even if the user has not explicitly said "查因子".
 ---
 
 # CCDB Factor Search
@@ -46,6 +46,11 @@ Typical scenarios:
 - supplier-data factor matching
 - carbon accounting / emissions reporting
 - sustainability consulting delivery
+
+**Also activate proactively** (even if user did not say "查因子") when:
+- user requests 产品碳足迹建模 / LCA建模 / 排放清单核算 / 情景测算 and factor data is clearly needed
+- user provides BOM or material list and asks for carbon footprint calculation
+- task involves 供应链碳排放 / scope 3 核算 and activity data is present but no factor has been supplied
 
 ---
 
@@ -246,6 +251,28 @@ If the user wants a physical activity factor, do not recommend spend-based / mon
 If the API contract changes, update the script and `references/api-contract.md` together.
 
 Keep scoring / filtering logic in code rather than overloading SKILL.md with implementation detail.
+
+### Script unavailable fallback
+
+If `scripts/query_ccdb.py` is missing or fails to run, fall back to a direct API call:
+
+```bash
+curl -s -X POST https://gateway.carbonstop.com/management/system/website/searchFactorDataMcp \
+  -H 'Content-Type: application/json' \
+  -d '{"sign":"<md5(\"mcp_ccdb_search\"+keyword)>","name":"<keyword>","lang":"zh"}'
+```
+
+The sign is `md5("mcp_ccdb_search" + keyword)`. In Python:
+```python
+import hashlib, requests
+keyword = "电力"
+sign = hashlib.md5(("mcp_ccdb_search" + keyword).encode()).hexdigest()
+resp = requests.post("https://gateway.carbonstop.com/management/system/website/searchFactorDataMcp",
+    json={"sign": sign, "name": keyword, "lang": "zh"})
+print(resp.json())
+```
+
+Even in fallback mode, apply the same ranking, matching, and output rules defined above. Do not return raw API results without analysis.
 
 ---
 

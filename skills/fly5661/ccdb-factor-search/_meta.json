@@ -1,13 +1,18 @@
 {
   "owner": "fly5661",
   "slug": "ccdb-factor-search",
-  "displayName": "CCDB Factor Search",
+  "displayName": "Ccdb Factor Search",
   "latest": {
-    "version": "0.1.3",
-    "publishedAt": 1775557959195,
-    "commit": "https://github.com/openclaw/skills/commit/369d620ccd3cdc3b531cc1535c95e98b0b37c29b"
+    "version": "0.1.4",
+    "publishedAt": 1777033317025,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.3",
+      "publishedAt": 1775557959195,
+      "commit": "https://github.com/openclaw/skills/commit/369d620ccd3cdc3b531cc1535c95e98b0b37c29b"
+    },
     {
       "version": "0.1.2",
       "publishedAt": 1774427768019,

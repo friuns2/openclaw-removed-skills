@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4
+
+- added Chinese keywords to description frontmatter for better ClawHub search discoverability (`CCDB碳因子查询与匹配`)
+- extended description to include proactive activation rule: activate when LCA / PCF / 碳核算 tasks need factor data even if user did not explicitly say "查因子"
+- added proactive trigger section in "When to use this skill" for BOM/LCA/scope-3 implicit invocation scenarios
+- added script-unavailable fallback section with direct API call examples (curl + Python)
+- fixed `skill_name` typo in `evals/evals.json` (`ccdb-carbon-factor-search` → `ccdb-factor-search`)
+- bumped version to 0.1.4
+
 ## 0.1.3
 
 - upgraded README into a fuller public-facing skill page with capabilities, use cases, output fields, factor-type guidance, and API field checklist
