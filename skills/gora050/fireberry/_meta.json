@@ -3,11 +3,16 @@
   "slug": "fireberry",
   "displayName": "Fireberry",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165395608,
-    "commit": "https://github.com/openclaw/skills/commit/3046556dc8fd9819c6ce7fd9cfc54642beed266a"
+    "version": "1.0.3",
+    "publishedAt": 1776859324353,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165395608,
+      "commit": "https://github.com/openclaw/skills/commit/3046556dc8fd9819c6ce7fd9cfc54642beed266a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774022602540,
