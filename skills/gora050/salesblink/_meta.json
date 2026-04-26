@@ -3,11 +3,16 @@
   "slug": "salesblink",
   "displayName": "Salesblink",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166160467,
-    "commit": "https://github.com/openclaw/skills/commit/315c4780028914c0dfdd063a2e82e268d2f9f7ca"
+    "version": "1.0.3",
+    "publishedAt": 1776860032708,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166160467,
+      "commit": "https://github.com/openclaw/skills/commit/315c4780028914c0dfdd063a2e82e268d2f9f7ca"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774166619282,
