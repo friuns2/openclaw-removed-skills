@@ -3,11 +3,16 @@
   "slug": "hashnode",
   "displayName": "Hashnode",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166888154,
-    "commit": "https://github.com/openclaw/skills/commit/3a5f077a11a89e2d3439a364fd6d2135fab3c1d2"
+    "version": "1.0.3",
+    "publishedAt": 1776860563277,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166888154,
+      "commit": "https://github.com/openclaw/skills/commit/3a5f077a11a89e2d3439a364fd6d2135fab3c1d2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774321454933,
