@@ -3,11 +3,16 @@
   "slug": "serveravatar",
   "displayName": "Serveravatar",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167239648,
-    "commit": "https://github.com/openclaw/skills/commit/4d62819309b91f6fc3af42afcd7f4fa30266dd7c"
+    "version": "1.0.3",
+    "publishedAt": 1776861010064,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167239648,
+      "commit": "https://github.com/openclaw/skills/commit/4d62819309b91f6fc3af42afcd7f4fa30266dd7c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774400652898,
