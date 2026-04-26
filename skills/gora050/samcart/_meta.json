@@ -3,11 +3,16 @@
   "slug": "samcart",
   "displayName": "Samcart",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164681082,
-    "commit": "https://github.com/openclaw/skills/commit/167579ef84d3802d5c25a746042fe1df488e6f2d"
+    "version": "1.0.3",
+    "publishedAt": 1776858552087,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164681082,
+      "commit": "https://github.com/openclaw/skills/commit/167579ef84d3802d5c25a746042fe1df488e6f2d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773817411578,
