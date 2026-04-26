@@ -3,11 +3,16 @@
   "slug": "termius",
   "displayName": "Termius",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166147455,
-    "commit": "https://github.com/openclaw/skills/commit/5c53dc87d59d8066c51872ac7a5f13d8efcd3292"
+    "version": "1.0.3",
+    "publishedAt": 1776892182590,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166147455,
+      "commit": "https://github.com/openclaw/skills/commit/5c53dc87d59d8066c51872ac7a5f13d8efcd3292"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774159435067,
