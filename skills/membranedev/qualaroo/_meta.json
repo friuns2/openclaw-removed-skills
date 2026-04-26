@@ -3,11 +3,16 @@
   "slug": "qualaroo",
   "displayName": "Qualaroo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164617609,
-    "commit": "https://github.com/openclaw/skills/commit/504cd26ba0c19d3d97976d3326bfc608775d96ea"
+    "version": "1.0.3",
+    "publishedAt": 1776845159175,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164617609,
+      "commit": "https://github.com/openclaw/skills/commit/504cd26ba0c19d3d97976d3326bfc608775d96ea"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773806541876,
