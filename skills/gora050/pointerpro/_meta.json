@@ -3,11 +3,16 @@
   "slug": "pointerpro",
   "displayName": "Pointerpro",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166875576,
-    "commit": "https://github.com/openclaw/skills/commit/51e24db32bc49e698c4960889bcab13d27a66ed8"
+    "version": "1.0.3",
+    "publishedAt": 1776860540701,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166875576,
+      "commit": "https://github.com/openclaw/skills/commit/51e24db32bc49e698c4960889bcab13d27a66ed8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774321431795,
