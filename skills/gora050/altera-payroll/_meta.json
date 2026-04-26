@@ -3,11 +3,16 @@
   "slug": "altera-payroll",
   "displayName": "Altera Payroll",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167093474,
-    "commit": "https://github.com/openclaw/skills/commit/f5b68464006ab5e8163b0c54fd45a97fe5ec846a"
+    "version": "1.0.3",
+    "publishedAt": 1776892959316,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167093474,
+      "commit": "https://github.com/openclaw/skills/commit/f5b68464006ab5e8163b0c54fd45a97fe5ec846a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774380185048,
