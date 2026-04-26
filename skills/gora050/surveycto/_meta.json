@@ -3,11 +3,16 @@
   "slug": "surveycto",
   "displayName": "Surveycto",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165012091,
-    "commit": "https://github.com/openclaw/skills/commit/18fe4a059289429f8ac6212811ced3f832ea81c8"
+    "version": "1.0.3",
+    "publishedAt": 1776858939541,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165012091,
+      "commit": "https://github.com/openclaw/skills/commit/18fe4a059289429f8ac6212811ced3f832ea81c8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773943398910,
