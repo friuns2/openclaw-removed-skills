@@ -3,11 +3,16 @@
   "slug": "tutorial-docs",
   "displayName": "Tutorial Docs",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1775863516342,
-    "commit": "https://github.com/openclaw/skills/commit/6e32f91ab55072024480b598ced2770a6dcf23b9"
+    "version": "1.1.2",
+    "publishedAt": 1776831074359,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1775863516342,
+      "commit": "https://github.com/openclaw/skills/commit/6e32f91ab55072024480b598ced2770a6dcf23b9"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1774060492785,
