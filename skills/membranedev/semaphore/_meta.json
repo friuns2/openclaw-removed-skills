@@ -3,11 +3,16 @@
   "slug": "semaphore",
   "displayName": "Semaphore",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167132462,
-    "commit": "https://github.com/openclaw/skills/commit/88a7926b9cd6036569594ce3266c18bedd263b66"
+    "version": "1.0.3",
+    "publishedAt": 1776850054144,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167132462,
+      "commit": "https://github.com/openclaw/skills/commit/88a7926b9cd6036569594ce3266c18bedd263b66"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774382587537,
