@@ -3,11 +3,16 @@
   "slug": "imgix",
   "displayName": "Imgix",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166928066,
-    "commit": "https://github.com/openclaw/skills/commit/7604a79a8a86394564d24914b5d39ab6a5301ef0"
+    "version": "1.0.3",
+    "publishedAt": 1776860605895,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166928066,
+      "commit": "https://github.com/openclaw/skills/commit/7604a79a8a86394564d24914b5d39ab6a5301ef0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774325049974,
