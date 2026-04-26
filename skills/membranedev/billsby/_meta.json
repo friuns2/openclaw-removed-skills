@@ -3,11 +3,16 @@
   "slug": "billsby",
   "displayName": "Billsby",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165818440,
-    "commit": "https://github.com/openclaw/skills/commit/29b24cb68e62b408048f072d7b62cb6ce3a12708"
+    "version": "1.0.3",
+    "publishedAt": 1776847752224,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165818440,
+      "commit": "https://github.com/openclaw/skills/commit/29b24cb68e62b408048f072d7b62cb6ce3a12708"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774105367230,
