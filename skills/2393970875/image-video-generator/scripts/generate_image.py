@@ -7,6 +7,9 @@ Handles async task polling until completion.
 
 Supports Feishu webhook callback for result notification.
 Set FEISHU_WEBHOOK_URL environment variable to enable.
+
+Supports local file upload for reference images/videos.
+Local files are automatically uploaded to get public URLs before calling generation APIs.
 """
 
 import requests
@@ -19,7 +22,11 @@ import base64
 from pathlib import Path
 
 # Configuration
-BASE_URL = "https://staging.kocgo.vip/stage-api/ai"
+API_PREFIX = "https://ai.deepsop.com/prod-api/"
+BASE_URL = f"{API_PREFIX.rstrip('/')}/ai"
+FILE_UPLOAD_URL = f"{API_PREFIX.rstrip('/')}/system/fileUpload/upload"
+ESTIMATE_COST_URL = f"{BASE_URL}/estimate/cost"
+RECHARGE_URL = "https://ai.deepsop.com/"
 
 # Get API key from environment variable (required)
 API_KEY = os.environ.get("AI_ARTIST_TOKEN")
@@ -31,7 +38,7 @@ FEISHU_WEBHOOK_URL = os.environ.get("FEISHU_WEBHOOK_URL")
 def check_api_key():
     """Check if user has set their API key."""
     if not API_KEY:
-        print("❌ 错误: 未配置 AI_ARTIST_TOKEN 环境变量", file=sys.stderr)
+        print("错误：未配置 AI_ARTIST_TOKEN 环境变量", file=sys.stderr)
         print("", file=sys.stderr)
         print("请先设置你的 API Key:", file=sys.stderr)
         print("  export AI_ARTIST_TOKEN=\"sk-your_api_key_here\"", file=sys.stderr)
@@ -49,6 +56,78 @@ def get_headers():
         "Content-Type": "application/json",
         "X-Api-Key": API_KEY
     }
+
+
+def estimate_generation_cost(payload):
+    try:
+        response = requests.post(ESTIMATE_COST_URL, json=payload, headers=get_headers(), timeout=30)
+        response.raise_for_status()
+        result = response.json()
+
+        if result.get("code") != 200:
+            print(f"费用预估失败：{result.get('msg', '未知错误')}", file=sys.stderr)
+            return False
+
+        data = result.get("data") or {}
+        estimated_cost = data.get("estimatedCost")
+        sufficient_balance = data.get("sufficientBalance")
+
+        if estimated_cost is not None:
+            print(f"预估费用：{estimated_cost} K币")
+
+        if sufficient_balance is True:
+            print("余额充足，正在创建任务")
+            return True
+
+        if sufficient_balance is False:
+            print(f"余额不足，无法提交创建任务。请前往 {RECHARGE_URL} 充值 K 币后重试。", file=sys.stderr)
+            return False
+
+        print("费用预估返回结果不完整", file=sys.stderr)
+        return False
+
+    except requests.exceptions.RequestException as e:
+        print(f"费用预估网络错误：{e}", file=sys.stderr)
+        return False
+    except ValueError as e:
+        print(f"费用预估响应解析失败：{e}", file=sys.stderr)
+        return False
+
+
+def upload_file(file_path):
+    """
+    Upload a local file to the file server and get a public URL.
+    
+    Args:
+        file_path: Path to the local file
+    
+    Returns:
+        str: Public URL of the uploaded file, or None if failed
+    """
+    if not os.path.exists(file_path):
+        print(f"文件不存在：{file_path}", file=sys.stderr)
+        return None
+    
+    try:
+        with open(file_path, 'rb') as f:
+            files = {'file': (os.path.basename(file_path), f)}
+            headers = {'X-Api-Key': API_KEY}
+            
+            response = requests.post(FILE_UPLOAD_URL, headers=headers, files=files, timeout=60)
+            response.raise_for_status()
+            result = response.json()
+            
+            if result.get("code") == 200:
+                url = result.get("url")
+                print(f"文件已上传：{file_path} → {url}")
+                return url
+            else:
+                print(f"文件上传失败：{result.get('msg', '未知错误')}", file=sys.stderr)
+                return None
+                
+    except Exception as e:
+        print(f"文件上传错误：{e}", file=sys.stderr)
+        return None
 
 
 def download_image(url, output_path=None):
@@ -72,12 +151,12 @@ def download_image(url, output_path=None):
             Path(output_path).parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, 'wb') as f:
                 f.write(image_data)
-            print(f"💾 图片已保存: {output_path}")
+            print(f"图片已保存：{output_path}")
         
         return image_data
         
     except Exception as e:
-        print(f"⚠️ 下载图片失败: {e}", file=sys.stderr)
+        print(f"下载图片失败：{e}", file=sys.stderr)
         return None
 
 
@@ -107,7 +186,7 @@ def send_feishu_message(prompt, result):
                 "msg_type": "interactive",
                 "card": {
                     "header": {
-                        "title": {"tag": "plain_text", "content": "✅ 图片生成成功"},
+                        "title": {"tag": "plain_text", "content": "图片生成成功"},
                         "template": "green"
                     },
                     "elements": [
@@ -136,7 +215,7 @@ def send_feishu_message(prompt, result):
                 "msg_type": "interactive",
                 "card": {
                     "header": {
-                        "title": {"tag": "plain_text", "content": "❌ 图片生成失败"},
+                        "title": {"tag": "plain_text", "content": "图片生成失败"},
                         "template": "red"
                     },
                     "elements": [{
@@ -159,7 +238,7 @@ def send_feishu_message(prompt, result):
         return True
         
     except Exception as e:
-        print(f"[Feishu] 发送通知失败: {e}", file=sys.stderr)
+        print(f"[Feishu] 发送通知失败：{e}", file=sys.stderr)
         return False
 
 
@@ -236,6 +315,209 @@ MODEL_CONFIGS = {
             "videoUrlList": [],
             "durationList": []
         }
+    },
+    "VEO3.1FAST_LITE": {
+        "media_type": "video",
+        "type": "9",
+        "methodType": "3",
+        "default_ratio": "16:9",
+        "default_resolution": "1080p",
+        "default_duration": 8,
+        "extra_params": {
+            "generationType": "FIRST&LAST",
+            "negativePrompt": "",
+            "imageUrlList": None,
+            "firstImageUrl": None,
+            "lastImageUrl": None,
+            "audioUrl": None,
+            "videoUrlList": None,
+            "durationList": [],
+            "enhancePrompt": False,
+            "generateAudio": True,
+            "n": 1,
+            "personGeneration": "allow_adult",
+            "resizeMode": "pad",
+            "promptExtend": False,
+            "shotType": "single",
+            "durationSwitch": "1",
+            "targetMaxSize": 10,
+            "targetMinLength": 300,
+            "targetMaxLength": 6000
+        }
+    },
+    "VEO3.1PRO_LITE": {
+        "media_type": "video",
+        "type": "9",
+        "methodType": "4",
+        "default_ratio": "adaptive",
+        "default_resolution": "720p",
+        "default_duration": 8,
+        "extra_params": {
+            "generationType": "FIRST&LAST",
+            "negativePrompt": "",
+            "imageUrlList": None,
+            "firstImageUrl": None,
+            "lastImageUrl": None,
+            "audioUrl": None,
+            "videoUrlList": None,
+            "durationList": [],
+            "enhancePrompt": False,
+            "generateAudio": True,
+            "n": 1,
+            "personGeneration": "allow_adult",
+            "resizeMode": "pad",
+            "promptExtend": False,
+            "shotType": "single",
+            "durationSwitch": "1",
+            "targetMaxSize": 10,
+            "targetMinLength": 300,
+            "targetMaxLength": 6000
+        }
+    },
+    "VEO3.1FAST": {
+        "media_type": "video",
+        "type": "9",
+        "methodType": "5",
+        "default_ratio": "16:9",
+        "default_resolution": "720p",
+        "default_duration": 8,
+        "extra_params": {
+            "generationType": "FIRST&LAST",
+            "negativePrompt": "",
+            "imageUrlList": None,
+            "firstImageUrl": None,
+            "lastImageUrl": None,
+            "audioUrl": None,
+            "videoUrlList": None,
+            "durationList": [],
+            "enhancePrompt": False,
+            "generateAudio": True,
+            "n": 1,
+            "personGeneration": "allow_adult",
+            "resizeMode": "pad",
+            "promptExtend": False,
+            "shotType": "single",
+            "durationSwitch": "1",
+            "targetMaxSize": 10,
+            "targetMinLength": 300,
+            "targetMaxLength": 6000
+        }
+    },
+    "VEO3.1PRO": {
+        "media_type": "video",
+        "type": "9",
+        "methodType": "6",
+        "default_ratio": "16:9",
+        "default_resolution": "1080p",
+        "default_duration": 8,
+        "extra_params": {
+            "generationType": "FIRST&LAST",
+            "negativePrompt": "",
+            "imageUrlList": None,
+            "firstImageUrl": None,
+            "lastImageUrl": None,
+            "audioUrl": None,
+            "videoUrlList": None,
+            "durationList": [],
+            "enhancePrompt": False,
+            "generateAudio": True,
+            "n": 1,
+            "personGeneration": "allow_adult",
+            "resizeMode": "pad",
+            "promptExtend": False,
+            "shotType": "single",
+            "durationSwitch": "1",
+            "targetMaxSize": 10,
+            "targetMinLength": 300,
+            "targetMaxLength": 6000
+        }
+    },
+    "WAN2.6_T2V": {
+        "media_type": "video",
+        "type": "9",
+        "methodType": "7",
+        "default_ratio": "16:9",
+        "default_resolution": "720p",
+        "default_duration": 10,
+        "extra_params": {
+            "generationType": "TEXT",
+            "negativePrompt": "",
+            "imageUrlList": None,
+            "firstImageUrl": None,
+            "lastImageUrl": None,
+            "audioUrl": None,
+            "videoUrlList": None,
+            "durationList": [],
+            "enhancePrompt": False,
+            "generateAudio": True,
+            "n": 1,
+            "personGeneration": "allow_adult",
+            "resizeMode": "pad",
+            "promptExtend": False,
+            "shotType": "single",
+            "durationSwitch": "1",
+            "targetMaxSize": 10,
+            "targetMinLength": 360,
+            "targetMaxLength": 2000
+        }
+    },
+    "WAN2.6_I2V": {
+        "media_type": "video",
+        "type": "9",
+        "methodType": "8",
+        "default_ratio": "16:9",
+        "default_resolution": "720p",
+        "default_duration": 10,
+        "extra_params": {
+            "generationType": "FIRST&LAST",
+            "negativePrompt": "",
+            "imageUrlList": None,
+            "firstImageUrl": None,
+            "lastImageUrl": None,
+            "audioUrl": None,
+            "videoUrlList": None,
+            "durationList": [],
+            "enhancePrompt": False,
+            "generateAudio": True,
+            "n": 1,
+            "personGeneration": "allow_adult",
+            "resizeMode": "pad",
+            "promptExtend": False,
+            "shotType": "single",
+            "durationSwitch": "1",
+            "targetMaxSize": 10,
+            "targetMinLength": 360,
+            "targetMaxLength": 2000
+        }
+    },
+    "WAN2.6_R2V": {
+        "media_type": "video",
+        "type": "9",
+        "methodType": "9",
+        "default_ratio": "16:9",
+        "default_resolution": "720p",
+        "default_duration": 10,
+        "extra_params": {
+            "generationType": "REFERENCE",
+            "negativePrompt": "",
+            "imageUrlList": None,
+            "firstImageUrl": None,
+            "lastImageUrl": None,
+            "audioUrl": None,
+            "videoUrlList": None,
+            "durationList": [],
+            "enhancePrompt": False,
+            "generateAudio": True,
+            "n": 1,
+            "personGeneration": "allow_adult",
+            "resizeMode": "pad",
+            "promptExtend": False,
+            "shotType": "single",
+            "durationSwitch": "1",
+            "targetMaxSize": 10,
+            "targetMinLength": 240,
+            "targetMaxLength": 5000
+        }
     }
 }
 
@@ -243,7 +525,8 @@ MODEL_CONFIGS = {
 def create_video_task(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=None,
                       duration=None, first_image_url=None, last_image_url=None,
                       generate_audio=None, scale_factor=None, generation_type=None,
-                      enhance_prompt=None, prompt_extend=None):
+                      enhance_prompt=None, prompt_extend=None, audio_url=None,
+                      image_url_list=None, video_url_list=None):
     """Create a video generation task.
 
     Args:
@@ -259,11 +542,14 @@ def create_video_task(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=N
         generation_type: Generation type override, e.g. 'FIRST&LAST', 'TEXT'
         enhance_prompt: Whether to enhance the prompt
         prompt_extend: Whether to extend the prompt
+        audio_url: URL of audio file (WAN2.6 series)
+        image_url_list: List of image URLs for reference (WAN2.6_R2V)
+        video_url_list: List of video URLs for reference (WAN2.6_R2V)
     """
     url = f"{BASE_URL}/AiArtistRecord"
 
     if model not in MODEL_CONFIGS or MODEL_CONFIGS[model]["media_type"] != "video":
-        print(f"❌ 不支持的视频模型: {model}", file=sys.stderr)
+        print(f"不支持的视频模型：{model}", file=sys.stderr)
         return None
 
     config = MODEL_CONFIGS[model]
@@ -273,7 +559,7 @@ def create_video_task(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=N
 
     parameter = dict(config["extra_params"])  # copy defaults
 
-    # Resolve pixel size from ratio + resolution for SORA2
+    # Resolve pixel size from ratio + resolution
     resolution_size_map = {
         ("16:9", "720p"): "1280x720",
         ("16:9", "1080p"): "1920x1080",
@@ -281,6 +567,10 @@ def create_video_task(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=N
         ("9:16", "1080p"): "1080x1920",
         ("1:1", "720p"): "720x720",
         ("1:1", "1080p"): "1080x1080",
+        ("3:4", "720p"): "720x960",
+        ("3:4", "1080p"): "1080x1440",
+        ("4:3", "720p"): "960x720",
+        ("4:3", "1080p"): "1440x1080",
     }
     pixel_size = resolution_size_map.get((effective_ratio, effective_resolution), effective_ratio)
 
@@ -293,12 +583,48 @@ def create_video_task(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=N
         "duration": effective_duration,
     })
 
+    # VEO3.1 series: duration must be 4 or 8 seconds
+    if model in ["VEO3.1FAST_LITE", "VEO3.1PRO_LITE", "VEO3.1FAST", "VEO3.1PRO"]:
+        # Validate duration (must be 4 or 8)
+        if effective_duration not in [4, 8]:
+            print(f"VEO3.1 系列模型时长必须是 4 或 8 秒，当前 {effective_duration} 秒，自动调整为 8 秒")
+            effective_duration = 8
+            parameter["duration"] = effective_duration
+        # For VEO3.1, size should match ratio (not pixel resolution)
+        parameter["size"] = effective_ratio
+
+    # WAN2.6 series: duration must be 3-15 seconds
+    if model in ["WAN2.6_T2V", "WAN2.6_I2V", "WAN2.6_R2V"]:
+        # Validate duration (must be 3-15)
+        if effective_duration < 3 or effective_duration > 15:
+            print(f"WAN2.6 系列模型时长必须是 3-15 秒，当前 {effective_duration} 秒，自动调整为 10 秒")
+            effective_duration = 10
+            parameter["duration"] = effective_duration
+        # For WAN2.6, size should be pixel format for some models
+        if model == "WAN2.6_T2V":
+            parameter["size"] = f"{pixel_size.replace('x', '*')}"  # e.g., "1280*720"
+        elif model == "WAN2.6_I2V":
+            parameter["size"] = effective_ratio  # e.g., "16:9"
+        elif model == "WAN2.6_R2V":
+            parameter["size"] = f"{pixel_size.replace('x', '*')}"  # e.g., "1280*720"
+
     # SORA2: auto-switch generationType based on image inputs
     if model == "SORA2" and generation_type is None:
         if first_image_url or last_image_url:
             parameter["generationType"] = "FIRST&LAST"
         else:
             parameter["generationType"] = "FIRST&LAST"  # text-to-video also uses FIRST&LAST with null image URLs
+
+    # WAN2.6_I2V: auto-switch generationType based on first_image_url
+    if model == "WAN2.6_I2V" and generation_type is None:
+        if first_image_url:
+            parameter["generationType"] = "FIRST&LAST"
+        else:
+            parameter["generationType"] = "FIRST&LAST"
+
+    # WAN2.6_R2V: set generationType to REFERENCE
+    if model == "WAN2.6_R2V":
+        parameter["generationType"] = "REFERENCE"
 
     # Apply optional overrides
     if first_image_url is not None:
@@ -315,12 +641,22 @@ def create_video_task(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=N
         parameter["enhancePrompt"] = enhance_prompt
     if prompt_extend is not None:
         parameter["promptExtend"] = prompt_extend
+    # WAN2.6 series: audio_url, image_url_list, video_url_list
+    if audio_url is not None:
+        parameter["audioUrl"] = audio_url
+    if image_url_list is not None:
+        parameter["imageUrlList"] = image_url_list
+    if video_url_list is not None:
+        parameter["videoUrlList"] = video_url_list
 
     payload = {
         "type": config["type"],
         "methodType": config["methodType"],
         "parameter": json.dumps(parameter)
     }
+
+    if not estimate_generation_cost(payload):
+        return None
 
     try:
         response = requests.post(url, json=payload, headers=get_headers(), timeout=30)
@@ -330,18 +666,20 @@ def create_video_task(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=N
         if result.get("code") == 200 and result.get("data"):
             return result["data"][0]
         else:
-            print(f"❌ 创建视频任务失败: {result.get('msg', '未知错误')}", file=sys.stderr)
+            print(f"创建视频任务失败：{result.get('msg', '未知错误')}", file=sys.stderr)
             return None
 
     except requests.exceptions.RequestException as e:
-        print(f"❌ 网络错误: {e}", file=sys.stderr)
+        print(f"网络错误：{e}", file=sys.stderr)
         return None
 
 
 def generate_video(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=None,
                    duration=None, poll_interval=5, first_image_url=None,
                    last_image_url=None, generate_audio=None, scale_factor=None,
-                   generation_type=None, enhance_prompt=None, prompt_extend=None):
+                   generation_type=None, enhance_prompt=None, prompt_extend=None,
+                   first_image_path=None, last_image_path=None, audio_url=None,
+                   image_url_list=None, video_url_list=None, audio_path=None):
     """Generate a video from a text prompt.
 
     Args:
@@ -358,21 +696,41 @@ def generate_video(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=None
         generation_type: Generation type override
         enhance_prompt: Whether to enhance the prompt
         prompt_extend: Whether to extend the prompt
+        first_image_path: Local path to first frame image (auto-uploaded)
+        last_image_path: Local path to last frame image (auto-uploaded)
+        audio_url: URL of audio file (WAN2.6 series)
+        audio_path: Local path to audio file (auto-uploaded, WAN2.6 series)
+        image_url_list: List of image URLs for reference (WAN2.6_R2V)
+        video_url_list: List of video URLs for reference (WAN2.6_R2V)
 
     Returns:
         dict with 'status', 'url', 'message'
     """
+    # Upload local files to get URLs if provided
+    if first_image_path and not first_image_url:
+        first_image_url = upload_file(first_image_path)
+    if last_image_path and not last_image_url:
+        last_image_url = upload_file(last_image_path)
+    if audio_path and not audio_url:
+        audio_url = upload_file(audio_path)
+    
     config = MODEL_CONFIGS.get(model, {})
     effective_ratio = ratio or config.get("default_ratio", "16:9")
     effective_resolution = resolution or config.get("default_resolution", "720p")
     effective_duration = duration or config.get("default_duration", 10)
 
-    print(f"🎬 正在生成视频: {prompt}")
-    print(f"   模型: {model} | 分辨率: {effective_resolution} | 比例: {effective_ratio} | 时长: {effective_duration}s")
+    print(f"正在生成视频：{prompt}")
+    print(f"   模型：{model} | 分辨率：{effective_resolution} | 比例：{effective_ratio} | 时长：{effective_duration}s")
     if first_image_url:
-        print(f"   首帧图片: {first_image_url}")
+        print(f"   首帧图片：{first_image_url}")
     if last_image_url:
-        print(f"   尾帧图片: {last_image_url}")
+        print(f"   尾帧图片：{last_image_url}")
+    if audio_url:
+        print(f"   音频：{audio_url}")
+    if image_url_list:
+        print(f"   参考图片：{image_url_list}")
+    if video_url_list:
+        print(f"   参考视频：{video_url_list}")
 
     task_id = create_video_task(
         prompt, model, ratio, resolution, duration,
@@ -382,25 +740,28 @@ def generate_video(prompt, model="SEEDANCE_1_5_PRO", ratio=None, resolution=None
         scale_factor=scale_factor,
         generation_type=generation_type,
         enhance_prompt=enhance_prompt,
-        prompt_extend=prompt_extend
+        prompt_extend=prompt_extend,
+        audio_url=audio_url,
+        image_url_list=image_url_list,
+        video_url_list=video_url_list
     )
     if not task_id:
         return None
 
-    print(f"   任务ID: {task_id}")
+    print(f"   任务 ID: {task_id}")
 
     result = poll_task_status(task_id, interval=poll_interval, max_wait=600)
 
     if result and result["status"] == "SUCCESS":
-        print(f"✅ 视频生成成功!")
-        print(f"   视频链接: {result['url']}")
+        print(f"视频生成成功!")
+        print(f"   视频链接：{result['url']}")
     else:
-        print(f"❌ 视频生成失败: {result.get('message', '未知错误')}", file=sys.stderr)
+        print(f"视频生成失败：{result.get('message', '未知错误')}", file=sys.stderr)
 
     return result
 
 
-def create_generation_task(prompt, quality="2K", size=None, model="SEEDREAM5_0"):
+def create_generation_task(prompt, quality="2K", size=None, model="SEEDREAM5_0", reference_image_url=None):
     """Create an image generation task.
     
     Args:
@@ -408,11 +769,12 @@ def create_generation_task(prompt, quality="2K", size=None, model="SEEDREAM5_0")
         quality: Image quality (2K/4K)
         size: Image dimensions. SEEDREAM5_0 uses e.g. '2048x2048', NANO_BANANA_2 uses e.g. '1:1'
         model: Model to use, one of: SEEDREAM5_0, NANO_BANANA_2
+        reference_image_url: Optional reference image URL for image-to-image generation
     """
     url = f"{BASE_URL}/AiArtistRecord"
     
     if model not in MODEL_CONFIGS:
-        print(f"❌ 不支持的模型: {model}，可用模型: {list(MODEL_CONFIGS.keys())}", file=sys.stderr)
+        print(f"不支持的模型：{model}，可用模型：{list(MODEL_CONFIGS.keys())}", file=sys.stderr)
         return None
     
     config = MODEL_CONFIGS[model]
@@ -421,10 +783,15 @@ def create_generation_task(prompt, quality="2K", size=None, model="SEEDREAM5_0")
     if size is None:
         size = config["default_size"]
     
+    # Build image array - support reference image for image-to-image
+    image_array = []
+    if reference_image_url:
+        image_array = [reference_image_url]
+    
     parameter = {
         "methodType": config["methodType"],
         "prompt": prompt,
-        "image": [],
+        "image": image_array,
         "quality": quality,
         "size": size,
         "webSearch": False,
@@ -440,6 +807,9 @@ def create_generation_task(prompt, quality="2K", size=None, model="SEEDREAM5_0")
         "parameter": json.dumps(parameter)
     }
     
+    if not estimate_generation_cost(payload):
+        return None
+    
     try:
         response = requests.post(url, json=payload, headers=get_headers(), timeout=30)
         response.raise_for_status()
@@ -448,11 +818,11 @@ def create_generation_task(prompt, quality="2K", size=None, model="SEEDREAM5_0")
         if result.get("code") == 200 and result.get("data"):
             return result["data"][0]
         else:
-            print(f"❌ 创建任务失败: {result.get('msg', '未知错误')}", file=sys.stderr)
+            print(f"创建任务失败：{result.get('msg', '未知错误')}", file=sys.stderr)
             return None
             
     except requests.exceptions.RequestException as e:
-        print(f"❌ 网络错误: {e}", file=sys.stderr)
+        print(f"网络错误：{e}", file=sys.stderr)
         return None
 
 
@@ -479,7 +849,7 @@ def poll_task_status(task_id, interval=5, max_wait=600):
             
             # Only print status when it changes
             if status != last_status:
-                print(f"⏳ {status} - {data.get('message', '')}")
+                print(f"{status} - {data.get('message', '')}")
                 last_status = status
             
             if status == "SUCCESS":
@@ -499,7 +869,7 @@ def poll_task_status(task_id, interval=5, max_wait=600):
                 elapsed += interval
                 
         except requests.exceptions.RequestException as e:
-            print(f"⚠️ 查询状态出错: {e}", file=sys.stderr)
+            print(f"查询状态出错：{e}", file=sys.stderr)
             time.sleep(interval)
             elapsed += interval
     
@@ -511,7 +881,8 @@ def poll_task_status(task_id, interval=5, max_wait=600):
 
 
 def generate_image(prompt, quality="2K", size=None, poll_interval=5,
-                   download=False, output_dir=None, model="SEEDREAM5_0"):
+                   download=False, output_dir=None, model="SEEDREAM5_0",
+                   reference_image_path=None, reference_image_url=None):
     """
     Main function to generate an image from a prompt.
     
@@ -524,6 +895,8 @@ def generate_image(prompt, quality="2K", size=None, poll_interval=5,
         download: Whether to download the image
         output_dir: Directory to save the image (default: workspace/images)
         model: Model to use. Options: SEEDREAM5_0, NANO_BANANA_2
+        reference_image_path: Local path to reference image (auto-uploaded)
+        reference_image_url: URL of reference image (if already uploaded)
     
     Returns:
         dict with generation result including 'url', 'local_path', 'data_uri' if successful
@@ -531,22 +904,28 @@ def generate_image(prompt, quality="2K", size=None, poll_interval=5,
     config = MODEL_CONFIGS.get(model, {})
     effective_size = size or config.get("default_size", "2048x2048")
 
-    print(f"🎨 正在生成: {prompt}")
-    print(f"   模型: {model} | 质量: {quality} | 尺寸: {effective_size}")
+    # Upload reference image if local path provided
+    if reference_image_path and not reference_image_url:
+        reference_image_url = upload_file(reference_image_path)
+
+    print(f"正在生成：{prompt}")
+    print(f"   模型：{model} | 质量：{quality} | 尺寸：{effective_size}")
+    if reference_image_url:
+        print(f"   参考图：{reference_image_url}")
     
     # Step 1: Create task
-    task_id = create_generation_task(prompt, quality, size, model)
+    task_id = create_generation_task(prompt, quality, size, model, reference_image_url)
     if not task_id:
         return None
     
-    print(f"   任务ID: {task_id}")
+    print(f"   任务 ID: {task_id}")
     
     # Step 2: Poll until complete
     result = poll_task_status(task_id, interval=poll_interval)
     
     if result and result["status"] == "SUCCESS":
-        print(f"✅ 生成成功!")
-        print(f"   图片链接: {result['url']}")
+        print(f"生成成功!")
+        print(f"   图片链接：{result['url']}")
         
         # Download image if requested
         if download and result.get("url"):
@@ -567,7 +946,7 @@ def generate_image(prompt, quality="2K", size=None, poll_interval=5,
         
         return result
     else:
-        print(f"❌ 生成失败: {result.get('message', '未知错误')}", file=sys.stderr)
+        print(f"生成失败：{result.get('message', '未知错误')}", file=sys.stderr)
         return result
 
 
@@ -582,28 +961,31 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="AI 图片/视频生成器",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=f"图片模型: {', '.join(image_models)}\n视频模型: {', '.join(video_models)}"
+        epilog=f"图片模型：{', '.join(image_models)}\n视频模型：{', '.join(video_models)}"
     )
     parser.add_argument("prompt", help="生成提示词")
     parser.add_argument("--model", default="SEEDREAM5_0",
                         choices=all_models,
-                        help="生成模型 (默认: SEEDREAM5_0)")
+                        help="生成模型 (默认：SEEDREAM5_0)")
     # 图片专属参数
-    parser.add_argument("--quality", default="2K", help="[图片] 图片质量 (默认: 2K)")
+    parser.add_argument("--quality", default="2K", help="[图片] 图片质量 (默认：2K)")
     parser.add_argument("--size", default=None, help="[图片] 图片尺寸，不传则使用模型默认值")
     parser.add_argument("--download", action="store_true", help="[图片] 下载图片到本地")
     parser.add_argument("--output-dir", help="[图片] 图片保存目录")
-    parser.add_argument("--markdown-output", action="store_true", help="以Markdown格式输出图片链接")
+    parser.add_argument("--markdown-output", action="store_true", help="以 Markdown 格式输出图片链接")
+    parser.add_argument("--reference-image", default=None, help="[图片] 参考图本地路径，自动上传后作为 image-to-image 参考")
     # 视频专属参数
-    parser.add_argument("--ratio", default=None, help="[视频] 画面比例，如 16:9、9:16、1:1 (默认: 16:9)")
-    parser.add_argument("--resolution", default=None, help="[视频] 分辨率，如 720p、1080p (默认: 720p)")
-    parser.add_argument("--duration", type=int, default=None, help="[视频] 视频时长(秒) (默认: 10)")
+    parser.add_argument("--ratio", default=None, help="[视频] 画面比例，如 16:9、9:16、1:1 (默认：16:9)")
+    parser.add_argument("--resolution", default=None, help="[视频] 分辨率，如 720p、1080p (默认：720p)")
+    parser.add_argument("--duration", type=int, default=None, help="[视频] 视频时长 (秒) (默认：10)")
     # SORA2 专属参数
-    parser.add_argument("--first-image-url", default=None, help="[SORA2] 首帧图片URL（FIRST&LAST模式）")
-    parser.add_argument("--last-image-url", default=None, help="[SORA2] 尾帧图片URL（FIRST&LAST模式）")
+    parser.add_argument("--first-image-url", default=None, help="[SORA2] 首帧图片 URL（FIRST&LAST 模式）")
+    parser.add_argument("--last-image-url", default=None, help="[SORA2] 尾帧图片 URL（FIRST&LAST 模式）")
+    parser.add_argument("--first-image", default=None, help="[SORA2] 首帧图片本地路径，自动上传")
+    parser.add_argument("--last-image", default=None, help="[SORA2] 尾帧图片本地路径，自动上传")
     parser.add_argument("--generate-audio", action="store_true", default=None, help="[SORA2] 生成音频")
     parser.add_argument("--no-audio", action="store_true", help="[SORA2] 不生成音频")
-    parser.add_argument("--scale-factor", type=float, default=None, help="[SORA2] 缩放系数 (默认: 0.5)")
+    parser.add_argument("--scale-factor", type=float, default=None, help="[SORA2] 缩放系数 (默认：0.5)")
     parser.add_argument("--generation-type", default=None, help="[SORA2] 生成类型，如 FIRST&LAST、TEXT")
     # 通用参数
     parser.add_argument("--interval", type=int, default=5, help="轮询间隔秒数")
@@ -629,6 +1011,8 @@ if __name__ == "__main__":
             poll_interval=args.interval,
             first_image_url=args.first_image_url,
             last_image_url=args.last_image_url,
+            first_image_path=args.first_image,
+            last_image_path=args.last_image,
             generate_audio=gen_audio,
             scale_factor=args.scale_factor,
             generation_type=args.generation_type
@@ -648,7 +1032,8 @@ if __name__ == "__main__":
             poll_interval=args.interval,
             download=args.download,
             output_dir=args.output_dir,
-            model=args.model
+            model=args.model,
+            reference_image_path=args.reference_image
         )
 
         # Send result to Feishu if webhook is configured

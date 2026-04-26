@@ -2,7 +2,42 @@
 
 ## API 端点
 
-### 1. 创建生成任务
+### 1. 预估生成费用
+
+**POST** `/ai/estimate/cost`
+
+**请求头:**
+```
+Content-Type: application/json
+X-Api-Key: <api_key>
+```
+
+**请求体:**
+```json
+{
+  "type": "10",
+  "methodType": "4",
+  "parameter": "{...}"
+}
+```
+
+说明：请求体与创建生成任务时使用的参数完全一致，需要在正式创建任务前先调用本接口。
+
+**成功响应:**
+```json
+{
+  "msg": "操作成功",
+  "code": 200,
+  "data": {
+    "estimatedCost": 3.500000,
+    "sufficientBalance": true
+  }
+}
+```
+
+当 `sufficientBalance` 为 `false` 时，表示余额不足，不应继续提交创建任务，需要提醒用户先充值 K 币。
+
+### 2. 创建生成任务
 
 **POST** `/ai/AiArtistRecord`
 
@@ -60,7 +95,7 @@ X-Api-Key: <api_key>
 }
 ```
 
-### 2. 查询任务状态
+### 3. 查询任务状态
 
 **GET** `/ai/AiArtistImage/getInfoByArtistId/{artistId}`
 
@@ -100,7 +135,7 @@ X-Api-Key: <api_key>
 
 ```bash
 # 使用 SEEDREAM5_0 模型创建任务
-curl -X POST "https://staging.kocgo.vip/stage-api/ai/AiArtistRecord" \
+curl -X POST "https://ai.deepsop.com/prod-api/ai/AiArtistRecord" \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: <api_key>" \
   -d '{
@@ -110,7 +145,7 @@ curl -X POST "https://staging.kocgo.vip/stage-api/ai/AiArtistRecord" \
   }'
 
 # 使用 NANO_BANANA_2 模型创建任务
-curl -X POST "https://staging.kocgo.vip/stage-api/ai/AiArtistRecord" \
+curl -X POST "https://ai.deepsop.com/prod-api/ai/AiArtistRecord" \
   -H "Content-Type: application/json" \
   -H "X-Api-Key: <api_key>" \
   -d '{
@@ -120,6 +155,6 @@ curl -X POST "https://staging.kocgo.vip/stage-api/ai/AiArtistRecord" \
   }'
 
 # 查询状态
-curl -X GET "https://staging.kocgo.vip/stage-api/ai/AiArtistImage/getInfoByArtistId/<task_id>" \
+curl -X GET "https://ai.deepsop.com/prod-api/ai/AiArtistImage/getInfoByArtistId/<task_id>" \
   -H "X-Api-Key: <api_key>"
 ```

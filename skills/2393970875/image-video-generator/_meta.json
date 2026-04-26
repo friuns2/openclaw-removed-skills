@@ -3,11 +3,16 @@
   "slug": "image-video-generator",
   "displayName": "支持图片生成（SEEDREAM5_0/NANO_BANANA_2）和视频生成（SEEDANCE_1_5_PRO/SORA2），SORA2 支持文生视频和首尾帧图生视频",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1773798292515,
-    "commit": "https://github.com/openclaw/skills/commit/950056ad5f1403afb876ad9243aa6fce70e7857c"
+    "version": "1.0.3",
+    "publishedAt": 1777026605223,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1773798292515,
+      "commit": "https://github.com/openclaw/skills/commit/950056ad5f1403afb876ad9243aa6fce70e7857c"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1773738894195,
