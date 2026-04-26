@@ -3,11 +3,16 @@
   "slug": "facturadirecta",
   "displayName": "Facturadirecta",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165126017,
-    "commit": "https://github.com/openclaw/skills/commit/829af69d7ca58c518493827edac709a5d13784f1"
+    "version": "1.0.3",
+    "publishedAt": 1776859126003,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165126017,
+      "commit": "https://github.com/openclaw/skills/commit/829af69d7ca58c518493827edac709a5d13784f1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773961402607,
