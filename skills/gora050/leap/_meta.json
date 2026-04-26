@@ -3,11 +3,16 @@
   "slug": "leap",
   "displayName": "Leap",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166983218,
-    "commit": "https://github.com/openclaw/skills/commit/10806ddaf2616d16bb4b53c05cabb2a03ae3b671"
+    "version": "1.0.3",
+    "publishedAt": 1776860711069,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166983218,
+      "commit": "https://github.com/openclaw/skills/commit/10806ddaf2616d16bb4b53c05cabb2a03ae3b671"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774335828244,
