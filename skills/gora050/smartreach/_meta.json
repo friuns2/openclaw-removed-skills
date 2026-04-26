@@ -3,11 +3,16 @@
   "slug": "smartreach",
   "displayName": "Smartreach",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166156236,
-    "commit": "https://github.com/openclaw/skills/commit/53e67fa5665a16598664d7b06b63481a5e9b50cf"
+    "version": "1.0.3",
+    "publishedAt": 1776860025695,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166156236,
+      "commit": "https://github.com/openclaw/skills/commit/53e67fa5665a16598664d7b06b63481a5e9b50cf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774166613019,
