@@ -3,11 +3,16 @@
   "slug": "pumble",
   "displayName": "Pumble",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166677228,
-    "commit": "https://github.com/openclaw/skills/commit/7dbe89f84aa42f3f1e7891bd82fc2189da3d5c26"
+    "version": "1.0.3",
+    "publishedAt": 1776848961691,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166677228,
+      "commit": "https://github.com/openclaw/skills/commit/7dbe89f84aa42f3f1e7891bd82fc2189da3d5c26"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774296143367,
