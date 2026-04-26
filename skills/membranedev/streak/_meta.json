@@ -3,11 +3,16 @@
   "slug": "streak",
   "displayName": "Streak",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165261082,
-    "commit": "https://github.com/openclaw/skills/commit/8048cdf0a7013addaccab0fb8c26dc377876f5bd"
+    "version": "1.0.3",
+    "publishedAt": 1776846620275,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165261082,
+      "commit": "https://github.com/openclaw/skills/commit/8048cdf0a7013addaccab0fb8c26dc377876f5bd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773993743501,
