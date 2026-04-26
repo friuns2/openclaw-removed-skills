@@ -3,11 +3,16 @@
   "slug": "tapfiliate",
   "displayName": "Tapfiliate",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165728227,
-    "commit": "https://github.com/openclaw/skills/commit/45be1415d236b67324bd9ab2f0910dedfed77049"
+    "version": "1.0.3",
+    "publishedAt": 1776847636193,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165728227,
+      "commit": "https://github.com/openclaw/skills/commit/45be1415d236b67324bd9ab2f0910dedfed77049"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774087351099,
