@@ -3,11 +3,16 @@
   "slug": "kadoa",
   "displayName": "Kadoa",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165661957,
-    "commit": "https://github.com/openclaw/skills/commit/83bcb1cd4f2d17f4a7f65db19f7c71e623ee382e"
+    "version": "1.0.3",
+    "publishedAt": 1776859689922,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165661957,
+      "commit": "https://github.com/openclaw/skills/commit/83bcb1cd4f2d17f4a7f65db19f7c71e623ee382e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058655586,
