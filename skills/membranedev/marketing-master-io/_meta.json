@@ -3,11 +3,16 @@
   "slug": "marketing-master-io",
   "displayName": "Marketing Master Io",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165745994,
-    "commit": "https://github.com/openclaw/skills/commit/248df842dfd40cf1122482739b244c62e85703ea"
+    "version": "1.0.3",
+    "publishedAt": 1776847667598,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165745994,
+      "commit": "https://github.com/openclaw/skills/commit/248df842dfd40cf1122482739b244c62e85703ea"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774087372991,
