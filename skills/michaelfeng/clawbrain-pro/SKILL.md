@@ -1,5 +1,5 @@
 ---
-name: clawbrain-pro
+name: ClawBrain Pro
 description: ClawBrain v1.6 — 更准、更稳、越用越懂你的大模型。记忆系统 + 数据保真 + 自动容错 + 输出验证。21 场景评测第一。
 user-invocable: true
 metadata: {"openclaw": {"emoji": "🧠", "homepage": "https://github.com/michaelfeng/clawbrain", "requires": {}}}
