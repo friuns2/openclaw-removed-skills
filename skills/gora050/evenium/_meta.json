@@ -3,9 +3,15 @@
   "slug": "evenium",
   "displayName": "Evenium",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774217067806,
-    "commit": "https://github.com/openclaw/skills/commit/9dbe73c0763234237e987a59fced700904a08d42"
+    "version": "1.0.3",
+    "publishedAt": 1776860219633,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774217067806,
+      "commit": "https://github.com/openclaw/skills/commit/9dbe73c0763234237e987a59fced700904a08d42"
+    }
+  ]
 }
