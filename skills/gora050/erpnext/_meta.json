@@ -3,11 +3,16 @@
   "slug": "erpnext",
   "displayName": "Erpnext",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167217840,
-    "commit": "https://github.com/openclaw/skills/commit/035cfbe39b3adf6a1c66c259d09f244ca78fbdda"
+    "version": "1.0.3",
+    "publishedAt": 1776860971719,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167217840,
+      "commit": "https://github.com/openclaw/skills/commit/035cfbe39b3adf6a1c66c259d09f244ca78fbdda"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774393439093,
