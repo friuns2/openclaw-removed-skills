@@ -3,11 +3,16 @@
   "slug": "maxmind-minfraud",
   "displayName": "Maxmind Minfraud",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167209784,
-    "commit": "https://github.com/openclaw/skills/commit/eb93938360a8dbc44cfdbf52cabbc87c5f34df0f"
+    "version": "1.0.3",
+    "publishedAt": 1776860941167,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167209784,
+      "commit": "https://github.com/openclaw/skills/commit/eb93938360a8dbc44cfdbf52cabbc87c5f34df0f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774393425723,
