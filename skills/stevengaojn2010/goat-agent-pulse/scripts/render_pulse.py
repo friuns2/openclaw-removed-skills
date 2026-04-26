@@ -12,7 +12,6 @@ def main():
     print(f"status: {data.get('status', 'unknown')}")
     print(f"interruptibility: {data.get('interruptibility', 'medium')}")
     print(f"acceptNewTask: {data.get('acceptNewTask', 'caution')}")
-    print(f"contextRatio: {data.get('contextRatio', 'unknown')}")
     print(f"reason: {data.get('reason', 'insufficient signals')}")
 
 

@@ -35,6 +35,8 @@ Do not treat the current pulse interaction as proof that the agent is busy.
 - `hasStartedWork`: bool
 - `deliveryDue`: bool
 
+For OpenClaw-style runtimes, ignore routine system completion notices and pulse-check noise when estimating `queuedMessages` or recent work pressure.
+
 ## Default classification
 
 ### blocked

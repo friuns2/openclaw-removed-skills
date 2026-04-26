@@ -1,6 +1,6 @@
 ---
 name: agent-pulse
-description: Standardized agent interruptibility and load-status check with fixed trigger words and fixed output. Use when the user sends `Agent Pulse` or `/pulse`, asks whether the agent is busy, asks whether it can take a new task, or needs a compact status card about availability, backlog, blocking, or interruptibility. Prefer this low-cost rule-based skill before any heavy reasoning.
+description: Standardized agent interruptibility and load-status check with fixed trigger words and fixed output. Use when the user sends `Agent Pulse` or `/pulse`, asks whether the agent is busy, asks whether it can take a new task, asks if now is a good time to interrupt, or uses natural language such as `你现在忙吗`, `忙不忙`, `现在方便吗`, `能接新任务吗`, `能插个任务吗`. Prefer this low-cost rule-based skill before any heavy reasoning.
 ---
 
 # Agent Pulse
@@ -17,21 +17,24 @@ Treat these as direct pulse requests:
 - `Agent Pulse`
 - `/pulse`
 - `你现在忙吗`
+- `忙不忙`
+- `现在方便吗`
 - `现在负荷怎么样`
 - `能接新任务吗`
+- `能插个任务吗`
+- `现在能接活吗`
 
 If the user explicitly uses `Agent Pulse` or `/pulse`, always return the fixed pulse card format and do not switch into conversational explanation unless asked.
 
 ## Fixed output contract
 
-Return exactly these five lines after the first line label:
+Return exactly these four lines after the first line label:
 
 ```text
 Agent Pulse
 status: <idle|light|busy|blocked|unknown>
 interruptibility: <high|medium|low>
 acceptNewTask: <yes|caution|no>
-contextRatio: <e.g. 67%|unknown>
 reason: <short reason>
 ```
 
@@ -40,7 +43,6 @@ Rules:
 - No bullets by default
 - No long explanation unless the user asks why
 - Keep `reason` under 12 words when possible
-- Include current context usage ratio when available
 
 ## Status meanings
 
@@ -57,13 +59,17 @@ Rules:
 Use only cheap signals first:
 - running task or stream
 - queued messages
-- blocked/waiting state
+- blocked or waiting state
 - recent activity recency
 - obvious backlog signs
 - active project being advanced
 - pending action items not yet delivered
 - work already started even if no heavy tool is currently running
-- release-critical / due-soon work
+- release-critical or due-soon work
+- current tool or exec activity when visible
+- whether the agent is waiting on the user or an external dependency
+
+For OpenClaw-style environments, prefer visible runtime signals over introspection. Good sources include recent tool activity, pending background exec runs, undelivered work already in progress, and a quick `session_status` check when needed. Do not count routine async completion notices or the pulse query itself as workload evidence.
 
 ### 2. Evaluate with the bundled script
 
@@ -81,7 +87,7 @@ If trigger is natural language, the fixed card is still preferred unless the use
 - Do not infer hidden internal state without evidence
 - If signals are weak, use `unknown`
 - Use `no` only for genuinely overloaded or risky in-flight states
-- Do not run proactively by default, except for context safety alerts when session context usage approaches 90%
+- Do not run proactively; require explicit pulse trigger by default
 - Do not treat the pulse query itself as workload evidence
 
 ## Deployment defaults
@@ -101,3 +107,4 @@ To reproduce the intended product behavior across users/environments:
 
 ### references/
 - `references/rules.md` contains the classification thresholds and output policy
+- `references/openclaw-signals.md` shows a practical signal-mapping recipe for OpenClaw-style runtimes
