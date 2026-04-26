@@ -3,11 +3,16 @@
   "slug": "ezeep-blue",
   "displayName": "Ezeep Blue",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165094671,
-    "commit": "https://github.com/openclaw/skills/commit/7d8b9bc3c84479a754129ae17851b3a275005924"
+    "version": "1.0.3",
+    "publishedAt": 1776859089230,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165094671,
+      "commit": "https://github.com/openclaw/skills/commit/7d8b9bc3c84479a754129ae17851b3a275005924"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773954231655,
