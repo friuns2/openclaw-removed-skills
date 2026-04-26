@@ -3,11 +3,16 @@
   "slug": "promptmateio",
   "displayName": "Promptmateio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165370515,
-    "commit": "https://github.com/openclaw/skills/commit/9a538fe3da9a236478fddec6c59a4e4912d74372"
+    "version": "1.0.3",
+    "publishedAt": 1776859276354,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165370515,
+      "commit": "https://github.com/openclaw/skills/commit/9a538fe3da9a236478fddec6c59a4e4912d74372"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774015454008,
