@@ -3,11 +3,16 @@
   "slug": "mezmo",
   "displayName": "Mezmo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164978203,
-    "commit": "https://github.com/openclaw/skills/commit/1d6f6319a7276e33aae91c6f21bc26cd8e84ec1f"
+    "version": "1.0.3",
+    "publishedAt": 1776858885515,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164978203,
+      "commit": "https://github.com/openclaw/skills/commit/1d6f6319a7276e33aae91c6f21bc26cd8e84ec1f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773936208345,
