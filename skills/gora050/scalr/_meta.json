@@ -3,11 +3,16 @@
   "slug": "scalr",
   "displayName": "Scalr",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167551225,
-    "commit": "https://github.com/openclaw/skills/commit/7ad1d8ef371e4bd46a733f375b1ed1bb532e07cf"
+    "version": "1.0.3",
+    "publishedAt": 1776861525471,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167551225,
+      "commit": "https://github.com/openclaw/skills/commit/7ad1d8ef371e4bd46a733f375b1ed1bb532e07cf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774472657305,
