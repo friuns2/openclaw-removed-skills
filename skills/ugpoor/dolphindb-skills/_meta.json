@@ -1,13 +1,18 @@
 {
   "owner": "ugpoor",
   "slug": "dolphindb-skills",
-  "displayName": "DolphinDB 技能套件",
+  "displayName": "Dolphindb Skills",
   "latest": {
-    "version": "1.4.0",
-    "publishedAt": 1775116679250,
-    "commit": "https://github.com/openclaw/skills/commit/44dd7c99d9dab0182bf9926bb3e3840dcfee871c"
+    "version": "1.4.1",
+    "publishedAt": 1776774525658,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.4.0",
+      "publishedAt": 1775116679250,
+      "commit": "https://github.com/openclaw/skills/commit/44dd7c99d9dab0182bf9926bb3e3840dcfee871c"
+    },
     {
       "version": "1.3.5",
       "publishedAt": 1774795429694,
