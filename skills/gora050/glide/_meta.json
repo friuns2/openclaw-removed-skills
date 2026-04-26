@@ -3,11 +3,16 @@
   "slug": "glide",
   "displayName": "Glide",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165081109,
-    "commit": "https://github.com/openclaw/skills/commit/1a5bc4ae7eade3621bb36941932ddba90f8b9be7"
+    "version": "1.0.3",
+    "publishedAt": 1776859064187,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165081109,
+      "commit": "https://github.com/openclaw/skills/commit/1a5bc4ae7eade3621bb36941932ddba90f8b9be7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773954211296,
