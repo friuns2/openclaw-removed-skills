@@ -3,11 +3,16 @@
   "slug": "lucid",
   "displayName": "Lucid",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167265910,
-    "commit": "https://github.com/openclaw/skills/commit/367acae4439669fda549b9ddc55ff37482986513"
+    "version": "1.0.3",
+    "publishedAt": 1776861075626,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167265910,
+      "commit": "https://github.com/openclaw/skills/commit/367acae4439669fda549b9ddc55ff37482986513"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774400726377,
