@@ -3,11 +3,16 @@
   "slug": "stackhawk",
   "displayName": "Stackhawk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165699205,
-    "commit": "https://github.com/openclaw/skills/commit/303978ce51d6246c46bc8c42bfc3c83b0e9a3461"
+    "version": "1.0.3",
+    "publishedAt": 1776865786376,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165699205,
+      "commit": "https://github.com/openclaw/skills/commit/303978ce51d6246c46bc8c42bfc3c83b0e9a3461"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774073035112,
