@@ -3,9 +3,15 @@
   "slug": "cli-anything-zc",
   "displayName": "Cli Anything Zc",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1773873968480,
-    "commit": "https://github.com/openclaw/skills/commit/eaa0ecd8d7d955e72b8f1cf377031087291d94e5"
+    "version": "0.1.2",
+    "publishedAt": 1774095290003,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1773873968480,
+      "commit": "https://github.com/openclaw/skills/commit/eaa0ecd8d7d955e72b8f1cf377031087291d94e5"
+    }
+  ]
 }
