@@ -1,11 +1,17 @@
 {
   "owner": "chenjiahui11",
   "slug": "weixin-wechat-channel",
-  "displayName": "微信公众号自动发文一站式技能",
+  "displayName": "Weixin WeChat Channel",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773757990684,
-    "commit": "https://github.com/openclaw/skills/commit/0021b5cb6ab4b16ec0294f7a54b417d8adafcbb1"
+    "version": "1.0.2",
+    "publishedAt": 1776600563258,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773757990684,
+      "commit": "https://github.com/openclaw/skills/commit/0021b5cb6ab4b16ec0294f7a54b417d8adafcbb1"
+    }
+  ]
 }

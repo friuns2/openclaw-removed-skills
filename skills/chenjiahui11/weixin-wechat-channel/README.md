@@ -28,6 +28,12 @@
 - 微信公众号后台已经添加 IP 白名单
 - Python 依赖 `requests` `pillow` 已安装
 
+## 卡密
+
+- 使用 `scripts/license_gate.py` + `scripts/run_wechat_channel_ops.py`，与淘宝商家技能相同的 `TMO1` 卡密与 `TMO_MASTER_SECRET`。
+- 发卡请使用你已有的 `cardkey_issuer.py`（勿随客户包分发）。
+- 详见 `SKILL.md` 中「卡密（授权）」一节。
+
 ## 作者
 
 Created by: [你的名字] - 2026-03-17

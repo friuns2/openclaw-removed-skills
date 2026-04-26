@@ -33,6 +33,36 @@ description: "微信公众号自动发文一站式技能。组合 内容策划 +
 - 需要 IP 白名单已经添加正确
 - 需要 `requests` `pillow` Python 依赖已安装
 
+## 购买卡密
+
+| 类型 | 价格 | 链接 |
+|------|------|------|
+| 日卡 | 9.9元 | https://www.zhufaka.cn/item/tgcsid |
+| 月卡 | 399元 | https://www.zhufaka.cn/item/i6wfue |
+| 年卡 | 3500元 | https://www.zhufaka.cn/item/x8ancz |
+| 定制 | 联系 | 微信 CChenJ_ |
+
+## 卡密（授权）
+
+本技能采用**联网验证**模式，连接授权服务器校验卡密有效性。
+
+1. **客户端激活**（首次运行）：
+
+   ```text
+   cd "<本技能文件夹>"
+   py .\scripts\run_wechat_channel_ops.py --card-key "你的卡密"
+   ```
+
+2. **校验入口**：
+
+   ```text
+   py .\scripts\run_wechat_channel_ops.py --card-key "你的卡密"
+   py .\scripts\run_wechat_channel_ops.py --show-machine-id
+   py .\scripts\run_wechat_channel_ops.py --license-status
+   ```
+
+3. **授权服务器**：默认连接 `http://120.27.202.105:8000`，可通过环境变量 `TMO_LICENSE_SERVER` 覆盖。
+
 ## 作者
 
 组合技能 by OpenClaw session, 2026-03-17
