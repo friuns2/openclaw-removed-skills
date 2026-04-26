@@ -3,11 +3,16 @@
   "slug": "dripcel",
   "displayName": "Dripcel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165428815,
-    "commit": "https://github.com/openclaw/skills/commit/c7c467b6e8bb0053523f822fae30336c2afe2862"
+    "version": "1.0.3",
+    "publishedAt": 1776859375869,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165428815,
+      "commit": "https://github.com/openclaw/skills/commit/c7c467b6e8bb0053523f822fae30336c2afe2862"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774026209427,
