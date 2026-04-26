@@ -3,11 +3,16 @@
   "slug": "team-up",
   "displayName": "Team Up",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167454057,
-    "commit": "https://github.com/openclaw/skills/commit/bcd5b62ed7a6ff0872259a7ea47419b90309c3a4"
+    "version": "1.0.3",
+    "publishedAt": 1776861437824,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167454057,
+      "commit": "https://github.com/openclaw/skills/commit/bcd5b62ed7a6ff0872259a7ea47419b90309c3a4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774440196978,
