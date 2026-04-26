@@ -1,13 +1,18 @@
 {
   "owner": "yipxiyi",
   "slug": "pad-mode",
-  "displayName": "PAD Mode",
+  "displayName": "Pad Mode",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1774952826071,
-    "commit": "https://github.com/openclaw/skills/commit/e5bb71a53127ef6bc2de8ed33ead60dc895de080"
+    "version": "1.2.0",
+    "publishedAt": 1776868500819,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1774952826071,
+      "commit": "https://github.com/openclaw/skills/commit/e5bb71a53127ef6bc2de8ed33ead60dc895de080"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1774584486874,
