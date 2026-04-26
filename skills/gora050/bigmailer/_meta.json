@@ -3,11 +3,16 @@
   "slug": "bigmailer",
   "displayName": "Bigmailer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165830104,
-    "commit": "https://github.com/openclaw/skills/commit/acedd2df0e905303156bb1bd870b5439fd8f5864"
+    "version": "1.0.3",
+    "publishedAt": 1776862540204,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165830104,
+      "commit": "https://github.com/openclaw/skills/commit/acedd2df0e905303156bb1bd870b5439fd8f5864"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774108973906,
