@@ -1,13 +1,18 @@
 {
   "owner": "yanwenzhe",
   "slug": "pension-search-pro",
-  "displayName": "企业年金智能查询技能 Pro",
+  "displayName": "企业年金查询技能 Pro",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1774514281270,
-    "commit": "https://github.com/openclaw/skills/commit/5c1f7a0dcd7d10afc6b2f78354117a1460d03645"
+    "version": "1.2.0",
+    "publishedAt": 1777193472738,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1774514281270,
+      "commit": "https://github.com/openclaw/skills/commit/5c1f7a0dcd7d10afc6b2f78354117a1460d03645"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773993849842,

@@ -1,3 +1,10 @@
+---
+name: "pension-search-pro"
+description: "企业年金智能查询技能。搜索并确认企业年金信息，输出带来源链接和错误检查的标准化调查报告。只查询企业年金，不查询职业年金。"
+version: "1.2.0"
+author: "OpenClaw User"
+---
+
 # 企业年金智能查询技能 Pro (pension-search-pro)
 
 **版本**：v1.1.0  

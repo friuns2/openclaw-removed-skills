@@ -48,9 +48,49 @@ check_dependencies() {
     fi
 }
 
+# 加载 API Keys（支持轮换）
+load_api_keys() {
+    local keys_file="$SCRIPT_DIR/../tavily_keys.txt"
+    TAVILY_KEYS=()
+    
+    if [ -f "$keys_file" ]; then
+        while IFS= read -r line || [ -n "$line" ]; do
+            if [ -n "$line" ]; then
+                TAVILY_KEYS+=("$line")
+            fi
+        done < "$keys_file"
+        print_info "已加载 ${#TAVILY_KEYS[@]} 个 Tavily API Key"
+        return 0
+    elif [ -n "$TAVILY_API_KEY" ]; then
+        TAVILY_KEYS+=("$TAVILY_API_KEY")
+        return 0
+    else
+        print_warning "未找到 API Key 配置"
+        return 1
+    fi
+}
+
+# 获取下一个 API Key（轮换）
+get_next_api_key() {
+    if [ ${#TAVILY_KEYS[@]} -eq 0 ]; then
+        return 1
+    fi
+    
+    # 使用索引轮换
+    if [ -z "$TAVILY_KEY_INDEX" ]; then
+        TAVILY_KEY_INDEX=0
+    fi
+    
+    local key="${TAVILY_KEYS[$TAVILY_KEY_INDEX]}"
+    TAVILY_KEY_INDEX=$(( (TAVILY_KEY_INDEX + 1) % ${#TAVILY_KEYS[@]} ))
+    
+    echo "$key"
+    return 0
+}
+
 # 检查 Tavily API Key
 check_tavily_key() {
-    if [ -z "$TAVILY_API_KEY" ]; then
+    if [ ${#TAVILY_KEYS[@]} -eq 0 ]; then
         echo -e "${YELLOW}警告：未设置 TAVILY_API_KEY 环境变量${NC}"
         echo "Tavily 搜索可能不可用，将使用备用搜索方式"
         return 1
@@ -86,13 +126,16 @@ print_error() {
     echo -e "${RED}[错误]${NC} $1"
 }
 
-# Tavily 搜索
+# Tavily 搜索（支持 API Key 轮换）
 tavily_search() {
     local query="$1"
     local max_results="${2:-10}"
     
-    if ! check_tavily_key; then
-        print_warning "Tavily API Key 未设置，跳过 Tavily 搜索"
+    local api_key
+    api_key=$(get_next_api_key)
+    
+    if [ -z "$api_key" ]; then
+        print_warning "Tavily API Key 不可用，跳过 Tavily 搜索"
         return 1
     fi
     
@@ -102,7 +145,7 @@ tavily_search() {
     response=$(curl -s -X POST https://api.tavily.com/search \
         -H "Content-Type: application/json" \
         -d "{
-            \"api_key\": \"$TAVILY_API_KEY\",
+            \"api_key\": \"$api_key\",
             \"query\": \"$query\",
             \"max_results\": $max_results,
             \"search_depth\": \"advanced\"
@@ -252,6 +295,9 @@ main() {
         echo "用法：$0 \"企业名称\" [结果数量] [--full]"
         exit 1
     fi
+    
+    # 加载 API Keys
+    load_api_keys
     
     print_header
     print_step "0" "企业名称确认"
