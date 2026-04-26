@@ -3,11 +3,16 @@
   "slug": "rentcast",
   "displayName": "Rentcast",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165446287,
-    "commit": "https://github.com/openclaw/skills/commit/00e7418d086dc5adc90b5e541b17317df8fa61d9"
+    "version": "1.0.3",
+    "publishedAt": 1776859399245,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165446287,
+      "commit": "https://github.com/openclaw/skills/commit/00e7418d086dc5adc90b5e541b17317df8fa61d9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774026246251,
