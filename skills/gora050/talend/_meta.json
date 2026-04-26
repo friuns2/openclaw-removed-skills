@@ -3,11 +3,16 @@
   "slug": "talend",
   "displayName": "Talend",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166052917,
-    "commit": "https://github.com/openclaw/skills/commit/199d253c54de6a588ed960dce02fa93106c0a160"
+    "version": "1.0.3",
+    "publishedAt": 1776859901217,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166052917,
+      "commit": "https://github.com/openclaw/skills/commit/199d253c54de6a588ed960dce02fa93106c0a160"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774137890443,
