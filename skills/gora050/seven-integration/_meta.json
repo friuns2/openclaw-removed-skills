@@ -3,11 +3,16 @@
   "slug": "seven-integration",
   "displayName": "Seven",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167226970,
-    "commit": "https://github.com/openclaw/skills/commit/e67eb68132418947e98b8f389be01ca5e2da7b00"
+    "version": "1.0.3",
+    "publishedAt": 1776860986817,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167226970,
+      "commit": "https://github.com/openclaw/skills/commit/e67eb68132418947e98b8f389be01ca5e2da7b00"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774393456975,
