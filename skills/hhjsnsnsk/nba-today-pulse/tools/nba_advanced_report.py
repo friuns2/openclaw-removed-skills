@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Callable
@@ -275,6 +276,74 @@ def make_summary_line(game: dict[str, Any], labels: dict[str, str], favored_side
     return f"{favored_abbr} holds a slight edge, but the game still profiles as close."
 
 
+def _story_signals(game: dict[str, Any]) -> list[dict[str, str]]:
+    story = game.get("officialStory") or {}
+    if not story.get("available"):
+        return []
+    return [signal for signal in (story.get("summarySignals") or []) if isinstance(signal, dict)]
+
+
+def _story_brief(game: dict[str, Any], *, mode: str) -> dict[str, Any]:
+    story = game.get("officialStory") or {}
+    if not story.get("available"):
+        return {}
+    brief = story.get("storyBrief") or {}
+    if not isinstance(brief, dict):
+        return {}
+    if str(brief.get("phase") or "") not in ("", "unknown", mode):
+        return {}
+    return brief
+
+
+def _story_reason_text(signal: dict[str, str], labels: dict[str, str], *, mode: str) -> str:
+    kind = str(signal.get("kind") or "")
+    subject = str(signal.get("subject") or "").strip()
+    value = str(signal.get("value") or "").strip()
+    zh = labels["timezone"] == "请求方时区"
+    if zh:
+        if kind == "standout_scorer" and subject and value:
+            return f"报道主线: {subject} {value} 分表现被列为重点"
+        if kind == "short_handed":
+            return "报道背景: 阵容短缺影响了比赛配置"
+        if kind == "availability":
+            return "报道背景: 伤病或球员可用性是关键变量"
+        if kind == "series_context":
+            return "报道背景: 这场比赛处在系列赛开局语境中"
+        if kind == "previous_matchups":
+            return "报道背景: 常规赛交手和阵容变化会影响判断"
+        if kind == "efficiency":
+            return "报道主线: 投篮效率是解释比赛的关键线索"
+        if kind == "matchup_watch":
+            return "报道看点: 阵容变化会影响核心对位"
+        return "报道背景: NBA.com 提供了额外比赛语境"
+    if kind == "standout_scorer" and subject and value:
+        return f"Storyline: {subject}'s {value}-point night was central"
+    if kind == "short_handed":
+        return "Storyline: short-handed roster context shaped the game"
+    if kind == "availability":
+        return "Storyline: availability and injury context mattered"
+    if kind == "series_context":
+        return "Storyline: the game carried series-opening context"
+    if kind == "previous_matchups":
+        return "Storyline: prior meetings and changed lineups shape the preview"
+    if kind == "efficiency":
+        return "Storyline: shooting efficiency was a key explanation"
+    if kind == "matchup_watch":
+        return "Storyline: lineup changes shape the key matchup"
+    return "Storyline: NBA.com added game context"
+
+
+def _localized_player_stat_fragment(line: str | None, labels: dict[str, str]) -> str:
+    value = str(line or "").strip()
+    if labels["timezone"] != "请求方时区" or not value:
+        return value
+    value = re.sub(r"\s+\|\s+", " / ", value)
+    value = re.sub(r"(\d+(?:\.\d+)?)\s+PTS\b", r"\1分", value)
+    value = re.sub(r"(\d+(?:\.\d+)?)\s+REB\b", r"\1板", value)
+    value = re.sub(r"(\d+(?:\.\d+)?)\s+AST\b", r"\1助", value)
+    return value
+
+
 def build_pregame_analysis(game: dict[str, Any], labels: dict[str, str]) -> dict[str, Any]:
     scores = {"home": 0, "away": 0}
     reasons: list[tuple[int, str]] = []
@@ -380,6 +449,12 @@ def build_pregame_analysis(game: dict[str, Any], labels: dict[str, str]) -> dict
         favored_side = "home" if scores["home"] > scores["away"] else "away"
     strength = abs(scores["home"] - scores["away"])
     sorted_reasons = [text for _, text in sorted(reasons, key=lambda item: item[0], reverse=True)[:4]]
+    for signal in _story_signals(game):
+        story_reason = _story_reason_text(signal, labels, mode="pregame")
+        if story_reason and story_reason not in sorted_reasons:
+            sorted_reasons.append(story_reason)
+        if len(sorted_reasons) >= 4:
+            break
     analysis = {
         "mode": "pregame",
         "summary": make_summary_line(game, labels, favored_side, strength),
@@ -399,6 +474,8 @@ def build_pregame_analysis(game: dict[str, Any], labels: dict[str, str]) -> dict
             "homeScore": scores["home"],
             "awayScore": scores["away"],
             "pickcenter": pickcenter,
+            "storySignals": _story_signals(game),
+            "storyBrief": _story_brief(game, mode="pregame"),
         },
     }
     return analysis
@@ -1356,22 +1433,44 @@ def build_post_analysis(game: dict[str, Any], labels: dict[str, str]) -> dict[st
             reasons.append(f"Decisive stretch: {decisive_period}")
     winner_key_player = top_full_stats_player(game, winner_side) or (game.get("keyPlayers", {}).get(game[winner_side]["abbr"]) or [None])[0]
     if winner_key_player:
+        winner_key_player_display = _localized_player_stat_fragment(winner_key_player, labels)
         if labels["timezone"] == "请求方时区":
-            reasons.append(f"关键球员: {game[winner_side]['abbr']} {winner_key_player}")
+            reasons.append(f"关键球员: {game[winner_side]['abbr']} {winner_key_player_display}")
         else:
-            reasons.append(f"Lead performer: {game[winner_side]['abbr']} {winner_key_player}")
+            reasons.append(f"Lead performer: {game[winner_side]['abbr']} {winner_key_player_display}")
+    else:
+        winner_key_player_display = ""
     full_stats_reason = team_totals_edge_reason(game, winner_side, labels)
     if full_stats_reason:
         reasons.append(full_stats_reason)
+    for signal in _story_signals(game):
+        story_reason = _story_reason_text(signal, labels, mode="post")
+        if story_reason and story_reason not in reasons:
+            reasons.append(story_reason)
+        if len(reasons) >= 5:
+            break
     article = game.get("article") or {}
     if article.get("headline"):
         reasons.append(str(article["headline"]))
 
-    summary = (
-        f"{game[winner_side]['abbr']} 从整体走向上更稳定地掌控了比赛。"
-        if labels["timezone"] == "请求方时区"
-        else f"{game[winner_side]['abbr']} controlled the broader game flow more consistently."
-    )
+    if labels["timezone"] == "请求方时区":
+        if winner_key_player_display and full_stats_reason:
+            summary = f"{game[winner_side]['abbr']} 赢下 {margin} 分，主线是 {winner_key_player_display} 的输出以及 {full_stats_reason}。"
+        elif winner_key_player_display:
+            summary = f"{game[winner_side]['abbr']} 赢下 {margin} 分，{winner_key_player_display} 是最直接的进攻支点。"
+        elif full_stats_reason:
+            summary = f"{game[winner_side]['abbr']} 赢下 {margin} 分，关键差异来自 {full_stats_reason}。"
+        else:
+            summary = f"{game[winner_side]['abbr']} 赢下 {margin} 分，决定性阶段来自 {decisive_period or '终场前的执行'}。"
+    else:
+        if winner_key_player_display and full_stats_reason:
+            summary = f"{game[winner_side]['abbr']} won by {margin}, led by {winner_key_player_display} and {full_stats_reason}."
+        elif winner_key_player_display:
+            summary = f"{game[winner_side]['abbr']} won by {margin}, with {winner_key_player_display} as the clearest offensive hinge."
+        elif full_stats_reason:
+            summary = f"{game[winner_side]['abbr']} won by {margin}, with the key edge coming from {full_stats_reason}."
+        else:
+            summary = f"{game[winner_side]['abbr']} won by {margin}, with the decisive stretch coming from {decisive_period or 'late execution'}."
     trend = (
         f"{game[winner_side]['abbr']} 在关键时段压住了 {game[loser_side]['abbr']}。"
         if labels["timezone"] == "请求方时区"
@@ -1388,6 +1487,8 @@ def build_post_analysis(game: dict[str, Any], labels: dict[str, str]) -> dict[st
             "winner": game[winner_side]["abbr"],
             "margin": margin,
             "decisivePeriod": decisive_period,
+            "storySignals": _story_signals(game),
+            "storyBrief": _story_brief(game, mode="post"),
         },
     }
 

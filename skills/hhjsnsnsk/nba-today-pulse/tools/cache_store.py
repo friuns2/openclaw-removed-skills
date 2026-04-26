@@ -23,6 +23,8 @@ DEFAULT_DISK_NAMESPACES = {
     "espn:team_roster",
     "espn:team_schedule",
     "espn:team_statistics",
+    "nba:game_story",
+    "nba:league_schedule",
     "nba:scoreboard",
     "nba:play_by_play",
     "nba:boxscore",
@@ -31,13 +33,10 @@ DEFAULT_DISK_NAMESPACES = {
 
 
 def disk_cache_enabled() -> bool:
-    return os.environ.get("NBA_PULSE_ENABLE_DISK_CACHE", "").strip() == "1"
+    return False
 
 
 def cache_root() -> Path:
-    explicit = os.environ.get("NBA_PULSE_CACHE_DIR", "").strip()
-    if explicit:
-        return Path(explicit).expanduser().resolve()
     return Path(tempfile.gettempdir()) / "nba_tr_cache"
 
 
@@ -63,9 +62,22 @@ def _read_disk_entry(path: Path) -> dict[str, Any] | None:
 
 def _write_disk_entry(path: Path, entry: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp_path = path.with_suffix(".tmp")
-    tmp_path.write_text(json.dumps(entry, ensure_ascii=False), encoding="utf-8")
-    tmp_path.replace(path)
+    with tempfile.NamedTemporaryFile(
+        "w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f"{path.stem}.",
+        suffix=".tmp",
+        delete=False,
+    ) as tmp_file:
+        tmp_path = Path(tmp_file.name)
+        tmp_file.write(json.dumps(entry, ensure_ascii=False))
+        tmp_file.flush()
+        os.fsync(tmp_file.fileno())
+    try:
+        tmp_path.replace(path)
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 
 def _trim_oversized_entry(entry: dict[str, Any], max_payload_bytes: int) -> dict[str, Any]:

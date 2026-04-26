@@ -8,6 +8,7 @@ import json
 import sys
 
 from nba_common import NBAReportError
+from nba_official_report import build_official_report_payload, render_official_report_markdown
 from nba_pulse_core import (
     build_day_view,
     build_day_stats_view,
@@ -35,7 +36,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--opponent")
     parser.add_argument("--lang")
     parser.add_argument("--zh-locale", choices=("cn", "hk", "tw"))
-    parser.add_argument("--intent", choices=("day", "stats_day", "pregame", "live", "post", "injury", "scene"))
+    parser.add_argument("--intent", choices=("day", "stats_day", "pregame", "live", "post", "injury", "scene", "official_report"))
     parser.add_argument("--analysis-mode", choices=("auto", "pregame", "live", "post"))
     parser.add_argument("--format", default="markdown", choices=("markdown", "json"))
     return parser.parse_args(argv)
@@ -71,7 +72,35 @@ def main(argv: list[str] | None = None) -> int:
             if team and intent == "day" and not day_phase_filter:
                 intent = "scene"
 
+        if intent == "official_report":
+            payload = build_official_report_payload(
+                command=args.command or "",
+                tz=tz,
+                date_text=date_text,
+                team=team,
+                opponent=opponent,
+                lang=lang,
+                zh_locale=zh_locale,
+                scope=scope,
+            )
+            if args.format == "json":
+                print(json.dumps(payload, ensure_ascii=False, indent=2))
+            else:
+                print(render_official_report_markdown(payload))
+            return 0
+
         if intent == "injury":
+            if focus_section and team and analysis_mode in {"pregame", "live", "post"}:
+                scene = build_game_scene(tz=tz, date_text=date_text, team=team, lang=lang, analysis_mode=analysis_mode, zh_locale=zh_locale)
+                scene["intent"] = analysis_mode
+                scene["focusSection"] = str(focus_section)
+                if players:
+                    scene["playerFocus"] = players[0]
+                if args.format == "json":
+                    print(json.dumps(scene_payload(scene), ensure_ascii=False, indent=2))
+                else:
+                    print(render_game_scene_markdown(scene))
+                return 0
             payload = build_injury_report(tz=tz, date_text=date_text, team=team, opponent=opponent, lang=lang)
             if args.format == "json":
                 print(json.dumps(payload, ensure_ascii=False, indent=2))

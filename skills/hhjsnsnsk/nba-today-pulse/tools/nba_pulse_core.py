@@ -5,9 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -34,45 +38,221 @@ from provider_nba import (
     extract_scoreboard_games,
     fetch_team_player_averages,
     find_game_id_by_matchup,
+    find_game_id_by_schedule,
     fetch_live_boxscore,
     fetch_play_by_play,
+    fetch_nba_game_story,
     fetch_scoreboard as fetch_nba_scoreboard,
     fetch_team_roster as fetch_nba_team_roster,
+    public_game_story_payload,
+    unavailable_game_story,
 )
 from timezone_resolver import extract_timezone_hint, resolve_timezone
 
 LANG_EN_PATTERNS = [r"\bin english\b", r"\benglish\b", r"\blang\s*=\s*en\b", r"\ben\b", r"\b英文\b"]
 LANG_ZH_PATTERNS = [r"\bin chinese\b", r"\bchinese\b", r"\blang\s*=\s*zh\b", r"\bzh\b", r"\b中文\b"]
 DATE_PATTERN = re.compile(r"\b(20\d{2}-\d{2}-\d{2})\b")
+_MULTI_PREGAME_BUDGET_LOCK = threading.Lock()
+_MULTI_PREGAME_DEADLINE: float | None = None
+
+
+def _pregame_multi_budget_seconds() -> int:
+    raw = (os.environ.get("NBA_TR_PREGAME_MULTI_BUDGET_SECONDS") or "").strip()
+    try:
+        return max(int(raw), 0) if raw else 30
+    except ValueError:
+        return 30
+
+
+@contextmanager
+def _pregame_multi_budget_scope(enabled: bool):
+    global _MULTI_PREGAME_DEADLINE
+    with _MULTI_PREGAME_BUDGET_LOCK:
+        previous_deadline = _MULTI_PREGAME_DEADLINE
+        _MULTI_PREGAME_DEADLINE = time.monotonic() + _pregame_multi_budget_seconds() if enabled else None
+    try:
+        yield
+    finally:
+        with _MULTI_PREGAME_BUDGET_LOCK:
+            _MULTI_PREGAME_DEADLINE = previous_deadline
+
+
+def _remaining_pregame_multi_budget() -> float | None:
+    with _MULTI_PREGAME_BUDGET_LOCK:
+        deadline = _MULTI_PREGAME_DEADLINE
+    if deadline is None:
+        return None
+    return deadline - time.monotonic()
+
+
+def _bounded_multi_timeout(default_seconds: int, *, minimum_seconds: int = 1) -> int:
+    remaining = _remaining_pregame_multi_budget()
+    if remaining is None:
+        return default_seconds
+    if remaining <= 0:
+        return 0
+    return max(minimum_seconds, min(default_seconds, math.ceil(remaining)))
 PREGAME_PATTERNS = [
     r"比赛前瞻",
     r"前瞻预测",
     r"比赛预测",
     r"对阵预测",
+    r"对位分析",
     r"赛前情报",
     r"赛前信息",
     r"赛前预测",
     r"赛前分析",
+    r"赛前展望",
+    r"赛前看点",
+    r"赛前解读",
     r"赛前",
     r"前瞻",
     r"预测",
+    r"展望",
     r"对局分析",
     r"看好谁",
     r"谁更占优",
+    r"谁会赢",
+    r"谁能赢",
     r"\bpreview\b",
     r"\bpregame\b",
-    r"\bpre-game\b",
+    r"\bpre[- ]?game\b",
     r"\bgame preview\b",
+    r"\bmatch preview\b",
     r"\bpreview prediction\b",
     r"\bmatch prediction\b",
+    r"\bpreview analysis\b",
     r"\bpredict(?:ion)?\b",
     r"\bmatchup analysis\b",
     r"\bwho has the edge\b",
+    r"\bwho wins\b",
+    r"\bwho will win\b",
+    r"\bgame outlook\b",
+    r"\bhow do they match up\b",
+    r"\banaly[sz]e(?: the)? (?:game|matchup|preview|prediction)\b",
     r"\banaly[sz]e\b",
 ]
-LIVE_PATTERNS = [r"赛中", r"正在进行", r"走势", r"实时", r"\blive\b", r"\bin-game\b", r"\bmomentum\b"]
-POST_PATTERNS = [r"复盘", r"回顾", r"赛后", r"\brecap\b", r"\bpostgame\b", r"\breview\b"]
-INJURY_PATTERNS = [r"伤病报告", r"伤病名单", r"伤病", r"伤停", r"\binjury report\b", r"\binjuries\b", r"\bavailability\b"]
+LIVE_PATTERNS = [
+    r"赛中",
+    r"正在进行",
+    r"进行中",
+    r"比赛进行中",
+    r"走势",
+    r"实时",
+    r"实况",
+    r"直播",
+    r"实时比分",
+    r"当前比分",
+    r"比分更新",
+    r"比赛走势",
+    r"实时走势",
+    r"比赛进程",
+    r"比赛过程",
+    r"\blive\b",
+    r"\blive score\b",
+    r"\bcurrent score\b",
+    r"\bscore update\b",
+    r"\bin[- ]?game\b",
+    r"\bin progress\b",
+    r"\bgame flow\b",
+    r"\bplay[- ]?by[- ]?play\b",
+    r"\bmomentum\b",
+]
+POST_PATTERNS = [
+    r"复盘",
+    r"复盘一下",
+    r"回顾",
+    r"赛后",
+    r"赛后复盘",
+    r"赛后回顾",
+    r"赛后总结",
+    r"赛后分析",
+    r"赛后点评",
+    r"赛后解析",
+    r"赛后战报",
+    r"比赛复盘",
+    r"比赛回顾",
+    r"比赛总结",
+    r"总结比赛",
+    r"\brecap\b",
+    r"\bgame recap\b",
+    r"\bpost\b",
+    r"\bpost[- ]?game\b",
+    r"\bpostgame\b",
+    r"\bafter the game\b",
+    r"\bafter[- ]?game\b",
+    r"\bgame review\b",
+    r"\bfinal recap\b",
+    r"\bwhat happened in the game\b",
+    r"\breview\b",
+]
+INJURY_PATTERNS = [
+    r"伤病报告",
+    r"伤病名单",
+    r"伤病更新",
+    r"伤病情况",
+    r"伤病状态",
+    r"伤病",
+    r"伤情",
+    r"伤情更新",
+    r"伤停",
+    r"伤停名单",
+    r"可用性",
+    r"出战情况",
+    r"缺阵",
+    r"缺席",
+    r"\binjury report\b",
+    r"\binjury updates?\b",
+    r"\binjuries\b",
+    r"\binjury\b",
+    r"\bavailability\b",
+    r"\bavailability report\b",
+    r"\bstatus report\b",
+    r"\binactive(?:s)?\b",
+    r"\bwho(?:'s| is) out\b",
+    r"\bwho(?:'s| is) in\b",
+]
+OFFICIAL_REPORT_PATTERNS = [
+    r"https?://[^\s)>\]}]+/game/",
+    r"官方报道",
+    r"官网报道",
+    r"官方报道总结",
+    r"NBA\s*官网报道",
+    r"赛前报道",
+    r"赛后报道",
+    r"官方文章",
+    r"官方文章总结",
+    r"报道总结",
+    r"文章总结",
+    r"官方复盘",
+    r"官方赛报",
+    r"官方故事",
+    r"官网文章",
+    r"官网赛报",
+    r"报道摘要",
+    r"故事摘要",
+    r"\bpreview article\b",
+    r"\bpreview articles\b",
+    r"\brecap article\b",
+    r"\brecap articles\b",
+    r"\bofficial preview\b",
+    r"\bofficial recap\b",
+    r"\bofficial story\b",
+    r"\bofficial stories\b",
+    r"\bofficial article\b",
+    r"\bofficial articles\b",
+    r"\bofficial report\b",
+    r"\bofficial reports\b",
+    r"\bgame story\b",
+    r"\bgame stories\b",
+    r"\bgame article\b",
+    r"\bgame articles\b",
+    r"\bstory summary\b",
+    r"\barticle summary\b",
+    r"\breport summary\b",
+    r"\bnba\.com story\b",
+    r"\bnba\.com article\b",
+]
 STATS_DAY_PATTERNS = [
     r"今天比赛谁得分最高",
     r"比赛谁得分最高",
@@ -98,6 +278,18 @@ STATS_DAY_PATTERNS = [
     r"最佳表现",
     r"今天最大分差是哪场",
     r"最大分差是哪场",
+    r"数据王",
+    r"今日数据王",
+    r"今日统计",
+    r"今日数据统计",
+    r"今天数据榜",
+    r"数据榜",
+    r"统计榜",
+    r"今日排行榜",
+    r"今日得分榜",
+    r"今日篮板榜",
+    r"今日助攻榜",
+    r"今日三分榜",
     r"今天\s*NBA\s*统计",
     r"今日\s*NBA\s*统计",
     r"\bNBA\s*统计\b",
@@ -105,6 +297,10 @@ STATS_DAY_PATTERNS = [
     r"\b统计\b",
     r"\btoday'?s nba stats\b",
     r"\btoday stats\b",
+    r"\btoday'?s stats\b",
+    r"\bstat(?:s)? leaders\b",
+    r"\btoday'?s leaders\b",
+    r"\bleaders today\b",
     r"\btoday top scorer\b",
     r"\btop scorer\b",
     r"\bwho scored the most today\b",
@@ -119,32 +315,129 @@ STATS_DAY_PATTERNS = [
     r"\bbest performance\b",
     r"\blargest margin today\b",
     r"\blargest margin\b",
+    r"\bbiggest win\b",
+    r"\bbest stat line\b",
 ]
-ALL_GAMES_PATTERNS = [r"所有比赛", r"全部比赛", r"全部对局", r"\ball games\b", r"\bevery game\b", r"\ball matchups\b"]
+ALL_GAMES_PATTERNS = [
+    r"所有比赛",
+    r"全部比赛",
+    r"全部对局",
+    r"今日赛程",
+    r"今天赛程",
+    r"今日比赛",
+    r"今天比赛",
+    r"今日赛况",
+    r"今天赛况",
+    r"\ball games\b",
+    r"\bevery game\b",
+    r"\ball matchups\b",
+    r"\btoday'?s games\b",
+    r"\ball games today\b",
+    r"\bevery game today\b",
+    r"\btoday'?s slate\b",
+    r"\bdaily slate\b",
+    r"\bgame slate\b",
+    r"\btoday schedule\b",
+]
 MULTI_MATCHUP_SPLIT_PATTERNS = [r"和", r"以及", r"、", r",", r"，", r"\+", r"\band\b"]
 DAY_LIVE_ONLY_PATTERNS = [
     r"今天正在打的比赛",
     r"今天进行中的比赛",
     r"进行中比赛",
+    r"今天只看进行中",
+    r"只看进行中",
+    r"今天只看直播",
+    r"只看直播",
     r"live only",
+    r"today live only",
     r"\blive games\b",
+    r"\blive games only\b",
     r"\bgames in progress\b",
+    r"\bgames in progress only\b",
+    r"\bongoing games\b",
+    r"\bongoing games only\b",
+    r"\btoday'?s live games\b",
+    r"\bcurrent games\b",
 ]
 DAY_POST_ONLY_PATTERNS = [
     r"今天已结束比赛复盘",
     r"今日赛后重点",
     r"今天已结束的比赛",
+    r"今天只看已结束",
+    r"只看已结束",
+    r"今天只看赛后",
+    r"只看赛后",
+    r"今天只看完场",
+    r"只看完场",
     r"final recap",
+    r"today final only",
+    r"today finished games",
+    r"today'?s finished games",
     r"\bfinished games\b",
+    r"\bfinished games only\b",
     r"\bfinal games\b",
+    r"\bfinal games only\b",
+    r"\bcompleted games\b",
+    r"\bcompleted games only\b",
+    r"\bfinal scores only\b",
 ]
-FOCUS_KEY_PLAYER_PATTERNS = [r"只看关键球员", r"只看球员", r"只看.*球员", r"\bkey players only\b", r"\bjust key players\b"]
-FOCUS_PLAY_DIGEST_PATTERNS = [r"只看回合摘要", r"只看回合", r"回合摘要", r"\bplay digest\b", r"\bjust plays\b"]
-FOCUS_FOURTH_QUARTER_PATTERNS = [r"第四节", r"第4节", r"\b4th quarter\b", r"\bfourth quarter\b"]
-FOCUS_INJURY_PATTERNS = [r"只看伤病", r"\binjuries only\b", r"\binjury only\b"]
+FOCUS_KEY_PLAYER_PATTERNS = [
+    r"只看关键球员",
+    r"只看球员",
+    r"只看核心球员",
+    r"只看主要球员",
+    r"只看.*球员",
+    r"关键球员",
+    r"球员表现",
+    r"球员数据",
+    r"主力球员",
+    r"\bkey players only\b",
+    r"\bjust key players\b",
+    r"\bkey players\b",
+    r"\bplayer breakdown\b",
+    r"\bplayer lines\b",
+    r"\bplayers only\b",
+]
+FOCUS_PLAY_DIGEST_PATTERNS = [
+    r"只看回合摘要",
+    r"只看回合",
+    r"回合摘要",
+    r"回合明细",
+    r"回合梳理",
+    r"关键回合",
+    r"\bplay digest\b",
+    r"\bplay by play\b",
+    r"\bplay-by-play\b",
+    r"\bpbp\b",
+    r"\bjust plays\b",
+    r"\bplays only\b",
+    r"\bgame flow\b",
+]
+FOCUS_FOURTH_QUARTER_PATTERNS = [
+    r"只看第四节",
+    r"第四节",
+    r"第4节",
+    r"第四节回合",
+    r"第四节摘要",
+    r"末节",
+    r"决胜节",
+    r"\b4th quarter\b",
+    r"\bfourth quarter\b",
+    r"\bfinal quarter\b",
+    r"\blast quarter\b",
+    r"\b4q\b",
+]
+FOCUS_INJURY_PATTERNS = [
+    r"只看伤病",
+    r"只看伤情",
+    r"\binjuries only\b",
+    r"\binjury only\b",
+    r"\binjury focus\b",
+    r"\binjury breakdown\b",
+]
 FOLLOW_UP_REFRESH_PATTERNS = [
-    r"^\s*(更新|刷新|再看一下|再看下|重新看|重新查|update|refresh)\s*[。.!?？]*\s*$",
-    r"^\s*(比分不对|比分变了吗|现在呢|现在比分|latest score)\s*[。.!?？]*\s*$",
+    r"^\s*(更新|刷新|再看一下|再看下|重新看|重新查|再来一版|再来一次|再看一遍|update|refresh|again|show again)\s*[。.!?？]*\s*$",
+    r"^\s*(比分不对|比分变了吗|现在呢|现在比分|最新比分|最新情况|current score|latest score|score update|what(?:'s| is) the latest)\s*[。.!?？]*\s*$",
 ]
 RELATIVE_DATE_PATTERNS = [
     (r"后天", 2),
@@ -182,6 +475,8 @@ def detect_analysis_mode(command: str) -> str:
 
 def detect_intent(command: str) -> str:
     lowered = command.strip()
+    if contains_any(lowered, OFFICIAL_REPORT_PATTERNS):
+        return "official_report"
     if contains_any(lowered, DAY_LIVE_ONLY_PATTERNS) or contains_any(lowered, DAY_POST_ONLY_PATTERNS):
         return "day"
     if contains_any(lowered, INJURY_PATTERNS):
@@ -217,6 +512,12 @@ def extract_matchups_from_text(text: str | None) -> list[dict[str, str]]:
 
 
 def detect_scope(command: str, intent: str, matchups: list[dict[str, str]], teams: list[str]) -> str:
+    if intent == "official_report":
+        if _all_games_requested(command) or (not teams and not matchups and not re.search(r"https?://[^\s)>\]}]+/game/", command, flags=re.IGNORECASE)):
+            return "multi_all"
+        if len(matchups) > 1:
+            return "multi_explicit"
+        return "single"
     if intent == "stats_day":
         return "multi_all"
     if intent == "pregame":
@@ -934,8 +1235,11 @@ def _team_player_averages(team_abbr: str) -> dict[str, dict[str, float | None]]:
     nba_team_id = provider_team_id(team_abbr, "nba")
     if not nba_team_id:
         return {}
+    timeout_seconds = _bounded_multi_timeout(8)
+    if timeout_seconds <= 0:
+        return {}
     try:
-        payload = fetch_team_player_averages(nba_team_id)["data"]
+        payload = fetch_team_player_averages(nba_team_id, timeout_seconds=timeout_seconds)["data"]
     except NBAReportError:
         return {}
     return extract_team_player_averages(payload)
@@ -1062,7 +1366,59 @@ def build_game_context(game: dict[str, Any]) -> dict[str, Any]:
         "seasonAverages": build_season_averages_context(game),
         "liveState": live_state,
         "fullStats": game.get("fullStats") or {"available": False, "teams": {}, "players": {}},
+        "officialStory": game.get("officialStory") or {},
     }
+
+
+def attach_official_story(game: dict[str, Any], *, requested_date: str | None) -> None:
+    if game.get("officialStory"):
+        return
+    remaining_budget = _remaining_pregame_multi_budget()
+    if remaining_budget is not None and remaining_budget <= 0:
+        game["officialStory"] = unavailable_game_story("budget_exhausted")
+        return
+    game_id = str(game.get("nbaGameId") or "").strip()
+    if not game_id and requested_date:
+        date_candidates = [requested_date]
+        try:
+            base_date = datetime.strptime(requested_date, "%Y-%m-%d").date()
+            for offset in (-1, 1):
+                candidate = (base_date + timedelta(days=offset)).isoformat()
+                if candidate not in date_candidates:
+                    date_candidates.append(candidate)
+        except ValueError:
+            pass
+        for candidate_date in date_candidates:
+            schedule_timeout = _bounded_multi_timeout(6)
+            if schedule_timeout <= 0:
+                break
+            try:
+                game_id = find_game_id_by_schedule(candidate_date, game["away"]["abbr"], game["home"]["abbr"], timeout_seconds=schedule_timeout) or ""
+            except NBAReportError:
+                game_id = ""
+            if not game_id:
+                scoreboard_timeout = _bounded_multi_timeout(4)
+                if scoreboard_timeout <= 0:
+                    break
+                try:
+                    game_id = find_game_id_by_matchup(candidate_date, game["away"]["abbr"], game["home"]["abbr"], timeout_seconds=scoreboard_timeout) or ""
+                except NBAReportError:
+                    game_id = ""
+            if game_id:
+                break
+    if game_id:
+        game["nbaGameId"] = game_id
+        story_timeout = _bounded_multi_timeout(4)
+        if story_timeout <= 0:
+            game["officialStory"] = unavailable_game_story("budget_exhausted")
+            game["storyAiContextRaw"] = _build_day_story_ai_context(game, game["officialStory"], phase="unknown")
+            return
+        story = fetch_nba_game_story(game_id, game["away"]["abbr"], game["home"]["abbr"], timeout_seconds=story_timeout)
+        game["storyAiContextRaw"] = _build_day_story_ai_context(game, story, phase="unknown")
+        game["officialStory"] = public_game_story_payload(story)
+    else:
+        game["officialStory"] = public_game_story_payload(None)
+        game["storyAiContextRaw"] = _build_day_story_ai_context(game, game["officialStory"], phase="unknown")
 
 
 def build_pregame_view(game: dict[str, Any], analysis: dict[str, Any]) -> dict[str, Any]:
@@ -1308,6 +1664,16 @@ def _append_unique_line(lines: list[str], text: str | None) -> None:
     lines.append(candidate)
 
 
+def _normalize_comparable_text(text: str | None) -> str:
+    value = str(text or "").strip().casefold()
+    if not value:
+        return ""
+    value = re.sub(r"^[\-\s]+", "", value)
+    value = re.sub(r"[。．.!！?？]+$", "", value)
+    value = re.sub(r"\s+", " ", value)
+    return value
+
+
 def _append_team_player_block(lines: list[str], team_heading: str, player_lines: list[str]) -> bool:
     rendered = [line for line in player_lines if str(line or "").strip()]
     if not rendered:
@@ -1340,6 +1706,90 @@ def _append_provenance_lines(lines: list[str], scene: dict[str, Any]) -> None:
     )
 
 
+def _official_story_available(official_story: dict[str, Any] | None) -> bool:
+    story = official_story or {}
+    return bool(story.get("available")) and bool(
+        story.get("url")
+        or story.get("headline")
+        or story.get("storyBrief")
+        or story.get("storySummary")
+        or story.get("summarySignals")
+    )
+
+
+def _card_has_official_report(card: dict[str, Any] | None, game_context: dict[str, Any] | None = None) -> bool:
+    card = card or {}
+    game_context = game_context or {}
+    story_context = card.get("storyAiContext") or {}
+    if story_context.get("available"):
+        return True
+    if _official_story_available(game_context.get("officialStory")):
+        return True
+    return bool(
+        _story_brief_is_substantive(card.get("storyBrief"))
+        or card.get("storySummary")
+        or card.get("storySignal")
+    )
+
+
+def _official_report_prompt_text(
+    *,
+    kind: str,
+    lang: str,
+    requested_date: str,
+    timezone: str,
+    away_abbr: str | None = None,
+    home_abbr: str | None = None,
+) -> str:
+    date_part = str(requested_date or "").strip()
+    tz_part = str(timezone or "").strip()
+    matchup_part = " vs ".join(part for part in (away_abbr, home_abbr) if part)
+    if lang == "zh":
+        suffix = f"，按 {tz_part}" if tz_part else ""
+        if kind == "day":
+            query = f"{date_part} NBA 官方报道{suffix}" if date_part else f"今天 NBA 官方报道{suffix}"
+            return f"官方报道提示：本日部分比赛有 NBA.com 官方报道；如需全文摘要，可问「{query}」。"
+        if kind == "pregame_multi":
+            query = f"{date_part} NBA 官方报道{suffix}" if date_part else f"明天 NBA 官方报道{suffix}"
+            return f"官方报道提示：这些前瞻有 NBA.com 赛前稿；如需逐场文章摘要，可问「{query}」。"
+        if kind == "pregame_single":
+            query = f"{date_part} {matchup_part} 官方报道{suffix}".strip()
+            return f"官方报道提示：这场比赛有 NBA.com 赛前稿；如需全文摘要，可问「{query}」。"
+        query_team = home_abbr or away_abbr or matchup_part
+        query = f"复盘 {date_part} {query_team} 的官方报道{suffix}".strip()
+        return f"官方报道提示：这场比赛有 NBA.com 赛后报道；如需全文摘要，可问「{query}」。"
+
+    suffix = f" in {tz_part}" if tz_part else ""
+    if kind == "day":
+        query = f"{date_part} NBA official reports{suffix}".strip()
+        return f"Official report tip: NBA.com stories are available for part of this slate; ask \"{query}\" for full summaries."
+    if kind == "pregame_multi":
+        query = f"{date_part} NBA official reports{suffix}".strip()
+        return f"Official report tip: NBA.com previews are available for these matchups; ask \"{query}\" for article summaries."
+    if kind == "pregame_single":
+        query = f"{date_part} {matchup_part} official report{suffix}".strip()
+        return f"Official report tip: an NBA.com preview is available for this game; ask \"{query}\" for the full summary."
+    query_team = home_abbr or away_abbr or matchup_part
+    query = f"recap {date_part} {query_team} official report{suffix}".strip()
+    return f"Official report tip: an NBA.com recap is available for this game; ask \"{query}\" for the full summary."
+
+
+def _official_report_prompt_for_scene(scene: dict[str, Any], *, kind: str) -> str:
+    game = scene.get("game") or {}
+    story = (game.get("gameContext") or {}).get("officialStory") or game.get("officialStory") or {}
+    if not _official_story_available(story):
+        return ""
+    report = scene.get("report") or {}
+    return _official_report_prompt_text(
+        kind=kind,
+        lang=str(report.get("lang") or "zh"),
+        requested_date=str(report.get("requestedDate") or game.get("requestedDate") or ""),
+        timezone=str(report.get("timezone") or ""),
+        away_abbr=(game.get("away") or {}).get("abbr"),
+        home_abbr=(game.get("home") or {}).get("abbr"),
+    )
+
+
 def _append_summary_section_if_needed(
     lines: list[str],
     *,
@@ -1351,7 +1801,7 @@ def _append_summary_section_if_needed(
     rendered = str(summary or none_label).strip()
     if not rendered:
         rendered = none_label
-    if already_shown and rendered == str(already_shown).strip():
+    if already_shown and _normalize_comparable_text(rendered) == _normalize_comparable_text(already_shown):
         return
     lines.extend([f"## {title}", "", f"- {rendered}", ""])
 
@@ -1444,6 +1894,262 @@ def _narrative_reasons(reasons: list[str], *, lang: str) -> str:
     english_reasons = [_english_reason_fragment(reason) for reason in reasons if str(reason or "").strip()]
     joined = "; ".join(fragment for fragment in english_reasons if fragment)
     return f"The edge was backed by {joined}."
+
+
+def _render_story_signal_text(signal: dict[str, Any] | None, *, lang: str) -> str:
+    if not signal:
+        return ""
+    source = str(signal.get("sourceLabel") or "NBA.com")
+    kind = str(signal.get("kind") or "")
+    subject = display_player_name(str(signal.get("subject") or ""), lang)
+    value = str(signal.get("value") or "").strip()
+    if lang == "zh":
+        if kind == "standout_scorer" and subject and value:
+            return f"报道看点：{source} 把 {subject} 的 {value} 分表现列为比赛主线。"
+        if kind == "short_handed":
+            return f"报道背景：{source} 提到阵容短缺是这场比赛的重要背景。"
+        if kind == "availability":
+            return f"报道背景：{source} 提到伤病或球员可用性是关键变量。"
+        if kind == "series_context":
+            return f"报道背景：{source} 将这场比赛放在系列赛走势里观察。"
+        if kind == "previous_matchups":
+            return f"报道背景：{source} 提到双方常规赛交手和阵容变化会影响赛前判断。"
+        if kind == "efficiency":
+            return f"报道看点：{source} 把投篮效率列为比赛的重要解释线索。"
+        if kind == "matchup_watch":
+            return f"报道看点：{source} 提醒这场对位会受阵容变化和核心轮换影响。"
+        return f"报道看点：{source} 提供了这场比赛的背景线索。"
+    if kind == "standout_scorer" and subject and value:
+        return f"Story note: {source} framed {subject}'s {value}-point performance as a central theme."
+    if kind == "short_handed":
+        return f"Story note: {source} highlighted the short-handed roster context."
+    if kind == "availability":
+        return f"Story note: {source} highlighted availability and injury context."
+    if kind == "series_context":
+        return f"Story note: {source} framed this game through the series context."
+    if kind == "previous_matchups":
+        return f"Story note: {source} pointed to the regular-season meetings and changed lineups."
+    if kind == "efficiency":
+        return f"Story note: {source} pointed to shooting efficiency as a key explanation."
+    if kind == "matchup_watch":
+        return f"Story note: {source} flagged lineup and rotation context for the matchup."
+    return f"Story note: {source} added matchup context."
+
+
+def _append_story_signal_line(lines: list[str], signal: dict[str, Any] | None, *, lang: str) -> None:
+    rendered = _render_story_signal_text(signal, lang=lang)
+    if rendered:
+        _append_unique_line(lines, rendered)
+
+
+def _story_summary_text(official_story: dict[str, Any] | None, *, phase: str, lang: str) -> str:
+    story = official_story or {}
+    if not story.get("available"):
+        return ""
+    summary = (story.get("storySummary") or {}).get(phase) or {}
+    if not isinstance(summary, dict):
+        return ""
+    return str(summary.get(lang) or summary.get("zh" if lang == "en" else "en") or "").strip()
+
+
+def _story_brief(official_story: dict[str, Any] | None, *, phase: str) -> dict[str, Any]:
+    story = official_story or {}
+    if not story.get("available"):
+        return {}
+    brief = story.get("storyBrief") or {}
+    if not isinstance(brief, dict):
+        return {}
+    brief_phase = str(brief.get("phase") or "")
+    if brief_phase and brief_phase != "unknown" and brief_phase != phase:
+        return {}
+    return brief
+
+
+def _clean_story_ai_paragraphs(story: dict[str, Any] | None, *, limit: int = 16) -> list[str]:
+    paragraphs: list[str] = []
+    for item in (story or {}).get("content") or []:
+        text = re.sub(r"\s+", " ", str(item or "")).strip()
+        if not text:
+            continue
+        paragraphs.append(text)
+        if len(paragraphs) >= limit:
+            break
+    return paragraphs
+
+
+def _build_day_story_ai_context(game: dict[str, Any], story: dict[str, Any] | None, *, phase: str) -> dict[str, Any]:
+    story = story or {}
+    paragraphs = _clean_story_ai_paragraphs(story)
+    available = bool(story.get("available")) and bool(paragraphs)
+    return {
+        "available": available,
+        "reason": "" if available else str(story.get("reason") or "missing_story_content"),
+        "eventId": game.get("eventId") or "",
+        "phase": phase,
+        "matchup": {
+            "away": game["away"]["abbr"],
+            "home": game["home"]["abbr"],
+            "text": f"{game['away']['abbr']} @ {game['home']['abbr']}",
+        },
+        "headline": story.get("headline") or "",
+        "storyType": story.get("storyType") or "",
+        "date": story.get("date") or "",
+        "byline": story.get("byline") or story.get("bytitle") or "",
+        "sourceLabel": story.get("sourceLabel") or "NBA.com",
+        "sourceUrl": story.get("url") or "",
+        "paragraphCount": len(paragraphs),
+        "cleanedParagraphs": paragraphs,
+    }
+
+
+def _story_ai_context_for_card(game: dict[str, Any], *, phase: str) -> dict[str, Any]:
+    context = dict(game.get("storyAiContextRaw") or {})
+    if not context:
+        context = _build_day_story_ai_context(game, game.get("officialStory"), phase=phase)
+    context["phase"] = phase
+    return context
+
+
+def _story_brief_text(official_story: dict[str, Any] | None, *, phase: str, lang: str) -> str:
+    brief = _story_brief(official_story, phase=phase)
+    if not brief:
+        return ""
+    key = "compactZh" if lang == "zh" else "compactEn"
+    fallback_key = "compactEn" if lang == "zh" else "compactZh"
+    return str(brief.get(key) or brief.get(fallback_key) or "").strip()
+
+
+def _naturalize_embedded_story_text(text: str, *, phase: str, lang: str) -> str:
+    value = str(text or "").strip()
+    if not value:
+        return ""
+    if lang == "zh":
+        replacements = (
+            ("NBA.com 的报道标题提供了这场比赛的基础背景：", ""),
+            ("NBA.com 的标题只提供了基础报道背景：", ""),
+            ("NBA.com 提到 ", ""),
+            ("NBA.com 强调 ", ""),
+            ("NBA.com 复盘认为 ", ""),
+            ("NBA.com 复盘强调 ", ""),
+            ("NBA.com 复盘把 ", ""),
+            ("NBA.com 复盘里重点提到了", ""),
+            ("NBA.com 把 ", ""),
+            ("是官方复盘里的核心个人主线。", "是复盘主线。"),
+            ("是官方复盘里的核心个人主线", "是复盘主线"),
+            ("是官方报道里的核心个人主线。", "是报道主线。"),
+            ("是官方报道里的核心个人主线", "是报道主线"),
+            ("这场比赛被放在系列赛首战语境中解读，胜负会影响首轮开局叙事。", "这场比赛仍被放在系列赛首战语境下解读。"),
+            ("这场比赛被放在系列赛首战语境中解读，胜负会影响首轮开局叙事", "这场比赛仍被放在系列赛首战语境下解读"),
+            ("阵容可用性和轮换变化的影响。", "阵容可用性和轮换变化。"),
+        )
+        for source, target in replacements:
+            value = value.replace(source, target)
+        value = re.sub(r"^；+", "", value)
+        value = re.sub(r"\s+", " ", value).strip()
+        value = re.sub(r"^[，。；:：\s]+", "", value)
+        value = re.sub(r"[；]+\s*；", "；", value)
+        value = re.sub(r"([。！？])\1+", r"\1", value)
+        return value
+    replacements_en = (
+        ("NBA.com's headline provides the basic story frame: ", ""),
+        ("NBA.com's headline only provides a basic story frame: ", ""),
+        ("NBA.com highlights that ", ""),
+        ("NBA.com highlights ", ""),
+        ("NBA.com notes that ", ""),
+        ("NBA.com notes ", ""),
+        ("NBA.com emphasizes that ", ""),
+        ("NBA.com emphasizes ", ""),
+        ("NBA.com frames the turning point around ", ""),
+        ("NBA.com frames the recap around ", ""),
+    )
+    for source, target in replacements_en:
+        value = value.replace(source, target)
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def _story_brief_is_substantive(brief: dict[str, Any] | None) -> bool:
+    if not isinstance(brief, dict) or not brief:
+        return False
+    themes = {str(theme) for theme in (brief.get("themes") or [])}
+    if not themes:
+        return False
+    return themes != {"headline_fallback"}
+
+
+def _render_pregame_story_background(official_story: dict[str, Any] | None, *, lang: str) -> str:
+    story = official_story or {}
+    if not story.get("available"):
+        return ""
+    brief_text = _story_brief_text(story, phase="pregame", lang=lang)
+    if brief_text:
+        brief_text = _naturalize_embedded_story_text(brief_text, phase="pregame", lang=lang)
+        if lang == "zh":
+            return f"官方报道背景：{brief_text}"
+        return f"Official story background: {brief_text}"
+    summary_text = _story_summary_text(story, phase="pregame", lang=lang)
+    if summary_text:
+        summary_text = _naturalize_embedded_story_text(summary_text, phase="pregame", lang=lang)
+        if lang == "zh":
+            return f"官方报道背景：{summary_text}"
+        return f"Official story background: {summary_text}"
+    signal = _pregame_story_signal(story)
+    if signal:
+        rendered = _render_story_signal_text(signal, lang=lang)
+        if lang == "zh":
+            if rendered.startswith("报道看点："):
+                return rendered.replace("报道看点：", "官方报道背景：", 1)
+            if rendered.startswith("报道背景："):
+                return rendered.replace("报道背景：", "官方报道背景：", 1)
+            return f"官方报道背景：{rendered}"
+        return rendered.replace("Story note:", "Official story background:", 1)
+    source = str(story.get("sourceLabel") or "NBA.com")
+    if lang == "zh":
+        return f"官方报道背景：{source} 赛前稿给这场对决补充了额外背景，但没有形成更明确的主线信号。"
+    return f"Official story background: {source} added extra pregame context, even without a clearer lead signal."
+
+
+def _append_pregame_story_background_line(lines: list[str], official_story: dict[str, Any] | None, *, lang: str) -> None:
+    rendered = _render_pregame_story_background(official_story, lang=lang)
+    if rendered:
+        _append_unique_line(lines, rendered)
+
+
+def _render_postgame_story_background(official_story: dict[str, Any] | None, *, lang: str) -> str:
+    story = official_story or {}
+    if not story.get("available"):
+        return ""
+    brief_text = _story_brief_text(story, phase="post", lang=lang)
+    if brief_text:
+        brief_text = _naturalize_embedded_story_text(brief_text, phase="post", lang=lang)
+        if lang == "zh":
+            return f"官方报道复盘：{brief_text}"
+        return f"Official recap theme: {brief_text}"
+    summary_text = _story_summary_text(story, phase="post", lang=lang)
+    if summary_text:
+        summary_text = _naturalize_embedded_story_text(summary_text, phase="post", lang=lang)
+        if lang == "zh":
+            return f"官方报道复盘：{summary_text}"
+        return f"Official recap theme: {summary_text}"
+    signal = _primary_story_signal(story)
+    if signal:
+        rendered = _render_story_signal_text(signal, lang=lang)
+        if lang == "zh":
+            if rendered.startswith("报道看点："):
+                return rendered.replace("报道看点：", "官方报道复盘：", 1)
+            if rendered.startswith("报道背景："):
+                return rendered.replace("报道背景：", "官方报道复盘：", 1)
+            return f"官方报道复盘：{rendered}"
+        return rendered.replace("Story note:", "Official recap theme:", 1)
+    source = str(story.get("sourceLabel") or "NBA.com")
+    if lang == "zh":
+        return f"官方报道复盘：{source} 对这场比赛补充了额外主线。"
+    return f"Official recap theme: {source} adds extra recap context."
+
+
+def _append_postgame_story_background_line(lines: list[str], official_story: dict[str, Any] | None, *, lang: str) -> None:
+    rendered = _render_postgame_story_background(official_story, lang=lang)
+    if rendered:
+        _append_unique_line(lines, rendered)
 
 
 LEADER_LINE_PATTERN = re.compile(r"^(?P<name>.+?)\s*\((?P<stats>.+)\)$")
@@ -2402,6 +3108,61 @@ def _day_card_status_title(phase: str, labels: dict[str, str]) -> str:
     return labels["pre_title"]
 
 
+def _primary_story_signal(official_story: dict[str, Any] | None) -> dict[str, str]:
+    story = official_story or {}
+    if not story.get("available"):
+        return {}
+    signals = [signal for signal in (story.get("summarySignals") or []) if isinstance(signal, dict)]
+    if not signals:
+        return {}
+    return {
+        "sourceLabel": str(story.get("sourceLabel") or "NBA.com"),
+        "headline": str(story.get("headline") or ""),
+        "url": str(story.get("url") or ""),
+        **{str(key): str(value or "") for key, value in signals[0].items()},
+    }
+
+
+def _story_signal_by_priority(
+    official_story: dict[str, Any] | None,
+    preferred_kinds: tuple[str, ...],
+) -> dict[str, str]:
+    story = official_story or {}
+    if not story.get("available"):
+        return {}
+    signals = [signal for signal in (story.get("summarySignals") or []) if isinstance(signal, dict)]
+    if not signals:
+        return {}
+    selected = None
+    for kind in preferred_kinds:
+        selected = next((signal for signal in signals if str(signal.get("kind") or "") == kind), None)
+        if selected:
+            break
+    if not selected:
+        selected = signals[0]
+    return {
+        "sourceLabel": str(story.get("sourceLabel") or "NBA.com"),
+        "headline": str(story.get("headline") or ""),
+        "url": str(story.get("url") or ""),
+        **{str(key): str(value or "") for key, value in selected.items()},
+    }
+
+
+def _pregame_story_signal(official_story: dict[str, Any] | None) -> dict[str, str]:
+    return _story_signal_by_priority(
+        official_story,
+        (
+            "availability",
+            "short_handed",
+            "matchup_watch",
+            "previous_matchups",
+            "series_context",
+            "efficiency",
+            "standout_scorer",
+        ),
+    )
+
+
 def _compact_lineups_for_day(scene: dict[str, Any]) -> dict[str, Any]:
     game = scene["game"]
     lineups = (game.get("gameContext") or {}).get("lineups") or {}
@@ -2427,6 +3188,7 @@ def _build_pregame_card(scene: dict[str, Any]) -> dict[str, Any]:
     game = scene["game"]
     pregame = scene.get("pregame") or {}
     prediction = pregame.get("prediction") or {}
+    story_signal = _primary_story_signal(game.get("officialStory"))
     return {
         "type": "pregameCard",
         "info": pregame.get("info") or {},
@@ -2441,6 +3203,10 @@ def _build_pregame_card(scene: dict[str, Any]) -> dict[str, Any]:
             "keyMatchup": prediction.get("keyMatchup") or "",
         },
         "summary": pregame.get("summary") or "",
+        "storySignal": story_signal,
+        "storyBrief": _story_brief(game.get("officialStory"), phase="pregame"),
+        "storySummary": _story_summary_text(game.get("officialStory"), phase="pregame", lang=scene["report"]["lang"]),
+        "storyAiContext": _story_ai_context_for_card(game, phase="pregame"),
         "teams": {
             "away": game["away"],
             "home": game["home"],
@@ -2491,6 +3257,7 @@ def _build_live_card(scene: dict[str, Any]) -> dict[str, Any]:
 
 def _build_postgame_card(scene: dict[str, Any]) -> dict[str, Any]:
     postgame = scene.get("postgame") or {}
+    story_signal = _primary_story_signal((scene["game"] or {}).get("officialStory"))
     return {
         "type": "postgameCard",
         "info": postgame.get("info") or {},
@@ -2501,6 +3268,10 @@ def _build_postgame_card(scene: dict[str, Any]) -> dict[str, Any]:
         "summary": postgame.get("summary") or "",
         "trend": scene.get("analysis", {}).get("trend") or "",
         "reasons": scene.get("analysis", {}).get("reasons") or [],
+        "storySignal": story_signal,
+        "storyBrief": _story_brief((scene["game"] or {}).get("officialStory"), phase="post"),
+        "storySummary": _story_summary_text((scene["game"] or {}).get("officialStory"), phase="post", lang=scene["report"]["lang"]),
+        "storyAiContext": _story_ai_context_for_card(scene["game"], phase="post"),
     }
 
 
@@ -2565,6 +3336,7 @@ def _build_day_game_context_minimal(game: dict[str, Any]) -> dict[str, Any]:
             "winProbabilityTimeline": game.get("winProbabilityTimeline") or [],
         },
         "fullStats": game.get("fullStats") or {"available": False, "source": "unavailable", "teams": {}, "players": {}},
+        "officialStory": game.get("officialStory") or {},
     }
 
 
@@ -2622,6 +3394,10 @@ def _build_day_fast_card(game: dict[str, Any], analysis: dict[str, Any], phase: 
             "summary": analysis.get("summary") or "",
             "trend": analysis.get("trend") or "",
             "reasons": analysis.get("reasons") or [],
+            "storySignal": _primary_story_signal(game.get("officialStory")),
+            "storyBrief": _story_brief(game.get("officialStory"), phase="post"),
+            "storySummary": _story_summary_text(game.get("officialStory"), phase="post", lang=game.get("lang") or "zh"),
+            "storyAiContext": _story_ai_context_for_card(game, phase="post"),
         }
     return {
         "type": "pregameCard",
@@ -2640,6 +3416,10 @@ def _build_day_fast_card(game: dict[str, Any], analysis: dict[str, Any], phase: 
             "keyMatchup": analysis.get("keyMatchup") or "",
         },
         "summary": analysis.get("summary") or "",
+        "storySignal": _primary_story_signal(game.get("officialStory")),
+        "storyBrief": _story_brief(game.get("officialStory"), phase="pregame"),
+        "storySummary": _story_summary_text(game.get("officialStory"), phase="pregame", lang=game.get("lang") or "zh"),
+        "storyAiContext": _story_ai_context_for_card(game, phase="pregame"),
         "teams": {
             "away": game["away"],
             "home": game["home"],
@@ -2687,7 +3467,7 @@ def _finalize_day_payload(
         "pre": sum(1 for game in games_payload if game.get("phase") == "pregame"),
     }
     summary = format_counts_summary(filtered_counts, report["labels"])
-    return {
+    payload = {
         "intent": "day",
         "scope": "multi_all",
         "requestedDate": report["requestedDate"],
@@ -2702,6 +3482,7 @@ def _finalize_day_payload(
         },
         "games": games_payload,
     }
+    return payload
 
 
 def _build_day_view_full(
@@ -2764,6 +3545,7 @@ def _build_day_view_fast(
     for game in raw_games:
         phase = _status_to_phase(str(game.get("statusState") or "pre"))
         game["requestedDate"] = report["requestedDate"]
+        game["lang"] = report["lang"]
         if phase == "live" and (not game.get("playTimeline") or not game.get("winProbabilityTimeline")):
             augment_game_with_nba_live(game, requested_date=report["requestedDate"])
         game["fullStats"] = build_full_stats(game)
@@ -2796,6 +3578,92 @@ def build_day_view(
     if detail_level == "full":
         return _build_day_view_full(tz=tz, date_text=date_text, lang=lang, zh_locale=zh_locale, phase_filter=phase_filter)
     return _build_day_view_fast(tz=tz, date_text=date_text, lang=lang, zh_locale=zh_locale, phase_filter=phase_filter)
+
+
+def _day_starters_line(
+    *,
+    lineups: dict[str, Any],
+    matchup: dict[str, Any],
+    lang: str,
+    zh_locale: str | None,
+) -> str:
+    if not lineups.get("startersConfirmed"):
+        return ""
+    parts: list[str] = []
+    for side in ("away", "home"):
+        team = matchup.get(side) or {}
+        abbr = team.get("abbr")
+        if not abbr:
+            continue
+        starters = (lineups.get("starters") or {}).get(abbr) or []
+        if not starters:
+            continue
+        rendered = ", ".join(localize_player_list(starters, lang))
+        parts.append(f"{_display_team(abbr, lang, zh_locale)}: {rendered}")
+    if not parts:
+        return ""
+    label = "首发" if lang == "zh" else "Starters"
+    joiner = " / " if lang == "zh" else " | "
+    return f"{label}: {joiner.join(parts)}"
+
+
+def _day_key_player_lines(
+    *,
+    full_stats: dict[str, Any],
+    lineups: dict[str, Any],
+    matchup: dict[str, Any],
+    lang: str,
+    zh_locale: str | None,
+    limit: int = 2,
+) -> list[str]:
+    players_by_team = full_stats.get("players") or {}
+    lines: list[str] = []
+    for side in ("away", "home"):
+        team = matchup.get(side) or {}
+        abbr = team.get("abbr")
+        if not abbr:
+            continue
+        selected, _coverage = _select_live_players_for_display(
+            abbr=abbr,
+            players_by_team=players_by_team,
+            lineups=lineups,
+            limit=limit,
+            prioritize_starters=False,
+        )
+        rendered = [
+            render_compact_player_stat_line(player, lang=lang, include_secondary=False, include_shooting=False)
+            for player in selected[:limit]
+        ]
+        rendered = [item for item in rendered if item]
+        if not rendered:
+            fallback = (lineups.get("keyPlayersByTeam") or {}).get(abbr) or (lineups.get("keyPlayers") or {}).get(abbr) or []
+            rendered = [localize_player_line(item, lang) for item in fallback[:limit] if str(item or "").strip()]
+        if rendered:
+            team_name = _display_team(abbr, lang, zh_locale)
+            label = "关键球员" if lang == "zh" else "Key players"
+            lines.append(f"{team_name} {label}: {'; '.join(rendered)}")
+    return lines
+
+
+def _day_team_totals_lines(
+    *,
+    full_stats: dict[str, Any],
+    matchup: dict[str, Any],
+    lang: str,
+    zh_locale: str | None,
+) -> list[str]:
+    teams = full_stats.get("teams") or {}
+    lines: list[str] = []
+    for side in ("away", "home"):
+        team = matchup.get(side) or {}
+        abbr = team.get("abbr")
+        if not abbr:
+            continue
+        compact = render_compact_team_totals_line(teams.get(abbr) or {}, lang=lang)
+        if compact:
+            label = "球队统计" if lang == "zh" else "Team totals"
+            lines.append(f"{_display_team(abbr, lang, zh_locale)} {label}: {compact}")
+    return lines
 
 
 def render_day_view_markdown(payload: dict[str, Any]) -> str:
@@ -2866,7 +3734,10 @@ def render_day_view_markdown(payload: dict[str, Any]) -> str:
                 if prediction.get("summary"):
                     localized_prediction = _localize_team_mentions(prediction["summary"], lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs)
                     lines.append(f"- {day_labels['prediction']}: {localized_prediction}")
-                if card.get("summary"):
+                if prediction.get("keyMatchup"):
+                    key_matchup = _localize_team_mentions(prediction["keyMatchup"], lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs)
+                    lines.append(f"- {'关键对位' if lang == 'zh' else 'Key matchup'}: {key_matchup}")
+                if card.get("summary") and not prediction.get("summary"):
                     _append_unique_line(
                         lines,
                         _localize_team_mentions(card["summary"], lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs),
@@ -2913,6 +3784,29 @@ def render_day_view_markdown(payload: dict[str, Any]) -> str:
                         lines,
                         _localize_team_mentions(card["summary"], lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs),
                     )
+                lineups = card.get("lineups") or {}
+                full_stats = card.get("fullStats") or {}
+                starters_line = _day_starters_line(lineups=lineups, matchup=matchup, lang=lang, zh_locale=zh_locale)
+                if starters_line:
+                    lines.append(f"- {starters_line}")
+                for player_line in _day_key_player_lines(
+                    full_stats=full_stats,
+                    lineups=lineups,
+                    matchup=matchup,
+                    lang=lang,
+                    zh_locale=zh_locale,
+                    limit=2,
+                ):
+                    lines.append(f"- {player_line}")
+                for totals_line in _day_team_totals_lines(full_stats=full_stats, matchup=matchup, lang=lang, zh_locale=zh_locale):
+                    lines.append(f"- {totals_line}")
+                if card.get("reasons"):
+                    localized_reasons = [
+                        _localize_team_mentions(_localize_analysis_reason(reason, lang), lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs)
+                        for reason in (card.get("reasons") or [])[:2]
+                    ]
+                    if localized_reasons:
+                        lines.append(f"- {'关键依据' if lang == 'zh' else 'Key reasons'}: {' / '.join(localized_reasons)}")
                 if card.get("turningPoint"):
                     localized_turning_point = _localize_team_mentions(card["turningPoint"], lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs)
                     lines.append(f"- {day_labels['turning_point']}: {_narrative_turning_point(localized_turning_point, lang)}")
@@ -3118,11 +4012,14 @@ def finalize_scene_game(
     intent: str,
     scope: str = "single",
     include_full_stats: bool = True,
+    include_context_enrichment: bool = True,
 ) -> dict[str, Any]:
     game["requestedDate"] = report["requestedDate"]
-    harden_game_injuries(game, tz=report.get("timezone"))
-    roster_snapshots = fetch_game_rosters(game)
-    game = apply_roster_guard(game, roster_snapshots, lang=lang)
+    roster_snapshots: dict[str, Any] = {}
+    if include_context_enrichment:
+        harden_game_injuries(game, tz=report.get("timezone"))
+        roster_snapshots = fetch_game_rosters(game)
+        game = apply_roster_guard(game, roster_snapshots, lang=lang)
     sources = ["espn"]
     freshness = "fresh"
     fallback_level = "none"
@@ -3140,14 +4037,19 @@ def finalize_scene_game(
             sources.append("nba_live")
             freshness = augment_meta.get("dataFreshness", freshness)
             fallback_level = augment_meta.get("fallbackLevel", fallback_level)
-            game = apply_roster_guard(game, roster_snapshots, lang=lang)
+            if include_context_enrichment:
+                game = apply_roster_guard(game, roster_snapshots, lang=lang)
     team_schedule_payloads = game.get("teamSchedulePayloads") or {}
     if include_full_stats:
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            full_stats_future = executor.submit(build_full_stats, game, allowed_names=set(game.get("verifiedPlayers") or []))
-            team_averages_future = executor.submit(_team_player_averages_for_game, game)
-            game["fullStats"] = full_stats_future.result()
-            team_player_averages = team_averages_future.result()
+        if include_context_enrichment:
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                full_stats_future = executor.submit(build_full_stats, game, allowed_names=set(game.get("verifiedPlayers") or []))
+                team_averages_future = executor.submit(_team_player_averages_for_game, game)
+                game["fullStats"] = full_stats_future.result()
+                team_player_averages = team_averages_future.result()
+        else:
+            game["fullStats"] = build_full_stats(game, allowed_names=set(game.get("verifiedPlayers") or []))
+            team_player_averages = {}
         _sync_full_stats_scoreboard(game)
     else:
         team_player_averages = _team_player_averages_for_game(game)
@@ -3158,23 +4060,29 @@ def finalize_scene_game(
             "players": {},
         }
     game["teamPlayerAverages"] = team_player_averages
-    attach_season_averages(game, team_averages=team_player_averages)
-    game["context"] = {
-        "teamForm": build_team_form_context(game),
-        "headToHead": build_head_to_head_context(
-            game,
-            away_schedule=(
-                team_schedule_payloads.get(game["away"]["abbr"])
-                if team_schedule_payloads.get(game["away"]["abbr"]) is not None
-                else _team_schedule_payload(game["away"].get("id"))
+    if include_context_enrichment:
+        attach_season_averages(game, team_averages=team_player_averages)
+        game["context"] = {
+            "teamForm": build_team_form_context(game),
+            "headToHead": build_head_to_head_context(
+                game,
+                away_schedule=(
+                    team_schedule_payloads.get(game["away"]["abbr"])
+                    if team_schedule_payloads.get(game["away"]["abbr"]) is not None
+                    else _team_schedule_payload(game["away"].get("id"))
+                ),
+                home_schedule=(
+                    team_schedule_payloads.get(game["home"]["abbr"])
+                    if team_schedule_payloads.get(game["home"]["abbr"]) is not None
+                    else _team_schedule_payload(game["home"].get("id"))
+                ),
             ),
-            home_schedule=(
-                team_schedule_payloads.get(game["home"]["abbr"])
-                if team_schedule_payloads.get(game["home"]["abbr"]) is not None
-                else _team_schedule_payload(game["home"].get("id"))
-            ),
-        ),
-    }
+        }
+    else:
+        game["context"] = {
+            "teamForm": {"available": False, "source": "deferred_live_fast_path"},
+            "headToHead": {"available": False, "source": "deferred_live_fast_path"},
+        }
     game["meta"] = {
         "sections": {
             "analysis": {
@@ -3182,7 +4090,13 @@ def finalize_scene_game(
                 "fallbackLevel": fallback_level,
             },
             "context": {
-                "teamForm": {"source": "espn_summary+espn_team_statistics+espn_team_schedule"},
+                "teamForm": {
+                    "source": (
+                        "espn_summary+espn_team_statistics+espn_team_schedule"
+                        if include_context_enrichment
+                        else "deferred_live_fast_path"
+                    )
+                },
                 "headToHead": {"source": (game["context"]["headToHead"].get("source") or "unavailable")},
             },
             "fullStats": {
@@ -3208,7 +4122,7 @@ def finalize_scene_game(
         "fallbackLevel": fallback_level,
         "dataFreshness": freshness,
     }
-    phase = analysis.get("mode") or analysis_mode
+    phase = analysis_mode if analysis_mode == "live" else (analysis.get("mode") or analysis_mode)
     if phase == "pregame":
         scene["pregame"] = build_pregame_view(game, analysis)
     elif phase == "live":
@@ -3236,12 +4150,22 @@ def build_game_scene(
     analysis_mode: str,
     zh_locale: str | None = None,
 ) -> dict[str, Any]:
-    report = build_scene_report(tz=tz, date_text=date_text, team=team, lang=lang, zh_locale=zh_locale)
+    requested_mode = analysis_mode
+    report_detail_level = "live_fast" if requested_mode == "live" else "full"
+    report = build_scene_report(
+        tz=tz,
+        date_text=date_text,
+        team=team,
+        lang=lang,
+        zh_locale=zh_locale,
+        detail_level=report_detail_level,
+    )
     game = report["games"][0]
     effective_mode = analysis_mode
     if effective_mode == "auto":
         effective_mode = {"pre": "pregame", "in": "live", "post": "post"}.get(game.get("statusState"), "pregame")
     include_full_stats = effective_mode != "pregame"
+    include_context_enrichment = analysis_mode != "live"
     intent = analysis_mode if analysis_mode in {"pregame", "live", "post"} else "scene"
     return finalize_scene_game(
         report=report,
@@ -3250,6 +4174,7 @@ def build_game_scene(
         analysis_mode=analysis_mode,
         intent=intent,
         include_full_stats=include_full_stats,
+        include_context_enrichment=include_context_enrichment,
     )
 
 
@@ -3396,6 +4321,29 @@ def render_pregame_scene_markdown(scene: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _story_key_for_game(game: dict[str, Any]) -> tuple[str, str]:
+    return str((game.get("away") or {}).get("abbr") or ""), str((game.get("home") or {}).get("abbr") or "")
+
+
+def _apply_prefetched_story(scene: dict[str, Any], official_story: dict[str, Any] | None) -> None:
+    story = official_story or {}
+    if not story.get("available"):
+        return
+    game = scene.get("game") or {}
+    game["officialStory"] = story
+    game_context = game.get("gameContext") or {}
+    game_context["officialStory"] = story
+    game["gameContext"] = game_context
+    analysis = scene.get("analysis") or {}
+    signals = analysis.get("signals") or {}
+    signals["storySignals"] = story.get("summarySignals") or []
+    brief = _story_brief(story, phase=str(analysis.get("mode") or "pregame"))
+    if brief:
+        signals["storyBrief"] = brief
+    analysis["signals"] = signals
+    scene["analysis"] = analysis
+
+
 def build_pregame_collection(
     *,
     tz: str | None,
@@ -3407,20 +4355,24 @@ def build_pregame_collection(
     report = build_scene_report(tz=tz, date_text=date_text, team=None, lang=lang, zh_locale=zh_locale)
     scenes: list[dict[str, Any]] = []
     scope = "multi_all"
-    if matchups:
-        scope = "multi_explicit"
-        for matchup in matchups:
-            resolved = resolve_requested_game(tz=tz, date_text=date_text, team=matchup["team"], opponent=matchup["opponent"])
-            resolved_date = str(resolved.get("requestedDate") or report["requestedDate"])
-            scene = build_game_scene(tz=tz, date_text=resolved_date, team=matchup["team"], lang=lang, analysis_mode="pregame", zh_locale=zh_locale)
-            if not any(existing["game"]["eventId"] == scene["game"]["eventId"] for existing in scenes):
+    pregame_game_count = sum(1 for game in report["games"] if game.get("statusState") == "pre")
+    enable_budget = bool(matchups and len(matchups) > 1) or (not matchups and pregame_game_count > 1)
+    with _pregame_multi_budget_scope(enable_budget):
+        if matchups:
+            scope = "multi_explicit"
+            for matchup in matchups:
+                resolved = resolve_requested_game(tz=tz, date_text=date_text, team=matchup["team"], opponent=matchup["opponent"])
+                resolved_date = str(resolved.get("requestedDate") or report["requestedDate"])
+                scene = build_game_scene(tz=tz, date_text=resolved_date, team=matchup["team"], lang=lang, analysis_mode="pregame", zh_locale=zh_locale)
+                if not any(existing["game"]["eventId"] == scene["game"]["eventId"] for existing in scenes):
+                    scenes.append(scene)
+        else:
+            for game in report["games"]:
+                if game.get("statusState") != "pre":
+                    continue
+                scene = build_game_scene(tz=tz, date_text=report["requestedDate"], team=game["away"]["abbr"], lang=lang, analysis_mode="pregame", zh_locale=zh_locale)
                 scenes.append(scene)
-    else:
-        for game in report["games"]:
-            if game.get("statusState") != "pre":
-                continue
-            scenes.append(build_game_scene(tz=tz, date_text=report["requestedDate"], team=game["away"]["abbr"], lang=lang, analysis_mode="pregame", zh_locale=zh_locale))
-    return {
+    payload = {
         "intent": "pregame",
         "scope": scope,
         "requestedDate": report["requestedDate"],
@@ -3429,6 +4381,7 @@ def build_pregame_collection(
         "zhLocale": report.get("zhLocale"),
         "games": scenes,
     }
+    return payload
 
 
 def render_pregame_collection_markdown(payload: dict[str, Any]) -> str:
@@ -3458,7 +4411,9 @@ def render_pregame_collection_markdown(payload: dict[str, Any]) -> str:
             if snapshot:
                 recent = (snapshot.get("recentForm") or {}).get("record") or "N/A"
                 injury_count = (snapshot.get("injuries") or {}).get("count")
-                form_sentence = _narrative_team_form(_display_team(abbr, lang, zh_locale), recent, labels["pending"] if lang == "zh" else "Pending", lang)
+                rest_days = (snapshot.get("schedule") or {}).get("restDays")
+                rest_text = ("待确认" if lang == "zh" else "Pending") if rest_days is None else str(rest_days)
+                form_sentence = _narrative_team_form(_display_team(abbr, lang, zh_locale), recent, rest_text, lang)
                 extra = f"伤病人数 {injury_count if injury_count is not None else labels['none']}。" if lang == "zh" else f"Injury count: {injury_count if injury_count is not None else labels['none']}."
                 lines.append(f"- {form_sentence} {extra}" if lang == "en" else f"- {form_sentence[:-1]}，{extra}")
         for abbr in (game["away"]["abbr"], game["home"]["abbr"]):
@@ -3475,8 +4430,10 @@ def render_pregame_collection_markdown(payload: dict[str, Any]) -> str:
         if prediction.get("keyMatchup"):
             key_matchup = _localize_team_mentions(prediction["keyMatchup"], lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs)
             lines.append(f"- {'关键对位会落在' if lang == 'zh' else 'The matchup should turn on '}{key_matchup}{'' if lang == 'zh' else '.'}")
-        if pregame.get("summary"):
-            _append_unique_line(lines, _localize_team_mentions(pregame["summary"], lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs))
+        localized_prediction_summary = _localize_team_mentions(prediction.get("summary"), lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs)
+        localized_pregame_summary = _localize_team_mentions(pregame.get("summary"), lang=lang, zh_locale=zh_locale, team_abbrs=team_abbrs)
+        if localized_pregame_summary and _normalize_comparable_text(localized_pregame_summary) != _normalize_comparable_text(localized_prediction_summary):
+            _append_unique_line(lines, localized_pregame_summary)
         lines.append("")
     return "\n".join(lines).rstrip()
 

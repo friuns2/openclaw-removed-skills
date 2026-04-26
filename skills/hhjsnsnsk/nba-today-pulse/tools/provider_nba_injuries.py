@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import os
 import re
+import socket
+import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -93,7 +95,7 @@ def _fetch_bytes(url: str) -> bytes:
             return response.read()
     except urllib.error.HTTPError as exc:
         raise NBAReportError(f"官方 NBA injury report 请求失败: HTTP {exc.code}", kind="nba_http_error") from exc
-    except urllib.error.URLError as exc:
+    except (urllib.error.URLError, socket.timeout, TimeoutError, ssl.SSLError) as exc:
         raise NBAReportError(f"无法连接官方 NBA injury report 数据源: {exc}", kind="nba_connection_failed") from exc
 
 
