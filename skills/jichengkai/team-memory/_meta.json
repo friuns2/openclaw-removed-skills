@@ -3,11 +3,16 @@
   "slug": "team-memory",
   "displayName": "team-memory",
   "latest": {
-    "version": "2.2.3",
-    "publishedAt": 1774191916816,
-    "commit": "https://github.com/openclaw/skills/commit/c675e7ff2d7ad9d1b55a5ddd5337b0c1becb5d26"
+    "version": "2.3.0",
+    "publishedAt": 1777135633115,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.3",
+      "publishedAt": 1774191916816,
+      "commit": "https://github.com/openclaw/skills/commit/c675e7ff2d7ad9d1b55a5ddd5337b0c1becb5d26"
+    },
     {
       "version": "2.2.1",
       "publishedAt": 1774148033227,
