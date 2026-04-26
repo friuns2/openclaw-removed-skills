@@ -3,11 +3,16 @@
   "slug": "serphouse",
   "displayName": "Serphouse",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166707317,
-    "commit": "https://github.com/openclaw/skills/commit/abe5b4eae9b41c94e98269ea267e54d34df13e61"
+    "version": "1.0.3",
+    "publishedAt": 1776849025886,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166707317,
+      "commit": "https://github.com/openclaw/skills/commit/abe5b4eae9b41c94e98269ea267e54d34df13e61"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774299769136,
