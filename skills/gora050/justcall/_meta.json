@@ -3,11 +3,16 @@
   "slug": "justcall",
   "displayName": "Justcall",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167231235,
-    "commit": "https://github.com/openclaw/skills/commit/06e934a76b5b1bdd117b74a34fffb6ad88b71771"
+    "version": "1.0.3",
+    "publishedAt": 1776860994200,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167231235,
+      "commit": "https://github.com/openclaw/skills/commit/06e934a76b5b1bdd117b74a34fffb6ad88b71771"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774393463927,
