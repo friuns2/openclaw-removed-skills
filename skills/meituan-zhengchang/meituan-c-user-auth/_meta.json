@@ -3,11 +3,16 @@
   "slug": "meituan-c-user-auth",
   "displayName": "美团C端用户Agent认证工具",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1776089519339,
-    "commit": "https://github.com/openclaw/skills/commit/90f67c6b2d230da668cedf1e50395a3b0d7fbd6d"
+    "version": "1.0.8",
+    "publishedAt": 1776675989370,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1776089519339,
+      "commit": "https://github.com/openclaw/skills/commit/90f67c6b2d230da668cedf1e50395a3b0d7fbd6d"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1774974688959,
