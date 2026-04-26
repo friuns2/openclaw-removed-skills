@@ -3,11 +3,16 @@
   "slug": "lighthouse",
   "displayName": "Lighthouse",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167654633,
-    "commit": "https://github.com/openclaw/skills/commit/96672a48be5e67aaf2682a8353cb64408e365d96"
+    "version": "1.0.3",
+    "publishedAt": 1776861676922,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167654633,
+      "commit": "https://github.com/openclaw/skills/commit/96672a48be5e67aaf2682a8353cb64408e365d96"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774487267185,
