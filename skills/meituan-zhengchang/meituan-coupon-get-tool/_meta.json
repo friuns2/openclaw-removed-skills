@@ -3,11 +3,16 @@
   "slug": "meituan-coupon-get-tool",
   "displayName": "美团优惠领取工具",
   "latest": {
-    "version": "1.0.17",
-    "publishedAt": 1776088587005,
-    "commit": "https://github.com/openclaw/skills/commit/8850dae5dde843ac07ce28a0cd36261f3edf7498"
+    "version": "1.0.18",
+    "publishedAt": 1776675951160,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.17",
+      "publishedAt": 1776088587005,
+      "commit": "https://github.com/openclaw/skills/commit/8850dae5dde843ac07ce28a0cd36261f3edf7498"
+    },
     {
       "version": "1.0.16",
       "publishedAt": 1775115810646,
