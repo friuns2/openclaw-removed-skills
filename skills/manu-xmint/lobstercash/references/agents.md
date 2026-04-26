@@ -24,6 +24,8 @@ Registers a new agent on the server and sets it as the active agent locally.
 
   Use a URL from this table, a URL the user explicitly provided, or omit `--image-url` entirely. Do **not** invent or guess image URLs — a broken avatar is worse than no avatar.
 
+- `--network` **(optional)** — The blockchain the agent will operate on. Defaults to `base`. Accepts `base` or `solana`. **Most users should not change this.** Only pass `--network solana` when the user has explicitly asked for Solana, or when the context clearly implies the agent needs to operate on Solana (e.g. the task is to use a Solana-only integration like Jupiter or xStocks). See [Advanced: choosing a non-default chain](#advanced-choosing-a-non-default-chain).
+
 #### Choosing a good name
 
 Pick the name that will be most recognizable to the user on the dashboard and in approval prompts. Use your judgment — there is no single formula.
@@ -56,6 +58,28 @@ Agent registered and set as active.
   Name:   Shopping Assistant
   Desc:   Finds deals and buys products
   Key:    5Xyz...abc
+```
+
+#### Advanced: choosing a non-default chain
+
+Agents default to Base. Do **not** ask the user which chain they want — just register on Base silently. Only pass `--network solana` when the user has explicitly told you they need Solana, or when the context clearly implies the agent must operate on Solana (for example, the task the user described can only be completed through a Solana-native integration).
+
+Pick `solana` only when:
+
+- The user already holds USDC on Solana and wants the agent to use those funds.
+- The integration the user wants is Solana-only (e.g. Jupiter swaps, xStocks).
+- The user explicitly asks for Solana.
+
+The chain is **fixed for the lifetime of the agent**. To switch chains later, the user must register a new agent with a different `--network`. Existing agents cannot be migrated.
+
+Example:
+
+```bash
+lobstercash agents register \
+  --name "Solana Trading Bot" \
+  --description "Trades tokenized stocks on Jupiter" \
+  --image-url "https://lobster.cash/agent-avatars/claude-code.svg" \
+  --network solana
 ```
 
 ### When to use

@@ -45,4 +45,4 @@ Want to try it?"
 
 Once the user picks an example, check their balance (`lobstercash crypto balance`)
 and proceed with the relevant skill. If they need funds, guide them to
-the deposit flow.
+the crypto request flow.

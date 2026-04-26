@@ -1,9 +1,8 @@
 ---
 name: lobstercash
-description: >
-  Use this skill when the user wants to spend money, make purchases, send crypto, pay for APIs, browse websites for shopping, complete checkout, or manage an AI agent's payment wallet. Covers buying products online with credit cards (including browser-automated checkout), sending tokens, paying for x402 protocol APIs, checking balances, depositing funds, browsing available services, and signing on-chain transactions — all with secure guardrails, and appropriate human controls. Trigger on any spending, wallet, or shopping intent: "buy this", "pay for that", "send tokens", "how much do I have", "what can I buy", "top up my wallet", "get a card", "set up payments", "find me something to buy", "complete the checkout", or "browse that site" — even if the user doesn't mention "lobster", "crypto", or "Solana" directly.
+description: 'Use this skill when the user wants to spend money, make purchases, send crypto, pay for APIs, browse websites for shopping, complete checkout, or manage an AI agent''s payment wallet. Covers buying products online with credit cards (including browser-automated checkout), sending tokens, paying for x402 protocol APIs, checking balances, depositing funds, browsing available services, and signing on-chain transactions — all with secure guardrails, and appropriate human controls. Trigger on any spending, wallet, or shopping intent: "buy this", "pay for that", "send tokens", "how much do I have", "what can I buy", "top up my wallet", "get a card", "set up payments", "find me something to buy", "complete the checkout", or "browse that site" — even if the user doesn''t mention "lobster", "crypto", or "Solana" directly.'
 metadata:
-  version: "0.0.8"
+  version: "0.0.11"
 ---
 
 # Lobster Cash CLI Skill
@@ -61,10 +60,12 @@ Virtual cards are backed by the user's credit card — no USDC or wallet funding
 ##### Step 1: Request a virtual card
 
 ```bash
-lobstercash cards request --amount <amount> --description "<what it's for>"
+lobstercash cards request --amount <amount> --description "<what it's for>" [--period <period>]
 ```
 
-Extract the amount and description from context — don't ask if the user already told you (e.g. "buy me a $25 AWS credit" → `--amount 25 --description "AWS credits"`).
+Extract the amount, description, and period from context — don't ask if the user already told you (e.g. "buy me a $25 monthly AWS credit" → `--amount 25 --description "AWS credits" --period monthly`).
+
+The `--period` flag is **optional** and sets the billing period for the virtual card mandate. Valid values: `weekly`, `monthly`, `yearly`. When omitted the card is single-use. Only ask the user about period if the purchase is clearly recurring and they haven't specified one.
 
 This command handles everything — if the wallet isn't configured yet, it bundles setup automatically.
 
@@ -130,12 +131,12 @@ lobstercash status
 Route based on the result:
 
 - **Wallet configured + has enough funds** → proceed to step 2.
-- **Wallet configured + insufficient funds** → run `lobstercash crypto deposit --amount <needed> --description "<description>"` to top up, show the approval URL, wait for user confirmation, then proceed.
-- **Wallet not configured** → run `lobstercash crypto deposit --amount <needed> --description "<description>"` (bundles wallet creation + deposit). Show the approval URL, wait for user confirmation, verify with `lobstercash status`, then proceed.
+- **Wallet configured + insufficient funds** → run `lobstercash crypto request --amount <needed> --description "<description>"` to top up, show the approval URL, wait for user confirmation, then proceed.
+- **Wallet not configured** → run `lobstercash crypto request --amount <needed> --description "<description>"` (bundles wallet creation + funding). Show the approval URL, wait for user confirmation, verify with `lobstercash status`, then proceed.
 
 The `--description` must explain what the agent will spend the funds on — derive it from the user's task, not generic filler like "top up wallet".
 
-See [deposit reference](references/deposit.md) for the full deposit flow.
+See [crypto request reference](references/crypto-request.md) for the full crypto request flow.
 
 ### Step 2: Fetch the paid endpoint
 
@@ -223,7 +224,7 @@ Common actions:
 - **Link wallet / configure agent (setup only):** `lobstercash setup` → [setup reference](references/setup.md). Use when the user says "configure", "set up", "link wallet", or similar — and isn't trying to make a purchase.
 - **Sign/submit a transaction:** `lobstercash crypto tx create` → [tx reference](references/tx.md)
 
-For crypto operations (`crypto send`, `crypto tx create`), always run `lobstercash status` first to confirm the wallet is configured and has sufficient funds. If not, use `lobstercash crypto deposit --amount <needed> --description "<description>"` to fund it — see [deposit reference](references/deposit.md).
+For crypto operations (`crypto send`, `crypto tx create`), always run `lobstercash status` first to confirm the wallet is configured and has sufficient funds. If not, use `lobstercash crypto request --amount <needed> --description "<description>"` to fund it — see [crypto request reference](references/crypto-request.md).
 
 ## Quick Reference
 
@@ -237,9 +238,9 @@ lobstercash setup                                                # link agent to
 lobstercash crypto balance                                       # check balances
 lobstercash crypto send --to <addr> --amount <n> --token usdc    # send tokens
 lobstercash crypto x402 fetch <url>                              # pay for API
-lobstercash crypto deposit --amount <n> --description "<desc>"    # request deposit / top up (bundles wallet setup)
+lobstercash crypto request --amount <n> --description "<desc>"    # request crypto funding / top up (bundles wallet setup)
 lobstercash crypto tx create|approve|status                      # low-level transaction management
-lobstercash cards request --amount <n> --description "<desc>"    # request virtual card
+lobstercash cards request --amount <n> --description "<desc>" [--period <weekly|monthly|yearly>]  # request virtual card (period optional, omit for single-use)
 lobstercash cards list                                           # list cards (includes card-id)
 lobstercash cards reveal --card-id <id> --merchant-name "..." --merchant-url "https://..." --merchant-country US  # checkout credentials
 lobstercash browser open <url>                                   # start browser session, navigate to URL
@@ -255,7 +256,7 @@ lobstercash browser close                                        # close browser
 
 - All commands produce human-readable output to stdout.
 - Errors go to stderr as plain text.
-- Exit 0 = success. Exit 1 = unexpected error. Exit 2 = wallet not set up (use `cards request` or `crypto deposit` to set up).
+- Exit 0 = success. Exit 1 = unexpected error. Exit 2 = wallet not set up (use `cards request` or `crypto request` to set up).
 
 ## Decision Tree
 
@@ -263,7 +264,7 @@ lobstercash browser close                                        # close browser
 - Read [status](references/status.md) if the user asks about agent status or payment readiness
 - Read [balance](references/balance.md) if the user wants to check token balances
 - Read [cards request](references/cards-request.md) if the user wants to request a virtual card for a purchase (Credit Card Path)
-- Read [deposit](references/deposit.md) if the user wants to deposit USDC, top up their wallet, or fund a crypto operation
+- Read [crypto request](references/crypto-request.md) if the user wants to request USDC, top up their wallet, or fund a crypto operation
 - Read [cards](references/cards.md) if the user needs to list or reveal credentials for an existing virtual card
 - Read [browser](references/browser.md) if the user wants to browse a website, complete a checkout, find products, or interact with a web page
 - Read [send](references/send.md) if the user wants to send tokens to an address (Crypto Path)
@@ -275,17 +276,18 @@ lobstercash browser close                                        # close browser
 ## Anti-Patterns
 
 - **Running crypto commands without checking status first:** Always run `lobstercash status` before `crypto send`, `crypto x402 fetch`, or `crypto tx create`. If the wallet isn't configured or has insufficient funds, the command will fail with a confusing error. Check first, fund if needed, then execute.
-- **Running setup when the user wants to buy something:** If the user wants to make a purchase, don't run `setup` first — use `cards request` or `crypto deposit` which bundle setup automatically. Only use `lobstercash setup` when the user explicitly wants to link the agent to their wallet without buying anything.
+- **Running setup when the user wants to buy something:** If the user wants to make a purchase, don't run `setup` first — use `cards request` or `crypto request` which bundle setup automatically. Only use `lobstercash setup` when the user explicitly wants to link the agent to their wallet without buying anything.
 - **Re-running setup when the agent is already configured:** If `lobstercash status` shows the wallet is already configured, do not generate a new setup session. The existing configuration is valid. Only start a fresh setup if the user explicitly tells you their current configuration is broken and needs to be regenerated.
 - **Asking the user for info the CLI can fetch:** Check balance before sending. Check status before acting. Read command output before asking questions.
 - **Running write commands in loops:** One attempt, read the result, then decide. Read operations (`crypto balance`, `status`, `examples`) are idempotent and safe to repeat. Write operations (`crypto send`, `cards request`) are not.
 - **Ignoring terminal status:** A pending transaction is not a success. All write commands now wait for on-chain confirmation by default.
 - **Polling for HITL approval:** When a command returns an approval URL, the user must tell you they approved. Do not auto-poll.
 - **Running commands before registering an agent:** Always ensure an agent exists via `lobstercash agents list` before running any other command. If you need to work with a different agent, use `lobstercash agents set-active`.
+- **Asking the user which chain to use:** Agents default to Base silently. Do not ask "which chain do you want?" at registration — just register on Base. Only pass `--network solana` if the user has explicitly told you they need Solana, or when the context clearly implies the agent must operate on Solana (e.g. they already hold USDC on Solana, or the integration they want is Solana-only). Chain is fixed per agent; switching later means registering a new one.
 - **Recommending cards for crypto-only integrations:** If the integration only uses crypto, don't suggest a virtual card.
 - **Requiring USDC for card-supported integrations:** Virtual cards are backed by credit cards, not USDC. Don't tell the user to "add funds" when the integration accepts cards.
 - **Treating x402/send/tx as separate user flows:** They all go through the same Crypto Path. The only split is credit card vs crypto.
-- **Suggesting `crypto deposit` or `cards request` when the user just wants to connect:** If the user wants to check balance, run a crypto command, or simply link their wallet — without topping up or creating a card — guide them through `lobstercash setup` first. Don't jump to `crypto deposit` or `cards request` unless the user actually wants to fund the wallet or make a purchase.
+- **Suggesting `crypto request` or `cards request` when the user just wants to connect:** If the user wants to check balance, run a crypto command, or simply link their wallet — without topping up or creating a card — guide them through `lobstercash setup` first. Don't jump to `crypto request` or `cards request` unless the user actually wants to fund the wallet or make a purchase.
 - **Jumping to readiness checks before showing options:** Show what's available first (via `examples`), then check payment readiness only when the user wants to try one.
 - **Assuming an integration's payment method:** Never guess whether a flow uses cards or crypto. Run `lobstercash status` and read the payment methods output before choosing a path.
 - **Hallucinating product URLs or paths:** Never guess URLs beyond the root domain. You cannot know the correct path structure for any website — `/w/socks`, `/category/socks`, `/shop/socks` are all guesses. Always `browser open` the homepage (`https://example.com`), then use `browser act` to search or navigate the site's own UI to find products.

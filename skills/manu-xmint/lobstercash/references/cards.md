@@ -20,10 +20,11 @@ Key properties:
 
 ### What you need before running
 
-Two pieces of information — extract from context, do not ask if already clear:
+Three pieces of information — extract from context, do not ask if already clear:
 
 - `amount`: what is the maximum amount of USD that can be spent using this virtual card (e.g. `25.00`). Other currencies will be supported soon.
 - `description`: what the card will be used for (e.g. `"AWS credits"`)
+- `period`: billing period for the mandate — **required**, one of `weekly`, `monthly`, `yearly`. If the user doesn't specify, ask them.
 
 If the user said "I need a card for $25 for AWS" you already have both.
 
@@ -33,6 +34,7 @@ If the user said "I need a card for $25 for AWS" you already have both.
 lobstercash cards request \
   --amount <amount> \
   --description "<description>" \
+  --period <weekly|monthly|yearly>
 ```
 
 ### Reading the output

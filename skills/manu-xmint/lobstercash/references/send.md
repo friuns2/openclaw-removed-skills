@@ -1,6 +1,6 @@
 # Send Tokens
 
-Send tokens from the agent wallet to a blockchain address. Use this when lobstercash is initiating the transfer itself. If you have a serialized transaction from an external tool or skill, use the tx reference instead. Note: currently only Solana chain is supported.
+Send tokens from the agent wallet to a blockchain address. Use this when lobstercash is initiating the transfer itself. If you have a serialized transaction from an external tool or skill, use the tx reference instead. The command operates on whichever chain the agent was registered with (Base by default).
 
 ## Before sending — always check balance first
 
@@ -10,8 +10,8 @@ Confirm the balance covers the amount plus a small buffer for fees.
 
 If balance is insufficient, stop and tell the user:
 "Your wallet has [X] [token]. This needs [Y] [token]."
-Then use `lobstercash crypto deposit --amount <needed> --description "<reason>"` to
-generate a deposit link for the user.
+Then use `lobstercash crypto request --amount <needed> --description "<reason>"` to
+generate a funding request link for the user.
 
 ## Confirmation rule
 

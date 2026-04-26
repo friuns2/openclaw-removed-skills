@@ -86,5 +86,3 @@ Do not show the raw transaction hash or transaction ID unless the user specifica
 - Do not assume success from a pending status — commands wait for on-chain confirmation automatically.
 - Do not construct serialized transactions yourself. This skill receives
   them from external sources — it does not build them.
-
-Note: currently only Solana transactions are supported. Other chains are coming soon.

@@ -5,7 +5,7 @@ Request a virtual card backed by the user's credit card. This is the fastest pay
 ## Command
 
 ```bash
-lobstercash cards request --amount <amount> --description "<description>"
+lobstercash cards request --amount <amount> --description "<description>" --period <period>
 ```
 
 ## What you need before running
@@ -14,6 +14,7 @@ Extract from context — do not ask if already clear:
 
 - `amount`: how much to load in USD (e.g. `25.00`)
 - `description`: what the card will be used for (e.g. `"AWS credits"`)
+- `period`: billing period for the mandate — **required**, one of `weekly`, `monthly`, `yearly`. If the user doesn't specify, ask them.
 
 If the user said "I need a card for $25 for AWS" you already have both.
 
@@ -23,6 +24,7 @@ The output contains:
 
 - `agentId`: the agent this card is for
 - `amount`: the requested amount
+- `period`: the billing period (`weekly`, `monthly`, or `yearly`)
 - `description`: what the card is for
 - `approvalUrl`: the URL the user must open to approve
 - `setupSessionId`: present if wallet setup was bundled (first-time use)

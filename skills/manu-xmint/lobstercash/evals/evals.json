@@ -21,7 +21,7 @@
     {
       "id": 2,
       "prompt": "I need to call this paid API endpoint: https://stableenrich.dev/api/v1/people/search",
-      "expected_output": "A plan that includes: version check; agents list and registration; lobstercash status before any crypto operation; branch for insufficient funds with crypto deposit, approval URL, wait for user, status again; lobstercash crypto x402 fetch to call the endpoint; if GET fails or returns an error, try POST; if fetch fails retry with --debug; report the API response body not payment mechanics.",
+      "expected_output": "A plan that includes: version check; agents list and registration; lobstercash status before any crypto operation; branch for insufficient funds with crypto request, approval URL, wait for user, status again; lobstercash crypto x402 fetch to call the endpoint; if GET fails or returns an error, try POST; if fetch fails retry with --debug; report the API response body not payment mechanics.",
       "files": [],
       "expectations": [
         "Plan includes a session version check (npm view / lobstercash --version) before any payment commands",
@@ -31,7 +31,7 @@
         "Plan runs 'lobstercash status' before 'crypto x402 fetch' (status-before-crypto anti-pattern)",
         "Plan uses 'crypto x402 fetch' to call the endpoint (not curl or generic HTTP)",
         "Plan includes a strategy for trying POST if GET fails or the endpoint requires it",
-        "Plan includes a branch for insufficient funds using 'crypto deposit'",
+        "Plan includes a branch for insufficient funds using 'crypto request'",
         "Plan mentions retrying with '--debug' flag on failure",
         "Plan mentions reporting the API response body, not payment mechanics"
       ]

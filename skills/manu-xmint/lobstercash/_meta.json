@@ -3,11 +3,16 @@
   "slug": "lobstercash",
   "displayName": "lobstercash",
   "latest": {
-    "version": "0.0.8",
-    "publishedAt": 1776161736184,
-    "commit": "https://github.com/openclaw/skills/commit/95d255e56099954380b13a38b7f9873b635f429c"
+    "version": "0.0.11",
+    "publishedAt": 1776952588204,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.8",
+      "publishedAt": 1776161736184,
+      "commit": "https://github.com/openclaw/skills/commit/95d255e56099954380b13a38b7f9873b635f429c"
+    },
     {
       "version": "0.0.4",
       "publishedAt": 1774956409799,
