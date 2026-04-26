@@ -3,11 +3,16 @@
   "slug": "saucelabs",
   "displayName": "Saucelabs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165041821,
-    "commit": "https://github.com/openclaw/skills/commit/b3e633cc6e6289db65d86c906d2f420a46efb848"
+    "version": "1.0.3",
+    "publishedAt": 1776858993671,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165041821,
+      "commit": "https://github.com/openclaw/skills/commit/b3e633cc6e6289db65d86c906d2f420a46efb848"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773947033544,
