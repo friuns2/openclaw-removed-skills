@@ -3,11 +3,16 @@
   "slug": "robly",
   "displayName": "Robly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165851239,
-    "commit": "https://github.com/openclaw/skills/commit/1111269aa6fb35679714f06ad3e5237c46f3a7c9"
+    "version": "1.0.3",
+    "publishedAt": 1776862595271,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165851239,
+      "commit": "https://github.com/openclaw/skills/commit/1111269aa6fb35679714f06ad3e5237c46f3a7c9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774109023874,
