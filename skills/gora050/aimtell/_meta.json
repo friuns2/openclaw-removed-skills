@@ -3,11 +3,16 @@
   "slug": "aimtell",
   "displayName": "Aimtell",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165640499,
-    "commit": "https://github.com/openclaw/skills/commit/47c80ed38450e3aa8ff7e01c49400876762954b6"
+    "version": "1.0.3",
+    "publishedAt": 1776859649691,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165640499,
+      "commit": "https://github.com/openclaw/skills/commit/47c80ed38450e3aa8ff7e01c49400876762954b6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058619530,
