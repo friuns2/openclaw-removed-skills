@@ -3,11 +3,16 @@
   "slug": "parsehub",
   "displayName": "Parsehub",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165510951,
-    "commit": "https://github.com/openclaw/skills/commit/a121da154d0ca0f5999e389611f41e58aabdfcf1"
+    "version": "1.0.3",
+    "publishedAt": 1776859516139,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165510951,
+      "commit": "https://github.com/openclaw/skills/commit/a121da154d0ca0f5999e389611f41e58aabdfcf1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774040638148,
