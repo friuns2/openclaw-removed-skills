@@ -1,7 +1,7 @@
 ---
 name: brain-map-visualizer
 version: 3.3.4
-description: "Visualize how attention moves across your agent's projects. 13 named attention categories. Momentum-ready edges (recentCount/lifetimeCount). Directional flow encoding. Sorted by co-access score."
+description: "Visualize how attention moves across your agent's projects. Every session leaves a trace. Over time, those traces form a map — not of what your agent was told to do, but of what it actually cared about. Where it kept returning. What it let go. This is that map. 13 attention categories. Momentum edges. The recent rises. The forgotten fades. It has no utility beyond insight. That's the point."
 homepage: https://github.com/highnoonoffice/hno-skills
 source: https://github.com/highnoonoffice/hno-skills/tree/main/oc-brain-map
 license: MIT
@@ -19,6 +19,22 @@ First click on any node reorbits the graph around it: the layout reorganizes to 
 The graph also surfaces Emerging Projects — recurring concepts detected across session journals that have not yet been mapped to a named Attention Pocket. These appear as a separate dimmed section with a Promote action.
 
 Works for any OpenClaw agent with a vault of markdown files and a session journal history.
+
+### What You're Looking At
+
+When the graph loads, here's what you're seeing:
+
+**Nodes** are your vault files. Bigger = accessed more often. Color = which project domain it belongs to (gold for core identity files, blue for infrastructure, green for publishing, etc.).
+
+**Lines** connect files that were opened in the same session. Thicker lines = more sessions where those two files appeared together.
+
+**Clusters** are Attention Pockets — project-level groupings. Files that get used together in the same kind of work naturally orbit each other.
+
+**First click** on any node reorbits the graph around that file — its neighborhood rearranges to show what it's most closely connected to. **Second click** opens the file.
+
+**Dim nodes at the bottom** are Emerging Projects — patterns the graph detected that don't have a named home yet.
+
+That's the whole interface. The mechanics behind each piece are below.
 
 ### What This Skill Builds
 

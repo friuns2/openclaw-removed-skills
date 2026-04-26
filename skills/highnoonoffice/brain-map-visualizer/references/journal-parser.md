@@ -340,7 +340,7 @@ const journalFiles = fs.readdirSync(JOURNAL_DIR)
   .filter(f => f.match(/^\d{4}-\d{2}-\d{2}\.md$/))
   .sort();
 
-console.log(`Parsing ${journalFiles.length} journal files...`);
+process.stdout.write(`Parsing ${journalFiles.length} journal files...`);
 
 const projectMap = {};
 for (const def of PROJECT_DEFS) {
@@ -459,10 +459,10 @@ projects.sort((a, b) => b.coAccessScore - a.coAccessScore);
 const output = { projects, generated: new Date().toISOString(), journalCount };
 fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
 
-console.log(`\n✓ Written to ${OUTPUT_PATH}`);
-console.log(`  ${projects.length} projects, sorted by attention:\n`);
+process.stdout.write(`\n✓ Written to ${OUTPUT_PATH}`);
+process.stdout.write(`  ${projects.length} projects, sorted by attention:\n`);
 projects.forEach((p, i) =>
-  console.log(`  ${String(i+1).padStart(2)}. [${p.coAccessScore.toString().padStart(5)} co-access] ${p.label}: ${p.sessionCount} sessions, ${p.fileCount} files`)
+  process.stdout.write(`  ${String(i+1).padStart(2)}. [${p.coAccessScore.toString().padStart(5)} co-access] ${p.label}: ${p.sessionCount} sessions, ${p.fileCount} files`)
 );
 
 // ── Exported API ──────────────────────────────────────────────────────────────

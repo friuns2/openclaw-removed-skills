@@ -1,19 +1,96 @@
 ---
-title: "OC Brain Map — BrainMapGraph Component"
+title: "OC Brain Map — BrainMapProjects Component"
 created: 2026-03-17
-modified: 2026-03-17
+modified: 2026-04-17
 tags: [brain-map, react, d3, component, tsx]
 status: active
 ---
 
-# BrainMapGraph.tsx
+# BrainMapProjects.tsx
 
-Full React + D3.js force-directed graph component. Copy to `components/BrainMapGraph.tsx`.
+Project-centric Brain Map component. Left panel shows attention projects ranked by recency-weighted density. Right panel renders a D3 force-directed graph for the selected project.
 
 **Dependencies:** `d3`, `@types/d3`
 
 ```bash
 npm install d3 @types/d3
+```
+
+---
+
+## Recency-Weighted Ranking
+
+The left panel sorts projects by a recency-weighted score rather than raw co-access density. This surfaces recently-active projects over historically-dense-but-stale ones.
+
+**Equation:**
+
+```
+rank_score = coAccessScore / (daysSinceLastSession + 1)
+```
+
+- `coAccessScore` — total edge weight across all sessions (aggregate attention density)
+- `daysSinceLastSession` — days since `dateLast` (ISO date from parser output)
+- `+1` — prevents division by zero for projects touched today
+
+A project touched yesterday with moderate density outranks a project with high lifetime density last touched 60 days ago. The `+1` floor keeps today's sessions from producing infinite scores.
+
+**Implementation:**
+
+```tsx
+const rankedProjects = data?.projects
+  ? [...data.projects].sort((a, b) => {
+      const now = Date.now();
+      const daysA = (now - new Date(a.dateLast).getTime()) / 86_400_000;
+      const daysB = (now - new Date(b.dateLast).getTime()) / 86_400_000;
+      const scoreA = a.coAccessScore / (daysA + 1);
+      const scoreB = b.coAccessScore / (daysB + 1);
+      return scoreB - scoreA;
+    })
+  : [];
+```
+
+Then render `rankedProjects.map(proj => ...)` instead of `data.projects.map`.
+
+---
+
+## Project Interface
+
+```tsx
+interface Project {
+  id: string;           // machine id, e.g. "ghost-publishing"
+  label: string;        // display name
+  color: string;        // hex color for this project
+  sessionCount: number; // journal sessions attributed to this project
+  fileCount: number;    // unique files accessed
+  coAccessScore: number;// total edge weight — aggregate attention proxy
+  dateFirst: string;    // YYYY-MM-DD of earliest session
+  dateLast: string;     // YYYY-MM-DD of most recent session
+  sessions: ProjectSession[];
+  nodes: ProjectNode[];
+  edges: ProjectEdge[];
+}
+
+interface ProjectData {
+  projects: Project[];
+  generated: string;    // ISO timestamp of last parser run
+  journalCount: number; // number of journal files parsed
+}
+```
+
+---
+
+## Node Color Groups
+
+```tsx
+const NODE_COLORS: Record<string, string> = {
+  core: '#c8a84b',
+  memory: '#a78bfa',
+  publishing: '#22c55e',
+  infrastructure: '#60a5fa',
+  skills: '#f97316',
+  journal: '#6b7280',
+  general: '#6b7280',
+};
 ```
 
 ---
