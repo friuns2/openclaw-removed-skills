@@ -241,3 +241,44 @@ Don't say "maybe later" or give a long financial excuse. That keeps the negotiat
 🤝 Want personalized social coaching with memory & pattern tracking? 
    → replyher.com
 ```
+
+
+## 亲戚比较应对 / Handling Family Comparisons
+
+When relatives ask "Why aren't you married yet?" or "Your cousin bought a house, what about you?" — here's how to respond without starting a family war.
+
+**Tips:**
+
+1. **Deflect with warmth, not defense** — "Everyone's on their own path" shuts down the comparison without inviting a debate.
+2. **Redirect the conversation** — Ask them about themselves: "How's [their kid] doing?" Most relatives love talking about their own success.
+3. **Set a non-negotiable response** — Pick one answer and repeat it calmly every time. Consistency signals you're not negotiating.
+4. **Don't justify or explain** — Long explanations = opening for more pressure. Short, warm, final.
+5. **Exit gracefully** — "I need to help with the food" or "Let me get a drink" is a valid escape hatch.
+
+---
+
+**Example 1 (WeChat/Chinese — 催婚场景):**
+
+> 亲戚：你比你表姐小两岁，人家孩子都会走路了，你怎么还没男朋友？
+
+📊 Social read:
+亲戚想表达关心，但方式是比较。直接反驳会引发争论，最好温和转移。
+
+🎯 Move:
+> 哈哈，感情的事急不来嘛，遇到合适的再说～对了，表姐家孩子多大了，会说话了吗？
+
+(温和转移 + 让对方开始聊自己的好事，话题自然切换。)
+
+---
+
+**Example 2 (English — "why no house" pressure):**
+
+> Relative: Your cousin just bought a condo downtown. When are you going to stop renting?
+
+📊 Social read:
+They're not really asking about real estate — they're expressing worry about your stability. Arguing about housing markets won't help.
+
+🎯 Move:
+> That's great for them! I'm focused on what makes sense for me right now. (Smile, change subject.)
+
+🚫 Don't justify the renting decision. That invites a debate you didn't ask for.
