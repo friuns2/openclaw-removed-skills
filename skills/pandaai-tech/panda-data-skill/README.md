@@ -1,15 +1,19 @@
 # Panda Data Skill
 
-本目录为 **ClawHub 技能包**，完整文档见 [项目 README](../README.md)。
+本目录为 **ClawHub 技能包**。
+
+- **安装全流程（OpenClaw / pip / 凭证）**：请优先阅读 **[INSTALL_GUIDE.md](INSTALL_GUIDE.md)**（结构与 [Tushare Skills 安装指南](https://tushare.pro/document/1) 类似，便于对照）。
+- 仓库根目录说明见 [项目 README](../README.md)。
 
 ## 目录结构
 
 ```
 panda-data-skill/
-├── SKILL.md          # 技能元信息（ClawHub 必须）
-├── README.md         # 本文档
-├── CHANGELOG.md      # 版本变更记录
-├── api_reference.md  # API 详细参考
+├── SKILL.md            # 技能元信息（ClawHub 必须）
+├── README.md           # 本文档
+├── INSTALL_GUIDE.md    # 安装指南（panda_data + panda-data-tools + 凭证）
+├── CHANGELOG.md        # 版本变更记录
+├── api_reference.md    # API 详细参考
 └── scripts/call_tool.py
 ```
 

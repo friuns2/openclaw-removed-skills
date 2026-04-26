@@ -495,3 +495,301 @@
 ## 维护说明
 
 若业务侧 Schema 有变更，请以 `panda_tools/tools/*.py` 中 `TOOLS` 的 `parameters` 为准，并同步更新本文档。
+
+---
+
+## readers 扩展补充（按 TOOLS.parameters）
+
+以下为本次 readers 接入新增方法，按所属章节归类。
+
+### 行情数据 `market_data`（新增）
+
+#### get_hk_daily
+
+**说明：** 港股日线行情。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 港股代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_us_daily
+
+**说明：** 美股日线行情。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 美股代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| fields | 否 | string \| string[] | 返回列 |
+
+### 市场参考数据 `market_ref`（新增）
+
+#### get_stock_cash_dividend
+
+**说明：** 股票现金分红信息。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 股票代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| market | 否 | string | 市场，默认 cn |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_stock_dividend_info
+
+**说明：** 股票分红方案与实施信息。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 股票代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| market | 否 | string | 市场，默认 cn |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_stock_split_info
+
+**说明：** 股票送转拆合信息。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 股票代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| market | 否 | string | 市场，默认 cn |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_stock_dividend_amount
+
+**说明：** 股票分红金额与分红比例。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 股票代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| market | 否 | string | 市场，默认 cn |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_stock_private_placement
+
+**说明：** 股票定向增发信息。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 股票代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| market | 否 | string | 市场，默认 cn |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_stock_allotment
+
+**说明：** 股票配股信息。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 股票代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| market | 否 | string | 市场，默认 cn |
+| fields | 否 | string \| string[] | 返回列 |
+
+### 财务与因子 `financial`（新增）
+
+#### get_audit_opinion
+
+**说明：** 审计意见数据。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 股票代码 |
+| start_quarter | 否 | string | 起始季度 yyyyqN |
+| end_quarter | 否 | string | 结束季度 yyyyqN |
+| market | 否 | string | 市场，默认 cn |
+| fields | 否 | string \| string[] | 返回列 |
+
+### 期货 `futures`（新增）
+
+#### get_future_netposi_rank
+
+**说明：** 净持仓排名。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| underlying_symbol | 否 | string \| string[] | 品种代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| max_rank | 否 | int | 最大排名 |
+| fields | 否 | string \| string[] | 返回列 |
+| type | 否 | string | 持仓类型 |
+
+#### get_future_symbol_posi_rank
+
+**说明：** 合约席位持仓排名。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| start_date | **是** | string | YYYYMMDD |
+| end_date | **是** | string | YYYYMMDD |
+| symbol | 否 | string \| string[] | 合约代码 |
+| position_type | 否 | string | 持仓方向 |
+| broker_name | 否 | string \| string[] | 席位名称 |
+| rank_max | 否 | int | 最大排名 |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_future_variety_posi_rank
+
+**说明：** 品种席位持仓排名。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| start_date | **是** | string | YYYYMMDD |
+| end_date | **是** | string | YYYYMMDD |
+| symbol | 否 | string \| string[] | 品种代码 |
+| position_type | 否 | string | 持仓方向 |
+| broker_name | 否 | string \| string[] | 席位名称 |
+| rank_max | 否 | int | 最大排名 |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_future_contract_daily_indicators
+
+**说明：** 合约日度指标。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| start_date | **是** | string | YYYYMMDD |
+| end_date | **是** | string | YYYYMMDD |
+| symbol | 否 | string \| string[] | 合约代码 |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_broker_variety_profit
+
+**说明：** 席位品种盈利。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| start_date | **是** | string | YYYYMMDD |
+| end_date | **是** | string | YYYYMMDD |
+| symbol | 否 | string \| string[] | 品种代码 |
+| fields | 否 | string \| string[] | 返回列 |
+| broker | 否 | string \| string[] | 席位名称 |
+
+#### get_broker_grade
+
+**说明：** 席位评级。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| grade | 否 | string | 评级 |
+
+#### get_broker_net_margin
+
+**说明：** 席位净保证金。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| underlying_symbol | 否 | string \| string[] | 品种代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| fields | 否 | string \| string[] | 返回列 |
+| broker | 否 | string \| string[] | 席位名称 |
+
+#### get_broker_net_margin_change
+
+**说明：** 席位净保证金变化。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| underlying_symbol | 否 | string \| string[] | 品种代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| fields | 否 | string \| string[] | 返回列 |
+| broker | 否 | string \| string[] | 席位名称 |
+
+#### get_broker_total_margin
+
+**说明：** 席位总保证金。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| underlying_symbol | 否 | string \| string[] | 品种代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| fields | 否 | string \| string[] | 返回列 |
+| broker | 否 | string \| string[] | 席位名称 |
+
+#### get_future_net_flow
+
+**说明：** 期货净资金流向。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| start_date | **是** | string | YYYYMMDD |
+| end_date | **是** | string | YYYYMMDD |
+| symbol | 否 | string \| string[] | 合约代码 |
+| fields | 否 | string \| string[] | 返回列 |
+| broker_name | 否 | string \| string[] | 席位名称 |
+| position_type | 否 | string | 持仓方向 |
+
+#### get_future_basis
+
+**说明：** 期货基差。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| underlying_symbol | 否 | string \| string[] | 品种代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_future_wr
+
+**说明：** 期货仓单比率。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| underlying_symbol | 否 | string \| string[] | 品种代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| fields | 否 | string \| string[] | 返回列 |
+
+#### get_future_ls_ratio
+
+**说明：** 期货多空比。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 合约代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+
+#### get_future_net_cap_change
+
+**说明：** 期货净资金变化。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 合约代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| broker | 否 | string \| string[] | 席位名称 |
+
+#### get_future_contract_rank
+
+**说明：** 期货合约席位排名。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| symbol | 否 | string \| string[] | 合约代码 |
+| underlying_symbol | 否 | string \| string[] | 品种代码 |
+| start_date | 否 | string | YYYYMMDD |
+| end_date | 否 | string | YYYYMMDD |
+| type | 否 | string | 统计类型 |
+| max_rank | 否 | int | 最大排名 |
+| rank_type | 否 | string | 排名类型 |

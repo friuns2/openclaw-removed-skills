@@ -1,9 +1,9 @@
 ---
-name: panda-data
-version: 1.0.0
-description: PandaAI 金融数据 API 的 LLM Tool 封装，35 个数据查询方法，支持行情、财务、期货等
+name: panda-data-skill
+version: 3.0.0
+description: PandaAI 金融数据 API 的 LLM Tool 封装多个数据查询方法，支持A股行情、A股基本面，期货，指数等
 author: PandaAI
-homepage: https://github.com/pandaai/panda-data
+homepage: https://pypi.org/project/panda-data-tools/
 user-invocable: true
 metadata:
   categories:
@@ -31,7 +31,9 @@ result = registry.call_tool("get_market_data", start_date="20250101", end_date="
 ## Key Notes
 
 - 需配置环境变量 `PANDA_DATA_USERNAME` 和 `PANDA_DATA_PASSWORD` 作为 API 凭证
-- `panda_data` 包需通过本地 whl 单独安装
+- 需安装 PandaData SDK：`pip install panda_data`
+- 需安装 PandaDataSkill SDK：`pip install panda-data-tools`
+- 完整安装步骤（ClawHub、pip、凭证）见同目录 **[INSTALL_GUIDE.md](INSTALL_GUIDE.md)**
 - 日期格式统一为 YYYYMMDD（如 20250101）
 - 股票代码格式：A股 `000001.SZ`、指数 `000300.SH`、期货 `A2501.DCE`
 
@@ -198,3 +200,99 @@ registry.call_tool("get_last_trade_date")
 #### 35. `get_future_dominant(start_date, end_date, underlying_symbol)` — 获取期货主力合约
 
 获取每日主力合约代码。
+
+#### 38. `get_hk_daily(symbol, start_date, end_date, fields)` — 获取港股日线
+
+获取港股日线行情数据。
+
+#### 39. `get_us_daily(symbol, start_date, end_date, fields)` — 获取美股日线
+
+获取美股日线行情数据。
+
+#### 40. `get_stock_cash_dividend(symbol, start_date, end_date, market, fields)` — 获取现金分红
+
+获取股票现金分红公告与金额信息。
+
+#### 41. `get_stock_dividend_info(symbol, start_date, end_date, market, fields)` — 获取分红信息
+
+获取股票分红方案及实施信息。
+
+#### 42. `get_stock_split_info(symbol, start_date, end_date, market, fields)` — 获取拆合股信息
+
+获取送股、转增、拆合股相关信息。
+
+#### 43. `get_stock_dividend_amount(symbol, start_date, end_date, market, fields)` — 获取分红金额
+
+获取股票累计分红金额与分红比例信息。
+
+#### 44. `get_stock_private_placement(symbol, start_date, end_date, market, fields)` — 获取定向增发
+
+获取股票定向增发相关信息。
+
+#### 45. `get_stock_allotment(symbol, start_date, end_date, market, fields)` — 获取配股信息
+
+获取股票配股方案与执行信息。
+
+#### 46. `get_audit_opinion(symbol, start_quarter, end_quarter, market, fields)` — 获取审计意见
+
+获取审计意见与审计机构信息。
+
+#### 47. `get_future_netposi_rank(underlying_symbol, start_date, end_date, max_rank, fields, type)` — 获取净持仓排名
+
+获取期货净持仓排名统计。
+
+#### 48. `get_future_symbol_posi_rank(start_date, end_date, symbol, position_type, broker_name, rank_max, fields)` — 获取合约持仓排名
+
+获取合约维度席位持仓排名。
+
+#### 49. `get_future_variety_posi_rank(start_date, end_date, symbol, position_type, broker_name, rank_max, fields)` — 获取品种持仓排名
+
+获取品种维度席位持仓排名。
+
+#### 50. `get_future_contract_daily_indicators(start_date, end_date, symbol, fields)` — 获取合约日度指标
+
+获取期货合约日度指标数据。
+
+#### 51. `get_broker_variety_profit(start_date, end_date, symbol, fields, broker)` — 获取席位品种盈利
+
+获取席位在品种维度的盈利统计。
+
+#### 52. `get_broker_grade(grade)` — 获取席位评级
+
+获取期货席位评级信息。
+
+#### 53. `get_broker_net_margin(underlying_symbol, start_date, end_date, fields, broker)` — 获取净保证金
+
+获取席位净保证金数据。
+
+#### 54. `get_broker_net_margin_change(underlying_symbol, start_date, end_date, fields, broker)` — 获取净保证金变化
+
+获取席位净保证金变动数据。
+
+#### 55. `get_broker_total_margin(underlying_symbol, start_date, end_date, fields, broker)` — 获取总保证金
+
+获取席位总保证金数据。
+
+#### 56. `get_future_net_flow(start_date, end_date, symbol, fields, broker_name, position_type)` — 获取净资金流
+
+获取期货净资金流向数据。
+
+#### 57. `get_future_basis(underlying_symbol, start_date, end_date, fields)` — 获取期货基差
+
+获取期货基差统计数据。
+
+#### 58. `get_future_wr(underlying_symbol, start_date, end_date, fields)` — 获取仓单比率
+
+获取期货仓单比率数据。
+
+#### 59. `get_future_ls_ratio(symbol, start_date, end_date)` — 获取多空比
+
+获取期货多空比数据。
+
+#### 60. `get_future_net_cap_change(symbol, start_date, end_date, broker)` — 获取净资金变化
+
+获取期货净资金变化数据。
+
+#### 61. `get_future_contract_rank(symbol, underlying_symbol, start_date, end_date, type, max_rank, rank_type)` — 获取合约排名
+
+获取期货合约席位排名数据。
