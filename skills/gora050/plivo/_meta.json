@@ -3,11 +3,16 @@
   "slug": "plivo",
   "displayName": "Plivo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166995959,
-    "commit": "https://github.com/openclaw/skills/commit/e3c924fc7f6fa4aecffd579f6542cf1fe6fd0e49"
+    "version": "1.0.3",
+    "publishedAt": 1776860734065,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166995959,
+      "commit": "https://github.com/openclaw/skills/commit/e3c924fc7f6fa4aecffd579f6542cf1fe6fd0e49"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774339413135,
