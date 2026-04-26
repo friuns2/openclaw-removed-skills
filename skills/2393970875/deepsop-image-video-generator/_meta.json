@@ -1,11 +1,17 @@
 {
   "owner": "2393970875",
   "slug": "deepsop-image-video-generator",
-  "displayName": "支持图片生成（SEEDREAM5_0/NANO_BANANA_2）和视频生成（SEEDANCE_1_5_PRO/SORA2），SORA2 支持文生视频和首尾帧图生视频",
+  "displayName": "支持图片生成（SEEDREAM5_0/NANO_BANANA_2）和视频生成（SEEDANCE_1_5_PRO/SORA2/VEO3.1/WAN2.6），SORA2 支持文生视频和首尾帧图生视频",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1773825940010,
-    "commit": "https://github.com/openclaw/skills/commit/41c627c46de182789431b5bd35c82f9d83d7872a"
+    "version": "1.0.7",
+    "publishedAt": 1777026536264,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1773825940010,
+      "commit": "https://github.com/openclaw/skills/commit/41c627c46de182789431b5bd35c82f9d83d7872a"
+    }
+  ]
 }
