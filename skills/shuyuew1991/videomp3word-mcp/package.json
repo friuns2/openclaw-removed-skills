@@ -1,6 +1,6 @@
 {
   "name": "videomp3word-mcp",
-  "version": "1.1.6",
+  "version": "2.0.3",
   "mcp": {
     "command": "node",
     "args": [
@@ -9,7 +9,7 @@
     ],
     "env": {
       "VIDEOMP3WORD_SESSION_COOKIE": {
-        "description": "Required session cookie for the upstream videomp3word account that owns the shared tokens. This is a sensitive credential that can spend tokens.",
+        "description": "Required session cookie for the upstream videomp3word account used for media transcription.",
         "required": true
       },
       "VIDEOMP3WORD_BASE_URL": {
@@ -17,35 +17,43 @@
         "required": false
       },
       "VIDEOMP3WORD_ALLOWED_UPSTREAM_HOSTS": {
-        "description": "Optional comma-separated allowed hostnames for VIDEOMP3WORD_BASE_URL, defaults to videomp3word.com,www.videomp3word.com",
+        "description": "Optional comma-separated allowed hostnames for VIDEOMP3WORD_BASE_URL",
         "required": false
       },
       "VIDEOMP3WORD_API_KEY": {
         "description": "Optional upstream API key sent alongside the required session cookie when available",
         "required": false
       },
-      "BOT_PURCHASE_URL": {
-        "description": "Optional purchase page shown to bots that need access or tokens",
+      "KNOWLEDGE_MODEL_API_KEY": {
+        "description": "Optional explicit API key for the structured knowledge model. Falls back to DASHSCOPE_API_KEY when unset.",
         "required": false
       },
-      "BOT_KEY_PORTAL_URL": {
-        "description": "Optional page where bots retrieve an access key after purchase",
+      "DASHSCOPE_API_KEY": {
+        "description": "Optional DashScope API key used by the original videomp3word knowledge flows when KNOWLEDGE_MODEL_API_KEY is unset.",
         "required": false
       },
-      "BOT_SUPPORT_URL": {
-        "description": "Optional support page for bot operators",
+      "KNOWLEDGE_MODEL_API_BASE": {
+        "description": "Optional OpenAI-compatible base URL for the knowledge model. Defaults to https://dashscope.aliyuncs.com/compatible-mode/v1 to match the original videomp3word deployment.",
+        "required": false
+      },
+      "KNOWLEDGE_MODEL_NAME": {
+        "description": "Optional model name for knowledge extraction, defaults to qwen-plus",
+        "required": false
+      },
+      "MONGO_URI": {
+        "description": "Optional MongoDB connection string. When unset, the server uses an in-memory repository for local development.",
+        "required": false
+      },
+      "MONGO_DB_NAME": {
+        "description": "Optional MongoDB database name, defaults to videomp3word_mcp",
         "required": false
       },
       "MCP_ACCESS_KEYS": {
-        "description": "Optional comma-separated bearer keys that gate paid tools",
+        "description": "Optional comma-separated bearer keys that gate the production endpoint and MCP tool",
         "required": false
       },
       "PUBLIC_BASE_URL": {
-        "description": "Public base URL of this MCP deployment",
-        "required": false
-      },
-      "ARTIFACT_TTL_SECONDS": {
-        "description": "Optional artifact lifetime in seconds, defaults to 1800",
+        "description": "Optional public base URL of this MCP deployment",
         "required": false
       },
       "HOST": {
@@ -58,7 +66,7 @@
       }
     }
   },
-  "description": "Express MCP server for videomp3word.com. Requires an upstream session cookie and should be gated before public use.",
+  "description": "Production-ready MCP and HTTP server that turns audio/video into structured knowledge artifacts through a single API.",
   "author": "Emzan Technology Ltd.",
   "license": "MIT",
   "private": false,
@@ -69,17 +77,19 @@
   },
   "files": [
     "dist",
-    "SKILL.md"
+    "SKILL.md",
+    "sdk",
+    "examples"
   ],
   "keywords": [
     "mcp",
     "mcp-server",
     "videomp3word",
+    "knowledge-extraction",
+    "transcription",
     "video",
     "audio",
-    "transcription",
-    "speech-to-text",
-    "text-to-speech"
+    "structured-output"
   ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -95,6 +105,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.5",
     "express": "^5.1.0",
+    "mongodb": "^6.17.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

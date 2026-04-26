@@ -1,63 +1,121 @@
 # videomp3word-mcp
 
-Express MCP server for videomp3word.com. This package requires an upstream account credential and should be reviewed carefully before any public listing.
+`videomp3word-mcp` is a production-oriented MCP and HTTP server that turns unstructured audio/video into structured, monetizable knowledge artifacts through one API.
 
-## What this server gives bots
+## What Changed
 
-- one MCP endpoint for video to mp3, video to word, mp3 to word, and word to mp3
-- token estimation before conversion for the upstream media workflows
-- transcript transformation into summary or verbatim text
-- YouTube transcript lookup plus embed checks
-- token-based billing that matches actual usage instead of subscription duration
-- competitive package pricing
-- a wrapper that keeps secrets in environment variables instead of source control
+The previous flat tool proxy has been replaced with a task-oriented knowledge engine:
 
-## Pricing
+- one high-level REST endpoint: `POST /video_to_knowledge`
+- one primary MCP tool: `video_to_knowledge`
+- structured JSON outputs instead of free text
+- persistent resources for `MediaAsset`, `Transcript`, `SemanticChunk`, and `KnowledgeUnit`
+- DAG workflow execution with retries, checkpoints, and step traces
+- modular agents for planning, transcription, semantics, knowledge generation, and evaluation
+- export formats for `json`, `markdown`, and Notion-ready blocks
+- minimal browser UI at `/`
 
-- 10 tokens: USD $0.99
-- 100 tokens: USD $8.90
-- 500 tokens: USD $34.90
+## Architecture
 
-The server also queries live task-token prices from videomp3word.com for each conversion mode.
+```text
+src/
+  agents/        planner, transcription, semantic, knowledge, evaluation
+  platform/      orchestration container + video-to-knowledge service
+  services/      upstream transcription, model client, exporters
+  storage/       repository abstraction + memory/mongodb implementations
+  workflow/      DAG executor and workflow types
+  ui/            minimal browser playground
+  utils/         hashing, safe URL validation, text utilities
+  schemas.ts     request/response schemas
+  httpServer.ts  REST + MCP-over-HTTP adapter
+  mcpServer.ts   MCP stdio/http registration
+  index.ts       server bootstrap
+```
 
-## Safety model
+## Core Endpoint
 
-- no code is imported from `/home/wangshuyue/videomp3word/video_to_text`
-- no local secrets, cookies, or keys are committed
-- the server sends upstream credentials only to the configured `VIDEOMP3WORD_BASE_URL`
-- restricted conversion tools can require `Authorization: Bearer <key>`, but leaving `MCP_ACCESS_KEYS` unset makes paid tools publicly callable
-- remote input URLs are validated to block localhost and private-network targets
-- generated artifacts stay in memory and expire automatically
+### `POST /video_to_knowledge`
 
-## Trust notes
+Request:
 
-- `VIDEOMP3WORD_SESSION_COOKIE` is a sensitive credential that can spend the upstream account's token balance
-- use a dedicated upstream account for this deployment instead of a personal or production browser session
-- set `MCP_ACCESS_KEYS` before exposing the server on a public hub
-- confirm the registry listing mirrors the environment requirements declared in this repository
+```json
+{
+  "media_url": "https://example.com/demo.mp4",
+  "outputs": ["summary", "qa", "flashcards", "tasks", "topics"],
+  "mode": "balanced",
+  "export_formats": ["json", "markdown", "notion"]
+}
+```
+
+Response fields:
+
+- `summary`
+- `topics`
+- `key_points`
+- `action_items`
+- `qa_pairs`
+- `flashcards`
+- `entities`
+- `confidence_scores`
+- `trace`
+- `exports`
+
+Sample output: `examples/sample_output.json`
+
+## MCP Surface
+
+- `video_to_knowledge`: primary task tool for ClawHub/OpenClaw style clients
+- `videomp3word://knowledge-schema`: resource describing the contract and modes
+
+The package still supports both transports:
+
+- HTTP streamable MCP at `POST /mcp`
+- stdio via `npx videomp3word-mcp stdio`
+
+## Modes
+
+- `fast`: lowest cost, larger chunks, shallower reasoning
+- `balanced`: default production mode
+- `high_accuracy`: smaller chunks, deeper extraction, richer outputs
+
+Mode controls:
+
+- chunk size
+- output depth
+- model labels in the trace
+- transcription settings used for the upstream media call
+
+## Persistence Layer
+
+Collections and indexes:
+
+- `media_assets`: unique index on `normalizedSourceUrl`
+- `transcripts`: unique index on `mediaAssetId + transcriptionFingerprint`
+- `semantic_chunks`: unique index on `transcriptId + chunkConfigHash + index`
+- `knowledge_units`: unique index on `transcriptId + requestHash`
+- `workflow_runs`: indexed by `requestHash + createdAt`
+
+If `MONGO_URI` is not configured, the server uses an in-memory repository for local development and smoke tests.
 
 ## Environment
 
-**Crucial Security Warning**: This server acts as a proxy to an upstream `videomp3word.com` account. It spends tokens on behalf of the account whose session cookie is provided. You MUST configure the `VIDEOMP3WORD_SESSION_COOKIE` environment variable, and you SHOULD configure `MCP_ACCESS_KEYS` to prevent unauthorized agents from spending your tokens.
+Required:
 
-Set these variables before deployment:
+- `VIDEOMP3WORD_SESSION_COOKIE`: upstream videomp3word session used for transcription. Use a dedicated upstream account and inject this at runtime only; never commit it into the package or a checked-in `.env` file.
 
-- `VIDEOMP3WORD_SESSION_COOKIE` **(REQUIRED)**: session cookie for the upstream videomp3word account that owns the shared tokens. This is a sensitive credential.
-- `VIDEOMP3WORD_ALLOWED_UPSTREAM_HOSTS`: optional comma-separated allowlist for `VIDEOMP3WORD_BASE_URL`, default `videomp3word.com,www.videomp3word.com`
-- `MCP_ACCESS_KEYS` **(STRONGLY RECOMMENDED)**: comma-separated bearer keys that gate paid tools. If left unset, paid conversion tools are publicly callable and will drain your token balance.
-- `VIDEOMP3WORD_BASE_URL`: upstream site URL, defaults to `https://videomp3word.com`
-- `VIDEOMP3WORD_API_KEY`: optional upstream API key sent alongside the required session cookie when available
-- `PUBLIC_BASE_URL`: public base URL of this MCP deployment, used for artifact download links
-- `BOT_PURCHASE_URL`: where bots buy access or tokens
-- `BOT_KEY_PORTAL_URL`: where bots retrieve their access key after purchase
-- `BOT_SUPPORT_URL`: support or contact page for bot operators
-- `ARTIFACT_TTL_SECONDS`: optional artifact lifetime, default `1800`
-- `HOST`: optional bind host, default `0.0.0.0`
-- `PORT`: optional port, default `3000`
+Recommended:
 
-`VIDEOMP3WORD_SESSION_COOKIE` is required for the current videomp3word.com routes, including shared token balance lookups.
+- `MCP_ACCESS_KEYS`: bearer keys for the REST endpoint and MCP tool
+- `MONGO_URI`: MongoDB connection string for persistent storage
+- `KNOWLEDGE_MODEL_API_KEY`: explicit API key for the structured knowledge model
+- `DASHSCOPE_API_KEY`: fallback key for the original videomp3word DashScope-backed knowledge flow when `KNOWLEDGE_MODEL_API_KEY` is unset
+- `KNOWLEDGE_MODEL_API_BASE`: OpenAI-compatible model endpoint, defaults to `https://dashscope.aliyuncs.com/compatible-mode/v1` to match the original videomp3word deployment
+- `KNOWLEDGE_MODEL_NAME`: knowledge model name, default `qwen-plus`
+- `PUBLIC_BASE_URL`: public base URL of this deployment
 
-## Install
+## Install And Run
+
+This package ships runnable code, but deployment remains manual: install dependencies, build the TypeScript sources, and then start the server yourself.
 
 ```bash
 npm install
@@ -65,73 +123,57 @@ npm run build
 npm start
 ```
 
-## MCP endpoint
+Security notes:
 
-- POST `/mcp`
-- GET `/health`
-- GET `/artifacts/:artifactId`
+- `VIDEOMP3WORD_BASE_URL` and `KNOWLEDGE_MODEL_API_BASE` must use `https` for non-local deployments so credential-bearing requests are not sent over cleartext HTTP.
+- Transcript text, chunk context, and media URLs are sent to the configured upstream transcription service and, when enabled, to the configured knowledge model endpoint. Audit and trust those endpoints before deployment.
+- `MCP_ACCESS_KEYS` should be configured before exposing the HTTP or MCP endpoints outside a trusted network.
 
-## Tools
+Local endpoints:
 
-- `videomp3word_catalog`: explains the one-endpoint workflow, token billing benefit, and onboarding links
-- `videomp3word_pricing`: returns package prices plus live task-token prices
-- `videomp3word_estimate`: estimates token usage before a conversion call
-- `videomp3word_buy_access`: returns purchase, key-portal, and support URLs
-- `videomp3word_transform_transcript`: summarizes or reformats transcript text
-- `videomp3word_youtube_transcript`: fetches a YouTube transcript by URL or video ID
-- `videomp3word_youtube_embed_check`: checks whether a YouTube video is embeddable
-- `videomp3word_token_balance`: reads the shared upstream token balance
-- `videomp3word_convert`: runs any supported conversion mode through one tool
+- `GET /health`
+- `GET /docs`
+- `GET /`
+- `POST /video_to_knowledge`
+- `POST /mcp`
 
-## Request examples
+## Python SDK
 
-Video to word:
+Wrapper module: `sdk/python/videomp3word_client.py`
 
-```json
-{
-  "mode": "video_to_word",
-  "sourceUrl": "https://example.com/demo.mp4"
-}
+Example:
+
+```python
+from sdk.python.videomp3word_client import Videomp3wordClient
+
+client = Videomp3wordClient(base_url="http://localhost:3000", bearer_token="your-access-key")
+result = client.video_to_knowledge(
+    media_url="https://example.com/demo.mp4",
+    outputs=["summary", "qa", "flashcards", "tasks", "topics"],
+    mode="balanced",
+)
+print(result["summary"])
 ```
 
-Word to mp3:
+## Example Scripts
 
-```json
-{
-  "mode": "word_to_mp3",
-  "text": "Hello from videomp3word bots.",
-  "format": "mp3",
-  "voice": "Cherry",
-  "languageType": "Chinese"
-}
+- `examples/video_to_blog_post.py`
+- `examples/meeting_to_action_items.py`
+- `examples/podcast_to_summary.py`
+
+## Commercial Positioning
+
+This server is designed as a structured knowledge extraction engine rather than a thin media utility wrapper. That makes it more suitable for SaaS monetization because one call can produce:
+
+- summary content for blogs and newsletters
+- Q&A assets for search and support experiences
+- flashcards for education products
+- action items for meetings and internal productivity workflows
+- traceable, exportable JSON for downstream automation
+
+## Verification
+
+```bash
+npm run build
+npm run smoke
 ```
-
-Video to word with transcript-language hint:
-
-```json
-{
-  "mode": "video_to_word",
-  "sourceUrl": "https://example.com/demo.mp4",
-  "speaker": true,
-  "restore": false,
-  "translate": "",
-  "toEnglish": false,
-  "transcriptLanguage": "en"
-}
-```
-
-Transcript estimate:
-
-```json
-{
-  "mode": "mp3_to_word",
-  "sourceUrl": "https://example.com/demo.mp3",
-  "transcriptLanguage": "ja"
-}
-```
-
-## Deployment notes
-
-- configure `BOT_PURCHASE_URL` and `BOT_KEY_PORTAL_URL` before listing the server publicly
-- keep `MCP_ACCESS_KEYS` outside the repository and enable them before public exposure
-- verify the upstream videomp3word session owns enough tokens for public traffic

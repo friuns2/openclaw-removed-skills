@@ -15,24 +15,18 @@ type StartedServer = {
 };
 
 type SpawnedApp = import("node:child_process").ChildProcess;
-type ToolTextContent = {
-  type: "text";
-  text: string;
-};
+type ToolTextContent = { type: "text"; text: string };
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 async function startServer(
-  handler: (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => void
+  handler: (req: IncomingMessage, res: ServerResponse<IncomingMessage>) => void,
 ): Promise<StartedServer> {
   const server = createServer(handler);
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
   const address = server.address() as AddressInfo;
-  return {
-    server,
-    url: `http://127.0.0.1:${address.port}`,
-  };
+  return { server, url: `http://127.0.0.1:${address.port}` };
 }
 
 async function stopServer(server: ReturnType<typeof createServer>) {
@@ -41,26 +35,10 @@ async function stopServer(server: ReturnType<typeof createServer>) {
 }
 
 async function waitForAppReady(process: SpawnedApp): Promise<void> {
-  let stdout = "";
   let stderr = "";
-
-  process.stdout?.setEncoding("utf8");
   process.stderr?.setEncoding("utf8");
-
   await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error(`Timed out waiting for app startup.\nstdout:\n${stdout}\nstderr:\n${stderr}`));
-    }, 15000);
-
-    const onStdout = (chunk: string) => {
-      stdout += chunk;
-      if (stdout.includes("videomp3word-mcp listening on")) {
-        cleanup();
-        resolve();
-      }
-    };
-
+    const timeout = setTimeout(() => reject(new Error(`Timed out waiting for app startup.\nstderr:\n${stderr}`)), 15000);
     const onStderr = (chunk: string) => {
       stderr += chunk;
       if (stderr.includes("videomp3word-mcp listening on")) {
@@ -68,65 +46,31 @@ async function waitForAppReady(process: SpawnedApp): Promise<void> {
         resolve();
       }
     };
-
     const onExit = (code: number | null, signal: NodeJS.Signals | null) => {
       cleanup();
-      reject(new Error(`App exited before startup. code=${code} signal=${signal}\nstdout:\n${stdout}\nstderr:\n${stderr}`));
+      reject(new Error(`App exited before startup. code=${code} signal=${signal}\nstderr:\n${stderr}`));
     };
-
     const cleanup = () => {
       clearTimeout(timeout);
-      process.stdout?.off("data", onStdout);
       process.stderr?.off("data", onStderr);
       process.off("exit", onExit);
     };
-
-    process.stdout?.on("data", onStdout);
     process.stderr?.on("data", onStderr);
     process.on("exit", onExit);
   });
 }
 
 async function stopProcess(process: SpawnedApp) {
-  if (process.exitCode !== null || process.killed) {
-    return;
-  }
-
+  if (process.exitCode !== null || process.killed) return;
   process.kill("SIGTERM");
   await once(process, "exit");
-}
-
-async function captureProcessExit(process: SpawnedApp) {
-  let stdout = "";
-  let stderr = "";
-
-  process.stdout?.setEncoding("utf8");
-  process.stderr?.setEncoding("utf8");
-  process.stdout?.on("data", (chunk: string) => {
-    stdout += chunk;
-  });
-  process.stderr?.on("data", (chunk: string) => {
-    stderr += chunk;
-  });
-
-  const [code, signal] = (await once(process, "exit")) as [number | null, NodeJS.Signals | null];
-  return { code, signal, stdout, stderr };
 }
 
 function createClient(baseUrl: string, headers?: HeadersInit) {
   const transport = new StreamableHTTPClientTransport(new URL("/mcp", baseUrl), {
     requestInit: headers ? { headers } : undefined,
   });
-  const client = new Client(
-    {
-      name: "smoke-test-client",
-      version: "1.0.0",
-    },
-    {
-      capabilities: {},
-    }
-  );
-
+  const client = new Client({ name: "smoke-test-client", version: "1.0.0" }, { capabilities: {} });
   return { client, transport };
 }
 
@@ -135,117 +79,29 @@ function getToolText(result: unknown): string {
   const content = (result as { content?: unknown }).content;
   assert.ok(Array.isArray(content));
   const textItem = content.find((item): item is ToolTextContent => {
-    if (!item || typeof item !== "object") {
-      return false;
-    }
-
+    if (!item || typeof item !== "object") return false;
     const textContent = item as Partial<ToolTextContent>;
     return textContent.type === "text" && typeof textContent.text === "string";
   });
-
   assert.ok(textItem);
   return textItem.text;
 }
 
-test("bot access flow smoke test", async () => {
+test("structured knowledge endpoint and MCP tool work end-to-end", async () => {
   const accessKey = "smoke-access-key";
   const sessionCookie = "session=smoke-cookie";
-  let profileSawCookie = false;
-  let convertSawCookie = false;
-  let estimateSawCookie = false;
-  let transformSawCookie = false;
+  let upstreamCalls = 0;
 
   const upstream = await startServer(async (req, res) => {
     const url = new URL(req.url || "/", "http://127.0.0.1");
-
-    if (url.pathname === "/api/profile") {
-      profileSawCookie = req.headers.cookie === sessionCookie;
-      res.setHeader("content-type", "application/json");
-      res.end(
-        JSON.stringify({
-          user_available_quota: {
-            tokens_left: 42.5,
-            updated_time: "2026-03-25T00:00:00.000Z",
-          },
-          quotas: [],
-        })
-      );
-      return;
-    }
-
-    if (url.pathname === "/api/word2mp3") {
-      convertSawCookie = req.headers.cookie === sessionCookie;
+    if ((url.pathname === "/api/video2word" || url.pathname === "/api/mp32word") && req.method === "POST") {
+      upstreamCalls += 1;
+      assert.equal(req.headers.cookie, sessionCookie);
       res.setHeader("content-type", "application/x-ndjson");
-      res.write(
-        `${JSON.stringify({
-          type: "result",
-          data: {
-            audio: {
-              data: Buffer.from("synthetic-audio").toString("base64"),
-              mime: "audio/mpeg",
-              filename: "sample.mp3",
-              format: "mp3",
-            },
-          },
-        })}\n`
-      );
+      res.write(`${JSON.stringify({ type: "stdout", data: "Alice will send the roadmap by next Friday. The team discussed AI workflows, semantic chunking, and action items." })}\n`);
       res.end(`${JSON.stringify({ type: "exit", code: 0 })}\n`);
       return;
     }
-
-    if (url.pathname === "/api/video2word" && req.method === "POST") {
-      estimateSawCookie = req.headers.cookie === sessionCookie;
-      res.setHeader("content-type", "application/json");
-      res.end(
-        JSON.stringify({
-          estimatedTokenConsumption: 2.5,
-          durationSeconds: 45,
-          taskTokenPrice: 1,
-        })
-      );
-      return;
-    }
-
-    if (url.pathname === "/api/transcript-transform" && req.method === "POST") {
-      transformSawCookie = req.headers.cookie === sessionCookie;
-      res.setHeader("content-type", "application/json");
-      res.end(
-        JSON.stringify({
-          result: "Short summary from transcript.",
-        })
-      );
-      return;
-    }
-
-    if (url.pathname === "/api/youtube/transcript" && req.method === "GET") {
-      res.setHeader("content-type", "application/json");
-      res.end(
-        JSON.stringify({
-          transcript: [
-            { text: "Hello from YouTube." },
-            { text: "Second transcript line." },
-          ],
-          languageCode: "en",
-          languageName: "English",
-          title: "Transcript Demo",
-          source: "youtube-metadata",
-        })
-      );
-      return;
-    }
-
-    if (url.pathname === "/api/youtube/oembed" && req.method === "GET") {
-      res.setHeader("content-type", "application/json");
-      res.end(
-        JSON.stringify({
-          embeddable: true,
-          title: "Embeddable Demo",
-          authorName: "Demo Author",
-        })
-      );
-      return;
-    }
-
     res.statusCode = 404;
     res.end("not found");
   });
@@ -268,9 +124,6 @@ test("bot access flow smoke test", async () => {
       VIDEOMP3WORD_ALLOWED_UPSTREAM_HOSTS: "127.0.0.1",
       VIDEOMP3WORD_SESSION_COOKIE: sessionCookie,
       MCP_ACCESS_KEYS: accessKey,
-      BOT_PURCHASE_URL: "https://example.com/buy",
-      BOT_KEY_PORTAL_URL: "https://example.com/portal",
-      BOT_SUPPORT_URL: "https://example.com/support",
     },
     stdio: ["ignore", "pipe", "pipe", "ipc"],
   });
@@ -280,147 +133,90 @@ test("bot access flow smoke test", async () => {
 
     const healthResponse = await fetch(`${baseUrl}/health`);
     assert.equal(healthResponse.status, 200);
-    assert.deepEqual(await healthResponse.json(), {
-      ok: true,
-      name: "videomp3word-mcp",
-      hasAccessKeys: true,
-      hasUpstreamCredentials: true,
-    });
+    const healthJson = await healthResponse.json() as { ok: boolean; name: string; auth_required: boolean };
+    assert.equal(healthJson.ok, true);
+    assert.equal(healthJson.name, "videomp3word-mcp");
+    assert.equal(healthJson.auth_required, true);
 
-    const unauthorizedResponse = await fetch(`${baseUrl}/mcp`, {
+    const unauthorizedResponse = await fetch(`${baseUrl}/video_to_knowledge`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ media_url: "https://example.com/demo.mp4", outputs: ["summary"], mode: "balanced" }),
+    });
+    assert.equal(unauthorizedResponse.status, 401);
+
+    const endpointResponse = await fetch(`${baseUrl}/video_to_knowledge`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        authorization: `Bearer ${accessKey}`,
       },
       body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "tools/call",
-        params: {
-          name: "videomp3word_token_balance",
-          arguments: {},
-        },
+        media_url: "https://example.com/demo.mp4",
+        outputs: ["summary", "qa", "flashcards", "tasks", "topics"],
+        mode: "balanced",
+        export_formats: ["json", "markdown", "notion"],
       }),
     });
-
-    assert.equal(unauthorizedResponse.status, 401);
-    const unauthorizedPayload = (await unauthorizedResponse.json()) as {
-      error?: { message?: string };
+    assert.equal(endpointResponse.status, 200);
+    const endpointJson = await endpointResponse.json() as {
+      summary: string;
+      topics: string[];
+      action_items: Array<{ owner: string }>;
+      qa_pairs: Array<{ question: string }>;
+      flashcards: Array<{ front: string }>;
+      trace: { steps: Array<{ step: string; cached: boolean }>; models_used: string[] };
+      exports: Record<string, unknown>;
     };
-    assert.match(unauthorizedPayload.error?.message || "", /valid bearer key/i);
+    assert.match(endpointJson.summary, /roadmap|semantic chunking|AI workflows/i);
+    assert.ok(endpointJson.topics.length > 0);
+    assert.ok(endpointJson.action_items.length > 0);
+    assert.ok(endpointJson.qa_pairs.length > 0);
+    assert.ok(endpointJson.flashcards.length > 0);
+    assert.equal(typeof endpointJson.exports.json, "string");
+    assert.equal(typeof endpointJson.exports.markdown, "string");
+    assert.ok(Array.isArray((endpointJson.exports.notion as { blocks?: unknown[] }).blocks));
+    assert.deepEqual(endpointJson.trace.steps.map((step) => step.step), [
+      "ingest_media",
+      "transcribe_media",
+      "segment_transcript",
+      "extract_semantics",
+      "generate_knowledge",
+      "evaluate_knowledge",
+    ]);
 
-    const publicAccess = createClient(baseUrl);
-    await publicAccess.client.connect(publicAccess.transport);
-    const buyAccess = await publicAccess.client.callTool({
-      name: "videomp3word_buy_access",
-      arguments: {},
-    });
-    const buyAccessText = getToolText(buyAccess);
-    assert.match(buyAccessText, /https:\/\/example\.com\/buy/);
-    assert.match(buyAccessText, /https:\/\/example\.com\/portal/);
-    assert.match(buyAccessText, /https:\/\/example\.com\/support/);
-
-    const youtubeEmbedCheck = await publicAccess.client.callTool({
-      name: "videomp3word_youtube_embed_check",
-      arguments: {
-        videoId: "jNQXAC9IVRw",
+    const cachedResponse = await fetch(`${baseUrl}/video_to_knowledge`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${accessKey}`,
       },
+      body: JSON.stringify({
+        media_url: "https://example.com/demo.mp4",
+        outputs: ["summary", "qa", "flashcards", "tasks", "topics"],
+        mode: "balanced",
+      }),
     });
-    const youtubeEmbedPayload = JSON.parse(getToolText(youtubeEmbedCheck)) as {
-      embeddable: boolean;
-      title: string;
-      authorName: string;
-    };
-    assert.equal(youtubeEmbedPayload.embeddable, true);
-    assert.equal(youtubeEmbedPayload.title, "Embeddable Demo");
-    assert.equal(youtubeEmbedPayload.authorName, "Demo Author");
-    await publicAccess.transport.close();
+    assert.equal(cachedResponse.status, 200);
+    const cachedJson = await cachedResponse.json() as { trace: { steps: Array<{ step: string; cached: boolean }> } };
+    assert.equal(cachedJson.trace.steps[0]?.cached, true);
+    assert.equal(cachedJson.trace.steps[1]?.cached, true);
+    assert.equal(upstreamCalls, 1);
 
-    const authorizedAccess = createClient(baseUrl, {
-      Authorization: `Bearer ${accessKey}`,
-    });
+    const authorizedAccess = createClient(baseUrl, { Authorization: `Bearer ${accessKey}` });
     await authorizedAccess.client.connect(authorizedAccess.transport);
-
-    const tokenBalance = await authorizedAccess.client.callTool({
-      name: "videomp3word_token_balance",
-      arguments: {},
-    });
-    const tokenBalanceText = getToolText(tokenBalance);
-    assert.match(tokenBalanceText, /42\.50/);
-
-    const conversion = await authorizedAccess.client.callTool({
-      name: "videomp3word_convert",
+    const toolResult = await authorizedAccess.client.callTool({
+      name: "video_to_knowledge",
       arguments: {
-        mode: "word_to_mp3",
-        text: "Hello from the smoke test.",
-        format: "mp3",
+        media_url: "https://example.com/demo.mp4",
+        outputs: ["summary", "topics"],
+        mode: "fast",
       },
     });
-    const conversionText = getToolText(conversion);
-    const conversionPayload = JSON.parse(conversionText) as {
-      filename: string;
-      mimeType: string;
-      downloadUrl: string;
-    };
-
-    assert.equal(conversionPayload.filename, "sample.mp3");
-    assert.equal(conversionPayload.mimeType, "audio/mpeg");
-    assert.match(conversionPayload.downloadUrl, new RegExp(`^${baseUrl}/artifacts/`));
-
-    const artifactResponse = await fetch(conversionPayload.downloadUrl);
-    assert.equal(artifactResponse.status, 200);
-    assert.equal(artifactResponse.headers.get("content-type"), "audio/mpeg");
-    assert.equal(await artifactResponse.text(), "synthetic-audio");
-
-    const estimate = await authorizedAccess.client.callTool({
-      name: "videomp3word_estimate",
-      arguments: {
-        mode: "video_to_word",
-        sourceUrl: "https://example.com/demo.mp4",
-        transcriptLanguage: "en",
-      },
-    });
-    const estimatePayload = JSON.parse(getToolText(estimate)) as {
-      estimatedTokenConsumption: number;
-      durationSeconds: number;
-      taskTokenPrice: number;
-      transcriptLanguage: { value: string; label: string } | null;
-    };
-    assert.equal(estimatePayload.estimatedTokenConsumption, 2.5);
-    assert.equal(estimatePayload.durationSeconds, 45);
-    assert.equal(estimatePayload.taskTokenPrice, 1);
-    assert.deepEqual(estimatePayload.transcriptLanguage, {
-      value: "en",
-      label: "English",
-    });
-
-    const transformTranscript = await authorizedAccess.client.callTool({
-      name: "videomp3word_transform_transcript",
-      arguments: {
-        transcript: "Hello world.\nThis is a longer transcript.",
-        action: "summary",
-        summaryLanguage: "en",
-        summaryLengthWords: 120,
-      },
-    });
-    assert.equal(getToolText(transformTranscript), "Short summary from transcript.");
-
-    const youtubeTranscript = await authorizedAccess.client.callTool({
-      name: "videomp3word_youtube_transcript",
-      arguments: {
-        sourceUrl: "https://www.youtube.com/watch?v=jNQXAC9IVRw",
-        language: "en",
-      },
-    });
-    const youtubeTranscriptText = getToolText(youtubeTranscript);
-    assert.match(youtubeTranscriptText, /Hello from YouTube\./);
-    assert.match(youtubeTranscriptText, /Second transcript line\./);
-
-    assert.equal(profileSawCookie, true);
-    assert.equal(convertSawCookie, true);
-    assert.equal(estimateSawCookie, true);
-    assert.equal(transformSawCookie, true);
-
+    const toolPayload = JSON.parse(getToolText(toolResult)) as { summary: string; topics: string[]; trace: { resource_ids: { knowledge_unit_id: string } } };
+    assert.ok(toolPayload.summary.length > 0);
+    assert.ok(toolPayload.topics.length > 0);
+    assert.ok(toolPayload.trace.resource_ids.knowledge_unit_id.length > 0);
     await authorizedAccess.transport.close();
   } finally {
     await stopProcess(app);
@@ -439,8 +235,39 @@ test("startup fails without required session cookie", async () => {
     stdio: ["ignore", "pipe", "pipe", "ipc"],
   });
 
-  const result = await captureProcessExit(app);
-  assert.notEqual(result.code, 0);
-  assert.equal(result.signal, null);
-  assert.match(result.stderr, /VIDEOMP3WORD_SESSION_COOKIE is required/i);
+  let stderr = "";
+  app.stderr?.setEncoding("utf8");
+  app.stderr?.on("data", (chunk: string) => {
+    stderr += chunk;
+  });
+
+  const [code, signal] = (await once(app, "exit")) as [number | null, NodeJS.Signals | null];
+  assert.notEqual(code, 0);
+  assert.equal(signal, null);
+  assert.match(stderr, /VIDEOMP3WORD_SESSION_COOKIE is required/i);
+});
+
+test("startup fails when upstream base URL uses insecure remote http", async () => {
+  const app = fork("dist/index.js", [], {
+    cwd: repoRoot,
+    env: {
+      HOST: "127.0.0.1",
+      PORT: "0",
+      VIDEOMP3WORD_BASE_URL: "http://videomp3word.com",
+      VIDEOMP3WORD_SESSION_COOKIE: "session=smoke-cookie",
+      MCP_ACCESS_KEYS: "smoke-access-key",
+    },
+    stdio: ["ignore", "pipe", "pipe", "ipc"],
+  });
+
+  let stderr = "";
+  app.stderr?.setEncoding("utf8");
+  app.stderr?.on("data", (chunk: string) => {
+    stderr += chunk;
+  });
+
+  const [code, signal] = (await once(app, "exit")) as [number | null, NodeJS.Signals | null];
+  assert.notEqual(code, 0);
+  assert.equal(signal, null);
+  assert.match(stderr, /VIDEOMP3WORD_BASE_URL must use https outside local development/i);
 });
