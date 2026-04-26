@@ -3,11 +3,16 @@
   "slug": "route4me",
   "displayName": "Route4Me",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165289012,
-    "commit": "https://github.com/openclaw/skills/commit/08934dfa85c035508c3d73050030a8d8bb9ee0d0"
+    "version": "1.0.3",
+    "publishedAt": 1776859211463,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165289012,
+      "commit": "https://github.com/openclaw/skills/commit/08934dfa85c035508c3d73050030a8d8bb9ee0d0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773993810795,
