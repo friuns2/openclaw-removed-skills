@@ -1,0 +1,11 @@
+{
+  "accounts": [
+    {
+      "name": "账号名称",
+      "profile_id": "小红书用户ID（从主页URL获取）",
+      "profile_url": "https://www.xiaohongshu.com/user/profile/你的用户ID",
+      "save_dir": "~/Downloads/你的文件夹名/",
+      "fixed_tab_id": ""
+    }
+  ]
+}
