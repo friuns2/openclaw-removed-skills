@@ -3,11 +3,16 @@
   "slug": "tapform",
   "displayName": "Tapform",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164408856,
-    "commit": "https://github.com/openclaw/skills/commit/9732817eb9650893c2c4ad00fd169b0cf01c0d5a"
+    "version": "1.0.3",
+    "publishedAt": 1776837827162,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164408856,
+      "commit": "https://github.com/openclaw/skills/commit/9732817eb9650893c2c4ad00fd169b0cf01c0d5a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773716544917,
