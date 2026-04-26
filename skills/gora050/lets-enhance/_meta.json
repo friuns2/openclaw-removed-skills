@@ -3,11 +3,16 @@
   "slug": "lets-enhance",
   "displayName": "Lets Enhance",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167612429,
-    "commit": "https://github.com/openclaw/skills/commit/f4a945f14eb53209bb4bad0c4acf51e5c232c201"
+    "version": "1.0.3",
+    "publishedAt": 1776861588457,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167612429,
+      "commit": "https://github.com/openclaw/skills/commit/f4a945f14eb53209bb4bad0c4acf51e5c232c201"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479835022,
