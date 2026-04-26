@@ -3,11 +3,16 @@
   "slug": "donately",
   "displayName": "Donately",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164645559,
-    "commit": "https://github.com/openclaw/skills/commit/fb5f1f9dabcda6bba8a6fa9b90d0b3086cff2f6e"
+    "version": "1.0.3",
+    "publishedAt": 1776858536604,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164645559,
+      "commit": "https://github.com/openclaw/skills/commit/fb5f1f9dabcda6bba8a6fa9b90d0b3086cff2f6e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773806591937,
