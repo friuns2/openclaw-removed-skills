@@ -3,11 +3,16 @@
   "slug": "agendor",
   "displayName": "Agendor",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165917643,
-    "commit": "https://github.com/openclaw/skills/commit/29ae353f0e0f7dcafc041fb416523eccc0440b7d"
+    "version": "1.0.3",
+    "publishedAt": 1776862275576,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165917643,
+      "commit": "https://github.com/openclaw/skills/commit/29ae353f0e0f7dcafc041fb416523eccc0440b7d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774119847087,
