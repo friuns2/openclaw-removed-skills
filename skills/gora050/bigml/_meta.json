@@ -3,11 +3,16 @@
   "slug": "bigml",
   "displayName": "Bigml",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164860748,
-    "commit": "https://github.com/openclaw/skills/commit/96dd09345592585bd31ebb7fd389ed62560766e3"
+    "version": "1.0.3",
+    "publishedAt": 1776858668736,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164860748,
+      "commit": "https://github.com/openclaw/skills/commit/96dd09345592585bd31ebb7fd389ed62560766e3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773907400464,
