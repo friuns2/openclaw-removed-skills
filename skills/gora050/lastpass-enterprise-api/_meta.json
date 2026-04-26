@@ -3,11 +3,16 @@
   "slug": "lastpass-enterprise-api",
   "displayName": "Lastpass Enterprise Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165785551,
-    "commit": "https://github.com/openclaw/skills/commit/175861667d0d38167967c2c647e54bbe87afbd54"
+    "version": "1.0.3",
+    "publishedAt": 1776893177309,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165785551,
+      "commit": "https://github.com/openclaw/skills/commit/175861667d0d38167967c2c647e54bbe87afbd54"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774101852752,
