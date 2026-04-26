@@ -3,11 +3,16 @@
   "slug": "display-video-360",
   "displayName": "Display Video 360",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165773134,
-    "commit": "https://github.com/openclaw/skills/commit/7e912d6438fa4023dddd945816ff12ad58731717"
+    "version": "1.0.3",
+    "publishedAt": 1776893150100,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165773134,
+      "commit": "https://github.com/openclaw/skills/commit/7e912d6438fa4023dddd945816ff12ad58731717"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774101824649,
