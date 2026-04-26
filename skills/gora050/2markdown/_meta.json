@@ -3,11 +3,16 @@
   "slug": "2markdown",
   "displayName": "2Markdown",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166131022,
-    "commit": "https://github.com/openclaw/skills/commit/04c4d3f7144e1c94dd405b9805b41a3da9d61d28"
+    "version": "1.0.3",
+    "publishedAt": 1776863159414,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166131022,
+      "commit": "https://github.com/openclaw/skills/commit/04c4d3f7144e1c94dd405b9805b41a3da9d61d28"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774152203911,
