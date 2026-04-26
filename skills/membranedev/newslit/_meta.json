@@ -3,11 +3,16 @@
   "slug": "newslit",
   "displayName": "Newslit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167592966,
-    "commit": "https://github.com/openclaw/skills/commit/f605827f2ba87981db9ff6a2abb6a4c5ce0fc9e3"
+    "version": "1.0.3",
+    "publishedAt": 1776851217497,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167592966,
+      "commit": "https://github.com/openclaw/skills/commit/f605827f2ba87981db9ff6a2abb6a4c5ce0fc9e3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774479757320,
