@@ -3,11 +3,16 @@
   "slug": "loopmessage",
   "displayName": "Loopmessage",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167128468,
-    "commit": "https://github.com/openclaw/skills/commit/f57c820c682397b33c00adcf839c9466d8e64e1f"
+    "version": "1.0.3",
+    "publishedAt": 1776850043591,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167128468,
+      "commit": "https://github.com/openclaw/skills/commit/f57c820c682397b33c00adcf839c9466d8e64e1f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774382578166,
