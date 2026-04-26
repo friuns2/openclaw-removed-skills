@@ -3,11 +3,16 @@
   "slug": "middesk",
   "displayName": "Middesk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167249013,
-    "commit": "https://github.com/openclaw/skills/commit/a8a256fc7cfc8e0e95c2e9a0e1fd51191916c39f"
+    "version": "1.0.3",
+    "publishedAt": 1776861025486,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167249013,
+      "commit": "https://github.com/openclaw/skills/commit/a8a256fc7cfc8e0e95c2e9a0e1fd51191916c39f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774400685281,
