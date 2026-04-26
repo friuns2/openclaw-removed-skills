@@ -3,11 +3,16 @@
   "slug": "okx-agentic-wallet",
   "displayName": "Okx Agentic Wallet",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776332796331,
-    "commit": "https://github.com/openclaw/skills/commit/62046b36487b371b0cd22331c80d0d30fda72675"
+    "version": "2.4.0",
+    "publishedAt": 1776778606075,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776332796331,
+      "commit": "https://github.com/openclaw/skills/commit/62046b36487b371b0cd22331c80d0d30fda72675"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775722559594,
