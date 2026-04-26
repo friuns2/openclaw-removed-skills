@@ -3,11 +3,16 @@
   "slug": "lob",
   "displayName": "Lob",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164777962,
-    "commit": "https://github.com/openclaw/skills/commit/2699b3113d6c84db2e7e25c0f5e0a4736865e4a2"
+    "version": "1.0.3",
+    "publishedAt": 1776858616992,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164777962,
+      "commit": "https://github.com/openclaw/skills/commit/2699b3113d6c84db2e7e25c0f5e0a4736865e4a2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773885775419,
