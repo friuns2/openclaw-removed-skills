@@ -3,11 +3,16 @@
   "slug": "tines",
   "displayName": "Tines",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166534498,
-    "commit": "https://github.com/openclaw/skills/commit/2243214d8c32f6f93746b1762ac2fb946a15b8f8"
+    "version": "1.0.3",
+    "publishedAt": 1776863694377,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166534498,
+      "commit": "https://github.com/openclaw/skills/commit/2243214d8c32f6f93746b1762ac2fb946a15b8f8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774231487959,
