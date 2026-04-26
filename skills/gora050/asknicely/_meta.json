@@ -3,11 +3,16 @@
   "slug": "asknicely",
   "displayName": "Asknicely",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167649609,
-    "commit": "https://github.com/openclaw/skills/commit/17d07d30e2dd8327b2ffcb946a61bf401546a2b7"
+    "version": "1.0.3",
+    "publishedAt": 1776861668858,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167649609,
+      "commit": "https://github.com/openclaw/skills/commit/17d07d30e2dd8327b2ffcb946a61bf401546a2b7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774487199225,
