@@ -3,11 +3,16 @@
   "slug": "little-green-light",
   "displayName": "Little Green Light",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164500133,
-    "commit": "https://github.com/openclaw/skills/commit/1f1299a11bf102d7ae59ff3ca238f01a7a4fe7cb"
+    "version": "1.0.3",
+    "publishedAt": 1776838020957,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164500133,
+      "commit": "https://github.com/openclaw/skills/commit/1f1299a11bf102d7ae59ff3ca238f01a7a4fe7cb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773727422862,
