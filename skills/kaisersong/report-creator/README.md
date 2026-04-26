@@ -138,6 +138,70 @@ The enemy: instantly recognizable AI output — uniform borders, primary color f
 
 **Pre-output check:** *"If you told someone 'an AI wrote this', would they believe it? If yes — find the most generic-looking part and redesign it."*
 
+### 6. Contract Enforcement Before Render
+
+v1.20.0's guard validation pipeline introduces a new principle: **intercept invalid IR before rendering, not repair after.**
+
+```
+IR → Guard (validate + downgrade) → Renderer → HTML
+              ↑
+              Block invalid input
+```
+
+Three sub-principles:
+
+| Principle | Implementation | Meaning |
+|-----------|----------------|---------|
+| **Zero-Drift Resolution** | Guard and renderer share the same `resolve_report_class` logic | Validation and rendering never diverge |
+| **Graceful Degradation** | Invalid components auto-downgrade (kpi→callout, chart→table, timeline→list) | Don't fail outright; fall back to safe substitute |
+| **Traceability** | `<meta name="ir-hash">` embeds IR hash in HTML | Output is traceable to source IR |
+
+**Why it matters:**
+- Earlier `--review` was post-hoc repair; guard is pre-hoc interception
+- Prevents invalid IR from entering the render pipeline and producing unpredictable output
+- Zero-drift ensures guard's judgment and renderer's behavior stay aligned
+
+### 7. Eval as Quality Boundary, Not Quality Score
+
+v1.15.0's eval workflow embodies this principle: **evals define boundaries, not scores.**
+
+```
+compression → ir_contract → async_readability → render_integrity
+     ↓             ↓              ↓                  ↓
+   Source→IR     IR Spec        Reading UX          HTML Integrity
+```
+
+| Layer | What it checks | Where to fix |
+|-------|----------------|--------------|
+| compression | report_class, audience, decision_goal declared | SKILL.md |
+| ir_contract | timeline is real time, kpi is short value, chart schema legal | rendering-rules.md + contract_checks.py |
+| async_readability | BLUF, heading stack, takeaway after data | review-checklist.md |
+| render_integrity | shell IDs, report-summary JSON, no `:::` leak | html-shell-template.md |
+
+**Failure Map rule:** Every real production failure → one new eval case. Not post-hoc discussion about "feels wrong", but direct pointer to the layer that needs fixing.
+
+**Rubric design:** Output structured JSON (verdict + scores + findings), not fuzzy scores. Downstream agents can parse and auto-repair.
+
+### 8. Contract Checks as Programmable Guardrails
+
+`contract_checks.py` makes IR spec executable:
+
+```python
+# Timeline must be real dates
+DATE_PATTERNS = [YYYY-MM-DD, YYYY-MM, Q1-4 YYYY, Day N, Week N]
+
+# KPI value must be shorter than 8 CJK chars or 3 English words
+def is_short_kpi_value(value): ...
+
+# Placeholder pattern recognition
+PLACEHOLDER_RE = r"\[(INSERT VALUE|数据待填写)\]"
+```
+
+**Design principles:**
+- Spec declared in SKILL.md, validated in contract_checks.py
+- Guard calls contract_checks, zero drift
+- Every component has `auto_downgrade_target`: safe fallback path when invalid
+
 ---
 
 ## Install
@@ -474,6 +538,8 @@ For offline bundles with `--bundle`: internet connection needed once to inline C
 ---
 
 ## Version History
+
+**v1.20.1** — Design philosophy expansion: added §6 (Contract Enforcement Before Render), §7 (Eval as Quality Boundary), §8 (Contract Checks as Programmable Guardrails) documenting the guard pipeline and eval workflow principles.
 
 **v1.20.0** — Guard validation pipeline: Python guard (`scripts/guard_validate.py`) runs before HTML rendering with zero-drift report_class resolution, auto-downgrade invalid blocks (kpi→callout, chart→table, timeline→list, diagram→callout), IR hash embedding in `<meta name="ir-hash">` for traceability, and guard integration tests.
 
