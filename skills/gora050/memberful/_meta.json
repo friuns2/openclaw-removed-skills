@@ -3,11 +3,16 @@
   "slug": "memberful",
   "displayName": "Memberful",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166301591,
-    "commit": "https://github.com/openclaw/skills/commit/d35c675b0ba98ef217096d6eaecb6130afb68a7b"
+    "version": "1.0.3",
+    "publishedAt": 1776863419003,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166301591,
+      "commit": "https://github.com/openclaw/skills/commit/d35c675b0ba98ef217096d6eaecb6130afb68a7b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774195433968,
