@@ -3,11 +3,16 @@
   "slug": "givingfuel",
   "displayName": "Givingfuel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167222382,
-    "commit": "https://github.com/openclaw/skills/commit/c98b60bc1281ffb816749ea6fe6ff56e86fed733"
+    "version": "1.0.3",
+    "publishedAt": 1776860979413,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167222382,
+      "commit": "https://github.com/openclaw/skills/commit/c98b60bc1281ffb816749ea6fe6ff56e86fed733"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774393445817,
