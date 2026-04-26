@@ -3,11 +3,16 @@
   "slug": "azure-ai-vision",
   "displayName": "Azure Ai Vision",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165985505,
-    "commit": "https://github.com/openclaw/skills/commit/305aa72f0e5aff9c47962be103248b6326f73bf9"
+    "version": "1.0.3",
+    "publishedAt": 1776859925524,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165985505,
+      "commit": "https://github.com/openclaw/skills/commit/305aa72f0e5aff9c47962be103248b6326f73bf9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774130703688,
