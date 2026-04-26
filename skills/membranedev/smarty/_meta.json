@@ -3,11 +3,16 @@
   "slug": "smarty",
   "displayName": "Smarty",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166493295,
-    "commit": "https://github.com/openclaw/skills/commit/58d6061d5b399df83920ca2e87ccb38cd62f2d08"
+    "version": "1.0.3",
+    "publishedAt": 1776848633843,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166493295,
+      "commit": "https://github.com/openclaw/skills/commit/58d6061d5b399df83920ca2e87ccb38cd62f2d08"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774227768502,
