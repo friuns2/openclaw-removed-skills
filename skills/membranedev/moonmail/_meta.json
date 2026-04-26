@@ -3,11 +3,16 @@
   "slug": "moonmail",
   "displayName": "Moonmail",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167182156,
-    "commit": "https://github.com/openclaw/skills/commit/4f45f7025d09b7ddd29c07ea76c09bb769b54f66"
+    "version": "1.0.3",
+    "publishedAt": 1776850068224,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167182156,
+      "commit": "https://github.com/openclaw/skills/commit/4f45f7025d09b7ddd29c07ea76c09bb769b54f66"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774389751246,
