@@ -1,13 +1,18 @@
 {
   "owner": "sparki-io",
   "slug": "sparki-video-editor",
-  "displayName": "Sparki AI Video Editor",
+  "displayName": "Video Editor Sparki",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1774451475593,
-    "commit": "https://github.com/openclaw/skills/commit/0ea430fd044095ce653d2524419373dba8fe2ba9"
+    "version": "1.1.0",
+    "publishedAt": 1777016792923,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1774451475593,
+      "commit": "https://github.com/openclaw/skills/commit/0ea430fd044095ce653d2524419373dba8fe2ba9"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1774015440536,
