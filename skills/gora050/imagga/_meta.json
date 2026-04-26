@@ -3,11 +3,16 @@
   "slug": "imagga",
   "displayName": "Imagga",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165193833,
-    "commit": "https://github.com/openclaw/skills/commit/ef0c855d50d3e6d7ad8c061223b6e21800b82813"
+    "version": "1.0.3",
+    "publishedAt": 1776861308798,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165193833,
+      "commit": "https://github.com/openclaw/skills/commit/ef0c855d50d3e6d7ad8c061223b6e21800b82813"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773968573086,
