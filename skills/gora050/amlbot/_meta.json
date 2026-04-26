@@ -3,11 +3,16 @@
   "slug": "amlbot",
   "displayName": "Amlbot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165798366,
-    "commit": "https://github.com/openclaw/skills/commit/542dde9d2432062acf4499428d715615b2cb5bee"
+    "version": "1.0.3",
+    "publishedAt": 1776893236741,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165798366,
+      "commit": "https://github.com/openclaw/skills/commit/542dde9d2432062acf4499428d715615b2cb5bee"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774101873631,
