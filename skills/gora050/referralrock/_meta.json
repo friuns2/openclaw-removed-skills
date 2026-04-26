@@ -3,11 +3,16 @@
   "slug": "referralrock",
   "displayName": "Referralrock",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167484171,
-    "commit": "https://github.com/openclaw/skills/commit/7a94b1e4aa7cfecf09d4a37ee04fad5f0dcbbca2"
+    "version": "1.0.3",
+    "publishedAt": 1776861501040,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167484171,
+      "commit": "https://github.com/openclaw/skills/commit/7a94b1e4aa7cfecf09d4a37ee04fad5f0dcbbca2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774440269115,
