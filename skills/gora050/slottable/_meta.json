@@ -3,11 +3,16 @@
   "slug": "slottable",
   "displayName": "Slottable",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164637254,
-    "commit": "https://github.com/openclaw/skills/commit/1eadf910ef95b1606cf77a0e4ea3d6f20d84acf5"
+    "version": "1.0.3",
+    "publishedAt": 1776858519136,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164637254,
+      "commit": "https://github.com/openclaw/skills/commit/1eadf910ef95b1606cf77a0e4ea3d6f20d84acf5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773806580010,
