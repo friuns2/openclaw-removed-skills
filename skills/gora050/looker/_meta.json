@@ -3,11 +3,16 @@
   "slug": "looker",
   "displayName": "Looker",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165313844,
-    "commit": "https://github.com/openclaw/skills/commit/0ffa32b9592e3bda00421d18e31ea95e97ff52e7"
+    "version": "1.0.3",
+    "publishedAt": 1776865165318,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165313844,
+      "commit": "https://github.com/openclaw/skills/commit/0ffa32b9592e3bda00421d18e31ea95e97ff52e7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774000985190,
