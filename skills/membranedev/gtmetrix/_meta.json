@@ -3,11 +3,16 @@
   "slug": "gtmetrix",
   "displayName": "Gtmetrix",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164665192,
-    "commit": "https://github.com/openclaw/skills/commit/2d9a1c00e86ee761bd6caba341171dad4143fd93"
+    "version": "1.0.3",
+    "publishedAt": 1776845269916,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164665192,
+      "commit": "https://github.com/openclaw/skills/commit/2d9a1c00e86ee761bd6caba341171dad4143fd93"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773817365321,
