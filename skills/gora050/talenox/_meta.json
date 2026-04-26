@@ -3,11 +3,16 @@
   "slug": "talenox",
   "displayName": "Talenox",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165606255,
-    "commit": "https://github.com/openclaw/skills/commit/0805fbd10c7240af20e9535dd56c3df9a8996901"
+    "version": "1.0.3",
+    "publishedAt": 1776859635011,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165606255,
+      "commit": "https://github.com/openclaw/skills/commit/0805fbd10c7240af20e9535dd56c3df9a8996901"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051480042,
