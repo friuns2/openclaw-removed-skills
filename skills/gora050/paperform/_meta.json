@@ -3,11 +3,16 @@
   "slug": "paperform",
   "displayName": "Paperform",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165492965,
-    "commit": "https://github.com/openclaw/skills/commit/b40015f7828c6728e99f899c695dbbf6f8af48ac"
+    "version": "1.0.3",
+    "publishedAt": 1776859485239,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165492965,
+      "commit": "https://github.com/openclaw/skills/commit/b40015f7828c6728e99f899c695dbbf6f8af48ac"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774040603471,
