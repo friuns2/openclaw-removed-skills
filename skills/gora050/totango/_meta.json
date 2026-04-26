@@ -3,11 +3,16 @@
   "slug": "totango",
   "displayName": "Totango",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166624626,
-    "commit": "https://github.com/openclaw/skills/commit/d7ad12a2fd9fbe689372d3c7e65b724d4914de83"
+    "version": "1.0.3",
+    "publishedAt": 1776863719278,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166624626,
+      "commit": "https://github.com/openclaw/skills/commit/d7ad12a2fd9fbe689372d3c7e65b724d4914de83"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774260240844,
