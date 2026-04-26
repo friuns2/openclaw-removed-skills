@@ -3,9 +3,15 @@
   "slug": "sendlane",
   "displayName": "Sendlane",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774415077015,
-    "commit": "https://github.com/openclaw/skills/commit/bbf80529b0a2c38caeff4784f196dc7ebd2d3f85"
+    "version": "1.0.1",
+    "publishedAt": 1776861193360,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774415077015,
+      "commit": "https://github.com/openclaw/skills/commit/bbf80529b0a2c38caeff4784f196dc7ebd2d3f85"
+    }
+  ]
 }
