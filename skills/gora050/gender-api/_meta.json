@@ -3,11 +3,16 @@
   "slug": "gender-api",
   "displayName": "Gender Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165913382,
-    "commit": "https://github.com/openclaw/skills/commit/9c81eb8386c697197c3b6acf520229eeef959469"
+    "version": "1.0.3",
+    "publishedAt": 1776862261442,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165913382,
+      "commit": "https://github.com/openclaw/skills/commit/9c81eb8386c697197c3b6acf520229eeef959469"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774119836257,
