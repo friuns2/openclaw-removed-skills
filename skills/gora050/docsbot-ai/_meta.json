@@ -3,11 +3,16 @@
   "slug": "docsbot-ai",
   "displayName": "Docsbot Ai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166940705,
-    "commit": "https://github.com/openclaw/skills/commit/523da9e927ec62de69d15bf0ecbe62c9fcb6506b"
+    "version": "1.0.3",
+    "publishedAt": 1776860629402,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166940705,
+      "commit": "https://github.com/openclaw/skills/commit/523da9e927ec62de69d15bf0ecbe62c9fcb6506b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774325072833,
