@@ -3,11 +3,16 @@
   "slug": "simplebackups",
   "displayName": "Simplebackups",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165177580,
-    "commit": "https://github.com/openclaw/skills/commit/684343b58151180451329e0db32d2292c8cf0ad4"
+    "version": "1.0.3",
+    "publishedAt": 1776859171457,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165177580,
+      "commit": "https://github.com/openclaw/skills/commit/684343b58151180451329e0db32d2292c8cf0ad4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773965013889,
