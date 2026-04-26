@@ -3,9 +3,15 @@
   "slug": "ruankao-gaoxiang-prep",
   "displayName": "Ruankao Gaoxiang Prep",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774441753011,
-    "commit": "https://github.com/openclaw/skills/commit/936336d12f87c2ed657c29aeb802876b46ce7e18"
+    "version": "1.0.4",
+    "publishedAt": 1776774153066,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774441753011,
+      "commit": "https://github.com/openclaw/skills/commit/936336d12f87c2ed657c29aeb802876b46ce7e18"
+    }
+  ]
 }

@@ -101,29 +101,34 @@ metadata: {"openclaw":{"emoji":"📚","requires":{"config":["channels.qqbot"]}}}
 1. 从 `references/` 中读取对应章节的重点文件
 2. 输出该章节的背诵要点（10条）
 
-**章节对应关系：**
+**章节对应关系（教材第四版，共24章）：**
 
 | 章节 | 名称 | 文件 |
 |------|------|------|
 | 第1章 | 信息系统基础 | `chapter01-info-system.md` |
-| 第2章 | 信息系统项目管理 | `chapter02-pm-overview.md` |
-| 第3章 | 项目立项管理 | `chapter03-initiation.md` |
-| 第4章 | 项目整体管理 | `chapter04-integration.md` |
-| 第5章 | 项目范围管理 | `chapter05-scope.md` |
-| 第6章 | 项目进度管理 | `chapter06-schedule.md` |
-| 第7章 | 项目成本管理 | `chapter07-cost.md` |
-| 第8章 | 项目质量管理 | `chapter08-quality.md` |
-| 第9章 | 项目人力资源管理 | `chapter09-hr.md` |
-| 第10章 | 项目沟通管理 | `chapter10-communication.md` |
-| 第11章 | 项目风险管理 | `chapter11-risk.md` |
-| 第12章 | 项目采购管理 | `chapter12-procurement.md` |
-| 第13章 | 项目干系人管理 | `chapter13-stakeholder.md` |
-| 第14章 | 项目配置管理 | `chapter14-config.md` |
-| 第15章 | 项目变更管理 | `chapter15-change.md` |
-| 第16章 | 信息系统安全管理 | `chapter16-security.md` |
-| 第17章 | 信息系统监理 | `chapter17-supervision.md` |
-| 第18章 | 信息系统综合测试与管理 | `chapter18-testing.md` |
-| 第19章 | 项目管理高级知识 | `chapter19-advanced.md` |
+| 第2章 | 信息系统项目管理 | `chapter02-it-development.md` |
+| 第3章 | 项目立项管理 | `chapter03-governance.md` |
+| 第4章 | 项目整体管理 | `chapter04-is-management.md` |
+| 第5章 | 信息系统工程 | `chapter05-is-engineering.md` |
+| 第6章 | 项目整体管理 | `chapter06-pm-overview.md` |
+| 第7章 | 立项管理 | `chapter07-initiation.md` |
+| 第8章 | 项目整合管理 | `chapter08-integration.md` |
+| 第9章 | 项目范围管理 | `chapter09-scope.md` |
+| 第10章 | 进度管理 | `chapter10-schedule.md` |
+| 第11章 | 成本管理 | `chapter11-cost.md` |
+| 第12章 | 质量管理 | `chapter12-quality.md` |
+| 第13章 | 资源管理 | `chapter13-resource.md` |
+| 第14章 | 沟通管理 | `chapter14-communication.md` |
+| 第15章 | 风险管理 | `chapter15-risk.md` |
+| 第16章 | 采购管理 | `chapter16-procurement.md` |
+| 第17章 | 干系人管理 | `chapter17-stakeholder.md` |
+| 第18章 | 项目绩效域 | `chapter18-performance.md` |
+| 第19章 | 配置与变更管理 | `chapter19-config-change.md` |
+| 第20章 | 高级项目管理 | `chapter20-advanced.md` |
+| 第21章 | 运筹学计算 | `chapter21-calculation.md` |
+| 第22章 | 组织通用治理 | `chapter22-governance.md` |
+| 第23章 | 组织通用管理 | `chapter23-management.md` |
+| 第24章 | 法律法规与标准规范 | `chapter24-legal.md` |
 
 ---
 
@@ -195,7 +200,7 @@ metadata: {"openclaw":{"emoji":"📚","requires":{"config":["channels.qqbot"]}}}
 每日推送内容由 `scripts/daily_push.py` 生成：
 
 **逻辑：**
-1. 根据日期确定今天的章节（使用日期轮询：日期 % 19 + 1）
+1. 根据日期确定今天的章节（使用日期轮询：日期 % 24 + 1）
 2. 读取该章节的重点内容（取前10条）
 3. 读取英语单词（取前10个）
 4. 格式化输出

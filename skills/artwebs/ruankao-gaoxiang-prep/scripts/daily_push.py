@@ -9,27 +9,32 @@ import json
 import os
 from datetime import datetime, date
 
-# 章节映射
+# 章节映射（教材第四版，共24章）
 CHAPTERS = {
     1: {"file": "chapter01-info-system.md", "name": "信息系统基础"},
-    2: {"file": "chapter02-pm-overview.md", "name": "信息系统项目管理"},
-    3: {"file": "chapter03-initiation.md", "name": "项目立项管理"},
-    4: {"file": "chapter04-integration.md", "name": "项目整体管理"},
-    5: {"file": "chapter05-scope.md", "name": "项目范围管理"},
-    6: {"file": "chapter06-schedule.md", "name": "项目进度管理"},
-    7: {"file": "chapter07-cost.md", "name": "项目成本管理"},
-    8: {"file": "chapter08-quality.md", "name": "项目质量管理"},
-    9: {"file": "chapter09-hr.md", "name": "项目人力资源管理"},
-    10: {"file": "chapter10-communication.md", "name": "项目沟通管理"},
-    11: {"file": "chapter11-risk.md", "name": "项目风险管理"},
-    12: {"file": "chapter12-procurement.md", "name": "项目采购管理"},
-    13: {"file": "chapter13-stakeholder.md", "name": "项目干系人管理"},
-    14: {"file": "chapter14-config.md", "name": "项目配置管理"},
-    15: {"file": "chapter15-change.md", "name": "项目变更管理"},
-    16: {"file": "chapter16-security.md", "name": "信息系统安全管理"},
-    17: {"file": "chapter17-supervision.md", "name": "信息系统监理"},
-    18: {"file": "chapter18-testing.md", "name": "信息系统综合测试与管理"},
-    19: {"file": "chapter19-advanced.md", "name": "项目管理高级知识"},
+    2: {"file": "chapter02-it-development.md", "name": "信息系统项目管理"},
+    3: {"file": "chapter03-governance.md", "name": "项目立项管理"},
+    4: {"file": "chapter04-is-management.md", "name": "项目整体管理"},
+    5: {"file": "chapter05-is-engineering.md", "name": "信息系统工程"},
+    6: {"file": "chapter06-pm-overview.md", "name": "项目整体管理"},
+    7: {"file": "chapter07-initiation.md", "name": "立项管理"},
+    8: {"file": "chapter08-integration.md", "name": "项目整合管理"},
+    9: {"file": "chapter09-scope.md", "name": "项目范围管理"},
+    10: {"file": "chapter10-schedule.md", "name": "进度管理"},
+    11: {"file": "chapter11-cost.md", "name": "成本管理"},
+    12: {"file": "chapter12-quality.md", "name": "质量管理"},
+    13: {"file": "chapter13-resource.md", "name": "资源管理"},
+    14: {"file": "chapter14-communication.md", "name": "沟通管理"},
+    15: {"file": "chapter15-risk.md", "name": "风险管理"},
+    16: {"file": "chapter16-procurement.md", "name": "采购管理"},
+    17: {"file": "chapter17-stakeholder.md", "name": "干系人管理"},
+    18: {"file": "chapter18-performance.md", "name": "项目绩效域"},
+    19: {"file": "chapter19-config-change.md", "name": "配置与变更管理"},
+    20: {"file": "chapter20-advanced.md", "name": "高级项目管理"},
+    21: {"file": "chapter21-calculation.md", "name": "运筹学计算"},
+    22: {"file": "chapter22-governance.md", "name": "组织通用治理"},
+    23: {"file": "chapter23-management.md", "name": "组织通用管理"},
+    24: {"file": "chapter24-legal.md", "name": "法律法规与标准规范"},
 }
 
 def get_skill_dir():
@@ -38,10 +43,10 @@ def get_skill_dir():
     return os.path.dirname(script_dir)
 
 def get_today_chapter():
-    """根据日期确定今天的章节（19章轮询）"""
+    """根据日期确定今天的章节（24章轮询）"""
     today = date.today()
     day_of_year = today.timetuple().tm_yday
-    chapter_num = (day_of_year % 19) + 1  # 1-19
+    chapter_num = (day_of_year % 24) + 1  # 1-24
     return chapter_num
 
 def read_chapter_points(chapter_num):
