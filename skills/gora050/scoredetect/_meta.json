@@ -3,11 +3,16 @@
   "slug": "scoredetect",
   "displayName": "Scoredetect",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165420880,
-    "commit": "https://github.com/openclaw/skills/commit/760af0bfde3bd25fc4e153a612df8e24bba9c8a3"
+    "version": "1.0.3",
+    "publishedAt": 1776859361676,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165420880,
+      "commit": "https://github.com/openclaw/skills/commit/760af0bfde3bd25fc4e153a612df8e24bba9c8a3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774026194487,
