@@ -3,11 +3,16 @@
   "slug": "new-sloth",
   "displayName": "New Sloth",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165130028,
-    "commit": "https://github.com/openclaw/skills/commit/fbf700fa1d562faa561b78513d269c29a7dc5e63"
+    "version": "1.0.3",
+    "publishedAt": 1776859133197,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165130028,
+      "commit": "https://github.com/openclaw/skills/commit/fbf700fa1d562faa561b78513d269c29a7dc5e63"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773961412091,
