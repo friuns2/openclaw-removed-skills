@@ -3,11 +3,16 @@
   "slug": "rev",
   "displayName": "Rev",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166919828,
-    "commit": "https://github.com/openclaw/skills/commit/9fe56689732c114e5ba5ca87e9bc44bd975619b3"
+    "version": "1.0.3",
+    "publishedAt": 1776860588952,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166919828,
+      "commit": "https://github.com/openclaw/skills/commit/9fe56689732c114e5ba5ca87e9bc44bd975619b3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774325031868,
