@@ -3,11 +3,16 @@
   "slug": "solcast",
   "displayName": "Solcast",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165213024,
-    "commit": "https://github.com/openclaw/skills/commit/4df38dd20c856b6d3f52a0cdd78c62205dd48b85"
+    "version": "1.0.3",
+    "publishedAt": 1776846576720,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165213024,
+      "commit": "https://github.com/openclaw/skills/commit/4df38dd20c856b6d3f52a0cdd78c62205dd48b85"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773972150950,
