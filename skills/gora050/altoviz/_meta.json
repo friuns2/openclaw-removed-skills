@@ -3,11 +3,16 @@
   "slug": "altoviz",
   "displayName": "Altoviz",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164601951,
-    "commit": "https://github.com/openclaw/skills/commit/6c85dea75356071c399d7e0453347a3dac8ba62d"
+    "version": "1.0.3",
+    "publishedAt": 1776858486542,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164601951,
+      "commit": "https://github.com/openclaw/skills/commit/6c85dea75356071c399d7e0453347a3dac8ba62d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773802977320,
