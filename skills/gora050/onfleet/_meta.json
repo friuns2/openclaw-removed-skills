@@ -3,11 +3,16 @@
   "slug": "onfleet",
   "displayName": "Onfleet",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167062287,
-    "commit": "https://github.com/openclaw/skills/commit/136a75bf6a32afc82f6c3b7f48ded3790245e053"
+    "version": "1.0.3",
+    "publishedAt": 1776860843738,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167062287,
+      "commit": "https://github.com/openclaw/skills/commit/136a75bf6a32afc82f6c3b7f48ded3790245e053"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774350211665,
