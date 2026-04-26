@@ -41,6 +41,7 @@ Use:
 sequenzy account
 sequenzy companies list
 sequenzy companies get comp_123
+sequenzy urls --company comp_123
 ```
 
 Choose:
@@ -48,6 +49,37 @@ Choose:
 - `account` for user ID, current company, and accessible companies
 - `companies list` for a compact list with localization info
 - `companies get` when the user already has a company ID
+- `urls` when the user needs a dashboard/settings link
+
+## "Open, review, or edit something I just created"
+
+Prefer the `url` or `appUrls` fields returned by recent CLI/MCP calls. If you need to generate links from IDs:
+
+```bash
+sequenzy urls --company comp_123 --sequence seq_123
+sequenzy urls --company comp_123 --campaign camp_123
+sequenzy urls --company comp_123 --settings-tab integrations
+```
+
+MCP equivalent: call `get_app_urls` with:
+
+```json
+{
+  "companyId": "comp_123",
+  "sequenceId": "seq_123",
+  "settingsTab": "integrations"
+}
+```
+
+URL patterns:
+
+- sequence editor: `/dashboard/company/{companyId}/sequences/{sequenceId}`
+- campaign editor: `/dashboard/company/{companyId}/campaign/{campaignId}`
+- template/email editor: `/dashboard/company/{companyId}/emails/{emailId}`
+- settings: `/dashboard/company/{companyId}/settings`
+- settings tab: `/dashboard/company/{companyId}/settings?tab={tab}`
+
+After generating a sequence or campaign, give the user the relevant review/edit URL instead of only returning the ID.
 
 ## "Show me delivery performance"
 
@@ -147,6 +179,7 @@ sequenzy tags
 sequenzy segments list
 sequenzy segments count seg_123
 sequenzy segments create --name "Bought Pro" --stripe-product prod_pro
+sequenzy segments create --name "VIP or Churn Risk" --match any --filter-json '[{"field":"tag","operator":"contains","value":"vip"},{"field":"emailOpened","operator":"is_not","value":"30d"}]'
 ```
 
 For Stripe purchase thresholds:
@@ -160,19 +193,23 @@ Guidance:
 - use `tags` for inspection only; there are no CLI tag mutations
 - use Stripe product IDs, not product names
 - use `--filter-json` when the user needs a non-Stripe or mixed filter payload
+- use `--match any` when the segment should match any top-level filter instead of all filters
 - `segments count` is the quickest way to preview impact before using a segment in a campaign
 
-For MCP-driven workflows, `create_segment` supports the same Stripe filter shape:
+For MCP-driven workflows, `create_segment` supports the same Stripe filter shape and `filterJoinOperator: "or"` for match-any segments:
 
 ```json
-[
-  {
-    "id": "filter-1",
-    "field": "stripeProduct",
-    "operator": "at_least",
-    "value": "prod_pro:3"
-  }
-]
+{
+  "filterJoinOperator": "or",
+  "filters": [
+    {
+      "id": "filter-1",
+      "field": "stripeProduct",
+      "operator": "at_least",
+      "value": "prod_pro:3"
+    }
+  ]
+}
 ```
 
 ## "Create or manage a template"
@@ -183,12 +220,16 @@ What works today:
 sequenzy templates list
 sequenzy templates get tmpl_123
 sequenzy templates create welcome --subject "Welcome" --html-file ./welcome.html
+sequenzy templates create welcome --subject "Welcome" --blocks-file ./welcome-blocks.json
 sequenzy templates update tmpl_123 --subject "Updated" --html-file ./welcome-v2.html
+sequenzy templates update tmpl_123 --blocks-file ./welcome-v2-blocks.json
 ```
 
 Guidance:
 
-- use HTML input; this API path stores it as a single text block
+- use block JSON when the user needs conditional content or an exact editor-compatible structure
+- use HTML input for simpler one-off content; this API path stores raw HTML as a single text block
+- a conditional block uses a block-level `condition` object with merge-tag variable names and no `{{ }}` braces
 - use `get` before `update` or `delete` when the user is uncertain about the target ID
 - warn that delete can fail when the template is still referenced by a campaign or sequence
 
@@ -199,8 +240,11 @@ What works today:
 ```bash
 sequenzy campaigns list --status draft
 sequenzy campaigns get camp_123
+sequenzy campaigns create "April Launch" --prompt "Announce our new dashboard"
 sequenzy campaigns create "April Launch" --subject "We shipped" --html-file ./campaign.html
+sequenzy campaigns create "April Launch" --subject "We shipped" --blocks-file ./campaign-blocks.json
 sequenzy campaigns update camp_123 --subject "Updated subject"
+sequenzy campaigns update camp_123 --blocks-file ./campaign-v2-blocks.json
 sequenzy campaigns update camp_123 --reply-to support@example.com
 sequenzy campaigns update camp_123 --reply-profile reply_123
 sequenzy campaigns test camp_123 --to you@example.com
@@ -209,12 +253,26 @@ sequenzy campaigns test camp_123 --to you@example.com
 Guidance:
 
 - the CLI only handles draft creation, draft updates, inspection, and test requests
+- create, get, update, list, and test outputs include dashboard URLs when the company can be resolved
+- use `--prompt` for AI-generated draft content; do not combine it with HTML or block flags
+- use block JSON when the user needs conditional content or an exact editor-compatible structure
 - use `--reply-to` when the user knows the reply profile email and it already exists for the company
 - use `--reply-profile` when the user already has the reply profile ID
 - do not pass `--reply-to` and `--reply-profile` together
 - use `campaigns get` after an update when you want to confirm the saved reply-to details
 - there is no CLI command for sending or scheduling a campaign
 - in the current backend checkout, `campaigns test` returns a success message path rather than confirmed delivery
+
+For MCP-driven campaign updates, `update_campaign` supports the same reply-to behavior:
+
+```json
+{
+  "campaignId": "camp_123",
+  "replyTo": "support@example.com"
+}
+```
+
+Use `replyProfileId` instead when the caller already has the reply profile ID, and never send both fields together.
 
 Preferred fallback for unsupported campaign workflows:
 
@@ -255,6 +313,7 @@ Minimal `steps.json` shape:
 Guidance:
 
 - CLI sequence creation supports either AI `--goal` mode or explicit step files
+- create, get, update, and list outputs include dashboard URLs when the company can be resolved
 - choose the correct trigger options for `--trigger`
 - use `--goal` when you want AI-generated drafts, or `--steps-file` when you already know the exact step content
 - use either `--steps-file` or `--emails-file` for update
@@ -280,6 +339,17 @@ Guidance:
 
 ## "Generate email content with AI"
 
-Treat `sequenzy generate ...` as unsupported in the current CLI. The command names exist, but the current handlers intentionally exit with a not-implemented message.
+Use the CLI when the user wants draft copy or structured generated output:
 
-If the user still needs copy, generate it outside the CLI and clearly state that the Sequenzy CLI path is not implemented yet.
+```bash
+sequenzy generate email "Welcome email for new SaaS trial users"
+sequenzy generate sequence "Onboarding for SaaS trial users" --count 4 --days 14
+sequenzy generate subjects "Black Friday sale" --count 5
+```
+
+Guidance:
+
+- use `--json` when another agent or tool should parse the result
+- generated content is draft content and should be reviewed before sending
+- sequence generation accepts at most 10 emails
+- use `sequenzy campaigns create "Name" --prompt "..."` when the user wants to create a draft campaign from generated content in one step
