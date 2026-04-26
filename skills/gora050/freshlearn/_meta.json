@@ -3,11 +3,16 @@
   "slug": "freshlearn",
   "displayName": "Freshlearn",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166470069,
-    "commit": "https://github.com/openclaw/skills/commit/143de4788902cf837c062a9c0675e91cf4e56cee"
+    "version": "1.0.3",
+    "publishedAt": 1776860290119,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166470069,
+      "commit": "https://github.com/openclaw/skills/commit/143de4788902cf837c062a9c0675e91cf4e56cee"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774224286219,
