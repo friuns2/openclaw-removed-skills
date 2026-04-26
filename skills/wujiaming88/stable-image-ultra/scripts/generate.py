@@ -121,6 +121,8 @@ Note: Stability AI models on Bedrock are only available in us-west-2 (Oregon).
                         help="Model: ultra (default) or sd35")
     parser.add_argument("-n", "--count", type=int, default=1, help="Number of images 1-5 (default: 1)")
     parser.add_argument("--negative", help="Negative prompt (what to avoid)")
+    parser.add_argument("--aspect-ratio", dest="aspect_ratio", default=None,
+                        help="Aspect ratio: 1:1(default), 16:9, 21:9, 2:3, 3:2, 4:5, 5:4, 9:16, 9:21")
     parser.add_argument("--seed", type=int, default=None, help="Seed for reproducibility")
 
     # AWS auth
@@ -155,19 +157,23 @@ Note: Stability AI models on Bedrock are only available in us-west-2 (Oregon).
     model_id = MODELS[args.model]
     model_label = MODEL_LABELS[args.model]
 
-    # Build request — Stability AI Bedrock API is very simple
+    # Build request
     body_dict = {"prompt": args.prompt}
 
-    # Note: Stable Image Ultra and SD3.5 Large on Bedrock have a minimal API
-    # Only "prompt" is required. negative_prompt, seed, etc. may not be supported
-    # in the Bedrock wrapper (they use the simplest possible API surface).
-    # We include them as best-effort.
+    # Aspect ratio
+    if args.aspect_ratio:
+        body_dict["aspect_ratio"] = args.aspect_ratio
+
+    # Negative prompt
     if args.negative:
         body_dict["negative_prompt"] = args.negative
+
+    # Seed
     if args.seed is not None:
         body_dict["seed"] = args.seed
-    if args.model == "ultra":
-        body_dict["output_format"] = "png"
+
+    # Output format — always PNG for maximum quality
+    body_dict["output_format"] = "png"
 
     body = json.dumps(body_dict)
 
