@@ -3,11 +3,16 @@
   "slug": "eqxiu-h5creator",
   "displayName": "易企秀H5制作",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775804043772,
-    "commit": "https://github.com/openclaw/skills/commit/64d224ea37b702cc80f3a7f12f6ceb2a41203dcf"
+    "version": "1.0.2",
+    "publishedAt": 1776899193428,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775804043772,
+      "commit": "https://github.com/openclaw/skills/commit/64d224ea37b702cc80f3a7f12f6ceb2a41203dcf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774247890105,
