@@ -3,11 +3,16 @@
   "slug": "planyo-online-booking",
   "displayName": "Planyo Online Booking",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165981588,
-    "commit": "https://github.com/openclaw/skills/commit/f179dbf412b2d84b123aec741665e9795f4c8e86"
+    "version": "1.0.3",
+    "publishedAt": 1776859917721,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165981588,
+      "commit": "https://github.com/openclaw/skills/commit/f179dbf412b2d84b123aec741665e9795f4c8e86"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774130693806,
