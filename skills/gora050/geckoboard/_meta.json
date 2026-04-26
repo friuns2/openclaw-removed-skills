@@ -3,11 +3,16 @@
   "slug": "geckoboard",
   "displayName": "Geckoboard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165285163,
-    "commit": "https://github.com/openclaw/skills/commit/44c6bb6b20c826c9fde912d02d25c5949e9d29d2"
+    "version": "1.0.3",
+    "publishedAt": 1776859203297,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165285163,
+      "commit": "https://github.com/openclaw/skills/commit/44c6bb6b20c826c9fde912d02d25c5949e9d29d2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773993803293,
