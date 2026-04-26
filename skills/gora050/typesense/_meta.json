@@ -3,11 +3,16 @@
   "slug": "typesense",
   "displayName": "Typesense",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166186273,
-    "commit": "https://github.com/openclaw/skills/commit/af4b3df011c4f141befc07d1c902cf9bc48f339f"
+    "version": "1.0.3",
+    "publishedAt": 1776866845403,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166186273,
+      "commit": "https://github.com/openclaw/skills/commit/af4b3df011c4f141befc07d1c902cf9bc48f339f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774173849150,
