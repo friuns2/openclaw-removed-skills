@@ -3,11 +3,16 @@
   "slug": "lime-go",
   "displayName": "Lime Go",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165054167,
-    "commit": "https://github.com/openclaw/skills/commit/64b055192972c5524ba0be1b341b81d86cc12de6"
+    "version": "1.0.3",
+    "publishedAt": 1776859016224,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165054167,
+      "commit": "https://github.com/openclaw/skills/commit/64b055192972c5524ba0be1b341b81d86cc12de6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773947087490,
