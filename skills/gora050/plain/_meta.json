@@ -3,11 +3,16 @@
   "slug": "plain",
   "displayName": "Plain",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165297041,
-    "commit": "https://github.com/openclaw/skills/commit/89f3b5cd7a49e1ceb70d1dc6258a57044bdef4c3"
+    "version": "1.0.3",
+    "publishedAt": 1776859228621,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165297041,
+      "commit": "https://github.com/openclaw/skills/commit/89f3b5cd7a49e1ceb70d1dc6258a57044bdef4c3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773993826235,
