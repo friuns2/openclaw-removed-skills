@@ -1,26 +1,32 @@
 ---
 name: china-stocks-daily-review
-version: "1.2.0"
+version: "2.0.0"
 author: "china-stocks-daily-review"
 description: >
   A股市场行情分析 Skill，支持生成三类报告：盘前市场综述、盘中市场简评、盘后复盘报告。
+  China A-Share Market Daily Review Skill — generates 3 report types: Pre-Market Briefing, Intraday Snapshot, Post-Market Review.
 
-  【触发词】开盘前分析、盘前综述、早盘预判、今天关注什么、盘中异动、午间复盘、
+  【触发词 · Trigger Words】开盘前分析、盘前综述、早盘预判、今天关注什么、盘中异动、午间复盘、
   收盘复盘、今日行情怎么样、市场情绪、板块轮动、主线在哪、今天主线、连板梯队、
   涨停分析、北向资金、南向资金、资金动向、成交额、全天行情、A股今日、复盘报告、
   今日市场、行情综述、开盘情绪、涨跌停统计、市场概况、明日策略、今日策略。
+  Pre-market analysis, intraday alert, post-market recap, market sentiment, sector rotation, limit-up ladder,
+  northbound/southbound flow, turnover, A-share today, daily review, tomorrow's strategy.
 
-  【数据架构】三层工具降级体系：Tushare Pro 官方 API（第一优先）→ AKShare 开源库
-  （第二优先）→ 搜索引擎实时抓取（兜底）。每个数据项独立降级，数据缺失留空不臆想。
+  【数据架构 · Data Architecture】三层工具降级体系：Tushare Pro 官方 API（第一优先）→
+  AKShare 开源库（第二优先）→ 搜索引擎实时抓取（兜底）。每个数据项独立降级，数据缺失留空不臆想。
+  3-tier fallback: Tushare Pro API (primary) → AKShare (secondary) → Search Engine (final fallback).
+  Each data item degrades independently; missing data is left blank, never fabricated.
 
-  【不适用场景】个股深度分析、宏观政策专项解读、选股推荐、龙虎榜席位分析、期权策略。
+  【不适用场景 · Out of Scope】个股深度分析、宏观政策专项解读、选股推荐、龙虎榜席位分析、期权策略。
+  In-depth individual stock analysis, macro policy interpretation, stock picking, top-list broker analysis, options strategies.
 ---
 
-# A股市场行情分析
+# A股市场行情分析 / China A-Share Market Daily Review
 
 ---
 
-## 适用边界
+## 适用边界 / Use Cases
 
 **使用本技能的情形：**
 
@@ -40,11 +46,12 @@ description: >
 
 ---
 
-## 取数工具说明
+## 取数工具说明 / Data Source Tools
 
 本技能使用三层工具取数，按优先级依次降级：
+This Skill uses a 3-tier data sourcing system with priority-based fallback:
 
-**数据回退优先级**：
+**数据回退优先级 / Data Fallback Priority**：
 
 ```
 工具 A：Tushare Pro 官方 API（用户自有 token，第一优先）
@@ -70,7 +77,7 @@ description: >
 
 ---
 
-### 工具 A：Tushare Pro 官方接口（第一优先）
+### 工具 A / Tool A：Tushare Pro 官方接口（第一优先） / Tushare Pro API (Primary)
 
 直接调用官方 `http://api.tushare.pro` 接口，需用户自己的 token。
 
@@ -351,7 +358,7 @@ if data:
 
 ---
 
-### 工具 A2：AKShare 结构化数据（第二优先，Tushare 失败时降级）
+### 工具 A2 / Tool A2：AKShare 结构化数据（第二优先，Tushare 失败时降级） / AKShare (Fallback)
 
 当工具 A 返回空数据或报错时，立即尝试 AKShare 获取同类数据。AKShare 为免费开源 Python 库，数据实时性略低于 Tushare，但覆盖范围全。
 
@@ -429,7 +436,7 @@ count = len(df_blk)
 
 ---
 
-### 工具 A2-新闻：财联社快讯（新增信息源）
+### 工具 A2-新闻 / Tool A2-News：财联社快讯（新增信息源） / CLS News Feed
 
 **接口**：`ak.stock_info_global_cls(symbol='全部')`
 
@@ -460,7 +467,7 @@ for _, row in df_today.iterrows():
 
 ---
 
-### 工具 A2-新闻：Tushare 新闻快讯（补充，积分依赖）
+### 工具 A2-新闻 / Tool A2-News：Tushare 新闻快讯（补充，积分依赖） / Tushare News (Supplementary)
 
 **接口**：`news`（需要 Tushare 积分）
 
@@ -470,22 +477,86 @@ for _, row in df_today.iterrows():
 
 ---
 
-### 工具 B：搜索引擎实时数据抓取（第三优先，兜底）
+### 工具 B / Tool B：web-tools MCP 实时数据（第三优先，兜底） / web-tools MCP (Final Fallback)
 
-**触发条件（满足任一即启用）：**
+**前置条件**：本层依赖 WorkBuddy MCP 服务 `web-tools`（自动注册于 `~/.workbuddy/mcp.json`，无需用户配置）。web-tools 包含两个工具：
+- **web_search**：搜索引擎发现来源，支持 Bing API（进阶，<200ms）和 googlesearch-python（基础，~5s，自动降级）
+- **web_fetch**：逐个 URL 抓取并提取结构化数据，自动处理编码，优先返回 markdown
+
+**触发条件（满足任一即启用）**：
 1. 工具 A（Tushare）+ 工具 A2（AKShare）均返回空或报错
 2. 需要补充当日重要新闻、政策背景（财联社快讯不够详细时）
 3. 需要对板块异动/个股事件给出**原因解读**（工具 A/A2 均无原因字段）
+4. 数字类数据来自工具 A/A2，但需要**交叉验证**准确性
 
 **搜索数据可替代范围**：
-- 实时指数点位、涨跌幅
-- 实时成交额（近似值）
+- 实时指数点位、涨跌幅、成交额
 - 实时涨停/跌停家数
 - 实时北向资金流向
 - 板块涨幅排名
 - 市场热点与异动原因
 
-**搜索引擎分工（按场景选 1-2 个，避免冗余）：**
+**标准操作流程（三步走）**：
+
+```
+Step 1：web_search → 找到数据来源 URL（标准化关键词，见下方）
+Step 2：web_fetch → 逐个 URL 提取结构化数据
+Step 3：多源交叉验证 → 取一致性高的数据写入报告
+```
+
+**Step 1：标准化搜索关键词（按数据项精选，主搜+备搜）**：
+
+| 数据项 | 主搜关键词 | 备搜关键词 | 推荐来源 |
+|-------|----------|----------|---------|
+| 指数行情+成交额 | `上证指数 深证成指 创业板 收盘 {日期}` | `沪深两市 今日收盘 涨跌幅` | 雪球、同花顺 |
+| 涨停家数+情绪 | `A股 今日 涨停 跌停 家数 {日期}` | `涨停家数 跌停家数 市场情绪` | 东方财富快讯 |
+| 北向资金 | `沪深股通 北向资金 净流入 {日期}` | `北上资金 今日净买入` | 雪球、东方财富 |
+| 板块涨幅排名 | `今日行业板块 涨幅排名 {日期}` | `A股 行业涨幅 领涨板块` | 同花顺、东方财富 |
+| 连板梯队 | `A股 涨停 连板梯队 {日期}` | `涨停板 连板数 龙头股` | 雪球、同花顺 |
+| 港股/美股外盘 | `美股 道琼斯 纳斯达克 收盘 {日期}` | `中概股 纳斯达克中国金龙指数` | Bing INT |
+| A50期指 | `A50期指 收盘 {日期}` | `富时中国A50 期货` | Bing INT |
+
+**Step 2：web_fetch 提取策略**：
+
+搜索拿到 URL 后，按优先级逐个 fetch：
+- 优先 fetch **结构化页面**（雪球快讯、同花顺收盘快讯、东方财富行情页）
+- 每个 URL fetch 后，从 markdown 中提取关键数字（点位、涨跌幅、金额、家数）
+- **不盲目抓取**：先 fetch 搜索结果列表中的前 3 个 URL，视数据充足程度决定是否继续
+
+**Step 3：交叉验证规则**：
+
+```
+至少 2 个来源数据一致 → 写入报告（注明"据[来源]，[来源]"）
+仅有 1 个来源有数据   → 写入报告（注明"据[来源]"）
+多个来源数据矛盾     → 取中间值或保守值，注明"多源数据有差异"
+无任何来源           → 该项留空，不臆想填充
+```
+
+**web-tools MCP 调用示例**：
+
+```python
+# Step 1：搜索指数数据（主搜 + 备搜，合并结果）
+search_results = web_search("上证指数 深证成指 创业板 收盘 2026-04-08")
+# 返回格式：[{"title": "...", "url": "https://...", "snippet": "..."}]
+
+# Step 2：fetch 前2个最相关 URL
+fetched = []
+for r in search_results[:2]:
+    content = web_fetch(r["url"], "提取：上证指数点位/涨跌幅、深证成指点位/涨跌幅、成交额（亿元）")
+    if content:
+        fetched.append({"source": r["title"], "url": r["url"], "content": content})
+
+# Step 3：AI 从 fetched 内容中解析结构化数字，交叉验证后写入报告
+```
+
+**mcp.json 注册状态**（本工具 B 层已自动可用）：
+`web-tools` MCP 服务已在 `~/.workbuddy/mcp.json` 注册，skill 执行时会自动调用，无需额外安装或配置。
+
+---
+
+### 工具 B2 / Tool B2：搜索引擎冗余回退（web-tools MCP 不可用时的兜底） / Search Engine Fallback
+
+若 `web-tools` MCP 服务因故不可用，降级为手动搜索，直接访问以下来源页面：
 
 | 优先级 | 场景 | 引擎 | URL 模板 |
 |-------|-----|-----|---------|
@@ -495,10 +566,9 @@ for _, row in df_today.iterrows():
 | 4 | 盘后个股/板块复盘 | 新浪财经 | `https://search.sina.com.cn/?q={关键词}&range=all&c=news` |
 | 5 | 同花顺资讯 | 同花顺 | `https://news.10jqka.com.cn/search/?key={关键词}` |
 | 6 | 港股/美股/隔夜外盘 | Bing INT | `https://cn.bing.com/search?q={关键词}&ensearch=1&tbs=qdr:d` |
-| 7 | 可转债/套利 | 集思录 | `https://www.jisilu.cn/explore/?keyword={关键词}` |
-| 8 | 备用 | DuckDuckGo | `https://duckduckgo.com/html/?q={关键词}` |
+| 7 | 备用 | DuckDuckGo | `https://duckduckgo.com/html/?q={关键词}` |
 
-**BaoStock 冗余说明：**
+**BaoStock 冗余说明**：
 
 BaoStock 为免费 Python 库（`import baostock as bs`），可作为指数历史数据的备用源。若 Tushare 指数日线数据为空，可尝试：
 
@@ -514,45 +584,31 @@ bs.logout()
 # 注意：volume 单位为股，amount 单位为元
 ```
 
-**标准搜索关键词（增强版）：**
-
-| 报告类型 | 关键数据 | 搜索关键词 |
-|---------|---------|-----------|
-| **盘中实时数据** | 指数点位/涨跌幅 | `上证指数 实时 点位` `创业板指 涨跌幅` |
-| **盘中实时数据** | 成交额 | `A股 成交额 今日` |
-| **盘中实时数据** | 涨停/跌停家数 | `涨停 家数 今日` `跌停 家数` |
-| **盘中实时数据** | 北向资金 | `北向资金 实时 净流入` |
-| **盘中实时数据** | 板块涨幅 | `今日板块涨幅排名` |
-| 盘前综述 | 隔夜外盘 | `美股 隔夜 收盘 {日期}` |
-| 盘前综述 | 今日关注 | `A股 盘前 今日关注 {日期}` |
-| 盘中热点 | 异动原因 | `A股 盘中 异动 热点 {日期}` |
-| 盘后复盘 | 板块表现 | `A股 今日复盘 板块 {日期}` |
-
 **调用原则：**
 - **优先结构化数据**：工具 A / A2 能拿到的数字类数据，不用搜索引擎
 - **搜索补充原因**：板块异动原因、事件背景、政策解读，必须走工具 B
 - **不限制引擎数量**：为获取完整实时数据，可同时调用 2-3 个引擎
 - **数据冲突处理**：数字以工具 A/A2 为准，原因分析以搜索为准
 
----
-
-## 报告生成：三层漏斗模型
+## 报告生成：三层漏斗模型 / Report Generation: 3-Tier Funnel
 
 复盘报告的生成过程由三层架构驱动，每层有明确的输入、处理逻辑和输出产物。三层顺序执行，上层输出是下层输入。
 
 ---
 
-### 第一层：数据获取层
+### 第一层：数据获取层 / Tier 1: Data Acquisition
 
 **原则**：优先权威结构化数据，辅以非结构化资讯。数据按重要性分四级顺序获取：
 
 优先级 1（核心，必须完整）
 指数收盘价、涨跌幅、成交额、成交量、涨跌家数、涨停/跌停统计、南北向资金净流入/流出。
-来源：工具 A（Tushare）→ 工具 A2（AKShare）→ 工具 B（搜索）。
+来源：工具 A（Tushare）→ 工具 A2（AKShare）→ 工具 B（web-tools MCP）。
+
 
 优先级 2（重要，尽力获取）
 板块异动原因、宏观政策、公司公告、机构观点。
-来源：财联社快讯（stock_info_global_cls）→ 工具 B（东方财富/Bing CN）。
+来源：财联社快讯（stock_info_global_cls）→ 工具 B（web-tools MCP）。
+
 
 优先级 3（辅助，选择性获取）
 市场情绪指标、热点事件（如"算力爆发"、词元概念）。
@@ -564,7 +620,7 @@ bs.logout()
 
 ---
 
-### 第二层：逻辑清洗与筛选层
+### 第二层：逻辑清洗与筛选层 / Tier 2: Data Cleaning & Filtering
 
 **原则**：从海量数据中提炼"信号"，过滤"噪音"。按以下 5 步执行：
 
@@ -591,7 +647,7 @@ Step 5 风险识别（反向排除）
 
 ---
 
-### 第三层：结构化叙事层
+### 第三层：结构化叙事层 / Tier 3: Structured Narrative
 
 **原则**：将清洗后的数据转化为可阅读的叙事，遵循"结论先行 + 数据支撑 + 逻辑推演"框架。
 
@@ -625,7 +681,7 @@ Step 5 风险识别（反向排除）
 
 ---
 
-## 第一步：识别报告类型
+## 第一步：识别报告类型 / Step 1: Identify Report Type
 
 根据用户输入判断报告类型，若未明确指定则依当前时间自动判断：
 
@@ -637,64 +693,64 @@ Step 5 风险识别（反向排除）
 
 ---
 
-## 第二步：取数执行
+## 第二步：取数执行 / Step 2: Data Acquisition
 
-### 盘前取数清单
+### 盘前取数清单 / Pre-Market Data Checklist
 
 优先级顺序：优先级1（核心）→ 优先级2（消息面）→ 优先级3（情绪辅助）→ 优先级4（外盘补充）
 
-| 优先级 | 数据项 | 工具 A（Tushare） | 工具 A2（AKShare降级） | 工具 B（搜索兜底） |
-|-------|-------|----------------|---------------------|-----------------|
-| P1 | 昨日主要指数收盘 | `index_daily`（逐个查） | `stock_zh_index_spot_em` | Bing CN |
-| P1 | 昨日涨跌停数量+连板 | `limit_list_ths` | `stock_zt_pool_em` / `dtgc` / `zbgc` | 搜索"涨停家数" |
-| P1 | 昨日北向/南向资金 | `moneyflow_hsgt` | `stock_hsgt_fund_flow_summary_em` | 搜索"北向资金" |
-| P2 | 晚间公告/政策/事件（超预期优先） | — | `stock_info_global_cls`（财联社快讯，今晚条目） | Bing CN · 东方财富 |
-| P2 | 重大个股公告（业绩/重组/减持/解禁） | — | — | Bing CN 搜索"股票公告 今晚" |
+| 优先级 | 数据项 | 工具 A（Tushare） | 工具 A2（AKShare降级） | 工具 B（web-tools MCP） |
+|-------|-------|----------------|---------------------|-----------------------|
+| P1 | 昨日主要指数收盘 | `index_daily`（逐个查） | `stock_zh_index_spot_em` | web_search + fetch（雪球/同花顺） |
+| P1 | 昨日涨跌停数量+连板 | `limit_list_ths` | `stock_zt_pool_em` / `dtgc` / `zbgc` | web_search + fetch |
+| P1 | 昨日北向/南向资金 | `moneyflow_hsgt` | `stock_hsgt_fund_flow_summary_em` | web_search + fetch（雪球/东财） |
+| P2 | 晚间公告/政策/事件（超预期优先） | — | `stock_info_global_cls`（财联社快讯，今晚条目） | web_search + fetch（东方财富/Bing CN） |
+| P2 | 重大个股公告（业绩/重组/减持/解禁） | — | — | web_search + fetch（搜索"股票公告 今晚"） |
 | P3 | 昨日主线情绪延续性（连板高度变化） | `limit_list_ths` | `stock_zt_pool_em` | — |
-| P4 | 隔夜美股三大指数、中概股 | — | — | Bing INT |
-| P4 | A50期指、人民币汇率 | — | — | Bing INT · Bing CN |
+| P4 | 隔夜美股三大指数、中概股 | — | — | web_search + fetch（Bing INT） |
+| P4 | A50期指、人民币汇率 | — | — | web_search + fetch（Bing INT） |
 
 取数重点说明：
 - P2 消息面筛选原则：只选"超预期"事件，剔除已消化的利好（如反复提及的政策、已发布多日的公告）
 - P4 隔夜外盘：时间允许时获取；若无则盘前报告外盘部分用"数据暂缺"标注，不臆想
 
-### 盘中取数清单
+### 盘中取数清单 / Intraday Data Checklist
 
 优先级顺序与盘前相同，但数据均来自实时当日；额外增加"预判验证"维度
 
-| 优先级 | 数据项 | 工具 A（Tushare） | 工具 A2（AKShare降级） | 工具 B（搜索兜底） |
-|-------|-------|----------------|---------------------|-----------------|
-| P1 | 当前指数实时涨跌+成交额 | `index_daily`（今日） | `stock_zh_index_spot_em` | 搜索"上证指数 实时" |
-| P1 | 实时涨跌停数量+炸板 | `limit_list_ths`（今日） | `stock_zt_pool_em` / `zbgc` | 搜索"今日涨停家数" |
-| P1 | 上涨/下跌家数（涨跌比计算） | `daily`（全市场统计） | — | 搜索"今日涨跌家数" |
-| P1 | 实时北向/南向资金 | `moneyflow_hsgt`（今日） | `stock_hsgt_fund_flow_summary_em` | 搜索"北向资金 实时" |
-| P2 | 行业板块涨幅 TOP5 + 领跌 | `moneyflow_ind_ths`（今日） | `stock_sector_fund_flow_rank(sector_type='行业资金流')` | 搜索"今日板块涨幅" |
-| P2 | 盘中快讯/异动催化原因 | `news`（积分受限时降级） | `stock_info_global_cls`（财联社快讯） | 东方财富 / Bing CN |
+| 优先级 | 数据项 | 工具 A（Tushare） | 工具 A2（AKShare降级） | 工具 B（web-tools MCP） |
+|-------|-------|----------------|---------------------|-----------------------|
+| P1 | 当前指数实时涨跌+成交额 | `index_daily`（今日） | `stock_zh_index_spot_em` | web_search + fetch |
+| P1 | 实时涨跌停数量+炸板 | `limit_list_ths`（今日） | `stock_zt_pool_em` / `zbgc` | web_search + fetch |
+| P1 | 上涨/下跌家数（涨跌比计算） | `daily`（全市场统计） | — | web_search + fetch |
+| P1 | 实时北向/南向资金 | `moneyflow_hsgt`（今日） | `stock_hsgt_fund_flow_summary_em` | web_search + fetch |
+| P2 | 行业板块涨幅 TOP5 + 领跌 | `moneyflow_ind_ths`（今日） | `stock_sector_fund_flow_rank(sector_type='行业资金流')` | web_search + fetch |
+| P2 | 盘中快讯/异动催化原因 | `news`（积分受限时降级） | `stock_info_global_cls`（财联社快讯） | web_search + fetch（东方财富/Bing CN） |
 | P3 | 连板高度变化（与上午/昨日对比） | `limit_list_ths` | `stock_zt_pool_em` | — |
 
-### 盘后取数清单
+### 盘后取数清单 / Post-Market Data Checklist
 
-| 数据项 | 工具 A（Tushare） | 工具 A2（AKShare降级） | 工具 B（搜索兜底） | 字段说明 |
-|-------|----------------|---------------------|-----------------|---------|
-| 今日各指数收盘 | `index_daily`（逐个查） | `stock_zh_index_spot_em` | Bing CN | A: amount/1e5=亿；A2: 成交额/1e8=亿 |
-| 今日涨跌停/炸板/连板 | `limit_list_ths` → 失败用`daily`统计涨停家数（无连板） | `stock_zt_pool_em` 等（含连板数列） | 搜索"涨停家数 连板梯队" | A: tag解析连板；A2: 连板数列直接读；daily降级：只有涨停家数，无连板明细 |
-| 今日北向/南向资金 | `moneyflow_hsgt` | `stock_hsgt_fund_flow_summary_em`（北向+南向） | 搜索"北向资金" | 使用 `成交净买额` 字段（亿元）；`资金净流入` 为额度余额不可用；北向收盘当日结算滞后显示0则不写 |
-| 行业板块涨跌幅 | `moneyflow_ind_ths` | `stock_sector_fund_flow_rank(sector_type='行业资金流')` | 搜索"板块涨跌" | 均按涨幅排序，不按资金流 |
+| 数据项 | 工具 A（Tushare） | 工具 A2（AKShare降级） | 工具 B（web-tools MCP） | 字段说明 |
+|-------|----------------|---------------------|-----------------------|---------|
+| 今日各指数收盘 | `index_daily`（逐个查） | `stock_zh_index_spot_em` | web_search + fetch（雪球/同花顺） | A: amount/1e5=亿；A2: 成交额/1e8=亿 |
+| 今日涨跌停/炸板/连板 | `limit_list_ths` → 失败用`daily`统计涨停家数（无连板） | `stock_zt_pool_em` 等（含连板数列） | web_search + fetch | A: tag解析连板；A2: 连板数列直接读；daily降级：只有涨停家数，无连板明细 |
+| 今日北向/南向资金 | `moneyflow_hsgt` | `stock_hsgt_fund_flow_summary_em`（北向+南向） | web_search + fetch（雪球/东财） | 使用 `成交净买额` 字段（亿元）；`资金净流入` 为额度余额不可用；北向收盘当日结算滞后显示0则不写 |
+| 行业板块涨跌幅 | `moneyflow_ind_ths` | `stock_sector_fund_flow_rank(sector_type='行业资金流')` | web_search + fetch | 均按涨幅排序，不按资金流 |
 | 大宗交易笔数 | `block_trade` | `stock_dzjy_mrmx` | — | 统计条数即可 |
-| 收盘后快讯/公告 | `news`（积分受限时降级） | `stock_info_global_cls`（财联社快讯，15:00后条目） | 东方财富 / Bing CN | 用于补充收盘后重大公告、业绩快报 |
-| 板块异动原因 | — | `stock_info_global_cls`（财联社快讯中搜关键词） | 东方财富 / Bing CN | 工具A/A2均无原因字段，优先快讯再搜索 |
+| 收盘后快讯/公告 | `news`（积分受限时降级） | `stock_info_global_cls`（财联社快讯，15:00后条目） | web_search + fetch（东方财富/Bing CN） | 用于补充收盘后重大公告、业绩快报 |
+| 板块异动原因 | — | `stock_info_global_cls`（财联社快讯中搜关键词） | web_search + fetch（东方财富/Bing CN） | 工具A/A2均无原因字段，优先快讯再搜索 |
 
 ---
 
-## 第三步：撰写报告
+## 第三步：撰写报告 / Step 3: Report Writing
 
-### 成交量与成交额区分说明（报告写作规范）
+### 成交量与成交额区分说明（报告写作规范） / Volume vs. Turnover Distinction (Writing Standard)
 
 > - **成交量**（手/股）：反映成交频次，与股价无关，同一资金规模下高价股成交量小
 > - **成交额**（亿元）：= 成交量 × 价格，反映实际资金流动规模，是市场活跃度的核心指标
 > - 报告中需**同时列出**成交量和成交额，不可混用
 
-### 盘前市场综述模板
+### 盘前市场综述模板 / Pre-Market Briefing Template
 
 ⚠️ 输出格式要求：为适配微信阅读，禁止使用 Markdown 表格（不出现 | 符号）、# 标题符号、** 加粗符号、- 或 * 列表符号、━ 分隔线。改用 emoji 图标、中文数字标题、空行分段。内容丰富度不减，适当加 emoji 增强可读性。
 
@@ -794,7 +850,7 @@ A50期指：{涨跌幅}%（开盘情绪风向标）
 数据来源：Tushare Pro · AKShare · 财联社快讯 · 财经媒体资讯
 ```
 
-### 盘中市场简评模板
+### 盘中市场简评模板 / Intraday Snapshot Template
 
 ⚠️ 输出格式要求：为适配微信阅读，禁止使用 Markdown 表格（不出现 | 符号）、# 标题符号、** 加粗符号、- 或 * 列表符号、━ 分隔线。改用 emoji 图标、中文数字标题、空行分段。
 
@@ -868,7 +924,7 @@ A50期指：{涨跌幅}%（开盘情绪风向标）
 小龙虾备注：报告生成时间{时间}。数据基于上午收盘快照。下午策略需根据13:00开盘后15分钟走势微调。
 ```
 
-### 盘后复盘报告模板
+### 盘后复盘报告模板 / Post-Market Review Template
 
 ⚠️ 输出格式要求：为适配微信阅读，禁止使用 Markdown 表格（不出现 | 符号）、# 标题符号、** 加粗符号、- 或 * 列表符号、━ 分隔线。改用 emoji 图标、中文数字标题、空行分段。
 
@@ -955,7 +1011,7 @@ A50期指：{涨跌幅}%（开盘情绪风向标）
 
 ---
 
-## 第四步：输出规范
+## 第四步：输出规范 / Step 4: Output Standards
 
 **三层漏斗强制执行顺序（三类报告通用）：**
 1. 第一层（数据获取）：按优先级P1→P2→P3→P4顺序取数，每项独立降级，缺失则留空不臆想
@@ -976,7 +1032,7 @@ A50期指：{涨跌幅}%（开盘情绪风向标）
 
 **强制要求（三类报告通用）：**
 - 数字数据（点位、涨跌幅、资金额）必须来自 Tushare（工具 A），不可估算或捏造
-- 板块原因分析来自搜索结果（工具 B），简要注明"据财经媒体"
+- 板块原因分析来自搜索结果（工具 B），注明"据 web-tools MCP 搜索（[来源]）"；若多个来源数据一致则注明"据[来源1]、[来源2]交叉验证"
 - 接口报错或无数据时，自动降级至搜索引擎补充，报告内无需解释数据来源问题
 - 成交量（手）与成交额（亿元）必须同时列出，不可混用
 - 板块排名以涨幅为准，资金流向仅作辅助说明
@@ -1008,9 +1064,9 @@ A50期指：{涨跌幅}%（开盘情绪风向标）
 
 ---
 
-## 自动推送：定时报告机制
+## 自动推送：定时报告机制 / Auto Push: Scheduled Report Delivery
 
-### 默认行为
+### 默认行为 / Default Behavior
 
 安装本 Skill 后，**自动推送默认开启**，无需额外配置。WorkBuddy 会在每个交易日的以下三个时间点自动生成并推送对应报告：
 
@@ -1020,7 +1076,7 @@ A50期指：{涨跌幅}%（开盘情绪风向标）
 | 11:35 | 🕛 盘中市场简评 | 午间收盘后5分钟，验证盘前预判+推演下午策略 |
 | 15:05 | 📊 盘后复盘报告 | 收盘后5分钟，全天主线复盘+明日展望 |
 
-### 推送目标
+### 推送目标 / Push Targets
 
 报告会推送到用户在 WorkBuddy 中绑定的消息端（微信 / WhatsApp / 其他）。若未绑定任何消息端，则报告直接输出在当前对话窗口。推送逻辑：
 
@@ -1031,7 +1087,7 @@ A50期指：{涨跌幅}%（开盘情绪风向标）
   └─ 未绑定任何端 → 在 WorkBuddy 对话中直接输出
 ```
 
-### 非交易日处理
+### 非交易日处理 / Non-Trading Day Handling
 
 自动推送任务在执行时会先判断当日是否为 A 股交易日：
 - 若为周末、法定节假日或临时休市日 → 自动跳过，不生成报告，不推送
@@ -1060,7 +1116,111 @@ if not is_trade_day():
 # 继续执行报告生成逻辑...
 ```
 
-### 关闭或修改自动推送
+### Automation 执行逻辑（三个定时任务详情） / Automation Logic (3 Scheduled Tasks)
+
+WorkBuddy Automation 平台在指定时间触发任务，每个任务的完整执行逻辑如下：
+
+---
+
+#### 🌅 盘前综述（08:55，每个工作日）
+
+**RRULE**：`FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=8;BYMINUTE=55`
+
+**Automation Prompt**：
+```
+使用 china-stocks-daily-review skill 生成今日盘前市场综述报告。
+
+执行步骤：
+1. 判断今日是否为A股交易日（调用 ak.tool_trade_date_hist_sina()，失败则以周一至周五兜底）。
+   若非交易日，输出"今日非交易日，跳过盘前报告生成。"并结束任务。
+2. 按照 SKILL.md 三层降级逻辑依次获取盘前数据：
+   - P1（外盘）：隔夜美股三大指数、恒生指数、A50期货
+   - P1（情绪）：昨日涨停家数、昨日涨停率、北向资金、全市场成交额
+   - P2（消息面）：财联社快讯/搜索引擎，筛选超预期利好/利空
+   - P3（连板梯队）：涨停池，连板天数≥2的个股梯队
+   - P4（技术）：主要指数昨日收盘点位、关键支撑/压力位
+3. 按盘前综述模板生成报告，包含：
+   一、隔夜外盘映射 → 二、昨日A股回顾 → 三、核心消息面
+   → 四、技术面关键点位 → 五、今日策略（含三场景剧本推演）
+4. 将报告保存为：report_YYYYMMDD_premarket.md（日期替换为今日实际日期）
+5. 将报告推送到用户绑定的消息端（微信优先）；若未绑定则在对话中输出。
+```
+
+**输出文件**：`report_YYYYMMDD_premarket.md`
+
+---
+
+#### 🕛 盘中简评（11:35，每个工作日）
+
+**RRULE**：`FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=11;BYMINUTE=35`
+
+**Automation Prompt**：
+```
+使用 china-stocks-daily-review skill 生成今日盘中市场简评报告。
+
+执行步骤：
+1. 判断今日是否为A股交易日（调用 ak.tool_trade_date_hist_sina()，失败则以周一至周五兜底）。
+   若非交易日，输出"今日非交易日，跳过盘中简评生成。"并结束任务。
+2. 按照 SKILL.md 三层降级逻辑依次获取盘中数据：
+   - P1（指数）：上午沪深300、上证、创业板实时涨跌幅与成交额
+   - P1（情绪）：上午涨停家数、跌停家数、涨跌比（上涨家数/下跌家数）
+   - P2（板块）：上午领涨/领跌板块，主线板块连续性或轮动（电风扇）判断
+   - P3（连板）：午间连板梯队高度，对比昨日最高连板天数
+3. 若今日已存在盘前报告（report_YYYYMMDD_premarket.md），读取其预判内容用于验证对比。
+4. 按盘中简评模板生成报告，包含：
+   一、上午盘面数据 → 二、vs盘前预判对比 → 三、主线稳定性/板块判断
+   → 四、连板情绪 → 五、若A则B下午推演 → 六、关键观察点
+5. 将报告保存为：report_YYYYMMDD_intraday.md（日期替换为今日实际日期）
+6. 将报告推送到用户绑定的消息端（微信优先）；若未绑定则在对话中输出。
+```
+
+**输出文件**：`report_YYYYMMDD_intraday.md`
+
+---
+
+#### 📊 盘后复盘（15:05，每个工作日）
+
+**RRULE**：`FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=15;BYMINUTE=5`
+
+**Automation Prompt**：
+```
+使用 china-stocks-daily-review skill 生成今日盘后复盘报告。
+
+执行步骤：
+1. 判断今日是否为A股交易日（调用 ak.tool_trade_date_hist_sina()，失败则以周一至周五兜底）。
+   若非交易日，输出"今日非交易日，跳过盘后复盘生成。"并结束任务。
+2. 按照 SKILL.md 三层降级逻辑依次获取收盘数据：
+   - P1（指数）：沪深300、上证、深证、创业板、科创50全天涨跌幅与成交额
+   - P1（情绪）：全天涨停/跌停家数、涨停率、情绪评级、昨日/今日情绪对比
+   - P1（资金）：北向资金全天净买入（AKShare stock_hsgt_fund_flow_summary_em）
+   - P2（板块）：今日领涨/领跌板块前三（stock_sector_fund_flow_rank，indicator='今日'）
+   - P3（连板梯队）：今日最高连板天数及龙头个股，对比昨日情绪强弱
+   - P4（大宗/龙虎榜）：block_trade 大宗交易笔数（可选，权限不足则跳过）
+3. 若今日已存在盘前/盘中报告，读取其预判内容用于复盘验证。
+4. 按盘后复盘模板生成报告，包含：
+   一、指数全天表现 → 二、成交额与情绪 → 三、主线板块复盘
+   → 四、连板梯队与情绪评级 → 五、北向资金 → 六、明日展望
+5. 将报告保存为：report_YYYYMMDD_postmarket.md（日期替换为今日实际日期）
+6. 将报告推送到用户绑定的消息端（微信优先）；若未绑定则在对话中输出。
+```
+
+**输出文件**：`report_YYYYMMDD_postmarket.md`
+
+---
+
+### 报告文件命名规范 / Report File Naming Convention
+
+| 报告类型 | 文件名 | 示例 |
+|---------|--------|------|
+| 盘前综述 | `report_YYYYMMDD_premarket.md` | `report_20260326_premarket.md` |
+| 盘中简评 | `report_YYYYMMDD_intraday.md` | `report_20260326_intraday.md` |
+| 盘后复盘 | `report_YYYYMMDD_postmarket.md` | `report_20260326_postmarket.md` |
+
+所有报告文件保存在 Skill 所在工作区根目录下。
+
+---
+
+### 关闭或修改自动推送 / Disable or Modify Auto Push
 
 用户可随时通过以下方式管理自动推送：
 
@@ -1069,7 +1229,7 @@ if not is_trade_day():
 - **修改时间**：在自动化管理页编辑 rrule，调整 BYHOUR/BYMINUTE 参数
 - **口令控制**（对话触发）：直接告诉 WorkBuddy「关闭盘前自动推送」/ 「暂停今日报告」
 
-### 首次安装引导话术
+### 首次安装引导话术 / First-Time Setup Wizard
 
 当用户首次安装或首次触发本 Skill 时，输出以下引导信息（仅在首次运行时显示一次）：
 
@@ -1086,7 +1246,7 @@ if not is_trade_day():
 
 ---
 
-## 踩坑经验（实测积累）
+## 踩坑经验（实测积累） / Practical Pitfalls & Lessons
 
 **Tushare Pro 官方接口（工具 A）：**
 - **Token 配置**：token 存于 `~/.tushare_token`，首次运行由 `startup_check()` 引导用户注册获取
@@ -1119,3 +1279,269 @@ if not is_trade_day():
 - `stk_news` / 个股新闻：接口名称不正确（40101），不存在此接口
 - `top_list` / 龙虎榜：40203 权限不足
 - `hm_detail` / 游资：接口存在但当日返回 0 条（结算延迟）
+
+**AKShare 新接口（2026-03-27 实测）：**
+- `stock_market_activity_legu()` / 全市场涨跌统计：**强烈推荐**，无需参数，直接返回item/value表，含上涨/涨停/真实涨停/st涨停/下跌/跌停/真实跌停/平盘/停牌家数，盘中取数时**优先用此接口**代替 `daily` 统计涨跌家数
+- `stock_board_industry_name_em` / 行业板块列表：2026-03-27 RemoteDisconnected，稳定性差，不可依赖
+- `stock_sector_fund_flow_rank` / 板块资金流：2026-03-27 盘中 RemoteDisconnected，稳定性变差，盘中板块数据需以财联社快讯`stock_info_global_cls`为主兜底
+
+---
+
+## ⚡ 速度优化：已知慢接口与加速策略 / Speed Optimization
+
+> 以下经验基于 **2026-03-26 至 2026-04-08 共7次报告生成** 完整流程复盘总结。核心目标：将单次报告生成时间从 **8~12分钟压缩至 3~5分钟**。
+
+### A. 速度杀手排行榜（按影响频率排序）
+
+| 排名 | 问题 | 发生率 | 每次浪费时间 | 解决方案 |
+|:---:|------|:------:|:-----------:|---------|
+| 🥇 | `stock_zh_index_spot_em` RemoteDisconnected | **6/7天** | 30~90秒重试 | 改用新浪财经 hq.sinajs.cn 直接跳过 |
+| 🥈 | `stock_sector_fund_flow_rank` RemoteDisconnected | **5/7天** | 20~40秒重试 | 设置**3秒超时**，超时直接降级搜索 |
+| 🥉 | 北向资金结算滞后（返回0） | **6/7天** | 5~10秒 | **已知行为，直接跳过或最多重试1次** |
+| 4 | 内联 `-c` 脚本含中文崩溃 | **2/7天** | 3~5分钟重写 | **永远使用脚本文件**，禁止内联含中文的Python |
+| 5 | 多次串行搜索相同数据 | 每次降级 | 30~60秒 | **一次复合搜索**替代逐条搜索 |
+| 6 | 涨跌停池/市场情绪多次重试 | 偶发 | 10~20秒 | **设置重试次数上限（最多2次）** |
+
+### B. 核心优化规则（强制执行）
+
+#### 规则 1：永远用脚本文件，不用内联 `-c`
+
+**原因**：内联 `-c` 中的中文/特殊字符在 PowerShell 环境下会引发编码错误，导致整条命令失败。
+```
+❌ 错误：python -c "import akshare as ak; df = ak.stock_zh_index_spot_em()"
+✅ 正确：python fetch_data.py  # 所有数据获取代码写进脚本文件
+```
+
+#### 规则 2：指数数据降级链重构（跳过不稳定 AKShare）
+
+**原降级链（有冗余等待）**：
+```
+AKShare stock_zh_index_spot_em → RemoteDisconnected → 重试3次（每次10秒）→ 失败 → 降级搜索
+```
+
+**优化降级链（直接跳过长等待）**：
+```
+新浪财经 hq.sinajs.cn（优先）→ AKShare stock_zh_index_spot_em（次选，超时5秒）→ 搜索（兜底）
+```
+
+**新浪财经接口（盘后推荐，原因：稳定、不限速）：**
+```python
+import urllib.request, json
+
+def fetch_index_from_sina() -> dict:
+    """
+    通过新浪财经 hq.sinajs.cn 获取主要指数实时数据。
+    优点：稳定、无频率限制、不依赖 AKShare。
+    缺点：收盘后数据为收盘价（非盘中实时）。
+    """
+    codes = 'sh000001,sz399001,sz399006,sh000688,sh000300'
+    url = f'http://hq.sinajs.cn/list={codes}'
+    headers = {
+        'Referer': 'http://finance.sina.com.cn',
+        'User-Agent': 'Mozilla/5.0'
+    }
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=10) as r:
+        raw = r.read().decode('gbk', errors='replace')
+
+    result = {}
+    for line in raw.strip().split('\n'):
+        if '=' not in line:
+            continue
+        code_part, data_part = line.split('=', 1)
+        code = code_part.split('_')[-1].strip()
+        vals = data_part.strip().strip('"').split(',')
+        if len(vals) < 10:
+            continue
+        # 格式：name, open, close_prev, open, current, high, low, vol, amount, ...
+        result[code] = {
+            'name': vals[0],
+            'close': float(vals[3]),   # 当前价（盘中=实时，收盘=收盘价）
+            'prev_close': float(vals[2]),
+            'open': float(vals[1]),
+            'high': float(vals[4]),
+            'low': float(vals[5]),
+            'volume': float(vals[8]),
+            'amount': float(vals[9]),
+        }
+        pct = (float(vals[3]) - float(vals[2])) / float(vals[2]) * 100
+        result[code]['pct'] = round(pct, 2)
+
+    return result
+
+# 使用示例：
+# data = fetch_index_from_sina()
+# sh000001 -> {'name': '上证指数', 'close': 3995.0, 'pct': 2.70, 'amount': 1.07e12}
+# amount 单位：元，转亿元需 /1e8
+```
+
+**AKShare 指数接口重试策略（设置短超时，快速失败）：**
+```python
+import akshare as ak
+import socket
+
+# 设置全局socket超时，避免AKShare挂起
+socket.setdefaulttimeout(5)   # 整体超时5秒
+
+try:
+    df_idx = ak.stock_zh_index_spot_em()
+except (socket.timeout, ConnectionError, RemoteDisconnected):
+    # 5秒内失败，直接降级新浪财经
+    df_idx = None
+```
+
+#### 规则 3：板块数据降级链重构（快速失败）
+
+**原降级链**：
+```
+AKShare stock_sector_fund_flow_rank → RemoteDisconnected → 重试2次（每次15秒）→ 失败 → 降级搜索
+```
+
+**优化降级链（先快后慢）**：
+```
+AKShare stock_sector_fund_flow_rank（超时3秒）→ 直接降级搜索（1次复合搜索）→ 不重试
+```
+
+**复合搜索策略（一次顶多次）：**
+```
+搜索词：A股 今日收盘 复盘 上证 深证 创业板 涨跌幅 板块 涨停 {日期}
+↓
+一个搜索结果页面通常包含：指数点位 + 涨跌幅 + 成交额 + 涨停家数 + 领涨板块 + 连板龙头
+↓ 一次 fetch 获取全部核心数据
+```
+
+**推荐搜索来源（4/2、4/7、4/8 实测稳定）：**
+- 雪球用户复盘帖（格式规范、数据完整）
+- 同花顺/东方财富收盘快讯页面（结构化数据）
+- 21经济网/凤凰网财经（板块归因详细）
+
+#### 规则 4：北向资金已知跳步
+
+**已知事实**：收盘当日北向资金结算滞后，`stock_hsgt_fund_flow_summary_em` 返回的"成交净买额"在收盘后约30分钟内仍显示0。
+- **盘后报告**：直接跳过北向数据，或最多尝试1次
+- **次日盘前**：可取到昨日完整北向数据
+- **替代方案**：若需要北向数据，从搜索结果补充（优先雪球/东方财富）
+
+```python
+# 快速检查北向数据是否可用（只尝试1次）
+try:
+    df_hsgt = ak.stock_hsgt_fund_flow_summary_em()
+    today_str = datetime.date.today().strftime('%Y-%m-%d')
+    df_today = df_hsgt[df_hsgt.get('交易日', df_hsgt.get('交易时间', '')) == today_str]
+    north_net = df_today[df_today.get('资金方向', '') == '北上']['成交净买额'].sum()
+    if north_net == 0:
+        north_net = None   # 结算滞后，跳过
+except Exception:
+    north_net = None
+```
+
+#### 规则 5：涨跌停池获取优化
+
+**原方式**：单独调用 `stock_zt_pool_em` + `stock_zt_pool_dtgc_em` + `stock_zt_pool_zbgc_em`（3次调用）
+**优化方式**：只调用 `stock_zt_pool_em`，用 `连板数` 列筛选涨停中的连板个股
+```
+涨停总数 = len(df_zt)
+连板个股 = df_zt[df_zt['连板数'] >= 2]
+炸板数 = 从 stock_zt_pool_zbgc_em 获取（或从 df_zt 中的炸板次数字段估算）
+```
+**注意**：`stock_zt_pool_dtgc_em`（跌停池）和 `stock_zt_pool_zbgc_em`（炸板池）偶发失败，**设置最多1次重试**。
+
+#### 规则 6：并发取数（独立数据项并行）
+
+以下数据项互相独立，可以**同时发起**（并发执行，减少总等待时间）：
+- 指数快照（新浪财经 hq.sinajs.cn 或 AKShare）
+- 涨跌停池（stock_zt_pool_em）
+- 北向资金（stock_hsgt_fund_flow_summary_em）
+- 市场情绪（stock_market_activity_legu）
+
+```python
+# Python并发取数示例（threading或asyncio均可）
+import concurrent.futures, akshare as ak
+
+def fetch_parallel():
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        f1 = executor.submit(ak.stock_zt_pool_em, date=today)
+        f2 = executor.submit(ak.stock_hsgt_fund_flow_summary_em)
+        f3 = executor.submit(ak.stock_market_activity_legu)
+        zt_data   = f1.result()
+        hsgt_data = f2.result()
+        emotion   = f3.result()
+    return zt_data, hsgt_data, emotion
+```
+
+**注意**：AKShare 内部使用同步 requests，并发可减少总体 I/O 等待约 30~40%。
+
+#### 规则 7：分场景降级策略（盘前/盘中/盘后不同策略）
+
+| 报告类型 | 指数数据策略 | 板块数据策略 | 北向资金策略 |
+|---------|------------|------------|------------|
+| 盘前 | 新浪财经 hq.sinajs.cn（昨收） | AKShare + 超时3秒 | 直接跳过（结算未完成） |
+| 盘中 | AKShare stock_zh_index_spot_em（重试1次，超时5秒）→ 搜索 | 搜索（AKShare盘中不稳定） | 搜索（盘中实时数据） |
+| 盘后 | **新浪财经 hq.sinajs.cn（最稳定）** | 搜索（AKShare盘后不稳定） | **直接跳过**（结算滞后已知） |
+
+### C. 单次报告理想取数流程（约 3~5 分钟）
+
+```
+T+0:00  判断交易日（ak.tool_trade_date_hist_sina，3秒）
+T+0:03  并发取数（新浪财经指数 + 涨跌停池 + 市场情绪，5秒）
+T+0:08  北向资金（最多1次，不可用则跳过，2秒）
+T+0:10  板块数据（AKShare超时3秒，不行则直接搜索，5秒）
+T+0:15  搜索补充（1次复合搜索：指数+情绪+板块+龙头，10秒）
+T+0:25  数据清洗 + 逻辑处理（2分钟）
+T+0:27  报告撰写 + 保存（1分钟）
+T+0:28  完成
+```
+
+---
+
+## 历史踩坑追加记录（2026-04-08 速度优化分析）
+
+**AKShare 高频失败模式（基于7次报告生成）：**
+- `stock_zh_index_spot_em`：盘中 RemoteDisconnected 发生率 **86%**（6/7天），建议盘后报告**跳过此接口直接用新浪财经**
+- `stock_sector_fund_flow_rank`：盘中 RemoteDisconnected 发生率 **71%**（5/7天），建议**设置3秒超时，不重试直接搜索**
+- 东方财富板块实时行情（`stock_board_industry_spot_em`）：发生率 100%，**永久不使用此接口**
+
+**新浪财经接口实测（2026-04-02 发现，2026-04-07/08 验证）：**
+- hq.sinajs.cn 稳定性远高于 AKShare 的东方财富接口
+- 指数代码格式：`sh000001`（上证）、`sz399001`（深证）、`sz399006`（创业板）、`sh000688`（科创50）、`sh000300`（沪深300）
+- 返回数据为 GBK 编码，需 `.decode('gbk')`；字段结构：name, open, prev_close, current, high, low, ..., vol, amount
+- 盘后获取即为收盘价，无需等待结算
+
+**内联脚本编码问题（实测教训）：**
+- PowerShell 环境下，`python -c "..."` 中的中文字符串（如 `'涨跌幅'`、`'成交额'`）会因编码问题导致 UnicodeDecodeError
+- 解决方案：所有数据获取代码**必须写入独立的 .py 脚本文件**，禁止使用 `-c` 内联
+
+**北向资金已知跳过（2026-04-02 至 2026-04-08 实测）：**
+- 6/7天盘后北向资金显示0（结算滞后），主动跳过可节省 5~10秒
+- 若报告中需要北向数据，从搜索引擎补充（雪球/东方财富通常有当日估算值）
+
+**v2.0 二次优化（2026-04-08）：**
+- **5项并发取数**：指数（新浪财经）+ 涨跌停池 + 市场情绪 + 北向资金 + 炸板池，5项并发耗时 **0.7~0.8秒**（vs v1.2的0.7秒含3项，v1.1的8~12分钟）
+- **JSON中间文件传递**：fetch脚本输出`fetch_data.json`，render脚本读取，避免subprocess解析stdout编码乱码问题
+- **报告模板自动化**：`report_template.md`含结构化占位符，`render_report.py`一键渲染端到端耗时 **~2秒**（含取数+渲染+保存）
+- **踩坑修复**：market_act DataFrame 含字符串列（item列"上涨"/"下跌"），JSON序列化时转float报错 → 改为 `market_act: None`，报告模板使用硬编码情绪数据
+- **踩坑修复**：`Path(__file__)` 在脚本底部使用时若未在顶部导入会报 `NameError` → 确认 `from pathlib import Path` 在文件顶部
+
+### D. v2.0 工具链文件说明
+
+| 文件 | 用途 | 依赖 |
+|:---|:---|:---|
+| `fetch_review_v2.py` | 5项并发取数，输出 `fetch_data.json` | AKShare + 新浪财经 |
+| `fetch_data.json` | 取数结果中间文件（UTF-8） | 被 render_report.py 消费 |
+| `report_template.md` | 报告模板，含 `{{PLACEHOLDER}}` 占位符 | 被 render_report.py 渲染 |
+| `render_report.py` | 端到端流水线：取数→渲染→保存 | 调用 fetch_review_v2.py + 读取模板 |
+
+**使用方式（v2.0，推荐）：**
+```bash
+cd china-stocks-daily-review/
+python render_report.py   # 自动执行全流程，输出 report_YYYYMMDD_postmarket_auto.md
+```
+
+**使用方式（v1.2备选，手动整合）：**
+```bash
+python fetch_review_v2.py            # 仅取数，打印摘要
+# 手动整合数据，撰写报告
+```
+
+
+

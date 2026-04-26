@@ -109,6 +109,40 @@ Weekends, public holidays, and unexpected market closures are automatically skip
 **关闭方式 · How to disable**：在 WorkBuddy 自动化管理页暂停/删除对应任务，或直接告诉 WorkBuddy「关闭盘前自动推送」。
 Pause or delete the tasks in WorkBuddy's Automation panel, or simply tell WorkBuddy: "关闭盘前自动推送" (disable pre-market auto-push).
 
+### Automation 执行逻辑 · Automation Execution Logic
+
+每个定时任务的 RRULE 及核心执行流程如下：
+Each scheduled task's RRULE and core execution flow:
+
+| 报告 · Report | RRULE | 执行流程 · Flow |
+|---|---|---|
+| 🌅 盘前综述 | `FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=8;BYMINUTE=55` | 交易日判断 → 三层降级取数（外盘/情绪/消息/连板/技术）→ 生成报告 → 保存 `report_YYYYMMDD_premarket.md` → 推送 |
+| 🕛 盘中简评 | `FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=11;BYMINUTE=35` | 交易日判断 → 三层降级取数（指数/涨跌比/板块/连板）→ 读取盘前预判 → 生成报告 → 保存 `report_YYYYMMDD_intraday.md` → 推送 |
+| 📊 盘后复盘 | `FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=15;BYMINUTE=5` | 交易日判断 → 三层降级取数（指数/情绪/资金/板块/连板）→ 读取盘前/盘中预判 → 生成报告 → 保存 `report_YYYYMMDD_postmarket.md` → 推送 |
+
+**交易日判断 · Trade day check**：
+```python
+import akshare as ak
+from datetime import date
+
+def is_trade_day(check_date=None):
+    if check_date is None:
+        check_date = date.today()
+    try:
+        df = ak.tool_trade_date_hist_sina()
+        return check_date.strftime('%Y-%m-%d') in set(df['trade_date'].astype(str))
+    except Exception:
+        return check_date.weekday() < 5  # 失败时以周一至周五兜底
+```
+
+**报告文件命名 · File naming**：
+
+| 类型 · Type | 文件名 · Filename |
+|---|---|
+| 盘前 Pre-market | `report_YYYYMMDD_premarket.md` |
+| 盘中 Intraday | `report_YYYYMMDD_intraday.md` |
+| 盘后 Post-market | `report_YYYYMMDD_postmarket.md` |
+
 ---
 
 ## 报告输出格式 · Output Format
