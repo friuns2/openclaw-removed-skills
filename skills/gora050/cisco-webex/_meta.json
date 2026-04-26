@@ -3,11 +3,16 @@
   "slug": "cisco-webex",
   "displayName": "Cisco Webex",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164809665,
-    "commit": "https://github.com/openclaw/skills/commit/b751b2f63e2420b0e16794941178a8d570d594ba"
+    "version": "1.0.3",
+    "publishedAt": 1776858624105,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164809665,
+      "commit": "https://github.com/openclaw/skills/commit/b751b2f63e2420b0e16794941178a8d570d594ba"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773900182574,
