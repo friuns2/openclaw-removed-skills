@@ -3,11 +3,16 @@
   "slug": "baoyu-imagine",
   "displayName": "Baoyu Imagine",
   "latest": {
-    "version": "1.103.1",
-    "publishedAt": 1776096909162,
-    "commit": "https://github.com/openclaw/skills/commit/f2c8fd9ed74a61a376beb673b7467d66854608da"
+    "version": "1.104.0",
+    "publishedAt": 1776802553791,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.103.1",
+      "publishedAt": 1776096909162,
+      "commit": "https://github.com/openclaw/skills/commit/f2c8fd9ed74a61a376beb673b7467d66854608da"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774487482604,

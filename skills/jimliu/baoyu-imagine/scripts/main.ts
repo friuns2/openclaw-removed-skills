@@ -124,7 +124,7 @@ Environment variables:
   JIMENG_ACCESS_KEY_ID      Jimeng Access Key ID
   JIMENG_SECRET_ACCESS_KEY  Jimeng Secret Access Key
   ARK_API_KEY               Seedream/Ark API key
-  OPENAI_IMAGE_MODEL        Default OpenAI model (gpt-image-1.5)
+  OPENAI_IMAGE_MODEL        Default OpenAI model (gpt-image-2)
   OPENROUTER_IMAGE_MODEL    Default OpenRouter model (google/gemini-3.1-flash-image-preview)
   GOOGLE_IMAGE_MODEL        Default Google model (gemini-3-pro-image-preview)
   DASHSCOPE_IMAGE_MODEL     Default DashScope model (qwen-image-2.0-pro)
@@ -151,7 +151,7 @@ Environment variables:
   AZURE_OPENAI_BASE_URL     Azure OpenAI resource or deployment endpoint
   AZURE_OPENAI_DEPLOYMENT   Default Azure deployment name
   AZURE_API_VERSION         Azure API version (default: 2025-04-01-preview)
-  AZURE_OPENAI_IMAGE_MODEL  Backward-compatible Azure deployment/model alias (defaults to gpt-image-1.5)
+  AZURE_OPENAI_IMAGE_MODEL  Backward-compatible Azure deployment/model alias (defaults to gpt-image-2)
   SEEDREAM_BASE_URL         Custom Seedream endpoint
   BAOYU_IMAGE_GEN_MAX_WORKERS  Override batch worker cap
   BAOYU_IMAGE_GEN_<PROVIDER>_CONCURRENCY  Override provider concurrency

@@ -46,7 +46,7 @@ options:
   - label: "Google (Recommended)"
     description: "Gemini multimodal - high quality, reference images, flexible sizes"
   - label: "OpenAI"
-    description: "GPT Image - consistent quality, reliable output"
+    description: "GPT Image 2 - latest OpenAI image model, reference-image workflows"
   - label: "Azure OpenAI"
     description: "Azure-hosted GPT Image deployments with resource-specific routing"
   - label: "OpenRouter"
@@ -101,10 +101,12 @@ Only show if user selected Azure OpenAI.
 header: "Azure Deploy"
 question: "Default Azure image deployment name?"
 options:
-  - label: "gpt-image-1.5 (Recommended)"
-    description: "Best default if your Azure deployment uses the same name"
-  - label: "gpt-image-1"
+  - label: "gpt-image-2 (Recommended)"
+    description: "Use if your Azure deployment uses the GPT Image 2 model name"
+  - label: "gpt-image-1.5"
     description: "Previous GPT Image deployment name"
+  - label: "gpt-image-1"
+    description: "Earlier GPT Image deployment name"
 ```
 
 ### Question 2d: Default MiniMax Model
@@ -214,10 +216,12 @@ options:
 header: "OpenAI Model"
 question: "Choose a default OpenAI image generation model?"
 options:
-  - label: "gpt-image-1.5 (Recommended)"
-    description: "Latest GPT Image model, high quality"
+  - label: "gpt-image-2 (Recommended)"
+    description: "Latest GPT Image model, flexible sizes up to 4K, high-fidelity image inputs"
+  - label: "gpt-image-1.5"
+    description: "Previous GPT Image model"
   - label: "gpt-image-1"
-    description: "Previous generation GPT Image model"
+    description: "Earlier GPT Image model"
 ```
 
 ### Azure Deployment Selection
@@ -226,8 +230,10 @@ options:
 header: "Azure Deploy"
 question: "Choose a default Azure image deployment name?"
 options:
-  - label: "gpt-image-1.5 (Recommended)"
-    description: "Use when your Azure deployment name matches the GPT-image-1.5 model"
+  - label: "gpt-image-2 (Recommended)"
+    description: "Use when your Azure deployment name matches the GPT Image 2 model"
+  - label: "gpt-image-1.5"
+    description: "Use when your Azure deployment name matches the GPT Image 1.5 model"
   - label: "gpt-image-1"
     description: "Use when your Azure deployment name matches GPT-image-1"
 ```

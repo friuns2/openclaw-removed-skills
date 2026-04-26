@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { CliArgs } from "../types.ts";
 import {
   buildOpenAIGenerationsBody,
   extractImageFromResponse,
+  getDefaultModel,
   getOpenAIAspectRatio,
   getOpenAIImageApiDialect,
   getOpenAIResolution,
@@ -13,9 +15,33 @@ import {
   inferAspectRatioFromSize,
   inferResolutionFromSize,
   parseAspectRatio,
+  validateArgs,
 } from "./openai.ts";
 
+function makeArgs(overrides: Partial<CliArgs> = {}): CliArgs {
+  return {
+    prompt: null,
+    promptFiles: [],
+    imagePath: null,
+    provider: null,
+    model: null,
+    aspectRatio: null,
+    size: null,
+    quality: "2k",
+    imageSize: null,
+    imageApiDialect: null,
+    referenceImages: [],
+    n: 1,
+    batchFile: null,
+    jobs: null,
+    json: false,
+    help: false,
+    ...overrides,
+  };
+}
+
 test("OpenAI aspect-ratio parsing and size selection match model families", () => {
+  assert.equal(getDefaultModel(), "gpt-image-2");
   assert.deepEqual(parseAspectRatio("16:9"), { width: 16, height: 9 });
   assert.equal(parseAspectRatio("wide"), null);
   assert.equal(parseAspectRatio("0:1"), null);
@@ -25,6 +51,10 @@ test("OpenAI aspect-ratio parsing and size selection match model families", () =
   assert.equal(getOpenAISize("dall-e-2", "16:9", "2k"), "1024x1024");
   assert.equal(getOpenAISize("gpt-image-1.5", "16:9", "2k"), "1536x1024");
   assert.equal(getOpenAISize("gpt-image-1.5", "4:3", "2k"), "1024x1024");
+  assert.equal(getOpenAISize("gpt-image-2", "16:9", "2k"), "2048x1152");
+  assert.equal(getOpenAISize("gpt-image-2", "9:16", "2k"), "1152x2048");
+  assert.equal(getOpenAISize("gpt-image-2", "4:3", "2k"), "2048x1536");
+  assert.equal(getOpenAISize("gpt-image-2", "2.35:1", "normal"), "1248x528");
   assert.equal(inferAspectRatioFromSize("1536x1024"), "3:2");
   assert.equal(inferResolutionFromSize("1536x1024"), "2K");
   assert.equal(getOpenAIAspectRatio({ aspectRatio: null, size: "2048x1152" }), "16:9");
@@ -37,7 +67,7 @@ test("OpenAI aspect-ratio parsing and size selection match model families", () =
 
 test("OpenAI generations body switches between native and ratio-metadata dialects", () => {
   assert.deepEqual(
-    buildOpenAIGenerationsBody("Draw a skyline", "gpt-image-1.5", {
+    buildOpenAIGenerationsBody("Draw a skyline", "gpt-image-2", {
       aspectRatio: "16:9",
       size: null,
       quality: "2k",
@@ -45,9 +75,10 @@ test("OpenAI generations body switches between native and ratio-metadata dialect
       imageApiDialect: null,
     }),
     {
-      model: "gpt-image-1.5",
+      model: "gpt-image-2",
       prompt: "Draw a skyline",
-      size: "1536x1024",
+      size: "2048x1152",
+      quality: "high",
     },
   );
 
@@ -87,6 +118,28 @@ test("OpenAI generations body switches between native and ratio-metadata dialect
         orientation: "portrait",
       },
     },
+  );
+});
+
+test("OpenAI validates gpt-image-2 custom size constraints", () => {
+  assert.doesNotThrow(() =>
+    validateArgs("gpt-image-2", makeArgs({ size: "3840x2160" })),
+  );
+  assert.doesNotThrow(() =>
+    validateArgs("gpt-image-2-2026-04-21", makeArgs({ aspectRatio: "2.35:1" })),
+  );
+
+  assert.throws(
+    () => validateArgs("gpt-image-2", makeArgs({ size: "1024x576" })),
+    /total pixels/,
+  );
+  assert.throws(
+    () => validateArgs("gpt-image-2", makeArgs({ size: "1025x1024" })),
+    /multiples of 16px/,
+  );
+  assert.throws(
+    () => validateArgs("gpt-image-2", makeArgs({ aspectRatio: "4:1" })),
+    /must not exceed 3:1/,
   );
 });
 

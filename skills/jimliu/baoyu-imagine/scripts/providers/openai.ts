@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import type { CliArgs, OpenAIImageApiDialect } from "../types";
 
 export function getDefaultModel(): string {
-  return process.env.OPENAI_IMAGE_MODEL || "gpt-image-1.5";
+  return process.env.OPENAI_IMAGE_MODEL || "gpt-image-2";
 }
 
 type OpenAIImageResponse = { data: Array<{ url?: string; b64_json?: string }> };
@@ -25,6 +25,55 @@ type SizeMapping = {
 
 type OpenAIGenerationsBody = Record<string, unknown>;
 
+function isGptImageModel(model: string): boolean {
+  return model.includes("gpt-image");
+}
+
+function isGptImage2Model(model: string): boolean {
+  return model.includes("gpt-image-2");
+}
+
+function roundToMultiple(value: number, multiple: number): number {
+  return Math.max(multiple, Math.round(value / multiple) * multiple);
+}
+
+function buildGptImage2SizeFromAspectRatio(
+  ar: string | null,
+  quality: CliArgs["quality"],
+): string {
+  const parsed = ar ? parseAspectRatio(ar) : null;
+  const ratio = parsed ? parsed.width / parsed.height : 1;
+
+  if (!parsed || Math.abs(ratio - 1) < 0.1) {
+    const edge = quality === "2k" ? 2048 : 1024;
+    return `${edge}x${edge}`;
+  }
+
+  const targetLongEdge = quality === "2k" ? 2048 : 1024;
+  let width: number;
+  let height: number;
+
+  if (ratio > 1) {
+    width = targetLongEdge;
+    height = roundToMultiple(width / ratio, 16);
+  } else {
+    height = targetLongEdge;
+    width = roundToMultiple(height * ratio, 16);
+  }
+
+  while (width * height < 655_360) {
+    if (ratio > 1) {
+      width += 16;
+      height = roundToMultiple(width / ratio, 16);
+    } else {
+      height += 16;
+      width = roundToMultiple(height * ratio, 16);
+    }
+  }
+
+  return `${width}x${height}`;
+}
+
 export function getOpenAISize(
   model: string,
   ar: string | null,
@@ -35,6 +84,10 @@ export function getOpenAISize(
 
   if (isDalle2) {
     return "1024x1024";
+  }
+
+  if (isGptImage2Model(model)) {
+    return buildGptImage2SizeFromAspectRatio(ar, quality);
   }
 
   const sizes: SizeMapping = isDalle3
@@ -127,6 +180,18 @@ export function getOpenAIResolution(
   return args.quality === "normal" ? "1K" : "2K";
 }
 
+function getOpenAIQuality(model: string, quality: CliArgs["quality"]): "standard" | "hd" | "medium" | "high" | null {
+  if (model.includes("dall-e-3")) {
+    return quality === "2k" ? "hd" : "standard";
+  }
+
+  if (isGptImageModel(model)) {
+    return quality === "2k" ? "high" : "medium";
+  }
+
+  return null;
+}
+
 export function getOrientationFromAspectRatio(ar: string): "landscape" | "portrait" | null {
   const parsed = parseAspectRatio(ar);
   if (!parsed) return null;
@@ -163,11 +228,51 @@ export function buildOpenAIGenerationsBody(
     size: args.size || getOpenAISize(model, args.aspectRatio, args.quality),
   };
 
-  if (model.includes("dall-e-3")) {
-    body.quality = args.quality === "2k" ? "hd" : "standard";
+  const quality = getOpenAIQuality(model, args.quality);
+  if (quality) {
+    body.quality = quality;
   }
 
   return body;
+}
+
+export function validateArgs(model: string, args: CliArgs): void {
+  if (!isGptImage2Model(model)) return;
+
+  if (args.aspectRatio && !args.size) {
+    const parsed = parseAspectRatio(args.aspectRatio);
+    if (!parsed) {
+      throw new Error(`Invalid gpt-image-2 aspect ratio: ${args.aspectRatio}`);
+    }
+    const ratio = parsed.width / parsed.height;
+    if (Math.max(ratio, 1 / ratio) > 3) {
+      throw new Error("gpt-image-2 aspect ratio must not exceed 3:1.");
+    }
+  }
+
+  if (!args.size) return;
+
+  const parsedSize = parsePixelSize(args.size);
+  if (!parsedSize) {
+    throw new Error(`Invalid gpt-image-2 --size: ${args.size}. Expected <width>x<height>.`);
+  }
+
+  const { width, height } = parsedSize;
+  const totalPixels = width * height;
+  const ratio = Math.max(width, height) / Math.min(width, height);
+
+  if (Math.max(width, height) > 3840) {
+    throw new Error("gpt-image-2 --size maximum edge length must be 3840px or less.");
+  }
+  if (width % 16 !== 0 || height % 16 !== 0) {
+    throw new Error("gpt-image-2 --size width and height must both be multiples of 16px.");
+  }
+  if (ratio > 3) {
+    throw new Error("gpt-image-2 --size long edge to short edge ratio must not exceed 3:1.");
+  }
+  if (totalPixels < 655_360 || totalPixels > 8_294_400) {
+    throw new Error("gpt-image-2 --size total pixels must be between 655,360 and 8,294,400.");
+  }
 }
 
 export async function generateImage(
@@ -198,7 +303,7 @@ export async function generateImage(
     }
     if (model.includes("dall-e-2") || model.includes("dall-e-3")) {
       throw new Error(
-        "Reference images with OpenAI in this skill require GPT Image models. Use --model gpt-image-1.5 (or another gpt-image model)."
+        "Reference images with OpenAI in this skill require GPT Image models. Use --model gpt-image-2 (or another gpt-image model)."
       );
     }
     const size = args.size || getOpenAISize(model, args.aspectRatio, args.quality);
@@ -283,8 +388,9 @@ async function generateWithOpenAIEdits(
   form.append("prompt", prompt);
   form.append("size", size);
 
-  if (model.includes("gpt-image")) {
-    form.append("quality", quality === "2k" ? "high" : "medium");
+  const openAIQuality = getOpenAIQuality(model, quality);
+  if (openAIQuality && openAIQuality !== "standard" && openAIQuality !== "hd") {
+    form.append("quality", openAIQuality);
   }
 
   for (const refPath of referenceImages) {
