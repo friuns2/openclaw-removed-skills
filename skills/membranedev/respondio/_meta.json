@@ -3,11 +3,16 @@
   "slug": "respondio",
   "displayName": "Respondio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165157930,
-    "commit": "https://github.com/openclaw/skills/commit/7df92bd2526d4057d518a6f07b26958a53515e27"
+    "version": "1.0.3",
+    "publishedAt": 1776846491139,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165157930,
+      "commit": "https://github.com/openclaw/skills/commit/7df92bd2526d4057d518a6f07b26958a53515e27"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773964956190,
