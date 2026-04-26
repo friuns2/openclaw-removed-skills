@@ -3,11 +3,16 @@
   "slug": "azure-api-management",
   "displayName": "Azure Api Management",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166607353,
-    "commit": "https://github.com/openclaw/skills/commit/73664131645a3de081975fe21593d5512828a8fc"
+    "version": "1.0.3",
+    "publishedAt": 1776898874989,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166607353,
+      "commit": "https://github.com/openclaw/skills/commit/73664131645a3de081975fe21593d5512828a8fc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774253037500,
