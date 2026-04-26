@@ -3,11 +3,16 @@
   "slug": "smarterpay",
   "displayName": "Smarterpay",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166620626,
-    "commit": "https://github.com/openclaw/skills/commit/eb9cde110017ab612cf733f1c4369a3b772b1ec3"
+    "version": "1.0.3",
+    "publishedAt": 1776863710779,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166620626,
+      "commit": "https://github.com/openclaw/skills/commit/eb9cde110017ab612cf733f1c4369a3b772b1ec3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774260222856,
