@@ -3,11 +3,16 @@
   "slug": "gradeus",
   "displayName": "Gradeus",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167012508,
-    "commit": "https://github.com/openclaw/skills/commit/511a571b93a854dda4705ff13f5c131dd1d2e584"
+    "version": "1.0.3",
+    "publishedAt": 1776860765749,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167012508,
+      "commit": "https://github.com/openclaw/skills/commit/511a571b93a854dda4705ff13f5c131dd1d2e584"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774339440660,
