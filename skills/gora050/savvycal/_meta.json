@@ -3,11 +3,16 @@
   "slug": "savvycal",
   "displayName": "Savvycal",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165121889,
-    "commit": "https://github.com/openclaw/skills/commit/4709b5f996b20db7c97ba82981b31818099debb0"
+    "version": "1.0.3",
+    "publishedAt": 1776859119341,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165121889,
+      "commit": "https://github.com/openclaw/skills/commit/4709b5f996b20db7c97ba82981b31818099debb0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773961394728,
