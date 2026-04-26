@@ -3,11 +3,16 @@
   "slug": "sifter",
   "displayName": "Sifter",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167198949,
-    "commit": "https://github.com/openclaw/skills/commit/dcb2923845b01ccbd273b9f1b3ba50ad749d1dd7"
+    "version": "1.0.3",
+    "publishedAt": 1776850096032,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167198949,
+      "commit": "https://github.com/openclaw/skills/commit/dcb2923845b01ccbd273b9f1b3ba50ad749d1dd7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774389776226,
