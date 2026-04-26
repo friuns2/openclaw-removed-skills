@@ -3,11 +3,16 @@
   "slug": "opn",
   "displayName": "Opn",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167269990,
-    "commit": "https://github.com/openclaw/skills/commit/2e561d6c8cc82d0bf47624a50c7736c961a8a5d4"
+    "version": "1.0.3",
+    "publishedAt": 1776861091605,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167269990,
+      "commit": "https://github.com/openclaw/skills/commit/2e561d6c8cc82d0bf47624a50c7736c961a8a5d4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774400733802,
