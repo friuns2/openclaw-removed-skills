@@ -43,8 +43,6 @@ flyai search-train --origin "北京" --destination "上海" --dep-date 2026-03-1
 
 ```json
 {
-  "status": 0,
-  "message": "success",
   "data": {
     "itemList": [
       {
@@ -72,6 +70,9 @@ flyai search-train --origin "北京" --destination "上海" --dep-date 2026-03-1
         "jumpUrl": "..."
       }
     ]
-  }
+  },
+  "message": "success",
+  "systemMessage": "...",
+  "status": 0
 }
 ```

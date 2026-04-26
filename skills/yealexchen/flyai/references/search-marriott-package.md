@@ -20,8 +20,6 @@ flyai search-marriott-package --keyword "JW万豪" --sort-type price_asc
 
 ```json
 {
-  "status": 0,
-  "message": "success",
   "data": {
     "itemList": [
       {
@@ -35,6 +33,9 @@ flyai search-marriott-package --keyword "JW万豪" --sort-type price_asc
         "sellingPoint": "高空景观、双人下午茶、周末可用"
       }
     ]
-  }
+  },
+  "message": "success",
+  "systemMessage": "...",
+  "status": 0
 }
 ```

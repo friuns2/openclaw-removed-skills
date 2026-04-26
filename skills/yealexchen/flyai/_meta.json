@@ -3,11 +3,16 @@
   "slug": "flyai",
   "displayName": "FlyAI — Travel, Flight & Hotel Search and Booking",
   "latest": {
-    "version": "1.0.14",
-    "publishedAt": 1775040385969,
-    "commit": "https://github.com/openclaw/skills/commit/feb8af3db77af1181a9ed332456bb6cce9d6bf98"
+    "version": "1.0.15",
+    "publishedAt": 1776770260836,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.14",
+      "publishedAt": 1775040385969,
+      "commit": "https://github.com/openclaw/skills/commit/feb8af3db77af1181a9ed332456bb6cce9d6bf98"
+    },
     {
       "version": "1.0.13",
       "publishedAt": 1774887881930,

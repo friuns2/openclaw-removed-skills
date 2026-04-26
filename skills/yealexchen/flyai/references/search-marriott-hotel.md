@@ -28,8 +28,6 @@ flyai search-marriott-hotel --dest-name "杭州" --hotel-name "杭州JW万豪酒
 
 ```json
 {
-  "status": 0,
-  "message": "success",
   "data": {
     "itemList": [
       {
@@ -49,6 +47,9 @@ flyai search-marriott-hotel --dest-name "杭州" --hotel-name "杭州JW万豪酒
         "star": "豪华型"
       }
     ]
-  }
+  },
+  "message": "success",
+  "systemMessage": "...",
+  "status": 0
 }
 ```

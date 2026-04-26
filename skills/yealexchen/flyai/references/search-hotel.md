@@ -30,8 +30,6 @@ flyai search-hotel --dest-name "三亚" --hotel-stars "4,5" --sort rate_desc --m
 
 ```json
 {
-  "status": 0,
-  "message": "success",
   "data": {
     "itemList": [
         {
@@ -52,6 +50,9 @@ flyai search-hotel --dest-name "三亚" --hotel-stars "4,5" --sort rate_desc --m
           "star": "豪华型"
         }
     ]
-  }
+  },
+  "message": "success",
+  "systemMessage": "...",
+  "status": 0
 }
 ```

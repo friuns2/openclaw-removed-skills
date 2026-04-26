@@ -42,6 +42,7 @@ flyai search-poi --city-name "西安" --category "历史古迹"
       ]
     },
     "message": "success",
+    "systemMessage": "...",
     "status": 0
 }
 ```

@@ -82,6 +82,7 @@ flyai search-flight --origin "北京" --destination "上海" --dep-date 2026-03-
     ]
   },
   "message": "success",
+  "systemMessage": "...",
   "status": 0
 }
 ```
