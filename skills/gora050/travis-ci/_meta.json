@@ -3,11 +3,16 @@
   "slug": "travis-ci",
   "displayName": "Travis Ci",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165003927,
-    "commit": "https://github.com/openclaw/skills/commit/10fd18920e1eff3903175eaef452f93de448b1cb"
+    "version": "1.0.3",
+    "publishedAt": 1776858925441,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165003927,
+      "commit": "https://github.com/openclaw/skills/commit/10fd18920e1eff3903175eaef452f93de448b1cb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773943374006,
