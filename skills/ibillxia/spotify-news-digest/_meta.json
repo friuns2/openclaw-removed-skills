@@ -3,9 +3,15 @@
   "slug": "spotify-news-digest",
   "displayName": "spotify-news-digest",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773749256993,
-    "commit": "https://github.com/openclaw/skills/commit/c6849363377e5a53bf8350bfe29b137563b91bce"
+    "version": "1.0.1",
+    "publishedAt": 1776824299843,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773749256993,
+      "commit": "https://github.com/openclaw/skills/commit/c6849363377e5a53bf8350bfe29b137563b91bce"
+    }
+  ]
 }

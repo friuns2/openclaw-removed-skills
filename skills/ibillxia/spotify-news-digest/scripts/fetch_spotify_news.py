@@ -33,11 +33,39 @@ try:
 except ImportError:
     HAS_BS4 = False
 
-import ssl
-try:
-    ssl._create_default_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
+# SSL verification is intentionally LEFT ENABLED (no bypass).
+# Do NOT add ssl._create_default_https_context overrides here —
+# that would weaken TLS for the entire process.
+
+# ── Domain allowlist for DDG search results ──────────────────────────────────
+# Only URLs whose hostname ends with one of these suffixes will be included.
+# Edit this list to restrict or extend trusted news domains.
+ALLOWED_DDG_DOMAINS: tuple = (
+    'atspotify.com',
+    'newsroom.spotify.com',
+    'spotify.design',
+    'techcrunch.com',
+    'theverge.com',
+    'musicbusinessworldwide.com',
+    'billboard.com',
+    'rollingstone.com',
+    'pitchfork.com',
+    'forbes.com',
+    'reuters.com',
+    'apnews.com',
+    'bbc.com',
+    'bbc.co.uk',
+    'theguardian.com',
+    'nytimes.com',
+    'wsj.com',
+    'wired.com',
+    'engadget.com',
+    'musicweek.com',
+    'news.ycombinator.com',
+)
+
+# Default per-request network timeout (seconds). Overridable via sources.json settings.timeout.
+_DEFAULT_TIMEOUT: int = 12
 
 
 HEADERS = {
@@ -52,7 +80,7 @@ class SpotifyNewsFetcher:
             config_path = Path(__file__).parent.parent / 'config' / 'sources.json'
         with open(config_path, 'r', encoding='utf-8') as f:
             self.config = json.load(f)
-        self.timeout = self.config['settings']['timeout']
+        self.timeout = int(self.config['settings'].get('timeout', _DEFAULT_TIMEOUT))
         self.max_per_source = self.config['settings']['max_news_per_source']
 
     # ─────────────────────────────────────────────────────
@@ -91,7 +119,12 @@ class SpotifyNewsFetcher:
     # ─────────────────────────────────────────────────────
     def _fetch_rss(self, source: Dict, cutoff: datetime) -> List[Dict]:
         keyword = source.get('keyword_filter', '').lower()
-        resp = requests.get(source['url'], timeout=self.timeout, headers=HEADERS)
+        resp = requests.get(
+            source['url'],
+            timeout=self.timeout,
+            headers=HEADERS,
+            verify=True,  # Explicit: TLS verification ON
+        )
         resp.raise_for_status()
         feed = feedparser.parse(resp.content)
         result = []
@@ -125,7 +158,12 @@ class SpotifyNewsFetcher:
         return result
 
     def _fetch_hn(self, source: Dict, cutoff: datetime) -> List[Dict]:
-        resp = requests.get(source['url'], timeout=self.timeout, headers=HEADERS)
+        resp = requests.get(
+            source['url'],
+            timeout=self.timeout,
+            headers=HEADERS,
+            verify=True,  # Explicit: TLS verification ON
+        )
         data = resp.json()
         result = []
         for hit in data.get('hits', []):
@@ -163,8 +201,10 @@ class SpotifyNewsFetcher:
         results = []
         seen_urls = set()
 
-        # 排除无关结果的域名
-        exclude_domains = ['palestinechronicle.com', 'aol.com/articles/meghan', 'dispatch.com']
+        # Domain allowlist: only keep results from trusted news domains.
+        # Internal/private hostnames will naturally fail this check, preventing
+        # accidental access to intranet endpoints via search results.
+        allowed_domains = ALLOWED_DDG_DOMAINS
 
         try:
             with DDGS() as ddgs:
@@ -175,8 +215,15 @@ class SpotifyNewsFetcher:
                             url = h.get('url', '')
                             if not url or url in seen_urls:
                                 continue
-                            # 排除明显无关域名
-                            if any(ex in url for ex in exclude_domains):
+                            # Allow only trusted domains; reject everything else
+                            # (including any intranet or metadata-service URLs)
+                            try:
+                                from urllib.parse import urlparse as _up
+                                hostname = _up(url).hostname or ''
+                            except Exception:
+                                hostname = ''
+                            if not any(hostname == d or hostname.endswith('.' + d)
+                                       for d in allowed_domains):
                                 continue
                             title = h.get('title', '').strip()
                             body = h.get('body', '')
