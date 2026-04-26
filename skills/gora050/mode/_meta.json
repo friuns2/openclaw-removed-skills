@@ -3,11 +3,16 @@
   "slug": "mode",
   "displayName": "Mode",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164999711,
-    "commit": "https://github.com/openclaw/skills/commit/40d5e1aefde9093fa980ca46ef8e434b22d72987"
+    "version": "1.0.3",
+    "publishedAt": 1776858917103,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164999711,
+      "commit": "https://github.com/openclaw/skills/commit/40d5e1aefde9093fa980ca46ef8e434b22d72987"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773943366561,
