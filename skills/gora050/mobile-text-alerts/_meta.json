@@ -3,11 +3,16 @@
   "slug": "mobile-text-alerts",
   "displayName": "Mobile Text Alerts",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165589131,
-    "commit": "https://github.com/openclaw/skills/commit/46b41f081e55e6db7b338950dac2384d29089263"
+    "version": "1.0.3",
+    "publishedAt": 1776859613058,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165589131,
+      "commit": "https://github.com/openclaw/skills/commit/46b41f081e55e6db7b338950dac2384d29089263"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051440397,
