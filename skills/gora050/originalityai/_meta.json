@@ -3,11 +3,16 @@
   "slug": "originalityai",
   "displayName": "Originalityai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167148335,
-    "commit": "https://github.com/openclaw/skills/commit/1cf416a17cd2e21bd2f3329426ef73051ab65a37"
+    "version": "1.0.3",
+    "publishedAt": 1776860901701,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167148335,
+      "commit": "https://github.com/openclaw/skills/commit/1cf416a17cd2e21bd2f3329426ef73051ab65a37"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774386250879,
