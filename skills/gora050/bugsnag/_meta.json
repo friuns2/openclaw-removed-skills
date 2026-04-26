@@ -3,11 +3,16 @@
   "slug": "bugsnag",
   "displayName": "Bugsnag",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167433194,
-    "commit": "https://github.com/openclaw/skills/commit/cffba45020f0367351e07f26187529587d02a3a2"
+    "version": "1.0.3",
+    "publishedAt": 1776861396971,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167433194,
+      "commit": "https://github.com/openclaw/skills/commit/cffba45020f0367351e07f26187529587d02a3a2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774433032925,
