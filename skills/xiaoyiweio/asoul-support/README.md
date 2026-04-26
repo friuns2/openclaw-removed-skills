@@ -1,184 +1,180 @@
-# A-SOUL Support
+<p align="center">
+  <img src="assets/asoul-logo.png" width="120" alt="A-SOUL Logo" />
+</p>
 
-A-SOUL 粉丝自动应援工具 — 自动给嘉然、贝拉、乃琳、心宜、思诺的视频点赞和动态点赞。
+<h1 align="center">A-SOUL Support</h1>
 
-搭配 [OpenClaw](https://openclaw.ai) 还可以自动检测开播 → 心跳挂机涨亲密度 → 点亮粉丝牌。
+<p align="center">
+  <strong>A-SOUL 粉丝全自动应援工具</strong> — 开播自动挂机涨亲密度 + 点亮粉丝牌 + 视频/动态点赞
+</p>
 
-不需要安装任何软件，不需要会编程，只要有 GitHub 账号就行。
+<p align="center">
+  <a href="https://clawhub.ai/skills/asoul-support">🦞 ClawHub</a> ·
+  <a href="https://github.com/XiaoYiWeio/asoul-support">📦 GitHub</a>
+</p>
 
-> 如果觉得好用，欢迎帮我点亮一下右上角的 **Star** 🌟 让更多魂们看到！
+<p align="center">
+  <img src="https://img.shields.io/badge/version-4.0.1-blue" alt="version" />
+  <img src="https://img.shields.io/badge/python-3.9+-green" alt="python" />
+  <img src="https://img.shields.io/badge/license-MIT-orange" alt="license" />
+</p>
 
-## 功能
+---
 
-### GitHub Actions 自动执行（不需要开播）
+## 🚀 一句话安装
 
-| 功能 | 默认 | 说明 |
-|------|------|------|
-| 👍 视频点赞 | ✅ 开启 | 每 2 天自动给成员最近发布的视频点赞 |
-| 💬 动态点赞 | ❌ 关闭 | 每 2 天自动给成员最近发布的动态点赞 |
+复制下面这句话，发给你的 AI 助手（支持任意 agent 框架），它会帮你搞定一切：
 
-### OpenClaw 智能执行（需要开播）
+```
+帮我安装这个项目并设置 A-SOUL 自动挂机：https://github.com/XiaoYiWeio/asoul-support
+```
 
-| 功能 | 说明 |
+---
+
+## ✨ 它能做什么？
+
+| 功能 | 使用条件 | 说明 |
+|------|----------|------|
+| 💓 **心跳挂机涨亲密度** | 需要开播 | 移动端心跳，每 5 分钟 +6 亲密度，每日上限 30 |
+| 🏅 **粉丝牌自动点亮** | 需要开播 | 发 10 条弹幕点亮牌子，保持 3 天可见 |
+| 🪙 **自动投币** | 无 | 给成员视频投币（1 币 = 10 亲密度），需用户明确开启 |
+| 👍 **视频自动点赞** | 无 | 每 2 天自动给成员新视频点赞 |
+| 💬 **动态自动点赞** | 无 | 每 2 天自动给成员新动态点赞 |
+
+> B站亲密度规则：观看直播每 5 分钟 +6，每日每成员上限 30（挂满 25 分钟即满额）；投币 1 币 = 10 亲密度。
+
+---
+
+## 📝 更新日志
+
+| 版本 | 日期 | 更新内容 |
+|------|------|----------|
+| **v4** | 2026-04-01 | 心跳协议升级为 `mobileHeartBeat`，纯 Python 签名，零外部依赖，亲密度实测可涨 |
+| v3 | 2026-03-23 | 新增开播检测 + 心跳挂机 + Discord 通知 |
+| v2 | 2026-03-20 | 粉丝牌点亮（10 条弹幕，3 天有效期） |
+| v1 | 2026-03 | 视频点赞 + 动态点赞 + GitHub Actions |
+
+---
+
+## 🔬 技术方案
+
+| 项目 | 说明 |
 |------|------|
-| 💓 心跳挂机 | 检测到成员开播 → 移动端心跳协议自动涨亲密度（每 5 分钟 +6，上限 30/天/成员） |
-| 🏅 粉丝牌点亮 | 检测到成员开播 → 发 10 条弹幕 → 牌子保持 3 天可见 |
+| **心跳协议** | B站移动端 `mobileHeartBeat`（v4.0 升级，旧版 `x25Kn` 已失效） |
+| **签名算法** | `sha512 → sha3_512 → sha384 → sha3_384 → blake2b` 链式 hash |
+| **实现语言** | 纯 Python 3.9+，标准库 `hashlib` |
+| **外部依赖** | 无（不需要 Node.js / pm2 / Docker） |
+| **运行方式** | 命令行直接执行 或 任意 agent 框架调度 |
 
-### 关于亲密度和粉丝牌
+## 🔒 安全说明
 
-- **涨亲密度**：只有观看直播（每 5 分钟 +6，上限 30/天）和投币（1 币 = 10 亲密度）可以涨
-- **点亮粉丝牌**：发 10 条弹幕 / 观看 15 分钟 / 投币等操作可以点亮，有效期 3 天
-- **以上操作都需要成员正在直播**，视频点赞和动态点赞不受限制
+- Cookie **加密存储**在本地（权限 600）或 GitHub Secrets 中，所有代码**完全开源**
+- 只做点赞和弹幕操作，**不会自动投币**（需用户明确开启），不送礼、不关注陌生人
+- GitHub Actions 对公开仓库完全免费
 
-## 设置教程（GitHub Actions）
+---
 
-### 第 1 步：Fork 仓库
+## 💌 一个魂寄语
 
-1. 确保你已经登录了 GitHub（没有账号的话先注册一个，免费的）
-2. 点击本页面右上角的 **Fork** 按钮
-3. 在弹出的页面直接点击 **Create fork**
-4. 等几秒钟，你的账号下就会出现一个一模一样的仓库
+做这个工具不是为了让大家不看直播，是因为我自己工作太忙经常错过开播，才写了这个在忙的时候帮我守着。**有时间的话还是去直播间看直播吧**，跟大家一起刷弹幕互动的快乐是工具给不了的。
 
-### 第 2 步：获取 B 站 Cookie
+如果你也关注其他主播，只需要替换脚本里对应的主播 UID 和房间号就可以用。不过……记得先关注[**嘉然今天吃什么**](https://space.bilibili.com/672328094/)哦～
 
-1. 打开 Chrome 浏览器，进入 [bilibili.com](https://www.bilibili.com)
-2. 确保你已经登录了 B 站账号
-3. 按键盘上的 **F12**（Mac 用户按 **Cmd + Option + I**），会弹出开发者工具
-4. 点击开发者工具顶部的 **Application**（应用程序）标签
-   - 如果看不到这个标签，点击 **>>** 展开更多标签找到它
-5. 在左侧面板展开 **Cookies** → 点击 **https://www.bilibili.com**
-6. 在右侧列表中找到这两项，双击 Value 列复制它们的值：
-   - **SESSDATA** — 一长串字母数字和符号
-   - **bili_jct** — 32 位字母数字
+<p align="center">
+  <img src="assets/diana-heart.png" width="100" alt="嘉然比心" />
+</p>
 
-> ⚠️ 这两个值相当于你的登录凭证，不要分享给任何人。
-> Cookie 大约 6 个月后会过期，届时更新一下就好。
+如果这个项目帮到了你，**请给个 Star ⭐！** 这对我真的很重要，能让更多魂们发现这个工具。也欢迎 **Fork** 到自己账号使用，遇到问题或有好的想法随时提 **Issue**，我都会看。
 
-### 第 3 步：配置 Secrets（把 Cookie 填进去）
+希望能帮到跟我一样忙碌但心里还惦记着 A-SOUL 的魂们。
 
-1. 打开你 Fork 后的仓库页面（就是你自己账号下的 asoul-support）
-2. 点击顶部的 **Settings**（设置）标签
-3. 在左侧菜单找到 **Secrets and variables**，点击展开
-4. 点击 **Actions**
-5. 点击右上角的 **New repository secret** 按钮
-6. 第一个 Secret：
-   - **Name** 填：`SESSDATA`
-   - **Secret** 填：你刚才复制的 SESSDATA 值
-   - 点击 **Add secret**
-7. 再点 **New repository secret**，添加第二个：
-   - **Name** 填：`BILI_JCT`
-   - **Secret** 填：你刚才复制的 bili_jct 值
-   - 点击 **Add secret**
+---
 
-### 第 4 步：启用 Actions
+## 📖 使用教程
 
-1. 点击顶部的 **Actions** 标签
-2. 你会看到一个黄色提示：「Workflows aren't being run on this forked repository」
-3. 点击 **I understand my workflows, go ahead and enable them**
-4. 搞定！
+### 🤖 OpenClaw / Hermes / QClaw 等 Agent 助手用户
 
-### 验证是否成功
-
-1. 在 **Actions** 标签页面，左侧选择 **A-SOUL 自动应援**
-2. 点击右侧 **Run workflow** → 再点绿色 **Run workflow** 按钮
-3. 等大约 1-2 分钟，页面会出现一条新的运行记录
-4. 点进去，展开 **👍 视频点赞** 那一步
-5. 如果看到视频点赞成功的输出，就说明一切正常！
-
-之后每 2 天自动执行一次。
-
-## 可选功能：开启动态点赞
-
-默认只做视频点赞。如果你还想自动给成员的动态点赞：
-
-1. 在你的仓库中打开 `.github/workflows/daily.yml` 文件
-2. 点击右上角的铅笔图标（Edit）
-3. 找到这一行，把 `false` 改成 `true`：
+直接把下面这句话发给你的 AI 助手，它会帮你搞定安装、配置和定时任务：
 
 ```
-  ENABLE_DYNAMIC_LIKE: 'true'
+帮我安装这个项目并设置 A-SOUL 自动挂机：https://github.com/XiaoYiWeio/asoul-support
 ```
 
-4. 点击右上角 **Commit changes** 保存
-
-## 进阶：搭配 OpenClaw 使用
-
-如果你安装了 [OpenClaw](https://openclaw.ai)，可以解锁**心跳挂机涨亲密度**和**粉丝牌自动点亮**功能。
-
-这两个功能需要成员正在直播时才能执行，OpenClaw 会每 30 分钟自动检测开播状态，检测到开播就自动执行。
-
-### 工作流程
+安装完成后，再告诉它：
 
 ```
-每 30 分钟检测开播
-      │
-      ├─ 没人在播 → 静默结束
-      │
-      └─ 有人在播 → 1. 发 10 条弹幕点亮粉丝牌
-                     2. 移动端心跳挂机直到下播
-                     3. 下播后 Discord 通知
+帮我设置一个定时任务，每 30 分钟检测 A-SOUL 成员是否在直播，在播就帮我挂机涨亲密度并点亮粉丝牌
 ```
 
-### 心跳挂机技术方案
+> 支持所有兼容 Python 的 agent 框架，助手会自动处理代码克隆、Cookie 配置和定时调度。
 
-v4.0 使用 **B站移动端心跳协议**（`mobileHeartBeat`），纯 Python 实现：
+---
 
-- 签名算法：`sha512 → sha3_512 → sha384 → sha3_384 → blake2b` 链式 hash
-- **零外部依赖**：不需要 Node.js 签名服务，不需要 pm2，标准库即可运行
-- 每 60 秒发送一次心跳，每 5 分钟 B站 计入 +6 亲密度
-- 每日每个成员上限 30 亲密度
+<details>
+<summary>🐍 纯命令行用户（不使用 Agent 助手，点击展开）</summary>
 
-### 手动命令
+**环境要求：** Python 3.9+
+
+**第 1 步：获取代码**
 
 ```bash
-# 检测谁在播
-python3 scripts/heartbeat.py --check-only
+git clone https://github.com/XiaoYiWeio/asoul-support.git
+cd asoul-support
+```
 
-# 挂机指定成员 25 分钟
-python3 scripts/heartbeat.py --members 嘉然,贝拉
+**第 2 步：配置 Cookie**
 
-# 挂机直到下播（推荐，配合定时任务使用）
+```bash
+python3 scripts/checkin.py --save-cookie --sessdata "你的SESSDATA" --bili-jct "你的bili_jct"
+```
+
+如何获取 B站 Cookie：Chrome 打开 [bilibili.com](https://www.bilibili.com)（确保已登录）→ 按 **F12** → **Application** → **Cookies** → **https://www.bilibili.com**，找到 **SESSDATA** 和 **bili_jct** 复制即可。
+
+> ⚠️ 相当于登录凭证，不要分享。约 6 个月后过期。
+
+**第 3 步：运行**
+
+```bash
+# 检测谁在播 + 自动挂机涨亲密度
+python3 scripts/heartbeat.py
+
+# 挂机到下播为止
 python3 scripts/heartbeat.py --until-offline
 
-# 发弹幕点亮粉丝牌（只对在播成员）
+# 发弹幕点亮粉丝牌
 python3 scripts/checkin.py --live-only
 ```
 
-### 设置定时任务
+**第 4 步：设置定时任务（cron）**
 
-告诉你的 OpenClaw：
+```bash
+# crontab -e
+*/30 * * * * cd /path/to/asoul-support && python3 scripts/heartbeat.py --until-offline
+```
 
-> 帮我设置一个定时任务，每 30 分钟检测 A-SOUL 成员是否在直播，如果在播就帮我挂机涨亲密度并点亮粉丝牌
+</details>
 
-## 安全说明
+---
 
-- 你的 Cookie **只存储在你自己的 GitHub Secrets 中**，加密保存
-- 任何人（包括本仓库作者）都**无法看到**你的 Cookie
-- 所有代码完全开源，你可以自行检查每一行
-- 只做点赞和弹幕操作，不会修改账号设置，不会发私信，不会关注陌生人
-- GitHub Actions 对公开仓库完全免费
+## 🔧 GitHub Actions 自动点赞（不需要 OpenClaw）
 
-## 常见问题
+只需要视频/动态点赞（不涨亲密度）的话，Fork 本仓库 + 配置 Cookie 即可。
 
-**Q: Cookie 过期了怎么办？**
-重新按第 2 步获取新值，然后在 Settings → Secrets 里更新 SESSDATA 和 BILI_JCT。Cookie 过期后 GitHub 会自动发邮件通知你执行失败，不用自己天天检查。
+<details>
+<summary>📋 设置教程（点击展开）</summary>
 
-**Q: 怎么知道每天有没有成功？**
-不用主动去看。只有失败时 GitHub 才会发邮件通知你。没收到邮件 = 一切正常。
+1. 点击右上角 **Fork** → **Create fork**
+2. **Settings** → **Secrets and variables** → **Actions** → 添加 `SESSDATA` 和 `BILI_JCT`
+3. **Actions** 标签 → 点击 **I understand my workflows, go ahead and enable them**
+4. 验证：**Actions** → **A-SOUL 自动应援** → **Run workflow**
 
-**Q: 可以改执行时间和频率吗？**
-打开 `.github/workflows/daily.yml`，修改 `cron` 行。当前是 `*/2`（每 2 天）。改成 `*`（每天）也可以，不会有副作用。
+之后每 2 天自动执行。动态点赞需编辑 `daily.yml` 将 `ENABLE_DYNAMIC_LIKE` 改为 `'true'`。
 
-**Q: 这个工具能帮我涨亲密度吗？**
-可以！v4.0 使用移动端心跳协议，实测可以涨亲密度。需要搭配 OpenClaw 使用（自动检测开播并挂机）。纯 GitHub Actions 版本不支持涨亲密度（因为需要在直播时保持心跳）。
+</details>
 
-**Q: 投币会消耗硬币吗？**
-默认不投币。本工具不会消耗你的硬币。
+---
 
-**Q: 需要安装 Node.js 或其他服务吗？**
-不需要。v4.0 纯 Python 实现，只需要 Python 3.9+，不依赖任何外部签名服务。
-
-## 内置成员
+## 🌟 内置成员
 
 | 成员 | 直播间 | 主页 |
 |------|--------|------|
@@ -188,31 +184,36 @@ python3 scripts/checkin.py --live-only
 | 心宜 | [30849777](https://live.bilibili.com/30849777) | [space](https://space.bilibili.com/3537115310721181) |
 | 思诺 | [30858592](https://live.bilibili.com/30858592) | [space](https://space.bilibili.com/3537115310721781) |
 
-## 更新日志
+## ❓ 常见问题
 
-### v4.0（2026-03-31）
+**Q: Cookie 过期了怎么办？** — 重新获取，重跑 `--save-cookie` 命令更新即可。GitHub Actions 失败时会发邮件通知。
 
-- **心跳协议升级**：从旧版 `x25Kn` 升级为移动端 `mobileHeartBeat` 协议
-- **纯 Python 签名**：`sha512→sha3_512→sha384→sha3_384→blake2b` 链式 hash，不再需要 Node.js 签名服务
-- **零外部依赖**：移除 pcheartbeat / pm2 依赖，标准库即可运行
-- **亲密度实测可涨**：实测从 0 涨到 30/30 满额
-- **新增 `--until-offline`**：挂机直到主播下播，自动发弹幕 + 心跳 + 下播通知
+**Q: 需要电脑一直开着吗？** — 用服务器/NAS 跑脚本，或用 GitHub Actions（视频/动态点赞部分），都不需要盯着。
 
-### v3.0（2026-03-23）
+**Q: 投币会消耗硬币吗？** — 默认不投币。需要手动开启 `--coin` 参数才会投。
 
-- 新增开播检测 + 心跳挂机功能
-- 新增每日挂机日报
-- 新增 Discord 开播/下播通知
+**Q: 需要 Node.js 吗？** — 不需要。v4.0 纯 Python，只需 Python 3.9+。
 
-### v2.0（2026-03-20）
+---
 
-- 粉丝牌点亮取代单条弹幕签到（10 条弹幕，3 天有效期）
-- 增加操作间隔防 ban
+## 🛠 手动命令参考
 
-### v1.0（初始版本）
+```bash
+# 检测谁在播
+python3 scripts/heartbeat.py --check-only
 
-- 视频点赞 + 动态点赞
-- GitHub Actions 定时执行
+# 挂机指定成员 25 分钟
+python3 scripts/heartbeat.py --members 嘉然,贝拉
+
+# 挂机直到下播
+python3 scripts/heartbeat.py --until-offline
+
+# 发弹幕点亮粉丝牌
+python3 scripts/checkin.py --live-only
+
+# 给最近视频投币+收藏
+python3 scripts/videos.py --days 7 --coin --fav
+```
 
 ## License
 

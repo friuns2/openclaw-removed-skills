@@ -1,13 +1,18 @@
 {
   "owner": "xiaoyiweio",
   "slug": "asoul-support",
-  "displayName": "A-SOUL Support",
+  "displayName": "Asoul Support",
   "latest": {
-    "version": "4.0.0",
-    "publishedAt": 1775012785237,
-    "commit": "https://github.com/openclaw/skills/commit/938a290314cc14dbc4e74b7353048672b904e516"
+    "version": "4.0.2",
+    "publishedAt": 1776914947189,
+    "commit": null
   },
   "history": [
+    {
+      "version": "4.0.0",
+      "publishedAt": 1775012785237,
+      "commit": "https://github.com/openclaw/skills/commit/938a290314cc14dbc4e74b7353048672b904e516"
+    },
     {
       "version": "3.0.0",
       "publishedAt": 1774254261050,
