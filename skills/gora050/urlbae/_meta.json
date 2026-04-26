@@ -3,11 +3,16 @@
   "slug": "urlbae",
   "displayName": "Urlbae",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165777242,
-    "commit": "https://github.com/openclaw/skills/commit/c1901da4d9470a55b32b986a851c28eb849e7a0e"
+    "version": "1.0.3",
+    "publishedAt": 1776893157905,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165777242,
+      "commit": "https://github.com/openclaw/skills/commit/c1901da4d9470a55b32b986a851c28eb849e7a0e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774101833119,
