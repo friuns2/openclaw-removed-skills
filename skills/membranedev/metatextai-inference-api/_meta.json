@@ -3,11 +3,16 @@
   "slug": "metatextai-inference-api",
   "displayName": "Metatextai Inference Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164793792,
-    "commit": "https://github.com/openclaw/skills/commit/5785c306c93391c609eca65a030951c9768ef252"
+    "version": "1.0.3",
+    "publishedAt": 1776845519913,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164793792,
+      "commit": "https://github.com/openclaw/skills/commit/5785c306c93391c609eca65a030951c9768ef252"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773900151957,
