@@ -3,9 +3,15 @@
   "slug": "draftable",
   "displayName": "Draftable",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774415085244,
-    "commit": "https://github.com/openclaw/skills/commit/b96e53ed96d69a8a2d41a5d57d60d11ee4bf4dff"
+    "version": "1.0.1",
+    "publishedAt": 1776861198938,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774415085244,
+      "commit": "https://github.com/openclaw/skills/commit/b96e53ed96d69a8a2d41a5d57d60d11ee4bf4dff"
+    }
+  ]
 }
