@@ -3,11 +3,16 @@
   "slug": "dealmachine",
   "displayName": "Dealmachine",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165601735,
-    "commit": "https://github.com/openclaw/skills/commit/7909b1d79725c83ea913e4cf67c66d16a4ba2205"
+    "version": "1.0.3",
+    "publishedAt": 1776859628418,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165601735,
+      "commit": "https://github.com/openclaw/skills/commit/7909b1d79725c83ea913e4cf67c66d16a4ba2205"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774051470485,
