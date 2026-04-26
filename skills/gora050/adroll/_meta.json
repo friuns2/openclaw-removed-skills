@@ -3,11 +3,16 @@
   "slug": "adroll",
   "displayName": "Adroll",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165876163,
-    "commit": "https://github.com/openclaw/skills/commit/4a98be74c11ddb10b2318e4adf514e419aff1487"
+    "version": "1.0.3",
+    "publishedAt": 1776859791442,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165876163,
+      "commit": "https://github.com/openclaw/skills/commit/4a98be74c11ddb10b2318e4adf514e419aff1487"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774112622505,
