@@ -3,11 +3,16 @@
   "slug": "reachmail",
   "displayName": "Reachmail",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166209092,
-    "commit": "https://github.com/openclaw/skills/commit/72e5eb8ba0a325f7bd95755397138e7ae2d2a0f9"
+    "version": "1.0.3",
+    "publishedAt": 1776848349125,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166209092,
+      "commit": "https://github.com/openclaw/skills/commit/72e5eb8ba0a325f7bd95755397138e7ae2d2a0f9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774184568234,
