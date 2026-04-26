@@ -3,11 +3,16 @@
   "slug": "dailybot",
   "displayName": "Dailybot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164447088,
-    "commit": "https://github.com/openclaw/skills/commit/1705207f9aa35a8b0f90ea8eab08c5a59b2fc03a"
+    "version": "1.0.3",
+    "publishedAt": 1776837931630,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164447088,
+      "commit": "https://github.com/openclaw/skills/commit/1705207f9aa35a8b0f90ea8eab08c5a59b2fc03a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773720177646,
