@@ -3,11 +3,16 @@
   "slug": "melo",
   "displayName": "Melo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165633795,
-    "commit": "https://github.com/openclaw/skills/commit/fd878cf8f31485d348a1812e7591e6725b2e413d"
+    "version": "1.0.3",
+    "publishedAt": 1776847500286,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165633795,
+      "commit": "https://github.com/openclaw/skills/commit/fd878cf8f31485d348a1812e7591e6725b2e413d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058569563,
