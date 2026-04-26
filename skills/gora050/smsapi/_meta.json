@@ -3,11 +3,16 @@
   "slug": "smsapi",
   "displayName": "Smsapi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165068031,
-    "commit": "https://github.com/openclaw/skills/commit/298f9fba75c0d0eb703c5f97fc5ec11af2955bfc"
+    "version": "1.0.3",
+    "publishedAt": 1776859039984,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165068031,
+      "commit": "https://github.com/openclaw/skills/commit/298f9fba75c0d0eb703c5f97fc5ec11af2955bfc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773954185419,
