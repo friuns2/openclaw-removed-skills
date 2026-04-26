@@ -3,11 +3,16 @@
   "slug": "hotspotsystem",
   "displayName": "Hotspotsystem",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166126808,
-    "commit": "https://github.com/openclaw/skills/commit/34ce6437bbefc967776cd4926ed07b71e5ed9050"
+    "version": "1.0.3",
+    "publishedAt": 1776863151764,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166126808,
+      "commit": "https://github.com/openclaw/skills/commit/34ce6437bbefc967776cd4926ed07b71e5ed9050"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774152196004,
