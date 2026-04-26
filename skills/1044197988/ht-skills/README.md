@@ -9,6 +9,7 @@
 - 更新文集/文档内容
 - 设置文档父级（管理文档层级）
 - 移动文档到其他文集
+- 图片分组、上传图片到 COS、查询图片列表/详情与图片额度
 
 ## 配置
 
@@ -51,6 +52,14 @@ export HT_SKILL_TOKEN="你的个人Token"
 | `get_document.py` | GET | `/api/documents/{id}` | 查询文档详情 |
 | `update_document.py` | PATCH | `/api/documents/{id}` | 更新文档 |
 | `move_document.py` | PATCH | `/api/documents/{id}/collection` | 修改文档归属（移动到目标文集） |
+| `get_garden_limits_usage.py` | GET | `/api/garden/limits-usage` | 查询当前用户个人花园限制与用量 |
+| `create_image_group.py` | POST | `/api/image-groups` | 创建图片分组 |
+| `list_image_groups.py` | GET | `/api/image-groups` | 查询图片分组列表 |
+| `update_image_group.py` | PATCH | `/api/image-groups/{id}` | 修改图片分组名称 |
+| `get_image_limits_usage.py` | GET | `/api/images/limits-usage` | 查询图片上传额度与占用 |
+| `upload_image.py` | POST | `/api/images/upload` | 上传图片（multipart） |
+| `list_images.py` | GET | `/api/images` | 查询当前用户图片列表 |
+| `get_image.py` | GET | `/api/images/{id}` | 查询图片详情 |
 
 ---
 
@@ -187,6 +196,83 @@ export HT_SKILL_TOKEN="你的个人Token"
 
 ---
 
+### get_garden_limits_usage.py — 查询个人花园限制与用量
+
+无参数，直接调用：
+
+```bash
+python scripts/get_garden_limits_usage.py
+```
+
+返回内容包含：
+- 个人花园限制：是否管理员、文集上限、每文集文档上限、单文档字数上限
+- 当前用量：当前文集数、总文档数、每个文集的文档占用情况、是否还能新建文集
+
+---
+
+### create_image_group.py — 创建图片分组
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `--name` | string | 是 | 分组名称（对应服务端 `group_name`） |
+
+---
+
+### list_image_groups.py — 查询图片分组
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `--limit` | int | 否 | 每页条数，默认 100，服务端最大 200 |
+| `--offset` | int | 否 | 偏移，默认 0 |
+
+---
+
+### update_image_group.py — 修改图片分组名称
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `--id` | int | 是 | 分组 ID |
+| `--name` | string | 是 | 新分组名称 |
+
+---
+
+### get_image_limits_usage.py — 查询图片额度与占用
+
+无参数。返回 `max_images`、`max_image_size_mb`、`current_images`、`can_upload` 等。
+
+---
+
+### upload_image.py — 上传图片
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `--file` | path | 是 | 本地图片路径（相对路径相对 client 根目录解析） |
+| `--remark` | string | 否 | 备注 |
+| `--group-id` | int | 否 | 图片分组 ID（须属于当前用户） |
+
+成功时响应 `data.file_url` 为外链地址（需服务端配置 `cos.public_base_url` 或 `cos.domain`）。
+
+---
+
+### list_images.py — 查询图片列表
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `--group-id` | int | 否 | 按分组筛选 |
+| `--name` | string | 否 | 文件名关键词（Query：`file_name`） |
+| `--limit` | int | 否 | 默认 50，服务端最大 100 |
+| `--offset` | int | 否 | 默认 0 |
+
+---
+
+### get_image.py — 查询图片详情
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `--id` | int | 是 | 图片 ID |
+
+---
+
 ## 使用示例
 
 ```bash
@@ -210,6 +296,17 @@ python scripts/set_document_parent.py --collection-id 1 --document-id 5 --parent
 # 修改文档归属（移动到另一文集）
 python scripts/move_document.py --id 10 --collection-id 2
 python scripts/move_document.py --id 10 --collection-id 2 --from-collection-id 1  # 文档属于多文集时
+
+# 查询当前用户个人花园限制与用量
+python scripts/get_garden_limits_usage.py
+
+# 图片：分组、额度、上传、列表、详情
+python scripts/create_image_group.py --name "插图"
+python scripts/list_image_groups.py
+python scripts/get_image_limits_usage.py
+python scripts/upload_image.py --file ./photo.png --remark "封面" --group-id 1
+python scripts/list_images.py --group-id 1 --name "封面"
+python scripts/get_image.py --id 100
 ```
 
 ---

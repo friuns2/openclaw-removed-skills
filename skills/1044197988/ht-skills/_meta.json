@@ -3,9 +3,15 @@
   "slug": "ht-skills",
   "displayName": "ht-skills",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1773804847824,
-    "commit": "https://github.com/openclaw/skills/commit/f532ae6d301e8ba5d851cfec6113211837551646"
+    "version": "1.0.1",
+    "publishedAt": 1776743993167,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1773804847824,
+      "commit": "https://github.com/openclaw/skills/commit/f532ae6d301e8ba5d851cfec6113211837551646"
+    }
+  ]
 }

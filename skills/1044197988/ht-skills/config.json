@@ -1,4 +1,4 @@
 {
-  "server_base_url": "https://zzht.tech",
+  "server_base_url": "http://zzht.tech", 
   "token": "your-personal-api-token"
 }
