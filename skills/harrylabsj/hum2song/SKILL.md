@@ -1,6 +1,11 @@
+---
+name: Hum2Song
+description: Hum2Song turns a hummed or sung melody into a complete song with local audio processing, MIDI extraction, and optional AI-assisted arrangement, without uploading sensitive recordings to third-party services.
+---
+
 # Hum2Song
 
-将用户哼唱的旋律转换为完整歌曲，支持本地音频处理，无需上传敏感数据到第三方服务。
+Turn a hummed melody into a complete song with local audio processing, without uploading sensitive recordings to third-party services.
 
 ---
 
@@ -323,7 +328,7 @@ All files will be in: ~/Music/hum2song_export/
 |-----------|-------|
 | **Name** | Hum2Song |
 | **Slug** | hum2song |
-| **Version** | 3.0.0 |
+| **Version** | 3.0.4 |
 | **Category** | Audio / Music Generation |
 | **Tags** | music, audio, midi, ai-generation, local-processing |
 | **License** | MIT-0 |

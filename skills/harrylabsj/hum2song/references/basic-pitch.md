@@ -1,37 +1,36 @@
-# Basic Pitch 参考资料
+# Basic Pitch Reference
 
-Spotify 开源的音高检测工具，用于从音频中提取 MIDI 音符。
+Basic Pitch is Spotify's open-source audio-to-MIDI model. In Hum2Song it is the main tool for extracting note events from humming or singing recordings.
 
-## 简介
+## What It Is Used For
 
-Basic Pitch 是 Spotify 开发的轻量级音高检测模型，能够将音频转换为 MIDI 格式。
+- convert monophonic or light polyphonic melody recordings into MIDI
+- recover note timing, pitch, and velocity estimates
+- produce a MIDI object that can be cleaned before arrangement or synthesis
 
-## 安装
+## Install
 
 ```bash
 pip install basic-pitch
 ```
 
-## 基本用法
+## Minimal Example
 
 ```python
 from basic_pitch import ICASSP_2022_MODEL_PATH
 from basic_pitch.inference import predict
 
-# 预测音频
 model_output, midi_data, note_events = predict("audio_file.wav")
-
-# 保存 MIDI
 midi_data.write("output.mid")
 ```
 
-## 输出说明
+## Output Notes
 
-- `model_output`: 原始模型输出
-- `midi_data`: PrettyMIDI 对象
-- `note_events`: 音符事件列表
+- `model_output`: raw model predictions
+- `midi_data`: PrettyMIDI object for downstream processing
+- `note_events`: note-level event list for inspection or debugging
 
-## 参考资料
+## References
 
 - GitHub: https://github.com/spotify/basic-pitch
-- 论文: https://arxiv.org/abs/2203.09893
+- Paper: https://arxiv.org/abs/2203.09893

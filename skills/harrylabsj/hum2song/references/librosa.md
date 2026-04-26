@@ -1,58 +1,53 @@
-# Librosa 参考资料
+# Librosa Reference
 
-Python 音频分析库，用于音乐和音频分析。
+Librosa is a Python library for music and audio analysis. In Hum2Song it is useful for loading source audio, inspecting tempo, and extracting lightweight analysis features before MIDI or synthesis steps.
 
-## 简介
+## Common Uses In This Skill
 
-Librosa 是一个用于音乐和音频分析的 Python 库，提供音频特征提取、节拍检测、音高分析等功能。
+- load input audio and normalize sample rate
+- estimate beat or tempo information
+- inspect pitch-related information
+- derive spectral features for debugging or preprocessing
 
-## 安装
+## Install
 
 ```bash
 pip install librosa
 ```
 
-## 核心功能
+## Minimal Examples
 
-### 音频加载
+### Load Audio
 
 ```python
 import librosa
 
-# 加载音频
 y, sr = librosa.load("audio.wav", sr=44100)
 ```
 
-### 节拍检测
+### Beat Tracking
 
 ```python
-# 检测 BPM
 tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
 beat_times = librosa.frames_to_time(beat_frames, sr=sr)
 ```
 
-### 音高检测
+### Pitch Tracking
 
 ```python
-# 使用 piptrack 检测音高
 pitches, magnitudes = librosa.piptrack(y=y, sr=sr)
 ```
 
-### 频谱特征
+### Spectral Features
 
 ```python
-# 短时傅里叶变换
 D = librosa.stft(y)
-
-# 梅尔频谱
 mel_spec = librosa.feature.melspectrogram(y=y, sr=sr)
-
-# 色度特征
 chroma = librosa.feature.chroma_stft(y=y, sr=sr)
 ```
 
-## 参考资料
+## References
 
-- 官网: https://librosa.org/
-- 文档: https://librosa.org/doc/latest/
+- Website: https://librosa.org/
+- Docs: https://librosa.org/doc/latest/
 - GitHub: https://github.com/librosa/librosa

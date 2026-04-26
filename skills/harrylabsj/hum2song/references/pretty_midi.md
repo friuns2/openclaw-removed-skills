@@ -1,63 +1,56 @@
-# Pretty MIDI 参考资料
+# Pretty MIDI Reference
 
-用于创建、操作和写入 MIDI 文件的 Python 库。
+Pretty MIDI is a Python library for reading, editing, and writing MIDI files. In Hum2Song it is the main utility for cleaning extracted melody data and exporting MIDI for synthesis or DAW editing.
 
-## 简介
+## What It Is Used For
 
-Pretty MIDI 是一个用于处理 MIDI 文件的 Python 库，提供了简洁的 API 来创建和操作 MIDI 数据。
+- load extracted MIDI from Basic Pitch
+- quantize note timing
+- edit note ranges or durations
+- build instrument tracks
+- export cleaned MIDI for synthesis or arrangement
 
-## 安装
+## Install
 
 ```bash
 pip install pretty_midi
 ```
 
-## 基本用法
+## Minimal Examples
 
-### 创建 MIDI 文件
+### Create MIDI
 
 ```python
 import pretty_midi
 
-# 创建 MIDI 对象
 pm = pretty_midi.PrettyMIDI()
-
-# 创建乐器轨道
-instrument = pretty_midi.Instrument(program=0)  # 钢琴
-
-# 添加音符
+instrument = pretty_midi.Instrument(program=0)
 note = pretty_midi.Note(
     velocity=100,
-    pitch=60,  # C4
+    pitch=60,
     start=0.0,
     end=0.5
 )
 instrument.notes.append(note)
-
-# 添加轨道
 pm.instruments.append(instrument)
-
-# 保存
 pm.write("output.mid")
 ```
 
-### 读取 MIDI 文件
+### Read MIDI
 
 ```python
-# 加载 MIDI
+import pretty_midi
+
 pm = pretty_midi.PrettyMIDI("input.mid")
+print(pm.get_end_time())
+print(pm.estimate_tempo())
 
-# 获取信息
-print(f"时长: {pm.get_end_time()}秒")
-print(f"BPM: {pm.estimate_tempo()}")
-
-# 遍历音符
 for instrument in pm.instruments:
     for note in instrument.notes:
-        print(f"音高: {note.pitch}, 开始: {note.start}, 结束: {note.end}")
+        print(note.pitch, note.start, note.end)
 ```
 
-## 参考资料
+## References
 
 - GitHub: https://github.com/craffel/pretty-midi
-- 文档: https://craffel.github.io/pretty-midi/
+- Docs: https://craffel.github.io/pretty-midi/
