@@ -3,11 +3,16 @@
   "slug": "apple-icloud-suite",
   "displayName": "Apple Icloud Suite",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1775968722416,
-    "commit": "https://github.com/openclaw/skills/commit/346f3718ba91fb4d72d1a56071226af0343a3e75"
+    "version": "1.0.7",
+    "publishedAt": 1776571478204,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1775968722416,
+      "commit": "https://github.com/openclaw/skills/commit/346f3718ba91fb4d72d1a56071226af0343a3e75"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1775787824857,
