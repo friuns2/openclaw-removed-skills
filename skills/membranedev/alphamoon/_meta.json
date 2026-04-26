@@ -3,11 +3,16 @@
   "slug": "alphamoon",
   "displayName": "Alphamoon",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165216994,
-    "commit": "https://github.com/openclaw/skills/commit/656a6d9077290c5eb2b62188cdf4ae1221f11925"
+    "version": "1.0.3",
+    "publishedAt": 1776846584016,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165216994,
+      "commit": "https://github.com/openclaw/skills/commit/656a6d9077290c5eb2b62188cdf4ae1221f11925"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773972155710,
