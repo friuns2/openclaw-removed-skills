@@ -3,11 +3,16 @@
   "slug": "signrequest",
   "displayName": "Signrequest",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164785242,
-    "commit": "https://github.com/openclaw/skills/commit/d28b6cc2c805cabbed2d427f6b618386c9ddd009"
+    "version": "1.0.3",
+    "publishedAt": 1776845505155,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164785242,
+      "commit": "https://github.com/openclaw/skills/commit/d28b6cc2c805cabbed2d427f6b618386c9ddd009"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775164783643,
