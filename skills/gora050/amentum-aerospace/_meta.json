@@ -3,11 +3,16 @@
   "slug": "amentum-aerospace",
   "displayName": "Amentum Aerospace",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167308130,
-    "commit": "https://github.com/openclaw/skills/commit/82f903a8bc102037fd51577e4374abeb5824fe21"
+    "version": "1.0.3",
+    "publishedAt": 1776861049481,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167308130,
+      "commit": "https://github.com/openclaw/skills/commit/82f903a8bc102037fd51577e4374abeb5824fe21"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774407818532,
