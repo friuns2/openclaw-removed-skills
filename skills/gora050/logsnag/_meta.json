@@ -3,11 +3,16 @@
   "slug": "logsnag",
   "displayName": "Logsnag",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167577172,
-    "commit": "https://github.com/openclaw/skills/commit/06e17c864df9651fe9fbae1368e69d39f659a609"
+    "version": "1.0.3",
+    "publishedAt": 1776861579409,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167577172,
+      "commit": "https://github.com/openclaw/skills/commit/06e17c864df9651fe9fbae1368e69d39f659a609"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774472718794,
