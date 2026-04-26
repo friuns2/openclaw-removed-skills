@@ -3,9 +3,15 @@
   "slug": "cloudmersive",
   "displayName": "Cloudmersive",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774425798672,
-    "commit": "https://github.com/openclaw/skills/commit/654808aba753e7d0117de715216bb3fd844d78be"
+    "version": "1.0.1",
+    "publishedAt": 1776861227039,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774425798672,
+      "commit": "https://github.com/openclaw/skills/commit/654808aba753e7d0117de715216bb3fd844d78be"
+    }
+  ]
 }
