@@ -3,11 +3,16 @@
   "slug": "snyk-integration",
   "displayName": "Snyk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166979331,
-    "commit": "https://github.com/openclaw/skills/commit/847ba62dd5e6f0dbf471144b2d94c8b441f0036a"
+    "version": "1.0.3",
+    "publishedAt": 1776860703554,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166979331,
+      "commit": "https://github.com/openclaw/skills/commit/847ba62dd5e6f0dbf471144b2d94c8b441f0036a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774332284262,
