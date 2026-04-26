@@ -3,11 +3,16 @@
   "slug": "abstract",
   "displayName": "Abstract",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166516538,
-    "commit": "https://github.com/openclaw/skills/commit/f650c7ef50f0c3b221eec4a59b1c2bf8ad2fd536"
+    "version": "1.0.3",
+    "publishedAt": 1776863658336,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166516538,
+      "commit": "https://github.com/openclaw/skills/commit/f650c7ef50f0c3b221eec4a59b1c2bf8ad2fd536"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774231458204,
