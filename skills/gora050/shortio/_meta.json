@@ -3,11 +3,16 @@
   "slug": "shortio",
   "displayName": "Shortio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165437144,
-    "commit": "https://github.com/openclaw/skills/commit/ca3f0da40b1930781db71f0eea2cf13479044a0d"
+    "version": "1.0.3",
+    "publishedAt": 1776859383527,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165437144,
+      "commit": "https://github.com/openclaw/skills/commit/ca3f0da40b1930781db71f0eea2cf13479044a0d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774026231816,
