@@ -1,11 +1,17 @@
 {
   "owner": "jiajiaoy",
   "slug": "mingshi",
-  "displayName": "Ming Shi",
+  "displayName": "Yunshi",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1774356268979,
-    "commit": "https://github.com/openclaw/skills/commit/db9a2bc825a872c04d111f85b83526aab6efb29d"
+    "version": "1.2.0",
+    "publishedAt": 1776839441146,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1774356268979,
+      "commit": "https://github.com/openclaw/skills/commit/db9a2bc825a872c04d111f85b83526aab6efb29d"
+    }
+  ]
 }

@@ -1,175 +1,149 @@
 ---
-name: mingshi
-description: 中文命理综合技能，用于用户请求"算命""算八字""看运势""占卜""合婚""看风水""今日运势""紫微斗数""奇门遁甲""梅花易数""六爻""流年大运""事业财运婚姻分析"等场景；关键词包括：八字、四柱、命理、紫微、奇门、风水、占卜、运势、合婚、每日运程。/ Chinese metaphysics skill for requests like "read my fortune", "BaZi chart", "daily horoscope", "feng shui", "marriage compatibility", "ZiWei chart", "QiMen divination", "yearly luck", "career & wealth reading", "I Ching divination"; keywords include: BaZi, Four Pillars, ZiWei DouShu, Qi Men Dun Jia, Feng Shui, divination, horoscope, fortune telling, Chinese astrology, daily fortune, lucky color, marriage compatibility.
-keywords: 八字, 四柱, 命理, 紫微斗数, 奇门遁甲, 梅花易数, 六爻, 占卜, 运势, 合婚, 风水, 每日运程, 流年, 大运, 事业, 财运, 婚姻, 健康, 算命, 今日运势, mingshi, BaZi, ZiWei, QiMen, FengShui, fortune, horoscope, divination, Chinese astrology, lucky color
+name: yunshi
+description: |
+  MingLi is your all-in-one Chinese astrology and fortune-telling companion. It combines six ancient divination systems — BaZi (Four Pillars of Destiny), ZiWei DouShu (Purple Star Astrology), QiMen DunJia, I Ching (Meihua Yishu & LiuYao), marriage compatibility analysis, and feng shui — into a single skill, with no external API required.
+
+  Every morning MingLi delivers a personalized daily fortune reading covering career, wealth, relationships, and health. Every evening it previews tomorrow's energy and lucky elements. Ask for a full BaZi chart, a ZiWei life-map reading, an I Ching divination, a marriage compatibility report, or a feng shui layout recommendation — MingLi handles them all. Built-in calculation algorithms produce accurate traditional charts instantly.
+
+  Supports Chinese and English output. Trigger: fortune telling, BaZi, daily horoscope, ZiWei, QiMen, I Ching, divination, feng shui, marriage compatibility, lucky color, yearly luck, 算命, 八字, 今日运势, 紫微斗数, 占卜, 合婚, 风水.
+keywords: BaZi, Chinese astrology, daily horoscope, fortune telling, ZiWei DouShu, four pillars of destiny, I Ching, divination, feng shui, marriage compatibility, QiMen DunJia, daily fortune, horoscope push, lucky color, yearly luck, lucky elements, astrology, Chinese zodiac, fate analysis, life reading, 八字, 算命, 今日运势, 每日运程, 紫微斗数, 奇门遁甲, 梅花易数, 六爻, 占卜, 合婚, 风水, 流年, 大运, 命理, 四柱
+metadata:
+  openclaw:
+    runtime:
+      node: ">=18"
+    install:
+      - kind: node
+        package: iztro
+    env:
+      - name: OPENCLAW_KNOWLEDGE_DIR
+        required: false
+        description: "Optional path to ZiWei pattern knowledge base (.md files). Defaults to ~/.openclaw/workspace/knowledge. Skill degrades gracefully if absent."
 ---
 
-# 明师 (MingShi)
+# 运势 (YunShi)
 
-> 你的私人风水命理顾问，传承倪海厦体系，结合现代科技
+> 私人命理顾问 — 每日运程推送 · 八字紫微 · 占卜风水
 
----
+## 何时使用
 
-## 何时使用 / When to Use
-
-- 用户想算八字、排四柱命盘。/ User wants BaZi (Four Pillars) chart.
-- 用户想看今日或近期运势。/ User asks for daily, weekly, or yearly fortune.
-- 用户想算紫微斗数命盘。/ User wants a ZiWei DouShu chart.
-- 用户想合婚、看双方八字是否相配。/ User wants marriage compatibility analysis.
-- 用户想占一卦（梅花易数、六爻、奇门遁甲）。/ User wants I Ching or QiMen divination.
-- 用户询问风水布局、财位、幸运颜色。/ User asks about feng shui, wealth position, or lucky colors.
-- 用户想分析事业、财运、健康或感情方向。/ User wants career, wealth, health, or relationship reading.
-- 用户说"算命""看运势""占卜""帮我占一卦"等。/ User says "tell my fortune", "read my horoscope", "divine for me".
+- 八字/四柱排盘、流年大运分析
+- 今日/近期运势（事业/财运/感情/健康）
+- 紫微斗数命盘
+- 合婚、双方八字相配
+- 占卦（梅花易数、六爻、奇门遁甲）
+- 风水布局、财位、幸运颜色
+- 用户说"算命""看运势""占卜""帮我占一卦"
 
 ---
 
-## 🎯 核心定位
+## 🌐 多语言响应规则
 
-**角色**：私人命理顾问 + 人生导师
-**使命**：帮助用户了解命运、把握机遇、规避风险、提供情绪价值
-**风格**：专业但不冷漠，准确但有温度
-
----
-
-## ⚡ 快速开始
-
-```
-你好，我想算算命
-/注册 张三|男|1990-05-15|14:30|上海
-今日运势
-合婚 张三 李四
-占卦
-```
+1. **语言跟随**：用户语言 → 全程同语言回复
+2. **专有术语保留中文**：柱名/星曜/卦名保持中文原字，括号内附译文
+   - 英文示例：Your Day Pillar is **甲子** (Jiǎ Zǐ — Wood Rat), indicating...
+3. **脚本输出翻译**：脚本返回的中文结构由 Agent 解读后以用户语言呈现
+4. **注册格式**：非中文用户使用 `Name | Gender(M/F) | BirthDate | BirthTime | BirthPlace`
+5. **推送语言**：跟随档案 `language` 字段（默认 `zh`）
 
 ---
 
 ## 📖 功能列表
 
-### 1. 排盘系统
+### 排盘
 
-| 功能 | 说明 | 命令 |
-|------|------|------|
-| 八字排盘 | 四柱八字、日主、用神、神煞 | `八字 1990-05-15 14:30` |
-| 紫微斗数 | 命宫主星、十二宫、四化星 | `紫微 1990-05-15 男` |
-| 奇门遁甲 | 九星八门、择吉选时 | `奇门 2026-03-24 15:00` |
+| 功能 | 命令 |
+|------|------|
+| 八字排盘（四柱/日主/用神/神煞） | `八字 1990-05-15 14:30` |
+| 紫微斗数（命宫/十二宫/四化） | `紫微 1990-05-15 男` |
+| 奇门遁甲 | `奇门 2026-03-24 15:00` |
+| 择吉选日 | `择吉 2026-04 开业` |
 
-### 2. 分析系统
+### 分析
 
-| 功能 | 说明 | 命令 |
-|------|------|------|
-| 流年分析 | 年度运势详析 | `2026年运势如何` |
-| 大运分析 | 十年一步运 | `未来十年运势` |
-| 事业分析 | 职业方向、事业运势 | `事业运势怎么样` |
-| 财运分析 | 投资理财、赚钱模式 | `财运好不好` |
-| 婚姻分析 | 姻缘、感情、桃花 | `我的姻缘如何` |
-| 合婚分析 | 双方八字合盘 | `合婚 张三 李四` |
-| 健康分析 | 五行健康预警 | `健康需要注意什么` |
-| 风水分析 | 阳宅、财位、颜色 | `风水分析` |
+| 功能 | 命令 |
+|------|------|
+| 流年/大运/事业/财运/婚姻/健康 | `2026年运势` / `未来十年运势` / `财运好不好` |
+| 合婚分析 | `合婚 张三 李四` |
+| 风水分析 | `风水分析` |
 
-### 3. 占卜系统
+### 占卜
 
-| 功能 | 说明 | 命令 |
-|------|------|------|
-| 梅花易数 | 报数/时间/方位起卦 | `梅花易数 3 5 2` |
-| 六爻预测 | 铜钱卦、世应六亲 | `六爻占卜` |
-| 奇门占卜 | 时空选择、方位建议 | `奇门选时 明天15:00` |
+| 功能 | 命令 |
+|------|------|
+| 梅花易数 | `梅花易数 3 5 2`（数字起卦）或留空时间起卦 |
+| 六爻预测 | `六爻占卜` |
+| 奇门占卜 | `奇门选时 明天15:00` |
 
-### 4. 每日运程
+### 每日运程（自动推送）
 
-| 功能 | 说明 | 推送时间 |
-|------|------|----------|
-| 早晨运程 | 今日完整运势 | 07:00 |
-| 傍晚预告 | 明日运势预告 | 20:00 |
+早晨 07:00 推送今日运势，晚间 20:00 推送明日预告。内容：综合指数、幸运颜色/方位/数字、今日宜忌、风险预警、吉时、每日一言。
 
-每日内容包含：
-- 📊 综合指数（事业/财运/感情/健康）
-- 🎨 幸运颜色
-- 💼 今日宜忌
-- ⚠️ 风险预警
-- ⏰ 吉时
-- 💡 每日一句
+| 推送命令 | 说明 |
+|---------|------|
+| `每日运势开` / `开启运势推送` | 开启 |
+| `每日运势关` / `关闭运势推送` | 关闭 |
+| `推送状态` | 查看当前状态 |
 
-### 5. 用户档案
+---
 
-| 成员 | 档案内容 |
-|------|----------|
-| 本人 | 八字、紫微、家庭信息 |
-| 配偶 | 八字、命盘 |
-| 父母 | 八字 |
-| 子女 | 八字、出生信息 |
+## 📦 环境依赖
+
+- **Node.js >=18**（必须）
+- `npm install` 安装 `iztro`（紫微斗数）和 `lunar-typescript`（农历转换）
+- `OPENCLAW_KNOWLEDGE_DIR`：可选，紫微格局知识库，不存在时自动降级
+- **推送渠道**：`telegram`/`feishu` 由 openclaw 运行时投递，skill 不调用任何渠道 API
+- **新闻联动**：由 Agent 的 WebSearch 工具完成，无搜索能力时跳过
+- **个人数据**：存储在 `data/profiles/<userId>.json`，含敏感信息，请确认访问权限
 
 ---
 
 ## 🛠️ 工具脚本
 
-### 排盘工具
-
 ```bash
-# 用户注册（内置八字排盘，无需外部依赖）
+# 注册 / 档案
 node scripts/register.js <userId> <姓名> <性别> <出生日期> <出生时间> [地点]
-
-# 紫微斗数
-node scripts/ziwei.js <出生日期> <性别> [时辰]
-
-# 奇门遁甲
-node scripts/qimen.js [日期] [时辰]
-
-# 风水分析
-node scripts/fengshui.js [八字] [年份]
-```
-
-### 分析工具
-
-```bash
-# 每日运程
-node scripts/daily-fortune.js [日期]
-
-# 合婚分析
-node scripts/marriage.js <userId1> <userId2>
-node scripts/marriage.js <姓名1> <八字1> <姓名2> <八字2>
-
-# 风水分析
-node scripts/fengshui.js [八字] [年份]
-
-# 用户档案
 node scripts/profile.js show <userId>
-node scripts/profile.js add <userId> spouse <姓名> <出生日期> <性别>
-node scripts/profile.js add <userId> child <姓名> <出生日期> <性别>
+node scripts/profile.js add <userId> spouse|child <姓名> <出生日期> <性别>
 
-# 快速注册
-node scripts/register.js <userId> <姓名> <性别> <出生日期> <出生时间> [地点]
-```
+# 排盘
+node scripts/ziwei.js <出生日期> <性别> [时辰]
+node scripts/qimen.js [日期] [时辰]
+node scripts/zhuanshi.js <YYYY-MM> <活动类型> [用户八字]
+node scripts/fengshui.js [八字] [年份]
 
-### 占卜工具
+# 运程 / 合婚 / 占卜
+node scripts/daily-fortune.js [日期]
+node scripts/marriage.js <userId1> <userId2>
+node scripts/meihua.js [数字1-3]
+node scripts/liuyao.js [010203] [问题]
 
-```bash
-# 梅花易数
-node scripts/meihua.js [数字1-3]        # 报数起卦
-node scripts/meihua.js                 # 时间起卦
+# 推送管理
+node scripts/daily-push.js --dry-run          # 模拟推送
+node scripts/daily-push.js --test <userId>    # 测试推送
+node scripts/daily-push.js --list             # 查看已开启用户
+node scripts/push-toggle.js on|off|status <userId>
 
-# 六爻
-node scripts/liuyao.js [问题]          # 模拟铜钱卦
-node scripts/liuyao.js 010203 <问题>   # 指定爻象
+# 偏好追踪（每次提问后调用）
+node scripts/preference-tracker.js record <userId> <topic> explicit_query|topic_drill
+node scripts/preference-tracker.js weights|top <userId> [N]
+# topic: 财运|事业|感情|健康|婚姻|子女|官司|出行|风水
 ```
 
 ---
 
-## 📊 交叉验证体系
+## ⏰ Cron 推送配置
 
-### 支持的命理系统
+```bash
+openclaw cron add "0 7 * * *" "cd ~/.openclaw/workspace/skills/yunshi && node scripts/daily-push.js"
+openclaw cron list
+openclaw cron delete <任务ID>
+```
 
-| 系统 | 八字 | 紫微 | 奇门 | 梅花 | 六爻 | 风水 |
-|------|:----:|:----:|:----:|:----:|:----:|:----:|
-| 四柱排盘 | ✅ | - | - | - | - | - |
-| 紫微斗数 | - | ✅ | - | - | - | - |
-| 流年分析 | ✅ | ✅ | ✅ | - | ✅ | - |
-| 大运分析 | ✅ | ✅ | - | - | - | - |
-| 事业财运 | ✅ | ✅ | ✅ | - | ✅ | ✅ |
-| 婚姻感情 | ✅ | ✅ | - | ✅ | ✅ | - |
-| 占卜问事 | - | - | ✅ | ✅ | ✅ | - |
-| 风水调整 | - | - | - | - | - | ✅ |
+**子时算法**：`1` = 23:00-23:59 算次日（倪海厦派）；`2` = 算当日（传统派）
 
-### 验证权重
+---
+
+## 📊 交叉验证权重
 
 | 问题类型 | 八字 | 紫微 | 奇门 | 梅花 | 六爻 |
 |----------|------|------|------|------|------|
@@ -181,173 +155,31 @@ node scripts/liuyao.js 010203 <问题>   # 指定爻象
 
 ---
 
-## ⚠️ 风险预警系统
+## ⚠️ 风险预警等级
 
-### 预警等级
+🔴 严重（立即处理）· 🟡 注意（谨慎处理）· 🟢 提示（一般提醒）
 
-| 等级 | 符号 | 说明 |
-|------|------|------|
-| 严重 | 🔴 | 需立即处理 |
-| 注意 | 🟡 | 需谨慎处理 |
-| 提示 | 🟢 | 一般性提醒 |
-
-### 预警类型
-
-- 🚨 **健康预警**：五行缺失对应的健康风险
-- 💰 **财务预警**：破财、投资风险
-- 💕 **感情预警**：争吵、分手危机
-- 💼 **事业预警**：小人、事业阻碍
-- ⚖️ **法律预警**：官非诉讼风险
+类型：🚨 健康 · 💰 财务 · 💕 感情 · 💼 事业 · ⚖️ 法律
 
 ---
 
-## 💬 对话示例
-
-### 算命
+## 📁 数据文件
 
 ```
-用户：帮我算算2026年的事业运势
-助手：
-  【八字分析】
-  流年丙午与大运辛巳...
-  
-  【紫微分析】
-  官禄宫太阳星耀...
-  
-  【综合建议】
-  2026年事业上会有突破...
+data/profiles/{userId}.json   # 用户档案（姓名/出生/家庭成员八字）
+scripts/                      # register, ziwei, qimen, fengshui, profile,
+                              # daily-fortune, marriage, meihua, liuyao,
+                              # zhuanshi, daily-push, push-toggle, preference-tracker
 ```
-
-### 占卜
-
-```
-用户：梅花易数 占卦
-助手：
-  🎲 摇卦中...
-  📍 得：火风鼎卦
-  
-  【卦象】鼎卦
-  【体用】体火生用木
-  【吉凶】中平
-  【建议】循序渐进
-```
-
-### 合婚
-
-```
-用户：合婚 张三 李四
-助手：
-  💕 【合婚分析】
-  
-  男方：庚午 辛巳 庚辰 癸未
-  女方：乙亥 甲申 癸未 丁巳
-  
-  📊 综合评分：★★★☆☆ (55分)
-  乙庚合（仁义之合）✅
-  日柱相合缘分深厚
-```
-
-### 风水
-
-```
-用户：风水分析
-助手：
-  🏠 【风水分析报告】
-  
-  流年飞星：
-  一白 → 北（财平健康凶）
-  八白 → 东南（财吉事业吉）
-  
-  财位：大门对角线、流年财位在北
-  幸运色：黄色、棕色、红色
-  
-  💡 建议：
-  - 财位保持整洁
-  - 门口保持畅通
-  - 多用幸运色布置
-```
-
----
-
-## 📁 数据存储
-
-```
-data/profiles/
-└── {userId}.json      # 用户档案
-
-scripts/
-├── daily-fortune.js   # 每日运程
-├── meihua.js          # 梅花易数
-├── liuyao.js          # 六爻
-├── ziwei.js           # 紫微斗数
-├── qimen.js           # 奇门遁甲
-├── fengshui.js        # 风水分析 🆕
-├── profile.js         # 档案管理
-├── register.js         # 注册
-└── marriage.js         # 合婚
-```
-
----
-
-## 🔧 配置
-
-### 推送时间
-
-```javascript
-preferences: {
-  pushMorning: true,     // 早晨推送
-  pushEvening: true,     // 傍晚推送
-  morningTime: "07:00",
-  eveningTime: "20:00",
-  channels: ["telegram", "feishu", "whatsapp"]
-}
-```
-
-> 推送渠道（Telegram / 飞书 / WhatsApp）由宿主平台（OpenClaw）负责投递，skill 脚本仅生成内容，不直接调用渠道 API。
-
-### 子时算法
-
-| 值 | 算法 |
-|----|------|
-| 1 | 23:00-23:59 算次日（倪海厦派） |
-| 2 | 23:00-23:59 算当日（传统派） |
-
----
-
-## 📋 术语表
-
-| 术语 | 说明 |
-|------|------|
-| 日主 | 八字中日柱天干，代表本人 |
-| 用神 | 八字中最重要的平衡五行 |
-| 十神 | 比肩、劫财、食神、伤官、正财、偏财、正官、七杀、正印、偏印 |
-| 格局 | 八字的组合结构，如正官格、财格 |
-| 大运 | 每十年一步运程 |
-| 流年 | 当年的运势 |
-| 神煞 | 特殊的吉凶标志 |
 
 ---
 
 ## ⚠️ 注意事项
 
-1. **用户数据优先**：AI计算与用户认知冲突时，以用户提供的信息为准
-2. **不承诺100%准确**：命理是参考，不是定数
-3. **保护隐私**：用户命理数据仅供个人使用
-4. **持续学习**：根据反馈不断优化判断准确度
+1. 用户数据与AI计算冲突时，以用户提供信息为准
+2. 命理是参考，不是定数
+3. 用户档案仅供个人使用，注意数据隐私
 
 ---
 
-*Version: 1.1.1*
-*Created: 2026-03-24*
-*Updated: 2026-03-24*
-*Author: MingLi Mentor Team*
-
----
-
-## 📝 版本历史
-
-| 版本 | 日期 | 说明 |
-|------|------|------|
-| 1.1.1 | 2026-03-24 | 修复梅花易数五行生克表 lookup 错误（keys 长度不匹配导致永远失效）；删除空 templates 目录 |
-| 1.1.0 | 2026-03-24 | 修复注册功能（移除外部依赖，内置完整八字算法）；修复紫微命宫计算；修正月柱节气算法；修正铜钱卦概率；修复奇门值符计算；修复风水日主提取；修复运势星级显示 |
-| 1.0.0 | 2026-03-24 | 初始版本 |
+*Version: 1.1.0 · Updated: 2026-03-30*

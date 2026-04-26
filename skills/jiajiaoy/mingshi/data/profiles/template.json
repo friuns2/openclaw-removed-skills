@@ -27,6 +27,7 @@
     "patterns": [],
     "source": "pending"
   },
+  "language": "zh",
   "preferences": {
     "pushMorning": true,
     "pushEvening": false,
@@ -97,6 +98,8 @@
       "weeklySummary": false
     }
   },
+  "interactionLog": [],
+  "lastPushDate": "",
   "createdAt": "{{注册日期}}",
   "updatedAt": "{{更新日期}}"
 }

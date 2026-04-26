@@ -303,7 +303,7 @@ switch (command) {
       console.log('');
       console.log('示例:');
       console.log('  node profile.js add 123 spouse 李四 1990-05-15 女');
-      console.log('  node profile.js add 123 child 小明 2020-01-01 男');
+      console.log('  node profile.js add 123 child 子女姓名 2020-01-01 男');
     } else {
       const userId = args[1];
       const type = args[2];
@@ -358,22 +358,22 @@ switch (command) {
 
 示例:
   # 查看档案
-  node profile.js show 8597078097
-  
+  node profile.js show 123456
+
   # 添加配偶
-  node profile.js add 8597078097 spouse 李梅 1990-05-15 女
-  
+  node profile.js add 123456 spouse 配偶姓名 1990-05-15 女
+
   # 添加子女
-  node profile.js add 8597078097 child 小明 2020-01-01 男
-  
+  node profile.js add 123456 child 子女姓名 2020-01-01 男
+
   # 添加父亲
-  node profile.js add 8597078097 father 张三 1950-03-15
-  
+  node profile.js add 123456 father 父亲姓名 1950-03-15
+
   # 查看家庭成员
-  node profile.js family 8597078097
-  
+  node profile.js family 123456
+
   # 保存八字
-  node profile.js save 8597078097 family.spouse.bazi.year 庚午
+  node profile.js save 123456 family.spouse.bazi.year 庚午
 `);
 }
 

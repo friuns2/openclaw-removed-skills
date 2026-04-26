@@ -52,10 +52,10 @@ const yiJi = {
  * 计算当日天干地支
  */
 function getDayGanZhi(date = new Date()) {
-  // 以2024年1月1日=甲子日为基准
-  const baseDate = new Date('2024-01-01');
+  // 以2024年1月1日=甲子日为基准（取正午避免夏令时边界问题）
+  const baseDate = new Date('2024-01-01T12:00:00');
 
-  const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round((date - baseDate) / (1000 * 60 * 60 * 24));
   const ganIndex = ((diffDays % 10) + 10) % 10; // 甲=0
   const zhiIndex = ((diffDays % 12) + 12) % 12; // 子=0
   

@@ -370,8 +370,8 @@ if (args.length < 2) {
   node marriage.js <name1> <bazi1> <name2> <bazi2>
 
 示例:
-  node marriage.js 8597078091 8597078097
-  node marriage.js 张三 "戊午 乙卯 戊子 壬子" 李四 "庚午 辛巳 庚辰 癸未"
+  node marriage.js 111111 222222
+  node marriage.js 张三 "甲子 乙丑 丙寅 丁卯" 李四 "庚午 辛巳 庚辰 癸未"
 `);
   process.exit(1);
 }

@@ -19,12 +19,9 @@ const baGuaDirection = {
   '兑': { direction: '西', number: 7, element: '金', color: '白色', trait: '喜悦、口才' }
 };
 
-// 九宫飞星（流年派）
-const flyingStar = {
-  2024: { '一白': '中宫', '二黑': '乾', '三碧': '兑', '四绿': '艮', '五黄': '离', '六白': '坎', '七赤': '坤', '八白': '震', '九紫': '巽' },
-  2025: { '一白': '坤', '二黑': '震', '三碧': '巽', '四绿': '中宫', '五黄': '兑', '六白': '乾', '七赤': '离', '八白': '坎', '九紫': '艮' },
-  2026: { '一白': '坎', '二黑': '坤', '三碧': '离', '四绿': '乾', '五黄': '艮', '六白': '兑', '七赤': '中宫', '八白': '巽', '九紫': '震' }
-};
+// 九宫飞星宫位序列（洛书飞布次序）
+const PALACE_SEQ = ['中宫', '乾', '兑', '艮', '离', '坎', '坤', '震', '巽'];
+const STAR_NAMES = ['一白', '二黑', '三碧', '四绿', '五黄', '六白', '七赤', '八白', '九紫'];
 
 // 财位寻找
 const caiWei = {
@@ -47,15 +44,18 @@ const jiXiongDirections = {
 };
 
 /**
- * 获取流年飞星
+ * 获取流年飞星（动态计算，支持任意年份）
+ * 基准：2024年中宫=一白，每年中宫星顺序+3（3年一轮：一白→四绿→七赤）
  */
 function getFlyingStars(year = new Date().getFullYear()) {
-  const yearKey = year;
-  if (flyingStar[yearKey]) {
-    return flyingStar[yearKey];
+  // yearOffset: 0→中宫一白, 1→中宫四绿, 2→中宫七赤
+  const yearOffset = ((year - 2024) % 3 + 3) % 3;
+  const result = {};
+  for (let i = 0; i < 9; i++) {
+    const starIdx = (i + yearOffset * 3) % 9;
+    result[STAR_NAMES[starIdx]] = PALACE_SEQ[i];
   }
-  // 简化计算
-  return flyingStar[2026];
+  return result;
 }
 
 /**
