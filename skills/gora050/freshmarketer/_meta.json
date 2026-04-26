@@ -3,11 +3,16 @@
   "slug": "freshmarketer",
   "displayName": "Freshmarketer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166879889,
-    "commit": "https://github.com/openclaw/skills/commit/e645b4e43041fae969e86d0422f7c234ab5e8ee3"
+    "version": "1.0.3",
+    "publishedAt": 1776860547685,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166879889,
+      "commit": "https://github.com/openclaw/skills/commit/e645b4e43041fae969e86d0422f7c234ab5e8ee3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774321440836,
