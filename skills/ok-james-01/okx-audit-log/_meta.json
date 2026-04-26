@@ -3,11 +3,16 @@
   "slug": "okx-audit-log",
   "displayName": "Okx Audit Log",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776332885213,
-    "commit": "https://github.com/openclaw/skills/commit/5115e72cd53e1dceb61a1d3ff4fa5ab21b4a58e7"
+    "version": "2.4.0",
+    "publishedAt": 1776778633139,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776332885213,
+      "commit": "https://github.com/openclaw/skills/commit/5115e72cd53e1dceb61a1d3ff4fa5ab21b4a58e7"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775722607807,
