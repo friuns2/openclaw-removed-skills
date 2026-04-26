@@ -3,11 +3,16 @@
   "slug": "dialmycalls",
   "displayName": "Dialmycalls",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164590254,
-    "commit": "https://github.com/openclaw/skills/commit/a3c94d2294ab95a59efd6f884f3ca87a803906a7"
+    "version": "1.0.3",
+    "publishedAt": 1776845089719,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164590254,
+      "commit": "https://github.com/openclaw/skills/commit/a3c94d2294ab95a59efd6f884f3ca87a803906a7"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775164588474,
