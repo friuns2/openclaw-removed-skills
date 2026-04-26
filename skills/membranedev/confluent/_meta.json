@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "confluent",
+  "displayName": "Confluent",
+  "latest": {
+    "version": "1.0.3",
+    "publishedAt": 1776845384472,
+    "commit": null
+  },
+  "history": []
+}
