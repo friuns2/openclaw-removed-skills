@@ -3,11 +3,16 @@
   "slug": "nationbuilder",
   "displayName": "Nationbuilder",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166726983,
-    "commit": "https://github.com/openclaw/skills/commit/89fb2cc782686572adc3ad48f76a8bb8ebfe2ac2"
+    "version": "1.0.3",
+    "publishedAt": 1776860345496,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166726983,
+      "commit": "https://github.com/openclaw/skills/commit/89fb2cc782686572adc3ad48f76a8bb8ebfe2ac2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774299856164,
