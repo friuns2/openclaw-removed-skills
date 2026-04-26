@@ -3,11 +3,16 @@
   "slug": "automizy",
   "displayName": "Automizy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165679034,
-    "commit": "https://github.com/openclaw/skills/commit/237479cddfc4bd345973dace4309e1647ced006e"
+    "version": "1.0.3",
+    "publishedAt": 1776859727717,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165679034,
+      "commit": "https://github.com/openclaw/skills/commit/237479cddfc4bd345973dace4309e1647ced006e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774065797751,
