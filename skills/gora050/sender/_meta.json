@@ -3,11 +3,16 @@
   "slug": "sender",
   "displayName": "Sender",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165670323,
-    "commit": "https://github.com/openclaw/skills/commit/46554cd803c30522fbe0ce61fdfdf450d169dd97"
+    "version": "1.0.3",
+    "publishedAt": 1776859710464,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165670323,
+      "commit": "https://github.com/openclaw/skills/commit/46554cd803c30522fbe0ce61fdfdf450d169dd97"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774058673284,
