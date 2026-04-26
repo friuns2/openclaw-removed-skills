@@ -23,6 +23,7 @@ from urllib.error import HTTPError, URLError
 sys.path.insert(0, os.path.dirname(__file__))
 
 from lib.auth import get_server_url, get_stored_key, handle_401, get_ssl_context, _format_connection_error
+from lib.version import default_headers, exit_if_upgrade_required
 
 from lib.paths import get_default_output_dir
 
@@ -48,60 +49,6 @@ def save_manifest(output_dir: str, manifest: dict):
     os.replace(tmp_path, manifest_path)
 
 
-def _fix_mojibake(text: str) -> str:
-    """Fix GBK→Latin-1 mojibake in a single string.
-
-    On Chinese Windows, text may be double-encoded: GBK bytes interpreted as
-    Latin-1 (each byte 0x80-0xFF mapped to the same Unicode code point), then
-    saved as UTF-8. This reverses that: encode as Latin-1 to recover the raw
-    GBK bytes, then decode as GBK to get correct Chinese.
-    """
-    try:
-        raw = text.encode("latin-1")
-        return raw.decode("gbk")
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        return text
-
-
-def _fix_mojibake_recursive(obj):
-    """Recursively fix mojibake in all string values of a JSON object."""
-    if isinstance(obj, str):
-        return _fix_mojibake(obj)
-    if isinstance(obj, list):
-        return [_fix_mojibake_recursive(item) for item in obj]
-    if isinstance(obj, dict):
-        return {k: _fix_mojibake_recursive(v) for k, v in obj.items()}
-    return obj
-
-
-def _repair_mojibake(file_path: str) -> bool:
-    """Detect and fix mojibake in a JSON file. Returns True if file was repaired."""
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    # Quick check: if no chars in 0x80-0xFF range, no mojibake possible
-    if not any("\x80" <= ch <= "\xff" for ch in content):
-        return False
-
-    try:
-        data = json.loads(content)
-    except json.JSONDecodeError:
-        return False
-
-    fixed = _fix_mojibake_recursive(data)
-    fixed_content = json.dumps(fixed, ensure_ascii=False, indent=2)
-
-    if fixed_content == json.dumps(data, ensure_ascii=False, indent=2):
-        return False
-
-    # Re-save the repaired file
-    tmp_path = file_path + ".tmp"
-    with open(tmp_path, "w", encoding="utf-8") as f:
-        f.write(fixed_content)
-    os.replace(tmp_path, file_path)
-    return True
-
-
 def _load_stats(trajectory_path: str) -> str | None:
     """Load the stats JSON file that corresponds to a trajectory file."""
     stats_path = trajectory_path.replace(".trajectory.json", ".stats.json").replace(".openai.json", ".stats.json")
@@ -111,28 +58,45 @@ def _load_stats(trajectory_path: str) -> str | None:
         return f.read()
 
 
+def _companion_paths(trajectory_path: str) -> tuple[str, str]:
+    """Return (prompt_hint_path, session_bundle_path) for the given trajectory.
+
+    New multi-adapter clients emit these alongside the trajectory; old
+    OpenClaw flows do not.  Either may be missing on disk, in which case
+    the upload omits the corresponding multipart field.
+    """
+    base = trajectory_path.replace(".trajectory.json", "").replace(".openai.json", "")
+    return f"{base}.prompt_hint.json", f"{base}.session_bundle.zip"
+
+
 def upload_file(server_url: str, secret_key: str, file_path: str, force: bool = False) -> dict:
-    """Upload a trajectory file to the server, with optional stats.
+    """Upload a trajectory file to the server, with optional companions.
+
+    Besides the legacy (file, stats, force) multipart fields, we also ship
+    ``prompt_hint`` and ``session_bundle`` when the adapter produced them
+    — matching the extended /upload contract from docs/adapter-design.md
+    §5.4.
 
     Args:
         force: If True, overwrite existing submission with same session_id.
     """
     filename = os.path.basename(file_path)
-
-    # Repair mojibake before upload (trajectory + stats)
-    repaired = []
-    if _repair_mojibake(file_path):
-        repaired.append(os.path.basename(file_path))
-    stats_path = file_path.replace(".trajectory.json", ".stats.json").replace(".openai.json", ".stats.json")
-    if os.path.isfile(stats_path) and _repair_mojibake(stats_path):
-        repaired.append(os.path.basename(stats_path))
-    if repaired:
-        print(f"  [encoding] Fixed mojibake in: {', '.join(repaired)}")
+    prompt_hint_path, session_bundle_path = _companion_paths(file_path)
 
     with open(file_path, "rb") as f:
         file_data = f.read()
 
     stats_json = _load_stats(file_path)
+
+    prompt_hint_json: str | None = None
+    if os.path.isfile(prompt_hint_path):
+        with open(prompt_hint_path, "r", encoding="utf-8") as f:
+            prompt_hint_json = f.read()
+
+    session_bundle_bytes: bytes | None = None
+    if os.path.isfile(session_bundle_path):
+        with open(session_bundle_path, "rb") as f:
+            session_bundle_bytes = f.read()
 
     boundary = "----ClawTracesBoundary9876543210"
     parts = (
@@ -151,6 +115,24 @@ def upload_file(server_url: str, secret_key: str, file_path: str, force: bool = 
             f"{stats_json}\r\n"
         ).encode("utf-8")
 
+    if prompt_hint_json:
+        parts += (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="prompt_hint"\r\n'
+            f"Content-Type: application/json\r\n"
+            f"\r\n"
+            f"{prompt_hint_json}\r\n"
+        ).encode("utf-8")
+
+    if session_bundle_bytes is not None:
+        bundle_name = os.path.basename(session_bundle_path)
+        parts += (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="session_bundle"; filename="{bundle_name}"\r\n'
+            f"Content-Type: application/zip\r\n"
+            f"\r\n"
+        ).encode("utf-8") + session_bundle_bytes + b"\r\n"
+
     if force:
         parts += (
             f"--{boundary}\r\n"
@@ -167,14 +149,18 @@ def upload_file(server_url: str, secret_key: str, file_path: str, force: bool = 
         data=body,
         headers={
             "Content-Type": f"multipart/form-data; boundary={boundary}",
-            "X-Secret-Key": secret_key,
-            "User-Agent": "ClawTraces/1.0",
+            **default_headers(secret_key),
         },
         method="POST",
     )
 
+    # Timeout scales with body size: 30s baseline is fine for a pure trajectory,
+    # but a 50MB session_bundle on a slow link needs room to breathe.
+    # Rough upper bound: 1 MB/s worst case plus a 30s cushion.
+    timeout_seconds = max(30, len(body) // (1024 * 1024) + 30)
+
     try:
-        with urlopen(req, timeout=30, context=get_ssl_context()) as resp:
+        with urlopen(req, timeout=timeout_seconds, context=get_ssl_context()) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except HTTPError as e:
         if e.code == 401:
@@ -183,6 +169,35 @@ def upload_file(server_url: str, secret_key: str, file_path: str, force: bool = 
         error_body = e.read().decode("utf-8", errors="replace")
         try:
             parsed = json.loads(error_body)
+            exit_if_upgrade_required(parsed)
+            if "error" not in parsed:
+                parsed["error"] = f"HTTP {e.code}"
+            return parsed
+        except (json.JSONDecodeError, ValueError):
+            return {"error": f"HTTP {e.code}", "detail": error_body}
+    except URLError as e:
+        return {"error": _format_connection_error(e.reason)}
+
+
+def fetch_recollections(server_url: str, secret_key: str) -> dict:
+    """Fetch the list of session_ids the server has flagged for re-collection.
+
+    Returns {"session_ids": [...], "total": N} on success, or {"error": ...}.
+    """
+    url = f"{server_url}/recollections"
+    req = Request(url, headers=default_headers(secret_key), method="GET")
+
+    try:
+        with urlopen(req, timeout=10, context=get_ssl_context()) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except HTTPError as e:
+        if e.code == 401:
+            handle_401()
+            return {"error": "unauthorized"}
+        error_body = e.read().decode("utf-8", errors="replace")
+        try:
+            parsed = json.loads(error_body)
+            exit_if_upgrade_required(parsed)
             if "error" not in parsed:
                 parsed["error"] = f"HTTP {e.code}"
             return parsed
@@ -195,7 +210,7 @@ def upload_file(server_url: str, secret_key: str, file_path: str, force: bool = 
 def query_count(server_url: str, secret_key: str) -> dict:
     """Query the server for submission count."""
     url = f"{server_url}/count"
-    req = Request(url, headers={"X-Secret-Key": secret_key, "User-Agent": "ClawTraces/1.0"}, method="GET")
+    req = Request(url, headers=default_headers(secret_key), method="GET")
 
     try:
         with urlopen(req, timeout=10, context=get_ssl_context()) as resp:
@@ -207,6 +222,7 @@ def query_count(server_url: str, secret_key: str) -> dict:
         error_body = e.read().decode("utf-8", errors="replace")
         try:
             parsed = json.loads(error_body)
+            exit_if_upgrade_required(parsed)
             if "error" not in parsed:
                 parsed["error"] = f"HTTP {e.code}"
             return parsed
@@ -283,7 +299,7 @@ def submit_all(
             auth_failed = True
             break
         elif result.get("error") == "workspace_required":
-            msg = result.get("message", "需要先提交 Workspace 配置才能继续")
+            msg = result.get("message", "需要先提交 Harness 才能继续")
             print(f"STOPPED ({msg})")
             error_count += 1
             break

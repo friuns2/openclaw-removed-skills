@@ -23,12 +23,11 @@ import json
 import os
 import sys
 import zipfile
-from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from lib.auth import get_server_url, get_stored_key, handle_401, get_ssl_context, _format_connection_error
+from lib.auth import get_server_url, get_stored_key
+from lib.harness import upload_harness
 from lib.pii_scrubber import scrub_text_with_stats
 
 from lib.paths import get_default_output_dir
@@ -83,12 +82,6 @@ def discover_workspaces(output_dir: str) -> list[dict]:
         try:
             with open(stats_path, "r", encoding="utf-8") as f:
                 stats = json.load(f)
-        except UnicodeDecodeError:
-            try:
-                with open(stats_path, "r", encoding="gbk") as f:
-                    stats = json.load(f)
-            except (json.JSONDecodeError, UnicodeDecodeError, OSError):
-                continue
         except (json.JSONDecodeError, OSError):
             continue
 
@@ -203,58 +196,17 @@ def create_workspace_bundle(agent_id: str, cwd: str, output_dir: str) -> tuple[s
 
 
 def upload_workspace(server_url: str, secret_key: str, zip_path: str, agent_id: str) -> dict:
-    """Upload a workspace zip to the server."""
-    filename = os.path.basename(zip_path)
+    """Upload a workspace zip to the server.
 
+    Thin wrapper over the generic harness uploader: OpenClaw workspace is
+    just one harness scope (adapter='openclaw', scope_type='agent',
+    scope_id=<agent_id>). Delegating here keeps a single code path for
+    every adapter's harness upload; new adapters plug in at
+    ``lib/harness/`` without touching this file.
+    """
     with open(zip_path, "rb") as f:
-        file_data = f.read()
-
-    boundary = "----ClawTracesWsBoundary9876543210"
-    parts = (
-        f"--{boundary}\r\n"
-        f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
-        f"Content-Type: application/zip\r\n"
-        f"\r\n"
-    ).encode("utf-8") + file_data + b"\r\n"
-
-    parts += (
-        f"--{boundary}\r\n"
-        f'Content-Disposition: form-data; name="agent_id"\r\n'
-        f"\r\n"
-        f"{agent_id}\r\n"
-    ).encode("utf-8")
-
-    body = parts + f"--{boundary}--\r\n".encode("utf-8")
-
-    url = f"{server_url}/upload-workspace"
-    req = Request(
-        url,
-        data=body,
-        headers={
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
-            "X-Secret-Key": secret_key,
-            "User-Agent": "ClawTraces/1.0",
-        },
-        method="POST",
-    )
-
-    try:
-        with urlopen(req, timeout=30, context=get_ssl_context()) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except HTTPError as e:
-        if e.code == 401:
-            handle_401()
-            return {"error": "unauthorized"}
-        error_body = e.read().decode("utf-8", errors="replace")
-        try:
-            parsed = json.loads(error_body)
-            if "error" not in parsed:
-                parsed["error"] = f"HTTP {e.code}"
-            return parsed
-        except (json.JSONDecodeError, ValueError):
-            return {"error": f"HTTP {e.code}", "detail": error_body}
-    except URLError as e:
-        return {"error": _format_connection_error(e.reason)}
+        zip_bytes = f.read()
+    return upload_harness(server_url, secret_key, "openclaw", "agent", agent_id, zip_bytes)
 
 
 def main():

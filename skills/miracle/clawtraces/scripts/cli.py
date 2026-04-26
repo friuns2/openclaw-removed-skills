@@ -28,10 +28,13 @@ from lib.auth import (
 )
 from lib.paths import get_default_output_dir
 from lib.session_index import find_openclaw_sessions_dirs
-from scan_and_convert import scan_and_convert, list_qualifying_sessions
-from review import process_reviews
-from submit import submit_all, query_count
+from pathlib import Path
+
+from lib.adapters.openclaw._list_ui import list_qualifying_sessions
+import scan_adapter
+from submit import submit_all, query_count, fetch_recollections, resubmit_one
 from query import query_submissions
+from sync import sync_manifest_from_server
 from workspace_bundle import discover_workspaces, create_workspace_bundle, upload_workspace
 
 DEFAULT_OUTPUT_DIR = get_default_output_dir()
@@ -134,16 +137,17 @@ def show_menu() -> str:
     """Display main menu and return selected mode."""
     _print_header("请选择操作")
     print()
-    print("  1. 采集并提交数据")
+    print("  1. 采集提交数据")
     print("  2. 查看提交记录")
-    print("  3. 提交 Workspace 配置")
+    print("  3. 提交 Harness")
+    print("  4. 自动重新补录")
     print()
 
     while True:
         raw = _prompt("选择", default="1")
-        if raw in ("1", "2", "3"):
-            return {"1": "submit", "2": "query", "3": "workspace"}[raw]
-        print("  ⚠️  请输入 1、2 或 3")
+        if raw in ("1", "2", "3", "4"):
+            return {"1": "submit", "2": "query", "3": "workspace", "4": "recollect"}[raw]
+        print("  ⚠️  请输入 1、2、3 或 4")
 
 
 # ── Phase 1: Auth ────────────────────────────────────────────
@@ -286,6 +290,10 @@ def list_and_select(
         "rejected": "🚫预审被拒",
         "model_mismatch": "⚠️ 模型不符",
         "cron_task": "🤖自动任务",
+        "turns_too_low": "⛔轮次不足",
+        "tool_use_too_low": "⛔工具不足",
+        "reasoning_too_low": "⛔推理不足",
+        "no_cache_trace": "⛔缺 cache",
     }
 
     HEADERS = ("#", "Session", "时间", "模型", "轮次", "状态", "摘要")
@@ -343,10 +351,8 @@ def list_and_select(
             nav_parts.append("p 上一页")
         if current_page < total_pages - 1:
             nav_parts.append("n 下一页")
-        if nav_parts:
-            print(f"  {hint}，输入序号，或 {' / '.join(nav_parts)}")
-        else:
-            print(f"  {hint}，或输入序号（如 1,3,5 或 2-4）")
+        nav_parts.append("q 退出")
+        print(f"  {hint}，输入序号，或 {' / '.join(nav_parts)}")
         print()
 
         raw = _prompt("选择", default=default_label)
@@ -366,6 +372,8 @@ def list_and_select(
             else:
                 print("  已经是第一页")
             continue
+        if cmd == "q":
+            sys.exit(0)
 
         selected = _parse_selection(raw, total)
         if selected is not None:
@@ -375,7 +383,14 @@ def list_and_select(
     selected_sessions = [sessions[i - 1] for i in selected]
 
     # Classify selected sessions by status
-    HARD_BLOCKED = {"model_mismatch": "模型不符", "cron_task": "自动任务"}
+    HARD_BLOCKED = {
+        "model_mismatch": "模型不符",
+        "cron_task": "自动任务",
+        "turns_too_low": "轮次不足",
+        "tool_use_too_low": "工具不足",
+        "reasoning_too_low": "推理不足",
+        "no_cache_trace": "缺 cache",
+    }
     FORCE_LABELS = {"active": "正在活跃", "rejected": "预审被拒"}
 
     processable = []
@@ -428,32 +443,32 @@ def list_and_select(
 
 
 def do_scan(
-    sessions_dirs: list[str],
     output_dir: str,
     session_ids: list[str],
 ) -> list[dict]:
-    """Run scan_and_convert for selected sessions. Returns candidates."""
+    """Run the openclaw adapter for selected sessions. Returns emitted entries."""
     print(f"\n⚙️  处理 {len(session_ids)} 条对话...")
 
-    candidates, filter_report = scan_and_convert(
-        sessions_dirs, output_dir, session_ids=session_ids,
+    result = scan_adapter.run(
+        "openclaw",
+        Path(output_dir),
+        explicit_session_ids=set(session_ids),
     )
+    emitted = result["emitted"]
+    filtered = result["filtered"]
 
-    passed = filter_report["passed"]
-    filtered = filter_report["filtered_count"]
-
-    if filtered > 0:
+    if filtered:
         reasons: dict[str, int] = {}
-        for f in filter_report["filtered"]:
+        for f in filtered:
             r = f["reason"]
             reasons[r] = reasons.get(r, 0) + 1
-        print(f"  {passed} 条通过，{filtered} 条未通过:")
+        print(f"  {len(emitted)} 条通过，{len(filtered)} 条未通过:")
         for reason, count in reasons.items():
             print(f"     - {reason}: {count}")
     else:
-        print(f"  {passed} 条全部通过")
+        print(f"  {len(emitted)} 条全部通过")
 
-    return candidates
+    return emitted
 
 
 # ── Phase 5: Submit ──────────────────────────────────────────
@@ -498,9 +513,16 @@ def do_submit(
 # ── Phase 6: Query ──────────────────────────────────────────
 
 
-def do_query(server_url: str, key: str):
-    """Query and display previously submitted sessions with pagination."""
+def do_query(server_url: str, key: str, output_dir: str):
+    """Query and display previously submitted sessions with pagination.
+
+    On entry, runs a full sweep of ``/submissions`` and merges server session_ids
+    into the local manifest so future scans don't re-surface already-submitted
+    sessions — even ones uploaded from another machine.
+    """
     print("\n📊 查询提交记录...")
+
+    sync_manifest_from_server(server_url, key, output_dir)
 
     page = 1
     while True:
@@ -512,13 +534,14 @@ def do_query(server_url: str, key: str):
 
         items = result.get("items", [])
         total = result.get("total", 0)
+        recollection_total = result.get("recollection_total", 0)
         total_pages = (total + PAGE_SIZE - 1) // PAGE_SIZE if total > 0 else 1
 
         if not items and page == 1:
             print("\n  暂无提交记录。")
             return
 
-        HEADERS = ("#", "标题", "领域", "模型", "轮次", "提交时间")
+        HEADERS = ("#", "标题", "领域", "模型", "轮次", "状态", "提交时间")
 
         rows = []
         for i, item in enumerate(items, (page - 1) * PAGE_SIZE + 1):
@@ -548,6 +571,8 @@ def do_query(server_url: str, key: str):
 
             turns = str(item.get("turns") or "")
 
+            status = "需重采" if item.get("recollection_required") else ""
+
             submitted_at = item.get("submitted_at") or ""
             time_str = ""
             if submitted_at:
@@ -563,7 +588,7 @@ def do_query(server_url: str, key: str):
                 except (ValueError, TypeError):
                     time_str = submitted_at[:16].replace("T", " ")
 
-            rows.append((str(i), title, domain, model, turns, time_str))
+            rows.append((str(i), title, domain, model, turns, status, time_str))
 
         widths = [max(_display_width(h), max((_display_width(r[ci]) for r in rows), default=0))
                   for ci, h in enumerate(HEADERS)]
@@ -580,7 +605,8 @@ def do_query(server_url: str, key: str):
             return "  " + "  ".join(parts)
 
         page_label = f"第 {page}/{total_pages} 页" if total_pages > 1 else ""
-        _print_header(f"提交记录（共 {total} 条）{' — ' + page_label if page_label else ''}")
+        recollect_suffix = f"，其中 {recollection_total} 条需重采" if recollection_total else ""
+        _print_header(f"提交记录（共 {total} 条{recollect_suffix}）{' — ' + page_label if page_label else ''}")
         print()
         print(_fmt_row(HEADERS))
         print("  " + "  ".join("─" * w for w in widths))
@@ -612,13 +638,130 @@ def do_query(server_url: str, key: str):
             print("  ⚠️  无效输入")
 
 
+# ── Phase 6b: Recollect ─────────────────────────────────────
+
+
+def _collect_local_session_ids(sessions_dirs: list[str]) -> set[str]:
+    """Scan every sessions_dir and return the set of session_ids that have
+    at least one local .jsonl file (live or .reset.* archived).
+
+    Handles all OpenClaw filename shapes (plain / topic / fork-timestamped)
+    by reading the ``{"type":"session","id":...}`` header; falls back to
+    the filename stem for legacy files with no header.
+    """
+    from lib.parse.session_index import read_session_id_from_header
+
+    local_ids: set[str] = set()
+    for d in sessions_dirs:
+        try:
+            entries = os.listdir(d)
+        except OSError:
+            continue
+        for fn in entries:
+            if ".jsonl" not in fn:
+                continue
+            file_path = os.path.join(d, fn)
+            sid = read_session_id_from_header(file_path)
+            if not sid:
+                # Legacy fallback for pre-header files: name may be
+                # "<sid>.jsonl" or "<sid>.jsonl.reset.<...>".
+                sid = fn.split(".jsonl", 1)[0]
+            if sid:
+                local_ids.add(sid)
+    return local_ids
+
+
+def do_recollect(
+    server_url: str,
+    key: str,
+    sessions_dirs: list[str],
+    output_dir: str,
+):
+    """Re-collect sessions the server has flagged for re-collection.
+
+    Flow: pull /recollections → intersect with local JSONL files → confirm →
+    scan+convert via explicit-session-ids (pipeline bypasses the "already
+    submitted" filter in explicit mode) → force-resubmit each one.
+    """
+    print("\n🔄 查找需要重采的数据列表...")
+    result = fetch_recollections(server_url, key)
+    if "error" in result:
+        print(f"  ❌ 拉取失败: {result.get('message') or result['error']}")
+        return
+
+    server_ids = result.get("session_ids", []) or []
+    server_total = result.get("total", len(server_ids))
+
+    if not server_ids:
+        print("  ✅ 暂无待重采数据。")
+        return
+
+    local_ids = _collect_local_session_ids(sessions_dirs)
+    available = [sid for sid in server_ids if sid in local_ids]
+    skipped = server_total - len(available)
+
+    print(f"  找到了 {server_total} 条标记为待重采的记录，本地有对应数据 {len(available)} 条")
+    if skipped > 0:
+        print(f"  （本地无对应 JSONL 的 {skipped} 条将被跳过）")
+
+    if not available:
+        print("\n  本地暂无可重采的数据。")
+        return
+
+    print()
+    if not _confirm(
+        f"本次有 {len(available)} 条数据可以自动重新采集，是否继续？",
+        default_yes=False,
+    ):
+        print("  已取消。")
+        return
+
+    # Re-scan — explicit_session_ids bypasses pipeline's "already submitted" filter
+    emitted = do_scan(output_dir, available)
+    if not emitted:
+        print("\n所选对话全部未通过重采筛选。")
+        return
+
+    passed_ids = [e["session_id"] for e in emitted]
+
+    # Force re-upload each (overwrites server record, clears
+    # recollection_required, stamps last_resubmit_at)
+    print(f"\n📤 重新提交 {len(passed_ids)} 条...")
+    success = 0
+    failed = 0
+    for sid in passed_ids:
+        res = resubmit_one(sid, output_dir, server_url, key)
+        if "error" in res:
+            failed += 1
+            if res.get("error") == "unauthorized":
+                break
+        else:
+            success += 1
+
+    status = f"\n✅ 重采完成: {success} 条成功"
+    if failed:
+        status += f"，{failed} 条失败"
+    print(status)
+
+
 # ── Phase 7: Workspace ─────────────────────────────────────
 
 
-def do_workspace(server_url: str, key: str, output_dir: str, silent_skip: bool = False) -> bool:
+def do_workspace(
+    server_url: str,
+    key: str,
+    output_dir: str,
+    silent_skip: bool = False,
+    allow_resubmit: bool = False,
+) -> bool:
     """Bundle and upload workspace configuration.
 
     Returns True if workspace was submitted successfully, False otherwise.
+
+    When ``allow_resubmit`` is True and a harness is already on record, the
+    user is offered an explicit "覆盖提交" entry point (for when local config
+    has changed). Gate / side-trigger call sites leave it False so they stay
+    silent on already-submitted state.
     """
     # Check if already submitted
     count_result = query_count(server_url, key)
@@ -629,15 +772,19 @@ def do_workspace(server_url: str, key: str, output_dir: str, silent_skip: bool =
     if count_result.get("workspace_submitted"):
         if silent_skip:
             return True
-        print("\n  ✅ Workspace 配置已提交，无需重复操作。")
-        return True
+        if not allow_resubmit:
+            print("\n  ✅ Harness 已提交，无需重复操作。")
+            return True
+        print("\n  ✅ Harness 已提交。如本地配置已变化，可重新提交覆盖。")
+        if not _confirm("是否重新提交？", default_yes=False):
+            return True
 
-    print("\n📦 提交 Workspace 配置...")
+    print("\n📦 提交 Harness...")
 
     # Discover workspaces
     workspaces = discover_workspaces(output_dir)
     if not workspaces:
-        print("  ⚠️  未发现可用的 Workspace（需要先提交过对话数据）。")
+        print("  ⚠️  未发现可用的 Harness（需要先提交过对话数据）。")
         return False
 
     # Bundle each workspace
@@ -647,7 +794,7 @@ def do_workspace(server_url: str, key: str, output_dir: str, silent_skip: bool =
         cwd = ws["cwd"]
 
         if not os.path.isdir(cwd):
-            print(f"  ⚠️  Workspace 目录不存在，跳过: {cwd}")
+            print(f"  ⚠️  工作区目录不存在，跳过: {cwd}")
             continue
 
         zip_path, scrub_report = create_workspace_bundle(agent_id, cwd, output_dir)
@@ -660,7 +807,7 @@ def do_workspace(server_url: str, key: str, output_dir: str, silent_skip: bool =
         bundles.append((agent_id, zip_path, scrub_report))
 
     if not bundles:
-        print("  ❌ 没有可提交的 Workspace 配置。")
+        print("  ❌ 没有可提交的 Harness。")
         return False
 
     # Show PII scrub report
@@ -677,7 +824,7 @@ def do_workspace(server_url: str, key: str, output_dir: str, silent_skip: bool =
     else:
         print("\n  未检测到需要脱敏的敏感信息。")
 
-    if not _confirm("是否确认提交 Workspace 配置？"):
+    if not _confirm("是否确认提交 Harness？"):
         # Clean up zips
         for _, zip_path, _ in bundles:
             try:
@@ -704,10 +851,10 @@ def do_workspace(server_url: str, key: str, output_dir: str, silent_skip: bool =
             pass
 
     if success > 0:
-        print(f"\n  ✅ Workspace 配置提交完成（{success} 个）")
+        print(f"\n  ✅ Harness 提交完成（{success} 个）")
         return True
     else:
-        print("\n  ❌ Workspace 配置提交失败")
+        print("\n  ❌ Harness 提交失败")
         return False
 
 
@@ -730,15 +877,15 @@ def check_workspace_gate(server_url: str, key: str, output_dir: str) -> bool:
         return True
 
     print(f"\n  ⚠️  你已提交 {count} 条数据（达到 {threshold} 条阈值），")
-    print(f"  需要先提交 Workspace 配置才能继续采集。")
-    print(f"  Workspace 包含你的 SOUL.md、USER.md 等配置文件，")
+    print(f"  需要先提交 Harness 才能继续采集。")
+    print(f"  Harness 包含你的 SOUL.md、USER.md 等配置文件，")
     print(f"  所有文件会在本地自动脱敏后再提交。")
     print()
 
     if do_workspace(server_url, key, output_dir):
         return True
     else:
-        print("\n  ❌ 未完成 Workspace 提交，无法继续采集。")
+        print("\n  ❌ 未完成 Harness 提交，无法继续采集。")
         return False
 
 
@@ -753,13 +900,13 @@ def maybe_trigger_workspace(result: dict, server_url: str, key: str, output_dir:
 
     print(f"\n{'━' * 56}")
     print(f"  你已提交 {server_total} 条数据（达到 {threshold} 条阈值）。")
-    print(f"  为提升数据质量，我们希望额外采集你的 Workspace 配置文件")
-    print(f"  （SOUL.md、USER.md 等）。这是一次性采集，所有文件会在")
-    print(f"  本地自动脱敏后再提交。")
+    print(f"  为提升数据质量，我们希望采集你的 Harness")
+    print(f"  （SOUL.md、USER.md 等配置文件）。这是一次性采集，所有")
+    print(f"  文件会在本地自动脱敏后再提交。")
     print(f"{'━' * 56}")
     print()
 
-    if _confirm("是否同意提交 Workspace 配置？"):
+    if _confirm("是否同意提交 Harness？"):
         do_workspace(server_url, key, output_dir, silent_skip=True)
 
 
@@ -781,12 +928,22 @@ def main():
     mode = show_menu()
 
     if mode == "query":
-        do_query(server_url, key)
+        os.makedirs(output_dir, exist_ok=True)
+        do_query(server_url, key, output_dir)
         return
 
     if mode == "workspace":
         os.makedirs(output_dir, exist_ok=True)
-        do_workspace(server_url, key, output_dir)
+        do_workspace(server_url, key, output_dir, allow_resubmit=True)
+        return
+
+    if mode == "recollect":
+        os.makedirs(output_dir, exist_ok=True)
+        sessions_dirs = find_openclaw_sessions_dirs()
+        if not sessions_dirs:
+            print("\n❌ 未找到 OpenClaw sessions 目录。")
+            sys.exit(1)
+        do_recollect(server_url, key, sessions_dirs, output_dir)
         return
 
     # mode == "submit"
@@ -808,17 +965,13 @@ def main():
         return
 
     # Phase 4: Scan & convert selected sessions
-    candidates = do_scan(sessions_dirs, output_dir, selected_ids)
-    if not candidates:
+    emitted = do_scan(output_dir, selected_ids)
+    if not emitted:
         print("\n所选对话全部未通过质量检查，无法提交。")
         return
 
-    # Auto-approve all candidates (use heuristic domain/title)
-    reviews = [{"session_id": c["session_id"], "verdict": "pass"} for c in candidates]
-    process_reviews(output_dir, reviews)
-
-    # Phase 5: Submit (only the sessions that passed scan_and_convert)
-    passed_ids = [c["session_id"] for c in candidates]
+    # Phase 5: Submit (stats/domain/title use heuristic values directly)
+    passed_ids = [e["session_id"] for e in emitted]
     result = do_submit(output_dir, server_url, key, passed_ids)
 
     # Phase 6: Maybe trigger workspace

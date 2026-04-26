@@ -88,9 +88,9 @@ python3 /{{baseDir}}/scripts/env_check.py
   > ✅ 环境已就绪。你可以：
   > - **📋 采集数据** — 列出可采集的对话，选择后提交
   > - **📊 查看进度** — 已提交多少条、查看提交记录
-  > - **📦 提交 Workspace** — 提交工作区配置文件
+  > - **📦 提交 Harness** — 提交你的 SOUL.md、USER.md 等配置文件
 
-  **必须原样输出上面的提示，不要自行增减内容，然后停下来等待用户回复。** 用户回复后根据语义判断进入步骤 2（采集）、步骤 5（查看进度）或步骤 5.5（提交 Workspace）。
+  **必须原样输出上面的提示，不要自行增减内容，然后停下来等待用户回复。** 用户回复后根据语义判断进入步骤 2（采集）、步骤 5（查看进度）或步骤 5.5（提交 Harness）。
 
 ---
 
@@ -101,7 +101,7 @@ python3 /{{baseDir}}/scripts/env_check.py
 **2.1 列出对话清单**
 
 ```bash
-python3 /{{baseDir}}/scripts/scan_and_convert.py --list-only
+python3 /{{baseDir}}/scripts/scan_adapter.py --adapter openclaw --list-only
 ```
 
 脚本输出 JSON 对象（分页），包含以下字段：
@@ -118,7 +118,7 @@ python3 /{{baseDir}}/scripts/scan_and_convert.py --list-only
 |-----------|------|---------|
 | `null` | 正常，可直接处理提交 | ✅ |
 | `"active"` | 当前活跃对话（尚未 /new 或 /reset） | ✅ 需通过 `--sessions` 显式指定 |
-| `"rejected"` | 已在之前的初审中被标记为不合格 | ❌ |
+| `"rejected"` | 之前的扫描中被硬过滤（如轮次不足、模型不合格） | ❌ |
 | `"model_mismatch"` | 使用的模型不在采集白名单中 | ❌ |
 
 将 `items` 以表格形式展示给用户。status 映射为中文标记：
@@ -147,7 +147,7 @@ python3 /{{baseDir}}/scripts/scan_and_convert.py --list-only
 **分页**：当 `has_more` 为 true 时，展示"还有 {total - page*page_size} 条，回复「更多」查看下一页"。用户说"更多"时执行：
 
 ```bash
-python3 /{{baseDir}}/scripts/scan_and_convert.py --list-only --page 2
+python3 /{{baseDir}}/scripts/scan_adapter.py --adapter openclaw --list-only --page 2
 ```
 
 继续展示下一页内容，累加到之前的列表上下文中。页码递增直到 `has_more` 为 false。
@@ -165,7 +165,7 @@ python3 /{{baseDir}}/scripts/scan_and_convert.py --list-only --page 2
 确定要处理的 session_id 列表后，执行：
 
 ```bash
-python3 /{{baseDir}}/scripts/scan_and_convert.py --sessions <id1> <id2> <id3>
+python3 /{{baseDir}}/scripts/scan_adapter.py --adapter openclaw --sessions <id1> <id2> <id3>
 ```
 
 #### 快捷方式：指定数量
@@ -173,7 +173,7 @@ python3 /{{baseDir}}/scripts/scan_and_convert.py --sessions <id1> <id2> <id3>
 如果用户在一开始就说了"最近 3 条"、"处理 5 个"等指定数量的表达，可以跳过列表直接使用 `--limit` 参数：
 
 ```bash
-python3 /{{baseDir}}/scripts/scan_and_convert.py --limit <N>
+python3 /{{baseDir}}/scripts/scan_adapter.py --adapter openclaw --limit <N>
 ```
 
 #### 快捷方式：按日期范围
@@ -183,13 +183,13 @@ python3 /{{baseDir}}/scripts/scan_and_convert.py --limit <N>
 将用户的日期表达转换为 YYYY-MM-DD 格式，使用 `--since` 参数：
 
 ```bash
-python3 /{{baseDir}}/scripts/scan_and_convert.py --since <YYYY-MM-DD>
+python3 /{{baseDir}}/scripts/scan_adapter.py --adapter openclaw --since <YYYY-MM-DD>
 ```
 
 `--since` 可与 `--limit` 组合使用。例如"最近一周的前 5 条"：
 
 ```bash
-python3 /{{baseDir}}/scripts/scan_and_convert.py --since 2026-03-29 --limit 5
+python3 /{{baseDir}}/scripts/scan_adapter.py --adapter openclaw --since 2026-03-29 --limit 5
 ```
 
 #### 处理结果（所有模式共用）
@@ -200,10 +200,9 @@ python3 /{{baseDir}}/scripts/scan_and_convert.py --since 2026-03-29 --limit 5
 - 从 cache-trace 提取真实 system prompt（自动模式下无数据则跳过；`--sessions` 显式指定时使用重建 prompt）
 - 为每个通过的 session 自动生成启发式 domain（基于工具使用模式）和 title（基于第一条用户消息）
 - 生成 .trajectory.json 文件和 .stats.json 文件
-- 输出 candidates.json（含每个候选的用户消息，供语义初审）
 
 脚本 stdout 输出 JSON 对象，包含两个字段：
-- `candidates`：通过所有过滤的候选列表（摘要信息，不含 user_messages）
+- `candidates`：通过所有过滤的候选列表（session_id、turns、domain、model 等摘要字段）
 - `filter_report`：过滤报告，包含 `total_found`（发现总数）、`total_scanned`（实际处理数）、`pre_filter`（前置过滤计数）、`passed`（通过数）、`filtered_count`（被过滤数）、`filtered`（每个被过滤 session 的 session_id、topic、reason、detail）
 
 **展示过滤报告**：当 `filter_report.filtered_count > 0` 时，向用户展示过滤摘要。按 reason 分组，默认展示每条的 detail 和 session_id，例如：
@@ -230,104 +229,13 @@ python3 /{{baseDir}}/scripts/scan_and_convert.py --since 2026-03-29 --limit 5
 
 如果 `total_found` 为 0，说明没有使用支持模型的对话，单独说明。
 
-**如果有候选**：展示扫描结果（候选数量、每个 session 的模型、轮次和启发式 domain），然后继续步骤 3。
+**如果有候选**：展示扫描结果（候选数量、每个 session 的模型、轮次和启发式 domain），然后继续步骤 3。启发式 domain（由工具使用模式推断）和启发式 title（第一条用户消息截断）直接作为最终值使用；数据的语义质检下沉到服务端打分 + 人工终审阶段。
 
 ---
 
-### 步骤 3：语义初审 + 领域/标题审核（合并为一次判断）
+### 步骤 3：Harness 门槛检查（进入提交前）
 
-每个候选已有启发式 domain（基于工具使用模式推断）和 title（基于第一条用户消息截断）。本步骤审核并改善这些值。
-
-读取 `output/candidates.json` 文件，对每个候选 session 的 `user_messages` 字段完成：
-
-1. **初审判定**：PASS 或 FAIL（这是系统自动初审，不代表最终人工审核结果）
-2. **领域分类**：审核启发式 domain 是否准确，必要时纠正为 13 个领域中更匹配的一个
-3. **标题改善**：将启发式 title（截断的用户消息）改写为更精炼的任务概括
-
-#### 分批审核
-
-为控制单次上下文消耗，当候选数量 **超过 15 个**时，**必须分批审核**：
-
-1. 将 candidates.json 按每批 15 个分组
-2. 每批读取对应范围的候选（例如第 1-15 个、第 16-30 个...），逐批完成初审判定和领域/标题审核
-3. 每批审核完成后立即执行该批的后续处理（更新 stats / 调用 reject.py），再进入下一批
-4. 所有批次处理完毕后，汇总结果进入步骤 4
-
-候选数量 ≤ 15 个时，一次性处理即可。
-
-#### 初审判定标准
-
-**合格（PASS）** — 满足以下任一条件：
-- 用户围绕一个明确的任务目标在与 AI 协作（如开发功能、分析数据、撰写文档、解决技术问题等）
-- 对话涉及特定领域的专业知识探讨（如编程、系统运维、数据分析、金融、内容创作等）
-- 用户在进行有深度的信息调研或方案设计
-- 对话体现了多轮迭代推进的工作过程（需求描述 → 方案讨论 → 执行 → 调整）
-
-**不合格（FAIL）** — 满足以下任一条件：
-- 用户消息几乎全是简单指令（"继续"、"好的"、"下一个"），没有实质性需求描述
-- 对话内容是闲聊、打招呼、测试 AI 能力（"你是谁"、"讲个笑话"、"hello"）
-- 用户在做重复性的简单操作，没有专业知识深度
-- 对话内容涉及不当、违规或纯粹无意义的灌水
-
-#### 领域分类（13 选 1）
-
-根据用户消息的核心意图，从以下 13 个领域中选择最匹配的：
-
-| ID | 名称 | 判定要点 |
-|----|------|---------|
-| `development` | 软件开发与工程 | 写代码、调试、测试、Git 操作、架构设计 |
-| `system_admin` | 系统运维与管理 | 装软件、配服务器、管文件、网络/防火墙 |
-| `data_analysis` | 数据分析与建模 | 数据清洗、统计、可视化、机器学习 |
-| `research` | 研究与信息检索 | 调研、对比方案、文献查找、行业分析 |
-| `content_creation` | 内容与文案创作 | 写文章、翻译、润色、报告、营销文案 |
-| `communication` | 通信与消息管理 | 飞书/微信/邮件/Telegram 消息收发 |
-| `media_processing` | 多媒体内容处理 | 图片/视频/音频处理、OCR、TTS |
-| `automation` | 工作流与智能体编排 | 自动化脚本、定时任务、pipeline、agent |
-| `monitoring` | 系统监控与诊断 | 监控告警、日志分析、性能诊断、健康检查 |
-| `scheduling` | 日程与任务管理 | 日程安排、待办、提醒、日报周报 |
-| `knowledge_mgmt` | 知识与记忆管理 | 笔记、知识库、归档、RAG 检索 |
-| `finance` | 金融与量化交易 | 股票/基金/加密货币、量化策略、回测 |
-| `crm` | 客户与业务运营 | 客户管理、销售、电商、订单运营 |
-
-**判定原则**：基于用户的核心意图而非表面关键词。例如「用 Playwright 截图对比监控网页变化」核心意图是监控，应分类为 `monitoring` 而非 `development`。详细的边界判定规则参考 `showcase/domain-categories.md`。
-
-#### 输出格式
-
-对每个候选输出：
-- **初审结果**：PASS 或 FAIL + 简短理由（不超过 20 字）。注意：展示时必须使用「初审结果」而非「审核结果」，以明确这是系统自动初审，提交后还需经过人工终审
-- **领域**：13 个 ID 之一（仅 PASS 的需要）
-- **标题**：一句话概括该 session 的核心任务（不超过 30 字，仅 PASS 的需要）。例如「为 React 项目添加用户认证模块」「分析 Q1 销售数据并生成可视化报告」
-
-#### 后续处理
-
-审核完成后，将所有结果（PASS 和 FAIL）合并为一个 JSON 数组，一次性提交给 `review.py` 处理：
-
-```bash
-python3 /{{baseDir}}/scripts/review.py <<'EOF'
-[
-  {"session_id": "xxx", "verdict": "pass", "domain": "development", "title": "为 React 项目添加认证"},
-  {"session_id": "yyy", "verdict": "fail", "reason": "纯闲聊无实质内容"}
-]
-EOF
-```
-
-每个条目必须包含 `session_id` 和 `verdict`（`"pass"` 或 `"fail"`）。PASS 的需要 `domain`（13 个领域 ID 之一）和 `title`；FAIL 的可选 `reason`。
-
-脚本自动完成：
-- PASS：更新 stats 文件的 domain、title、review_status
-- FAIL：删除 trajectory 和 stats 文件，记录到 manifest.json 的 `rejected` 字段
-
-输出 JSON 汇总：`{"passed": N, "rejected": M, "errors": [...]}`。
-
-**如果所有候选均 FAIL**：本次流程结束，不继续步骤 4。输出：
-
-> 本次初审的所有候选均未通过语义质量检查，没有可提交的数据。
-
----
-
-### 步骤 3.5：Workspace 门槛检查（进入提交前）
-
-在展示待提交列表之前，先检查是否需要强制提交 Workspace 配置：
+在展示待提交列表之前，先检查是否需要强制提交 Harness：
 
 ```bash
 python3 -c "
@@ -343,16 +251,16 @@ print(json.dumps(result, indent=2))
 检查返回的 `workspace_force_required`、`workspace_threshold`、`workspace_submitted`、`count` 字段：
 
 - 如果 `workspace_force_required == true` 且 `count >= workspace_threshold` 且 `workspace_submitted == false`：
-  - 告知用户：「你已提交 {count} 条数据（达到 {threshold} 条阈值），需要先提交 Workspace 配置才能继续采集。」
-  - 自动进入步骤 5.5（提交 Workspace）
-  - Workspace 提交成功后继续步骤 4；用户拒绝则流程结束
+  - 告知用户：「你已提交 {count} 条数据（达到 {threshold} 条阈值），需要先提交 Harness 才能继续采集。」
+  - 自动进入步骤 5.5（提交 Harness）
+  - Harness 提交成功后继续步骤 4；用户拒绝则流程结束
 - 否则：直接进入步骤 4
 
 ---
 
 ### 步骤 4：提交
 
-展示通过初审的最终待提交列表，格式如下：
+展示最终待提交列表，格式如下：
 
 ```
 找到 N 条可提交的日志：
@@ -375,21 +283,21 @@ python3 /{{baseDir}}/scripts/submit.py
 
 提交完成后展示：本次提交数量 + 你累计已提交的数量（注意：这是当前用户个人的提交总数，不是全平台的）。并提示用户可以说「查看提交记录」来查看历史提交。
 
-**workspace_required 错误处理**：如果提交过程中某条记录返回 `workspace_required` 错误（服务端 403），说明用户需要先提交 Workspace 配置。告知用户原因，自动进入步骤 5.5。Workspace 提交成功后，可重新运行提交。
+**workspace_required 错误处理**：如果提交过程中某条记录返回 `workspace_required` 错误（服务端 403），说明用户需要先提交 Harness。告知用户原因，自动进入步骤 5.5。Harness 提交成功后，可重新运行提交。
 
 提交脚本的输出中包含 `workspace_threshold`、`workspace_submitted`、`workspace_force_required` 字段，用于判断是否触发步骤 4.5。
 
 ---
 
-### 步骤 4.5：Workspace 配置采集（条件触发）
+### 步骤 4.5：Harness 采集（条件触发）
 
 **触发条件**：步骤 4 提交完成后，如果满足以下两个条件则触发：
 1. 用户累计提交数量 ≥ `workspace_threshold`（阈值由服务端控制）
-2. `workspace_submitted` 为 false（尚未提交过 workspace）
+2. `workspace_submitted` 为 false（尚未提交过 Harness）
 
 如果不满足条件，静默跳过此步骤。
 
-注意：此步骤是**推荐性**提示，无论 `workspace_force_required` 是否启用都会触发。用户可以拒绝。强制拦截由步骤 3.5 和服务端 403 保证。
+注意：此步骤是**推荐性**提示，无论 `workspace_force_required` 是否启用都会触发。用户可以拒绝。强制拦截由步骤 3 和服务端 403 保证。
 
 **触发后**：
 
@@ -397,7 +305,7 @@ python3 /{{baseDir}}/scripts/submit.py
 
 告知用户：
 
-> 你已提交 {count} 条数据（达到 {threshold} 条阈值）。为提升数据质量，我们希望额外采集你的 Workspace 配置文件（SOUL.md、USER.md 等）。这是一次性采集，所有文件会在本地自动脱敏后再提交。是否同意？
+> 你已提交 {count} 条数据（达到 {threshold} 条阈值）。为提升数据质量，我们希望采集你的 Harness（SOUL.md、USER.md 等配置文件）。这是一次性采集，所有文件会在本地自动脱敏后再提交。是否同意？
 
 **等待用户确认。** 用户拒绝则跳过此步骤。
 
@@ -473,9 +381,9 @@ python3 /{{baseDir}}/scripts/query.py [--page N] [--page-size N]
 
 ---
 
-### 步骤 5.5：独立 Workspace 提交
+### 步骤 5.5：独立 Harness 提交
 
-**触发**：用户说「提交 Workspace」「提交工作区配置」「workspace」等。
+**触发**：用户说「提交 Harness」「提交 Workspace」「提交工作区配置」「workspace」等。
 
 #### 5.5.1 查询已提交状态
 
@@ -493,9 +401,9 @@ print(json.dumps(query_count(get_server_url(), get_stored_key()), indent=2))
 
 #### 5.5.2 已提交过的提醒（workspace_submitted == true）
 
-如果用户之前已经提交过 Workspace 配置，**不要拒绝**，而是原样输出以下提示并 **停下来等待用户回复**：
+如果用户之前已经提交过 Harness，**不要拒绝**，而是原样输出以下提示并 **停下来等待用户回复**：
 
-> 你之前已经提交过 Workspace 配置。如果你本地的配置文件有了更新（比如 SOUL.md、USER.md、memory/ 下的内容有新变化），可以再提交一份最新版本，后端会保留所有历史版本作为参考。
+> 你之前已经提交过 Harness。如果你本地的配置文件有了更新（比如 SOUL.md、USER.md、memory/ 下的内容有新变化），可以再提交一份最新版本，后端会保留所有历史版本作为参考。
 >
 > 是否需要提交一份新版本？
 
@@ -562,7 +470,6 @@ python3 /{{baseDir}}/scripts/submit.py --resubmit {session_id}
 {workspace}/.clawtraces/
 ├── .env                             # API key + server URL
 └── output/
-    ├── candidates.json              # 扫描结果（候选 session 列表，含用户消息）
     ├── {session_id}.trajectory.json # 转换后的 Anthropic trajectory 文件
     ├── {session_id}.stats.json      # session 元数据
     └── manifest.json                # 提交记录 + 拒绝记录（已处理 session 跟踪）
@@ -572,7 +479,7 @@ python3 /{{baseDir}}/scripts/submit.py --resubmit {session_id}
 
 - **认证完成后必须原样输出提示文案并等待用户指令**，不要自动开始采集，不要自行增减提示内容
 - `--list-only` 是轻量操作（只读索引和文件元数据），不消耗大量资源
-- `--limit N` 只处理最近 N 个对话，减少处理量和后续语义审核的 token 消耗
+- `--limit N` 只处理最近 N 个对话
 - `--since YYYY-MM-DD` 只处理该日期之后的对话，可与 `--limit` 组合使用
 - `--sessions` 指定的对话会跳过"活跃"和"已提交"的自动过滤，因为用户明确选择了它们
 - `--list-only` 列出除已提交外的所有对话（包括活跃、已拒绝、模型不符的），用 `status` 字段区分

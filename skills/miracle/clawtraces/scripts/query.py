@@ -19,6 +19,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 from lib.auth import get_server_url, get_stored_key, handle_401, get_ssl_context, _format_connection_error
+from lib.version import default_headers, exit_if_upgrade_required
 
 
 def query_submissions(server_url: str, secret_key: str,
@@ -28,7 +29,7 @@ def query_submissions(server_url: str, secret_key: str,
     from urllib.error import HTTPError, URLError
 
     url = f"{server_url}/submissions?page={page}&page_size={page_size}"
-    req = Request(url, headers={"X-Secret-Key": secret_key, "User-Agent": "ClawTraces/1.0"}, method="GET")
+    req = Request(url, headers=default_headers(secret_key), method="GET")
 
     try:
         with urlopen(req, timeout=30, context=get_ssl_context()) as resp:
@@ -40,6 +41,7 @@ def query_submissions(server_url: str, secret_key: str,
         error_body = e.read().decode("utf-8", errors="replace")
         try:
             parsed = json.loads(error_body)
+            exit_if_upgrade_required(parsed)
             if "error" not in parsed:
                 parsed["error"] = f"HTTP {e.code}"
             return parsed

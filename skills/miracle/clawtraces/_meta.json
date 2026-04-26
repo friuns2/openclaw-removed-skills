@@ -1,13 +1,18 @@
 {
   "owner": "miracle",
   "slug": "clawtraces",
-  "displayName": "Tmp.4zmXoYsJt3",
+  "displayName": "Tmp.F4uxZi4Lp8",
   "latest": {
-    "version": "1.2.5",
-    "publishedAt": 1776077084959,
-    "commit": "https://github.com/openclaw/skills/commit/40d761724499cb08a6e0cc45dac4343be06c7f03"
+    "version": "2.0.8",
+    "publishedAt": 1776944686644,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.5",
+      "publishedAt": 1776077084959,
+      "commit": "https://github.com/openclaw/skills/commit/40d761724499cb08a6e0cc45dac4343be06c7f03"
+    },
     {
       "version": "1.2.4",
       "publishedAt": 1775842727680,
