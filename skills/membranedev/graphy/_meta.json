@@ -3,11 +3,16 @@
   "slug": "graphy",
   "displayName": "Graphy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775165324651,
-    "commit": "https://github.com/openclaw/skills/commit/8d633571b0d9c490c5294c2cf7a83349d13de7e3"
+    "version": "1.0.3",
+    "publishedAt": 1776846733957,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775165324651,
+      "commit": "https://github.com/openclaw/skills/commit/8d633571b0d9c490c5294c2cf7a83349d13de7e3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774015340864,
