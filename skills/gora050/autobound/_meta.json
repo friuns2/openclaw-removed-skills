@@ -3,11 +3,16 @@
   "slug": "autobound",
   "displayName": "Autobound",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167214067,
-    "commit": "https://github.com/openclaw/skills/commit/9bb46af1bd0bd9d095437ae4b908b4ece2fa21e1"
+    "version": "1.0.3",
+    "publishedAt": 1776860963660,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167214067,
+      "commit": "https://github.com/openclaw/skills/commit/9bb46af1bd0bd9d095437ae4b908b4ece2fa21e1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774393432093,
