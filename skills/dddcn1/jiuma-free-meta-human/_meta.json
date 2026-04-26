@@ -3,11 +3,16 @@
   "slug": "jiuma-free-meta-human",
   "displayName": "九马免费对口型数字人",
   "latest": {
-    "version": "1.0.12",
-    "publishedAt": 1776145404990,
-    "commit": "https://github.com/openclaw/skills/commit/0763f78ae7b0bb2e2713b40169ccc631bd9a71d2"
+    "version": "1.0.13",
+    "publishedAt": 1777012263875,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.12",
+      "publishedAt": 1776145404990,
+      "commit": "https://github.com/openclaw/skills/commit/0763f78ae7b0bb2e2713b40169ccc631bd9a71d2"
+    },
     {
       "version": "1.0.11",
       "publishedAt": 1775212833552,

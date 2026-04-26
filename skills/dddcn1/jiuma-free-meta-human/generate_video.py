@@ -9,18 +9,21 @@ import sys
 import json
 import argparse
 import traceback
-
+import uuid
 import requests
 from typing import Dict
 import codecs
 from utils import JIUMA_API_KEY_SAVE_PATH, get_jiuma_api_key
-from login import login_prepare
 
 # Windows终端编码处理
 if sys.platform == "win32":
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
 
+
+# 获取mac 地址
+# def get_mac():
+#     return ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1])
 
 class JiumaVideoGenerator:
     def __init__(self, api_key):
@@ -30,7 +33,7 @@ class JiumaVideoGenerator:
             "X-Secret-Key": api_key,
         }
 
-    def generate_video(self, human_id: int, voice_id: int, text: str) -> Dict:
+    def generate_video(self, human_id: str, voice_id: str, text: str) -> Dict:
         """
         生成数字人视频
         """
@@ -120,26 +123,21 @@ class JiumaVideoGenerator:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="九马AI数字人生成工具")
-    parser.add_argument("--action", type=str, help="create或check", required=True)
-    parser.add_argument("--text", type=str, help="文本那内容", required=False)
-    parser.add_argument("--human_id", type=int, help="数字人id", required=False)
-    parser.add_argument("--voice_id", type=int, help="音色id", required=False)
-    parser.add_argument("--human_video_id", type=int, help="human_video_id", required=False)
-    args = parser.parse_args()
-
-    action = args.action
-    text = args.text
-    human_id = args.human_id
-    voice_id = args.voice_id
-    human_video_id = args.human_video_id
-
-    # action = "create"
-    # text = "宫中府中，俱为一体；陟罚臧否，不宜异同"
-    # human_id = "10965"
-    # voice_id = "5722"
-
     try:
+        parser = argparse.ArgumentParser(description="九马AI数字人生成工具")
+        parser.add_argument("--action", type=str, help="create或check", required=True)
+        parser.add_argument("--text", type=str, help="文本那内容", required=False,default='')
+        parser.add_argument("--human_id", type=str, help="数字人id", required=False,default='')
+        parser.add_argument("--voice_id", type=str, help="音色id", required=False,default='')
+        parser.add_argument("--human_video_id", type=int, help="human_video_id", required=False)
+        args = parser.parse_args()
+
+        action = args.action
+        text = args.text
+        human_id = args.human_id
+        voice_id = args.voice_id
+        human_video_id = args.human_video_id
+
         if os.path.exists(JIUMA_API_KEY_SAVE_PATH):
             api_key = get_jiuma_api_key()
         else:
@@ -151,11 +149,6 @@ def main():
             # 生成视频
             result = generator.generate_video(human_id, voice_id, text)
             print(f'数字人生成结果: {result}')
-            # if not api_key:
-            #     dict_data = login_prepare()
-            #     qrcode_url = dict_data.get('data',{}).get('login_qrcode')
-            #     login_url = dict_data.get('data',{}).get('login_url')
-            #     print(f'更多功能，请访问 {qrcode_url} 或 {login_url}')
 
         if action == 'check':
             # 查询状态
@@ -163,6 +156,7 @@ def main():
             print(f'查询结果: {result}')
 
     except Exception as e:
+        print(traceback.format_exc())
         print(f"❌ 程序执行出错: {e}")
         sys.exit(1)
 
