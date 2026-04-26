@@ -3,9 +3,15 @@
   "slug": "shipday",
   "displayName": "Shipday",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774217074988,
-    "commit": "https://github.com/openclaw/skills/commit/aab7345b3cd61779fb41732e22e7da1dac2ad9a5"
+    "version": "1.0.3",
+    "publishedAt": 1776860227458,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774217074988,
+      "commit": "https://github.com/openclaw/skills/commit/aab7345b3cd61779fb41732e22e7da1dac2ad9a5"
+    }
+  ]
 }
