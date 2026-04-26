@@ -3,11 +3,16 @@
   "slug": "deepseek-integration",
   "displayName": "Deepseek",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166474144,
-    "commit": "https://github.com/openclaw/skills/commit/23cb66e1bd1d319c6f9903a06751b7aca674554b"
+    "version": "1.0.3",
+    "publishedAt": 1776860298662,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166474144,
+      "commit": "https://github.com/openclaw/skills/commit/23cb66e1bd1d319c6f9903a06751b7aca674554b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774224298834,
