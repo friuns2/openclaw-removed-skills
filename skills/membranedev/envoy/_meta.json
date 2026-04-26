@@ -3,11 +3,16 @@
   "slug": "envoy",
   "displayName": "Envoy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166685577,
-    "commit": "https://github.com/openclaw/skills/commit/6c753d4582c638a647b452b5a56d88906af584e8"
+    "version": "1.0.3",
+    "publishedAt": 1776848983627,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166685577,
+      "commit": "https://github.com/openclaw/skills/commit/6c753d4582c638a647b452b5a56d88906af584e8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774296149023,
