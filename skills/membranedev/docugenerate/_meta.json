@@ -3,11 +3,16 @@
   "slug": "docugenerate",
   "displayName": "Docugenerate",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775164766881,
-    "commit": "https://github.com/openclaw/skills/commit/c96e6d3d5bb4a84484b2c240cf7d6a6b0687ba9b"
+    "version": "1.0.3",
+    "publishedAt": 1776845474495,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775164766881,
+      "commit": "https://github.com/openclaw/skills/commit/c96e6d3d5bb4a84484b2c240cf7d6a6b0687ba9b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1773885748224,
