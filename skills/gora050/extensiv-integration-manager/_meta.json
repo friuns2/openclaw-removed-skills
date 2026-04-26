@@ -3,11 +3,16 @@
   "slug": "extensiv-integration-manager",
   "displayName": "Extensiv Integration Manager",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775166783944,
-    "commit": "https://github.com/openclaw/skills/commit/782df986d93f19e17f1c7d9be80b8955c7dd1b7e"
+    "version": "1.0.3",
+    "publishedAt": 1776860439714,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775166783944,
+      "commit": "https://github.com/openclaw/skills/commit/782df986d93f19e17f1c7d9be80b8955c7dd1b7e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774307069329,
