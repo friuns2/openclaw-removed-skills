@@ -3,11 +3,16 @@
   "slug": "aftership-integration",
   "displayName": "Aftership",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167406221,
-    "commit": "https://github.com/openclaw/skills/commit/ec86c5a38043d5057fa7ef567e31d7dc3548d2a1"
+    "version": "1.0.3",
+    "publishedAt": 1776861341438,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167406221,
+      "commit": "https://github.com/openclaw/skills/commit/ec86c5a38043d5057fa7ef567e31d7dc3548d2a1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774429445423,
