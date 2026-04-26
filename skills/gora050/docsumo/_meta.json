@@ -3,11 +3,16 @@
   "slug": "docsumo",
   "displayName": "Docsumo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167384426,
-    "commit": "https://github.com/openclaw/skills/commit/7cdb56dad0ee5bfb7f52425bc53e369557e562d3"
+    "version": "1.0.3",
+    "publishedAt": 1776861254750,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167384426,
+      "commit": "https://github.com/openclaw/skills/commit/7cdb56dad0ee5bfb7f52425bc53e369557e562d3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774429399702,
