@@ -3,11 +3,16 @@
   "slug": "everlaw",
   "displayName": "Everlaw",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168971960,
-    "commit": "https://github.com/openclaw/skills/commit/ad60d55a652b1f7299620d543b4f49b4662b8dca"
+    "version": "1.0.3",
+    "publishedAt": 1776863613082,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168971960,
+      "commit": "https://github.com/openclaw/skills/commit/ad60d55a652b1f7299620d543b4f49b4662b8dca"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774739117174,
