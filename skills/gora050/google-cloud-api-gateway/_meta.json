@@ -3,11 +3,16 @@
   "slug": "google-cloud-api-gateway",
   "displayName": "Google Cloud Api Gateway",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169720419,
-    "commit": "https://github.com/openclaw/skills/commit/0d5a3413c235a5c80b979e8e1047ebf66ae79f5d"
+    "version": "1.0.3",
+    "publishedAt": 1776864727942,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169720419,
+      "commit": "https://github.com/openclaw/skills/commit/0d5a3413c235a5c80b979e8e1047ebf66ae79f5d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774875954879,
