@@ -1,0 +1,11 @@
+{
+  "owner": "aisadocs",
+  "slug": "pred-polymarket",
+  "displayName": "Polymarket Data",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775108891078,
+    "commit": null
+  },
+  "history": []
+}
