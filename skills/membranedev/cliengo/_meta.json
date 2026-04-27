@@ -3,11 +3,16 @@
   "slug": "cliengo",
   "displayName": "Cliengo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168051649,
-    "commit": "https://github.com/openclaw/skills/commit/6e3fa139a0d301c49ea4adad2c3e730ac8ebd2db"
+    "version": "1.0.3",
+    "publishedAt": 1776851857737,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168051649,
+      "commit": "https://github.com/openclaw/skills/commit/6e3fa139a0d301c49ea4adad2c3e730ac8ebd2db"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774566163372,
