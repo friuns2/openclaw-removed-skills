@@ -3,9 +3,15 @@
   "slug": "kvdb",
   "displayName": "Kvdb",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169587209,
-    "commit": "https://github.com/openclaw/skills/commit/bbfe08de5f266fc956453c26a3959bfe7948ee50"
+    "version": "1.0.3",
+    "publishedAt": 1776855497944,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169587209,
+      "commit": "https://github.com/openclaw/skills/commit/bbfe08de5f266fc956453c26a3959bfe7948ee50"
+    }
+  ]
 }
