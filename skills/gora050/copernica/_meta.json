@@ -3,11 +3,16 @@
   "slug": "copernica",
   "displayName": "Copernica",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169598359,
-    "commit": "https://github.com/openclaw/skills/commit/1e6705b99f2f0d24eb2d57889aa50d9d18156df4"
+    "version": "1.0.3",
+    "publishedAt": 1776885411844,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169598359,
+      "commit": "https://github.com/openclaw/skills/commit/1e6705b99f2f0d24eb2d57889aa50d9d18156df4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774857796812,
