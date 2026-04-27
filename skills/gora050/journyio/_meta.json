@@ -3,11 +3,16 @@
   "slug": "journyio",
   "displayName": "Journyio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170260334,
-    "commit": "https://github.com/openclaw/skills/commit/6c985cd7e7bfe6e51e0606d7a8a976f5e1ef8d2c"
+    "version": "1.0.3",
+    "publishedAt": 1776865469527,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170260334,
+      "commit": "https://github.com/openclaw/skills/commit/6c985cd7e7bfe6e51e0606d7a8a976f5e1ef8d2c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998312995,
