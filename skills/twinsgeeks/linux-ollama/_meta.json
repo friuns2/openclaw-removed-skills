@@ -1,0 +1,11 @@
+{
+  "owner": "twinsgeeks",
+  "slug": "linux-ollama",
+  "displayName": "Linux Ollama",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775256826085,
+    "commit": null
+  },
+  "history": []
+}
