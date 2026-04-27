@@ -3,9 +3,15 @@
   "slug": "ayrshare",
   "displayName": "Ayrshare",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775271941941,
-    "commit": "https://github.com/openclaw/skills/commit/a4ab36230a570464f1c6a20c155572562ef82472"
+    "version": "1.0.1",
+    "publishedAt": 1776885537385,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775271941941,
+      "commit": "https://github.com/openclaw/skills/commit/a4ab36230a570464f1c6a20c155572562ef82472"
+    }
+  ]
 }
