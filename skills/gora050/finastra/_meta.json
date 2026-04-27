@@ -3,9 +3,15 @@
   "slug": "finastra",
   "displayName": "Finastra",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775279197820,
-    "commit": "https://github.com/openclaw/skills/commit/c1c5204ae9bffda8de0f57fbfb2d51bc0e6648ac"
+    "version": "1.0.1",
+    "publishedAt": 1776893553425,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775279197820,
+      "commit": "https://github.com/openclaw/skills/commit/c1c5204ae9bffda8de0f57fbfb2d51bc0e6648ac"
+    }
+  ]
 }
