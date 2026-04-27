@@ -3,11 +3,16 @@
   "slug": "digistore24",
   "displayName": "Digistore24",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168813511,
-    "commit": "https://github.com/openclaw/skills/commit/73d871e1bc249654001446f3de36a034c40a5d88"
+    "version": "1.0.3",
+    "publishedAt": 1776863374956,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168813511,
+      "commit": "https://github.com/openclaw/skills/commit/73d871e1bc249654001446f3de36a034c40a5d88"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774695886581,
