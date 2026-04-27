@@ -3,11 +3,16 @@
   "slug": "kyvio",
   "displayName": "Kyvio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168652146,
-    "commit": "https://github.com/openclaw/skills/commit/395cab004d5bf93802bb7efa969939da1c6452d1"
+    "version": "1.0.3",
+    "publishedAt": 1776853100391,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168652146,
+      "commit": "https://github.com/openclaw/skills/commit/395cab004d5bf93802bb7efa969939da1c6452d1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774674156128,
