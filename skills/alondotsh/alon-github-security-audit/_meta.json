@@ -1,11 +1,17 @@
 {
   "owner": "alondotsh",
   "slug": "alon-github-security-audit",
-  "displayName": "Alon Github Security Audit",
+  "displayName": "alon-github-security-audit",
   "latest": {
-    "version": "0.1.7",
-    "publishedAt": 1775195631223,
-    "commit": "https://github.com/openclaw/skills/commit/f14f1ca52f6c480abc71f85f4818e77c698176f1"
+    "version": "0.1.8",
+    "publishedAt": 1776738414853,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.7",
+      "publishedAt": 1775195631223,
+      "commit": "https://github.com/openclaw/skills/commit/f14f1ca52f6c480abc71f85f4818e77c698176f1"
+    }
+  ]
 }

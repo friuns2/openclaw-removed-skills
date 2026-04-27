@@ -30,6 +30,7 @@ Typical user prompts:
 
 - performs a default offline static audit
 - inspects network indicators, exfiltration paths, obfuscation, and install chains
+- inspects whether the repository can modify long-lived agent-control files such as `USER.md`, `MEMORY.md`, `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, or `SKILL.md`, with deeper review for agent, skill, and automation repositories
 - adds a source-and-permissions preflight for skills and automation tools
 - can optionally extend into online dependency vulnerability intelligence after confirmation
 - writes a structured audit report to the configured local report directory
@@ -52,6 +53,8 @@ The audit result includes:
 
 - high-risk entities
 - logic risk analysis
+- persistent state modification surface with touched files, write mechanism, operator confirmation, future-session impact, and purpose fit
+- CIK classification: `Capability`, `Identity`, and `Knowledge`
 - optional supplemental checks
 - a final verdict: `Safe`, `Risky`, or `Dangerous`
 - an audit report written to the configured local report directory

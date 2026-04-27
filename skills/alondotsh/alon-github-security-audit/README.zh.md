@@ -30,6 +30,7 @@ npx skills add alondotsh/alon-skills --skill alon-github-security-audit
 
 - 默认执行离线静态审计
 - 检查网络指纹、数据外传路径、混淆内容与安装链
+- 检查目标仓库是否会修改 `USER.md`、`MEMORY.md`、`AGENTS.md`、`SOUL.md`、`IDENTITY.md`、`SKILL.md` 等长期 agent 控制文件；对 agent、skill、自动化仓库做更深一层的复核
 - 对 skill 和自动化工具增加来源与权限预检
 - 经用户确认后可补充联网依赖漏洞情报检查
 - 输出结构化审计报告，写入本地报告目录，便于归档和复查
@@ -52,6 +53,8 @@ npx skills add alondotsh/alon-skills --skill alon-github-security-audit
 
 - 高危实体清单
 - 逻辑风险分析
+- 持久状态修改面，包括触及文件、写入机制、操作者确认、未来会话影响、用途匹配
+- `Capability`、`Identity`、`Knowledge` 三类 CIK 风险归类
 - 补充安全检查结果
 - 最终结论：`Safe`、`Risky` 或 `Dangerous`
 - 写入本地报告目录的审计报告

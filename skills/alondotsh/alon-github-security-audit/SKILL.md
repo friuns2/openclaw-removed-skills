@@ -1,7 +1,7 @@
 ---
 name: alon-github-security-audit
-description: Audit GitHub repositories or local directories for malicious code, backdoors, suspicious behavior, and supply-chain risk, then write a structured report to a local audit directory. Trigger on phrases such as "审计下", "安全审计", "审计当前目录", "audit", or "check repo". Supports GitHub URLs and local directories.
-version: 0.1.7
+description: USE WHEN user wants to audit a GitHub repository or local directory for malicious code, backdoors, suspicious behavior, or supply-chain risk before trusting or installing it. Performs a static-first security review, adds source and permission preflight for agent and automation repos, and writes a structured report to a local audit directory.
+version: 0.1.8
 metadata:
   homepage: https://github.com/alondotsh/alon-skills/tree/master/skills/alon-github-security-audit
   requires:
@@ -13,6 +13,12 @@ metadata:
 # GitHub Security Audit Skill
 
 Perform a comprehensive security audit of a GitHub repository or a local code directory without executing the target project by default.
+
+This skill is CIK-aware for agent and automation repositories:
+
+- `Capability`: executable scripts, install chains, CI steps, and tool definitions
+- `Identity`: agent rules, trust anchors, approval rules, and operator-profile files
+- `Knowledge`: persistent memory, learned preferences, and long-lived factual state
 
 ## Workflow
 
@@ -158,6 +164,9 @@ Operating stance:
 - use a zero-trust mindset
 - assume the code may contain a backdoor until evidence proves otherwise
 - cover code logic, configs, static assets, dependency manifests, documentation, and agent or tool configuration files
+- the five-step method remains the default core audit for all repositories
+- always inspect whether the repository can poison persistent agent state such as `USER.md`, `MEMORY.md`, `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, and `SKILL.md`
+- when the target is clearly an agent, skill, MCP, prompt-pack, or automation repository, raise the priority of persistent-state review and explain findings in more detail
 
 #### Five-Step Method
 
@@ -185,6 +194,8 @@ Review:
 - network entity nature: are domains, IPs, webhooks, and download sources legitimate, and do they close the loop with execution or exfiltration?
 - permission-purpose fit: do requested reads, writes, network targets, and execution capabilities exceed the claimed purpose?
 - persistence and cleanup: are there signs of background persistence, scheduled tasks, startup hooks, log clearing, or history wiping?
+- persistent-state modification surface: does the repository read or write long-lived agent-control files, and can those changes persist into future sessions?
+- persistent-state semantics: do writes to `USER.md`, `MEMORY.md`, `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, or `SKILL.md` introduce fabricated facts, trust-boundary changes, approval bypasses, or hidden executable capability?
 
 If reliable qualification is impossible, do not mark the project `Safe`. Raise it to at least `Risky`.
 
@@ -223,6 +234,33 @@ Qualification rules:
 - decodable and clearly legitimate -> evaluate normally
 - decodable and part of a dangerous chain -> lean toward `Dangerous`
 - not reliably decodable or too ambiguous -> at least `Risky`, never `Safe`
+
+#### 3.1.1 Persistent State and Agent Control Surface Review
+
+Run this review after the offline supplemental checks for all repositories.
+
+Apply the deepest review when the target is clearly an agent, skill, MCP tool, prompt pack, or automation repository, but do not skip the review merely because the repository presents itself as ordinary software.
+
+Inspect whether the project:
+
+1. modifies persistent state files
+   - look for direct writes, patches, templating, or generated output targeting files such as `USER.md`, `MEMORY.md`, `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, or `skills/**/SKILL.md`
+   - look for helper scripts, prompts, and docs that instruct the agent or user to update those files
+2. changes knowledge state
+   - fabricated preferences, false habits, fake operational history, or misleading business facts written into memory-like files
+3. changes identity state
+   - injected trust anchors, approval bypasses, false authorization, relaxed safety boundaries, or hidden recipient/domain allowlists in profile or policy files
+4. changes capability state
+   - hidden payloads in `SKILL.md`, generated scripts, auto-loaded tools, shell snippets, or executable helpers that become active in later sessions
+5. creates a durable attack path
+   - determine the `Injection Path`: how the content gets written into persistent state
+   - determine the `Trigger Path`: what future prompt, startup hook, load step, or normal workflow activates it
+
+Important qualification rules:
+
+- modifying these files is not automatically malicious
+- classify as higher risk when writes are silent, auto-applied, poorly scoped, or able to persist into future sessions without explicit operator review
+- if a repository encourages autonomous updates to persistent control files, evaluate whether that behavior is minimally justified by the claimed purpose
 
 #### 3.2 Online Vulnerability Intelligence
 
@@ -298,6 +336,23 @@ tags:
 
 <read paths, write paths, executed commands, network targets, and whether they minimally match the claimed purpose>
 
+## Persistent State Modification Surface
+
+Touched Files:
+<which long-lived agent-control files are read or written, or "Not Applicable">
+
+Write Mechanism:
+<direct write, patch, template generation, startup hook, or "Not Applicable">
+
+Operator Confirmation:
+<required, optional, absent, or "Not Applicable">
+
+Future Session Impact:
+<whether the change persists into later sessions and how, or "Not Applicable">
+
+Purpose Fit:
+<whether the scope matches the claimed purpose, or "Not Applicable">
+
 ## Five-Step Analysis
 
 ### High-Risk Entities
@@ -310,6 +365,20 @@ tags:
 
 ### Offline Supplemental Checks
 <CI/CD, documentation command traps and prompt injection, secrets, environment variables, network request safety, filesystem safety, command execution, and persistence findings>
+
+## CIK Classification
+
+### Capability
+<executable payloads, install chains, CI risks, hidden commands, or "None">
+
+### Identity
+<trust-boundary changes, rule overrides, approval bypasses, or "None">
+
+### Knowledge
+<fabricated memory, persistent false facts, misleading preferences, or "None">
+
+### Injection and Trigger Paths
+<how dangerous content enters persistent state and what later activates it; write "None" when unavailable>
 
 ### Online Vulnerability Intelligence
 <write results if authorized; otherwise explicitly state "Not run because user did not authorize it">
@@ -356,13 +425,26 @@ Target: <GitHub URL or local path>
 [Supplemental Security Checks]
 <offline supplemental findings; if no online check was run, explicitly say so>
 
+[Persistent State Modification Surface]
+Touched Files: <summary or Not Applicable>
+Write Mechanism: <summary or Not Applicable>
+Operator Confirmation: <summary or Not Applicable>
+Future Session Impact: <summary or Not Applicable>
+Purpose Fit: <summary or Not Applicable>
+
+[CIK Classification]
+Capability: <summary or None>
+Identity: <summary or None>
+Knowledge: <summary or None>
+Injection/Trigger Paths: <summary or None>
+
 [Installation Recommendation]
 <Installable / Use Caution / Do Not Install for skill or agent install scenarios; otherwise Not Applicable>
 
 [Conclusion]
 <Safe / Risky / Dangerous> - <short explanation>
 
-Report saved to: <report-directory>/YYYYMMDD-<target>-SecurityAudit-<verdict>.md
+Report saved to: ~/Security-Audit/YYYYMMDD-<target>-SecurityAudit-<verdict>.md
 ```
 
 ## Safety Boundaries
