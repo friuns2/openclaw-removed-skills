@@ -3,11 +3,16 @@
   "slug": "aci-payon",
   "displayName": "Aci Payon",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169427552,
-    "commit": "https://github.com/openclaw/skills/commit/6ef1b670777087dd90ebabe486d88766e642f3fc"
+    "version": "1.0.3",
+    "publishedAt": 1776855167162,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169427552,
+      "commit": "https://github.com/openclaw/skills/commit/6ef1b670777087dd90ebabe486d88766e642f3fc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774832570553,
