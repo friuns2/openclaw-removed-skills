@@ -3,11 +3,16 @@
   "slug": "coinapi",
   "displayName": "Coinapi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170719408,
-    "commit": "https://github.com/openclaw/skills/commit/473648afa19439bdd28a38eb1069e12b5c584dc2"
+    "version": "1.0.3",
+    "publishedAt": 1776866082118,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170719408,
+      "commit": "https://github.com/openclaw/skills/commit/473648afa19439bdd28a38eb1069e12b5c584dc2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775091910224,
