@@ -3,9 +3,15 @@
   "slug": "you-can-book-me",
   "displayName": "You Can Book Me",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775203493730,
-    "commit": "https://github.com/openclaw/skills/commit/1d2e15289266efc241684e10f4daa3b5ca3e6be7"
+    "version": "1.0.1",
+    "publishedAt": 1776881375097,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775203493730,
+      "commit": "https://github.com/openclaw/skills/commit/1d2e15289266efc241684e10f4daa3b5ca3e6be7"
+    }
+  ]
 }
