@@ -3,11 +3,16 @@
   "slug": "recruiterflow",
   "displayName": "Recruiterflow",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170210532,
-    "commit": "https://github.com/openclaw/skills/commit/c9d413882d401020b1d8e7a920604424591c67a1"
+    "version": "1.0.3",
+    "publishedAt": 1776865133107,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170210532,
+      "commit": "https://github.com/openclaw/skills/commit/c9d413882d401020b1d8e7a920604424591c67a1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774991101445,
