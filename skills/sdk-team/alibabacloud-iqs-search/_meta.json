@@ -3,9 +3,15 @@
   "slug": "alibabacloud-iqs-search",
   "displayName": "Alibabacloud Iqs Search",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775125567563,
-    "commit": "https://github.com/openclaw/skills/commit/b339b528b52cb4c7f8c54351b05f5b3b1d6acf99"
+    "version": "0.0.2",
+    "publishedAt": 1776997835339,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775125567563,
+      "commit": "https://github.com/openclaw/skills/commit/b339b528b52cb4c7f8c54351b05f5b3b1d6acf99"
+    }
+  ]
 }
