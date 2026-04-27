@@ -3,11 +3,16 @@
   "slug": "insightsoftware",
   "displayName": "Insightsoftware",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169173226,
-    "commit": "https://github.com/openclaw/skills/commit/5736a07e0874d5c5da533d5cbe16afbae52e4e02"
+    "version": "1.0.3",
+    "publishedAt": 1776885171989,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169173226,
+      "commit": "https://github.com/openclaw/skills/commit/5736a07e0874d5c5da533d5cbe16afbae52e4e02"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774771440258,
