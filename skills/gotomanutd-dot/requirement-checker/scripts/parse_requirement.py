@@ -239,8 +239,41 @@ class RequirementParser:
         
         return normalize(name1) == normalize(name2)
     
+    def _parse_with_markitdown(self, path: Path, original_format: str) -> Dict:
+        """使用 MarkItDown 解析文档（优先使用，格式保留更好）"""
+        try:
+            from markitdown import MarkItDown
+            
+            md = MarkItDown()
+            result = md.convert(str(path))
+            
+            return {
+                'success': True,
+                'content': result.text_content,
+                'format': original_format,
+                'metadata': {
+                    'source': str(path),
+                    'file_size': path.stat().st_size,
+                    'parser': 'markitdown',
+                    'content_length': len(result.text_content)
+                }
+            }
+        except ImportError:
+            # MarkItDown 未安装，返回 None 表示使用 fallback
+            return None
+        except Exception as e:
+            # MarkItDown 解析失败，返回 None 表示使用 fallback
+            print(f"⚠️  MarkItDown 解析失败：{e}，将使用备用解析器")
+            return None
+    
     def _parse_docx(self, path: Path) -> Dict:
-        """解析 Word 文档"""
+        """解析 Word 文档（优先使用 MarkItDown）"""
+        # 优先尝试 MarkItDown
+        markitdown_result = self._parse_with_markitdown(path, 'docx')
+        if markitdown_result:
+            return markitdown_result
+        
+        # Fallback: 使用 python-docx
         try:
             from docx import Document
             
@@ -279,13 +312,14 @@ class RequirementParser:
                     'source': str(path),
                     'paragraphs': len(paragraphs),
                     'tables': len(tables),
-                    'file_size': path.stat().st_size
+                    'file_size': path.stat().st_size,
+                    'parser': 'python-docx'
                 }
             }
         except ImportError:
             return {
                 'success': False,
-                'error': '需要安装 python-docx: pip install python-docx'
+                'error': '需要安装 python-docx: pip install python-docx（或安装 markitdown: pipx install markitdown）'
             }
     
     def _parse_text(self, path: Path) -> Dict:
@@ -325,7 +359,13 @@ class RequirementParser:
                 }
     
     def _parse_pdf(self, path: Path) -> Dict:
-        """解析 PDF 文档"""
+        """解析 PDF 文档（优先使用 MarkItDown）"""
+        # 优先尝试 MarkItDown
+        markitdown_result = self._parse_with_markitdown(path, 'pdf')
+        if markitdown_result:
+            return markitdown_result
+        
+        # Fallback: 使用 pdfplumber
         try:
             import pdfplumber
             
@@ -346,13 +386,14 @@ class RequirementParser:
                 'metadata': {
                     'source': str(path),
                     'pages': len(text_parts),
-                    'file_size': path.stat().st_size
+                    'file_size': path.stat().st_size,
+                    'parser': 'pdfplumber'
                 }
             }
         except ImportError:
             return {
                 'success': False,
-                'error': '需要安装 pdfplumber: pip install pdfplumber'
+                'error': '需要安装 pdfplumber: pip install pdfplumber（或安装 markitdown: pipx install markitdown）'
             }
     
     def _parse_image(self, path: Path) -> Dict:

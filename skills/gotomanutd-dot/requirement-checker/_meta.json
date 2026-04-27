@@ -3,11 +3,16 @@
   "slug": "requirement-checker",
   "displayName": "Requirement Checker",
   "latest": {
-    "version": "2.6.0",
-    "publishedAt": 1775626124813,
-    "commit": "https://github.com/openclaw/skills/commit/3c397451740820a7a8a0185bef2eaaf27fd4b078"
+    "version": "2.8.0",
+    "publishedAt": 1776841883839,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.6.0",
+      "publishedAt": 1775626124813,
+      "commit": "https://github.com/openclaw/skills/commit/3c397451740820a7a8a0185bef2eaaf27fd4b078"
+    },
     {
       "version": "2.5.0",
       "publishedAt": 1775328695667,

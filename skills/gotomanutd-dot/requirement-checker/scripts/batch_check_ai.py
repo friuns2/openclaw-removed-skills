@@ -19,7 +19,7 @@ from parse_requirement import RequirementParser
 
 # 导入 LLM 检查器
 try:
-    from check_with_llm import check_with_llm, get_llm_config, validate_config
+    from check_with_llm import check_with_llm, get_llm_config
 
     llm_config = get_llm_config()
     USE_LLM_CHECKER = llm_config is not None
@@ -29,14 +29,17 @@ try:
         print(f"   Source: {llm_config.get('source', 'unknown')}")
         print(f"   Base URL: {llm_config['base_url']}")
         print(f"   Model: {llm_config.get('model', 'glm-5')}")
-
-        # 验证配置（可选，避免首次使用失败）
-        # if not validate_config(llm_config, timeout=5):
-        #     print("⚠️  配置验证失败，将使用规则检查模式")
-        #     USE_LLM_CHECKER = False
 except ImportError as e:
     print(f"⚠️  LLM 检查器不可用：{e}")
     USE_LLM_CHECKER = False
+
+# 导入 LLM GWT 生成器
+try:
+    from generate_gwt_with_llm import generate_gwt_with_llm, call_llm_for_gwt
+    USE_GWT_LLM = True
+except ImportError as e:
+    print(f"⚠️  LLM GWT 生成器不可用：{e}")
+    USE_GWT_LLM = False
 
 
 class BatchRequirementChecker:
@@ -110,8 +113,7 @@ class BatchRequirementChecker:
                     "source": "llm",
                 }
             else:
-                print(f"  ⚠️  LLM 不可用，降级到规则检查")
-                # TODO: 规则检查 fallback
+                print(f"  ⚠️  LLM 不可用，跳过 AI 检查")
                 pre_check = {
                     "summary": {},
                     "warnings": [],
@@ -294,6 +296,46 @@ class BatchRequirementChecker:
                 report.append("")
 
         return "\n".join(report)
+
+    def generate_gwt_batch(self) -> None:
+        """批量生成 GWT 验收标准（LLM 驱动）"""
+        if not USE_GWT_LLM:
+            print("  ⚠️  LLM GWT 生成器不可用，跳过 GWT 生成")
+            return
+
+        print("  🧪 正在生成 GWT 验收标准...")
+
+        for result in self.results:
+            if not result["success"]:
+                continue
+
+            parse_result = result["result"].get("parse_result", {})
+            pre_check = result["result"].get("pre_check", {})
+            content = result.get("content", "")
+            filename = result["file"]
+
+            # 如果文档已有 GWT，跳过生成
+            gwt_analysis = pre_check.get("gwt_analysis", {})
+            if gwt_analysis.get("has_gwt"):
+                print(f"    ✅ {Path(filename).name}: 文档已有 GWT，跳过生成")
+                continue
+
+            # 调用 LLM 生成 GWT
+            gwt_result = call_llm_for_gwt(content, filename)
+
+            if gwt_result.get("success"):
+                auto_generated = gwt_result.get("auto_generated", [])
+                pre_check["gwt_analysis"]["auto_generated"] = auto_generated
+                pre_check["gwt_analysis"]["expert_comment"] = gwt_result.get(
+                    "expert_comment", ""
+                )
+                pre_check["gwt_analysis"]["source"] = "llm_generated"
+                print(
+                    f"    ✅ {Path(filename).name}: 生成 {len(auto_generated)} 个验收场景"
+                )
+            else:
+                error_msg = gwt_result.get("error", "未知错误")
+                print(f"    ⚠️  {Path(filename).name}: GWT 生成失败 - {error_msg}")
 
     def calculate_score_and_conclusion(self, pre_check: Dict) -> Dict:
         """计算评分和结论（友好版，支持优先级分级）"""
@@ -513,6 +555,10 @@ class BatchRequirementChecker:
                 )
             else:
                 print(f"  ❌ 检查失败：{result.get('error', '未知错误')}")
+
+        # 批量生成 GWT 验收标准
+        print()
+        self.generate_gwt_batch()
 
         # 记录结束时间
         self.stats["end_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

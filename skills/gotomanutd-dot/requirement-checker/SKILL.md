@@ -1,7 +1,7 @@
 ---
 name: requirement-checker
-version: 2.6.0
-description: 需求文档规范自动检查技能（AI 驱动 + 智能引导 + 温柔话术 + 建议分级）。使用 LLM 智能检查需求文档是否符合规范，生成具体问题说明、原文引用、针对性建议和 GWT 验收标准。首次使用会智能引导你设置目录和 API 配置，配置一次后无需重复设置。支持单个文件检查和批量检查，汇总报告可选。温柔话术：从"挑毛病"变成"建议式"。v2.6.0 基于 Claude Code 技巧优化文档结构。
+version: 2.7.0
+description: 需求文档规范自动检查技能（AI 驱动 + 智能引导 + 温柔话术 + 建议分级）。使用 LLM 智能检查需求文档是否符合规范，生成具体问题说明、原文引用、针对性建议和 GWT 验收标准。首次使用会智能引导你设置目录和 API 配置，配置一次后无需重复设置。支持单个文件检查和批量检查，汇总报告可选。温柔话术：从"挑毛病"变成"建议式"。v2.7.0 集成 MarkItDown，Word/PDF转换质量更高。v2.6.0 基于 Claude Code 技巧优化文档结构。
 ---
 
 ## 🎯 定位
@@ -349,9 +349,13 @@ python3 check_requirement.py
 ### Q5: 支持哪些文档格式？
 **A**: 支持：
 - ✅ Markdown (.md)
-- ✅ Word (.docx)
-- ✅ PDF (.pdf)
-- ❌ 不支持：Excel、PPT
+- ✅ Word (.docx) - 使用 MarkItDown 优先解析，格式保留更好
+- ✅ PDF (.pdf) - 使用 MarkItDown 优先解析，格式保留更好
+- ✅ 图片 (.jpg/.png) - OCR 识别
+- ✅ HTML (.html/.htm)
+- ❌ 不支持：Excel、PPT（可以用 MarkItDown 先转 Markdown）
+
+**💡 提示**：已集成 MarkItDown，Word/PDF 文档转换质量更高，表格/列表格式保留更好。
 
 ### Q6: 批量检查最多支持多少个文件？
 **A**: 建议每次 ≤50 个文件，过多会导致：
@@ -377,6 +381,8 @@ ls -lt  # 按时间排序
 
 | 版本 | 日期 | 变更内容 |
 |------|------|---------|
+| **v2.8.0** | **2026-04-22** | **🔧 修复 GWT 生成** - AI 驱动版(batch_check_ai.py)补全 GWT 验收标准自动生成逻辑，废弃旧版 batch_check.py |
+| **v2.7.0** | **2026-04-21** | **🔄 集成 MarkItDown** - Word/PDF 优先使用 MarkItDown 解析，格式保留更好（表格/列表），原有解析器作为 fallback |
 | **v2.6.0** | **2026-04-08** | **📖 基于 Claude Code 技巧优化** - 添加快速开始、正误示例对比、FAQ |
 | **v2.5.0** | **2026-04-05** | **🔍 新增系统对接检查项** - 对接方/数据内容/数据应用 + 建议分级体系 |
 | **v2.4.0** | **2026-04-03** | **🤖 智能配置引导** - 自动检测 API 配置 + 配置保存 + Provider 自动扫描 |
@@ -438,7 +444,19 @@ python3 check_environment.py
 |------|------|------|------|
 | Python | >= 3.7 | 必需 | Python 运行环境 |
 | requests | >= 2.28.0 | 必需 | HTTP 请求库（调用 LLM API） |
+| **markitdown** | >= 0.0.2 | 可选⭐ | Word/PDF转Markdown（推荐安装，格式保留更好） |
+| python-docx | >= 0.8 | 可选 | Word 解析（MarkItDown 不可用时 fallback） |
+| pdfplumber | >= 0.11 | 可选 | PDF 解析（MarkItDown 不可用时 fallback） |
+
+**💡 推荐安装 MarkItDown**：
+```bash
+pipx install markitdown  # 全局安装
+# 或
+pip install 'markitdown[all]'  # 带所有依赖
+```
+
+安装 MarkItDown 后，Word/PDF 文档转换质量更高，表格/列表格式保留更好。
 
 ---
 
-*Last Updated: 2026-04-08 (v2.6.0)*
+*Last Updated: 2026-04-22 15:01 (v2.8.0 已发布)*
