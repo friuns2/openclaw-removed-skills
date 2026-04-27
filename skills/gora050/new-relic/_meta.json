@@ -3,11 +3,16 @@
   "slug": "new-relic",
   "displayName": "New Relic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167945280,
-    "commit": "https://github.com/openclaw/skills/commit/e51bec81cced494cd1a4abcd825680da6e735abd"
+    "version": "1.0.3",
+    "publishedAt": 1776862987814,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167945280,
+      "commit": "https://github.com/openclaw/skills/commit/e51bec81cced494cd1a4abcd825680da6e735abd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774552976831,
