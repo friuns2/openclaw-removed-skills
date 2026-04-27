@@ -3,9 +3,15 @@
   "slug": "workflow-optimizer",
   "displayName": "Workflow Optimizer",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1775082036001,
-    "commit": "https://github.com/openclaw/skills/commit/d0db60f07ccf64f8e3aafb38c46023af66459449"
+    "version": "0.2.0",
+    "publishedAt": 1776406504693,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1775082036001,
+      "commit": "https://github.com/openclaw/skills/commit/d0db60f07ccf64f8e3aafb38c46023af66459449"
+    }
+  ]
 }
