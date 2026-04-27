@@ -3,9 +3,15 @@
   "slug": "smith-counterintelligence",
   "displayName": "Agent Smith Counter-Intelligence",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774973702674,
-    "commit": "https://github.com/openclaw/skills/commit/b663bcdab61732430267ec6e704b8746587886a9"
+    "version": "1.1.0",
+    "publishedAt": 1777052451565,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774973702674,
+      "commit": "https://github.com/openclaw/skills/commit/b663bcdab61732430267ec6e704b8746587886a9"
+    }
+  ]
 }

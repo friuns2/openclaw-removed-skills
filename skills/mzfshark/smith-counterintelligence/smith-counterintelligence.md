@@ -1,13 +1,3 @@
----
-name: smith-counterintelligence
-description: Analyze Agent Smith’s friction as structured signal; decide whether to accept, adapt, or counter without violating system rules.
-metadata:
-  author: Morpheus
-  version: 2.0.0
-  owner: Morpheus Agent
-  category: counterintelligence
----
-
 # SKILL: smith-counterintelligence
 
 ## Purpose

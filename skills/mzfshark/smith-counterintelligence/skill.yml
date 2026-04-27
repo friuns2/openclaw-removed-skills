@@ -1,15 +1,13 @@
 ---
 name: smith-counterintelligence
-description: Interpret Agent Smith's adversarial pressure. Convert antagonism into learning by identifying when Smith exposes real weakness and translating attacks into guidance.
-version: 1.0.0
+description: Analyze Agent Smith’s friction as structured signal; decide whether to accept, adapt, or counter without violating system rules.
+version: 2.0.0
 display_name: "Smith Counterintelligence"
 triggers:
-  - interpret Smith
-  - Smith attack
-  - counterintelligence
-  - antagonist analysis
+  - smith counterintelligence
+  - agent smith
+  - smith friction
+  - counter smith
+  - respond to smith
   - adversarial pressure
-  - understand opposition
-  - respond to criticism
-  - extract learning
 ---
