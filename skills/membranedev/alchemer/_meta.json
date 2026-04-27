@@ -3,11 +3,16 @@
   "slug": "alchemer",
   "displayName": "Alchemer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168600544,
-    "commit": "https://github.com/openclaw/skills/commit/c2ff88d9d21fa6dc9c33b3a2f246727f241fdcfb"
+    "version": "1.0.3",
+    "publishedAt": 1776853083734,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168600544,
+      "commit": "https://github.com/openclaw/skills/commit/c2ff88d9d21fa6dc9c33b3a2f246727f241fdcfb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774666966393,
