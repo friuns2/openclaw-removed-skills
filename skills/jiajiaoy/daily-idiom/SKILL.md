@@ -1,6 +1,6 @@
 ---
 name: daily-idiom
-description: "每日成语/俗语学习 — 每天一个中文成语或俗语，含故事典故、用法、例句，中英双语，测验打卡，学中文必备。Daily Chinese idiom — story usage examples quiz bilingual EN/CN, perfect for Chinese learners. Trigger on: 成语、每日成语、今日成语、俗语、学成语、成语故事、中文学习、idiom、Chinese idiom、chengyu、learn Chinese。"
+description: "Daily Chinese idiom (成语) — origin story, meaning, usage examples, and memory tip. Build Chinese vocabulary and cultural knowledge one 成语 per day."
 keywords:
   - 成语
   - 每日成语

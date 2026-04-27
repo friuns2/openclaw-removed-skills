@@ -1,6 +1,9 @@
-# Daily Idiom / 每日成语
+# Daily Idiom — Chinese Idiom Learning Skill
 
-> 每日成语 — 典故故事 · 用法例句 · 测验打卡 · 中文文化输出
+> One Chinese idiom (成语) every day — story, usage, examples, quiz. Perfect for Chinese learners.
+
+[![clawhub](https://img.shields.io/badge/clawhub-daily--idiom-blue)](https://clawhub.ai/skills/daily-idiom)
+[![openclaw](https://img.shields.io/badge/openclaw-skill-orange)](https://openclaw.ai)
 
 An [OpenClaw](https://openclaw.ai) skill for learning one Chinese idiom (成语) or proverb every day — with origin story, modern usage, example sentences, and an evening quiz. Perfect for Chinese learners, culture enthusiasts, and anyone who wants to level up their Mandarin.
 
@@ -51,3 +54,11 @@ Supported channels: `telegram` / `feishu` / `slack` / `discord`
 ---
 
 *MIT License · OpenClaw Skill*
+
+## Keywords
+
+Chinese idiom · chengyu · 成语 · daily idiom · Chinese learning · learn Chinese · Chinese proverb · 每日成语 · 成语故事 · 俗语 · 中文学习 · idiom of the day
+
+---
+
+Built for [OpenClaw](https://openclaw.ai) · Published on [clawhub.ai](https://clawhub.ai/skills/daily-idiom)

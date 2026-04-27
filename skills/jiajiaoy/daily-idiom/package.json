@@ -1,7 +1,7 @@
 {
   "name": "daily-idiom",
-  "version": "1.0.0",
-  "description": "\u6bcf\u65e5\u6210\u8bed",
+  "version": "1.0.2",
+  "description": "Daily Chinese idiom (成语) — origin story, meaning, usage examples, and memory tip. Build Chinese vocabulary and cultural knowledge one 成语 per day.",
   "engines": {
     "node": ">=18"
   },

@@ -3,9 +3,15 @@
   "slug": "daily-idiom",
   "displayName": "Daily Idiom",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775209968942,
-    "commit": "https://github.com/openclaw/skills/commit/fda3065edd3be1d163fb70a27916804d61fdf6a8"
+    "version": "1.0.3",
+    "publishedAt": 1777287266139,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775209968942,
+      "commit": "https://github.com/openclaw/skills/commit/fda3065edd3be1d163fb70a27916804d61fdf6a8"
+    }
+  ]
 }
