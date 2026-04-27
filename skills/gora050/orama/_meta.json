@@ -3,11 +3,16 @@
   "slug": "orama",
   "displayName": "Orama",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169983150,
-    "commit": "https://github.com/openclaw/skills/commit/aa9fc816f22e70a5b4b06001d485c58f060e051b"
+    "version": "1.0.3",
+    "publishedAt": 1776865070072,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169983150,
+      "commit": "https://github.com/openclaw/skills/commit/aa9fc816f22e70a5b4b06001d485c58f060e051b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774933553391,
