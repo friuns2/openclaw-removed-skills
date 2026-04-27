@@ -3,11 +3,16 @@
   "slug": "browserstack",
   "displayName": "Browserstack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168185763,
-    "commit": "https://github.com/openclaw/skills/commit/c936b5ec779125d66c63f571504880349596fdc6"
+    "version": "1.0.3",
+    "publishedAt": 1776862146351,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168185763,
+      "commit": "https://github.com/openclaw/skills/commit/c936b5ec779125d66c63f571504880349596fdc6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580684830,
