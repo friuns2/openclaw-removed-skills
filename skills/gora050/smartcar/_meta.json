@@ -3,11 +3,16 @@
   "slug": "smartcar",
   "displayName": "Smartcar",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775169699233,
-    "commit": "https://github.com/openclaw/skills/commit/89a66fed2e6fc82228cc527f5f39de213625e4e4"
+    "version": "1.0.4",
+    "publishedAt": 1776864577490,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775169699233,
+      "commit": "https://github.com/openclaw/skills/commit/89a66fed2e6fc82228cc527f5f39de213625e4e4"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774875882879,
