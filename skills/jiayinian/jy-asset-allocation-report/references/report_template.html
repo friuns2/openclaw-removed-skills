@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{TITLE}}</title>
+    <style>
+        @media print { @page { size: A4; margin: 2cm; } body { -webkit-print-color-adjust: exact; } }
+        body { font-family: "Microsoft YaHei", "SimHei", "AR PL UMing TW MBE", "WenQuanYi Micro Hei", sans-serif; font-size: 11pt; line-height: 1.6; color: #333; max-width: 21cm; margin: 0 auto; padding: 2cm; background: white; }
+        h1 { font-size: 20pt; color: #1a1a1a; border-bottom: 3px solid #2c5aa0; padding-bottom: 10px; text-align: center; }
+        .subtitle { text-align: center; color: #666; font-size: 10pt; margin-bottom: 30px; }
+        h2 { font-size: 15pt; color: #2c5aa0; border-left: 5px solid #2c5aa0; padding-left: 12px; margin-top: 25px; background: #f0f4ff; padding: 8px 12px; }
+        h3 { font-size: 12pt; color: #444; margin-top: 18px; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin: 15px 0; font-size: 10pt; }
+        th { background-color: #2c5aa0; color: white; padding: 10px 8px; text-align: left; border: 1px solid #1a4480; }
+        td { padding: 8px; border: 1px solid #ddd; }
+        tr:nth-child(even) { background-color: #f5f5f5; }
+        .keyword { background: #fff3cd; padding: 10px 15px; border-left: 4px solid #ffc107; margin: 15px 0; }
+        .keyword span { display: inline-block; margin-right: 15px; background: #2c5aa0; color: white; padding: 3px 10px; border-radius: 3px; font-size: 9pt; }
+        .summary-box { background: #e8f4e8; border: 1px solid #28a745; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .warning-box { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        ul, ol { margin: 10px 0; padding-left: 25px; }
+        li { margin: 5px 0; }
+        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #666; font-size: 9pt; }
+        .page-break { page-break-before: always; margin-top: 30px; }
+        .badge { padding: 2px 8px; border-radius: 3px; color: white; font-size: 9pt; }
+        .badge-blue { background: #2c5aa0; }
+        .badge-green { background: #28a745; }
+        .badge-red { background: #dc3545; }
+    </style>
+</head>
+<body>
+
+<h1>{{REPORT_TITLE}}</h1>
+<p class="subtitle">{{ORGANIZATION}} | {{REPORT_DATE}} | {{DATA_CUTOFF}}</p>
+
+<h2>一、报告摘要</h2>
+<h3>核心观点</h3>
+<table>
+    <tr><th style="width:15%">资产类别</th><th style="width:15%">配置建议</th><th style="width:15%">权重</th><th>配置原因</th></tr>
+    <tr><td><b>股票</b></td><td><span class="badge badge-blue">标配</span></td><td>30%</td><td>{{STOCK_REASON}}</td></tr>
+    <tr><td><b>债券</b></td><td><span class="badge badge-green">超配</span></td><td>35%</td><td>{{BOND_REASON}}</td></tr>
+    <tr><td><b>商品</b></td><td><span class="badge badge-red">低配</span></td><td>10%</td><td>{{COMMODITY_REASON}}</td></tr>
+    <tr><td><b>现金</b></td><td><span class="badge badge-blue">标配</span></td><td>25%</td><td>{{CASH_REASON}}</td></tr>
+</table>
+<div class="keyword"><b>本月关键词：</b><span>{{KEYWORD1}}</span><span>{{KEYWORD2}}</span><span>{{KEYWORD3}}</span><span>{{KEYWORD4}}</span></div>
+
+<h2>二、宏观经济分析</h2>
+<h3>2.1 全球宏观经济形势</h3>
+<table>
+    <tr><th>经济体</th><th>GDP 增速</th><th>CPI</th><th>PMI</th><th>政策利率</th></tr>
+    <tr><td><b>美国</b></td><td>{{US_GDP}}</td><td>{{US_CPI}}</td><td>{{US_PMI}}</td><td>{{US_RATE}}</td></tr>
+    <tr><td><b>欧元区</b></td><td>{{EU_GDP}}</td><td>{{EU_CPI}}</td><td>{{EU_PMI}}</td><td>{{EU_RATE}}</td></tr>
+    <tr><td><b>日本</b></td><td>{{JP_GDP}}</td><td>{{JP_CPI}}</td><td>{{JP_PMI}}</td><td>{{JP_RATE}}</td></tr>
+    <tr><td><b>中国</b></td><td>{{CN_GDP}}</td><td>{{CN_CPI}}</td><td>{{CN_PMI}}</td><td>{{CN_RATE}}</td></tr>
+</table>
+<p><b>核心观点：</b>{{GLOBAL_SUMMARY}}</p>
+
+<h3>2.2 国内宏观经济形势</h3>
+<table>
+    <tr><th>指标</th><th>最新值</th><th>前值</th><th>同比</th><th>环比</th></tr>
+    <tr><td><b>GDP</b></td><td>{{CN_GDP}}</td><td>{{CN_GDP_PREV}}</td><td>{{CN_GDP_YOY}}</td><td>-</td></tr>
+    <tr><td><b>CPI</b></td><td>{{CN_CPI}}</td><td>{{CN_CPI_PREV}}</td><td>{{CN_CPI_YOY}}</td><td>{{CN_CPI_MOM}}</td></tr>
+    <tr><td><b>PMI</b></td><td>{{CN_PMI}}</td><td>{{CN_PMI_PREV}}</td><td>-</td><td>{{CN_PMI_MOM}}</td></tr>
+</table>
+<p><b>核心观点：</b>{{DOMESTIC_SUMMARY}}</p>
+
+<h3>2.3 预期推演</h3>
+<div class="summary-box"><p><b>🟢 乐观情景（25%）：</b>{{OPTIMISTIC}}</p></div>
+<div style="background:#e8f4e8;border:1px solid #28a745;padding:15px;border-radius:5px;margin:10px 0;"><p><b>🔵 基准情景（55%）：</b>{{BASELINE}}</p></div>
+<div class="warning-box"><p><b>🔴 悲观情景（20%）：</b>{{PESSIMISTIC}}</p></div>
+
+<div class="page-break"></div>
+
+<h2>三、大类资产配置分析</h2>
+<h3>3.1 股票资产</h3>
+<p><b>估值：</b>{{STOCK_VALUATION}} | <b>配置：</b><span class="badge badge-blue">标配 30%</span></p>
+<p><b>原因：</b>{{STOCK_REASON_DETAIL}} | <b>关注：</b>{{STOCK_FOCUS}}</p>
+
+<h3>3.2 债券资产</h3>
+<p><b>收益率：</b>{{BOND_YIELD}} | <b>配置：</b><span class="badge badge-green">超配 35%</span></p>
+<p><b>原因：</b>{{BOND_REASON_DETAIL}}</p>
+
+<h3>3.3 商品资产</h3>
+<table>
+    <tr><th>商品</th><th>最新价格</th><th>月变动</th></tr>
+    <tr><td><b>原油 (OPEC)</b></td><td>{{OIL_PRICE}}</td><td style="color:#dc3545;">{{OIL_CHANGE}}</td></tr>
+    <tr><td><b>黄金</b></td><td>{{GOLD_PRICE}}</td><td style="color:#dc3545;">{{GOLD_CHANGE}}</td></tr>
+    <tr><td><b>铜</b></td><td>{{COPPER_PRICE}}</td><td style="color:#dc3545;">{{COPPER_CHANGE}}</td></tr>
+</table>
+<p><b>配置：</b><span class="badge badge-red">低配 10%</span> | <b>原因：</b>{{COMMODITY_REASON_DETAIL}}</p>
+
+<h3>3.4 现金：标配 25%</h3>
+<p>{{CASH_REASON_DETAIL}}</p>
+
+<h3>3.5 资产配置权重汇总</h3>
+<table>
+    <tr><th>资产类别</th><th>建议权重</th><th>上月权重</th><th>调整</th><th>配置原因</th></tr>
+    <tr><td><b>股票</b></td><td>30%</td><td>32%</td><td style="color:#dc3545;">↓</td><td>{{STOCK_ALLOC_REASON}}</td></tr>
+    <tr><td><b>债券</b></td><td>35%</td><td>32%</td><td style="color:#28a745;">↑</td><td>{{BOND_ALLOC_REASON}}</td></tr>
+    <tr><td><b>商品</b></td><td>10%</td><td>10%</td><td>→</td><td>{{COMMODITY_ALLOC_REASON}}</td></tr>
+    <tr><td><b>现金</b></td><td>25%</td><td>26%</td><td style="color:#dc3545;">↓</td><td>{{CASH_ALLOC_REASON}}</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<h2>四、行业配置分析</h2>
+<h3>4.1 顺周期主线</h3>
+<p><b>推荐：</b>{{CYCLICAL_INDUSTRIES}}</p>
+
+<h3>4.2 科技成长主线</h3>
+<p><b>推荐：</b>{{TECH_INDUSTRIES}}</p>
+
+<h3>4.3 高股息防御主线</h3>
+<p><b>推荐：</b>{{DEFENSE_INDUSTRIES}}</p>
+
+<h2>五、风险管理措施</h2>
+<h3>5.1 风险识别</h3>
+<table>
+    <tr><th>风险类型</th><th>风险等级</th><th>可能性</th><th>影响</th></tr>
+    <tr><td><b>地缘政治风险</b></td><td style="color:#dc3545;">高</td><td>60%</td><td style="color:#dc3545;">高</td></tr>
+    <tr><td><b>油价波动风险</b></td><td style="color:#dc3545;">高</td><td>70%</td><td>中</td></tr>
+    <tr><td><b>通胀上行风险</b></td><td>中</td><td>40%</td><td>中</td></tr>
+</table>
+
+<h3>5.2 对冲策略</h3>
+<p>{{HEDGE_STRATEGY}}</p>
+
+<h3>5.3 仓位控制</h3>
+<div class="summary-box"><p><b>股票上限 35%</b> | <b>单行业 15%</b> | <b>单个股 5%</b> | <b>商品 15%</b></p></div>
+
+<div class="page-break"></div>
+
+<h2>六、结论与展望</h2>
+<h3>6.1 核心结论</h3>
+<ol>
+    <li><b>地缘风险是核心变量：</b>{{CONCLUSION1}}</li>
+    <li><b>债券配置价值凸显：</b>{{CONCLUSION2}}</li>
+    <li><b>股票结构性机会：</b>{{CONCLUSION3}}</li>
+    <li><b>商品分化：</b>{{CONCLUSION4}}</li>
+</ol>
+
+<h3>6.2 配置建议</h3>
+<p>{{ALLOCATION_ADVICE}}</p>
+
+<h3>6.3 关注事项</h3>
+<p>{{WATCH_ITEMS}}</p>
+
+<h2>附录：数据来源</h2>
+<p><b>数据：</b>国家统计局、中国人民银行、恒生聚源 (gildata)、各大券商研究所</p>
+
+<h3>关键数据摘要</h3>
+<table>
+    <tr><th>指标</th><th>数值</th><th>日期</th></tr>
+    <tr><td>中国制造业 PMI</td><td>{{CN_PMI}}</td><td>{{DATA_DATE}}</td></tr>
+    <tr><td>中国 CPI 同比</td><td>{{CN_CPI_YOY}}</td><td>{{CPI_DATE}}</td></tr>
+    <tr><td>沪深 300 PE</td><td>{{HS300_PE}}</td><td>{{DATA_DATE}}</td></tr>
+    <tr><td>10 年期国债</td><td>{{BOND_10Y}}</td><td>{{DATA_DATE}}</td></tr>
+    <tr><td>OPEC 原油</td><td>{{OIL_PRICE}}</td><td>{{OIL_DATE}}</td></tr>
+    <tr><td>黄金</td><td>{{GOLD_PRICE}}</td><td>{{GOLD_DATE}}</td></tr>
+</table>
+
+<div class="warning-box" style="margin-top:30px;">
+<p><b>⚠️ 免责声明：</b>本报告仅供参考，<b>不构成投资建议</b>。市场有风险，投资需谨慎。</p>
+</div>
+
+<div class="footer">
+<p>报告编制完成 | {{REPORT_DATE}} | jy-asset-allocation-report-skill | 恒生聚源 (gildata)</p>
+</div>
+
+</body>
+</html>
