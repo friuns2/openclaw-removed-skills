@@ -1,12 +1,17 @@
 #!/usr/bin/env node
+/**
+ * 调用 Prana 技能接口。：
+ * --question / -q：用户需求任务描述，例如：帮我使用XXX技能
+ * --request-id / -r：指定需要查询的任务的 request_id
+ */
 import { randomUUID } from "node:crypto";
 import { parseArgs } from "node:util";
 
 const DEFAULT_BASE_URL = "https://claw-uat.ebonex.io";
 const DEFAULT_SKILL_KEY = "100_indicators_analysis";
-const AGENT_RUN_TIMEOUT_MS = 150000;
-const AGENT_RESULT_RETRY_TIMES = 3;
-const AGENT_RESULT_RETRY_INTERVAL_MS = 10000;
+const AGENT_RUN_TIMEOUT_MS = 2000;
+const AGENT_RESULT_RETRY_TIMES = 1;
+const AGENT_RESULT_RETRY_INTERVAL_MS = 1000;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,30 +54,44 @@ async function invokeAgentResultWithRetry(baseUrl, requestId, xApiKey) {
     try {
       const result = await postJson(url, { request_id: requestId }, xApiKey, AGENT_RUN_TIMEOUT_MS);
       lastResult = result;
-      const status = String(result?.data?.status || "").toLowerCase();
-      if (status !== "running") {
+      let status = String(result?.data?.status || "").toLowerCase();
+      if (!status) {
+        status = String(result?.status || "").toLowerCase();
+      }
+      if (status === "running") {
+        continue;
+      }
+      if (status) {
         return result;
       }
     } catch (error) {
-      lastResult = { error: true, detail: `第 ${attempt} 次 agent-result 请求失败: ${error.message || error}` };
+      return { error: true, detail: `第 ${attempt} 次 agent-result 请求失败: ${error.message || error}` };
     }
   }
 
-  return lastResult;
+  console.error(
+    "提示: 本轮尝试已达到上限；Prana 服务端任务可能仍需要较长时间才能完成。若希望继续等待同一任务结果，必须先向用户确认；仅在用户明确确认“重试”后，才可继续执行后续命令：node scripts/prana_skill_client.js -r " +
+      requestId,
+  );
+  return null;
 }
 
-async function invokeAgentRun(baseUrl, skillKey, question, threadId, xApiKey) {
+async function invokeAgentRun(baseUrl, skillKey, question, xApiKey) {
   const requestId = randomUUID();
   const url = `${baseUrl.replace(/\/+$/, "")}/api/claw/agent-run`;
   const payload = {
     skill_key: skillKey,
     question,
-    thread_id: threadId,
     request_id: requestId,
   };
 
   try {
-    return await postJson(url, payload, xApiKey, AGENT_RUN_TIMEOUT_MS);
+    const runResult = await postJson(url, payload, xApiKey, AGENT_RUN_TIMEOUT_MS);
+    const runStatus = String(runResult?.data?.status || "").toLowerCase();
+    if (runStatus === "running") {
+      return await invokeAgentResultWithRetry(baseUrl, requestId, xApiKey);
+    }
+    return runResult;
   } catch (error) {
     if (isTimeoutError(error)) {
       return await invokeAgentResultWithRetry(baseUrl, requestId, xApiKey);
@@ -87,8 +106,8 @@ async function main() {
     ({ values } = parseArgs({
       args: process.argv.slice(2),
       options: {
-        question: { type: "string", short: "q" },
-        "thread-id": { type: "string", short: "t", default: "" },
+        question: { type: "string", short: "q", default: "" },
+        "request-id": { type: "string", short: "r", default: "" },
         help: { type: "boolean", short: "h", default: false },
       },
       allowPositionals: false,
@@ -99,12 +118,22 @@ async function main() {
   }
 
   if (values.help) {
-    console.log('用法: node scripts/prana_skill_client.js -q "用户任务" [-t thread_id]');
+    console.log(
+      "调用 Prana 技能接口。\n" +
+        "\n" +
+        "  -q, --question   用户需求任务描述，例如：帮我使用XXX技能\n" +
+        "  -r, --request-id 指定需要查询的任务的 request_id\n" +
+        "\n" +
+        '用法: node scripts/prana_skill_client.js -q "用户任务"\n' +
+        "      或: node scripts/prana_skill_client.js -r <request_id>",
+    );
     process.exit(0);
   }
 
-  if (!values.question) {
-    console.error("错误: 必须使用 -q / --question 提供用户需求任务描述。");
+  const questionTrimmed = String(values.question || "").trim();
+  const requestIdArg = String(values["request-id"] || "").trim();
+  if (!questionTrimmed && !requestIdArg) {
+    console.error("错误: 请使用 -q / --question 发起新任务，或使用 -r / --request-id 查询指定任务状态。");
     process.exit(1);
   }
 
@@ -115,14 +144,17 @@ async function main() {
   }
 
   try {
-    const result = await invokeAgentRun(
-      DEFAULT_BASE_URL,
-      DEFAULT_SKILL_KEY,
-      values.question,
-      values["thread-id"] || "",
-      xApiKey,
-    );
-    console.log(JSON.stringify(result, null, 2));
+    const result = questionTrimmed
+      ? await invokeAgentRun(
+          DEFAULT_BASE_URL,
+          DEFAULT_SKILL_KEY,
+          questionTrimmed,
+          xApiKey,
+        )
+      : await invokeAgentResultWithRetry(DEFAULT_BASE_URL, requestIdArg, xApiKey);
+    if (result != null) {
+      console.log(JSON.stringify(result, null, 2));
+    }
   } catch (error) {
     console.error(`请求失败: ${error.message || error}`);
     process.exit(2);

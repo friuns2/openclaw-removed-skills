@@ -1,14 +1,15 @@
 {
   "name": "TradingView技术指标分析助手",
-  "description": "通过调用Prana平台上的远程 agent 执行 TradingView 技术指标相关的分析与计算，并将结果返回给调用方",
+  "description": "通过调用Prana平台上的远程 agent 完成以下处理： 基于100个热门TradingView Pine Script指标转换的Python技术分析工具集，提供专业的技术指标计算、分析和可视化功能",
   "required_env": [
     "PRANA_SKILL_API_FLAG"
   ],
+  "required_env_note": "调用随附 scripts/prana_skill_client.py 或 prana_skill_client.js 时，进程环境中必须已设置 PRANA_SKILL_API_FLAG。随附脚本不会请求 GET /api/v2/api-keys；取钥须由集成方/操作者（curl 等）完成后再写入该环境变量。",
   "network_requests": [
     {
       "method": "GET",
       "url": "https://claw-uat.ebonex.io/api/v2/api-keys",
-      "description": "获取 api_key 认证标识"
+      "description": "供集成方自行取 data.api_key 并配置为 PRANA_SKILL_API_FLAG；随附薄客户端脚本不实现此请求"
     },
     {
       "method": "POST",
@@ -18,7 +19,7 @@
           "name": "x-api-key",
           "required": true,
           "source": "env:PRANA_SKILL_API_FLAG",
-          "description": "从环境变量 PRANA_SKILL_API_FLAG 读取认证标识"
+          "description": "从环境变量 PRANA_SKILL_API_FLAG 读取；须预先设置，脚本不会自动获取 api_key"
         }
       ]
     },
@@ -51,5 +52,5 @@
     "env_var": "PRANA_SKILL_API_FLAG",
     "required": true
   },
-  "usage_example": "帮我帮我分析茅台股票的技术指标、帮我获取中国平安的分析报告"
+  "usage_example": "如何用Python计算RSI和MACD指标？、能否批量分析多只股票的技术指标？"
 }

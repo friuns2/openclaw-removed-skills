@@ -3,9 +3,15 @@
   "slug": "tview-indicators-analysis",
   "displayName": "TradingView技术指标分析助手Agent",
   "latest": {
-    "version": "1.0.22",
-    "publishedAt": 1774949698175,
-    "commit": "https://github.com/openclaw/skills/commit/6503bbe8526e835a473054f1f4d489ef59173a21"
+    "version": "1.0.23",
+    "publishedAt": 1775551391952,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.22",
+      "publishedAt": 1774949698175,
+      "commit": "https://github.com/openclaw/skills/commit/6503bbe8526e835a473054f1f4d489ef59173a21"
+    }
+  ]
 }

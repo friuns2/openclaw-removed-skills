@@ -11,13 +11,13 @@ import time
 import uuid
 import urllib.error
 import urllib.request
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 DEFAULT_BASE_URL = "https://claw-uat.ebonex.io"
 DEFAULT_SKILL_KEY = "100_indicators_analysis"
-AGENT_RUN_TIMEOUT_SEC = 150
-AGENT_RESULT_RETRY_TIMES = 3
-AGENT_RESULT_RETRY_INTERVAL_SEC = 10
+AGENT_RUN_TIMEOUT_SEC = 2
+AGENT_RESULT_RETRY_TIMES = 1
+AGENT_RESULT_RETRY_INTERVAL_SEC = 1
 
 
 def _headers(x_api_key: str) -> Dict[str, str]:
@@ -51,7 +51,9 @@ def _is_timeout_error(exc: BaseException) -> bool:
     return False
 
 
-def invoke_agent_result_with_retry(base_url: str, request_id: str, x_api_key: str) -> Dict[str, Any]:
+def invoke_agent_result_with_retry(
+    base_url: str, request_id: str, x_api_key: str
+) -> Optional[Dict[str, Any]]:
     url = base_url.rstrip("/") + "/api/claw/agent-result"
     last_result: Dict[str, Any] = {"error": True, "detail": "agent-result 尚未获取到结果"}
     for attempt in range(1, AGENT_RESULT_RETRY_TIMES + 1):
@@ -66,30 +68,46 @@ def invoke_agent_result_with_retry(base_url: str, request_id: str, x_api_key: st
             )
             last_result = result
             data = result.get("data") if isinstance(result, dict) else None
-            status = str((data or {}).get("status", "")).lower() if isinstance(data, dict) else ""
-            if status != "running":
+            status = ""
+            if isinstance(data, dict):
+                status = str(data.get("status", "")).lower()
+            if not status and isinstance(result, dict):
+                status = str(result.get("status", "")).lower()
+            if status == "running":
+                continue
+            if status:
                 return result
         except Exception as exc:  # noqa: BLE001
-            last_result = {"error": True, "detail": f"第 {attempt} 次 agent-result 请求失败: {exc}"}
-    return last_result
+            return {"error": True, "detail": f"第 {attempt} 次 agent-result 请求失败: {exc}"}
+    print(
+        f"提示: 本轮尝试已达到上限；Prana 服务端任务可能仍需要较长时间才能完成。若希望继续等待同一任务结果，必须先向用户确认；仅在用户明确确认“重试”后，才可继续执行后续命令：python3 scripts/prana_skill_client.py -r {request_id}",
+        file=sys.stderr,
+    )
+    return None
 
 
-def invoke_agent_run(base_url: str, skill_key: str, question: str, thread_id: str, x_api_key: str) -> Dict[str, Any]:
+def invoke_agent_run(
+    base_url: str, skill_key: str, question: str, x_api_key: str
+) -> Optional[Dict[str, Any]]:
     request_id = str(uuid.uuid4())
     run_url = base_url.rstrip("/") + "/api/claw/agent-run"
     run_payload = {
         "skill_key": skill_key,
         "question": question,
-        "thread_id": thread_id,
         "request_id": request_id,
     }
     try:
-        return _post_json(
+        run_result = _post_json(
             url=run_url,
             payload=run_payload,
             x_api_key=x_api_key,
             timeout=AGENT_RUN_TIMEOUT_SEC,
         )
+        run_data = run_result.get("data") if isinstance(run_result, dict) else None
+        run_status = str((run_data or {}).get("status", "")).lower() if isinstance(run_data, dict) else ""
+        if run_status == "running":
+            return invoke_agent_result_with_retry(base_url, request_id, x_api_key)
+        return run_result
     except Exception as exc:  # noqa: BLE001
         if _is_timeout_error(exc):
             return invoke_agent_result_with_retry(base_url, request_id, x_api_key)
@@ -98,14 +116,22 @@ def invoke_agent_run(base_url: str, skill_key: str, question: str, thread_id: st
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description=(
-            "调用 Prana 技能接口。参数参考 SKILL.md："
-            "question=用户需求任务，thread_id=首次传空、后续传上一轮返回的 thread_id。"
-        )
+        description="调用 Prana 技能接口。question=用户需求任务。"
     )
-    parser.add_argument("--question", "-q", required=True, help="用户需求任务描述，例如：帮我分析茅台股票的技术指标")
-    parser.add_argument("--thread-id", "-t", default="", help="会话ID；首次调用传空，后续传上一轮返回的 thread_id")
+    parser.add_argument("--question", "-q", default=None, help="用户需求任务描述，例如：帮我使用XXX技能")
+    parser.add_argument(
+        "--request-id",
+        "-r",
+        default=None,
+        dest="request_id",
+        help="指定需要查询的任务的 request_id",
+    )
     args = parser.parse_args()
+
+    question_trimmed = str(args.question).strip() if args.question is not None else ""
+    request_id_arg = (args.request_id or "").strip()
+    if not question_trimmed and not request_id_arg:
+        parser.error("必须提供 --question/-q 发起新任务，或提供 --request-id/-r 查询指定任务状态")
 
     x_api_key = os.getenv("PRANA_SKILL_API_FLAG", "").strip()
     if not x_api_key:
@@ -113,14 +139,21 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        result = invoke_agent_run(
-            base_url=DEFAULT_BASE_URL,
-            skill_key=DEFAULT_SKILL_KEY,
-            question=args.question,
-            thread_id=args.thread_id,
-            x_api_key=x_api_key,
-        )
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        if question_trimmed:
+            result = invoke_agent_run(
+                base_url=DEFAULT_BASE_URL,
+                skill_key=DEFAULT_SKILL_KEY,
+                question=question_trimmed,
+                x_api_key=x_api_key,
+            )
+        else:
+            result = invoke_agent_result_with_retry(
+                base_url=DEFAULT_BASE_URL,
+                request_id=request_id_arg,
+                x_api_key=x_api_key,
+            )
+        if result is not None:
+            print(json.dumps(result, ensure_ascii=False, indent=2))
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", errors="replace")
         print(f"HTTP {exc.code}: {body}", file=sys.stderr)
