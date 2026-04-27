@@ -6,7 +6,10 @@ homepage: https://cellcog.ai
 metadata:
   openclaw:
     emoji: "🖥️"
-    os: [darwin, linux]
+    os: [darwin, linux, windows]
+    requires:
+      bins: [python3]
+      env: [CELLCOG_API_KEY]
 dependencies: [cellcog]
 ---
 # Cowork Cog — CellCog on Your Machine
