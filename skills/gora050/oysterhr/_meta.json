@@ -3,11 +3,16 @@
   "slug": "oysterhr",
   "displayName": "Oysterhr",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169169154,
-    "commit": "https://github.com/openclaw/skills/commit/b67c2c95d5a35be00bbfad52cea0951fda46c876"
+    "version": "1.0.3",
+    "publishedAt": 1776885163907,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169169154,
+      "commit": "https://github.com/openclaw/skills/commit/b67c2c95d5a35be00bbfad52cea0951fda46c876"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774771433316,
