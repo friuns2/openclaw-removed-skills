@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Amazon Reviews List - LinkFox Skill
-Calls the amazon/reviews/list API endpoint
+Amazon US Reviews List - LinkFox Skill
+Calls the amazon/usReviewsList API endpoint (US marketplace only)
 
 Usage:
-  python amazon_reviews.py '{"asin": "B08N5WRWNW", "domainCode": "ca", "star1Num": 10, "star2Num": 10}'
+  python amazon_us_reviews.py '{"asin": "B08N5WRWNW", "allStarsNum": 10}'
+  python amazon_us_reviews.py '{"asin": "B08N5WRWNW", "positiveNum": 20, "criticalNum": 30}'
 """
 
 import json
@@ -14,7 +15,7 @@ from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 
 
-API_URL = "https://tool-gateway.linkfox.com/amazon/reviews/list"
+API_URL = "https://tool-gateway.linkfox.com/amazon/usReviewsList"
 
 
 def get_api_key():
@@ -34,6 +35,7 @@ def get_api_key():
 def call_api(params: dict) -> dict:
     """Call the tool gateway API."""
     api_key = get_api_key()
+    params["marketplace"] = "US"
     data = json.dumps(params).encode("utf-8")
 
     req = Request(
@@ -59,9 +61,9 @@ def call_api(params: dict) -> dict:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: amazon_reviews.py '<JSON parameters>'", file=sys.stderr)
+        print("Usage: amazon_us_reviews.py '<JSON parameters>'", file=sys.stderr)
         print(
-            'Example: amazon_reviews.py \'{"asin": "B08N5WRWNW", "domainCode": "ca", "star1Num": 10}\'',
+            'Example: amazon_us_reviews.py \'{"asin": "B08N5WRWNW", "allStarsNum": 10}\'',
             file=sys.stderr,
         )
         sys.exit(1)

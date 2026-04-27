@@ -3,9 +3,15 @@
   "slug": "linkfox-amazon-reviews",
   "displayName": "Amazon Reviews",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774932493916,
-    "commit": "https://github.com/openclaw/skills/commit/70d4d0553a9b26bbac8741a578410dc1b333c4a6"
+    "version": "1.0.1",
+    "publishedAt": 1776656054674,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774932493916,
+      "commit": "https://github.com/openclaw/skills/commit/70d4d0553a9b26bbac8741a578410dc1b333c4a6"
+    }
+  ]
 }
