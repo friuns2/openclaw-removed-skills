@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const manifest = {
   "baseUrl": "https://api.justoneapi.com",
-  "description": "Analyze Douyin (TikTok China) workflows with JustOneAPI, including user Profile, user Published Videos, and video Details across 9 operations.",
+  "description": "Analyze Douyin (TikTok China) workflows with JustOneAPI, including user Profile, user Published Videos, and video Details across 8 operations.",
   "displayName": "Douyin (TikTok China)",
   "openapi": "3.1.0",
   "platformKey": "douyin",
@@ -38,57 +38,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
-      "tags": [
-        "Douyin (TikTok China)"
-      ]
-    },
-    {
-      "description": "Get Douyin (TikTok China) user Published Videos data, including captions, covers, and publish times, for account monitoring.",
-      "method": "GET",
-      "operationId": "getUserVideoListV1",
-      "parameters": [
-        {
-          "defaultValue": null,
-          "description": "Access token for this API service.",
-          "enumValues": [],
-          "location": "query",
-          "name": "token",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": null,
-          "description": "The unique user ID (sec_uid) on Douyin.",
-          "enumValues": [],
-          "location": "query",
-          "name": "secUid",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": 0,
-          "description": "Pagination cursor; use 0 for the first page, and the `max_cursor` from the previous response for subsequent pages.",
-          "enumValues": [],
-          "location": "query",
-          "name": "maxCursor",
-          "required": false,
-          "schemaType": "integer"
-        }
-      ],
-      "path": "/api/douyin/get-user-video-list/v1",
-      "requestBody": null,
-      "responses": [
-        {
-          "description": "default response",
-          "statusCode": "default"
-        }
-      ],
-      "summary": "User Published Videos",
       "tags": [
         "Douyin (TikTok China)"
       ]
@@ -130,8 +84,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Videos",
@@ -176,8 +130,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Comments",
@@ -188,7 +142,7 @@ const manifest = {
     {
       "description": "Get Douyin (TikTok China) video Details data, including author details, publish time, and engagement counts, for video research, archiving, and performance analysis.",
       "method": "GET",
-      "operationId": "getVideoDetailV2",
+      "operationId": "getDouyinVideoDetailV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -213,8 +167,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Details",
@@ -259,8 +213,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Comment Replies",
@@ -271,7 +225,7 @@ const manifest = {
     {
       "description": "Get Douyin (TikTok China) user Search data, including profile metadata and follower signals, for creator discovery and account research.",
       "method": "GET",
-      "operationId": "searchUserV2",
+      "operationId": "searchDouyinUserV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -318,8 +272,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Search",
@@ -414,8 +368,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Search",
@@ -426,7 +380,7 @@ const manifest = {
     {
       "description": "Get Douyin (TikTok China) share Link Resolution data, including helping extract canonical IDs, for downstream video and comment workflows.",
       "method": "GET",
-      "operationId": "shareUrlTransferV1",
+      "operationId": "shareDouyinUrlTransferV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -451,8 +405,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Share Link Resolution",
