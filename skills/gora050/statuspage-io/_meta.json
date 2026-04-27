@@ -3,9 +3,15 @@
   "slug": "statuspage-io",
   "displayName": "Statuspage Io",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169049556,
-    "commit": "https://github.com/openclaw/skills/commit/99fa788df94971eebb40512fa53d2ea6c48e9268"
+    "version": "1.0.3",
+    "publishedAt": 1776863772839,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169049556,
+      "commit": "https://github.com/openclaw/skills/commit/99fa788df94971eebb40512fa53d2ea6c48e9268"
+    }
+  ]
 }
