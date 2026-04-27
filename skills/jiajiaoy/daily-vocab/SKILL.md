@@ -1,6 +1,6 @@
 ---
 name: daily-vocab
-description: "每天学习一个高级英语词汇，含发音、词源、例句和用法，精美闪卡呈现。Daily advanced English vocabulary card with pronunciation, etymology, examples, and quiz mode. Trigger on：每日词汇、今日单词、学个单词、每日一词、daily vocab、word of the day、GRE词汇、SAT word、高级词汇、advanced vocabulary。"
+description: "One advanced English word every day — IPA pronunciation, etymology, 3 example sentences, and quiz mode. GRE / SAT / IELTS / C2 vocabulary level."
 keywords:
   - 每日词汇
   - 今日单词
