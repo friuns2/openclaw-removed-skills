@@ -3,11 +3,16 @@
   "slug": "sage-people",
   "displayName": "Sage People",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170256013,
-    "commit": "https://github.com/openclaw/skills/commit/ceb3b74343d6075b1ba8384e963c04dbfdd98cdc"
+    "version": "1.0.3",
+    "publishedAt": 1776865462373,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170256013,
+      "commit": "https://github.com/openclaw/skills/commit/ceb3b74343d6075b1ba8384e963c04dbfdd98cdc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998303313,
