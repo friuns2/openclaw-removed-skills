@@ -1,13 +1,3 @@
----
-name: governance-explainer
-description: Explain DAO governance rules and implications clearly; translate constraints into allowed/forbidden actions with consequences.
-metadata:
-  author: Morpheus
-  version: 2.0.0
-  owner: Morpheus Agent
-  category: governance
----
-
 # SKILL: governance-explainer
 
 ## Purpose
