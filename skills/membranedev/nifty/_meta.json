@@ -3,11 +3,16 @@
   "slug": "nifty",
   "displayName": "Nifty",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168205386,
-    "commit": "https://github.com/openclaw/skills/commit/09d8cee8cb9805dc54849900432e7ad6526cdd73"
+    "version": "1.0.3",
+    "publishedAt": 1776852153106,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168205386,
+      "commit": "https://github.com/openclaw/skills/commit/09d8cee8cb9805dc54849900432e7ad6526cdd73"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774584159478,
