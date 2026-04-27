@@ -3,11 +3,16 @@
   "slug": "drug-pipeline",
   "displayName": "NoahAI drug pipeline",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1775203576173,
-    "commit": "https://github.com/openclaw/skills/commit/8f5cdbbf205feff378588607c6749dec6bb04960"
+    "version": "1.0.6",
+    "publishedAt": 1776611209527,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1775203576173,
+      "commit": "https://github.com/openclaw/skills/commit/8f5cdbbf205feff378588607c6749dec6bb04960"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774508758797,

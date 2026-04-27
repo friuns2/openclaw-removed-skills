@@ -136,7 +136,7 @@ def format_results(data: dict) -> str:
     """Format the API response into human-readable text."""
     lines = []
 
-    total = data.get("page_size", "unknown")
+    total = data.get("total_count", "unknown")
     drugs = data.get("results", data.get("data", []))
 
     lines.append(f"=== Results: {total} drug(s) matched ===\n")
@@ -162,8 +162,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # PD-1 antibody drugs in Phase 3
-  python scripts/search.py --params '{"target": {"logic": "or", "data": ["PD-1"]}, "drug_modality": {"logic": "or", "data": ["Antibody-Drug Conjugates, ADCs"]}, "phase": ["III"]}'
+  # PD-1 monoclonal antibody drugs in Phase 3
+  python scripts/search.py --params '{"target": {"logic": "or", "data": ["PD-1"]}, "drug_modality": {"logic": "or", "data": ["Monoclonal Antibodies"]}, "phase": ["III"]}'
+
+  # Search by drug modality (e.g. Small Molecule)
+  python scripts/search.py --params '{"drug_modality": {"logic": "or", "data": ["Small Molecule"]}, "indication": ["colorectal cancer"]}'
+
+  # Search by drug feature (e.g. Biologic)
+  python scripts/search.py --params '{"drug_feature": {"logic": "or", "data": ["Biologic"]}, "page_size": 20}'
 
   # Query by company name
   python scripts/search.py --params '{"company": ["Roche"]}'

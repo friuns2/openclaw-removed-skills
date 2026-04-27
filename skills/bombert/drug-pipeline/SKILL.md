@@ -25,11 +25,10 @@ Identify the following entity types from the user's question:
 | `company` | `List[str]` | Sponsor / developer company | `["Pfizer", "Roche"]`                                     |
 | `indication` | `List[str]` | Disease / indication        | `["lung cancer", "NSCLC"]`                                |
 | `target` | `dict` | Biological target(s)        | `{"logic": "or", "data": ["PD-1", "VEGF"]}`               |
-| `drug_modality` | `dict` | Drug modality / type        | `{"logic": "or", "data": ["antibody", "small molecule"]}` |
-| `drug_feature` | `dict` | Drug feature(s)             | `{"logic": "or", "data": ["bispecific"]}`                 |
+| `drug_modality` | `dict` | Drug modality  | `{"logic": "or", "data": ["Vaccine", "mRNA"]}` |
+| `drug_feature` | `dict` | Drug feature(s) | `{"logic": "or", "data": ["Biologic", "Non-NME"]}`                 |
 | `phase` | `List[str]` | Development phase(s)        | `["Preclinical", "I", "II", "III", "IV", "Others", "IND", "Suspended", "Approved", "Unknow", "Withdraw from Market", "BLA/NDA"]`                                 |
-| `location` | `List[str]` | Geographic location(s)      | `["China", "United States", "Japan"]`                                        |
-| `route_of_administration` | `dict` | Route of administration     | `{"logic": "or", "data": ["IV", "oral"]}`                 |
+| `route_of_administration` | `dict` | Route of administration (requires exact formatted values) | `{"logic": "or", "data": ["Intravenous (IV)", "Oral (PO)"]}`                 |
 | `page_num` | `int` | Page index (0-based)        | `0`                                                       |
 | `page_size` | `int` | Results per page (1–2000)      | `200`                                                       |
 
@@ -46,6 +45,40 @@ Identify the following entity types from the user's question:
 - `drug_name`, `target`, `drug_modality`, `drug_feature`, `route_of_administration` → `dict` with `logic` and `data`
 - Default to `page_num: 0, page_size: 10` unless the user specifies otherwise
 - Prefer English keywords (the database is indexed in English); translate non-English terms
+- `drug_modality` must use exact strings from this set:
+
+  ```json
+  [
+    "Steroids", "Vaccine", "Antisense RNA", "Antibody-Drug Conjugates, ADCs", "Unknown", "Protein Degrader",
+    "Monoclonal Antibodies", "mRNA", "Others", "Cell-based Therapies", "Imaging Agents", "Gene Therapy",
+    "miRNA", "Polypeptide", "Recombinant Proteins", "Small Molecule", "siRNA/RNAi", "Trispecific Antibodies",
+    "Polyclonal Antibodies", "Bi-specific Antibodies", "Glycoconjugates", "Radiopharmaceutical",
+    "Nucleic Acid-based", "Carbohydrates"
+  ]
+  ```
+- `drug_feature` must use exact strings from this set:
+
+  ```json
+  [
+    "505b2", "Bacterial Product", "Biologic", "Biosimilar", "Device", "Fixed-Dose Combination", "Immuno-Oncology",
+    "New Molecular Entity (NME)", "Non-NME", "Precision Medicine", "Reformulation", "Specialty Drug", "Viral"
+  ]
+  ```
+- `route_of_administration` must use exact strings from this set:
+
+  ```json
+  [
+    "Intraarterial", "Intraurethral", "Inhaled", "Intranasal", "Subcutaneous (SQ) - Unspecified", "Transdermal",
+    "Intraocular/Subretinal/Subconjunctival", "Subcutaneous (SQ) Injection", "Intrauterine", "Intralymphatic",
+    "Intradiscal", "Intra-amniotic", "Intrathecal", "Intracerebral/cerebroventricular", "Intramuscular (IM)",
+    "Intraarticular", "Intracochlear", "Surgical Implantation", "Hemoperfusion", "Subcutaneous (SQ) Infusion",
+    "Intravitreal", "Intravenous (IV)", "Oral (PO)", "Intradermal", "Percutaneous Catheter/Injection",
+    "Intranodal", "Intravesical", "Intracameral", "Intratympanic", "Intratumoral",
+    "Sublingual (SL)/Oral Transmucosal", "Intravaginal", "N/A", "Rectal", "Intracavitary",
+    "Intra-Cisterna Magna (ICM) Injection", "Injectable - Unspecified", "Intratracheal", "Topical",
+    "Instillation", "Intraintestinal", "Submucosal"
+  ]
+  ```
 
 ## Step 2: Execute the Query
 
@@ -64,7 +97,7 @@ Add `--raw` to receive the unformatted JSON response.
 ## Step 3: Interpret Results
 
 The response contains:
-- `page_num` / `page_size` — current pagination state
+- `total_count` — total number of matching drugs
 - `results` — current page of drug records, each with name, phase, modality, targets, companies, indication, development progress, etc.
 
 ## Step 4: Review and Fallback Search Strategies
@@ -103,7 +136,7 @@ When drug name matching is unreliable, use the company as the anchor. Fetch a br
 ```
 
 After retrieving results, apply local filters:
-- `modality == "Antibody-Drug Conjugates, ADCs"`
+- `modality == "Monoclonal Antibodies"`
 - `indication contains "breast cancer"`
 - `drug_name matches known code pattern`
 
@@ -118,7 +151,7 @@ When neither name nor company is reliable, search by biological target and modal
 ```json
 {
   "target": {"logic": "or", "data": ["CLDN18.2", "Nectin-4", "HER2"]},
-  "drug_modality": {"logic": "or", "data": ["Antibody-Drug Conjugates, ADCs"]},
+  "drug_modality": {"logic": "or", "data": ["Monoclonal Antibodies"]},
   "page_num": 0,
   "page_size": 200
 }
@@ -152,7 +185,7 @@ Any step hits HTTP 429?
 ```json
 {
   "target": {"logic": "or", "data": ["PD-1"]},
-  "drug_modality": {"logic": "or", "data": ["antibody"]},
+  "drug_modality": {"logic": "or", "data": ["Monoclonal Antibodies"]},
   "phase": ["III"],
   "page_num": 0,
   "page_size": 30
@@ -166,7 +199,7 @@ Any step hits HTTP 429?
 ```json
 {
   "company": ["Roche"],
-  "drug_feature": {"logic": "or", "data": ["bispecific"]},
+  "drug_modality": {"logic": "or", "data": ["Bi-specific Antibodies"]},
   "indication": ["lung cancer"],
   "page_num": 0,
   "page_size": 30
@@ -179,9 +212,9 @@ Any step hits HTTP 429?
 
 ```json
 {
-  "target": {"logic": "or", "data": ["KRAS G12C"]},
-  "drug_modality": {"logic": "or", "data": ["small molecule"]},
-  "route_of_administration": {"logic": "or", "data": ["oral"]},
+  "target": {"logic": "or", "data": ["KRAS"]},
+  "drug_modality": {"logic": "or", "data": ["Small Molecule"]},
+  "route_of_administration": {"logic": "or", "data": ["Oral (PO)"]},
   "page_num": 0,
   "page_size": 30
 }
