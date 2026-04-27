@@ -3,11 +3,16 @@
   "slug": "conveyor-integration",
   "displayName": "Conveyor",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168084507,
-    "commit": "https://github.com/openclaw/skills/commit/82d008d0b61eb6bc2aca78a5972bc6374de37f46"
+    "version": "1.0.3",
+    "publishedAt": 1776862037547,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168084507,
+      "commit": "https://github.com/openclaw/skills/commit/82d008d0b61eb6bc2aca78a5972bc6374de37f46"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774566295355,
