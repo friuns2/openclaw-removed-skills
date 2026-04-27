@@ -3,11 +3,16 @@
   "slug": "listenloop",
   "displayName": "Listenloop",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169091391,
-    "commit": "https://github.com/openclaw/skills/commit/6f3cf7a2c3e6a0d5f1e497e1ef77bad3b021703b"
+    "version": "1.0.3",
+    "publishedAt": 1776854377330,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169091391,
+      "commit": "https://github.com/openclaw/skills/commit/6f3cf7a2c3e6a0d5f1e497e1ef77bad3b021703b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774756983268,
