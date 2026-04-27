@@ -10,6 +10,7 @@
 对应页面：`https://www.siluzan.com/v3/foreign_trade/settings/invoiceInformation`
 
 发票抬头是开票申请时使用的公司/企业信息模板，支持三种类型：
+
 - **PI**：形式发票（境外美金账户，英文信息）
 - **VATI**：增值税普通发票
 - **VATSI**：增值税专用发票
@@ -76,16 +77,16 @@ siluzan-tso invoice-info delete <id>
 
 ### 字段说明
 
-| 选项 | 说明 | PI | VATI/VATSI |
-|------|------|----|------------|
-| `--company-name` | 公司名称（PI 用英文，VATI/VATSI 用中文） | ✅ | ✅ |
-| `--registered-address` | 英文注册地址 | ✅必填 | — |
-| `--tax-id` | 税号 | — | ✅必填 |
-| `--title` | 发票抬头 | — | ✅必填 |
-| `--landline` | 座机号码 | — | ✅必填 |
-| `--contact` | 联系人姓名 | ✅ | ✅ |
-| `--phone` | 联系人手机号 | ✅ | ✅ |
-| `--email` | 推送邮箱 | — | — |
+| 选项                   | 说明                                     | PI     | VATI/VATSI |
+| ---------------------- | ---------------------------------------- | ------ | ---------- |
+| `--company-name`       | 公司名称（PI 用英文，VATI/VATSI 用中文） | ✅     | ✅         |
+| `--registered-address` | 英文注册地址                             | ✅必填 | —          |
+| `--tax-id`             | 税号                                     | —      | ✅必填     |
+| `--title`              | 发票抬头                                 | —      | ✅必填     |
+| `--landline`           | 座机号码                                 | —      | ✅必填     |
+| `--contact`            | 联系人姓名                               | ✅     | ✅         |
+| `--phone`              | 联系人手机号                             | ✅     | ✅         |
+| `--email`              | 推送邮箱                                 | —      | —          |
 
 ---
 
@@ -104,15 +105,15 @@ siluzan-tso config show
 
 ### 功能总览
 
-| 功能 | 对应页面路径 | CLI 支持 |
-|------|-------------|----------|
-| 现金充值（单笔） | `/recharge/pay` | ❌ 引导网页 |
-| 现金充值（批量） | `/recharge/pay_batch` | ❌ 引导网页 |
-| 月结充值 | `/recharge/accountBillingQuota` | ❌ 引导网页 |
-| 丝路赞钱包（充值/提现/明细） | `/recharge/siluzanWallet` | ❌ 引导网页 |
-| 媒体转账记录 | `/recharge/accountTransfer` | ✅ `transfer` 命令 |
-| 开票记录 | `/recharge/invoiceList` | ✅ `invoice list` |
-| 开票申请列表 | `/recharge/invoicingApplicationList` | ✅ `invoice billable` / `invoice apply` |
+| 功能                         | 对应页面路径                         | CLI 支持                                |
+| ---------------------------- | ------------------------------------ | --------------------------------------- |
+| 现金充值（单笔）             | `/recharge/pay`                      | ❌ 引导网页                             |
+| 现金充值（批量）             | `/recharge/pay_batch`                | ❌ 引导网页                             |
+| 月结充值                     | `/recharge/accountBillingQuota`      | ❌ 引导网页                             |
+| 丝路赞钱包（充值/提现/明细） | `/recharge/siluzanWallet`            | ❌ 引导网页                             |
+| 媒体转账记录                 | `/recharge/accountTransfer`          | ✅ `transfer` 命令                      |
+| 开票记录                     | `/recharge/invoiceList`              | ✅ `invoice list`                       |
+| 开票申请列表                 | `/recharge/invoicingApplicationList` | ✅ `invoice billable` / `invoice apply` |
 
 ### 引导用户的标准话术
 
@@ -144,13 +145,13 @@ siluzan-tso config show
 siluzan-tso transfer list [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-m, --media <type>` | 媒体类型：`Google \| TikTok \| MetaAd \| BingV2` |
-| `-n, --number <no>` | 转账单号 |
-| `-s, --status <status>` | 到账状态 |
-| `--start / --end <date>` | 日期范围（YYYY-MM-DD） |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                                             |
+| ------------------------ | ------------------------------------------------ |
+| `-m, --media <type>`     | 媒体类型：`Google \| TikTok \| MetaAd \| BingV2` |
+| `-n, --number <no>`      | 转账单号                                         |
+| `-s, --status <status>`  | 到账状态                                         |
+| `--start / --end <date>` | 日期范围（YYYY-MM-DD）                           |
+| `--json`                 | 输出原始 JSON                                    |
 
 **示例：**
 
@@ -178,14 +179,14 @@ siluzan-tso transfer list -m Google --json
 siluzan-tso transfer create -m <媒体> --out <转出ID> --in <转入ID> --amount <金额>
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `-m, --media <type>` | 媒体类型：`Google \| TikTok \| MetaAd \| BingV2` | ✅ |
-| `--out <id>` | 转出账户 `mediaCustomerId`（来自 `list-accounts`） | ✅ |
-| `--in <id>` | 转入账户 `mediaCustomerId` | ✅ |
-| `--amount <amount>` | 转账金额（与账户货币单位一致） | ✅ |
-| `--customer-name <name>` | 客户名称备注（可选） | |
-| `--json` | 输出原始 JSON | |
+| 选项                     | 说明                                               | 必填 |
+| ------------------------ | -------------------------------------------------- | ---- |
+| `-m, --media <type>`     | 媒体类型：`Google \| TikTok \| MetaAd \| BingV2`   | ✅   |
+| `--out <id>`             | 转出账户 `mediaCustomerId`（来自 `list-accounts`） | ✅   |
+| `--in <id>`              | 转入账户 `mediaCustomerId`                         | ✅   |
+| `--amount <amount>`      | 转账金额（与账户货币单位一致）                     | ✅   |
+| `--customer-name <name>` | 客户名称备注（可选）                               |      |
+| `--json`                 | 输出原始 JSON                                      |      |
 
 **示例：**
 
@@ -207,11 +208,11 @@ siluzan-tso transfer create -m Google --out 1234567890 --in 9876543210 --amount 
 siluzan-tso invoice list [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-k, --keyword <text>` | 发票号/关键字 |
+| 选项                     | 说明                   |
+| ------------------------ | ---------------------- |
+| `-k, --keyword <text>`   | 发票号/关键字          |
 | `--start / --end <date>` | 日期范围（YYYY-MM-DD） |
-| `--json` | 输出原始 JSON |
+| `--json`                 | 输出原始 JSON          |
 
 **示例：**
 
@@ -239,13 +240,13 @@ siluzan-tso invoice list --json
 siluzan-tso invoice billable [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-m, --media <type>` | 媒体类型筛选 |
-| `-c, --currency <code>` | 币种，如 `USD \| CNY` |
-| `--wallet` | 查询钱包充值可开票记录 |
-| `--start / --end <date>` | 日期范围 |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                   |
+| ------------------------ | ---------------------- |
+| `-m, --media <type>`     | 媒体类型筛选           |
+| `-c, --currency <code>`  | 币种，如 `USD \| CNY`  |
+| `--wallet`               | 查询钱包充值可开票记录 |
+| `--start / --end <date>` | 日期范围               |
+| `--json`                 | 输出原始 JSON          |
 
 **示例：**
 
@@ -304,22 +305,22 @@ siluzan-tso invoice apply \
   --recipient-email zhang@example.com
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `--bill-ids` | 可开票订单 `entityId`，逗号分隔（来自 `invoice billable --json`） | ✅ |
-| `--bill-type` | 账单来源类型：`AmountAccount`（充值开票）\| `WalletRecharge`（钱包开票） | ✅ |
-| `--invoice-type` | 发票格式：`PI`（形式发票，境外英文）\| `VATI`（增值税普票）\| `VATSI`（增值税专票） | ✅ |
-| `--recipient-name` | 收件人姓名 | ✅ |
-| `--recipient-phone` | 收件人手机号 | ✅ |
-| `--recipient-email` | 推送邮箱 | — |
-| `--company-name-en` | 公司英文名称（PI 必填） | PI✅ |
-| `--registered-address-en` | 英文单位地址（PI 必填，与 Web 校验一致） | PI✅ |
-| `--company-name` | 公司中文名称（VATI/VATSI 必填） | VATI✅ |
-| `--tax-id` | 税号（VATI/VATSI 必填） | VATI✅ |
-| `--title` | 发票抬头（VATI/VATSI 必填） | VATI✅ |
-| `--company-phone` | 公司座机（VATI/VATSI 必填，对应接口 `InvoiceInfomation.Phone`） | VATI✅ |
-| `--media` | 媒体类型（与 `invoice billable` 一致；核对币种时会传给列表接口） | 建议与订单一致 |
-| `--skip-currency-check` | 跳过币种与发票类型校验 | — |
+| 选项                      | 说明                                                                                | 必填           |
+| ------------------------- | ----------------------------------------------------------------------------------- | -------------- |
+| `--bill-ids`              | 可开票订单 `entityId`，逗号分隔（来自 `invoice billable --json`）                   | ✅             |
+| `--bill-type`             | 账单来源类型：`AmountAccount`（充值开票）\| `WalletRecharge`（钱包开票）            | ✅             |
+| `--invoice-type`          | 发票格式：`PI`（形式发票，境外英文）\| `VATI`（增值税普票）\| `VATSI`（增值税专票） | ✅             |
+| `--recipient-name`        | 收件人姓名                                                                          | ✅             |
+| `--recipient-phone`       | 收件人手机号                                                                        | ✅             |
+| `--recipient-email`       | 推送邮箱                                                                            | —              |
+| `--company-name-en`       | 公司英文名称（PI 必填）                                                             | PI✅           |
+| `--registered-address-en` | 英文单位地址（PI 必填，与 Web 校验一致）                                            | PI✅           |
+| `--company-name`          | 公司中文名称（VATI/VATSI 必填）                                                     | VATI✅         |
+| `--tax-id`                | 税号（VATI/VATSI 必填）                                                             | VATI✅         |
+| `--title`                 | 发票抬头（VATI/VATSI 必填）                                                         | VATI✅         |
+| `--company-phone`         | 公司座机（VATI/VATSI 必填，对应接口 `InvoiceInfomation.Phone`）                     | VATI✅         |
+| `--media`                 | 媒体类型（与 `invoice billable` 一致；核对币种时会传给列表接口）                    | 建议与订单一致 |
+| `--skip-currency-check`   | 跳过币种与发票类型校验                                                              | —              |
 
 **完整示例流程：**
 

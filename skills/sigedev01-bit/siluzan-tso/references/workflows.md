@@ -25,13 +25,13 @@
 
 **常用时区速查**（完整列表：`siluzan-tso open-account google-timezones`）：
 
-| 时区 Code | 含义 |
-|-----------|------|
-| `Asia/Shanghai` | 北京/上海（选 CNY 时的默认值） |
-| `Asia/Hong_Kong` | 香港（选 USD 时的默认值） |
-| `America/New_York` | 美东 |
-| `America/Los_Angeles` | 美西 |
-| `Europe/London` | 伦敦 |
+| 时区 Code             | 含义                           |
+| --------------------- | ------------------------------ |
+| `Asia/Shanghai`       | 北京/上海（选 CNY 时的默认值） |
+| `Asia/Hong_Kong`      | 香港（选 USD 时的默认值）      |
+| `America/New_York`    | 美东                           |
+| `America/Los_Angeles` | 美西                           |
+| `Europe/London`       | 伦敦                           |
 
 ```bash
 # 第一步：提交开户申请（无需提前查 magKey，CLI 按公司名自动关联）
@@ -173,11 +173,11 @@ siluzan-tso account-history -m Kwai
 siluzan-tso account-history -m Google
 ```
 
-| 状态 | 含义 | 下一步 |
-|------|------|--------|
-| `Pending` | 审核中 | 等待，可反复轮询 |
-| `Approved` | 审核通过 | `list-accounts` 确认账户出现；引导用户充值激活（见各媒体第四步） |
-| `Rejected` | 被拒 | 查看拒绝原因（`account-history --json` 的 `reason` 字段）；修改资料后重新提交；如无法确定原因，引导用户联系丝路赞客服 |
+| 状态       | 含义     | 下一步                                                                                                                |
+| ---------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `Pending`  | 审核中   | 等待，可反复轮询                                                                                                      |
+| `Approved` | 审核通过 | `list-accounts` 确认账户出现；引导用户充值激活（见各媒体第四步）                                                      |
+| `Rejected` | 被拒     | 查看拒绝原因（`account-history --json` 的 `reason` 字段）；修改资料后重新提交；如无法确定原因，引导用户联系丝路赞客服 |
 
 ---
 
@@ -235,6 +235,7 @@ Failed / HasFailed（部分或全部失败）
 ```
 
 **常见场景**：
+
 - 草稿已有字段不满足需求 → `update` 修改后 `publish`
 - 创建失败 → `get` 查看详情，检查错误信息，网页上修正后再从 `update` 开始
 
@@ -297,6 +298,7 @@ siluzan-tso ad campaigns -a <mediaCustomerId> --json
 ```
 
 **关键词格式说明**：
+
 - `running shoes` → 广泛匹配（BROAD）
 - `"running shoes"` → 词组匹配（PHRASE）
 - `[running shoes]` → 精确匹配（EXACT）
@@ -545,8 +547,8 @@ siluzan-tso report delete --ids <id1>,<id2>
 
 ### 与流程六的区别
 
-| 流程六 | 流程六点五 |
-|--------|------------|
+| 流程六                                                       | 流程六点五                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
 | TSO **优化报告**：`report create` / `list` / 推送 / 查看链接 | Agent **撰写**的分析报告：CLI 取数后按纲要组织 Markdown/HTML |
 
 ### 步骤
@@ -867,13 +869,13 @@ siluzan-tso ad list -a <mediaCustomerId>
 
 ### `ad smart prepare` 输出说明
 
-| 字段 | 说明 | AI Agent 使用方式 |
-|------|------|-----------------|
-| `industry.industryName` | 匹配的行业 | 确认产品方向是否正确 |
-| `industry.language` / `languageId` | 推荐语言 | 设置广告系列语言定向 |
-| `keywordIdeas` | 关键词列表（含月搜索量） | 筛选高搜索量词加入广告组 |
-| `budgetProportions` | 地区预算比例 | 多地区方案中按比例分配预算 |
-| `account.currencyCode` | 货币单位 | 换算 `max-cpc` 的实际金额 |
+| 字段                               | 说明                     | AI Agent 使用方式          |
+| ---------------------------------- | ------------------------ | -------------------------- |
+| `industry.industryName`            | 匹配的行业               | 确认产品方向是否正确       |
+| `industry.language` / `languageId` | 推荐语言                 | 设置广告系列语言定向       |
+| `keywordIdeas`                     | 关键词列表（含月搜索量） | 筛选高搜索量词加入广告组   |
+| `budgetProportions`                | 地区预算比例             | 多地区方案中按比例分配预算 |
+| `account.currencyCode`             | 货币单位                 | 换算 `max-cpc` 的实际金额  |
 
 ### JSON 输出格式（`--json`）
 
@@ -948,11 +950,11 @@ siluzan-tso account auth -m Google
 
 **诊断结果对投放的影响**：
 
-| 诊断评级 | 建议操作 |
-|---------|---------|
-| 优秀（85分以上） | 可直接投放，继续完成 AIGC 方案生成 |
-| 良好（70-84分） | 建议优化后投放，可先小预算测试 |
-| 一般（60-69分） | 重点改善转化代码和页面速度后再投 |
+| 诊断评级         | 建议操作                                             |
+| ---------------- | ---------------------------------------------------- |
+| 优秀（85分以上） | 可直接投放，继续完成 AIGC 方案生成                   |
+| 良好（70-84分）  | 建议优化后投放，可先小预算测试                       |
+| 一般（60-69分）  | 重点改善转化代码和页面速度后再投                     |
 | 较差（60分以下） | 需先修复关键问题（参考诊断报告），否则广告效果会很差 |
 
 ---

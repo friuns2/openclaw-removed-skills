@@ -25,6 +25,7 @@ siluzan-tso forewarning notify-accounts
 ```
 
 输出示例：
+
 ```
 📱 微信通知对象列表
 
@@ -45,17 +46,17 @@ siluzan-tso forewarning notify-accounts
 
 ## 命令速查
 
-| 命令 | 说明 |
-|---|---|
-| `forewarning notify-accounts` | 查询可接收通知的微信账户列表（含关注二维码链接） |
-| `forewarning list -m Google` | 查询预警规则列表 |
-| `forewarning records -m Google` | 查询预警触发记录 |
-| `forewarning get -m Google --id <id>` | 获取单条规则详情 |
-| `forewarning create ...` | 创建自定义预警规则 |
-| `forewarning update --id <id> ...` | 更新已有预警规则 |
-| `forewarning start -m Google --id <id>` | 启动已停用的规则 |
-| `forewarning stop -m Google --id <id>` | 停止规则 |
-| `forewarning delete -m Google --id <id>` | 删除规则 |
+| 命令                                     | 说明                                             |
+| ---------------------------------------- | ------------------------------------------------ |
+| `forewarning notify-accounts`            | 查询可接收通知的微信账户列表（含关注二维码链接） |
+| `forewarning list -m Google`             | 查询预警规则列表                                 |
+| `forewarning records -m Google`          | 查询预警触发记录                                 |
+| `forewarning get -m Google --id <id>`    | 获取单条规则详情                                 |
+| `forewarning create ...`                 | 创建自定义预警规则                               |
+| `forewarning update --id <id> ...`       | 更新已有预警规则                                 |
+| `forewarning start -m Google --id <id>`  | 启动已停用的规则                                 |
+| `forewarning stop -m Google --id <id>`   | 停止规则                                         |
+| `forewarning delete -m Google --id <id>` | 删除规则                                         |
 
 ---
 
@@ -63,33 +64,33 @@ siluzan-tso forewarning notify-accounts
 
 ### 完整参数
 
-| 参数 | 必填 | 说明 |
-|---|---|---|
-| `-m, --media` | ✅ | 媒体类型：`Google` \| `TikTok` |
-| `--name` | ✅ | 规则名称 |
-| `--accounts` | ✅ | 监控的媒体账户 entityId，逗号分隔（由 `list-accounts --json` 查询） |
-| `--field` | ✅ | 监控指标，见下表 |
-| `--operator` | ✅ | 比较运算符：`GREATER_EQUALS` \| `GREATER` \| `LESS_EQUALS` \| `LESS` \| `EQUALS` |
-| `--value` | ✅ | 阈值（数字，单位为人民币元或对应货币） |
-| `--scope` | 否 | 执行范围：`Campaign`（默认）\| `AdGroup` \| `Ad` \| `Advertiser` |
-| `--days` | 否 | 统计周期（天）：`1`（默认）\| `3` \| `7` |
-| `--frequency` | 否 | 检查频率：`QuarterHour`（默认，每15分钟）\| `HalfHour` \| `Hour` |
-| `--notify` | 否 | 微信通知对象 entityId，逗号分隔（由 `forewarning notify-accounts` 查询） |
-| `--notify-by` | 否 | 通知颗粒度：`MediaAccount`（默认，按账户汇总）\| `Action`（按操作逐条，仅 Google 自定义规则） |
+| 参数          | 必填 | 说明                                                                                          |
+| ------------- | ---- | --------------------------------------------------------------------------------------------- |
+| `-m, --media` | ✅   | 媒体类型：`Google` \| `TikTok`                                                                |
+| `--name`      | ✅   | 规则名称                                                                                      |
+| `--accounts`  | ✅   | 监控的媒体账户 entityId，逗号分隔（由 `list-accounts --json` 查询）                           |
+| `--field`     | ✅   | 监控指标，见下表                                                                              |
+| `--operator`  | ✅   | 比较运算符：`GREATER_EQUALS` \| `GREATER` \| `LESS_EQUALS` \| `LESS` \| `EQUALS`              |
+| `--value`     | ✅   | 阈值（数字，单位为人民币元或对应货币）                                                        |
+| `--scope`     | 否   | 执行范围：`Campaign`（默认）\| `AdGroup` \| `Ad` \| `Advertiser`                              |
+| `--days`      | 否   | 统计周期（天）：`1`（默认）\| `3` \| `7`                                                      |
+| `--frequency` | 否   | 检查频率：`QuarterHour`（默认，每15分钟）\| `HalfHour` \| `Hour`                              |
+| `--notify`    | 否   | 微信通知对象 entityId，逗号分隔（由 `forewarning notify-accounts` 查询）                      |
+| `--notify-by` | 否   | 通知颗粒度：`MediaAccount`（默认，按账户汇总）\| `Action`（按操作逐条，仅 Google 自定义规则） |
 
 ### 可监控的指标（--field）
 
-| 字段值 | 含义 |
-|---|---|
-| `cost` | 广告消耗 |
-| `spend` | 广告花费（部分媒体） |
-| `CPC` | 每次点击费用 |
-| `CPM` | 每千次展示费用 |
-| `CPA` | 每次转化费用 |
-| `ctr` | 点击率 |
-| `conversions_count` | 转化次数 |
-| `balance` | 账户余额（账户级预警） |
-| `score` | 账户优化得分 |
+| 字段值              | 含义                   |
+| ------------------- | ---------------------- |
+| `cost`              | 广告消耗               |
+| `spend`             | 广告花费（部分媒体）   |
+| `CPC`               | 每次点击费用           |
+| `CPM`               | 每千次展示费用         |
+| `CPA`               | 每次转化费用           |
+| `ctr`               | 点击率                 |
+| `conversions_count` | 转化次数               |
+| `balance`           | 账户余额（账户级预警） |
+| `score`             | 账户优化得分           |
 
 ### 典型用法
 
@@ -118,10 +119,10 @@ siluzan-tso forewarning create \
 
 ## 通知颗粒度（--notify-by）
 
-| 值 | 适用场景 | 行为 |
-|---|---|---|
-| `MediaAccount`（默认） | 所有媒体、所有规则类型 | 按账户汇总，该账户下有任何匹配操作就发一条通知 |
-| `Action` | **仅** Google + 自定义规则（Customization） | 每个触发操作各发一条通知，消息更详细 |
+| 值                     | 适用场景                                    | 行为                                           |
+| ---------------------- | ------------------------------------------- | ---------------------------------------------- |
+| `MediaAccount`（默认） | 所有媒体、所有规则类型                      | 按账户汇总，该账户下有任何匹配操作就发一条通知 |
+| `Action`               | **仅** Google + 自定义规则（Customization） | 每个触发操作各发一条通知，消息更详细           |
 
 ---
 

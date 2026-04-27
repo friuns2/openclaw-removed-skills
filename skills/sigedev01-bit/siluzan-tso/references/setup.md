@@ -1,12 +1,17 @@
 # 安装与配置
 
+## 前置条件
+
+| 依赖        | 版本             | 用途                            |
+| ----------- | ---------------- | ------------------------------- |
+| Node.js     | 18+              | CLI 运行时及 `node -e` 数据过滤 |
+| npm 或 pnpm | npm 8+ / pnpm 8+ | 安装全局包                      |
+
 ## 安装 CLI
 
 ```bash
 npm install -g siluzan-tso-cli
 ```
-
-环境要求：Node.js 18+
 
 ---
 
@@ -44,6 +49,27 @@ siluzan-tso config set --token <Token>     # 备用：设置 JWT Token
 
 API Key 获取入口：`https://www.siluzan.com/v3/foreign_trade/settings/apiKeyManagement`
 
+### 通过环境变量传入凭据（CI/CD 推荐）
+
+无需写入 config.json，直接通过环境变量传入：
+
+```bash
+export SILUZAN_API_KEY=<YOUR_API_KEY>       # API Key（推荐）
+# 或
+export SILUZAN_AUTH_TOKEN=<YOUR_TOKEN>      # JWT Token
+```
+
+环境变量优先级高于 config.json，适合 CI/CD、Docker 容器、自动化脚本等场景。可通过 `siluzan-tso config show` 确认当前生效的凭据来源。
+
+**凭据读取优先级（由高到低）：**
+
+| 凭据类型  | 优先级                                                                           |
+| --------- | -------------------------------------------------------------------------------- |
+| API Key   | `SILUZAN_API_KEY` 环境变量 → `config.json` → `apiKey`                            |
+| JWT Token | `--token` CLI 参数 → `SILUZAN_AUTH_TOKEN` 环境变量 → `config.json` → `authToken` |
+
+> API Key 鉴权优先级高于 JWT Token，两者同时存在时使用 API Key。
+
 ---
 
 ## 查看当前配置
@@ -51,7 +77,9 @@ API Key 获取入口：`https://www.siluzan.com/v3/foreign_trade/settings/apiKey
 ```bash
 siluzan-tso config show
 ```
+
 输出示例：
+
 ```
   构建环境     : production
   apiBaseUrl   : https://tso-api.siluzan.com
@@ -71,6 +99,7 @@ siluzan-tso config show
 ## 更新
 
 需要严格按照步骤执行
+
 - 执行 npm install -g siluzan-tso-cli@[beta|latest]根据当前使用的是beta版本还是正式版本更新对应的版本到最新版
 - 执行 siluzan-tso init -d /path/to/skills 复制项目中最新的skill文件来更新你的skill
 
@@ -80,7 +109,8 @@ siluzan-tso config show
 
 ```bash
 siluzan-tso config set --api-base <url>    # 切换 TSO API 地址
-siluzan-tso config set --google-api <url>  # 切换 Google 网关地址
+# Google API 地址从 TSO API 自动推导，如需覆盖可设置环境变量：
+# export SILUZAN_GOOGLE_API=<url>
 siluzan-tso config clear                   # 清空所有凭据
 ```
 

@@ -10,14 +10,14 @@
 siluzan-tso clue -m <媒体> -a <账户ID> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-m, --media` | `TikTok \| Meta`（默认 TikTok） |
+| 选项                 | 说明                                                              |
+| -------------------- | ----------------------------------------------------------------- |
+| `-m, --media`        | `TikTok \| Meta`（默认 TikTok）                                   |
 | `-a, --account <id>` | TikTok：`advertiserId`（mediaCustomerId）；Meta：Facebook 页面 ID |
-| `--region <region>` | TikTok 专用：`eu \| us \| other \| ALL`（默认 ALL） |
-| `--start <date>` | Meta 专用：开始日期（YYYY-MM-DD） |
-| `--end <date>` | Meta 专用：结束日期（YYYY-MM-DD） |
-| `--json` | 输出原始 JSON |
+| `--region <region>`  | TikTok 专用：`eu \| us \| other \| ALL`（默认 ALL）               |
+| `--start <date>`     | Meta 专用：开始日期（YYYY-MM-DD）                                 |
+| `--end <date>`       | Meta 专用：结束日期（YYYY-MM-DD）                                 |
+| `--json`             | 输出原始 JSON                                                     |
 
 **TikTok 示例：**
 
@@ -44,14 +44,14 @@ siluzan-tso clue -m Meta -a 987654321 --start 2026-03-01 --json
 
 **输出字段说明（TikTok）：**
 
-| 字段 | 来源 |
-|------|------|
-| 姓名、邮箱、手机 | `custom_fields` |
+| 字段                                | 来源            |
+| ----------------------------------- | --------------- |
+| 姓名、邮箱、手机                    | `custom_fields` |
 | 表单名、广告名、区域、时间、lead_id | `system_fields` |
 
 **输出字段说明（Meta）：**
 
-| 字段 | 来源 |
-|------|------|
+| 字段             | 来源         |
+| ---------------- | ------------ |
 | 姓名、邮箱、手机 | `field_data` |
-| 表单名、创建时间 | 顶层字段 |
+| 表单名、创建时间 | 顶层字段     |

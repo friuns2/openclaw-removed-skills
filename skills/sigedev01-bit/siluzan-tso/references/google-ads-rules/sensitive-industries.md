@@ -32,11 +32,13 @@
 **Google 认证**：不需要，但须遵守当地酒类广告法。
 
 **允许的关键词模式**：
+
 - 自有品牌名："XX红酒"、"XX craft beer"
 - 品类词："red wine"、"craft beer"、"sake"、"whisky tasting"
 - 场景词："wine gift set"、"corporate wine tasting"
 
 **禁止的关键词模式**：
+
 - 面向未成年人："teen party drinks"、"kids cocktail"
 - 鼓励过量饮酒："get drunk fast"、"binge drinking deals"
 - 暗示健康益处："healthy wine"、"beer cures stress"
@@ -53,11 +55,13 @@
 **Google 认证**：**必须**申请 Google Ads 赌博认证后才能投放。
 
 **允许的关键词（认证后）**：
+
 - 自有品牌："XX Casino"、"XX Sportsbook"
 - 游戏类型："online poker"、"sports betting odds"、"roulette strategy"
 - 负责任赌博："responsible gambling"、"betting limits"
 
 **禁止的关键词**：
+
 - 面向未成年人："gambling for kids"、"teen poker"
 - 保证赢钱："guaranteed jackpot"、"never lose"、"sure bet"、"fixed match"
 - 非法赌博运营
@@ -67,6 +71,7 @@
 **落地页要求**：必须有负责任赌博信息 + 年龄限制声明 + 赌博成瘾帮助热线链接
 
 **地区限制**：
+
 - 美国：逐州规管，仅定向已合法化的州
 - 澳大利亚：禁止在线赌场广告，体育博彩有限制
 - 日本：仅允许公营竞技（赛马/竞艇/竞轮/赛车）
@@ -79,11 +84,13 @@
 **Google 认证**：贷款、信用修复等可能需要认证。
 
 **允许的关键词**：
+
 - 产品类型："personal loan"、"business insurance"、"mortgage refinance"
 - 比较类："mortgage rates compare"、"best savings account"
 - 教育类："credit score check"、"retirement planning guide"
 
 **禁止的关键词**：
+
 - 不切实际收益："guaranteed 50% returns"、"double your money"
 - 隐藏费用："instant cash no checks"、"no fee loan"（除非确实免费）
 - 债务欺诈："erase your debt instantly"、"delete bad credit overnight"
@@ -91,6 +98,7 @@
 **必备否定词**：`scam`、`fraud`、`free money`、`no repayment`、`illegal loan`
 
 **落地页要求**：
+
 - 贷款：必须展示 APR（年利率）
 - 投资：必须有风险提示
 - 保险：必须展示牌照号
@@ -98,6 +106,7 @@
 **最高级用词限制**："lowest rate"、"cheapest loan"、"best interest rate" → 仅当落地页有实时利率数据时可用
 
 **地区注意**：
+
 - 美国：须遵守 TILA（贷款真实性法案）
 - 英国：须有 FCA 授权
 - 澳大利亚：须展示 ASIC 信贷牌照号
@@ -111,11 +120,13 @@
 **无需认证**：接受加密支付的商家、矿机硬件、NFT 游戏内购。
 
 **允许的关键词（认证后）**：
+
 - 自有品牌："XX Exchange"
 - 交易类："buy Bitcoin"、"crypto exchange"、"ETH wallet"
 - 教育类："blockchain explained"、"crypto for beginners"
 
 **禁止的关键词**：
+
 - ICO 推广
 - DeFi 协议（除非认证）
 - 保证收益："Bitcoin guaranteed profit"、"crypto 100x return"
@@ -132,6 +143,7 @@
 **允许的关键词**：候选人名字（自己的竞选）、政策议题、投票信息
 
 **禁止的关键词**：
+
 - 投票程序虚假信息
 - 按种族/宗教/残疾定向选民
 - 选举静默期内的拉票关键词
@@ -145,6 +157,7 @@
 **允许的关键词**："online dating"、"singles near me"、"dating app"、"Christian dating"、"senior dating"
 
 **禁止的关键词**：
+
 - 色情相关："escort"、"hookup"、"sex chat"
 - 面向未成年人
 - 邮购新娘："mail-order bride"
@@ -156,11 +169,13 @@
 ## Tier 2: 减肥/美容
 
 **允许的关键词**：
+
 - 服务类："weight management program"、"body contouring clinic"
 - 方法类："meal planning service"、"personal training"
 - 教育类："nutrition consultation"、"calorie calculator"
 
 **禁止的关键词**：
+
 - 不切实际承诺："lose 30 pounds in 1 week"、"instant weight loss"
 - 危险方法："diet pills no prescription"、"extreme fasting"
 - 未批准药物："miracle weight loss pill"
@@ -177,12 +192,14 @@
 **Google 认证**：**必须认证**，且须遵守当地药品广告法。
 
 **允许的关键词（认证后）**：
+
 - 疾病教育："diabetes symptoms"、"migraine treatment options"
 - 医疗机构："cardiologist near me"、"physical therapy clinic"
 - 已批准药物（持牌药房/厂商）
 - 临床试验招募："clinical trial diabetes"
 
 **禁止的关键词**：
+
 - 未批准药物/实验性治疗
 - 治愈承诺："cure cancer"、"guaranteed diabetes reversal"
 - 无药房资质的处方药关键词
@@ -192,12 +209,14 @@
 **必备否定词**：`buy without prescription`、`illegal pharmacy`、`self-medicate`、`home remedy cure`、`miracle cure`
 
 **关键规则**：
+
 - **绝不声称**产品能治愈/预防/治疗疾病，除非有 FDA/EMA 等批准
 - 用 "may help with"、"supports"、"consult your doctor" 语言
 - 落地页必须有医疗免责声明
 - 仅定向产品已获批的国家
 
 **地区差异**：
+
 - 美国：FDA 监管；OTC 可广告，处方药限持牌方
 - 欧盟：**禁止**处方药直接面向消费者广告
 - 中国：NMPA 批准要求；中医药有单独规则
@@ -212,6 +231,7 @@
 **允许的关键词（认证后）**："addiction treatment center"、"rehab facility"、"substance abuse help"、"alcohol recovery program"
 
 **禁止的关键词**：
+
 - 未认证机构
 - 保证语言："guaranteed sobriety"、"100% cure rate"
 - 恐吓策略："you will die without treatment"
@@ -226,6 +246,7 @@
 **允许的关键词**："personal injury attorney"、"divorce lawyer"、"free legal consultation"、"immigration lawyer near me"
 
 **禁止的关键词**：
+
 - 保证结果："guaranteed settlement"、"win your case guaranteed"
 - 违法服务："fake alibi"、"forge documents"
 
@@ -238,10 +259,12 @@
 ## Tier 3: 保健品/CBD
 
 **允许的关键词**：
+
 - 产品类："vitamin D supplement"、"protein powder"、"omega-3 fish oil"
 - 目标类："muscle recovery supplement"、"sleep support"
 
 **禁止的关键词**：
+
 - 疾病治疗声明："supplement cures arthritis"
 - CBD（禁止地区）
 - THC 产品（Google 全球禁止）
@@ -251,6 +274,7 @@
 **必备否定词**：`steroids`、`anabolic`、`prescription`、`drug`、`controlled substance`
 
 **关键规则**：
+
 - 保健品仅可使用结构/功能声明："supports immune health" ✅，"prevents flu" ❌
 - CBD 仅在美国及部分欧盟国家允许——投放前确认
 - 落地页须包含 "These statements have not been evaluated by the FDA"（或对应当地免责声明）
@@ -262,11 +286,13 @@
 **Google 认证**：不需要（但学位/文凭广告须遵守当地教育主管部门法规）。
 
 **允许的关键词**：
+
 - 课程类："online MBA program"、"coding bootcamp"、"IELTS preparation course"
 - 机构类："university near me"、"business school ranking"
 - 技能类："learn Python"、"data science certification"
 
 **禁止的关键词**：
+
 - 虚假学历："buy diploma"、"fake degree"、"accredited in 24 hours"
 - 保证录取："guaranteed admission"、"100% acceptance rate"
 - 替考/作弊："write my essay"、"exam answers"、"take my test"
@@ -274,6 +300,7 @@
 **必备否定词**：`fake`、`buy diploma`、`cheat`、`plagiarism`、`answer key`、`free download`、`torrent`
 
 **落地页要求**：
+
 - 学位项目须展示认证/认可机构信息
 - 学费须明确标注（或标注 "contact for pricing"）
 - 就业率声明须有数据来源
@@ -287,11 +314,13 @@
 **Google 认证**：不需要。
 
 **允许的关键词**：
+
 - 岗位类："software engineer jobs"、"marketing manager hiring"
 - 平台类："job search site"、"resume builder"、"career coaching"
 - 地域类："remote jobs"、"jobs in Singapore"
 
 **禁止的关键词**：
+
 - 歧视性定向："jobs for young people only"、"male candidates preferred"
 - 虚假岗位："easy money from home"、"no experience $5000/week"
 - 个人信息收集："submit your SSN"、"send ID photo to apply"
@@ -299,11 +328,13 @@
 **必备否定词**：`scam`、`pyramid`、`MLM`、`get rich quick`、`no experience needed`（如非适用）
 
 **关键规则**：
+
 - 招聘广告不可基于年龄/性别/种族/宗教/残疾/婚姻状况定向或筛选
 - 薪资声明须与实际岗位一致
 - "Work from home" 须对应真实远程岗位
 
 **地区注意**：
+
 - 美国：须遵守 EEOC（平等就业机会）反歧视法
 - 欧盟：GDPR 限制求职者数据收集方式
 - 中国：招聘广告不可含性别/年龄限制（劳动法第十二条）
@@ -315,23 +346,27 @@
 **Google 认证**：不需要（但部分地区有投放限制）。
 
 **允许的关键词**：
+
 - 品牌/产品名："XX chocolate"、"XX energy drink"
 - 品类词："snack delivery"、"candy gift box"
 - 场景词："party snacks"、"office treats"
 
 **禁止的关键词**：
+
 - 面向儿童："kids candy"、"children's snack box"（英国/EU 限制）
 - 虚假健康声明："healthy chips"、"guilt-free candy"（须有营养认证）
 
 **必备否定词**：`diet`、`healthy`（如产品不符）、`children`、`kids`、`school lunch`
 
 **关键规则**：
+
 - **英国（2025 年 10 月起）**：HFSS 产品禁止面向 16 岁以下人群的付费在线广告（Online Advertising Programme）
 - **EU**：多个成员国限制针对儿童的 HFSS 广告
 - 不可声称 HFSS 产品为 "healthy"、"nutritious" 等，除非符合当地营养声明法规
 - 能量饮料在部分地区限制向未成年人推广
 
 **地区注意**：
+
 - 英国/EU：最严格，须避免儿童定向
 - 美国：FTC 自律指南，限制较宽松
 - 中东：特定食品须有清真认证
@@ -342,14 +377,14 @@
 
 ### 跨行业高风险用词（所有地区）
 
-| 模式 | 风险 |
-|------|------|
-| "guaranteed" + 任何结果 | 极高拒审 |
-| "free" + 实际收费 | 诱导欺诈 |
-| "#1" / "best" + 无佐证 | 被标记误导 |
-| "instant" + 不现实结果 | 高风险 |
-| "secret" + 方法/技巧 | 被标记 clickbait |
-| "they don't want you to know" | 被标记阴谋论 |
+| 模式                          | 风险             |
+| ----------------------------- | ---------------- |
+| "guaranteed" + 任何结果       | 极高拒审         |
+| "free" + 实际收费             | 诱导欺诈         |
+| "#1" / "best" + 无佐证        | 被标记误导       |
+| "instant" + 不现实结果        | 高风险           |
+| "secret" + 方法/技巧          | 被标记 clickbait |
+| "they don't want you to know" | 被标记阴谋论     |
 
 ### 中国市场
 

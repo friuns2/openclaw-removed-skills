@@ -51,16 +51,16 @@
 
 ### CLI 速查表
 
-| 数据块 | 子命令 |
-|--------|--------|
-| 总览 | `report bing-overview` |
-| 设备 | `report bing-device` |
-| 地域 | `report bing-geographic` |
-| 年龄受众 | `report bing-age-audience` |
+| 数据块   | 子命令                        |
+| -------- | ----------------------------- |
+| 总览     | `report bing-overview`        |
+| 设备     | `report bing-device`          |
+| 地域     | `report bing-geographic`      |
+| 年龄受众 | `report bing-age-audience`    |
 | 性别受众 | `report bing-gender-audience` |
 | 受众合并 | `report bing-audience-merged` |
-| 系列 | `report bing-campaigns` |
-| 广告组 | `report bing-ad-groups` |
-| 广告 | `report bing-ads` |
-| 关键词 | `report bing-keywords` |
-| 搜索字词 | `report bing-search-terms` |
+| 系列     | `report bing-campaigns`       |
+| 广告组   | `report bing-ad-groups`       |
+| 广告     | `report bing-ads`             |
+| 关键词   | `report bing-keywords`        |
+| 搜索字词 | `report bing-search-terms`    |

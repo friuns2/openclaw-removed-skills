@@ -23,14 +23,14 @@
 
 按 **媒体类型 Tab**（Google / TikTok / Yandex / Meta / Bing / Kwai）切换。
 
-| 模块 | 说明 | 前端调用的接口（相对 TSO `apiBaseUrl`） |
-|------|------|----------------------------------------|
-| 昨日转化 | 汇总昨日转化数 | `GET /report/media-account/Get-TSO-Overviews?MediaType={媒体}` |
-| 昨日消耗 | 汇总昨日花费 | 同上 |
-| 昨日充值金额 | 汇总昨日充值 | 同上 |
-| 今日待充值账户数 | 余额不足等提示，可点「充值」 | 同上 |
-| 广告媒体开户申请概览 | 各媒体开户申请数量表格 | `GET /report/media-account/Get-TSO-Open-Account-Overviews`（`mediaTypesStr` 为 JSON 数组） |
-| 各媒体账户余额 | 列表 + 单媒体「充值」按钮 | `GET /report/media-account/GetAccountBalance` |
+| 模块                 | 说明                         | 前端调用的接口（相对 TSO `apiBaseUrl`）                                                    |
+| -------------------- | ---------------------------- | ------------------------------------------------------------------------------------------ |
+| 昨日转化             | 汇总昨日转化数               | `GET /report/media-account/Get-TSO-Overviews?MediaType={媒体}`                             |
+| 昨日消耗             | 汇总昨日花费                 | 同上                                                                                       |
+| 昨日充值金额         | 汇总昨日充值                 | 同上                                                                                       |
+| 今日待充值账户数     | 余额不足等提示，可点「充值」 | 同上                                                                                       |
+| 广告媒体开户申请概览 | 各媒体开户申请数量表格       | `GET /report/media-account/Get-TSO-Open-Account-Overviews`（`mediaTypesStr` 为 JSON 数组） |
+| 各媒体账户余额       | 列表 + 单媒体「充值」按钮    | `GET /report/media-account/GetAccountBalance`                                              |
 
 **CLI 对应关系（近似，非同一接口）：**
 
@@ -45,9 +45,9 @@
 - 图表：全账户投放指标随时间变化；可切换指标、媒体筛选；国内贸易场景可能有占位数据。
 - 子 Tab：**广告投放数据概览** / **内容数据概览**（文案来自 i18n）。
 
-| 接口 | 用途 |
-|------|------|
-| `GET /report/media-account/accountreportoverview` | 报表总览（图表数据源之一） |
+| 接口                                               | 用途                                                                                         |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `GET /report/media-account/accountreportoverview`  | 报表总览（图表数据源之一）                                                                   |
 | `GET /report/media-account/GetAccountDataOverview` | 按媒体、账户、日期范围的账户级概览（`MediaType`、`MediaCustomerId`、`StartDate`、`EndDate`） |
 
 **CLI 对应关系：**

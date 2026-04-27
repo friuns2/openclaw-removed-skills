@@ -7,13 +7,13 @@
 
 ## 路由对照
 
-| 媒体 | 前端路由（path） | 说明 |
-|------|------------------|------|
+| 媒体       | 前端路由（path）                  | 说明                                                                                             |
+| ---------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
 | **Google** | `/openAnAccount?mediaType=Google` | 与 TikTok 共用 `openAnAccount.vue`；从开户记录进入 Google 时往往先弹 **GGwarn** 合规提示再进表单 |
-| **TikTok** | `/openAnAccount?mediaType=TikTok` | 同上组件，`mediaType` 区分字段与提交流程 |
-| **Yandex** | `/YandexOpenAnAccount` | 独立页面 `YandexOpenAnAccount_v2.vue` |
-| **BingV2** | `/bingOpenAnAccount` | 独立页面 `bingOpenAnAccount.vue` |
-| **Kwai** | `/KwaiOpenAnAccount` | 独立页面 `KwaiOpenAnAccount.vue` |
+| **TikTok** | `/openAnAccount?mediaType=TikTok` | 同上组件，`mediaType` 区分字段与提交流程                                                         |
+| **Yandex** | `/YandexOpenAnAccount`            | 独立页面 `YandexOpenAnAccount_v2.vue`                                                            |
+| **BingV2** | `/bingOpenAnAccount`              | 独立页面 `bingOpenAnAccount.vue`                                                                 |
+| **Kwai**   | `/KwaiOpenAnAccount`              | 独立页面 `KwaiOpenAnAccount.vue`                                                                 |
 
 ---
 
@@ -31,28 +31,28 @@
 
 ## 各媒体提交接口
 
-| CLI 子命令 | 提交接口 | Method | 关键 Header / 特点 |
-|------------|----------|--------|--------------------|
-| `open-account google` | `/command/media-account/google` | POST | `s-command-type: AddExistingMediaAccountList`；前置自动创建广告主组 |
-| `open-account tiktok` | `/command/media-account`（不是 `/google`） | POST | 同上；前置 `POST .../tiktok/Upload` 上传执照图片；可选 `POST .../command/attachment` 存档、`GET .../CheckUnionpayInfo` |
-| `open-account yandex` | `/command/media-account/AddAgencyClient` | POST | Body：`MediaAccountGroupId` + `AgencyClientInfo`（登录名、税号、电话等） |
-| `open-account bing` | `/command/media-account/AddBingV2Account` | POST | Body：`BingCustomerInfo` / `BingV2AccountInfo` + 执照 `FileId`；前置 `POST .../command/attachment` |
-| `open-account kwai` | `/command/media-account/AddKwaiAccount` | POST | Body：Kwai 专用主体/行业/执照结构 + `blobstoreKey`；前置 `POST .../KwaiAccount/Management/Upload` |
+| CLI 子命令            | 提交接口                                   | Method | 关键 Header / 特点                                                                                                     |
+| --------------------- | ------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `open-account google` | `/command/media-account/google`            | POST   | `s-command-type: AddExistingMediaAccountList`；前置自动创建广告主组                                                    |
+| `open-account tiktok` | `/command/media-account`（不是 `/google`） | POST   | 同上；前置 `POST .../tiktok/Upload` 上传执照图片；可选 `POST .../command/attachment` 存档、`GET .../CheckUnionpayInfo` |
+| `open-account yandex` | `/command/media-account/AddAgencyClient`   | POST   | Body：`MediaAccountGroupId` + `AgencyClientInfo`（登录名、税号、电话等）                                               |
+| `open-account bing`   | `/command/media-account/AddBingV2Account`  | POST   | Body：`BingCustomerInfo` / `BingV2AccountInfo` + 执照 `FileId`；前置 `POST .../command/attachment`                     |
+| `open-account kwai`   | `/command/media-account/AddKwaiAccount`    | POST   | Body：Kwai 专用主体/行业/执照结构 + `blobstoreKey`；前置 `POST .../KwaiAccount/Management/Upload`                      |
 
 ---
 
 ## 辅助接口
 
-| 用途 | 接口 | CLI 命令 |
-|------|------|---------|
-| Google 时区列表 | `GET {apiBaseUrl}/query/media-account/Google/TimeZoneInfo/ReadFile` | `open-account google-timezones` |
-| TikTok 时区列表 | `GET {apiBaseUrl}/query/media-account/tiktok/TikTokTimeZoneInfo/Read` | `open-account tiktok-timezones` |
-| TikTok 行业列表 | `GET {apiBaseUrl}/query/media-account/tiktok/TikTokIndustryInfo/Read` | `open-account tiktok-industries` |
-| TikTok 注册地列表 | `GET {apiBaseUrl}/query/media-account/tiktok/TikTokAreacode/Read` | `open-account tiktok-areas` |
-| Bing 行业列表 | `GET {apiBaseUrl}/query/media-account/bing/BingTradeList/Read`（返回中文行业名，`name` 字段即为 `--trade-id` 的值） | `open-account bing-industries` |
-| 修改 Google 申请 | `PUT .../command/media-account/google/{entityId}`，`s-command-type: UpdateMediaAccount` | — |
-| 修改 TikTok 申请 | `PUT .../command/media-account/{entityId}`，`s-command-type: UpdateMediaAccount` | — |
-| 修改 Yandex 申请 | `POST .../command/media-account/UpdateAgencyClient/{id}` | — |
+| 用途              | 接口                                                                                                                | CLI 命令                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Google 时区列表   | `GET {apiBaseUrl}/query/media-account/Google/TimeZoneInfo/ReadFile`                                                 | `open-account google-timezones`  |
+| TikTok 时区列表   | `GET {apiBaseUrl}/query/media-account/tiktok/TikTokTimeZoneInfo/Read`                                               | `open-account tiktok-timezones`  |
+| TikTok 行业列表   | `GET {apiBaseUrl}/query/media-account/tiktok/TikTokIndustryInfo/Read`                                               | `open-account tiktok-industries` |
+| TikTok 注册地列表 | `GET {apiBaseUrl}/query/media-account/tiktok/TikTokAreacode/Read`                                                   | `open-account tiktok-areas`      |
+| Bing 行业列表     | `GET {apiBaseUrl}/query/media-account/bing/BingTradeList/Read`（返回中文行业名，`name` 字段即为 `--trade-id` 的值） | `open-account bing-industries`   |
+| 修改 Google 申请  | `PUT .../command/media-account/google/{entityId}`，`s-command-type: UpdateMediaAccount`                             | —                                |
+| 修改 TikTok 申请  | `PUT .../command/media-account/{entityId}`，`s-command-type: UpdateMediaAccount`                                    | —                                |
+| 修改 Yandex 申请  | `POST .../command/media-account/UpdateAgencyClient/{id}`                                                            | —                                |
 
 ## 公司名称（广告主组）联想说明
 

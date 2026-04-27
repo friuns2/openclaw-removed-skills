@@ -3,11 +3,16 @@
   "slug": "siluzan-tso",
   "displayName": "Siluzan Tso",
   "latest": {
-    "version": "1.1.8",
-    "publishedAt": 1775724467750,
-    "commit": "https://github.com/openclaw/skills/commit/9f9395ca405419ad6350d49261f05750174245f6"
+    "version": "1.1.13",
+    "publishedAt": 1776762563391,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.8",
+      "publishedAt": 1775724467750,
+      "commit": "https://github.com/openclaw/skills/commit/9f9395ca405419ad6350d49261f05750174245f6"
+    },
     {
       "version": "1.1.7",
       "publishedAt": 1775199705083,

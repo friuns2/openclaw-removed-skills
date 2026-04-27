@@ -10,16 +10,16 @@
 siluzan-tso list-accounts [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-m, --media <type>` | 媒体类型（留空查全部）：`Google \| TikTok \| Yandex \| MetaAd \| BingV2 \| Kwai` |
-| `-k, --keyword <text>` | 按账户名称或 ID 搜索 |
-| `-s, --status <status>` | 账户状态：`normal \| invalid \| all`（默认 all）|
-| `-p, --page <n>` | 页码（默认 1） |
-| `--page-size <n>` | 每页数量（默认 20） |
-| `--json` | 输出原始 JSON |
-| `--unicode` | 表格使用 Unicode 线框；**默认**为 ASCII `+-|` 线框（兼容各类终端） |
-| `--plain` | 已默认 ASCII，无需再传；保留兼容旧脚本 |
+| 选项                    | 说明                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------- | ---------------------- |
+| `-m, --media <type>`    | 媒体类型（留空查全部）：`Google \| TikTok \| Yandex \| MetaAd \| BingV2 \| Kwai` |
+| `-k, --keyword <text>`  | 按账户名称或 ID 搜索                                                             |
+| `-s, --status <status>` | 账户状态：`normal \| invalid \| all`（默认 all）                                 |
+| `-p, --page <n>`        | 页码（默认 1）                                                                   |
+| `--page-size <n>`       | 每页数量（默认 20）                                                              |
+| `--json`                | 输出原始 JSON                                                                    |
+| `--unicode`             | 表格使用 Unicode 线框；**默认**为 ASCII `+-                                      | ` 线框（兼容各类终端） |
+| `--plain`               | 已默认 ASCII，无需再传；保留兼容旧脚本                                           |
 
 **示例：**
 
@@ -39,12 +39,12 @@ siluzan-tso list-accounts --page 2 --page-size 50
 
 **输出字段说明：**
 
-| 字段 | 说明 |
-|------|------|
-| `entityId` | 丝路赞内部 ID，`delink`/`share`、**`account-active-bills`** 等操作使用此 ID（**不是** `mediaCustomerId`） |
-| `mediaCustomerId` | 媒体平台账户数字 ID（Google Customer ID 等） |
-| `name` | 账户名称 |
-| `status` | 账户状态 |
+| 字段              | 说明                                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------- |
+| `entityId`        | 丝路赞内部 ID，`delink`/`share`、**`account-active-bills`** 等操作使用此 ID（**不是** `mediaCustomerId`） |
+| `mediaCustomerId` | 媒体平台账户数字 ID（Google Customer ID 等）                                                              |
+| `name`            | 账户名称                                                                                                  |
+| `status`          | 账户状态                                                                                                  |
 
 ---
 
@@ -60,26 +60,26 @@ siluzan-tso list-accounts --page 2 --page-size 50
 siluzan-tso account-active-bills -m <媒体> --id <entityId> [--json]
 ```
 
-| 选项 | 说明 |
-|------|------|
+| 选项                 | 说明                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------ |
 | `-m, --media <type>` | 必填：`Google \| TikTok \| Yandex \| MetaAd \| BingV2 \| Kwai`（与路径中媒体段一致） |
-| `--id <entityId>` | 必填：账户 `entityId` |
-| `--json` | 输出接口原始 JSON |
+| `--id <entityId>`    | 必填：账户 `entityId`                                                                |
+| `--json`             | 输出接口原始 JSON                                                                    |
 
 **响应体常用字段（以后端为准）：**
 
-| 字段 | 说明 |
-|------|------|
-| `totalRU` | 汇总相关数值（如示例中的 2.95） |
-| `totalResultCount` | 账单条数 |
-| `results[]` | 账单列表 |
-| `results[].state` | 如 `PaymentSuccessful` |
-| `results[].billNo` / `payNo` / `checkingNo` | 账单号、支付单号、对账号 |
-| `results[].data` | 明细：`amounts`、`rechargeAmounts`、`payType`（如 `Wallet`）、`currencyCode`、`mediaAccountId` 等 |
-| `results[].beforeAmounts` / `afterAmounts` | 变动前后余额相关 |
-| `results[].mediaCustomerId` / `mediaCustomerName` | 媒体侧账户 ID 与名称 |
-| `results[].invoiceState` | 如 `Pending` |
-| `results[].createdDateTime` | 创建时间 |
+| 字段                                              | 说明                                                                                              |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `totalRU`                                         | 汇总相关数值（如示例中的 2.95）                                                                   |
+| `totalResultCount`                                | 账单条数                                                                                          |
+| `results[]`                                       | 账单列表                                                                                          |
+| `results[].state`                                 | 如 `PaymentSuccessful`                                                                            |
+| `results[].billNo` / `payNo` / `checkingNo`       | 账单号、支付单号、对账号                                                                          |
+| `results[].data`                                  | 明细：`amounts`、`rechargeAmounts`、`payType`（如 `Wallet`）、`currencyCode`、`mediaAccountId` 等 |
+| `results[].beforeAmounts` / `afterAmounts`        | 变动前后余额相关                                                                                  |
+| `results[].mediaCustomerId` / `mediaCustomerName` | 媒体侧账户 ID 与名称                                                                              |
+| `results[].invoiceState`                          | 如 `Pending`                                                                                      |
+| `results[].createdDateTime`                       | 创建时间                                                                                          |
 
 **示例：**
 
@@ -104,11 +104,11 @@ siluzan-tso account-active-bills -m Google --id 18176820-6204-43c2-9a1f-0d0f5e9e
 siluzan-tso balance -m <媒体类型> -a <账户ID列表>
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-m, --media <type>` | 媒体类型（必填） |
+| 选项                   | 说明                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `-m, --media <type>`   | 媒体类型（必填）                                                                     |
 | `-a, --accounts <ids>` | 账户 `mediaCustomerId`（数字 ID），多个用逗号分隔（必填）。**注意：不是 `entityId`** |
-| `--json` | 输出原始 JSON |
+| `--json`               | 输出原始 JSON                                                                        |
 
 **示例：**
 
@@ -131,13 +131,13 @@ siluzan-tso balance -m Google -a 6326027735 --json
 siluzan-tso stats -m <媒体类型> [选项]
 ```
 
-| 选项 | 说明 | 默认 |
-|------|------|------|
-| `-m, --media <type>` | 媒体类型（必填） | — |
-| `-a, --accounts <ids>` | 账户 `mediaCustomerId`（数字 ID），逗号分隔（**必填**，接口不支持查全部账户） | — |
-| `--start <YYYY-MM-DD>` | 开始日期 | 7 天前 |
-| `--end <YYYY-MM-DD>` | 结束日期 | 昨天 |
-| `--json` | 输出原始 JSON | — |
+| 选项                   | 说明                                                                          | 默认   |
+| ---------------------- | ----------------------------------------------------------------------------- | ------ |
+| `-m, --media <type>`   | 媒体类型（必填）                                                              | —      |
+| `-a, --accounts <ids>` | 账户 `mediaCustomerId`（数字 ID），逗号分隔（**必填**，接口不支持查全部账户） | —      |
+| `--start <YYYY-MM-DD>` | 开始日期                                                                      | 7 天前 |
+| `--end <YYYY-MM-DD>`   | 结束日期                                                                      | 昨天   |
+| `--json`               | 输出原始 JSON                                                                 | —      |
 
 **示例：**
 
@@ -163,13 +163,13 @@ siluzan-tso stats -m Google -a 6326027735 --json
 siluzan-tso account-history [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-m, --media <type>` | 媒体类型 |
-| `-s, --status <status>` | 申请状态（如 `Approved \| Rejected \| Pending`） |
-| `-k, --keyword <text>` | 账户名/ID 关键字 |
-| `--start / --end <date>` | 申请日期范围（YYYY-MM-DD） |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                                             |
+| ------------------------ | ------------------------------------------------ |
+| `-m, --media <type>`     | 媒体类型                                         |
+| `-s, --status <status>`  | 申请状态（如 `Approved \| Rejected \| Pending`） |
+| `-k, --keyword <text>`   | 账户名/ID 关键字                                 |
+| `--start / --end <date>` | 申请日期范围（YYYY-MM-DD）                       |
+| `--json`                 | 输出原始 JSON                                    |
 
 **示例：**
 
@@ -186,11 +186,11 @@ siluzan-tso account-history --start 2026-03-01 --end 2026-03-31 --json
 
 **审核状态处理：**
 
-| 状态 | 含义 | 下一步操作 |
-|------|------|-----------|
-| `Pending` | 审核中 | 等待，可反复运行此命令轮询；审核周期因媒体而异 |
+| 状态       | 含义     | 下一步操作                                                                                                                                  |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Pending`  | 审核中   | 等待，可反复运行此命令轮询；审核周期因媒体而异                                                                                              |
 | `Approved` | 审核通过 | 运行 `list-accounts -m <媒体>` 确认账户已出现；引导用户充值激活（`config show` 取 `webUrl`，打开 `{webUrl}/v3/foreign_trade/tso/recharge`） |
-| `Rejected` | 被拒 | 查看 `--json` 输出中的 `reason` 字段了解拒绝原因；修改资料后重新提交；若原因不明，引导用户联系丝路赞客服 |
+| `Rejected` | 被拒     | 查看 `--json` 输出中的 `reason` 字段了解拒绝原因；修改资料后重新提交；若原因不明，引导用户联系丝路赞客服                                    |
 
 ---
 
@@ -206,8 +206,8 @@ siluzan-tso account-history --start 2026-03-01 --end 2026-03-31 --json
 siluzan-tso account auth -m <媒体类型>
 ```
 
-| 选项 | 说明 |
-|------|------|
+| 选项                 | 说明                                                                     |
+| -------------------- | ------------------------------------------------------------------------ |
 | `-m, --media <type>` | 媒体类型（必填）：`Google \| TikTok \| Meta \| Yandex \| BingV2 \| Kwai` |
 
 **示例：**
@@ -236,10 +236,10 @@ siluzan-tso account delink --id <entityId>
 siluzan-tso account delink --ids <id1,id2,id3>
 ```
 
-| 选项 | 说明 |
-|------|------|
+| 选项              | 说明                            |
+| ----------------- | ------------------------------- |
 | `--id <entityId>` | 断开单个账户（使用 `entityId`） |
-| `--ids <id1,id2>` | 批量断开多个账户（逗号分隔） |
+| `--ids <id1,id2>` | 批量断开多个账户（逗号分隔）    |
 
 **示例：**
 
@@ -264,11 +264,11 @@ siluzan-tso account mcc-bind --customers <mediaCustomerId> --mcc <MCC客户ID>
 siluzan-tso account mcc-bind --customers 111,222 --mcc "333;444"
 ```
 
-| 选项 | 说明 |
-|------|------|
+| 选项                | 说明                                                                                   |
+| ------------------- | -------------------------------------------------------------------------------------- |
 | `--customers <ids>` | 子账户 `mediaCustomerId`，多个逗号分隔（来自 `list-accounts` 的 `ma.mediaCustomerId`） |
-| `--mcc <ids>` | MCC 的客户 ID；多个可用英文逗号、中文逗号、分号、顿号等分隔（与网页输入规则一致） |
-| `--json` | 输出每个子账户接口的原始返回，便于排查 |
+| `--mcc <ids>`       | MCC 的客户 ID；多个可用英文逗号、中文逗号、分号、顿号等分隔（与网页输入规则一致）      |
+| `--json`            | 输出每个子账户接口的原始返回，便于排查                                                 |
 
 ---
 
@@ -304,9 +304,9 @@ siluzan-tso account share --id abc123def456 --phone 13800138000
 siluzan-tso account unshare --id <entityId> --account-id <userId>
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `--id <entityId>` | 账户 entityId |
+| 选项                    | 说明                |
+| ----------------------- | ------------------- |
+| `--id <entityId>`       | 账户 entityId       |
 | `--account-id <userId>` | 被取消分享的用户 ID |
 
 **示例：**
@@ -380,19 +380,19 @@ siluzan-tso open-account google \
 > 可选：`--industry1` / `--industry2`（网页端行业已弱化，多数情况可不填）。  
 > 可选：`--advertiser-id <magKey>` 仅用于调试或必须指定已有组时。
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `--advertiser-id` | 广告主组 magKey（**一般不用**，CLI 按公司名自动处理） | |
-| `--account-name` | 账户名称（≤22字符） | ✅ |
-| `--currency` | 货币：`USD \| CNY` | ✅ |
-| `--timezone` | 时区，如 `Asia/Hong_Kong` / `America/New_York` | ✅ |
-| `--invite-email` | 受邀邮箱 | ✅ |
-| `--company` | 公司名称（用于匹配/创建广告主组） | ✅ |
-| `--industry1 / --industry2` | 行业一/二级（可选） | |
-| `--promotion-link` | 推广链接 | ✅ |
-| `--promotion-type` | `b2b \| b2c \| app` | ✅ |
-| `--invite-role` | `Standard \| Admin`（默认 Standard） | |
-| `--counts` | 开户数量 1-3（默认 1） | |
+| 选项                        | 说明                                                  | 必填 |
+| --------------------------- | ----------------------------------------------------- | ---- |
+| `--advertiser-id`           | 广告主组 magKey（**一般不用**，CLI 按公司名自动处理） |      |
+| `--account-name`            | 账户名称（≤22字符）                                   | ✅   |
+| `--currency`                | 货币：`USD \| CNY`                                    | ✅   |
+| `--timezone`                | 时区，如 `Asia/Hong_Kong` / `America/New_York`        | ✅   |
+| `--invite-email`            | 受邀邮箱                                              | ✅   |
+| `--company`                 | 公司名称（用于匹配/创建广告主组）                     | ✅   |
+| `--industry1 / --industry2` | 行业一/二级（可选）                                   |      |
+| `--promotion-link`          | 推广链接                                              | ✅   |
+| `--promotion-type`          | `b2b \| b2c \| app`                                   | ✅   |
+| `--invite-role`             | `Standard \| Admin`（默认 Standard）                  |      |
+| `--counts`                  | 开户数量 1-3（默认 1）                                |      |
 
 ---
 
@@ -500,11 +500,11 @@ siluzan-tso open-account kwai \
   --license-file "/path/to/license.jpg"
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `--ad-type` | `1`=效果广告，`2`=品牌广告 |
-| `--expire-type` | `1`=有限期（追加 `--expire-at <毫秒时间戳>`），`2`=长期有效 |
-| `--target-country` | 投放目标国家/地区（ISO 代码，如 `US \| GB \| DE`） |
+| 选项               | 说明                                                        |
+| ------------------ | ----------------------------------------------------------- |
+| `--ad-type`        | `1`=效果广告，`2`=品牌广告                                  |
+| `--expire-type`    | `1`=有限期（追加 `--expire-at <毫秒时间戳>`），`2`=长期有效 |
+| `--target-country` | 投放目标国家/地区（ISO 代码，如 `US \| GB \| DE`）          |
 
 ---
 
@@ -521,10 +521,10 @@ siluzan-tso account close --accounts <mediaCustomerId>
 siluzan-tso account close --accounts <id1,id2,id3>
 ```
 
-| 选项 | 说明 |
-|------|------|
+| 选项               | 说明                                                                          |
+| ------------------ | ----------------------------------------------------------------------------- |
 | `--accounts <ids>` | TikTok 账户 `mediaCustomerId`，多个逗号分隔（来自 `list-accounts -m TikTok`） |
-| `--json` | 输出原始 JSON |
+| `--json`           | 输出原始 JSON                                                                 |
 
 **示例：**
 
@@ -551,12 +551,12 @@ siluzan-tso account close --accounts 1234567890123456,9876543210654321
 siluzan-tso account bm-bind --account-id <mediaCustomerId> --bm-id <bmId>
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `--account-id <id>` | Meta 广告账户 `mediaCustomerId`（来自 `list-accounts -m MetaAd`） | ✅ |
-| `--bm-id <id>` | Business Manager ID | ✅ |
-| `--action-type <type>` | 操作类型（默认 `bind`） | |
-| `--json` | 输出原始 JSON | |
+| 选项                   | 说明                                                              | 必填 |
+| ---------------------- | ----------------------------------------------------------------- | ---- |
+| `--account-id <id>`    | Meta 广告账户 `mediaCustomerId`（来自 `list-accounts -m MetaAd`） | ✅   |
+| `--bm-id <id>`         | Business Manager ID                                               | ✅   |
+| `--action-type <type>` | 操作类型（默认 `bind`）                                           |      |
+| `--json`               | 输出原始 JSON                                                     |      |
 
 **示例：**
 
@@ -584,9 +584,9 @@ siluzan-tso account bm-bind --account-id 123456789012345 --bm-id 987654321098765
 siluzan-tso account withdraw-list [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `--json` | 输出原始 JSON |
+| 选项        | 说明             |
+| ----------- | ---------------- |
+| `--json`    | 输出原始 JSON    |
 | `--verbose` | 显示详细错误信息 |
 
 输出包含：`entityId`（提现时使用）、`mediaCustomerId`、账户名称、**Google状态**（Suspended）、余额、赠送金、货币、是否可提现。
@@ -605,11 +605,11 @@ siluzan-tso account withdraw-list
 siluzan-tso account withdraw-submit --accounts <entityId,...>
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `--accounts <ids>` | 账户 `entityId`，逗号分隔（来自 `withdraw-list` 输出） | ✅ |
-| `--json` | 输出原始 JSON | |
-| `--verbose` | 显示详细错误信息 | |
+| 选项               | 说明                                                   | 必填 |
+| ------------------ | ------------------------------------------------------ | ---- |
+| `--accounts <ids>` | 账户 `entityId`，逗号分隔（来自 `withdraw-list` 输出） | ✅   |
+| `--json`           | 输出原始 JSON                                          |      |
+| `--verbose`        | 显示详细错误信息                                       |      |
 
 **完整流程示例：**
 
@@ -638,11 +638,11 @@ siluzan-tso account withdraw-submit --accounts id1,id2,id3
 siluzan-tso account bc-bind --customers <mediaCustomerId> --bc-ids <bcId>
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `--customers <ids>` | TikTok 广告账户 `mediaCustomerId`，多个逗号分隔（来自 `list-accounts -m TikTok`） | ✅ |
-| `--bc-ids <ids>` | Business Center ID，多个逗号分隔 | ✅ |
-| `--json` | 输出原始 JSON | |
+| 选项                | 说明                                                                              | 必填 |
+| ------------------- | --------------------------------------------------------------------------------- | ---- |
+| `--customers <ids>` | TikTok 广告账户 `mediaCustomerId`，多个逗号分隔（来自 `list-accounts -m TikTok`） | ✅   |
+| `--bc-ids <ids>`    | Business Center ID，多个逗号分隔                                                  | ✅   |
+| `--json`            | 输出原始 JSON                                                                     |      |
 
 **示例：**
 
@@ -664,11 +664,11 @@ siluzan-tso account bc-bind --customers 6967198846787059714 --bc-ids 73227573004
 siluzan-tso account bc-unbind --customers <mediaCustomerId> --bc-id <bcId>
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `--customers <ids>` | TikTok 广告账户 `mediaCustomerId`，多个逗号分隔 | ✅ |
-| `--bc-id <id>` | Business Center ID（一次只能解绑一个 BC） | ✅ |
-| `--json` | 输出原始 JSON | |
+| 选项                | 说明                                            | 必填 |
+| ------------------- | ----------------------------------------------- | ---- |
+| `--customers <ids>` | TikTok 广告账户 `mediaCustomerId`，多个逗号分隔 | ✅   |
+| `--bc-id <id>`      | Business Center ID（一次只能解绑一个 BC）       | ✅   |
+| `--json`            | 输出原始 JSON                                   |      |
 
 **示例：**
 
@@ -686,11 +686,11 @@ siluzan-tso account bc-unbind --customers 6967198846787059714 --bc-id 7322757300
 siluzan-tso account email-auth-list -c <mediaCustomerId> [--agent-type <type>]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-c, --customer-id <id>` | Google 广告账户 `mediaCustomerId`（与网页查询参数 `customerId` 一致） |
-| `--agent-type <type>` | 可选；网关需要时再传（与 `list-accounts --json` 的 `ma.accountType` 一致） |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                                                                       |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `-c, --customer-id <id>` | Google 广告账户 `mediaCustomerId`（与网页查询参数 `customerId` 一致）      |
+| `--agent-type <type>`    | 可选；网关需要时再传（与 `list-accounts --json` 的 `ma.accountType` 一致） |
+| `--json`                 | 输出原始 JSON                                                              |
 
 ---
 
@@ -702,12 +702,12 @@ siluzan-tso account email-auth-list -c <mediaCustomerId> [--agent-type <type>]
 siluzan-tso account email-auth -c <mediaCustomerId> --email <email> [--access-role ReadOnly|Standard]
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `-c, --customer-id <id>` | Google 广告账户 `mediaCustomerId` | ✅ |
-| `--email <email>` | 被授权用户邮箱 | ✅ |
-| `--agent-type <type>` | 账户代理类型（来自 `list-accounts --json`） | |
-| `--access-role <role>` | 权限类型：`ReadOnly \| Standard`（默认 `Standard`） | |
+| 选项                     | 说明                                                | 必填 |
+| ------------------------ | --------------------------------------------------- | ---- |
+| `-c, --customer-id <id>` | Google 广告账户 `mediaCustomerId`                   | ✅   |
+| `--email <email>`        | 被授权用户邮箱                                      | ✅   |
+| `--agent-type <type>`    | 账户代理类型（来自 `list-accounts --json`）         |      |
+| `--access-role <role>`   | 权限类型：`ReadOnly \| Standard`（默认 `Standard`） |      |
 
 **示例：**
 
@@ -729,13 +729,13 @@ siluzan-tso account email-auth -c 4656789737 --email user@gmail.com --access-rol
 siluzan-tso account email-deauth -c <mediaCustomerId> --invitation-id <id> --resource-name <name>
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-c, --customer-id <id>` | Google 广告账户 `mediaCustomerId` |
-| `--invitation-id <id>` | 邀请 ID（来自 `email-auth-list`） |
+| 选项                     | 说明                                                             |
+| ------------------------ | ---------------------------------------------------------------- |
+| `-c, --customer-id <id>` | Google 广告账户 `mediaCustomerId`                                |
+| `--invitation-id <id>`   | 邀请 ID（来自 `email-auth-list`）                                |
 | `--resource-name <name>` | 资源名称（来自 `email-auth-list --json` 的 `resourceName` 字段） |
-| `--agent-type <type>` | 账户代理类型 |
-| `--pending` | 邀请尚未被接受时加此参数 |
+| `--agent-type <type>`    | 账户代理类型                                                     |
+| `--pending`              | 邀请尚未被接受时加此参数                                         |
 
 ---
 
@@ -743,8 +743,8 @@ siluzan-tso account email-deauth -c <mediaCustomerId> --invitation-id <id> --res
 
 以下操作涉及图形交互（OAuth 跳转、充值页面等），**当前 CLI 不支持**，需引导用户打开浏览器完成：
 
-| 功能 | 媒体 | 网页路径 |
-|------|------|---------|
+| 功能                                    | 媒体   | 网页路径                                       |
+| --------------------------------------- | ------ | ---------------------------------------------- |
 | **账户激活**（邀请他人激活 / 充值激活） | Google | `{webUrl}/v3/foreign_trade/tso/manageAccounts` |
 
 **Agent 建议话术**：

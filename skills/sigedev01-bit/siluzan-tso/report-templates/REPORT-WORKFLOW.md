@@ -21,10 +21,10 @@
 
 根据媒体与用户意图，选择 `report-templates/` 下对应的 `*.md`：
 
-| 意图 | Google | Meta | TikTok | Bing |
-|------|--------|------|--------|------|
-| 周期分析 / 月报 / 周报 | `google-period-report.md` | `meta-period-report.md` | `tiktok-period-report.md` | `bing-period-report.md` |
-| 深度诊断 / 健康检查 | `google-account-diagnosis-report.md` | 同周期，注明能力受限 | 同周期 | 同周期 |
+| 意图                   | Google                               | Meta                    | TikTok                    | Bing                    |
+| ---------------------- | ------------------------------------ | ----------------------- | ------------------------- | ----------------------- |
+| 周期分析 / 月报 / 周报 | `google-period-report.md`            | `meta-period-report.md` | `tiktok-period-report.md` | `bing-period-report.md` |
+| 深度诊断 / 健康检查    | `google-account-diagnosis-report.md` | 同周期，注明能力受限    | 同周期                    | 同周期                  |
 
 无精确匹配时，用最接近媒体的同类 `*.md`，并在报告开头注明。
 
@@ -67,10 +67,10 @@
 
 ## 未知报告名处理
 
-| 用户措辞 | 映射 |
-|---------|------|
-| 月报、周报、投放总结、效果回顾 | 周期分析 → 对应媒体 `*-period-report.md` |
-| 健康检查、诊断、账户分析 | 诊断 → `google-account-diagnosis-report.md`（Google）或周期型降级 |
-| 对比、汇报、给客户看 | 以周期型为骨架，简化版本 |
+| 用户措辞                       | 映射                                                              |
+| ------------------------------ | ----------------------------------------------------------------- |
+| 月报、周报、投放总结、效果回顾 | 周期分析 → 对应媒体 `*-period-report.md`                          |
+| 健康检查、诊断、账户分析       | 诊断 → `google-account-diagnosis-report.md`（Google）或周期型降级 |
+| 对比、汇报、给客户看           | 以周期型为骨架，简化版本                                          |
 
 无法识别时，默认按**周期分析**处理，并在报告开头注明推断。

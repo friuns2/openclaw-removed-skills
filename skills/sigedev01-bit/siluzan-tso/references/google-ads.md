@@ -1,5 +1,7 @@
 # Google 广告管理命令详解
+
 > 所属 skill：`siluzan-tso`。
+
 ---
 
 ## 新建广告系列的流程
@@ -11,40 +13,43 @@
 
 操作开始前，**AI 必须先阅读完下面所有文档**，并在心智模型中内化规则后，才能进入任何「方案规划 / 广告创建 / 调整」步骤，严禁只读 `google-ads-launch-plan-template.md` 就直接出方案。
 
-| 文档地址 | 文档内容 |
-|----------|-----------|
-| `references/google-ads-rules/google-ads-compliance.md` | **Google 广告合规指南**：关键词 & 文案审核通过规则、编辑规范、禁止内容、虚假承诺处理、商标规则、多语言规则 |
-| `references/google-ads-rules/sensitive-industries.md` | **敏感行业合规细则**：酒精 / 赌博 / 金融 / 加密 / 医疗 / 法律等 15 个行业的关键词生成规则与地区限制 |
-| `references/google-ads-rules/google-ads-keyword-strategy.md` | **关键词策略与优化技巧**：匹配类型策略、分组结构、否定词技巧、出价意图分层、搜索词挖掘、竞品策略、PMax/AI Max 协同、信号污染防治 |
-| `references/google-ads-rules/google-ads-keyword-optimization.md` | **关键词持续优化指南**：基于投放数据的迭代优化闭环——指标解读、决策框架（暂停/提价/降价/加否定）、优化节奏、转化归因、预算再分配、衰减检测、竞争响应、CRM 反馈 |
-| `references/google-ads-rules/google-ads-creative-optimization.md` | **广告创意与素材优化**：RSA 六类主题法、Ad Strength 评分、文案 A/B 测试、创意疲劳管理、附加信息（Sitelink/Callout/Snippet/Image）优化、DKI/倒计时/IF 函数、落地页 CRO、PMax 创意策略、多语言管理 |
-| `references/google-ads-rules/google-ads-campaign-optimization.md` | **广告系列结构与投放优化**：系列类型选择决策树、电商/线索/本地/SaaS 架构模板、出价策略校准与启动协议、地域/设备优化、转化追踪（Enhanced Conversions/离线导入/价值规则）、预算优化、网络设置、实验设计、账户健康诊断 |
-| `references/google-ads-rules/google-ads-launch-plan-template.md` | **投放计划确认模板**：AI 生成完整投放方案的 Markdown 模板——信息收集清单、计划格式规范、字段与 CLI 参数映射、合规检查、执行命令预览；用于「用户确认后再执行」的工作流 |
-| `references/google-ads-rules/google-ads-account-audit.md` | **账户诊断与审计指南**：三层审计框架（账户→系列→组/词）、5 分钟快速健康检查、结构/转化/出价/关键词/创意/地域/设备/落地页/预算审计、竞争态势分析、20 条常见问题诊断速查表、审计报告模板 |
-| `references/google-ads-rules/google-ads-conversion-architecture.md` | **转化信号架构设计**：信号质量层级（L1-L5）、转化动作设计框架、多阶段漏斗价值设计、Enhanced Conversions 实施、离线转化导入策略、Consent Mode v2、利润导向出价（Profit-Based Bidding）、信号质量诊断与迁移路径、7 个行业推荐配置 |
-| `references/google-ads-rules/google-ads-audience-strategy.md` | **受众策略与分析**：受众类型全览、业务类型×漏斗阶段策略矩阵、观察 vs 定向模式决策、再营销四层分级（hot/warm/cool/cold）、RLSA 三大策略、Customer Match、受众数据分析框架、受众排除策略、2025-2026 隐私趋势 |
-| `references/google-ads-rules/google-ads-pmax-guide.md` | **PMax 与 Demand Gen 深度运营**：PMax 运营原理、Search 蚕食诊断（20% 品牌花费阈值）、Asset Group 策略、渠道级分析（2025 新功能）、搜索词/否定词/品牌排除管理、受众信号优化、Demand Gen 战术、AI Max for Search 协同、AI Overview 广告策略、常见问题诊断 |
+| 文档地址                                                            | 文档内容                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `references/google-ads-rules/google-ads-compliance.md`              | **Google 广告合规指南**：关键词 & 文案审核通过规则、编辑规范、禁止内容、虚假承诺处理、商标规则、多语言规则                                                                                                                                              |
+| `references/google-ads-rules/sensitive-industries.md`               | **敏感行业合规细则**：酒精 / 赌博 / 金融 / 加密 / 医疗 / 法律等 15 个行业的关键词生成规则与地区限制                                                                                                                                                     |
+| `references/google-ads-rules/google-ads-keyword-strategy.md`        | **关键词策略与优化技巧**：匹配类型策略、分组结构、否定词技巧、出价意图分层、搜索词挖掘、竞品策略、PMax/AI Max 协同、信号污染防治                                                                                                                        |
+| `references/google-ads-rules/google-ads-keyword-optimization.md`    | **关键词持续优化指南**：基于投放数据的迭代优化闭环——指标解读、决策框架（暂停/提价/降价/加否定）、优化节奏、转化归因、预算再分配、衰减检测、竞争响应、CRM 反馈                                                                                           |
+| `references/google-ads-rules/google-ads-creative-optimization.md`   | **广告创意与素材优化**：RSA 六类主题法、Ad Strength 评分、文案 A/B 测试、创意疲劳管理、附加信息（Sitelink/Callout/Snippet/Image）优化、DKI/倒计时/IF 函数、落地页 CRO、PMax 创意策略、多语言管理                                                        |
+| `references/google-ads-rules/google-ads-campaign-optimization.md`   | **广告系列结构与投放优化**：系列类型选择决策树、电商/线索/本地/SaaS 架构模板、出价策略校准与启动协议、地域/设备优化、转化追踪（Enhanced Conversions/离线导入/价值规则）、预算优化、网络设置、实验设计、账户健康诊断                                     |
+| `references/google-ads-rules/google-ads-launch-plan-template.md`    | **投放计划确认模板**：AI 生成完整投放方案的 Markdown 模板——信息收集清单、计划格式规范、字段与 CLI 参数映射、合规检查、执行命令预览；用于「用户确认后再执行」的工作流                                                                                    |
+| `references/google-ads-rules/google-ads-account-audit.md`           | **账户诊断与审计指南**：三层审计框架（账户→系列→组/词）、5 分钟快速健康检查、结构/转化/出价/关键词/创意/地域/设备/落地页/预算审计、竞争态势分析、20 条常见问题诊断速查表、审计报告模板                                                                  |
+| `references/google-ads-rules/google-ads-conversion-architecture.md` | **转化信号架构设计**：信号质量层级（L1-L5）、转化动作设计框架、多阶段漏斗价值设计、Enhanced Conversions 实施、离线转化导入策略、Consent Mode v2、利润导向出价（Profit-Based Bidding）、信号质量诊断与迁移路径、7 个行业推荐配置                         |
+| `references/google-ads-rules/google-ads-audience-strategy.md`       | **受众策略与分析**：受众类型全览、业务类型×漏斗阶段策略矩阵、观察 vs 定向模式决策、再营销四层分级（hot/warm/cool/cold）、RLSA 三大策略、Customer Match、受众数据分析框架、受众排除策略、2025-2026 隐私趋势                                              |
+| `references/google-ads-rules/google-ads-pmax-guide.md`              | **PMax 与 Demand Gen 深度运营**：PMax 运营原理、Search 蚕食诊断（20% 品牌花费阈值）、Asset Group 策略、渠道级分析（2025 新功能）、搜索词/否定词/品牌排除管理、受众信号优化、Demand Gen 战术、AI Max for Search 协同、AI Overview 广告策略、常见问题诊断 |
 
 > **AI Agent 具体要求：**
-> - 若当前会话中尚未阅读上述任一文件，AI 必须先主动阅读，再继续下一步流程，而不是直接生成广告计划或文案。  
-> - 在首次阅读后，AI 需用自己的话向用户**简要复述**上述文档中与本次任务强相关的 3～5 条关键合规/策略要点，并询问用户是否有本地特殊限制需要补充。  
+>
+> - 若当前会话中尚未阅读上述任一文件，AI 必须先主动阅读，再继续下一步流程，而不是直接生成广告计划或文案。
+> - 在首次阅读后，AI 需用自己的话向用户**简要复述**上述文档中与本次任务强相关的 3～5 条关键合规/策略要点，并询问用户是否有本地特殊限制需要补充。
 > - 后续生成的关键词、文案、出价与结构，必须**显式遵守这些规则**；一旦与规则冲突，应以规则优先，并向用户说明原因（例如：某些词因合规或商标问题被自动剔除）。
 
 ### 第二步：向用户补齐关键信息
 
-在进入计划设计前，AI 应最少询问并确认以下关键信息（可按需追加）：  
-- **业务与转化目标**：行业、主营产品/服务、主要转化动作（表单提交 / 电话咨询 / 在线下单 等）。  
-- **目标地区与语言**：主要投放国家/地区、语言组合、多语言站点情况。  
-- **预算与节奏**：日预算区间、是否有阶段性活动（如大促 / 节日档期）、允许的试错周期。  
-- **历史投放情况**：是否已有历史账户/系列/关键词表现数据，是否有必须保留/禁止使用的词或文案。  
+在进入计划设计前，AI 应最少询问并确认以下关键信息（可按需追加）：
+
+- **业务与转化目标**：行业、主营产品/服务、主要转化动作（表单提交 / 电话咨询 / 在线下单 等）。
+- **目标地区与语言**：主要投放国家/地区、语言组合、多语言站点情况。
+- **预算与节奏**：日预算区间、是否有阶段性活动（如大促 / 节日档期）、允许的试错周期。
+- **历史投放情况**：是否已有历史账户/系列/关键词表现数据，是否有必须保留/禁止使用的词或文案。
 - **合规与品牌限制**：是否涉及敏感行业、是否有品牌词 / 合作方词 / 法律风控要求等。
 
 ### 第三步：根据规则与信息生成计划并确认
 
 最终需要按照 `references/google-ads-rules/google-ads-launch-plan-template.md`  
 生成对应的计划，与用户沟通确认。**在该方案中，AI 必须：**
-- **引用并遵守**前述规则文档中的关键条款（尤其是合规与敏感行业部分），必要时在方案对应章节标注「来源规则」。  
-- **解释核心决定的依据**，例如为何采用某类匹配结构、为何排除某类词、为何推荐某种出价策略。  
+
+- **引用并遵守**前述规则文档中的关键条款（尤其是合规与敏感行业部分），必要时在方案对应章节标注「来源规则」。
+- **解释核心决定的依据**，例如为何采用某类匹配结构、为何排除某类词、为何推荐某种出价策略。
 - **明确列出风险点与替代方案**，帮助用户在确认前做出知情决策。
 
 **只有在用户通过自然语言明确表示「同意 / 确认按此方案执行」之后**，AI 才能真正开始下面的操作；在用户未确认前，不得对账户做任何结构性改动（系列 / 广告组 / 关键词 / 创意）。
@@ -62,8 +67,8 @@
 
 ### 广告修改
 
-- 对用户提出的修改内容进行评估与拓展评估标准基于（references/googles-ads-rules/*.md）中的对应的文件来确认
-- 确认修改方案按照 
+- 对用户提出的修改内容进行评估与拓展评估标准基于（references/googles-ads-rules/\*.md）中的对应的文件来确认
+- 确认修改方案按照
   - 读取`references/google-ads-rules/google-ads-launch-plan-template.md` 中关于计划模板的描述，节选用户需要修改的部分来按格式输出给用户确认
 - 使用对应命令来进行修改
   - 使用ad -h 来查询有哪些修改命令
@@ -77,19 +82,18 @@
 
 参考修改的流程，优化的部分需要有新旧对照的表格，其他与修改流程一致
 
-
-
 ## 下面是相关命令的示例，参考就行
 
 **ID 来源说明：**
 
-| 需要的 ID | 从哪里获取 |
-|----------|-----------|
-| `accountId`（`-a`） | `siluzan-tso list-accounts --json` → `mediaCustomerId` |
-| 广告系列 `id` | `siluzan-tso ad campaigns -a <accountId> --json` → `id` |
+| 需要的 ID           | 从哪里获取                                                   |
+| ------------------- | ------------------------------------------------------------ |
+| `accountId`（`-a`） | `siluzan-tso list-accounts --json` → `mediaCustomerId`       |
+| 广告系列 `id`       | `siluzan-tso ad campaigns -a <accountId> --json` → `id`      |
 | 广告组 `id`、`name` | `siluzan-tso ad groups -a <accountId> --json` → `id`、`name` |
-| 广告 `id` | `siluzan-tso ad list -a <accountId> --json` → `id` |
-| 关键词 `id` | `siluzan-tso ad keywords -a <accountId> --json` → `id` |
+| 广告 `id`           | `siluzan-tso ad list -a <accountId> --json` → `id`           |
+| 关键词 `id`         | `siluzan-tso ad keywords -a <accountId> --json` → `id`       |
+
 ---
 
 ## ad campaigns — 广告系列管理
@@ -100,12 +104,12 @@
 siluzan-tso ad campaigns -a <accountId> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-a, --account <id>` | Google mediaCustomerId（必填） |
-| `--start <YYYY-MM-DD>` | 统计开始日期 |
-| `--end <YYYY-MM-DD>` | 统计结束日期 |
-| `--json` | 输出原始 JSON |
+| 选项                   | 说明                           |
+| ---------------------- | ------------------------------ |
+| `-a, --account <id>`   | Google mediaCustomerId（必填） |
+| `--start <YYYY-MM-DD>` | 统计开始日期                   |
+| `--end <YYYY-MM-DD>`   | 统计结束日期                   |
+| `--json`               | 输出原始 JSON                  |
 
 **示例：**
 
@@ -169,11 +173,11 @@ siluzan-tso ad campaign-delete -a 6326027735 --id campaign_001
 siluzan-tso ad groups -a <accountId> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-a, --account <id>` | Google mediaCustomerId（必填） |
-| `--start / --end <date>` | 统计日期范围 |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                           |
+| ------------------------ | ------------------------------ |
+| `-a, --account <id>`     | Google mediaCustomerId（必填） |
+| `--start / --end <date>` | 统计日期范围                   |
+| `--json`                 | 输出原始 JSON                  |
 
 **示例：**
 
@@ -198,14 +202,14 @@ siluzan-tso ad adgroup-create \
   --max-cpc <金额（微单位）>
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `-a, --account <id>` | Google mediaCustomerId | ✅ |
-| `--campaign-id <id>` | 所属广告系列 ID（来自 `campaigns --json`） | ✅ |
-| `--campaign-name <name>` | 所属广告系列名称 | ✅ |
-| `--name <name>` | 广告组名称 | ✅ |
-| `--max-cpc <amount>` | 最高 CPC 出价（最小货币单位，如 `100000` = 1 USD） | ✅ |
-| `--status <status>` | `ENABLED \| PAUSED`（默认 `ENABLED`） | |
+| 选项                     | 说明                                               | 必填 |
+| ------------------------ | -------------------------------------------------- | ---- |
+| `-a, --account <id>`     | Google mediaCustomerId                             | ✅   |
+| `--campaign-id <id>`     | 所属广告系列 ID（来自 `campaigns --json`）         | ✅   |
+| `--campaign-name <name>` | 所属广告系列名称                                   | ✅   |
+| `--name <name>`          | 广告组名称                                         | ✅   |
+| `--max-cpc <amount>`     | 最高 CPC 出价（最小货币单位，如 `100000` = 1 USD） | ✅   |
+| `--status <status>`      | `ENABLED \| PAUSED`（默认 `ENABLED`）              |      |
 
 **示例：**
 
@@ -273,11 +277,11 @@ siluzan-tso ad adgroup-delete -a 6326027735 --id adgroup_001
 siluzan-tso ad list -a <accountId> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-a, --account <id>` | Google mediaCustomerId（必填） |
-| `--start / --end <date>` | 统计日期范围 |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                           |
+| ------------------------ | ------------------------------ |
+| `-a, --account <id>`     | Google mediaCustomerId（必填） |
+| `--start / --end <date>` | 统计日期范围                   |
+| `--json`                 | 输出原始 JSON                  |
 
 **示例：**
 
@@ -303,16 +307,16 @@ siluzan-tso ad ad-create \
   --descriptions "描述1,描述2"
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `-a, --account <id>` | Google mediaCustomerId | ✅ |
-| `--adgroup-id <id>` | 广告组 ID（来自 `groups --json`） | ✅ |
-| `--adgroup-name <name>` | 广告组名称 | ✅ |
-| `--final-url <url>` | 最终落地页 URL | ✅ |
-| `--headlines <titles>` | 标题列表，逗号分隔（**至少 3 个**，每个≤30字符） | ✅ |
-| `--descriptions <descs>` | 描述列表，逗号分隔（**至少 2 个**，每个≤90字符） | ✅ |
-| `--path1 <text>` | 显示路径第1段（≤15字符） | |
-| `--path2 <text>` | 显示路径第2段（≤15字符） | |
+| 选项                     | 说明                                             | 必填 |
+| ------------------------ | ------------------------------------------------ | ---- |
+| `-a, --account <id>`     | Google mediaCustomerId                           | ✅   |
+| `--adgroup-id <id>`      | 广告组 ID（来自 `groups --json`）                | ✅   |
+| `--adgroup-name <name>`  | 广告组名称                                       | ✅   |
+| `--final-url <url>`      | 最终落地页 URL                                   | ✅   |
+| `--headlines <titles>`   | 标题列表，逗号分隔（**至少 3 个**，每个≤30字符） | ✅   |
+| `--descriptions <descs>` | 描述列表，逗号分隔（**至少 2 个**，每个≤90字符） | ✅   |
+| `--path1 <text>`         | 显示路径第1段（≤15字符）                         |      |
+| `--path2 <text>`         | 显示路径第2段（≤15字符）                         |      |
 
 **示例：**
 
@@ -380,12 +384,12 @@ siluzan-tso ad ad-delete -a 6326027735 --id ad_001
 siluzan-tso ad keywords -a <accountId> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-a, --account <id>` | Google mediaCustomerId（必填） |
-| `--negative` | 查询否定关键词（默认查普通关键词） |
-| `--start / --end <date>` | 统计日期范围 |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                               |
+| ------------------------ | ---------------------------------- |
+| `-a, --account <id>`     | Google mediaCustomerId（必填）     |
+| `--negative`             | 查询否定关键词（默认查普通关键词） |
+| `--start / --end <date>` | 统计日期范围                       |
+| `--json`                 | 输出原始 JSON                      |
 
 **示例：**
 
@@ -414,15 +418,15 @@ siluzan-tso ad keyword-create \
   --keywords "词1,词2,词3"
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `-a, --account <id>` | Google mediaCustomerId | ✅ |
-| `--adgroup-id <id>` | 广告组 ID | ✅ |
-| `--adgroup-name <name>` | 广告组名称 | ✅ |
-| `--campaign-id <id>` | 广告系列 ID | ✅ |
-| `--campaign-name <name>` | 广告系列名称 | ✅ |
-| `--keywords <words>` | 关键词列表，逗号分隔 | ✅ |
-| `--final-url <url>` | 关键词独立落地页（可选） | |
+| 选项                     | 说明                     | 必填 |
+| ------------------------ | ------------------------ | ---- |
+| `-a, --account <id>`     | Google mediaCustomerId   | ✅   |
+| `--adgroup-id <id>`      | 广告组 ID                | ✅   |
+| `--adgroup-name <name>`  | 广告组名称               | ✅   |
+| `--campaign-id <id>`     | 广告系列 ID              | ✅   |
+| `--campaign-name <name>` | 广告系列名称             | ✅   |
+| `--keywords <words>`     | 关键词列表，逗号分隔     | ✅   |
+| `--final-url <url>`      | 关键词独立落地页（可选） |      |
 
 **示例：**
 
@@ -461,10 +465,10 @@ siluzan-tso ad keyword-negative-create \
   --keywords "词1,词2"
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `--adgroup-id <id>` | 广告组 ID（传入则在广告组层级添加，否则在广告系列层级） |
-| `--adgroup-name <name>` | 广告组名称（与 `--adgroup-id` 配套使用） |
+| 选项                    | 说明                                                    |
+| ----------------------- | ------------------------------------------------------- |
+| `--adgroup-id <id>`     | 广告组 ID（传入则在广告组层级添加，否则在广告系列层级） |
+| `--adgroup-name <name>` | 广告组名称（与 `--adgroup-id` 配套使用）                |
 
 **示例：**
 
@@ -496,8 +500,8 @@ siluzan-tso ad keyword-negative-delete \
   --id <negativeKeywordId>
 ```
 
-| 选项 | 说明 |
-|------|------|
+| 选项                     | 说明                                           |
+| ------------------------ | ---------------------------------------------- |
 | `--start / --end <date>` | 查询日期范围（用于定位关键词，默认最近 30 天） |
 
 **示例：**
@@ -522,16 +526,16 @@ siluzan-tso ad keyword-negative-delete -a 6326027735 --id negkw_abc123
 siluzan-tso ad batch list [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-s, --state <state>` | 状态：`Creating \| Successfully \| Failed \| HasFailed \| Unpublished` |
-| `--customer-id <id>` | Google mediaCustomerId |
-| `--customer-name <name>` | 客户名称关键字 |
-| `-k, --keyword <text>` | 关键字 |
-| `--start / --end <date>` | 创建日期范围 |
-| `-p, --page <n>` | 页码（默认 1） |
-| `--page-size <n>` | 每页数量（默认 20） |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                                                                   |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `-s, --state <state>`    | 状态：`Creating \| Successfully \| Failed \| HasFailed \| Unpublished` |
+| `--customer-id <id>`     | Google mediaCustomerId                                                 |
+| `--customer-name <name>` | 客户名称关键字                                                         |
+| `-k, --keyword <text>`   | 关键字                                                                 |
+| `--start / --end <date>` | 创建日期范围                                                           |
+| `-p, --page <n>`         | 页码（默认 1）                                                         |
+| `--page-size <n>`        | 每页数量（默认 20）                                                    |
+| `--json`                 | 输出原始 JSON                                                          |
 
 **示例：**
 
@@ -558,11 +562,11 @@ siluzan-tso ad batch get --id <recordId>
 siluzan-tso ad batch update --id <recordId> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `--budget <amount>` | 新预算（最小货币单位，如 `8500` = 85 元 CNY） |
-| `--url <url>` | 新推广链接 |
-| `--campaign-name <name>` | 新广告系列名称 |
+| 选项                     | 说明                                          |
+| ------------------------ | --------------------------------------------- |
+| `--budget <amount>`      | 新预算（最小货币单位，如 `8500` = 85 元 CNY） |
+| `--url <url>`            | 新推广链接                                    |
+| `--campaign-name <name>` | 新广告系列名称                                |
 
 ### publish — 发布草稿
 
@@ -582,13 +586,13 @@ siluzan-tso ad batch publish --id <recordId>
 siluzan-tso keyword -k <搜索词> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-k, --keyword <words>` | 种子词，多个逗号分隔（必填） |
-| `--url <url>` | 公司/产品网址（填写后触发「网址拓词 + 轮询」流程） |
-| `--include <words>` | 结果必须包含的词（逗号或空格分隔，本地过滤） |
-| `--exclude <words>` | 结果不包含的词（本地过滤） |
-| `--json` | 输出原始 JSON |
+| 选项                    | 说明                                               |
+| ----------------------- | -------------------------------------------------- |
+| `-k, --keyword <words>` | 种子词，多个逗号分隔（必填）                       |
+| `--url <url>`           | 公司/产品网址（填写后触发「网址拓词 + 轮询」流程） |
+| `--include <words>`     | 结果必须包含的词（逗号或空格分隔，本地过滤）       |
+| `--exclude <words>`     | 结果不包含的词（本地过滤）                         |
+| `--json`                | 输出原始 JSON                                      |
 
 **示例：**
 
@@ -615,10 +619,10 @@ siluzan-tso keyword -k "running shoes" --json
 
 新建搜索广告系列（异步批量任务）。支持两种创建模式：
 
-> - 默认行为：不加 `--draft` 时，CLI 直接走「立即发布」路径（`DraftStatus: Published`）。  
+> - 默认行为：不加 `--draft` 时，CLI 直接走「立即发布」路径（`DraftStatus: Published`）。
 > - 草稿行为：加上 `--draft` 时，仅创建草稿记录（`DraftStatus: Draft`），需后续用 `ad batch publish` 才真正提交给 Google。  
-> 广告组、关键词、广告创意的直接创建走另一套 Google 网关 API，均有对应的 `adgroup-create`、`keyword-create`、`ad-create` 等命令。  
-> 任务异步处理，任务 ID 可通过 `ad batch get --id <id>` 跟进进度。
+>   广告组、关键词、广告创意的直接创建走另一套 Google 网关 API，均有对应的 `adgroup-create`、`keyword-create`、`ad-create` 等命令。  
+>   任务异步处理，任务 ID 可通过 `ad batch get --id <id>` 跟进进度。
 
 ---
 
@@ -627,6 +631,7 @@ siluzan-tso keyword -k "running shoes" --json
 **当参数复杂（多广告组、含附加功能、标题中有逗号）时，AI 应优先使用此方式**：将所有参数写入一个 JSON 文件，再用 `--config-file` 传入路径。
 
 **优势：**
+
 - `headlines` 是真正的字符串数组，元素内**允许含逗号**（如 `"Global Reach, Local Impact"`）
 - `extensions` / `extraAdGroups` 直接写 JSON，不需要序列化为字符串
 - 参数复杂时无 shell 转义问题，AI 一次生成即可成功
@@ -643,34 +648,34 @@ siluzan-tso keyword -k "running shoes" --json
 
 **JSON文件 字段说明：**
 
-| 字段 | 必填 | 类型 | 说明 |
-|------|------|------|------|
-| `account` | ✅ | string | Google 账户 mediaCustomerId |
-| `customerName` | ✅ | string | 账户名称（`list-accounts --json` 的 `mediaAccountName`） |
-| `name` | ✅ | string | 广告系列名称 |
-| `budget` | ✅ | number | 日预算，**主币种展示金额**（100 = 每天 100 USD/CNY，内部 ×100） |
-| `bidding` | ✅ | string | 出价策略：`TARGET_SPEND` \| `MANUAL_CPC` \| `TARGET_CPA` \| `TARGET_ROAS` |
-| `locationIds` | ✅ | string[] | 地理位置 ID 数组（`ad geo search` 获取） |
-| `adgroupName` | ✅ | string | 第一个广告组名称 |
-| `maxCpc` | ✅ | number | 第一个广告组最高 CPC，主币种展示金额（1.5 = 1.50 USD，内部 ×100） |
-| `bidCeiling` | ✅ | number | TARGET_SPEND 出价上限（主币种，内部 ×100） |
-| `targetCpa` | ✅ | number | TARGET_CPA 目标 CPA（主币种，内部 ×100） |
-| `targetRoas` | ✅| number | TARGET_ROAS 目标 ROAS（如 2.5） |
-| `languageIds` | ✅ | string[] | 语言 ID 数组（默认 `["1000"]` = 英语，中文 = `"1017"`） |
-| `startDate` / `endDate` | ✅ | string | 日期 YYYY-MM-DD（默认：今天 / 2037-12-30） |
-| `url` | ✅ | string | 落地页 URL |
-| `status` | ✅| string | `Enabled` \| `Paused`（默认 Enabled） |
-| `matchType` | ✅ | string | 默认匹配类型：`BROAD` \| `PHRASE` \| `EXACT` |
-| `keywords` | ✅ | string[] | 第一个广告组关键词 |
-| `headlines` | ✅ | string[] | 标题数组，至少 3 条，推荐 15 条，每条 ≤ 30 字符，**元素内允许含逗号** |
-| `descriptions` | ✅| string[] | 描述数组，至少 2 条，推荐 4 条，每条 ≤ 90 字符 |
-| `finalUrl` | ✅| string | 广告落地页 |
-| `path1` / `path2` | ✅ | string | 展示 URL 路径（各 ≤ 15 字符） |
-| `productWords` | ✅ | string[] | 推广产品词（用于 AI 关键词推荐） |
-| `negativeKeywords` |✅ | string[] | 否定关键词数组（默认 BROAD 匹配） |
-| `extensions` | ✅ | array | 广告附加功能（CALL / SITELINK / STRUCTURED_SNIPPET），见 Schema |
-| `extraAdGroups` | ✅ | array | 额外广告组，追加到 AdGroupsForBatchJob，见 Schema |
-| `draft` | ✅ | boolean | `true` = 仅保存草稿（需后续 `ad batch publish` 发布） |
+| 字段                    | 必填 | 类型     | 说明                                                                      |
+| ----------------------- | ---- | -------- | ------------------------------------------------------------------------- |
+| `account`               | ✅   | string   | Google 账户 mediaCustomerId                                               |
+| `customerName`          | ✅   | string   | 账户名称（`list-accounts --json` 的 `mediaAccountName`）                  |
+| `name`                  | ✅   | string   | 广告系列名称                                                              |
+| `budget`                | ✅   | number   | 日预算，**主币种展示金额**（100 = 每天 100 USD/CNY，内部 ×100）           |
+| `bidding`               | ✅   | string   | 出价策略：`TARGET_SPEND` \| `MANUAL_CPC` \| `TARGET_CPA` \| `TARGET_ROAS` |
+| `locationIds`           | ✅   | string[] | 地理位置 ID 数组（`ad geo search` 获取）                                  |
+| `adgroupName`           | ✅   | string   | 第一个广告组名称                                                          |
+| `maxCpc`                | ✅   | number   | 第一个广告组最高 CPC，主币种展示金额（1.5 = 1.50 USD，内部 ×100）         |
+| `bidCeiling`            | ✅   | number   | TARGET_SPEND 出价上限（主币种，内部 ×100）                                |
+| `targetCpa`             | ✅   | number   | TARGET_CPA 目标 CPA（主币种，内部 ×100）                                  |
+| `targetRoas`            | ✅   | number   | TARGET_ROAS 目标 ROAS（如 2.5）                                           |
+| `languageIds`           | ✅   | string[] | 语言 ID 数组（默认 `["1000"]` = 英语，中文 = `"1017"`）                   |
+| `startDate` / `endDate` | ✅   | string   | 日期 YYYY-MM-DD（默认：今天 / 2037-12-30）                                |
+| `url`                   | ✅   | string   | 落地页 URL                                                                |
+| `status`                | ✅   | string   | `Enabled` \| `Paused`（默认 Enabled）                                     |
+| `matchType`             | ✅   | string   | 默认匹配类型：`BROAD` \| `PHRASE` \| `EXACT`                              |
+| `keywords`              | ✅   | string[] | 第一个广告组关键词                                                        |
+| `headlines`             | ✅   | string[] | 标题数组，至少 3 条，推荐 15 条，每条 ≤ 30 字符，**元素内允许含逗号**     |
+| `descriptions`          | ✅   | string[] | 描述数组，至少 2 条，推荐 4 条，每条 ≤ 90 字符                            |
+| `finalUrl`              | ✅   | string   | 广告落地页                                                                |
+| `path1` / `path2`       | ✅   | string   | 展示 URL 路径（各 ≤ 15 字符）                                             |
+| `productWords`          | ✅   | string[] | 推广产品词（用于 AI 关键词推荐）                                          |
+| `negativeKeywords`      | ✅   | string[] | 否定关键词数组（默认 BROAD 匹配）                                         |
+| `extensions`            | ✅   | array    | 广告附加功能（CALL / SITELINK / STRUCTURED_SNIPPET），见 Schema           |
+| `extraAdGroups`         | ✅   | array    | 额外广告组，追加到 AdGroupsForBatchJob，见 Schema                         |
+| `draft`                 | ✅   | boolean  | `true` = 仅保存草稿（需后续 `ad batch publish` 发布）                     |
 
 ---
 
@@ -678,31 +683,31 @@ siluzan-tso keyword -k "running shoes" --json
 
 所有参数也可以直接通过 CLI 选项传入（复杂场景推荐用 `--config-file`）：
 
-| 选项 | 必填 | 说明 |
-|------|------|------|
-| `-a, --account <id>` | ✅* | Google 账户 mediaCustomerId（*使用 `--config-file` 时可从文件读取） |
-| `--customer-name <name>` | ✅* | 账户名称 |
-| `--name <name>` | ✅* | 广告系列名称 |
-| `--budget <amount>` | ✅* | 日预算（主币种展示金额） |
-| `--bidding <strategy>` | ✅* | 出价策略 |
-| `--location-ids <ids>` | ✅* | 地理位置 ID，逗号分隔 |
-| `--adgroup-name <name>` | ✅* | 第一个广告组名称 |
-| `--max-cpc <amount>` | ✅* | 最高 CPC（主币种展示金额） |
-| `--keywords <kws>` | — | 关键词，逗号分隔 |
-| `--headlines <titles>` | — | 广告标题，逗号分隔（⚠️ 标题内不能含逗号，含逗号请用 `--config-file`） |
-| `--descriptions <descs>` | — | 广告描述，逗号分隔 |
-| `--product-words <words>` | — | 产品词，逗号分隔 |
-| `--negative-keywords <kws>` | — | 否定关键词，逗号分隔 |
-| `--extensions-json <json>` | — | 附加功能 JSON 数组字符串 |
-| `--extra-adgroups-json <json>` | — | 额外广告组 JSON 数组字符串 |
-| `--lang-ids <ids>` | — | 语言 ID，逗号分隔（默认 1000=英语） |
-| `--bid-ceiling / --target-cpa / --target-roas` | — | 出价相关参数 |
-| `--start / --end` | — | 日期 YYYY-MM-DD |
-| `--url / --final-url` | — | 落地页 |
-| `--path1 / --path2` | — | 展示路径 |
-| `--status` | — | Enabled \| Paused |
-| `--draft` | — | 仅保存草稿 |
-| `--config-file <path>` | — | JSON 配置文件路径（AI 推荐） |
+| 选项                                           | 必填 | 说明                                                                  |
+| ---------------------------------------------- | ---- | --------------------------------------------------------------------- |
+| `-a, --account <id>`                           | ✅\* | Google 账户 mediaCustomerId（\*使用 `--config-file` 时可从文件读取）  |
+| `--customer-name <name>`                       | ✅\* | 账户名称                                                              |
+| `--name <name>`                                | ✅\* | 广告系列名称                                                          |
+| `--budget <amount>`                            | ✅\* | 日预算（主币种展示金额）                                              |
+| `--bidding <strategy>`                         | ✅\* | 出价策略                                                              |
+| `--location-ids <ids>`                         | ✅\* | 地理位置 ID，逗号分隔                                                 |
+| `--adgroup-name <name>`                        | ✅\* | 第一个广告组名称                                                      |
+| `--max-cpc <amount>`                           | ✅\* | 最高 CPC（主币种展示金额）                                            |
+| `--keywords <kws>`                             | —    | 关键词，逗号分隔                                                      |
+| `--headlines <titles>`                         | —    | 广告标题，逗号分隔（⚠️ 标题内不能含逗号，含逗号请用 `--config-file`） |
+| `--descriptions <descs>`                       | —    | 广告描述，逗号分隔                                                    |
+| `--product-words <words>`                      | —    | 产品词，逗号分隔                                                      |
+| `--negative-keywords <kws>`                    | —    | 否定关键词，逗号分隔                                                  |
+| `--extensions-json <json>`                     | —    | 附加功能 JSON 数组字符串                                              |
+| `--extra-adgroups-json <json>`                 | —    | 额外广告组 JSON 数组字符串                                            |
+| `--lang-ids <ids>`                             | —    | 语言 ID，逗号分隔（默认 1000=英语）                                   |
+| `--bid-ceiling / --target-cpa / --target-roas` | —    | 出价相关参数                                                          |
+| `--start / --end`                              | —    | 日期 YYYY-MM-DD                                                       |
+| `--url / --final-url`                          | —    | 落地页                                                                |
+| `--path1 / --path2`                            | —    | 展示路径                                                              |
+| `--status`                                     | —    | Enabled \| Paused                                                     |
+| `--draft`                                      | —    | 仅保存草稿                                                            |
+| `--config-file <path>`                         | —    | JSON 配置文件路径（AI 推荐）                                          |
 
 **典型用法（简单场景）：**
 
@@ -760,15 +765,15 @@ siluzan-tso ad campaign-edit \
   [--content-network true|false]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `--name` | 新广告系列名称 |
-| `--budget` | 新预算，最小货币单位（如 100000 = 1 USD） |
-| `--bidding` | 出价策略：`TARGET_SPEND` \| `TARGET_CPA` \| `TARGET_ROAS` \| `MANUAL_CPC` |
-| `--bid-ceiling` | `TARGET_SPEND` 出价上限（最小货币单位，0 = 不限） |
-| `--target-cpa` | `TARGET_CPA` 目标 CPA |
-| `--search-network` | 投放 Google 搜索：`true` \| `false` |
-| `--content-network` | 投放展示网络：`true` \| `false` |
+| 选项                | 说明                                                                      |
+| ------------------- | ------------------------------------------------------------------------- |
+| `--name`            | 新广告系列名称                                                            |
+| `--budget`          | 新预算，最小货币单位（如 100000 = 1 USD）                                 |
+| `--bidding`         | 出价策略：`TARGET_SPEND` \| `TARGET_CPA` \| `TARGET_ROAS` \| `MANUAL_CPC` |
+| `--bid-ceiling`     | `TARGET_SPEND` 出价上限（最小货币单位，0 = 不限）                         |
+| `--target-cpa`      | `TARGET_CPA` 目标 CPA                                                     |
+| `--search-network`  | 投放 Google 搜索：`true` \| `false`                                       |
+| `--content-network` | 投放展示网络：`true` \| `false`                                           |
 
 **示例：**
 
@@ -809,19 +814,19 @@ CLI 会在请求前自动设置 **Datapermission**（与浏览器 `datapermissio
 
 ### 网关 JSON 与 CLI 参数对应（常用字段）
 
-| 网关字段 | 说明 | CLI |
-|----------|------|-----|
-| `id` | 广告 ID | `--id` |
-| `activeuseridg` | 账户 mediaCustomerId | `-a` / `--account` |
-| `headlinePart1` / `headlinePart2` / `headlinePart3` | 前 3 条标题 | `--headlines` 前 3 项 |
-| `AddtionalHeadlines` | 第 4～15 条标题（网关拼写为 Addtional） | `--headlines` 第 4 项起 |
-| `adDescription` / `adDescription2` | 前 2 条描述 | `--descriptions` 前 2 项 |
-| `AddtionalAdDescriptions` | 第 3～4 条描述 | `--descriptions` 第 3 项起 |
-| `finalUrl` | 落地页 | `--final-url` |
-| `path1` / `path2` | 显示路径 | `--path1` / `--path2` |
-| `adGroupId` / `adGroup` | 广告组 | 从列表结果保留，勿手改 |
-| `typeV2` | 广告类型 | 从列表保留（RSA 为 `RESPONSIVE_SEARCH_AD`） |
-| `statusV2` | `Enabled` / `Paused` | `--status Enabled` 或 `--status Paused` |
+| 网关字段                                            | 说明                                    | CLI                                         |
+| --------------------------------------------------- | --------------------------------------- | ------------------------------------------- |
+| `id`                                                | 广告 ID                                 | `--id`                                      |
+| `activeuseridg`                                     | 账户 mediaCustomerId                    | `-a` / `--account`                          |
+| `headlinePart1` / `headlinePart2` / `headlinePart3` | 前 3 条标题                             | `--headlines` 前 3 项                       |
+| `AddtionalHeadlines`                                | 第 4～15 条标题（网关拼写为 Addtional） | `--headlines` 第 4 项起                     |
+| `adDescription` / `adDescription2`                  | 前 2 条描述                             | `--descriptions` 前 2 项                    |
+| `AddtionalAdDescriptions`                           | 第 3～4 条描述                          | `--descriptions` 第 3 项起                  |
+| `finalUrl`                                          | 落地页                                  | `--final-url`                               |
+| `path1` / `path2`                                   | 显示路径                                | `--path1` / `--path2`                       |
+| `adGroupId` / `adGroup`                             | 广告组                                  | 从列表结果保留，勿手改                      |
+| `typeV2`                                            | 广告类型                                | 从列表保留（RSA 为 `RESPONSIVE_SEARCH_AD`） |
+| `statusV2`                                          | `Enabled` / `Paused`                    | `--status Enabled` 或 `--status Paused`     |
 
 **约束：** 至少指定一项：`--headlines` / `--descriptions` / `--final-url` / `--path1` / `--path2` / `--status`。若传 `--headlines` 须 ≥3 条；若传 `--descriptions` 须 ≥2 条。
 
@@ -918,15 +923,15 @@ siluzan-tso ad keyword-delete -a 6326027735 --id 2464982882313 --adgroup-id 1955
 
 ### 网关字段与 CLI 对应（常用）
 
-| 网关字段 | 说明 | CLI |
-|----------|------|-----|
-| `id` | 关键词资源 id | `--id` |
-| `keywordText` | 关键词文案（数组，一般一项） | `--text` → `["..."]` |
-| `matchTypeV2` | 匹配类型（网页用 Broad / Phrase / Exact） | `--match-type` |
-| `matchType` | 另一套枚举（如 EXACT），列表里可能仍存在 | 一般随 list 结果保留，勿手改 |
-| `maxCPC` | 最高每次点击费用 | `--max-cpc` |
-| `finalURL` | 关键词级最终到达网址 | `--final-url` |
-| `adGroupId` / `campaignId` 等 | 层级与统计字段 | 从列表保留 |
+| 网关字段                      | 说明                                      | CLI                          |
+| ----------------------------- | ----------------------------------------- | ---------------------------- |
+| `id`                          | 关键词资源 id                             | `--id`                       |
+| `keywordText`                 | 关键词文案（数组，一般一项）              | `--text` → `["..."]`         |
+| `matchTypeV2`                 | 匹配类型（网页用 Broad / Phrase / Exact） | `--match-type`               |
+| `matchType`                   | 另一套枚举（如 EXACT），列表里可能仍存在  | 一般随 list 结果保留，勿手改 |
+| `maxCPC`                      | 最高每次点击费用                          | `--max-cpc`                  |
+| `finalURL`                    | 关键词级最终到达网址                      | `--final-url`                |
+| `adGroupId` / `campaignId` 等 | 层级与统计字段                            | 从列表保留                   |
 
 **注意：** 成功响应也是数组；**`id` 可能与请求不一致**（网关可能返回新资源 id）。CLI 若检测到变化会打印提示，后续请用 **返回体中的新 `id`** 再查列表或再编辑。
 

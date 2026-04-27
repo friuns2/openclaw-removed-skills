@@ -2,7 +2,7 @@
 
 > 所属 skill：`siluzan-tso`。
 >
-> 本文档仅覆盖 **TSO  steward 优化报告**：列表、生成、删除、邮件推送与网页查看。  
+> 本文档仅覆盖 **TSO steward 优化报告**：列表、生成、删除、邮件推送与网页查看。  
 > **账户分析拉数**（`google-analysis`、`report tiktok-*`、`report bing-*`、`report meta-overview`）与**周期/诊断报告纲要**见 `references/account-analytics.md`。  
 > **异步批量 / 智投记录**（`ad batch`）见 `references/aigc.md`。  
 > **AI 广告优化**（`optimize`）见 `references/optimize.md`。  
@@ -18,14 +18,14 @@
 siluzan-tso report list -m <媒体> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-m, --media` | 媒体类型（必填）：`Google \| TikTok` |
-| `-t, --type <type>` | 报告类型：`Daily \| Hourly` |
-| `-s, --status <ready>` | 是否已生成：`true \| false` |
-| `-k, --keyword <text>` | 报告名称关键字 |
-| `--start / --end <date>` | 日期范围（YYYY-MM-DD） |
-| `--json` | 输出原始 JSON |
+| 选项                     | 说明                                 |
+| ------------------------ | ------------------------------------ |
+| `-m, --media`            | 媒体类型（必填）：`Google \| TikTok` |
+| `-t, --type <type>`      | 报告类型：`Daily \| Hourly`          |
+| `-s, --status <ready>`   | 是否已生成：`true \| false`          |
+| `-k, --keyword <text>`   | 报告名称关键字                       |
+| `--start / --end <date>` | 日期范围（YYYY-MM-DD）               |
+| `--json`                 | 输出原始 JSON                        |
 
 **示例：**
 
@@ -48,12 +48,12 @@ siluzan-tso report list -m Google --status true --json
 siluzan-tso report create -m <媒体> -a <账户ID列表> -t <类型> --start <date> --end <date>
 ```
 
-| 选项 | 说明 | 必填 |
-|------|------|------|
-| `-m, --media` | 媒体类型 | ✅ |
-| `-a, --accounts <ids>` | 账户 `mediaCustomerId`（数字 ID），逗号分隔。**注意：不是 `entityId`**，内部会自动转换 | ✅ |
-| `-t, --type` | 报告类型 | ✅ |
-| `--start / --end` | 日期范围 | ✅ |
+| 选项                   | 说明                                                                                   | 必填 |
+| ---------------------- | -------------------------------------------------------------------------------------- | ---- |
+| `-m, --media`          | 媒体类型                                                                               | ✅   |
+| `-a, --accounts <ids>` | 账户 `mediaCustomerId`（数字 ID），逗号分隔。**注意：不是 `entityId`**，内部会自动转换 | ✅   |
+| `-t, --type`           | 报告类型                                                                               | ✅   |
+| `--start / --end`      | 日期范围                                                                               | ✅   |
 
 **示例：**
 
@@ -104,14 +104,14 @@ siluzan-tso report delete --ids rpt_abc123,rpt_def456
 siluzan-tso report push list -m <媒体> [选项]
 ```
 
-| 选项 | 说明 |
-|------|------|
-| `-k, --keyword` | `Name` |
-| `-t, --type` | `ReportType` |
-| `--stopped` | 仅已停用 |
-| `--start` / `--end` | 日期筛选 |
-| `-p` / `--page-size` | 分页 |
-| `--json` | 原始 JSON（列表信封 + `items`） |
+| 选项                 | 说明                            |
+| -------------------- | ------------------------------- |
+| `-k, --keyword`      | `Name`                          |
+| `-t, --type`         | `ReportType`                    |
+| `--stopped`          | 仅已停用                        |
+| `--start` / `--end`  | 日期筛选                        |
+| `-p` / `--page-size` | 分页                            |
+| `--json`             | 原始 JSON（列表信封 + `items`） |
 
 #### create — 新建推送
 
@@ -195,11 +195,11 @@ siluzan-tso report push receive-emails -m Google [--json]
 
 报告生成后，在网页查看。先用 `siluzan-tso config show` 获取 `webUrl`，再按以下规则拼接链接：
 
-| 媒体 | 报告类型 | URL 模板 |
-|------|---------|---------|
-| Google | 日报（Daily） | `{webUrl}/media-report/publish/{entityId}?culture=zh-CN` |
-| Google | 小时报（Hourly） | `{webUrl}/media-report/hour/{entityId}?culture=zh-CN` |
-| TikTok | 日报 | `{webUrl}/media-report/publish/{entityId}?culture=zh-CN` |
+| 媒体   | 报告类型         | URL 模板                                                 |
+| ------ | ---------------- | -------------------------------------------------------- |
+| Google | 日报（Daily）    | `{webUrl}/media-report/publish/{entityId}?culture=zh-CN` |
+| Google | 小时报（Hourly） | `{webUrl}/media-report/hour/{entityId}?culture=zh-CN`    |
+| TikTok | 日报             | `{webUrl}/media-report/publish/{entityId}?culture=zh-CN` |
 
 `entityId` 来自 `siluzan-tso report list --json` 中每条记录的 `entityId` 字段。
 

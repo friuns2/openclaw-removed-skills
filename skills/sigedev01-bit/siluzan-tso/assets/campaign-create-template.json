@@ -1,104 +1,99 @@
 {
-    "account": "6326027735",
-    "customerName": "账户显示名称（来自 list-accounts --json 的 mediaAccountName）",
-    "name": "搜索-品牌词-2026",
-    "budget": 100,
-    "bidding": "TARGET_SPEND",
-    "bidCeiling": 1.5,
-    "locationIds": ["2840", "2826", "2036"],
-    "languageIds": ["1000", "1017"],
-    "startDate": "2026-04-01",
-    "endDate": "2027-04-01",
-    "url": "https://www.example.com",
-    "status": "Enabled",
-    "adgroupName": "核心词_品牌词",
-    "maxCpc": 1.5,
-    "matchType": "BROAD",
-    "keywords": [
-      "brand keyword 1",
-      "brand keyword 2",
-      "brand keyword 3"
-    ],
-    "headlines": [
-      "Brand Name: Quality Products",
-      "Trusted For Over 20 Years",
-      "Global Reach, Local Impact",
-      "Contact Us Today",
-      "Request A Free Quote Now"
-    ],
-    "descriptions": [
-      "Top-quality products with certified standards. Contact us today!",
-      "Trusted by global partners. Request a free quote now!"
-    ],
-    "finalUrl": "https://www.example.com/products",
-    "path1": "products",
-    "path2": "2026",
-    "productWords": ["brand", "product"],
-    "negativeKeywords": [
-      "free", "cheap", "wikipedia", "pdf", "ebay", "amazon"
-    ],
-    "extensions": [
-      {
-        "level": "Campaign",
-        "typeV2": "CALL",
-        "AssetFieldType": "CALL",
-        "Properties": { "ContryCode": "CN", "PhoneNumber": "+86 400-XXX-XXXX" }
-      },
-      {
-        "level": "Campaign",
-        "typeV2": "SITELINK",
-        "AssetFieldType": "SITELINK",
-        "properties": {
-          "DestinationUrl": "https://www.example.com/about",
-          "Text": "About Us",
-          "Line2": "Learn about our story",
-          "Line3": "Explore our mission"
-        }
-      },
-      {
-        "level": "Campaign",
-        "typeV2": "STRUCTURED_SNIPPET",
-        "AssetFieldType": "STRUCTURED_SNIPPET",
-        "StructuredSnippetHeaderValue": {
-          "key": "Services",
-          "value": ["Quality Certified", "Global Shipping", "24/7 Support"]
-        }
+  "account": "6326027735",
+  "customerName": "账户显示名称（来自 list-accounts --json 的 mediaAccountName）",
+  "name": "搜索-品牌词-2026",
+  "budget": 100,
+  "bidding": "TARGET_SPEND",
+  "bidCeiling": 1.5,
+  "locationIds": ["2840", "2826", "2036"],
+  "languageIds": ["1000", "1017"],
+  "startDate": "2026-04-01",
+  "endDate": "2027-04-01",
+  "url": "https://www.example.com",
+  "status": "Enabled",
+  "adgroupName": "核心词_品牌词",
+  "maxCpc": 1.5,
+  "matchType": "BROAD",
+  "keywords": ["brand keyword 1", "brand keyword 2", "brand keyword 3"],
+  "headlines": [
+    "Brand Name: Quality Products",
+    "Trusted For Over 20 Years",
+    "Global Reach, Local Impact",
+    "Contact Us Today",
+    "Request A Free Quote Now"
+  ],
+  "descriptions": [
+    "Top-quality products with certified standards. Contact us today!",
+    "Trusted by global partners. Request a free quote now!"
+  ],
+  "finalUrl": "https://www.example.com/products",
+  "path1": "products",
+  "path2": "2026",
+  "productWords": ["brand", "product"],
+  "negativeKeywords": ["free", "cheap", "wikipedia", "pdf", "ebay", "amazon"],
+  "extensions": [
+    {
+      "level": "Campaign",
+      "typeV2": "CALL",
+      "AssetFieldType": "CALL",
+      "Properties": { "ContryCode": "CN", "PhoneNumber": "+86 400-XXX-XXXX" }
+    },
+    {
+      "level": "Campaign",
+      "typeV2": "SITELINK",
+      "AssetFieldType": "SITELINK",
+      "properties": {
+        "DestinationUrl": "https://www.example.com/about",
+        "Text": "About Us",
+        "Line2": "Learn about our story",
+        "Line3": "Explore our mission"
       }
-    ],
-    "extraAdGroups": [
-      {
-        "MaxCPCAmount": 150,
-        "Name": "通用词_行业词",
-        "StatusV2": "Enabled",
-        "TypeV2": "SEARCH_STANDARD",
-        "RotationModeV2": "Unspecified",
-        "KeywordsForBatchJob": [
-          {
-            "KeywordText": ["industry keyword 1", "industry keyword 2"],
-            "MatchTypeV2": "BROAD",
-            "Finalurl": "https://www.example.com"
-          }
-        ],
-        "AdsForBatchJob": [
-          {
-            "AdTitle": null,
-            "DestinationUrl": "https://www.example.com",
-            "Finalurl": "https://www.example.com",
-            "Path1": "", "Path2": "",
-            "TypeV2": "RESPONSIVE_SEARCH_AD",
-            "headlinePart1": "Industry Leading Products",
-            "headlinePart2": "Certified Quality Standards",
-            "headlinePart3": "Get A Free Quote Today",
-            "AddtionalHeadlines": [
-              "Trusted By Global Partners",
-              "20+ Years Of Experience",
-              "Contact Us Now"
-            ],
-            "adDescription": "Top-quality industry products with global shipping. Contact us today!",
-            "adDescription2": "Certified standards and reliable delivery. Request a quote now!"
-          }
-        ]
+    },
+    {
+      "level": "Campaign",
+      "typeV2": "STRUCTURED_SNIPPET",
+      "AssetFieldType": "STRUCTURED_SNIPPET",
+      "StructuredSnippetHeaderValue": {
+        "key": "Services",
+        "value": ["Quality Certified", "Global Shipping", "24/7 Support"]
       }
-    ],
-    "draft": false
-  }
+    }
+  ],
+  "extraAdGroups": [
+    {
+      "MaxCPCAmount": 150,
+      "Name": "通用词_行业词",
+      "StatusV2": "Enabled",
+      "TypeV2": "SEARCH_STANDARD",
+      "RotationModeV2": "Unspecified",
+      "KeywordsForBatchJob": [
+        {
+          "KeywordText": ["industry keyword 1", "industry keyword 2"],
+          "MatchTypeV2": "BROAD",
+          "Finalurl": "https://www.example.com"
+        }
+      ],
+      "AdsForBatchJob": [
+        {
+          "AdTitle": null,
+          "DestinationUrl": "https://www.example.com",
+          "Finalurl": "https://www.example.com",
+          "Path1": "",
+          "Path2": "",
+          "TypeV2": "RESPONSIVE_SEARCH_AD",
+          "headlinePart1": "Industry Leading Products",
+          "headlinePart2": "Certified Quality Standards",
+          "headlinePart3": "Get A Free Quote Today",
+          "AddtionalHeadlines": [
+            "Trusted By Global Partners",
+            "20+ Years Of Experience",
+            "Contact Us Now"
+          ],
+          "adDescription": "Top-quality industry products with global shipping. Contact us today!",
+          "adDescription2": "Certified standards and reliable delivery. Request a quote now!"
+        }
+      ]
+    }
+  ],
+  "draft": false
+}

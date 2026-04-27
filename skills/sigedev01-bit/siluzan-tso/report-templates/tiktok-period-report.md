@@ -46,14 +46,14 @@
 
 ### CLI 速查表
 
-| 数据块 | 子命令 |
-|--------|--------|
-| 总览 | `report tiktok-overview` |
-| 系列 | `report tiktok-campaigns` |
-| 广告组 | `report tiktok-ad-groups` |
-| 广告 | `report tiktok-ads` |
-| 视频素材 | `report tiktok-videos` |
-| 受众（单维） | `report tiktok-audience -d …` |
+| 数据块                 | 子命令                          |
+| ---------------------- | ------------------------------- |
+| 总览                   | `report tiktok-overview`        |
+| 系列                   | `report tiktok-campaigns`       |
+| 广告组                 | `report tiktok-ad-groups`       |
+| 广告                   | `report tiktok-ads`             |
+| 视频素材               | `report tiktok-videos`          |
+| 受众（单维）           | `report tiktok-audience -d …`   |
 | 受众（性别+年龄+兴趣） | `report tiktok-audience-merged` |
-| 地区码 | `report tiktok-areacode` |
-| 兴趣列表 | `report tiktok-interest-list` |
+| 地区码                 | `report tiktok-areacode`        |
+| 兴趣列表               | `report tiktok-interest-list`   |
