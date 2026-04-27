@@ -1,0 +1,11 @@
+{
+  "owner": "cs200809",
+  "slug": "car-hailing-booking",
+  "displayName": "网约车预订",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1774925731209,
+    "commit": null
+  },
+  "history": []
+}
