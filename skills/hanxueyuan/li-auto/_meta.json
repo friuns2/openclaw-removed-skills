@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "li-auto",
-  "displayName": "li-auto",
+  "displayName": "Li Auto",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774865311785,
-    "commit": "https://github.com/openclaw/skills/commit/89a08baa72cbbdd5741e55f3a85131e52637b62d"
+    "version": "0.1.3",
+    "publishedAt": 1776533824666,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774865311785,
+      "commit": "https://github.com/openclaw/skills/commit/89a08baa72cbbdd5741e55f3a85131e52637b62d"
+    }
+  ]
 }

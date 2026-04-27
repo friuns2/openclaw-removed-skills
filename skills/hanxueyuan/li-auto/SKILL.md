@@ -1,56 +1,46 @@
 ---
-name: li-auto
-description: "Information assistant for 理想 Li Auto. Search products, news, financials, and official resources for 理想 Li Auto."
-metadata:
-  { "openclaw": { "emoji": "🏢", "version": "0.1.0", "author": "hanxueyuan", "tags": ["brand","li-auto","enterprise-info"] } }
+summary: "理想汽车 Li Auto——中国新势力电动车品牌、增程式电动路线开创者、家庭用车专家"
+read_when:
+  - 查询理想汽车 · Li Auto相关信息
+  - 了解相关行业发展
 ---
 
-# 理想 Li Auto — Information Assistant
+# 理想汽车 · Li Auto
 
-Query products, news, stock prices, financial reports, and official resources for **理想 Li Auto**.
+---
 
-## About
+## 发展历程
 
-- **Company**: 理想 Li Auto
-- **Industry**: Extended-range EVs
-- **Official Website**: https://www.lixiang.com
+| 时期 | 关键事件 |
+|:----:|--------|
+| **2015 年** | 李想创立车和家（后改名理想汽车） |
+| **2019 年** | 理想 ONE 发布——增程式电动 SUV |
+| **2020 年** | 纳斯达克上市 |
+| **2023 年** | 年交付量突破 37 万辆——新势力第一 |
+| **2024 年** | 推出纯电车型 MEGA——引发争议但关注度高 |
 
-## What This Skill Does
+---
 
-When activated, this skill helps you:
+## 核心特点
 
-1. **Product Search** — Find and compare 理想 Li Auto products, pricing, and availability
-2. **News & Updates** — Get the latest news, press releases, and announcements
-3. **Financial Info** — Stock price, market cap, earnings reports (for public companies)
-4. **Official Resources** — Direct links to official websites, support pages, and documentation
-5. **Competitor Comparison** — Compare with competitors in the same industry
+增程式电动 SUV（L7/L8/L9）+ 纯电（MEGA）+ 智能驾驶
 
-## Usage Examples
+## 核心优势
 
-- "What are the latest 理想 Li Auto products?"
-- "Show me 理想 Li Auto stock price"
-- "Compare 理想 Li Auto with competitors"
-- "Find 理想 Li Auto official support page"
-- "What's new at 理想 Li Auto?"
+增程式电动解决续航焦虑 + 精准定位家庭用户（'奶爸车'）
 
-## How It Works
+---
 
-This skill uses web search to fetch real-time information about 理想 Li Auto from:
-- Official website: https://www.lixiang.com
-- Financial data providers
-- News aggregators
-- Product databases
+## 关键数据
 
-## Instructions for Agent
+| 指标 | 数值 |
+|------|------|
+| 年交付 | 超过 37 万辆 |
+| 年营收 | 约 1200 亿元人民币 |
+| 员工数 | 约 20000 人 |
 
-When this skill is triggered:
-1. Identify the user's specific query about 理想 Li Auto
-2. Use web search tools to find current information
-3. Prioritize official sources (https://www.lixiang.com)
-4. Present results in a structured, easy-to-read format
-5. Include direct links to sources
+---
 
-## Author
+## 值得了解
 
-Created by hanxueyuan | Part of the Agent Commerce ecosystem
-License: MIT
+理想 ONE 连续 30 个月成为中国 SUV 销量冠军——是唯一一款国产 SUV 能做到这一点
