@@ -1,13 +1,18 @@
 {
   "owner": "zhangbin2025",
   "slug": "weiqi-joseki",
-  "displayName": "围棋定式数据库",
+  "displayName": "Weiqi Joseki Database",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1775826492990,
-    "commit": "https://github.com/openclaw/skills/commit/766d784a28b68424a6f2d51d0f222f803a075bac"
+    "version": "2.0.1",
+    "publishedAt": 1776863103131,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1775826492990,
+      "commit": "https://github.com/openclaw/skills/commit/766d784a28b68424a6f2d51d0f222f803a075bac"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1774938938425,
