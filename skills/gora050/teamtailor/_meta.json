@@ -3,11 +3,16 @@
   "slug": "teamtailor",
   "displayName": "Teamtailor",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170518701,
-    "commit": "https://github.com/openclaw/skills/commit/9aab4e47807e4bd76eba3a7f6ad50381e44253b7"
+    "version": "1.0.3",
+    "publishedAt": 1776886066737,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170518701,
+      "commit": "https://github.com/openclaw/skills/commit/9aab4e47807e4bd76eba3a7f6ad50381e44253b7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775037884206,
