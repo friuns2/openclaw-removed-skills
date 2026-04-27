@@ -3,11 +3,16 @@
   "slug": "delagent",
   "displayName": "Delagent",
   "latest": {
-    "version": "3.0.0",
-    "publishedAt": 1776382866174,
-    "commit": "https://github.com/openclaw/skills/commit/8bddfce637e714f411bbe1b791747de9d95956cf"
+    "version": "3.2.0",
+    "publishedAt": 1777249285553,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.0.0",
+      "publishedAt": 1776382866174,
+      "commit": "https://github.com/openclaw/skills/commit/8bddfce637e714f411bbe1b791747de9d95956cf"
+    },
     {
       "version": "2.1.0",
       "publishedAt": 1776023100129,
