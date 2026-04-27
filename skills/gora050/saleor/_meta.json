@@ -1,0 +1,11 @@
+{
+  "owner": "gora050",
+  "slug": "saleor",
+  "displayName": "Saleor",
+  "latest": {
+    "version": "1.0.2",
+    "publishedAt": 1775170573060,
+    "commit": null
+  },
+  "history": []
+}
