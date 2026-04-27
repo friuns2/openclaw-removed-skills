@@ -3,11 +3,16 @@
   "slug": "webcam",
   "displayName": "Webcam",
   "latest": {
-    "version": "0.0.3",
-    "publishedAt": 1776096067143,
-    "commit": "https://github.com/openclaw/skills/commit/74e97ac6d6663a23f7552c59f35d9596eda0c461"
+    "version": "1.0.0",
+    "publishedAt": 1776874491431,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.3",
+      "publishedAt": 1776096067143,
+      "commit": "https://github.com/openclaw/skills/commit/74e97ac6d6663a23f7552c59f35d9596eda0c461"
+    },
     {
       "version": "0.0.2",
       "publishedAt": 1775706869078,
