@@ -3,9 +3,15 @@
   "slug": "writer-integration",
   "displayName": "Writer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171086863,
-    "commit": "https://github.com/openclaw/skills/commit/5954094b9e6c3cfbeface60ec2bf0894f9b4ff98"
+    "version": "1.0.3",
+    "publishedAt": 1776892552140,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171086863,
+      "commit": "https://github.com/openclaw/skills/commit/5954094b9e6c3cfbeface60ec2bf0894f9b4ff98"
+    }
+  ]
 }
