@@ -44,7 +44,7 @@ export ZOPIA_BASE_URL="https://zopia.ai"  # 可选
 | 脚本 | 用途 | 关键参数 |
 |------|------|---------|
 | `create_project.py` | 创建项目 | `[名称]` |
-| `save_settings.py` | 项目设置 | `--base-id` `--style` `--aspect-ratio` `--video-model` ... |
+| `save_settings.py` | 项目设置 | `--base-id` `--style` `--aspect-ratio` `--video-model` `--storyboard-image-model` `--entity-image-model` ... |
 | `send_message.py` | 发送创作指令（异步） | `--base-id` `--episode-id` `消息` |
 | `query_session.py` | 查询进展 | `SESSION_ID` `--poll` `--after-seq N` |
 | `download_results.py` | 下载媒体资源 | `SESSION_ID` `--output-dir` `--type image\|video` |
@@ -97,6 +97,19 @@ python3 {baseDir}/scripts/save_settings.py --base-id BASE_ID \
 | `generate_video_by_viduq3` | Vidu Q3 | n_grid, multi_ref, multi_ref_v2 | n_grid |
 | `generate_video_by_seedance_15` | Seedance 1.5 Pro | start_frame | start_frame |
 
+### 图片模型
+
+分镜关键帧（`storyboard_image_model`）与角色/场景设定图（`entity_image_model`）使用独立的图片模型，可分别配置。
+
+| 模型 ID | 名称 | 默认场景 |
+|---------|------|---------|
+| `generate_image_by_nano_banana_2` | Nano Banana 2 | storyboard 默认 |
+| `generate_image_by_doubao_seedream_4` | Doubao Seedream 4 | entity 默认 |
+| `generate_image_by_nano_banana` | Nano Banana | — |
+| `generate_image_by_gpt_image_2` ⭐ | GPT Image 2 | — |
+
+不传则后端使用默认值。传非法 ID 后端会返回 `invalid_storyboard_image_model` / `invalid_entity_image_model` 400 错误，并在响应的 `allowed_values` 字段给出当前可用列表。
+
 ### 其他设置
 
 | 字段 | 可选值 |
@@ -105,6 +118,8 @@ python3 {baseDir}/scripts/save_settings.py --base-id BASE_ID \
 | `--image-size` | `1k`, `2K`, `4K`（注意 1k 小写）|
 | `--video-resolution` | `480p`, `720p`, `1080p` |
 | `--generation-method` | `n_grid`, `multi_ref`, `multi_ref_v2`, `start_frame`, `video_ref` |
+| `--storyboard-image-model` | 见上方"图片模型"表 |
+| `--entity-image-model` | 见上方"图片模型"表 |
 
 ---
 

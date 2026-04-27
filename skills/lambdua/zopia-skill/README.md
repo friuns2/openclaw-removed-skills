@@ -76,6 +76,17 @@ export ZOPIA_BASE_URL="https://zopia.ai"  # 可选，默认值即可
 | `anime_ghibli` | 吉卜力 |
 | `stylized_pixel` | 像素艺术 |
 
+### 支持的图片模型
+
+分镜图（storyboard）与角色/场景图（entity）可分别配置，两者共享同一组可选值：
+
+| 模型 | 名称 |
+|------|------|
+| `generate_image_by_nano_banana_2` | Nano Banana 2（storyboard 默认）|
+| `generate_image_by_doubao_seedream_4` | Doubao Seedream 4（entity 默认）|
+| `generate_image_by_nano_banana` | Nano Banana |
+| `generate_image_by_gpt_image_2` | GPT Image 2 |
+
 ### 支持的视频模型
 
 | 模型 | 名称 |

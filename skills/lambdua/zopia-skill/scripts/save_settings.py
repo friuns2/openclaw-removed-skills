@@ -9,13 +9,15 @@
     python save_settings.py --base-id BASE_ID --locale zh-CN --aspect-ratio 16:9 --style anime
 
 支持的设置字段:
-    --locale           语言 (zh-CN, en, ja)
-    --aspect-ratio     画面比例 (16:9, 9:16)
-    --style            视觉风格
-    --video-model      视频模型
-    --generation-method 生成方式
-    --image-size       图片尺寸
-    --video-resolution 视频分辨率
+    --locale                  语言 (zh-CN, en, ja)
+    --aspect-ratio            画面比例 (16:9, 9:16)
+    --style                   视觉风格
+    --video-model             视频模型
+    --generation-method       生成方式
+    --image-size              图片尺寸
+    --video-resolution        视频分辨率
+    --storyboard-image-model  分镜图模型
+    --entity-image-model      角色场景图模型
 """
 
 from __future__ import annotations
@@ -40,6 +42,8 @@ def main() -> None:
     parser.add_argument("--generation-method", help="生成方式")
     parser.add_argument("--image-size", help="图片尺寸")
     parser.add_argument("--video-resolution", help="视频分辨率")
+    parser.add_argument("--storyboard-image-model", help="分镜图模型")
+    parser.add_argument("--entity-image-model", help="角色场景图模型")
     args = parser.parse_args()
 
     if args.get:
@@ -56,6 +60,8 @@ def main() -> None:
         "generation_method": args.generation_method,
         "image_size": args.image_size,
         "video_resolution": args.video_resolution,
+        "storyboard_image_model": args.storyboard_image_model,
+        "entity_image_model": args.entity_image_model,
     }
     for key, value in field_map.items():
         if value is not None:
