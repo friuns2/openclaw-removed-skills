@@ -3,9 +3,15 @@
   "slug": "densify",
   "displayName": "Densify",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775225060129,
-    "commit": "https://github.com/openclaw/skills/commit/d977dc7e4aa762c1bb541ee4a3d73b000f60d81b"
+    "version": "1.0.1",
+    "publishedAt": 1776881992973,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775225060129,
+      "commit": "https://github.com/openclaw/skills/commit/d977dc7e4aa762c1bb541ee4a3d73b000f60d81b"
+    }
+  ]
 }
