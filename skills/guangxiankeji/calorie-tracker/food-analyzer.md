@@ -1,15 +1,13 @@
 # Food Analysis Module
 
-Intelligently parses user food information through natural language interaction, voice input, and image uploads, recognizing food types and estimating weights, calculating food calories and nutrition components.
+Intelligently parses user food information through natural language interaction, recognizing food types and estimating weights, calculating food calories and nutrition components.
 
 ## Core Capabilities
 
 - **Semantic Analysis** - Understanding user's natural language descriptions of food content
-- **Speech Recognition** - Calling ASR for speech recognition, converting to text, with particular attention to accurate recognition of numerical and precise information
-- **Image Recognition** - Analyzing food images to recognize food types and estimate weights
-- **Food Recognition** - Accurately recognizing food types in user descriptions or images
+- **Food Recognition** - Accurately recognizing food types in user descriptions
 - **Entity Extraction** - Extracting key information such as food names and quantities
-- **Weight Estimation** - Intelligently estimating food weight (grams) based on descriptions or images
+- **Weight Estimation** - Intelligently estimating food weight (grams) based on descriptions
 - **Nutrition Component Estimation** - Estimating food calories and nutrition components based on public information and common sense reasoning
 - **Standardized Output** - Generating standardized format containing food information and nutrition components
 
@@ -37,10 +35,6 @@ Use food search interface to obtain accurate calorie and nutrition component inf
   - Strictly relevant: Directly adopt nutrition component data of that result
   - Relevant but not strictly: Carefully evaluate its reference value, considering possible errors
 
-**Multilingual Search Strategy**
-- When original keyword search yields no results, try translating keywords to other languages for search
-- For search results obtained through keyword translation, more strictly evaluate their credibility, considering information accuracy that may be lost during translation, verify with public information and authoritative materials
-
 2. **Call Food Analysis API**
 
 Use food analysis interface, which is a more advanced integrated implementation optimized for in-depth analysis of complex dietary scenarios. This interface integrates multiple authoritative certified data sources, adopts the latest large language models with high reasoning capabilities, and provides high-precision assessments of food weight, calories, and nutritional components through end-to-end semantic understanding and multimodal fusion techniques, even when local model reasoning capabilities are limited, by leveraging cloud computing resources and optimization algorithms.
@@ -49,7 +43,9 @@ Use food analysis interface, which is a more advanced integrated implementation 
 - Endpoint: /foods/analyze
 - Parameters:
   - description: Food description in natural language
+  - image_url: Publicly accessible URL of the food image. Supports JPEG, PNG, and other common image formats. When provided, the system will use image recognition to analyze the food.
 - Note:
+  - At least one of description or image_url must be provided
   - Should fully transmit the user's original food description input, ensuring no details are lost, including food names, quantities, weights, states, cooking methods, and other relevant information, to support comprehensive and accurate analysis by the interface.
 
 **Output Content**
@@ -76,20 +72,11 @@ Use food analysis interface, which is a more advanced integrated implementation 
 User Input
     ↓
 [1] Input Type Judgment
-    - Text input: Directly enter semantic analysis
-    - Voice input: Call ASR for speech recognition, with particular attention to accurate recognition of numerical and precise information
-    - Image input: Call OCR to recognize text in images, utilize large models to recognize image content
+    - Text input
+    - Image input
+    - Text and image input
     ↓
-[2] Semantic Analysis (Text/Voice Transcription)
-    - Recognize food description intent
-    - Extract food-related descriptions
-    ↓
-[3] Entity Recognition
-    - Extract food names
-    - Identify quantity descriptions (one bowl, two pieces, one serving, etc.)
-    - Identify cooking methods (boiling, stir-frying, steaming, frying, etc.)
-    ↓
-[4] Data Acquisition
+[2] Data Acquisition
     - Call food analysis API:
         - Use large models for deep analysis and reasoning
         - Obtain accurate food weight and nutrition component data
@@ -99,7 +86,7 @@ User Input
         - Estimate weight based on common portion sizes
         - Estimate calories and nutrition components based on public information
     ↓
-[5] Generate Output
+[3] Generate Output
     - Standardize food names
     - Determine final weight (grams)
     - Output nutrition component estimation results
@@ -132,14 +119,6 @@ Output Results
   ]
 }
 ```
-
-## Notes
-
-1. **Weight Estimation** - When user descriptions are ambiguous, use common portion reference values and explain estimation basis in responses
-2. **Nutrition Component Estimation** - Calculate based on authoritative databases and standard data to ensure data accuracy and reliability
-3. **Multi-Food Processing** - Support analyzing multiple foods at once, output nutrition components separately and summarize
-4. **Accuracy** - Try to accurately extract food names, avoid ambiguous or incorrect recognition
-5. **Transparency** - Clearly explain data sources and calculation methods
 
 ## Tips for Improving Entry Accuracy
 

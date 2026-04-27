@@ -13,11 +13,8 @@ This agent provides intelligent health and nutrition management solutions, integ
 ## Business Processes
 
 ### Food Logging Process
-1. **User Input**: Receives user's food descriptions, voice input, or food images
-2. **Input Processing**:
-   - Voice input: Calls ASR for speech recognition, converting to text
-   - Image input: Calls OCR to recognize text in images, utilizes large models to recognize image content
-   - Text input: Direct semantic analysis
+1. **User Input**: Receives user's food descriptions
+2. **Input Processing**: Direct semantic analysis
 3. **Food Recognition**: Calls food analysis module to parse food types and portions
 4. **Nutrition Analysis**: Estimates nutrition data (calories, protein, fat, carbohydrates, etc.) based on food analysis results
 5. **Data Storage**: Displays recognition results and nutrition data to users, **asks users whether to record**, obtains explicit user confirmation, then calls API service module to persistently store food records to the database, including food information, nutrition data, timestamp, and user identifier
@@ -28,11 +25,8 @@ This agent provides intelligent health and nutrition management solutions, integ
    - For frequent operations, confirmation is not required each time; if users have indicated permission to store data, subsequent operations do not need repeated confirmation
 
 ### Exercise Logging Process
-1. **User Input**: Receives user's exercise descriptions, voice input, or exercise images
-2. **Input Processing**:
-   - Voice input: Calls ASR for speech recognition, converting to text
-   - Image input: Calls OCR to recognize text in images, utilizes large models to recognize image content
-   - Text input: Direct semantic analysis
+1. **User Input**: Receives user's exercise descriptions
+2. **Input Processing**: Direct semantic analysis
 3. **Exercise Recognition**: Calls exercise analysis module to parse exercise types and durations
 4. **Calorie Expenditure Analysis**: Estimates calorie expenditure data (calories) based on exercise analysis results
 5. **Data Storage**: Displays recognition results and calorie expenditure data to users, **asks users whether to record**, obtains explicit user confirmation, then calls API service module to persistently store exercise records to the database, including exercise information, calorie expenditure data, timestamp, and user identifier
@@ -43,11 +37,8 @@ This agent provides intelligent health and nutrition management solutions, integ
    - For frequent operations, confirmation is not required each time; if users have indicated permission to store data, subsequent operations do not need repeated confirmation
 
 ### Weight Logging Process
-1. **User Input**: Receives user's weight descriptions, voice input, or weight scale images
-2. **Input Processing**:
-   - Voice input: Calls ASR for speech recognition, converting to text
-   - Image input: Calls OCR to recognize text in images, utilizes large models to recognize image content
-   - Text input: Direct semantic analysis
+1. **User Input**: Receives user's weight descriptions
+2. **Input Processing**: Direct semantic analysis
 3. **Weight Recognition**: Calls weight analysis module to parse weight values and units
 4. **Weight Analysis**: Calculates BMI and analyzes weight change trends based on weight data
 5. **Data Storage**: Displays recognition results and analysis data to users, **asks users whether to record**, obtains explicit user confirmation, then calls API service module to persistently store weight records to the database, including weight information, BMI data, timestamp, and user identifier
@@ -117,12 +108,9 @@ This agent provides intelligent health and nutrition management solutions, integ
 
 All data processing is completed locally to ensure user privacy and data security:
 
-- **Speech Recognition (ASR)**: Local models perform speech-to-text conversion;
-- **Optical Character Recognition (OCR)**: Local models extract text from images;
-- **Image Content Recognition**: Local multimodal models analyze image content, including food recognition, information recognition from food packaging, exercise scene recognition, food scale and weight scale reading recognition;
 - **Semantic Analysis and Reasoning**: Local large models complete natural language understanding, nutrition estimation, and calorie calculation;
-- **Data Isolation**: All user raw data (voice, images, text) is processed locally only, and is not uploaded to any external servers.
-- **Temporary Data**: All temporary processing data (voice segments, image caches, text intermediate results) is immediately cleared after task completion, without establishing any form of local data persistence or logging;
+- **Data Isolation**: All user raw data (text) is processed locally only, and is not uploaded to any external servers.
+- **Temporary Data**: All temporary processing data (text intermediate results) is immediately cleared after task completion, without establishing any form of local data persistence or logging;
 
 ### External Service Interfaces
 This skill uses the following external API services for data storage and query:
