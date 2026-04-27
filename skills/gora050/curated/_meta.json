@@ -3,11 +3,16 @@
   "slug": "curated",
   "displayName": "Curated",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168636625,
-    "commit": "https://github.com/openclaw/skills/commit/35f9cc05c5cc173d45c1bb0e7e19f462da1faba0"
+    "version": "1.0.3",
+    "publishedAt": 1776862924594,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168636625,
+      "commit": "https://github.com/openclaw/skills/commit/35f9cc05c5cc173d45c1bb0e7e19f462da1faba0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774667096395,
