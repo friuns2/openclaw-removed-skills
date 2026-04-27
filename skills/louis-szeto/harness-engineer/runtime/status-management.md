@@ -183,8 +183,8 @@ It is the fast-read view of "where are we?" -- not a detailed log.
 
   ## Phase Status
   [x] Phase 0: Session init -- YYYY-MM-DD
-  [x] Phase 1: Research -- RESEARCH-NNN.md + GAPS-NNN.md produced -- YYYY-MM-DD
-  [x] Phase 2: Plan -- MASTER-PLAN-NNN.md approved -- YYYY-MM-DD
+  [x] Phase 1: Research -- RESEARCH-NNN.md produced (Q-Agent + R-Agent complete) -- YYYY-MM-DD
+  [x] Phase 2: Plan -- Design approved, Outlines approved, MASTER-PLAN-NNN.md approved -- YYYY-MM-DD
   [~] Phase 3: Implement -- GROUP-1 complete, GROUP-2 in progress -- YYYY-MM-DD
   [ ] Phase 4: Final review
   [ ] Phase 5: Reflect

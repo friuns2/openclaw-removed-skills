@@ -13,8 +13,20 @@ on-start:
   Surface: session type (new / resume), cycle number, checkpoint state
   Wait: human acknowledgment before proceeding
 
+on-research-questions:
+  Surface: Q-FINDINGS-NNN-*.md with all Q-Agent questions
+  Wait: human answers questions + explicit approval to proceed to R-Agent recording
+
+on-design-complete:
+  Surface: DESIGN-NNN-*.md with design questions and proposed directions
+  Wait: human confirms design direction + explicit approval to proceed to outlining
+
+on-outline-complete:
+  Surface: OUTLINE-NNN-*.md with change outlines and GAPS-NNN.md
+  Wait: human confirms outlines + explicit approval to proceed to master planning
+
 on-plan-complete:
-  Surface: PLAN-NNN.md for human review and approval
+  Surface: MASTER-PLAN-NNN.md for human review and approval
   Wait: explicit human approval -- do not implement without it
 
 on-cycle-complete:
@@ -36,10 +48,25 @@ See runtime/hook-system.md for the full hook protocol including tool-use hooks
 
 ## MANDATORY HUMAN APPROVAL GATES
 
-GATE 1 -- Plan approval (before any implementation)
-  Triggered by: planner sub-agent completing PLAN-NNN.md
+GATE R1 -- Research questions (before R-Agent recording)
+  Triggered by: Q-Agents completing their questioning phase
+  What human reviews: factual questions about codebase, design intent, requirements
+  What blocks without approval: R-Agent recording phase
+
+GATE P1 -- Design direction (before outlining)
+  Triggered by: design discussion agents completing
+  What human reviews: proposed architectural direction, patterns to follow, assumptions
+  What blocks without approval: outline phase
+
+GATE P2 -- Change outlines (before master planning)
+  Triggered by: outline agents completing with gap analysis
+  What human reviews: change scope, file impact, testing strategy, dependencies
+  What blocks without approval: master planning phase
+
+GATE P3 -- Plan approval (before any implementation)
+  Triggered by: planner sub-agent completing MASTER-PLAN-NNN.md
   What human reviews: scope, approach, test criteria, risks
-  What blocks without approval: entire Phase 4 (BUILD)
+  What blocks without approval: entire Phase 3 (IMPLEMENT)
 
 GATE 2 -- Architecture change
   Triggered by: any ADR that proposes a change to existing architecture

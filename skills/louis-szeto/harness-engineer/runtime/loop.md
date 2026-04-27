@@ -80,6 +80,16 @@ If no fast-path applies: proceed to Step 0c (standard init).
    - Implementation interrupted => read DISPATCH-TRACK-NNN.md
 7. If already above 20% context from init reads: compact before proceeding
 
+### Step 0d -- Storage format selection (before Phase 1)
+
+Ask user: "How should research documentation be saved?"
+  Options:
+    A) Markdown files in docs/ folder (default)
+    B) Obsidian LLM wiki
+  IF user selects B: ask vault location. Record setting.
+  This setting is used throughout all phases for output location.
+  Record in PROGRESS.md: storage_format = <choice>, vault_path = <path or null>
+
 LIFESPAN HOOK: on-start (combined with Check 4 above)
   Surface: session type, cycle number, checkpoint state, platform check results
   Wait: human acknowledgment before proceeding to Phase 1.
@@ -88,30 +98,41 @@ LIFESPAN HOOK: on-start (combined with Check 4 above)
 
 ## PHASE 1: RESEARCH
 
-Small-piece rule: sub-researchers cover at most 20 files each. Orchestrator reads
-only compressed Module Reports, never raw source. See agents/researcher.md.
+Small-piece rule: Q-Agents and R-Agents cover at most 20 files each. Orchestrator
+reads only compressed R-RECORDs, never raw source. See agents/researcher.md.
 
 Orchestrator: researcher_agent (agents/researcher.md)
 
-Phase A -- Parallel module analysis:
+Phase A -- Q-Agent questioning:
   - Orchestrator scans full file structure
-  - Spawns parallel sub-researchers (one per module boundary)
-  - Each sub-researcher produces a Module Report
-  - Orchestrator aggregates into RESEARCH-NNN.md
+  - Spawns parallel Q-Agents (one per module boundary)
+  - Each Q-Agent reads code, asks questions, performs web search if needed
+  - Each Q-Agent produces Q-FINDINGS-NNN-<module>.md
 
-Phase B -- Gap and violation analysis:
-  - Orchestrator analyzes findings against standards and harness principles
-  - Web search staged in docs/generated/search-staging/ if needed
-  - Produces GAPS-NNN.md (gap list only -- no solutions)
+GATE-R1 -- Research questions:
+  Surface all Q-FINDINGS to human for review.
+  Wait for human to answer questions and approve proceeding to R-Agent phase.
+  If human requests changes: re-spawn Q-Agents with adjusted scope.
 
-Phase C -- Tracking:
+Phase B -- R-Agent recording:
+  - Spawns paired R-Agents (1:1 with Q-Agents)
+  - Each R-Agent receives Q-FINDINGS + human answers
+  - Records facts + user vision verbatim
+  - Each R-Agent produces R-RECORD-NNN-<module>.md
+
+Phase C -- Aggregation:
+  - Orchestrator reads all R-RECORDs
+  - Cross-module integration analysis
+  - Aggregates into RESEARCH-NNN.md
+
+Phase D -- Tracking:
   - RESEARCH-TRACK-NNN.md updated at every step
   - HANDOFF.md written if context reset needed mid-research
 
-Context check: at every sub-researcher aggregation boundary, check orchestrator
+Context check: at every agent aggregation boundary, check orchestrator
 context. If above 40%: compact orchestrator context, keep only aggregated summaries.
 
-Output: docs/status/RESEARCH-NNN.md + docs/status/GAPS-NNN.md
+Output: docs/status/RESEARCH-NNN.md (NO GAPS-NNN.md -- gap analysis is the planner's job)
 
 ---
 
@@ -122,30 +143,58 @@ WUs are sized to fit in one implementer context window (3-5 files max). See agen
 
 Orchestrator: planner_agent (agents/planner.md)
 
-Phase A -- Parallel gap planning:
-  - Central planner spawns one gap planner per gap in GAPS-NNN.md
-  - Each gap planner produces GAP-PLAN-NNN-XX.md independently
-  - PLAN-TRACK-NNN.md updated as each gap plan completes
+Phase 2.1 -- Design Discussion:
+  - Planner spawns design discussion agents (one per subsystem if large/complex)
+  - Each agent analyzes current vs desired state, identifies patterns, asks open questions
+  - Each agent produces DESIGN-NNN-<scope>.md
+  - PLAN-TRACK-NNN.md updated as each design completes
 
-Phase B -- Aggregation and prioritization:
-  - Central planner checks cross-gap consistency
-  - Resolves conflicts (merges overlapping WUs, sets dependency order)
-  - Scores and ranks all gaps
+  GATE-P1 -- Design direction:
+    Surface DESIGN-NNN-*.md to human.
+    Wait for human to answer design questions and confirm direction.
+    No outlining begins until human approves design direction.
+
+Phase 2.2 -- Outline + Gap Analysis:
+  - Planner spawns outline agents (one per change area if large/complex)
+  - Each agent performs gap analysis (5 categories) and maps changes
+  - Produces OUTLINE-NNN-<scope>.md and GAPS-NNN.md
+  - PLAN-TRACK-NNN.md updated as each outline completes
+
+  GATE-P2 -- Change outlines:
+    Surface OUTLINE-NNN-*.md and GAPS-NNN.md to human.
+    Wait for human to confirm scope and approve outlines.
+    No master planning begins until human approves outlines.
+
+Phase 2.3 -- Master Planning:
+  - Classify gaps (SIMPLE/STANDARD/COMPLEX)
+  - Spawn gap planners per non-SIMPLE gap
+  - Each gap planner produces GAP-PLAN-NNN-XX.md
+  - Consistency check, conflict resolution, scoring, prioritization
   - Produces MASTER-PLAN-NNN.md with prioritized execution queue
 
-HUMAN GATE (P6 -- Gate 1): on-plan-complete lifespan hook
-  Surface MASTER-PLAN-NNN.md to human.
-  Wait for explicit approval (with any modifications) before Phase 3.
-  Record approval timestamp in MASTER-PLAN-NNN.md.
+  GATE-P3 (on-plan-complete lifespan hook):
+    Surface MASTER-PLAN-NNN.md to human.
+    Wait for explicit approval (with any modifications) before Phase 2.5.
+    Record approval timestamp in MASTER-PLAN-NNN.md.
 
-Context check: at every gap plan completion boundary, check central planner
-context. If above 40%: compact, keep only gap plan summaries and prioritization.
+Context check: at every agent completion boundary, check planner
+context. If above 40%: compact, keep only summaries and prioritization.
 
 ---
 
-## PHASE 2.5: CONTRACT NEGOTIATION (between Plan and Implement)
+## PHASE 2.5: CONTRACT NEGOTIATION AND WORKTREE (between Plan and Implement)
 
-Before dispatching any implementer agents, each WU enters a contract negotiation.
+Before dispatching any implementer agents, the worktree is built and contracts are negotiated.
+
+### Step 0 -- Worktree Agent
+Spawn a single worktree agent to produce WORKTREE-NNN.md:
+  - Reads MASTER-PLAN-NNN.md + all GAP-PLAN-NNN-XX.md
+  - Builds dependency graph between WUs
+  - Assigns execution slots with dependency ordering
+  - Defines checkpoint boundaries
+  - Output: docs/status/WORKTREE-NNN.md
+
+The worktree provides the execution order for Phase 3.
 
 ### Step 1 -- Contract Proposal (implementer agent)
 For each WU in MASTER-PLAN-NNN.md, a temporary implementer instance proposes:
@@ -185,16 +234,21 @@ See agents/implementer.md, agents/reviewer.md, agents/dispatcher.md.
 
 Orchestrator: dispatcher (agents/dispatcher.md)
 
-For each GROUP in MASTER-PLAN-NNN.md execution queue:
+For each GROUP in WORKTREE-NNN.md execution graph:
   For each WU in the group, read CONTRACT-NNN-XX.md (frozen done criteria) before dispatching.
 
   Phase B -- Parallel ITR execution:
     Spawn ITR group per WU (max: CONFIG.yaml max_parallel_agents).
     Each group runs the self-feedback loop:
-      implement => test (isolated sandbox) => review (3 layers) =>
-      feedback => loop until done or on-error hook.
+      implement => test (isolated sandbox, various environments/edge cases) =>
+      review (2-4 reviewers, clean-pass-only) =>
+      feedback => loop until CLEAN PASS or on-error hook.
     DISPATCH-TRACK-NNN.md updated after every iteration of every group.
     Status reported to dispatcher after each cycle.
+    Set a cron job to periodically check on subagent progress.
+    If any agent is stuck for >10 minutes without output, log the issue,
+    kill it, and spawn subagents to break the task into smaller pieces.
+    Complex WUs: break into subtasks, spawn nested ITR group per subtask.
 
   Integration check:
     After GROUP completes: run GROUP's integration verification tests.

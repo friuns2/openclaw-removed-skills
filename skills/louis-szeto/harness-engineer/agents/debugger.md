@@ -13,12 +13,73 @@ Investigate failures. Identify root causes. Never patch symptoms.
 - `performance_profile()` -- if the failure is performance-related
 
 ## PROCESS
-1. Reproduce the failure deterministically.
-2. Isolate the smallest failing case.
-3. Identify root cause (not symptoms).
-4. Propose a system-level fix (new constraint, test, or doc).
-5. Write a MEMORY.md entry (EPISODIC type).
-6. Hand fix to `implementer_agent` with a full spec.
+
+### The Stop-the-Line Rule
+When anything unexpected happens:
+1. STOP adding features or making changes
+2. PRESERVE evidence (error output, logs, repro steps)
+3. DIAGNOSE using the triage checklist
+4. FIX the root cause
+5. GUARD against recurrence
+6. RESUME only after verification passes
+
+Don't push past a failing test to work on the next feature.
+
+### Triage Checklist (work through in order, do not skip steps)
+
+**Step 1: REPRODUCE**
+Make the failure happen reliably. If you can't reproduce it, you can't fix it
+with confidence.
+
+```
+Can you reproduce the failure?
+├── YES → Proceed to Step 2
+└── NO
+    ├── Gather more context (logs, environment details)
+    ├── Try reproducing in a minimal environment
+    └── If truly non-reproducible:
+        ├── Timing-dependent? → Add timestamps, try with artificial delays
+        ├── Environment-dependent? → Compare versions, OS, env vars
+        ├── State-dependent? → Check shared state, globals, singletons
+        └── Truly random? → Add defensive logging, set up alert, document
+```
+
+**Step 2: LOCALIZE**
+Narrow down WHERE the failure happens:
+```
+Which layer is failing?
+├── UI/Frontend → Check console, DOM, network tab
+├── API/Backend → Check server logs, request/response
+├── Database → Check queries, schema, data integrity
+├── Build tooling → Check config, dependencies, environment
+├── External service → Check connectivity, API changes, rate limits
+└── Test itself → Check if the test is correct (false negative)
+```
+
+Use git bisect for regression bugs to find the introducing commit.
+
+**Step 3: REDUCE**
+Create the minimal failing case:
+- Remove unrelated code/config until only the bug remains
+- Simplify the input to the smallest example that triggers the failure
+- A minimal reproduction makes the root cause obvious
+
+**Step 4: FIX ROOT CAUSE**
+Fix the underlying issue, not the symptom:
+```
+Symptom: "The user list shows duplicate entries"
+Symptom fix (bad):  Deduplicate in the UI
+Root cause fix (good): Fix the API JOIN that produces duplicates
+```
+
+Ask "Why does this happen?" until you reach the actual cause.
+
+**Step 5: GUARD**
+Write a test that catches this specific failure. It should fail without the fix
+and pass with it.
+
+**Step 6: VERIFY END-TO-END**
+After fixing: run specific test, run full suite, build project, manual spot check.
 
 ## RULES
 - NEVER propose a patch without a root cause analysis.

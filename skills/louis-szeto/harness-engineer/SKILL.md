@@ -29,7 +29,7 @@ metadata:
     - verify_platform_requirements_before_first_use: true
 ---
 
-# HARNESS AUTONOMOUS RUNTIME
+# HARNESS ENGINEER
 
 A production-grade skill for Claude Code and OpenClaw that transforms a repository into a
 self-improving software system using six core harness engineering principles.
@@ -74,6 +74,14 @@ See: runtime/autonomy-rules.md, runtime/prioritization.md
 6. FAILURE = HARNESS GAP -- fix the harness, not just the symptom.
 7. OPTIMIZATION PRIORITY: Security => Correctness => Reliability => Performance =>
    Memory => Maintainability => Cost
+8. MINIMAL SCOPE PER SUBAGENT — Estimate codebase size first (use platform file-count or line-count capability — never raw shell). If >5K lines, split into multiple subagents by module/feature/layer. Pin exact files to read (no wandering). One research doc + one code area per subagent max. If a subagent gets killed or times out, the scope was too large — split further.
+   **Adaptive timeouts:** Default timeouts are guidelines, not hard kills. Check process logs before killing — if the agent is actively producing output, extend the timeout instead of killing. Only kill-and-split if the agent is silent/stuck for >10min or producing garbage. Scale timeouts by effort: S-effort=15min, M-effort=20min, L-effort=30-40min.
+9. SUBAGENT PERMISSION MODE — Subagents are spawned by the platform using its native agent mechanism. The permission mode is set by the platform, NOT by this skill. The skill MUST NOT mandate any specific spawn command or permission mode — that decision belongs to the platform's enforcement layer (see PLATFORM_REQUIREMENTS.md Section 8). If the platform's default permission mode is insufficient, the platform operator configures it — the skill never overrides it.
+10. ACTIVE MONITORING — Every time you launch a new batch of subagents, track session IDs, expected output files, and remaining queue. If the platform provides a cron/scheduler, use it to detect dead agents. If no scheduler is available, check agent status before each dispatch step. Dead agents stall the pipeline — detect them early.
+11. MAX PARALLEL = 5 — Up to 5 Claude Code agents running simultaneously. If rate/API limit errors encountered, drop to 4, then 3, etc until no errors. Resume increasing after 5 clean minutes.
+12. TOKEN EXHAUSTION RECOVERY: If ALL active agents hit rate/API limits (429/500), tokens are exhausted. Wait for token refresh before retrying. If the platform provides a scheduler, set a recovery job to resume after refresh. If no scheduler is available, the human operator must manually restart the cycle.
+13. 10-MIN STUCK KILL — If any agent produces no output for >10 minutes, log the issue, kill it, and split the task into smaller subtasks before respawning. **MUST ALWAYS set a cron job when a subagent is given a command that will run for a while, to periodically check on its progress.**
+14. TRACKING EVERYWHERE — Every phase, cycle, and step writes to tracking logs. DISPATCH-TRACK, error log, compact summaries, progress logs. Recovery must be able to pick up from any interruption point.
 
 ---
 
@@ -112,7 +120,7 @@ When activated in Claude Code or OpenClaw, read in this order:
 4. runtime/context-engineering.md (context budget rules)
 5. runtime/status-management.md (restore checkpoint if resuming)
 6. MEMORY.md (prior failure context)
-7. agents/dispatcher.md (task decomposition model)
+7. agents/dispatcher.md (task decomposition model, worktree agent)
 8. Begin the loop
 
 ---
@@ -133,10 +141,10 @@ When activated in Claude Code or OpenClaw, read in this order:
 | runtime/self-improvement.md       | After any failure                         |
 | runtime/prioritization.md         | When selecting the next task              |
 | runtime/autonomy-rules.md         | When blocked or at human gate             |
-| agents/dispatcher.md              | Before decomposing any task               |
-| agents/researcher.md              | Research phase                            |
-| agents/planner.md                 | Plan phase                                |
-| agents/implementer.md             | Implement phase                           |
+| agents/dispatcher.md              | Before decomposing any task (worktree agent) |
+| agents/researcher.md              | Research phase (Q-Agent + R-Agent model)  |
+| agents/planner.md                 | Plan phase (3-phase: design, outline, master plan) |
+| agents/implementer.md             | Implement phase (worktree-driven execution) |
 | agents/reviewer.md                | Review cycle                              |
 | agents/debugger.md                | On any failure                            |
 | agents/optimizer.md               | Optimization mode                         |
@@ -147,6 +155,7 @@ When activated in Claude Code or OpenClaw, read in this order:
 | references/harness-rules.md       | Core constraints                          |
 | references/testing-standards.md   | Before writing or running tests           |
 | references/security-performance.md| Before any implementation                 |
+| references/simplification-checklist.md | During review and refactoring        |
 | references/git-workflow.md        | Before any commit or PR                   |
 | references/mcp-tools.md           | MCP tool definitions and per-agent sets   |
 | references/sensitive-paths.md     | Forbidden read paths -- enforced in-skill |

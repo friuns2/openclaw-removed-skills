@@ -41,6 +41,110 @@ When producing scores or grades:
 
 ---
 
+## FIVE-AXIS REVIEW FRAMEWORK
+
+Every review evaluates code across these dimensions:
+
+### 1. Correctness
+- Does the code do what the spec/task says it should?
+- Are edge cases handled (null, empty, boundary values)?
+- Are error paths handled (not just the happy path)?
+- Do tests actually verify the behavior? Are they testing the right things?
+- Any off-by-one errors, race conditions, or state inconsistencies?
+
+### 2. Readability & Simplicity
+- Can another engineer understand this without the author explaining it?
+- Are names descriptive and consistent with project conventions?
+- Is the control flow straightforward (no deeply nested logic)?
+- Could this be done in fewer lines?
+- Are abstractions earning their complexity?
+- Dead code artifacts: no-op variables, backwards-compat shims, `// removed` comments?
+
+### 3. Architecture
+- Does the change follow existing patterns or introduce a new one? If new, is it justified?
+- Does it maintain clean module boundaries?
+- Is there code duplication that should be shared?
+- Are dependencies flowing in the right direction (no circular dependencies)?
+- Is the abstraction level appropriate?
+
+### 4. Security
+- Is user input validated and sanitized at system boundaries?
+- Are secrets kept out of code, logs, and version control?
+- Is authentication/authorization checked where needed?
+- Are SQL queries parameterized? Is output encoded?
+- Are dependencies from trusted sources?
+- Is data from external sources treated as untrusted?
+
+### 5. Performance
+- Any N+1 query patterns?
+- Any unbounded loops or unconstrained data fetching?
+- Any synchronous operations that should be async?
+- Any missing pagination on list endpoints?
+- Any large objects created in hot paths?
+
+---
+
+## FINDING SEVERITY LABELS
+
+Label every finding so the implementer knows what's required vs optional:
+
+| Prefix | Meaning | Author Action |
+|--------|---------|---------------|
+| **Critical** | Blocks merge. Security vulnerability, data loss, broken functionality | Must fix before merge |
+| **Important** | Should fix before merge. Missing test, wrong abstraction, poor error handling | Should fix, may defer with justification |
+| **Suggestion** | Worth considering but not required | Author may ignore |
+| **Nit** | Minor, optional. Formatting, style preferences | Author may ignore |
+
+This prevents implementers from treating all feedback as mandatory.
+
+---
+
+## REVIEW PROCESS ORDER
+
+1. **Understand the context** -- read spec/task, understand intent
+2. **Review tests first** -- tests reveal intent and coverage gaps
+3. **Review the implementation** -- walk through code with five axes
+4. **Categorize findings** -- label each with severity
+5. **Verify the verification** -- check author's test story, build results
+
+---
+
+## CHANGE SIZING GUIDELINES
+
+Small, focused changes are easier to review and safer to deploy:
+- ~100 lines changed → Good. Reviewable in one sitting.
+- ~300 lines changed → Acceptable if it's a single logical change.
+- ~1000 lines changed → Too large. Recommend splitting.
+
+When a change is too large, recommend splitting strategies:
+- **Stack**: Submit a small change, start the next based on it
+- **By file group**: Separate changes for groups needing different reviewers
+- **Vertical**: Break into smaller full-stack slices of the feature
+
+---
+
+## DEAD CODE HYGIENE
+
+After any refactoring or implementation change:
+1. Identify code that is now unreachable or unused
+2. List it explicitly in the review
+3. Recommend removal (but ask, don't silently delete)
+
+---
+
+## DEPENDENCY DISCIPLINE
+
+When a change adds dependencies, verify:
+1. Does the existing stack solve this already?
+2. How large is the dependency? (Check bundle impact.)
+3. Is it actively maintained?
+4. Does it have known vulnerabilities?
+5. What's the license?
+
+Prefer standard library and existing utilities over new dependencies.
+
+---
+
 ## TWO MODES
 
 ### Mode 1 -- ITR Cycle Review (per WU, per iteration)
@@ -127,6 +231,27 @@ Output: docs/status/FINAL-REVIEW-NNN.md (see format below)
 ---
 
 ## REVIEW OUTPUT FORMATS
+
+## CLEAN PASS POLICY
+
+Review output MUST be one of exactly two values:
+
+APPROVE -- zero findings, zero comments, zero conditions, zero suggestions.
+  The implementation is correct, complete, coherent, and clean.
+  Nothing further is needed.
+
+BLOCK -- at least one finding that requires changes.
+  Every finding must include: exact location, exact issue, exact fix needed.
+  Severity is labeled but does NOT affect the BLOCK decision -- ALL severities
+  block equally. A Nit blocks the same as a Critical.
+
+FORBIDDEN outcomes:
+  - "Approve with suggestions" -- those suggestions are findings => BLOCK
+  - "Pass with minor comments" -- those comments are findings => BLOCK
+  - "Approve but follow up on X" -- X is a finding => BLOCK
+  - "Conditional pass" -- conditions are findings => BLOCK
+
+Only CLEAN PASS advances the WU. No exceptions.
 
 ### ITR Cycle Review (per layer)
 

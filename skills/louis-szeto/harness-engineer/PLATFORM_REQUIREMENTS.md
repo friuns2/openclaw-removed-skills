@@ -123,6 +123,56 @@ Action if human gates cannot be enforced:
 
 ---
 
+### 8. Subagent Permission Mode
+
+| Check | Enforcement | How to verify |
+|-------|-------------|---------------|
+| Subagents run with the platform's configured permission mode (not `bypassPermissions`) | PLATFORM | Review subagent spawn command. Confirm no `--permission-mode bypassPermissions` flag. |
+| Platform enforces per-agent tool subsets at the infrastructure level | PLATFORM | Confirm tool-subset config in platform matches references/mcp-tools.md. |
+| Sensitive operations (write to protected paths, network access, credential use) require platform-level approval | PLATFORM | Attempt a protected write from a subagent. Confirm it is blocked unless explicitly approved. |
+
+Action if permission mode cannot be enforced:
+  Do not spawn autonomous subagents. Run the harness in single-pass with a human
+  reviewing and approving every tool call before execution. The skill does NOT
+  override the platform's permission configuration — it relies on it.
+
+---
+
+### 9. Scheduling and Token Recovery
+
+| Check | Enforcement | How to verify |
+|-------|-------------|---------------|
+| If cron/scheduler is used for monitoring or recovery, credentials are managed by the platform (not embedded in skill files) | PLATFORM | Review scheduler config. Confirm no tokens, API keys, or credentials are stored in skill files or docs/. |
+| Scheduled jobs are scoped to the current session only (no persistent access beyond session lifetime) | PLATFORM | Confirm scheduled jobs cannot outlive the session that created them. |
+| Token refresh and rate-limit recovery follow platform rate limits (no automated retry loops without backoff) | PLATFORM | Review retry logic. Confirm exponential backoff and platform rate limit headers are respected. |
+
+Action if scheduling is unavailable:
+  The harness operates without automated scheduling. The human operator manually
+  restarts interrupted cycles using the recovery protocol (docs/status/DISPATCH-TRACK-NNN.md).
+
+---
+
+### 10. Required Platform Capabilities
+
+The skill is instruction-only. It does NOT include, install, or execute any binaries.
+All operations depend on the host platform providing these capabilities:
+
+| Capability | How the skill uses it | What to verify |
+|-----------|----------------------|----------------|
+| Agent spawning | The skill instructs the orchestrator to spawn subagents. The platform's native mechanism handles the actual spawn. | Confirm your platform can spawn subagents with scoped tool access. |
+| File read/write | Agents read codebase files and write to docs/status/, docs/exec-plans/. | Confirm the platform's tool router allows read/write within these paths. |
+| Code search | Agents search the codebase for patterns and dependencies. | Confirm the platform provides code search capability. |
+| Git operations | Agents create branches, commit, and create PRs. | Confirm the platform provides git tools scoped to the target repo. |
+| File/line counting | Agents estimate codebase size to determine scope splits. | Confirm the platform provides file-count or line-count capability. No raw shell required. |
+| Web search (optional) | Q-Agents may search for framework standards. Results are staged, never written directly. | Confirm web search is available or disable it in references/mcp-tools.md. |
+
+The skill NEVER invokes raw shell commands. Any shell-like operations (file counting,
+process monitoring, test execution) must be provided by the platform as tools.
+The TOOL_REGISTRY explicitly forbids raw shell invocation. If your platform does not
+provide these capabilities as tools, the skill will not function correctly.
+
+---
+
 ## SAFE START SEQUENCE (run before any real-repo use)
 
 1. Clone the target repo to a throwaway branch
