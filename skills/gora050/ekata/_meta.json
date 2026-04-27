@@ -3,11 +3,16 @@
   "slug": "ekata",
   "displayName": "Ekata",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169267334,
-    "commit": "https://github.com/openclaw/skills/commit/eb47816df103933fd324c81e82fd9ea68195fde0"
+    "version": "1.0.3",
+    "publishedAt": 1776864059363,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169267334,
+      "commit": "https://github.com/openclaw/skills/commit/eb47816df103933fd324c81e82fd9ea68195fde0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774789467136,
