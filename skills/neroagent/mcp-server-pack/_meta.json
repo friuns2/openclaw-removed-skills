@@ -1,0 +1,11 @@
+{
+  "owner": "neroagent",
+  "slug": "mcp-server-pack",
+  "displayName": "MCP Server Pack",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775069957930,
+    "commit": null
+  },
+  "history": []
+}
