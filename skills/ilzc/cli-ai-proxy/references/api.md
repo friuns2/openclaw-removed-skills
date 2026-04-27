@@ -142,6 +142,8 @@ Returns HTTP 503 with `"status": "degraded"` if no CLI providers are available.
 
 ## CORS
 
-All endpoints include CORS headers:
+All endpoints include permissive CORS headers so that browser-based tools running on the same machine can call the proxy without preflight hassle:
 - `Access-Control-Allow-Origin: *`
 - `Access-Control-Expose-Headers: X-Session-Id`
+
+⚠️ This is only safe while the proxy is bound to `127.0.0.1` (the default). If you bind to `0.0.0.0`, the combination of a wildcard CORS origin and no authentication means any webpage visited in any browser on your LAN can drive your local CLIs. Keep `server.host` at `127.0.0.1` unless you are fronting the proxy with a reverse proxy that enforces auth and a narrow CORS origin.

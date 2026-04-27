@@ -45,7 +45,7 @@ models:
 
 | Variable | Overrides | Example |
 |----------|-----------|---------|
-| `CLI_AI_HOST` | `server.host` | `0.0.0.0` |
+| `CLI_AI_HOST` | `server.host` | `127.0.0.1` (default; do not change without a reverse proxy) |
 | `CLI_AI_PORT` | `server.port` | `8080` |
 | `GEMINI_CLI_PATH` | `cli.gemini` | `/usr/local/bin/gemini` |
 | `CLAUDE_CLI_PATH` | `cli.claude` | `/usr/local/bin/claude` |
@@ -56,7 +56,7 @@ models:
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `host` | string | `"127.0.0.1"` | Bind address. Use `0.0.0.0` to accept non-local connections. |
+| `host` | string | `"127.0.0.1"` | Bind address. **Keep at `127.0.0.1`.** The proxy has no authentication, so binding to `0.0.0.0` exposes it to any host that can reach your machine. Only change this behind a reverse proxy that enforces auth. |
 | `port` | number | `9090` | TCP port to listen on. |
 
 ### session

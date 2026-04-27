@@ -39,6 +39,8 @@ Check TypeScript version: `npx tsc --version` (needs 5.x+).
 
 ## CLI Not Available
 
+> **Note on credentials.** The env vars below (`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`) are consumed by the respective CLIs — **cli-ai-proxy never reads them**. The proxy only shells out to the CLI binary; all authentication state (OAuth tokens, API keys, session cookies) lives wherever the CLI puts it (usually under `~/.config/` or `~/.claude/` / `~/.gemini/`), managed by the CLI itself.
+
 ### Gemini CLI
 
 Check installation:
@@ -49,13 +51,13 @@ gemini --version
 
 Install:
 ```bash
-npm install -g @anthropic-ai/gemini-cli
+npm install -g @google/gemini-cli
 ```
 
-Auth:
+Auth (handled entirely by the Gemini CLI, not the proxy):
 ```bash
 gemini  # First run triggers OAuth login
-# Or set API key:
+# Or set the Gemini CLI's own API key env var:
 export GEMINI_API_KEY=your-key
 ```
 
@@ -72,10 +74,10 @@ Install:
 npm install -g @anthropic-ai/claude-code
 ```
 
-Auth:
+Auth (handled entirely by Claude Code, not the proxy):
 ```bash
 claude auth login
-# Or set API key:
+# Or set Claude Code's own API key env var:
 export ANTHROPIC_API_KEY=your-key
 ```
 

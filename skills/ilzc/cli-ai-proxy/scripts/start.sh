@@ -4,13 +4,10 @@ set -euo pipefail
 # Start the cli-ai-proxy server.
 # Usage: start.sh [-p port] [-h host]
 
-INSTALL_DIR="${CLI_AI_PROXY_DIR:-$HOME/.local/share/cli-ai-proxy}"
-CLI="$INSTALL_DIR/dist/cli.js"
-
-if [[ ! -f "$CLI" ]]; then
-  echo "ERROR: cli-ai-proxy not found at $INSTALL_DIR"
+if ! command -v cli-ai-proxy >/dev/null 2>&1; then
+  echo "ERROR: cli-ai-proxy not found on PATH."
   echo "Run the install script first: {baseDir}/scripts/install.sh"
   exit 1
 fi
 
-exec node "$CLI" start "$@"
+exec cli-ai-proxy start "$@"

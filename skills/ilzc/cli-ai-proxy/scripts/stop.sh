@@ -3,12 +3,9 @@ set -euo pipefail
 
 # Stop the cli-ai-proxy server.
 
-INSTALL_DIR="${CLI_AI_PROXY_DIR:-$HOME/.local/share/cli-ai-proxy}"
-CLI="$INSTALL_DIR/dist/cli.js"
-
-if [[ ! -f "$CLI" ]]; then
-  echo "ERROR: cli-ai-proxy not found at $INSTALL_DIR"
+if ! command -v cli-ai-proxy >/dev/null 2>&1; then
+  echo "ERROR: cli-ai-proxy not found on PATH."
   exit 1
 fi
 
-exec node "$CLI" stop
+exec cli-ai-proxy stop
