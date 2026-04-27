@@ -3,11 +3,16 @@
   "slug": "starshipit",
   "displayName": "Starshipit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168704970,
-    "commit": "https://github.com/openclaw/skills/commit/473a2e042ac32ba0846cb058eb2480566655a260"
+    "version": "1.0.3",
+    "publishedAt": 1776853294459,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168704970,
+      "commit": "https://github.com/openclaw/skills/commit/473a2e042ac32ba0846cb058eb2480566655a260"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774681352828,
