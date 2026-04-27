@@ -3,11 +3,16 @@
   "slug": "sms-everyone",
   "displayName": "Sms Everyone",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167758722,
-    "commit": "https://github.com/openclaw/skills/commit/0a20fb32a3feeeb8e5a88d6eb971e28ce7660967"
+    "version": "1.0.3",
+    "publishedAt": 1776861728497,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167758722,
+      "commit": "https://github.com/openclaw/skills/commit/0a20fb32a3feeeb8e5a88d6eb971e28ce7660967"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774501458956,
