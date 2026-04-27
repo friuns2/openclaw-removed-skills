@@ -1,11 +1,17 @@
 {
   "owner": "jayden-zhong",
   "slug": "trend-launch-scanner",
-  "displayName": "Trend Launch Scanner",
+  "displayName": "趋势启动扫描器",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774870228747,
-    "commit": "https://github.com/openclaw/skills/commit/7646af93ae3652ca1aaddd8e65ed369f10652b9a"
+    "version": "1.1.0",
+    "publishedAt": 1776853631614,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774870228747,
+      "commit": "https://github.com/openclaw/skills/commit/7646af93ae3652ca1aaddd8e65ed369f10652b9a"
+    }
+  ]
 }
