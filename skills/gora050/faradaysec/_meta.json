@@ -3,11 +3,16 @@
   "slug": "faradaysec",
   "displayName": "Faradaysec",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169258729,
-    "commit": "https://github.com/openclaw/skills/commit/26de1fda0e611523469fa795179079ccb3de64f3"
+    "version": "1.0.3",
+    "publishedAt": 1776863895336,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169258729,
+      "commit": "https://github.com/openclaw/skills/commit/26de1fda0e611523469fa795179079ccb3de64f3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774789443585,
