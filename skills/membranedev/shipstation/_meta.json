@@ -3,11 +3,16 @@
   "slug": "shipstation",
   "displayName": "Shipstation",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168656368,
-    "commit": "https://github.com/openclaw/skills/commit/c14318411f4bf83d9be55db05e6d3d87e046aa7f"
+    "version": "1.0.3",
+    "publishedAt": 1776853138104,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168656368,
+      "commit": "https://github.com/openclaw/skills/commit/c14318411f4bf83d9be55db05e6d3d87e046aa7f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774674161184,
