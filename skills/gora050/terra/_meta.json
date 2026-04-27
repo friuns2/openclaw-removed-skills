@@ -3,11 +3,16 @@
   "slug": "terra",
   "displayName": "Terra",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168913928,
-    "commit": "https://github.com/openclaw/skills/commit/aa6ef060d87358bc152d88345bffc0e81a4e2ba3"
+    "version": "1.0.3",
+    "publishedAt": 1776863584846,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168913928,
+      "commit": "https://github.com/openclaw/skills/commit/aa6ef060d87358bc152d88345bffc0e81a4e2ba3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774731929160,
