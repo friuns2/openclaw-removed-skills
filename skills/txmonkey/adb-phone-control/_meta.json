@@ -1,0 +1,11 @@
+{
+  "owner": "txmonkey",
+  "slug": "adb-phone-control",
+  "displayName": "adb-phone-control",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775045365492,
+    "commit": null
+  },
+  "history": []
+}
