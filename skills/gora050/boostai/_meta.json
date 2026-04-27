@@ -3,11 +3,16 @@
   "slug": "boostai",
   "displayName": "Boostai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170605288,
-    "commit": "https://github.com/openclaw/skills/commit/71528b8b7e089069769302104f52b0baa746d144"
+    "version": "1.0.3",
+    "publishedAt": 1776865896522,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170605288,
+      "commit": "https://github.com/openclaw/skills/commit/71528b8b7e089069769302104f52b0baa746d144"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775048770968,
