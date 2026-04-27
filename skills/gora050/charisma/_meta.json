@@ -3,9 +3,15 @@
   "slug": "charisma",
   "displayName": "Charisma",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168863996,
-    "commit": "https://github.com/openclaw/skills/commit/4023c427d5efea634563e81c3e9dfc8aab0ef2b4"
+    "version": "1.0.3",
+    "publishedAt": 1776864568472,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168863996,
+      "commit": "https://github.com/openclaw/skills/commit/4023c427d5efea634563e81c3e9dfc8aab0ef2b4"
+    }
+  ]
 }
