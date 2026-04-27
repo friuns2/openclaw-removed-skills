@@ -3,11 +3,16 @@
   "slug": "testrail",
   "displayName": "Testrail",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170038079,
-    "commit": "https://github.com/openclaw/skills/commit/01fd02944cb891df8b809cf0a52ea9b628de3e3c"
+    "version": "1.0.3",
+    "publishedAt": 1776885623187,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170038079,
+      "commit": "https://github.com/openclaw/skills/commit/01fd02944cb891df8b809cf0a52ea9b628de3e3c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774944287669,
