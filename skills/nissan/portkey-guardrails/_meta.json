@@ -1,0 +1,11 @@
+{
+  "owner": "nissan",
+  "slug": "portkey-guardrails",
+  "displayName": "Portkey Guardrails",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775179120098,
+    "commit": null
+  },
+  "history": []
+}
