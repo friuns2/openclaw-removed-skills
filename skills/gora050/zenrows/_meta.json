@@ -3,11 +3,16 @@
   "slug": "zenrows",
   "displayName": "Zenrows",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169761861,
-    "commit": "https://github.com/openclaw/skills/commit/a41b479b40267cc2c9b59f550b43a3f6bd915536"
+    "version": "1.0.3",
+    "publishedAt": 1776865837316,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169761861,
+      "commit": "https://github.com/openclaw/skills/commit/a41b479b40267cc2c9b59f550b43a3f6bd915536"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774898703722,
