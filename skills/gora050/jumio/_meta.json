@@ -3,11 +3,16 @@
   "slug": "jumio",
   "displayName": "Jumio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168847181,
-    "commit": "https://github.com/openclaw/skills/commit/8f2e6d24335bd37c6f168762b3a5076d6581609a"
+    "version": "1.0.3",
+    "publishedAt": 1776863461436,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168847181,
+      "commit": "https://github.com/openclaw/skills/commit/8f2e6d24335bd37c6f168762b3a5076d6581609a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774703107504,
