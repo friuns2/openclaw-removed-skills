@@ -3,11 +3,16 @@
   "slug": "quipu",
   "displayName": "Quipu",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170666673,
-    "commit": "https://github.com/openclaw/skills/commit/fd7435fd77e22f2b4126c943e92dc8e93441cd36"
+    "version": "1.0.3",
+    "publishedAt": 1776866004938,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170666673,
+      "commit": "https://github.com/openclaw/skills/commit/fd7435fd77e22f2b4126c943e92dc8e93441cd36"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775088270938,
