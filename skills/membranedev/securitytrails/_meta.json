@@ -3,9 +3,15 @@
   "slug": "securitytrails",
   "displayName": "Securitytrails",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286276522,
-    "commit": "https://github.com/openclaw/skills/commit/e17200c7c0ceaa10c93806e70a752704557600bf"
+    "version": "1.0.1",
+    "publishedAt": 1776882853397,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286276522,
+      "commit": "https://github.com/openclaw/skills/commit/e17200c7c0ceaa10c93806e70a752704557600bf"
+    }
+  ]
 }
