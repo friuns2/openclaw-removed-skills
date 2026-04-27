@@ -3,11 +3,16 @@
   "slug": "edrone",
   "displayName": "Edrone",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169661186,
-    "commit": "https://github.com/openclaw/skills/commit/d1c52bfdac4e0398dba981008c0362f20cfe7496"
+    "version": "1.0.3",
+    "publishedAt": 1776864559801,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169661186,
+      "commit": "https://github.com/openclaw/skills/commit/d1c52bfdac4e0398dba981008c0362f20cfe7496"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774865073168,
