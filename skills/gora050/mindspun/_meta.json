@@ -3,11 +3,16 @@
   "slug": "mindspun",
   "displayName": "Mindspun",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167809099,
-    "commit": "https://github.com/openclaw/skills/commit/7d6ce5f1617580adcc5d1328a94db0805af09b89"
+    "version": "1.0.3",
+    "publishedAt": 1776864885741,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167809099,
+      "commit": "https://github.com/openclaw/skills/commit/7d6ce5f1617580adcc5d1328a94db0805af09b89"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774512188987,
