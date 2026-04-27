@@ -3,9 +3,15 @@
   "slug": "growth-book",
   "displayName": "Growth Book",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775171024020,
-    "commit": "https://github.com/openclaw/skills/commit/54b2dac8d4ca753c1df5d4a994d1f0510a863694"
+    "version": "1.0.1",
+    "publishedAt": 1776870305209,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775171024020,
+      "commit": "https://github.com/openclaw/skills/commit/54b2dac8d4ca753c1df5d4a994d1f0510a863694"
+    }
+  ]
 }
