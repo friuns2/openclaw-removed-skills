@@ -3,11 +3,16 @@
   "slug": "code-cog",
   "displayName": "Code Cog",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776187909013,
-    "commit": "https://github.com/openclaw/skills/commit/4b18e6f15de51cac10d5e527394fc1ab1f0c86e9"
+    "version": "1.0.10",
+    "publishedAt": 1776925116013,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776187909013,
+      "commit": "https://github.com/openclaw/skills/commit/4b18e6f15de51cac10d5e527394fc1ab1f0c86e9"
+    },
     {
       "version": "1.0.8",
       "publishedAt": 1776042025534,
