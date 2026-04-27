@@ -3,11 +3,16 @@
   "slug": "referralhero",
   "displayName": "Referralhero",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168018906,
-    "commit": "https://github.com/openclaw/skills/commit/08ff59fefeea2d48f73a462c67818c4ccedb97db"
+    "version": "1.0.3",
+    "publishedAt": 1776861940031,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168018906,
+      "commit": "https://github.com/openclaw/skills/commit/08ff59fefeea2d48f73a462c67818c4ccedb97db"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774559097480,
