@@ -3,9 +3,15 @@
   "slug": "daily-fitness",
   "displayName": "Daily Fitness",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775108947953,
-    "commit": "https://github.com/openclaw/skills/commit/c37a8161d6c6f1caa71d2ddc4b1535c360b3df9c"
+    "version": "1.0.1",
+    "publishedAt": 1777286810264,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775108947953,
+      "commit": "https://github.com/openclaw/skills/commit/c37a8161d6c6f1caa71d2ddc4b1535c360b3df9c"
+    }
+  ]
 }

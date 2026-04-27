@@ -1,6 +1,6 @@
 ---
 name: daily-fitness
-description: "每天推荐一套5-15分钟快速运动方案，含动作示意和计时器，无需器材。Daily 5-15 min no-equipment workout with interactive timer. Trigger on：今日运动、每日锻炼、今天练什么、daily fitness、daily workout、quick workout、健身、拉伸、office workout。"
+description: "Daily no-equipment workout — 5–15 min bodyweight routines (HIIT, yoga, core, mobility) with instructions and streak tracking. Works at home, office, or travel."
 keywords:
   - 今日运动
   - 每日锻炼
