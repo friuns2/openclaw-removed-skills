@@ -15,7 +15,7 @@ Generated from JustOneAPI OpenAPI for platform key `amazon`.
 | Name | In | Required | Type | Default | Description |
 | --- | --- | --- | --- | --- | --- |
 | `token` | `query` | yes | `string` | n/a | Authentication token for this API service. |
-| `category` | `query` | yes | `string` | n/a | Best sellers category to return products for (e.g. 'software' or 'software/229535'). |
+| `category` | `query` | yes | `string` | n/a | Best sellers category to return products for (e.g. 'baby-products' or 'baby-products/166777011'). The value is derived from the URL path of the Amazon Best Sellers page, such as: https://www.amazon.com/Best-Sellers-Baby-Baby-Toddler-Feeding-Supplies/zgbs/baby-products/166777011 |
 | `country` | `query` | no | `string` | `US` | Country code for the Amazon product.
 
 Available Values:
@@ -52,7 +52,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getProductsByCategoryV1`
 
@@ -114,9 +114,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getProductDetailV1`
+## `getAmazonProductDetailV1`
 
 - Method: `GET`
 - Path: `/api/amazon/get-product-detail/v1`
@@ -165,7 +165,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getProductTopReviewsV1`
 
@@ -216,4 +216,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

@@ -26,7 +26,7 @@ const manifest = {
         },
         {
           "defaultValue": null,
-          "description": "Best sellers category to return products for (e.g. 'software' or 'software/229535').",
+          "description": "Best sellers category to return products for (e.g. 'baby-products' or 'baby-products/166777011'). The value is derived from the URL path of the Amazon Best Sellers page, such as: https://www.amazon.com/Best-Sellers-Baby-Baby-Toddler-Feeding-Supplies/zgbs/baby-products/166777011",
           "enumValues": [],
           "location": "query",
           "name": "category",
@@ -81,8 +81,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Best Sellers",
@@ -177,8 +177,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Products By Category",
@@ -189,7 +189,7 @@ const manifest = {
     {
       "description": "Get Amazon product Details data, including title, brand, and price, for building product catalogs and enriching item content (e.g., images), price monitoring and availability tracking, and e-commerce analytics and competitor tracking.",
       "method": "GET",
-      "operationId": "getProductDetailV1",
+      "operationId": "getAmazonProductDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -248,8 +248,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Details",
@@ -319,8 +319,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Top Reviews",

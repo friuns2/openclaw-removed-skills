@@ -3,11 +3,16 @@
   "slug": "justoneapi-amazon",
   "displayName": "Amazon API",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776239940520,
-    "commit": "https://github.com/openclaw/skills/commit/6d3e74c8ea15c37769b21ada2d4fbaf11be85d95"
+    "version": "1.0.10",
+    "publishedAt": 1776924411260,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776239940520,
+      "commit": "https://github.com/openclaw/skills/commit/6d3e74c8ea15c37769b21ada2d4fbaf11be85d95"
+    },
     {
       "version": "1.0.7",
       "publishedAt": 1775375294542,
