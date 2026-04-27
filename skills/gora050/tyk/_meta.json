@@ -3,11 +3,16 @@
   "slug": "tyk",
   "displayName": "Tyk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168556642,
-    "commit": "https://github.com/openclaw/skills/commit/9566fa6e7b0a0889ea4009eb93fadcc9b0b87d5a"
+    "version": "1.0.3",
+    "publishedAt": 1776870590625,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168556642,
+      "commit": "https://github.com/openclaw/skills/commit/9566fa6e7b0a0889ea4009eb93fadcc9b0b87d5a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774663386931,
