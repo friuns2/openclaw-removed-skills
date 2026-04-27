@@ -3,11 +3,16 @@
   "slug": "fireeye",
   "displayName": "Fireeye",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169542731,
-    "commit": "https://github.com/openclaw/skills/commit/6cd9bfca3be409de88325669fd9265d773b2b85a"
+    "version": "1.0.3",
+    "publishedAt": 1776864419783,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169542731,
+      "commit": "https://github.com/openclaw/skills/commit/6cd9bfca3be409de88325669fd9265d773b2b85a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774847074457,
