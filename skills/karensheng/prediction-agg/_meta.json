@@ -1,0 +1,11 @@
+{
+  "owner": "karensheng",
+  "slug": "prediction-agg",
+  "displayName": "Prediction Market Data Aggregator",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775098032697,
+    "commit": null
+  },
+  "history": []
+}
