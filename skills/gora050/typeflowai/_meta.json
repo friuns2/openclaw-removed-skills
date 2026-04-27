@@ -3,9 +3,15 @@
   "slug": "typeflowai",
   "displayName": "Typeflowai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168851757,
-    "commit": "https://github.com/openclaw/skills/commit/098c71e3343085bc6f8e0b179bf71d1604661da3"
+    "version": "1.0.3",
+    "publishedAt": 1776864505883,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168851757,
+      "commit": "https://github.com/openclaw/skills/commit/098c71e3343085bc6f8e0b179bf71d1604661da3"
+    }
+  ]
 }
