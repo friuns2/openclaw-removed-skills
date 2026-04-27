@@ -3,11 +3,16 @@
   "slug": "eci-software-solutions",
   "displayName": "Eci Software Solutions",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167702566,
-    "commit": "https://github.com/openclaw/skills/commit/6208a853f281aa5a0940a50f9bcfec06724d166e"
+    "version": "1.0.3",
+    "publishedAt": 1776865143549,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167702566,
+      "commit": "https://github.com/openclaw/skills/commit/6208a853f281aa5a0940a50f9bcfec06724d166e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774494225348,
