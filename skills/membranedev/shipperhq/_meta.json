@@ -3,11 +3,16 @@
   "slug": "shipperhq",
   "displayName": "Shipperhq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170434877,
-    "commit": "https://github.com/openclaw/skills/commit/d359f0f49da5be94ef3cb95e1aeaeab255ea5151"
+    "version": "1.0.3",
+    "publishedAt": 1776857298622,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170434877,
+      "commit": "https://github.com/openclaw/skills/commit/d359f0f49da5be94ef3cb95e1aeaeab255ea5151"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775023363329,
