@@ -3,11 +3,16 @@
   "slug": "red-sift",
   "displayName": "Red Sift",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169884769,
-    "commit": "https://github.com/openclaw/skills/commit/ba3407260a7d46dec60f6e8be303777d8b384595"
+    "version": "1.0.3",
+    "publishedAt": 1776892902006,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169884769,
+      "commit": "https://github.com/openclaw/skills/commit/ba3407260a7d46dec60f6e8be303777d8b384595"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774922667879,
