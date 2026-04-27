@@ -3,11 +3,16 @@
   "slug": "curity",
   "displayName": "Curity",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169997818,
-    "commit": "https://github.com/openclaw/skills/commit/172a3adff10c01d3c76b7e9386738edcecb4c2b0"
+    "version": "1.0.3",
+    "publishedAt": 1776856321471,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169997818,
+      "commit": "https://github.com/openclaw/skills/commit/172a3adff10c01d3c76b7e9386738edcecb4c2b0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774936964151,
