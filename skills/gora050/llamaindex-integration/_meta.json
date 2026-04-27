@@ -3,11 +3,16 @@
   "slug": "llamaindex-integration",
   "displayName": "Llamaindex",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168405947,
-    "commit": "https://github.com/openclaw/skills/commit/ec8defb4dc8796a920f75d6443eb5d5635fad878"
+    "version": "1.0.3",
+    "publishedAt": 1776863970972,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168405947,
+      "commit": "https://github.com/openclaw/skills/commit/ec8defb4dc8796a920f75d6443eb5d5635fad878"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774639383943,
