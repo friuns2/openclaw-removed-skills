@@ -3,11 +3,16 @@
   "slug": "planso-forms",
   "displayName": "Planso Forms",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168181610,
-    "commit": "https://github.com/openclaw/skills/commit/a9f64b6b862ac26f815129d818dfad1e04aa382c"
+    "version": "1.0.3",
+    "publishedAt": 1776862135807,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168181610,
+      "commit": "https://github.com/openclaw/skills/commit/a9f64b6b862ac26f815129d818dfad1e04aa382c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580677433,
