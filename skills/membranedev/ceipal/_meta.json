@@ -3,9 +3,15 @@
   "slug": "ceipal",
   "displayName": "Ceipal",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775232273151,
-    "commit": "https://github.com/openclaw/skills/commit/1b286ac19c235b7ccf49ecdcec9313b46d3c49d6"
+    "version": "1.0.1",
+    "publishedAt": 1776882098997,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775232273151,
+      "commit": "https://github.com/openclaw/skills/commit/1b286ac19c235b7ccf49ecdcec9313b46d3c49d6"
+    }
+  ]
 }
