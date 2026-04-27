@@ -3,11 +3,16 @@
   "slug": "contractbook",
   "displayName": "Contractbook",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169774654,
-    "commit": "https://github.com/openclaw/skills/commit/a08109f8d87d8ca829859c1969ca393b5385957b"
+    "version": "1.0.3",
+    "publishedAt": 1776864805410,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169774654,
+      "commit": "https://github.com/openclaw/skills/commit/a08109f8d87d8ca829859c1969ca393b5385957b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774904696779,
