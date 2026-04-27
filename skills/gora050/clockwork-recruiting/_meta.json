@@ -3,11 +3,16 @@
   "slug": "clockwork-recruiting",
   "displayName": "Clockwork Recruiting",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169678385,
-    "commit": "https://github.com/openclaw/skills/commit/d1f3eddbdc97c252d94167b84fcc373e6328c1d3"
+    "version": "1.0.3",
+    "publishedAt": 1776864667156,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169678385,
+      "commit": "https://github.com/openclaw/skills/commit/d1f3eddbdc97c252d94167b84fcc373e6328c1d3"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775169676531,
