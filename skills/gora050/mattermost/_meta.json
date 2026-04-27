@@ -3,11 +3,16 @@
   "slug": "mattermost",
   "displayName": "Mattermost",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167872072,
-    "commit": "https://github.com/openclaw/skills/commit/37284b932a08c499bce88200af6f4ca9d5aecc0a"
+    "version": "1.0.3",
+    "publishedAt": 1776861780322,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167872072,
+      "commit": "https://github.com/openclaw/skills/commit/37284b932a08c499bce88200af6f4ca9d5aecc0a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774519410277,
