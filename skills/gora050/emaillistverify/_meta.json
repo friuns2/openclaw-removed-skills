@@ -3,11 +3,16 @@
   "slug": "emaillistverify",
   "displayName": "Emaillistverify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168517875,
-    "commit": "https://github.com/openclaw/skills/commit/9c199b48a36f84b800d12351cc890d681c2f5972"
+    "version": "1.0.3",
+    "publishedAt": 1776862711333,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168517875,
+      "commit": "https://github.com/openclaw/skills/commit/9c199b48a36f84b800d12351cc890d681c2f5972"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652688167,
