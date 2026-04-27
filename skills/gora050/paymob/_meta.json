@@ -3,11 +3,16 @@
   "slug": "paymob",
   "displayName": "Paymob",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168290196,
-    "commit": "https://github.com/openclaw/skills/commit/377fa5a244add15b8070406ebb9461f493fca40c"
+    "version": "1.0.3",
+    "publishedAt": 1776865617389,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168290196,
+      "commit": "https://github.com/openclaw/skills/commit/377fa5a244add15b8070406ebb9461f493fca40c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774598640586,
