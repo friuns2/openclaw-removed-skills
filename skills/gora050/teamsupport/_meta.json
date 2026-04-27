@@ -3,11 +3,16 @@
   "slug": "teamsupport",
   "displayName": "Teamsupport",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169504740,
-    "commit": "https://github.com/openclaw/skills/commit/b55e53b1539ea351d4f62afee6c8e962fe2095eb"
+    "version": "1.0.3",
+    "publishedAt": 1776864403503,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169504740,
+      "commit": "https://github.com/openclaw/skills/commit/b55e53b1539ea351d4f62afee6c8e962fe2095eb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774839919045,
