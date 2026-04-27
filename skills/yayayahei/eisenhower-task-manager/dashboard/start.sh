@@ -45,4 +45,57 @@ else
 fi
 
 cd "$SCRIPT_DIR"
-node server.js "$@"
+
+# Check for --daemon flag
+DAEMON_MODE=false
+for arg in "$@"; do
+    if [ "$arg" = "--daemon" ]; then
+        DAEMON_MODE=true
+        break
+    fi
+done
+
+# Remove --daemon from args if present
+ARGS=()
+for arg in "$@"; do
+    if [ "$arg" != "--daemon" ]; then
+        ARGS+=("$arg")
+    fi
+done
+
+if [ "$DAEMON_MODE" = true ]; then
+    # Daemon mode: run in background with nohup
+    LOG_FILE="$SCRIPT_DIR/dashboard.log"
+    PID_FILE="$SCRIPT_DIR/dashboard.pid"
+    
+    # Check if already running
+    if [ -f "$PID_FILE" ]; then
+        OLD_PID=$(cat "$PID_FILE")
+        if kill -0 "$OLD_PID" 2>/dev/null; then
+            echo "[Dashboard] Already running (PID: $OLD_PID)"
+            echo "[Dashboard] Visit: http://localhost:$SAVED_PORT"
+            exit 0
+        fi
+    fi
+    
+    echo "[Dashboard] Starting in daemon mode..."
+    echo "[Dashboard] Log file: $LOG_FILE"
+    nohup node server.js "${ARGS[@]}" > "$LOG_FILE" 2>&1 &
+    PID=$!
+    echo $PID > "$PID_FILE"
+    
+    # Wait a moment to check if it started successfully
+    sleep 2
+    if kill -0 $PID 2>/dev/null; then
+        echo "[Dashboard] Started successfully (PID: $PID)"
+        echo "[Dashboard] Visit: http://localhost:$SAVED_PORT"
+        echo "[Dashboard] Stop with: kill $PID"
+    else
+        echo "[Dashboard] Failed to start. Check log: $LOG_FILE"
+        rm -f "$PID_FILE"
+        exit 1
+    fi
+else
+    # Interactive mode: run in foreground
+    node server.js "${ARGS[@]}"
+fi

@@ -264,21 +264,52 @@ If skipped  → Dashboard remains available for manual launch
 
 ### Manual Launch (Anytime)
 
+#### Method 1: Daemon Mode (Recommended for Long-term Use)
+
+Run in background, service continues after terminal closes:
+
 ```bash
 cd dashboard
-./start.sh              # Auto-installs deps on first run, then starts server
+./start.sh --daemon     # Start in background, no terminal dependency
 ```
 
-> **Features**:
-> - **Auto-install**: First run automatically installs npm dependencies
-> - **Port memory**: Remembers your last used port
-> - **Hot reload**: File changes auto-refresh the browser
+**Features**:
+- ✅ Service continues after terminal closes
+- ✅ Auto PID management, prevents duplicate starts
+- ✅ Logs output to `dashboard.log`
+- ✅ Shows access URL and PID after startup
+
+Stop the daemon:
+
+```bash
+./stop.sh               # Gracefully stop the service
+```
+
+#### Method 2: Foreground Mode (For Debugging)
+
+Suitable for development and debugging, service stops when terminal closes:
+
+```bash
+cd dashboard
+./start.sh              # Run in foreground, Ctrl+C to stop
+```
+
+#### Advanced Usage
+
+```bash
+# Specify port (default 8080)
+./start.sh --daemon --port 3000
+
+# Check running status
+curl http://localhost:8080/api/health
+```
 
 ### Architecture
 - Markdown files are the single source of truth
 - Node.js server parses markdown in real-time
 - WebSocket pushes updates to browser when files change
 - No database required - pure markdown-driven
+- Enhanced error handling: global exception capture, port conflict detection
 
 ## Reference Materials
 
@@ -291,11 +322,11 @@ cd dashboard
 | `references/maybe-list-workflow.md` | Step-by-step Maybe List operations |
 | `references/templates.md` | Statistics and report templates |
 | `references/dashboard-offer.md` | Dashboard offer workflow after task operations |
-| `dashboard/` | Real-time web dashboard (run `./start.sh`) |
+| `dashboard/` | Real-time web dashboard (`./start.sh --daemon` for background mode) |
 
 **Critical**: Always read `task-add.md` or `task-complete.md` before performing those operations to ensure full workflow compliance.
 
 ---
 
-*Version: 8.1 (Added task hover tooltip to show full details)*
-*Last Updated: 2026-04-17*
+*Version: 8.2 (Added daemon mode, stop.sh, enhanced error handling)*
+*Last Updated: 2026-04-21*

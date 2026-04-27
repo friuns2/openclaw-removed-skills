@@ -135,9 +135,30 @@ server.listen(port, () => {
   `);
 });
 
+// Handle server startup errors (e.g., port already in use)
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`[Error] Port ${port} is already in use. Please use a different port with: ./start.sh --port <port>`);
+  } else {
+    console.error('[Error] Server error:', err);
+  }
+  process.exit(1);
+});
+
+// Global error handlers to prevent crashes
+process.on('uncaughtException', (err) => {
+  console.error('[Fatal] Uncaught Exception:', err);
+  // Don't exit immediately, try to keep running
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Fatal] Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit immediately, try to keep running
+});
+
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n[Server] Shutting down...');
+  console.log('\n[Server] SIGINT received, shutting down gracefully...');
   watcher.close();
   wss.close();
   server.close(() => {
@@ -147,7 +168,7 @@ process.on('SIGINT', () => {
 });
 
 process.on('SIGTERM', () => {
-  console.log('\n[Server] Shutting down...');
+  console.log('\n[Server] SIGTERM received, shutting down gracefully...');
   watcher.close();
   wss.close();
   server.close(() => {
