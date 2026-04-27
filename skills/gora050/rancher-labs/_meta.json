@@ -3,11 +3,16 @@
   "slug": "rancher-labs",
   "displayName": "Rancher Labs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169962877,
-    "commit": "https://github.com/openclaw/skills/commit/bb06836d34bc5af9ed3263bffb6c49c9fd52b9d4"
+    "version": "1.0.3",
+    "publishedAt": 1776865036973,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169962877,
+      "commit": "https://github.com/openclaw/skills/commit/bb06836d34bc5af9ed3263bffb6c49c9fd52b9d4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774933487034,
