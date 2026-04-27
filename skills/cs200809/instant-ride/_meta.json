@@ -1,0 +1,11 @@
+{
+  "owner": "cs200809",
+  "slug": "instant-ride",
+  "displayName": "即时用车",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1774925811801,
+    "commit": null
+  },
+  "history": []
+}
