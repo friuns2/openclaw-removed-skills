@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "nio",
-  "displayName": "nio",
+  "displayName": "Nio",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774865305348,
-    "commit": "https://github.com/openclaw/skills/commit/701f89f0b9f8f86477e9f38bdb6bc21e254722af"
+    "version": "0.1.3",
+    "publishedAt": 1776533875813,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774865305348,
+      "commit": "https://github.com/openclaw/skills/commit/701f89f0b9f8f86477e9f38bdb6bc21e254722af"
+    }
+  ]
 }

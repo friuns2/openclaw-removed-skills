@@ -1,56 +1,47 @@
 ---
-name: nio
-description: "Information assistant for 蔚来 NIO. Search products, news, financials, and official resources for 蔚来 NIO."
-metadata:
-  { "openclaw": { "emoji": "🏢", "version": "0.1.0", "author": "hanxueyuan", "tags": ["brand","nio","enterprise-info"] } }
+summary: "蔚来 NIO——中国高端电动车品牌、换电模式先行者、用户社区运营标杆"
+read_when:
+  - 查询蔚来 · NIO相关信息
+  - 了解相关行业发展
 ---
 
-# 蔚来 NIO — Information Assistant
+# 蔚来 · NIO
 
-Query products, news, stock prices, financial reports, and official resources for **蔚来 NIO**.
+---
 
-## About
+## 发展历程
 
-- **Company**: 蔚来 NIO
-- **Industry**: Premium electric vehicles
-- **Official Website**: https://www.nio.com
+| 时期 | 关键事件 |
+|:----:|--------|
+| **2014 年** | 李斌在上海创立蔚来 |
+| **2016 年** | 发布 EP9——刷新纽北圈速记录的电动超跑 |
+| **2018 年** | 纽交所上市 |
+| **2019 年** | 推出换电模式——3 分钟完成电池更换 |
+| **2023 年** | 发布手机 + 芯片自研计划——生态扩展 |
+| **2024 年** | 与长安/吉利/奇瑞达成换电合作 |
 
-## What This Skill Does
+---
 
-When activated, this skill helps you:
+## 核心特点
 
-1. **Product Search** — Find and compare 蔚来 NIO products, pricing, and availability
-2. **News & Updates** — Get the latest news, press releases, and announcements
-3. **Financial Info** — Stock price, market cap, earnings reports (for public companies)
-4. **Official Resources** — Direct links to official websites, support pages, and documentation
-5. **Competitor Comparison** — Compare with competitors in the same industry
+高端电动车（ET7/ET5/ES6/EC7 等）+ 换电网络 + 用户社区（NIO House/Life）
 
-## Usage Examples
+## 核心优势
 
-- "What are the latest 蔚来 NIO products?"
-- "Show me 蔚来 NIO stock price"
-- "Compare 蔚来 NIO with competitors"
-- "Find 蔚来 NIO official support page"
-- "What's new at 蔚来 NIO?"
+换电模式全球独有 + 用户社区运营（NIO Day 等）+ 高端品牌定位
 
-## How It Works
+---
 
-This skill uses web search to fetch real-time information about 蔚来 NIO from:
-- Official website: https://www.nio.com
-- Financial data providers
-- News aggregators
-- Product databases
+## 关键数据
 
-## Instructions for Agent
+| 指标 | 数值 |
+|------|------|
+| 年交付 | 约 16 万辆 |
+| 换电站 | 超过 2400 座 |
+| 员工数 | 约 27000 人 |
 
-When this skill is triggered:
-1. Identify the user's specific query about 蔚来 NIO
-2. Use web search tools to find current information
-3. Prioritize official sources (https://www.nio.com)
-4. Present results in a structured, easy-to-read format
-5. Include direct links to sources
+---
 
-## Author
+## 值得了解
 
-Created by hanxueyuan | Part of the Agent Commerce ecosystem
-License: MIT
+蔚来车主自发在公司美股暴跌时自掏腰包打广告——被称为'蔚来饭圈'
