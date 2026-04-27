@@ -3,11 +3,16 @@
   "slug": "mapulus",
   "displayName": "Mapulus",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168080388,
-    "commit": "https://github.com/openclaw/skills/commit/c49d12262464f9b1ff96b0bd5ca3482ea124a342"
+    "version": "1.0.3",
+    "publishedAt": 1776862030400,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168080388,
+      "commit": "https://github.com/openclaw/skills/commit/c49d12262464f9b1ff96b0bd5ca3482ea124a342"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774566286548,
