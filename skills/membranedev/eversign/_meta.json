@@ -3,11 +3,16 @@
   "slug": "eversign",
   "displayName": "Eversign",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168156839,
-    "commit": "https://github.com/openclaw/skills/commit/b4addaa827c59541f9c4f64d7de4b215d7ce4a78"
+    "version": "1.0.3",
+    "publishedAt": 1776852060691,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168156839,
+      "commit": "https://github.com/openclaw/skills/commit/b4addaa827c59541f9c4f64d7de4b215d7ce4a78"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580575173,
