@@ -3,11 +3,16 @@
   "slug": "big-cartel",
   "displayName": "Big Cartel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168755914,
-    "commit": "https://github.com/openclaw/skills/commit/9de042d1e2ee70ac46723dce76947772a145694a"
+    "version": "1.0.3",
+    "publishedAt": 1776863136980,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168755914,
+      "commit": "https://github.com/openclaw/skills/commit/9de042d1e2ee70ac46723dce76947772a145694a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774688636860,
