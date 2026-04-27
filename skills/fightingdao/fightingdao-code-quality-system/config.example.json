@@ -1,0 +1,19 @@
+{
+  "codebaseDir": "/path/to/your/codebase",
+  "teamId": "your-team-id",
+  "apiBaseUrl": "http://localhost:3000/api/v1",
+  "teams": {
+    "webhookUrl": "https://your-teams-server.com/api/robot/send?access_token=xxxxxxxxx",
+    "secret": "your-teams-secret",
+    "botName": "质检君"
+  },
+  "smtp": {
+    "host": "smtp.example.com",
+    "port": 465,
+    "secure": true,
+    "user": "your-email@example.com",
+    "pass": "your-email-password-or-auth-code",
+    "fromName": "代码质量分析助手"
+  },
+  "emailRecipients": ["recipient1@example.com", "recipient2@example.com"]
+}
