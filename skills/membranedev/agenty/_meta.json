@@ -3,11 +3,16 @@
   "slug": "agenty",
   "displayName": "Agenty",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168546076,
-    "commit": "https://github.com/openclaw/skills/commit/005640e22b6a3ea18f6651cb0e42389c262febd2"
+    "version": "1.0.3",
+    "publishedAt": 1776852837766,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168546076,
+      "commit": "https://github.com/openclaw/skills/commit/005640e22b6a3ea18f6651cb0e42389c262febd2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774656167047,
