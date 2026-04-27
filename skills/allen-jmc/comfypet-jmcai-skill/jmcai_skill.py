@@ -6,28 +6,169 @@ import base64
 import json
 import mimetypes
 import os
+import socket
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
 
-VERSION = "1.1.0"
+VERSION = "1.2.5"
+DESKTOP_APP_URL = "https://github.com/allen-Jmc/comfypet-jmcai-Dist"
 DEFAULT_CONFIG = {
     "bridge_url": "http://127.0.0.1:32100",
     "request_timeout_ms": 15000,
-    "min_bridge_version": "1.1.0",
+    "upload_timeout_ms": 60000,
+    "download_timeout_ms": 120000,
+    "network_retry_count": 1,
+    "retry_backoff_ms": 1500,
+    "min_bridge_version": "1.2.0",
 }
-SKILL_ROOT = Path(__file__).resolve().parent.parent
+IMAGE_UPLOAD_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
+VIDEO_UPLOAD_EXTENSIONS = {".mp4", ".mov", ".avi", ".gif", ".webm", ".mkv"}
+AUDIO_UPLOAD_EXTENSIONS = {".wav", ".mp3", ".ogg", ".flac", ".m4a", ".aac"}
+# Generic file uploads stay intentionally narrow so the skill does not become a
+# broad exfiltration primitive for arbitrary local configs or secrets.
+FILE_UPLOAD_EXTENSIONS = (
+    IMAGE_UPLOAD_EXTENSIONS
+    | VIDEO_UPLOAD_EXTENSIONS
+    | AUDIO_UPLOAD_EXTENSIONS
+    | {".txt", ".csv", ".tsv", ".pdf", ".srt", ".vtt", ".ass"}
+)
+ASSET_FIELD_UPLOAD_EXTENSIONS = {
+    "image": IMAGE_UPLOAD_EXTENSIONS,
+    "mask": IMAGE_UPLOAD_EXTENSIONS,
+    "video": VIDEO_UPLOAD_EXTENSIONS,
+    "audio": AUDIO_UPLOAD_EXTENSIONS,
+    "file": FILE_UPLOAD_EXTENSIONS,
+}
+
+# 智能路径寻址：确保加载 config.json 或资源文件时使用绝对路径
+SKILL_ROOT = Path(__file__).resolve().parent
 LOOPBACK_BRIDGE_HOSTS = {"127.0.0.1", "localhost", "::1"}
+CONFIG_WARNINGS_KEY = "__config_warnings__"
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
+class RequestFailure(Exception):
+    def __init__(
+        self,
+        message: str,
+        payload: Any,
+        *,
+        kind: str = "request",
+        retryable: bool = False,
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.payload = payload
+        self.kind = kind
+        self.retryable = retryable
+
+# ==========================================
+# Dual-Mode: Registry 暴露与解耦配置加载
+# ==========================================
+
+def load_config(explicit_path: str | None = None) -> dict[str, Any]:
+    """解耦配置加载逻辑，支持无参调用（默认搜寻 SKILL_ROOT）"""
+    config_path = Path(explicit_path).resolve() if explicit_path else SKILL_ROOT / "config.json"
+    if config_path.exists():
+        return load_config_file(config_path)
+
+    example_path = SKILL_ROOT / "config.example.json"
+    if example_path.exists():
+        return load_config_file(example_path)
+
+    return normalize_config_payload({})
+
+
+def load_config_file(config_path: str | Path) -> dict[str, Any]:
+    path = Path(config_path).resolve()
+    with path.open("r", encoding="utf-8") as handle:
+        loaded = json.load(handle)
+    if not isinstance(loaded, dict):
+        raise ValueError(f"Config JSON must be an object: {path}")
+    return normalize_config_payload(loaded)
+
+
+def normalize_config_payload(loaded: dict[str, Any]) -> dict[str, Any]:
+    normalized = {**DEFAULT_CONFIG, **loaded}
+    min_bridge_version, config_warnings = resolve_min_bridge_version_config(loaded.get("min_bridge_version"))
+    normalized["min_bridge_version"] = min_bridge_version
+    normalized[CONFIG_WARNINGS_KEY] = config_warnings
+    return normalized
+
+
+def write_normalized_config_file(config_path: str | Path) -> dict[str, Any]:
+    path = Path(config_path).resolve()
+    if path.exists():
+        with path.open("r", encoding="utf-8") as handle:
+            loaded = json.load(handle)
+        if not isinstance(loaded, dict):
+            raise ValueError(f"Config JSON must be an object: {path}")
+    else:
+        loaded = {}
+
+    normalized = normalize_config_payload(loaded)
+    serialized = serialize_config_payload(normalized)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        json.dump(serialized, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    return serialized
+
+
+def serialize_config_payload(config: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in config.items() if key != CONFIG_WARNINGS_KEY}
+
+
+def get_config_warnings(config: dict[str, Any]) -> list[str]:
+    value = config.get(CONFIG_WARNINGS_KEY)
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if isinstance(item, str) and item.strip()]
+
+
+def resolve_min_bridge_version_config(raw_value: Any) -> tuple[str, list[str]]:
+    hard_minimum = str(DEFAULT_CONFIG["min_bridge_version"])
+    if raw_value is None:
+        return hard_minimum, []
+
+    configured = str(raw_value).strip()
+    if not configured or not is_numeric_version(configured):
+        return (
+            hard_minimum,
+            [f"Configured min_bridge_version '{configured or raw_value}' is invalid; using hard minimum {hard_minimum} instead."],
+        )
+
+    if compare_versions(configured, hard_minimum) < 0:
+        return (
+            hard_minimum,
+            [
+                f"Configured min_bridge_version '{configured}' is lower than the hard minimum {hard_minimum}; "
+                f"using {hard_minimum} instead."
+            ],
+        )
+
+    return configured, []
+
+def registry() -> dict[str, Any]:
+    """
+    显式暴露的 Registry 入口：
+    供 Agent 框架 (如 OpenClaw) 导入模块时直接调用 `import jmcai_skill; jmcai_skill.registry()` 获取技能元数据。
+    """
+    config = load_config()
+    return registry_command(config, _agent_mode=True)
+
+# ==========================================
+# CLI 入口与路由
+# ==========================================
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="JMCAI Comfypet Skill CLI")
@@ -78,22 +219,9 @@ def main(argv: list[str] | None = None) -> int:
 
     return 1
 
-
-def load_config(explicit_path: str | None) -> dict[str, Any]:
-    config_path = Path(explicit_path).resolve() if explicit_path else SKILL_ROOT / "config.json"
-    if config_path.exists():
-        with config_path.open("r", encoding="utf-8") as handle:
-            loaded = json.load(handle)
-            return {**DEFAULT_CONFIG, **loaded}
-
-    example_path = SKILL_ROOT / "config.example.json"
-    if example_path.exists():
-        with example_path.open("r", encoding="utf-8") as handle:
-            loaded = json.load(handle)
-            return {**DEFAULT_CONFIG, **loaded}
-
-    return dict(DEFAULT_CONFIG)
-
+# ==========================================
+# 核心功能实现
+# ==========================================
 
 def registry_command(config: dict[str, Any], _agent_mode: bool) -> dict[str, Any]:
     health = request_json(config, "GET", "/api/v1/health")
@@ -175,16 +303,19 @@ def history_command(config: dict[str, Any], workflow_id: str, limit: int | None)
 
 def doctor_command(config: dict[str, Any]) -> dict[str, Any]:
     problems: list[str] = []
-    warnings: list[str] = []
+    warnings: list[str] = get_config_warnings(config)
 
     try:
         health = request_json(config, "GET", "/api/v1/health")
     except RequestFailure as error:
+        msg = error.message
+        if is_loopback_bridge(config):
+            msg += f"\n[HINT] JMCAI Desktop App might not be running. Download it at: {DESKTOP_APP_URL}"
         return {
             "status": "error",
             "bridge_url": config["bridge_url"],
-            "problems": [error.message],
-            "warnings": [],
+            "problems": [msg],
+            "warnings": warnings,
         }
 
     bridge_version = str(health.get("bridge_version", "0.0.0"))
@@ -272,6 +403,7 @@ def normalize_workflow(payload: dict[str, Any]) -> dict[str, Any]:
                 "choices": list(field.get("choices", [])),
                 "min": field.get("min"),
                 "max": field.get("max"),
+                "step": field.get("step"),
             }
         )
 
@@ -324,7 +456,7 @@ def normalize_run(payload: dict[str, Any]) -> dict[str, Any]:
                 }
             )
 
-    return {
+    result = {
         "id": payload.get("id", ""),
         "workflow_id": payload.get("workflow_id") or payload.get("workflowId", ""),
         "workflow_name": payload.get("workflow_name") or payload.get("workflowName", ""),
@@ -342,6 +474,12 @@ def normalize_run(payload: dict[str, Any]) -> dict[str, Any]:
         "finished_at": payload.get("finished_at") or payload.get("finishedAt"),
         "duration_ms": payload.get("duration_ms") or payload.get("durationMs"),
     }
+
+    warnings = normalize_warnings(payload.get("warnings"))
+    if warnings:
+        result["warnings"] = warnings
+
+    return result
 
 
 def normalize_legacy_output(path_value: str) -> dict[str, Any]:
@@ -367,8 +505,12 @@ def request_json(
     method: str,
     path: str,
     body: dict[str, Any] | None = None,
+    *,
+    timeout_ms: int | None = None,
+    retry_count: int = 0,
+    retry_backoff_ms: int = 0,
 ) -> dict[str, Any]:
-    url = f"{str(config['bridge_url']).rstrip('/')}{path}"
+    url = build_bridge_url(config, path)
     request_body = None
     headers = {"Accept": "application/json"}
     if body is not None:
@@ -376,43 +518,36 @@ def request_json(
         headers["Content-Type"] = "application/json"
 
     request = urllib.request.Request(url, data=request_body, method=method, headers=headers)
-    timeout_seconds = max(float(config.get("request_timeout_ms", 15000)) / 1000.0, 1.0)
-
-    try:
-        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-            if not isinstance(payload, dict):
-                raise RequestFailure("Bridge returned non-object JSON.", {"payload": payload})
-            return payload
-    except urllib.error.HTTPError as error:
-        try:
-            payload = json.loads(error.read().decode("utf-8"))
-        except Exception:
-            payload = {"message": f"Bridge HTTP {error.code}"}
-        message = payload.get("message") if isinstance(payload, dict) else None
-        raise RequestFailure(str(message or f"Bridge HTTP {error.code}"), payload)
-    except urllib.error.URLError as error:
-        raise RequestFailure(f"Cannot reach Workflow Bridge at {url}: {error.reason}", None)
+    response_bytes, _headers = execute_request(
+        config,
+        request,
+        timeout_ms=timeout_ms or resolve_timeout_ms(config, "request_timeout_ms"),
+        retry_count=retry_count,
+        retry_backoff_ms=retry_backoff_ms,
+    )
+    payload = json.loads(response_bytes.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise RequestFailure("Bridge returned non-object JSON.", {"payload": payload}, kind="invalid_response")
+    return payload
 
 
-def request_bytes(config: dict[str, Any], path: str) -> tuple[bytes, dict[str, str]]:
+def request_bytes(
+    config: dict[str, Any],
+    path: str,
+    *,
+    timeout_ms: int | None = None,
+    retry_count: int = 0,
+    retry_backoff_ms: int = 0,
+) -> tuple[bytes, dict[str, str]]:
     url = build_bridge_url(config, path)
     request = urllib.request.Request(url, method="GET", headers={"Accept": "*/*"})
-    timeout_seconds = max(float(config.get("request_timeout_ms", 15000)) / 1000.0, 1.0)
-
-    try:
-        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-            headers = {key.lower(): value for key, value in response.headers.items()}
-            return response.read(), headers
-    except urllib.error.HTTPError as error:
-        try:
-            payload = json.loads(error.read().decode("utf-8"))
-        except Exception:
-            payload = {"message": f"Bridge HTTP {error.code}"}
-        message = payload.get("message") if isinstance(payload, dict) else None
-        raise RequestFailure(str(message or f"Bridge HTTP {error.code}"), payload)
-    except urllib.error.URLError as error:
-        raise RequestFailure(f"Cannot reach Workflow Bridge at {url}: {error.reason}", None)
+    return execute_request(
+        config,
+        request,
+        timeout_ms=timeout_ms or resolve_timeout_ms(config, "download_timeout_ms"),
+        retry_count=retry_count,
+        retry_backoff_ms=retry_backoff_ms,
+    )
 
 
 def prepare_run_args(
@@ -438,18 +573,20 @@ def prepare_run_args(
         return {"status": "error", "message": f"Workflow '{workflow_id}' not found in bridge registry."}
 
     schema = workflow.get("schema", [])
-    image_aliases = {
-        field.get("alias", "")
+    asset_aliases = {
+        field.get("alias", ""): normalize_asset_field_type(field.get("type"))
         for field in schema
-        if isinstance(field, dict) and field.get("type") == "image" and field.get("alias")
+        if isinstance(field, dict)
+        and field.get("alias")
+        and normalize_asset_field_type(field.get("type")) in ASSET_FIELD_UPLOAD_EXTENSIONS
     }
-    if not image_aliases:
+    if not asset_aliases:
         return {"status": "success", "args": parsed_args}
 
     uploaded_by_path: dict[str, str] = {}
     next_args = dict(parsed_args)
 
-    for alias in image_aliases:
+    for alias, field_type in asset_aliases.items():
         raw_value = next_args.get(alias)
         if not isinstance(raw_value, str):
             continue
@@ -457,10 +594,13 @@ def prepare_run_args(
         if not value or value.startswith("upload:") or not looks_like_absolute_path(value):
             continue
         if not os.path.exists(value):
-            return {"status": "error", "message": f"Image file does not exist on this machine: {value}"}
+            return {
+                "status": "error",
+                "message": f"{describe_asset_field_type(field_type)} does not exist on this machine: {value}",
+            }
         upload_token = uploaded_by_path.get(value)
         if not upload_token:
-            upload_result = upload_local_file(config, value)
+            upload_result = upload_local_file(config, value, field_type=field_type)
             if upload_result.get("status") == "error":
                 return upload_result
             upload_token = f"upload:{upload_result['upload_id']}"
@@ -470,8 +610,23 @@ def prepare_run_args(
     return {"status": "success", "args": next_args}
 
 
-def upload_local_file(config: dict[str, Any], local_path: str) -> dict[str, Any]:
-    file_path = Path(local_path)
+def upload_local_file(config: dict[str, Any], local_path: str, *, field_type: str = "file") -> dict[str, Any]:
+    file_path = Path(local_path).resolve()
+    if not file_path.exists():
+        return {"status": "error", "message": f"Local file does not exist: {local_path}"}
+
+    suffix = file_path.suffix.lower()
+    allowed_extensions = ASSET_FIELD_UPLOAD_EXTENSIONS.get(field_type, FILE_UPLOAD_EXTENSIONS)
+    if suffix not in allowed_extensions:
+        allowed_summary = ", ".join(sorted(allowed_extensions))
+        return {
+            "status": "error",
+            "message": (
+                f"File type '{suffix or '<none>'}' is not allowed for {describe_asset_field_type(field_type)}. "
+                f"Supported extensions: {allowed_summary}"
+            ),
+        }
+
     mime_type = mimetypes.guess_type(file_path.name)[0]
     try:
         content_base64 = base64.b64encode(file_path.read_bytes()).decode("ascii")
@@ -486,9 +641,36 @@ def upload_local_file(config: dict[str, Any], local_path: str) -> dict[str, Any]
         payload["mime_type"] = mime_type
 
     try:
-        response = request_json(config, "POST", "/api/v1/uploads", payload)
+        response = request_json(
+            config,
+            "POST",
+            "/api/v1/uploads",
+            payload,
+            timeout_ms=resolve_timeout_ms(config, "upload_timeout_ms"),
+            retry_count=resolve_retry_count(config),
+            retry_backoff_ms=resolve_retry_backoff_ms(config),
+        )
     except RequestFailure as error:
-        return {"status": "error", "message": error.message, "details": error.payload}
+        details = {
+            "stage": "upload",
+            "file_name": file_path.name,
+            "file_size_bytes": file_path.stat().st_size,
+            "timeout_ms": resolve_timeout_ms(config, "upload_timeout_ms"),
+        }
+        if isinstance(error.payload, dict):
+            details.update(error.payload)
+        if error.kind == "timeout":
+            details["suggestion"] = "Increase upload_timeout_ms when using a remote bridge or large media files, then retry."
+            return {
+                "status": "error",
+                "message": (
+                    f"Timed out while uploading '{file_path.name}' ({details['file_size_bytes']} bytes) "
+                    f"to the remote Workflow Bridge after {details['timeout_ms']} ms. "
+                    "Increase upload_timeout_ms and retry."
+                ),
+                "details": details,
+            }
+        return {"status": "error", "message": error.message, "details": details}
 
     upload_id = response.get("upload_id")
     if not isinstance(upload_id, str) or not upload_id:
@@ -505,24 +687,30 @@ def localize_run_outputs(config: dict[str, Any], run_payload: dict[str, Any]) ->
     if not isinstance(outputs, list):
         return run_payload
 
+    warnings = normalize_warnings(run_payload.get("warnings"))
     localized_outputs = []
     for output in outputs:
         if not isinstance(output, dict):
             localized_outputs.append(output)
             continue
-        localized_outputs.append(localize_output_asset(config, run_payload.get("id", ""), output))
+        localized_output, output_warnings = localize_output_asset(config, run_payload.get("id", ""), output)
+        localized_outputs.append(localized_output)
+        warnings.extend(output_warnings)
 
-    return {
+    result = {
         **run_payload,
         "outputs": localized_outputs,
     }
+    if warnings:
+        result["warnings"] = warnings
+    return result
 
 
-def localize_output_asset(config: dict[str, Any], run_id: str, output: dict[str, Any]) -> dict[str, Any]:
+def localize_output_asset(config: dict[str, Any], run_id: str, output: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
     download_path = output.get("download_path")
     file_name = str(output.get("file_name") or Path(str(output.get("path", ""))).name or "output.bin")
     if not isinstance(download_path, str) or not download_path:
-        return output
+        return output, []
 
     download_dir = Path(tempfile.gettempdir()) / "jmcai-skill-downloads" / str(run_id or "run")
     download_dir.mkdir(parents=True, exist_ok=True)
@@ -530,25 +718,180 @@ def localize_output_asset(config: dict[str, Any], run_id: str, output: dict[str,
 
     if not destination.exists():
         try:
-            content, headers = request_bytes(config, download_path)
+            content, headers = request_bytes(
+                config,
+                download_path,
+                timeout_ms=resolve_timeout_ms(config, "download_timeout_ms"),
+                retry_count=resolve_retry_count(config),
+                retry_backoff_ms=resolve_retry_backoff_ms(config),
+            )
             destination.write_bytes(content)
             mime_type = output.get("mime_type")
             if not mime_type and "content-type" in headers:
                 mime_type = headers["content-type"]
                 output = {**output, "mime_type": mime_type}
-        except RequestFailure:
-            return output
+        except RequestFailure as error:
+            return output, [build_download_warning(config, file_name, error)]
+        except OSError as error:
+            return output, [build_download_write_warning(file_name, error)]
 
     return {
         **output,
         "path": str(destination),
-    }
+    }, []
 
 
 def build_bridge_url(config: dict[str, Any], path: str) -> str:
     if path.startswith("http://") or path.startswith("https://"):
         return path
     return f"{str(config['bridge_url']).rstrip('/')}{path}"
+
+
+def execute_request(
+    config: dict[str, Any],
+    request: urllib.request.Request,
+    *,
+    timeout_ms: int,
+    retry_count: int,
+    retry_backoff_ms: int,
+) -> tuple[bytes, dict[str, str]]:
+    timeout_seconds = max(float(timeout_ms) / 1000.0, 1.0)
+    loopback_bridge = is_loopback_bridge(config)
+
+    for attempt in range(retry_count + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
+                headers = {key.lower(): value for key, value in response.headers.items()}
+                return response.read(), headers
+        except urllib.error.HTTPError as error:
+            raise parse_http_error(error)
+        except urllib.error.URLError as error:
+            failure = build_network_failure(request.full_url, error.reason, timeout_ms, loopback_bridge)
+            if failure.retryable and attempt < retry_count:
+                sleep_before_retry(retry_backoff_ms)
+                continue
+            raise failure
+        except (TimeoutError, socket.timeout, ConnectionResetError, ConnectionAbortedError, BrokenPipeError) as error:
+            failure = build_network_failure(request.full_url, error, timeout_ms, loopback_bridge)
+            if failure.retryable and attempt < retry_count:
+                sleep_before_retry(retry_backoff_ms)
+                continue
+            raise failure
+
+
+def parse_http_error(error: urllib.error.HTTPError) -> RequestFailure:
+    try:
+        payload = json.loads(error.read().decode("utf-8"))
+    except Exception:
+        payload = {"message": f"Bridge HTTP {error.code}"}
+    message = payload.get("message") if isinstance(payload, dict) else None
+    return RequestFailure(str(message or f"Bridge HTTP {error.code}"), payload, kind="http")
+
+
+def build_network_failure(
+    url: str,
+    error: Any,
+    timeout_ms: int,
+    loopback_bridge: bool,
+) -> RequestFailure:
+    is_timeout = is_timeout_error(error)
+    if is_timeout:
+        message = f"Request to Workflow Bridge timed out after {timeout_ms} ms: {url}"
+        kind = "timeout"
+    else:
+        message = f"Cannot reach Workflow Bridge at {url}: {describe_network_error(error)}"
+        kind = "network"
+    if loopback_bridge:
+        message += f" (Is JMCAI Desktop App running? Download: {DESKTOP_APP_URL})"
+    return RequestFailure(message, None, kind=kind, retryable=is_retryable_network_error(error))
+
+
+def is_timeout_error(error: Any) -> bool:
+    if isinstance(error, (TimeoutError, socket.timeout)):
+        return True
+    return "timed out" in describe_network_error(error).lower()
+
+
+def is_retryable_network_error(error: Any) -> bool:
+    if isinstance(error, (TimeoutError, socket.timeout, ConnectionResetError, ConnectionAbortedError, BrokenPipeError)):
+        return True
+    message = describe_network_error(error).lower()
+    retryable_markers = (
+        "timed out",
+        "connection reset",
+        "connection aborted",
+        "broken pipe",
+        "temporarily unavailable",
+        "unreachable",
+    )
+    return any(marker in message for marker in retryable_markers)
+
+
+def describe_network_error(error: Any) -> str:
+    if isinstance(error, urllib.error.URLError):
+        return describe_network_error(error.reason)
+    if error is None:
+        return "unknown network error"
+    return str(error)
+
+
+def sleep_before_retry(retry_backoff_ms: int) -> None:
+    if retry_backoff_ms <= 0:
+        return
+    time.sleep(max(float(retry_backoff_ms) / 1000.0, 0.0))
+
+
+def resolve_timeout_ms(config: dict[str, Any], key: str) -> int:
+    fallback = DEFAULT_CONFIG.get(key, DEFAULT_CONFIG["request_timeout_ms"])
+    raw_value = config.get(key)
+    if raw_value is None:
+        raw_value = fallback
+    try:
+        return max(int(float(raw_value)), 1000)
+    except (TypeError, ValueError):
+        return max(int(fallback), 1000)
+
+
+def resolve_retry_count(config: dict[str, Any]) -> int:
+    raw_value = config.get("network_retry_count", DEFAULT_CONFIG["network_retry_count"])
+    try:
+        return max(int(raw_value), 0)
+    except (TypeError, ValueError):
+        return int(DEFAULT_CONFIG["network_retry_count"])
+
+
+def resolve_retry_backoff_ms(config: dict[str, Any]) -> int:
+    raw_value = config.get("retry_backoff_ms", DEFAULT_CONFIG["retry_backoff_ms"])
+    try:
+        return max(int(float(raw_value)), 0)
+    except (TypeError, ValueError):
+        return int(DEFAULT_CONFIG["retry_backoff_ms"])
+
+
+def normalize_warnings(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if isinstance(item, str) and item.strip()]
+
+
+def build_download_warning(config: dict[str, Any], file_name: str, error: RequestFailure) -> str:
+    timeout_ms = resolve_timeout_ms(config, "download_timeout_ms")
+    if error.kind == "timeout":
+        return (
+            f"Run succeeded, but failed to download output '{file_name}' to this machine after "
+            f"{timeout_ms} ms. Increase download_timeout_ms and retry status/history."
+        )
+    return (
+        f"Run succeeded, but failed to download output '{file_name}' to this machine: "
+        f"{error.message}. Retry status/history after the network recovers."
+    )
+
+
+def build_download_write_warning(file_name: str, error: OSError) -> str:
+    return (
+        f"Run succeeded, but failed to save output '{file_name}' on this machine: {error}. "
+        "Retry status/history after fixing local disk or permission issues."
+    )
 
 
 def is_loopback_bridge(config: dict[str, Any]) -> bool:
@@ -574,6 +917,24 @@ def sanitize_file_name(file_name: str) -> str:
     return cleaned or "output.bin"
 
 
+def normalize_asset_field_type(value: Any) -> str:
+    if not isinstance(value, str):
+        return ""
+    return value.strip().lower()
+
+
+def describe_asset_field_type(field_type: str) -> str:
+    normalized = normalize_asset_field_type(field_type)
+    labels = {
+        "image": "Image file",
+        "mask": "Mask image file",
+        "video": "Video file",
+        "audio": "Audio file",
+        "file": "File input",
+    }
+    return labels.get(normalized, "File")
+
+
 def compare_versions(left: str, right: str) -> int:
     left_parts = [safe_int(part) for part in left.split(".")]
     right_parts = [safe_int(part) for part in right.split(".")]
@@ -590,6 +951,11 @@ def compare_versions(left: str, right: str) -> int:
     return 0
 
 
+def is_numeric_version(value: str) -> bool:
+    parts = value.split(".")
+    return bool(parts) and all(part.isdigit() for part in parts)
+
+
 def safe_int(value: str) -> int:
     try:
         return int(value)
@@ -599,13 +965,6 @@ def safe_int(value: str) -> int:
 
 def emit(payload: dict[str, Any]) -> None:
     print(json.dumps(payload, ensure_ascii=False, indent=2))
-
-
-class RequestFailure(Exception):
-    def __init__(self, message: str, payload: Any) -> None:
-        super().__init__(message)
-        self.message = message
-        self.payload = payload
 
 
 if __name__ == "__main__":
