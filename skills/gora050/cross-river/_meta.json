@@ -3,11 +3,16 @@
   "slug": "cross-river",
   "displayName": "Cross River",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168741803,
-    "commit": "https://github.com/openclaw/skills/commit/94d7c40d4b497b5a2d04fd758afd571712cf2ba2"
+    "version": "1.0.3",
+    "publishedAt": 1776877600500,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168741803,
+      "commit": "https://github.com/openclaw/skills/commit/94d7c40d4b497b5a2d04fd758afd571712cf2ba2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774685051159,
