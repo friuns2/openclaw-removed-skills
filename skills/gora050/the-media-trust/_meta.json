@@ -3,11 +3,16 @@
   "slug": "the-media-trust",
   "displayName": "The Media Trust",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169795444,
-    "commit": "https://github.com/openclaw/skills/commit/c4c91c47d57fe303ac0baf4c49de514c71f46521"
+    "version": "1.0.3",
+    "publishedAt": 1776864856424,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169795444,
+      "commit": "https://github.com/openclaw/skills/commit/c4c91c47d57fe303ac0baf4c49de514c71f46521"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774904762538,
