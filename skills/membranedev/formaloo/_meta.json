@@ -3,11 +3,16 @@
   "slug": "formaloo",
   "displayName": "Formaloo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169074643,
-    "commit": "https://github.com/openclaw/skills/commit/f1cbe7c1984b3237d7ea439d395ab4d7f1bd0262"
+    "version": "1.0.3",
+    "publishedAt": 1776854221309,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169074643,
+      "commit": "https://github.com/openclaw/skills/commit/f1cbe7c1984b3237d7ea439d395ab4d7f1bd0262"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774756959878,
