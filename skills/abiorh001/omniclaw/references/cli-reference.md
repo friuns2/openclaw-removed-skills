@@ -6,17 +6,20 @@ Do not hand-edit command schemas here; regenerate instead.
 Generator:
 
 ```bash
-python3 .agents/skills/omniclaw-cli/scripts/generate_cli_reference.py
+python3 scripts/generate_cli_reference.py
 ```
 
 ## Usage Notes
 
 - same CLI, two roles: buyer uses `pay`, seller uses `serve`
 - use `can-pay` before a new recipient when policy allow/deny matters
+- use `inspect-x402` before a new paid URL when you need to see seller requirements and buyer funding readiness
 - use `balance-detail` when Gateway state matters
 - use `--idempotency-key` for job-based payments
 - for x402 URLs, `--amount` can be omitted because the payment requirements come from the seller endpoint
+- `serve` is for owner-approved agent-run seller endpoints only
 - `serve` binds to `0.0.0.0` even if the banner prints `localhost`
+- `serve --exec` runs a host command; do not invent the command or expose it outside an isolated runtime
 
 ## Example Flows
 
@@ -24,6 +27,7 @@ Buyer paying an x402 endpoint:
 
 ```bash
 omniclaw-cli can-pay --recipient http://seller-host:8000/api/data
+omniclaw-cli inspect-x402 --recipient http://seller-host:8000/api/data
 omniclaw-cli pay --recipient http://seller-host:8000/api/data --idempotency-key job-123
 ```
 
@@ -43,9 +47,11 @@ Seller exposing a paid endpoint:
 omniclaw-cli serve \
   --price 0.01 \
   --endpoint /api/data \
-  --exec "python app.py" \
+  --exec "python safe_readonly_service.py" \
   --port 8000
 ```
+
+Only run this after the owner explicitly asks for an agent-run seller endpoint and supplies or approves the `--exec` command.
 
 ## Live Help Output
 
@@ -82,6 +88,9 @@ omniclaw-cli serve \
 │ withdraw_trustless_complete   Alias for withdraw-trustless-complete          │
 │ pay                           Execute a payment or pay for an x402 service.  │
 │ simulate                      Simulate a payment without executing.          │
+│ inspect-x402                  Inspect an x402 endpoint and show which        │
+│                               payment route OmniClaw would use.              │
+│ inspect_x402                  Alias for inspect-x402                         │
 │ can-pay                       Check if recipient is allowed.                 │
 │ can_pay                       Alias for can-pay                              │
 │ create-intent                 Create a payment intent (authorize).           │
@@ -201,6 +210,24 @@ omniclaw-cli serve \
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ *  --recipient        TEXT  Recipient to check [required]                    │
 │    --help                   Show this message and exit.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
+### `omniclaw-cli inspect-x402 --help`
+
+```text
+                                                                                
+ Usage: omniclaw-cli inspect-x402 [OPTIONS]                                     
+                                                                                
+ Inspect an x402 endpoint and show which payment route OmniClaw would use.      
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ *  --recipient        TEXT  x402 URL to inspect [required]                  │
+│    --amount           TEXT  Optional max amount in USDC                     │
+│    --method           TEXT  HTTP method for x402 requests [default: GET]    │
+│    --body             TEXT  Request body for x402 requests                  │
+│    --header           TEXT  Additional headers for x402 requests            │
+│    --help                   Show this message and exit.                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 

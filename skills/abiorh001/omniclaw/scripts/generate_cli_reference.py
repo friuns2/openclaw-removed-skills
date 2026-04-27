@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[4]
-SKILL_DIR = Path(__file__).resolve().parents[1]
-SKILL_REF = SKILL_DIR / "references" / "cli-reference.md"
-HUMAN_REF = ROOT / "docs" / "cli-reference.md"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+HUMAN_REF = REPO_ROOT / "docs" / "cli-reference.md"
 
 COMMANDS = [
     ("omniclaw-cli --help", ["omniclaw-cli", "--help"]),
@@ -18,6 +17,7 @@ COMMANDS = [
     ("omniclaw-cli balance --help", ["omniclaw-cli", "balance", "--help"]),
     ("omniclaw-cli balance-detail --help", ["omniclaw-cli", "balance-detail", "--help"]),
     ("omniclaw-cli can-pay --help", ["omniclaw-cli", "can-pay", "--help"]),
+    ("omniclaw-cli inspect-x402 --help", ["omniclaw-cli", "inspect-x402", "--help"]),
     ("omniclaw-cli simulate --help", ["omniclaw-cli", "simulate", "--help"]),
     ("omniclaw-cli pay --help", ["omniclaw-cli", "pay", "--help"]),
     ("omniclaw-cli deposit --help", ["omniclaw-cli", "deposit", "--help"]),
@@ -66,17 +66,20 @@ Do not hand-edit command schemas here; regenerate instead.
 Generator:
 
 ```bash
-python3 .agents/skills/omniclaw-cli/scripts/generate_cli_reference.py
+python3 scripts/generate_cli_reference.py
 ```
 
 ## Usage Notes
 
 - same CLI, two roles: buyer uses `pay`, seller uses `serve`
 - use `can-pay` before a new recipient when policy allow/deny matters
+- use `inspect-x402` before a new paid URL when you need to see seller requirements and buyer funding readiness
 - use `balance-detail` when Gateway state matters
 - use `--idempotency-key` for job-based payments
 - for x402 URLs, `--amount` can be omitted because the payment requirements come from the seller endpoint
+- `serve` is for owner-approved agent-run seller endpoints only
 - `serve` binds to `0.0.0.0` even if the banner prints `localhost`
+- `serve --exec` runs a host command; do not invent the command or expose it outside an isolated runtime
 
 ## Example Flows
 
@@ -84,6 +87,7 @@ Buyer paying an x402 endpoint:
 
 ```bash
 omniclaw-cli can-pay --recipient http://seller-host:8000/api/data
+omniclaw-cli inspect-x402 --recipient http://seller-host:8000/api/data
 omniclaw-cli pay --recipient http://seller-host:8000/api/data --idempotency-key job-123
 ```
 
@@ -103,9 +107,11 @@ Seller exposing a paid endpoint:
 omniclaw-cli serve \\
   --price 0.01 \\
   --endpoint /api/data \\
-  --exec "python app.py" \\
+  --exec "python safe_readonly_service.py" \\
   --port 8000
 ```
+
+Only run this after the owner explicitly asks for an agent-run seller endpoint and supplies or approves the `--exec` command.
 
 ## Live Help Output
 """
@@ -120,6 +126,7 @@ def run_help(title: str, args: list[str]) -> str:
             text=True,
             timeout=TIMEOUT_SECONDS,
             check=False,
+            env={"OMNICLAW_CLI_NO_BANNER": "1", **os.environ},
         )
     except subprocess.TimeoutExpired:
         fallback = FALLBACK_OUTPUTS.get(title)
@@ -142,7 +149,5 @@ for title, args in COMMANDS:
     sections.append(f"### `{title}`\n\n```text\n{output}\n```")
 
 content = "\n\n".join(sections) + "\n"
-SKILL_REF.write_text(content)
 HUMAN_REF.write_text(content)
-print(f"wrote {SKILL_REF}")
 print(f"wrote {HUMAN_REF}")
