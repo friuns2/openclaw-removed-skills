@@ -3,11 +3,16 @@
   "slug": "signaturit",
   "displayName": "Signaturit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168303744,
-    "commit": "https://github.com/openclaw/skills/commit/97073b44951691a83bbd9e586c0d1248d408de9f"
+    "version": "1.0.3",
+    "publishedAt": 1776862187551,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168303744,
+      "commit": "https://github.com/openclaw/skills/commit/97073b44951691a83bbd9e586c0d1248d408de9f"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775168301513,
