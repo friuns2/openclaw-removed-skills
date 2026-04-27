@@ -3,11 +3,16 @@
   "slug": "customerguru",
   "displayName": "Customerguru",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168189775,
-    "commit": "https://github.com/openclaw/skills/commit/c5ae559372cb4e5120562ecc0dc54ad8733ae828"
+    "version": "1.0.3",
+    "publishedAt": 1776862153485,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168189775,
+      "commit": "https://github.com/openclaw/skills/commit/c5ae559372cb4e5120562ecc0dc54ad8733ae828"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580699797,
