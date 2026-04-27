@@ -100,6 +100,12 @@
 - adapter / fallback 模型
 - 路由、升级、排除规则
 
+如果宿主后续启用 Dreaming，还应额外遵守：
+
+- Dreaming 是 optional consolidation engine
+- `DREAMS.md` / `memory/.dreams/` 不是新的 target class
+- 不应让 Dreaming 和人工 daily promotion 同时成为默认 authority
+
 这意味着：
 
 - 你可以用它来判断“什么该记”

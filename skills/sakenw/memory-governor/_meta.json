@@ -3,11 +3,16 @@
   "slug": "memory-governor",
   "displayName": "Memory Governor",
   "latest": {
-    "version": "0.2.8",
-    "publishedAt": 1775403049494,
-    "commit": "https://github.com/openclaw/skills/commit/e9e0055c038306464193544b7cd05bd7afabf156"
+    "version": "0.2.9",
+    "publishedAt": 1775519024688,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.2.8",
+      "publishedAt": 1775403049494,
+      "commit": "https://github.com/openclaw/skills/commit/e9e0055c038306464193544b7cd05bd7afabf156"
+    },
     {
       "version": "0.2.4-beta",
       "publishedAt": 1774932805009,

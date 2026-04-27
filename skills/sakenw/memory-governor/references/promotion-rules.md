@@ -10,12 +10,25 @@
 
 ### daily → MEMORY
 
-满足任意两个条件时，才考虑从 `memory/YYYY-MM-DD.md` 升到 `MEMORY.md`：
+这是最容易和 Dreaming 重叠的路径，所以先分两种宿主：
+
+- **Dreaming-enabled host**：优先由 Dreaming 负责 `daily_memory -> long_term_memory`
+- **Dreaming-disabled host**：才由人工 promotion 作为 fallback
+
+如果宿主 **没有启用 Dreaming**，满足任意两个条件时，才考虑从 `memory/YYYY-MM-DD.md` 升到 `MEMORY.md`：
 
 - 两周后大概率仍然有效
 - 在多个任务里重复出现
 - 会影响未来判断或协作方式
 - 已经从事件变成稳定模式
+
+如果宿主 **启用了 Dreaming**：
+
+- `daily_memory` 默认继续写入 daily layer
+- Dreaming 负责后台整理、主题提炼和长期记忆 promote
+- 人工只在 Dreaming disabled、Dreaming unavailable、或显式 override 时直接做 `daily -> MEMORY`
+
+不要让人工 promotion 和 Dreaming 同时对同一批 daily notes 做默认长期化。
 
 ### correction → learning_candidates
 
@@ -70,6 +83,34 @@
 
 capture 阶段遇到歧义时，先看 [routing-precedence.md](routing-precedence.md)。
 
+## Promotion Authority
+
+为了避免功能冗余，默认 authority 应固定：
+
+### Dreaming-preferred
+
+- `daily_memory -> long_term_memory`
+
+前提：
+
+- 宿主已经启用 Dreaming
+- 宿主接受 Dreaming 作为 daily consolidation engine
+
+### Manual-only
+
+- `learning_candidates -> reusable_lessons`
+- `reusable_lessons -> system_rules`
+- `reusable_lessons -> tool_rules`
+- `reusable_lessons -> AGENTS / TOOLS / SOUL`
+- `project_facts -> project docs`
+
+原因：
+
+- `learning_candidates` 承载的是显式纠错和待验证经验
+- 系统级规则仍应保持人工审核和明确 hardening
+
+Dreaming 不应直接决定 `AGENTS.md`、`TOOLS.md`、`SOUL.md` 这类治理文件。
+
 ## 禁止升级的情况
 
 - 原始长日志直接升到长期层
@@ -78,3 +119,4 @@ capture 阶段遇到歧义时，先看 [routing-precedence.md](routing-precedenc
 - 候选内容直接升到 `AGENTS.md` / `TOOLS.md` / `SOUL.md`
 - 临时恢复线索直接升到 `MEMORY.md`
 - 项目局部事实直接升到全局规则
+- 在 Dreaming-enabled host 中，让人工 promotion 和 Dreaming 同时默认长期化同一批 daily 内容

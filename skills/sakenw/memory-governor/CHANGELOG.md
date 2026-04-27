@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.9 - 2026-04-07
+
+### Added
+
+- `references/dreaming-integration.md` to define how `memory-governor` should coexist with OpenClaw Dreaming
+
+### Changed
+
+- README positioning now explains that `memory-governor` complements Dreaming instead of replacing it
+- promotion rules now separate Dreaming-preferred `daily_memory -> long_term_memory` from manual-only hardening paths
+- read-order guidance now explicitly excludes `DREAMS.md` from normal startup and recovery reads
+- adapter, host-profile, installation, and skill-integration docs now define `DREAMS.md` / `memory/.dreams/` as engine-owned artifacts and keep explicit correction staging out of Dreaming
+
 ## 0.2.8 - 2026-04-05
 
 ### Added

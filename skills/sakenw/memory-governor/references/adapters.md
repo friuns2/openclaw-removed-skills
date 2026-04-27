@@ -43,6 +43,30 @@
 | `system_rules` | built-in | `AGENTS.md` / `SOUL.md` |
 | `tool_rules` | built-in | `TOOLS.md` |
 
+## Dreaming Boundary
+
+如果宿主启用了 OpenClaw Dreaming，需要把它当成 **consolidation engine**，不是新的 target class。
+
+固定边界：
+
+- `DREAMS.md` is a dreaming artifact, not a target class
+- `memory/.dreams/` is engine state, not host memory contract
+- skills should not write directly into either of them
+- adapter tables should not model `dream_diary` or `dream_state` as standard memory targets
+
+Dreaming 的默认职责应限定在：
+
+- reading short-term memory signals
+- consolidating daily memory
+- promoting durable output into `MEMORY.md`
+
+它不应替代：
+
+- `learning_candidates`
+- `reusable_lessons`
+- `system_rules`
+- `tool_rules`
+
 ## Optional Skill Policy
 
 可选 skill 不应成为内核前提。
@@ -122,3 +146,4 @@ fallback 的目标不是完美，而是不让内核失效。
 - 不把 optional skill 写成 mandatory dependency
 - 不把某个 adapter 的路径当成 target class 本身
 - 不因为缺少某个 skill 就重写内核定义
+- 不把 `DREAMS.md` 或 `memory/.dreams/` 伪装成普通 target class adapter

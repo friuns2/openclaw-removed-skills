@@ -135,8 +135,33 @@ adapter 的职责：
 
 先证明候选层有用，再让工具链依赖它。
 
+## Dreaming-Aware Capture Policy
+
+如果宿主启用了 Dreaming，skill 仍然不应把“让 Dreaming 以后自己清洗”当成偷懒理由。
+
+默认分工应是：
+
+- explicit corrections -> `learning_candidates`
+- first-sighting emerging lessons -> `learning_candidates`
+- same-day events and recurring context -> `daily_memory`
+- stable reusable know-how already proven across tasks -> `reusable_lessons`
+
+不要这样做：
+
+- 把明确纠错直接丢进 `daily_memory`，指望 Dreaming 帮你决定它是不是长期规则
+- 把 Dreaming 当成 `learning_candidates` 的替代品
+- 让 Dreaming 直接生成系统级治理规则
+
+一句话：
+
+- `learning_candidates` handles explicit correction staging
+- Dreaming handles background consolidation from short-term signals
+
+两者可以配合，但不应争同一类输入。
+
 ## 禁止事项
 
 - 不把 `memory-governor` 变成下游写入总线
 - 不要求所有 skill 重构成同一种文件结构
 - 不为了一致性而打断已有有效工作流
+- 不把 Dreaming 当成跳过候选层或人工升格的理由

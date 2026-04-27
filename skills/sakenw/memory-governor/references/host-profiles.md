@@ -50,6 +50,7 @@ Current note:
 - OpenClaw reference profile can now declare these mappings in `memory-governor-host.toml`
 - existing external adapters such as `~/proactivity/...` may still be legacy human-readable files rather than schema-frontmatter targets
 - installing the skill into OpenClaw should not silently rewrite `AGENTS.md` or other skills; package-external integration should remain explicit
+- if OpenClaw Dreaming is enabled, treat it as an optional consolidation engine for `daily_memory -> long_term_memory`, not as a new target class or a replacement for `learning_candidates`
 
 ## Selection Rule
 

@@ -21,6 +21,7 @@
 7. today's `daily_memory` only if recent context matters
 8. `working_buffer` only when recovery risk is high
 9. do not read `learning_candidates` during normal startup unless you are explicitly reviewing candidate promotions
+10. do not read `DREAMS.md` during normal startup unless you are explicitly reviewing dreaming output or promotion quality
 
 ## Why This Order
 
@@ -30,6 +31,7 @@
 - 再读项目局部事实，避免把全局规则误用于局部例外
 - 最后读当前状态和临时 breadcrumb
 - 候选层默认不参与启动时主上下文，避免把未证明的规则提前当真
+- Dream diary 不是默认 recall 层，避免把后台 consolidation 轨迹误当成当前真相
 
 ## Recovery Mode
 
@@ -42,6 +44,9 @@
 5. today's `daily_memory`
 
 恢复模式优先找“现在要继续什么”，不是先读全部历史。
+
+`DREAMS.md` 在恢复模式里也不是默认入口。  
+只有在你明确要检查 Dreaming 为什么 promote、没 promote、或 promotion 质量如何时才读。
 
 ## Conflict Precedence
 
@@ -84,6 +89,26 @@
 
 - 提炼后的经验应优先于历史事件里的未提炼片段
 
+### `long_term_memory` vs `DREAMS.md`
+
+`long_term_memory` 优先。
+
+原因：
+
+- `DREAMS.md` 是 dreaming process artifact，不是 canonical durable memory layer
+
+### `learning_candidates` vs `DREAMS.md`
+
+两者默认不直接冲突，因为职责不同：
+
+- `learning_candidates` 保存显式纠错和待验证经验
+- `DREAMS.md` 保存后台 consolidation 轨迹和摘要
+
+如果看起来冲突，优先回到：
+
+- `learning_candidates` 用于 review 是否升格
+- `long_term_memory` 用于最终 durable truth
+
 ## Minimal-Load Principle
 
 不要为了“完整”一次读完所有层。
@@ -93,3 +118,4 @@
 - 先读最小必要集合
 - 只有在恢复风险高时再扩展读取
 - 不要默认把 `working_buffer` 当成第一入口
+- 不要把 `DREAMS.md` 当作普通启动记忆来加载
