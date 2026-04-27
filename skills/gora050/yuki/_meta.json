@@ -3,11 +3,16 @@
   "slug": "yuki",
   "displayName": "Yuki",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169122905,
-    "commit": "https://github.com/openclaw/skills/commit/caa004295d5d5cd51809d1bdb569438f83421987"
+    "version": "1.0.3",
+    "publishedAt": 1776863852610,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169122905,
+      "commit": "https://github.com/openclaw/skills/commit/caa004295d5d5cd51809d1bdb569438f83421987"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774760693327,
