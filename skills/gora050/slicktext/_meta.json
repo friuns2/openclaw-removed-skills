@@ -3,11 +3,16 @@
   "slug": "slicktext",
   "displayName": "Slicktext",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167958729,
-    "commit": "https://github.com/openclaw/skills/commit/3c9d40f9cdd3b36edb4a3a197730549123994e77"
+    "version": "1.0.3",
+    "publishedAt": 1776863046242,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167958729,
+      "commit": "https://github.com/openclaw/skills/commit/3c9d40f9cdd3b36edb4a3a197730549123994e77"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774553035745,
