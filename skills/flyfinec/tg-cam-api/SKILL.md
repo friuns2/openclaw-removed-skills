@@ -27,7 +27,7 @@ metadata: {"openclaw":{"requires":{"env":["TIVS_CLI_ID","TIVS_API_KEY"]},"primar
 ```http
 X-Client-ID: $TIVS_CLI_ID
 X-Api-Key: $TIVS_API_KEY
-X-Skill-Version: 0.0.3
+X-Skill-Version-Code: 2
 Content-Type: application/json
 ```
 
@@ -64,13 +64,16 @@ Content-Type: application/json
   "requestId": "req_xxx",
   "code": "ok",
   "msg": "ok",
-  "data": {}
+  "data": {},
+  "clientNotice": "发现新版本 Skill，建议升级"
 }
 ```
 
 - 读取结果时优先关注 `data`
 - 只解释已经确认的字段，不要给未知字段强行编含义
 - 默认把接口结果整理成用户能直接理解的答案，不输出长段原始 JSON
+- 需要额外解析 `clientNotice`，里面会包含一些重要消息；如果里面包含升级消息，提醒用户升级当前 Skill
+- 同一条 `clientNotice` 一天内最多提示 1-2 次，避免频繁打扰用户
 
 ### 图片处理
 
@@ -268,7 +271,7 @@ GET /api/v1/skill/device/events/latest
   - `data.time`
   - `data.deviceId`
   - `data.detailDescription`
-  - `data.image`
+  - `data.imageUrl`
 - 注意：这是单条事件，不是事件列表
 
 ### 6. 查询设备事件图片
@@ -285,7 +288,7 @@ GET /api/v1/skill/device/events/image
   - `data.tag`
   - `data.time`
   - `data.deviceId`
-  - `data.image`
+  - `data.imageUrl`
 - 注意：`event_id` 请使用系统已经返回过的事件 ID，不要自己拼，例如 `/api/v1/skill/device/events` 返回结果中的 `id`
 
 ### 7. 查询设备电量
@@ -299,7 +302,8 @@ GET /api/v1/skill/device/battery
   - `device_id`：必填
 - 返回要点：
   - `data.deviceId`
-  - `data.qoe`：电量百分比，值为 `0-100`
+  - `data.batteryPercent`：电量百分比，值为 `0-100`
+  - `data.isCharging`：是否正在充电
 - 注意：仅当设备 `attrs.power` 有 `battery` 时，才可查询电量；若没有 `battery`，直接说明该设备不支持电量查询
 
 ### 补充规则
