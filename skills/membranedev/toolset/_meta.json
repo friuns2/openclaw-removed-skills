@@ -3,9 +3,15 @@
   "slug": "toolset",
   "displayName": "Toolset",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775225019051,
-    "commit": "https://github.com/openclaw/skills/commit/66e77e512116f960cd58894a12f5c3c40e6dca33"
+    "version": "1.0.1",
+    "publishedAt": 1776881972362,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775225019051,
+      "commit": "https://github.com/openclaw/skills/commit/66e77e512116f960cd58894a12f5c3c40e6dca33"
+    }
+  ]
 }
