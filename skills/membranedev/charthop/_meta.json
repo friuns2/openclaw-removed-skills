@@ -3,11 +3,16 @@
   "slug": "charthop",
   "displayName": "Charthop",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170687875,
-    "commit": "https://github.com/openclaw/skills/commit/e189c5d756974879e5a99ecad295c592209fb245"
+    "version": "1.0.3",
+    "publishedAt": 1776857981698,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170687875,
+      "commit": "https://github.com/openclaw/skills/commit/e189c5d756974879e5a99ecad295c592209fb245"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775091760608,
