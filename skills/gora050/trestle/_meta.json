@@ -3,11 +3,16 @@
   "slug": "trestle",
   "displayName": "Trestle",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170193390,
-    "commit": "https://github.com/openclaw/skills/commit/6b37add26e56dd9da044f8b176bc3a91012d28a9"
+    "version": "1.0.3",
+    "publishedAt": 1776866188521,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170193390,
+      "commit": "https://github.com/openclaw/skills/commit/6b37add26e56dd9da044f8b176bc3a91012d28a9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774985079806,
