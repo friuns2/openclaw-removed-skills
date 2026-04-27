@@ -3,11 +3,16 @@
   "slug": "docmosis",
   "displayName": "Docmosis",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169250642,
-    "commit": "https://github.com/openclaw/skills/commit/df152e91f814bf6e7cb37e7e1f8e75ae0519c061"
+    "version": "1.0.3",
+    "publishedAt": 1776864118924,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169250642,
+      "commit": "https://github.com/openclaw/skills/commit/df152e91f814bf6e7cb37e7e1f8e75ae0519c061"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774782284028,
