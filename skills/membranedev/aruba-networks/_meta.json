@@ -3,9 +3,15 @@
   "slug": "aruba-networks",
   "displayName": "Aruba Networks",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775199854938,
-    "commit": "https://github.com/openclaw/skills/commit/311e837d23c72910ff59accf4862c4467ea498a9"
+    "version": "1.0.1",
+    "publishedAt": 1776881248851,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775199854938,
+      "commit": "https://github.com/openclaw/skills/commit/311e837d23c72910ff59accf4862c4467ea498a9"
+    }
+  ]
 }
