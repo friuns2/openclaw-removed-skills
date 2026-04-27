@@ -3,9 +3,15 @@
   "slug": "xeditor",
   "displayName": "Xeditor",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775200064068,
-    "commit": "https://github.com/openclaw/skills/commit/2e6d959e56aa9887c1ffa38de3dc3f183592277d"
+    "version": "1.0.1",
+    "publishedAt": 1776885013995,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775200064068,
+      "commit": "https://github.com/openclaw/skills/commit/2e6d959e56aa9887c1ffa38de3dc3f183592277d"
+    }
+  ]
 }
