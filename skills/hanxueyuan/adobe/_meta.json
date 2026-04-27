@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "adobe",
-  "displayName": "adobe",
+  "displayName": "Adobe",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774755022107,
-    "commit": "https://github.com/openclaw/skills/commit/07ade9b4b5f48740f9ba02d76fde183132caed2a"
+    "version": "1.0.7",
+    "publishedAt": 1776533673115,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774755022107,
+      "commit": "https://github.com/openclaw/skills/commit/07ade9b4b5f48740f9ba02d76fde183132caed2a"
+    }
+  ]
 }
