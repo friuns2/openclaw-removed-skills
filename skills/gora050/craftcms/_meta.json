@@ -3,9 +3,15 @@
   "slug": "craftcms",
   "displayName": "Craftcms",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775246755750,
-    "commit": "https://github.com/openclaw/skills/commit/2cb642bcc64680c6a4565f7ce20779cc8a6cb04f"
+    "version": "1.0.1",
+    "publishedAt": 1776899259187,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775246755750,
+      "commit": "https://github.com/openclaw/skills/commit/2cb642bcc64680c6a4565f7ce20779cc8a6cb04f"
+    }
+  ]
 }
