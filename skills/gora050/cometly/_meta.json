@@ -3,11 +3,16 @@
   "slug": "cometly",
   "displayName": "Cometly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168375458,
-    "commit": "https://github.com/openclaw/skills/commit/4e90585147db5b55cf42facb15bc5c572a9e7fbb"
+    "version": "1.0.3",
+    "publishedAt": 1776862484715,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168375458,
+      "commit": "https://github.com/openclaw/skills/commit/4e90585147db5b55cf42facb15bc5c572a9e7fbb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774616632957,
