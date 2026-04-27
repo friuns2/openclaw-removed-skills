@@ -3,9 +3,15 @@
   "slug": "poper",
   "displayName": "Poper",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775200077767,
-    "commit": "https://github.com/openclaw/skills/commit/40594552a9db21f8332a58cfa540c9dcf18b4b78"
+    "version": "1.0.1",
+    "publishedAt": 1776885018286,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775200077767,
+      "commit": "https://github.com/openclaw/skills/commit/40594552a9db21f8332a58cfa540c9dcf18b4b78"
+    }
+  ]
 }
