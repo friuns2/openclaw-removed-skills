@@ -38,6 +38,8 @@
 - `wps.export_image`：导出 PNG / JPEG 图片
 - `wps.query_export`：统一查询异步导出结果
 
+> `wps.export` 和 `wps.export_image` 的必填参数是 `link_id`（非 `file_id`）。`link_id` 来自 `get_file_info`、`list_files`、`search_files` 等接口返回，或从文档 URL 路径末尾提取，详见「获取文件标识指南」。
+
 ### 选择建议
 
 - 需要拿到 `.docx` 下载地址：用 `wps.export`，传 `format=docx`
@@ -109,7 +111,7 @@
 
 #### 参数说明
 
-- `link_id` (string, 必填): 在线文字文件链接 ID
+- `link_id` (string, 必填): 在线文字文件的链接 ID（非 file_id）
 - `format` (string, 必填): 导出格式。可选值：`docx` / `pdf` / `ap`
 - `with_checksums` (string, 可选): `format=docx` 时可传，校验算法列表，如 `md5,sha256`
 - `cid` (string, 可选): `format=docx` 时可传，分享链接 ID
@@ -124,6 +126,10 @@
 - `export_modify_password` (string, 可选): `format=pdf` 时可传
 - `name` (string, 可选): `format=ap` 时必填，AP 文稿名称，不含后缀
 
+
+#### 操作约束
+
+- **前置检查**：先通过 `get_file_info` / `search_files` / `list_files` 获取 `link_id`，或从文档 URL 路径末尾提取
 ---
 
 ### 2. wps.export_image
@@ -151,7 +157,7 @@
 
 #### 参数说明
 
-- `link_id` (string, 必填): 在线文字文件链接 ID
+- `link_id` (string, 必填): 在线文字文件的链接 ID（非 file_id）
 - `format` (string, 必填): 图片格式。可选值：`png` / `jpeg`
 - `dpi` (number, 可选): 图片 DPI；默认值：`96`
 - `water_mark` (boolean, 可选): 是否添加水印；默认值：`true`
@@ -163,6 +169,28 @@
 - `password` (string, 可选): 源文档密码
 - `store_type` (string, 可选): 如 `ks3`、`cloud`
 
+#### 返回值说明
+
+```json
+{
+  "code": 0,
+  "data": {
+    "url": "https://xxx.wps.cn/export/image.png",
+    "file_id": "string"
+  }
+}
+
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `data.url` | string | 导出图片的下载地址 |
+| `data.file_id` | string | 导出图片的文件 ID |
+
+
+#### 操作约束
+
+- **前置检查**：先通过 `get_file_info` / `search_files` / `list_files` 获取 `link_id`，或从文档 URL 路径末尾提取
 ---
 
 ### 3. wps.query_export

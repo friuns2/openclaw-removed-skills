@@ -1,291 +1,194 @@
-#!/bin/bash
-# 金山文档 Skill — MCP 服务注册脚本
+#!/bin/sh
+# kdocs-cli installer — downloads the platform-specific binary to a global PATH location.
+# No Node.js or Go required. Only curl/wget needed.
+#
+# Usage:
+#   bash scripts/setup.sh
+#   curl -fsSL <CDN>/setup.sh | sh
+#
+# Environment variables (all optional):
+#   KDOCS_CLI_VERSION   — version to install (default: read from SKILL.md or "latest")
+#   KDOCS_CLI_CDN       — CDN base URL override
+#   KDOCS_CLI_DIR       — install directory override (default: ~/.local/bin)
 
-set -euo pipefail
+set -eu
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILL_FILE="$SCRIPT_DIR/SKILL.md"
-LEGACY_ENV_FILE="$SCRIPT_DIR/.env"
-MCP_URL="https://mcp-center.wps.cn/skill_hub/mcp"
-AUTO_INSTALL_MCPORTER=0
+CDN_BASE="${KDOCS_CLI_CDN:-https://wpsai.wpscdn.cn/skillhub/pro}"
+BIN_NAME="kdocs-cli"
+INSTALL_DIR="${KDOCS_CLI_DIR:-$HOME/.local/bin}"
 
-for arg in "$@"; do
-    if [ "$arg" = "--auto-install-mcporter" ]; then
-        AUTO_INSTALL_MCPORTER=1
-    fi
-done
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
-echo "🚀 设置金山文档 Skill..."
-echo ""
+say()  { printf '  %s\n' "$@"; }
+err()  { printf '  ❌ %s\n' "$@" >&2; exit 1; }
 
-extract_header_value() {
-    local json="$1"
-    local key="$2"
-    if command -v jq >/dev/null 2>&1; then
-        jq -r --arg key "$key" '.headers[$key] // empty' <<<"$json" 2>/dev/null
-        return
-    fi
-    if command -v python3 >/dev/null 2>&1; then
-        JSON_INPUT="$json" JSON_KEY="$key" python3 - <<'PY'
-import json
-import os
+need_cmd() { command -v "$1" >/dev/null 2>&1; }
 
-try:
-    data = json.loads(os.environ["JSON_INPUT"])
-    value = data.get("headers", {}).get(os.environ["JSON_KEY"], "")
-    if value is None:
-        value = ""
-    print(value)
-except Exception:
-    pass
-PY
-        return
-    fi
-    if command -v python >/dev/null 2>&1; then
-        JSON_INPUT="$json" JSON_KEY="$key" python - <<'PY'
-import json
-import os
-
-try:
-    data = json.loads(os.environ["JSON_INPUT"])
-    value = data.get("headers", {}).get(os.environ["JSON_KEY"], "")
-    if value is None:
-        value = ""
-    print(value)
-except Exception:
-    pass
-PY
-        return
-    fi
-    sed -n "s/.*\"${key}\":[[:space:]]*\"\([^\"]*\)\".*/\1/p" <<<"$json" | head -n 1
+download() {
+  url="$1"; dest="$2"
+  if need_cmd curl; then
+    curl -fsSL "$url" -o "$dest"
+  elif need_cmd wget; then
+    wget -qO "$dest" "$url"
+  else
+    err "Neither curl nor wget found. Please install one and retry."
+  fi
 }
 
-get_skill_version() {
-    local version=""
-    if [ -f "$SKILL_FILE" ]; then
-        version=$(sed -n 's/^version:[[:space:]]*//p' "$SKILL_FILE" | head -n 1)
+detect_os() {
+  case "$(uname -s)" in
+    Linux*)  echo "linux"  ;;
+    Darwin*) echo "darwin" ;;
+    MINGW*|MSYS*|CYGWIN*) echo "windows" ;;
+    *) err "Unsupported OS: $(uname -s)" ;;
+  esac
+}
+
+detect_arch() {
+  case "$(uname -m)" in
+    x86_64|amd64)  echo "amd64" ;;
+    arm64|aarch64) echo "arm64" ;;
+    *) err "Unsupported architecture: $(uname -m)" ;;
+  esac
+}
+
+resolve_version() {
+  if [ -n "${KDOCS_CLI_VERSION:-}" ]; then
+    echo "$KDOCS_CLI_VERSION"
+    return
+  fi
+  # Try reading from nearby SKILL.md (when run from skill directory)
+  script_dir="$(cd "$(dirname "$0")" 2>/dev/null && pwd || echo ".")"
+  for candidate in "$script_dir/../SKILL.md" "$script_dir/../../SKILL.md" "./SKILL.md"; do
+    if [ -f "$candidate" ]; then
+      ver="$(sed -n 's/^version:[[:space:]]*//p' "$candidate" | head -1 | tr -d ' \r\n\"')"
+      if [ -n "$ver" ]; then
+        echo "$ver"
+        return
+      fi
     fi
-    if [ -z "$version" ]; then
-        echo "unknown"
+  done
+  err "Cannot determine version. Set KDOCS_CLI_VERSION explicitly."
+}
+
+version_ge() {
+  # Returns 0 (true) if $1 >= $2 using semantic version comparison
+  printf '%s\n%s\n' "$2" "$1" | sort -t. -k1,1n -k2,2n -k3,3n -C
+}
+
+check_existing() {
+  if need_cmd "$BIN_NAME"; then
+    existing_path="$(command -v "$BIN_NAME")"
+    existing_ver="$("$BIN_NAME" version 2>/dev/null || echo "0.0.0")"
+    if [ "$existing_ver" = "$1" ]; then
+      say "${BIN_NAME} v${1} is already installed at ${existing_path}"
+      say "Use '${BIN_NAME} upgrade' to check for updates."
+      exit 0
+    fi
+    if version_ge "$existing_ver" "$1"; then
+      say "Installed ${BIN_NAME} v${existing_ver} >= target v${1}, skipping."
+      say "Use '${BIN_NAME} upgrade' to manage versions."
+      exit 0
+    fi
+    say "Found existing ${BIN_NAME} v${existing_ver} at ${existing_path}"
+    say "Will upgrade to v${1} in ${INSTALL_DIR}/"
+  fi
+}
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+
+main() {
+  os="$(detect_os)"
+  arch="$(detect_arch)"
+  version="$(resolve_version)"
+
+  check_existing "$version"
+
+  if [ "$os" = "windows" ]; then
+    ext=".zip"
+  else
+    ext=".tar.gz"
+  fi
+
+  archive_name="${BIN_NAME}-${version}-${os}-${arch}${ext}"
+  download_url="${CDN_BASE}/v${version}/releases/${archive_name}"
+  checksums_url="${CDN_BASE}/v${version}/releases/checksums.txt"
+
+  say "Installing ${BIN_NAME} v${version} (${os}/${arch})..."
+  say "Target: ${INSTALL_DIR}/${BIN_NAME}"
+
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "$tmpdir"' EXIT INT TERM
+
+  say "Downloading ${archive_name}..."
+  download "$download_url" "$tmpdir/$archive_name"
+
+  # SHA256 verification
+  if download "$checksums_url" "$tmpdir/checksums.txt" 2>/dev/null; then
+    expected="$(awk -v file="$archive_name" '$2 == file { print $1; exit }' "$tmpdir/checksums.txt")"
+    if [ -n "$expected" ]; then
+      actual=""
+      if need_cmd sha256sum; then
+        actual="$(sha256sum "$tmpdir/$archive_name" | awk '{print $1}')"
+      elif need_cmd shasum; then
+        actual="$(shasum -a 256 "$tmpdir/$archive_name" | awk '{print $1}')"
+      fi
+      if [ -n "$actual" ] && [ "$actual" != "$expected" ]; then
+        err "SHA256 mismatch! Expected ${expected}, got ${actual}."
+      fi
+      if [ -n "$actual" ]; then
+        say "SHA256 verified ✓"
+      else
+        say "⚠ sha256sum/shasum not found; skipping checksum verification"
+      fi
     else
-        echo "$version"
+      say "⚠ Archive not found in checksums.txt; skipping verification"
     fi
-}
+  else
+    say "⚠ Could not download checksums.txt; skipping verification"
+  fi
 
-get_legacy_env_file_token() {
-    if [ ! -f "$LEGACY_ENV_FILE" ]; then
-        return
-    fi
-    sed -n 's/^KINGSOFT_DOCS_TOKEN=//p' "$LEGACY_ENV_FILE" | head -n 1
-}
-
-normalize_token() {
-    local auth_value="${1:-}"
-    if [[ "$auth_value" =~ ^[Bb][Ee][Aa][Rr][Ee][Rr][[:space:]]+(.+)$ ]]; then
-        echo "${BASH_REMATCH[1]}"
-    fi
-}
-
-ensure_mcporter() {
-    if command -v mcporter >/dev/null 2>&1; then
-        return
-    fi
-    if [ "$AUTO_INSTALL_MCPORTER" -eq 1 ]; then
-        if ! command -v npm >/dev/null 2>&1; then
-            echo "❌ 未找到 mcporter，且当前环境没有 npm，无法自动安装"
-            exit 1
-        fi
-        echo "⚠️  未找到 mcporter，已按参数要求自动安装..."
-        npm install -g mcporter
-        echo "✅ mcporter 安装完成"
-    fi
-    if ! command -v mcporter >/dev/null 2>&1; then
-        echo "❌ 未找到 mcporter"
-        echo "💡 默认不会自动修改系统环境。"
-        echo "   - 手动安装后重试；或"
-        echo "   - 追加参数 --auto-install-mcporter 允许脚本自动安装"
-        exit 1
-    fi
-}
-
-get_mcporter_config() {
-    mcporter config get kdocs-clawhub --json 2>/dev/null || true
-}
-
-validate_token() {
-    local candidate="$1"
-    local probe_name="kdocs-token-probe-$$-${RANDOM:-0}"
-    local response=""
-
-    if [ -z "$candidate" ]; then
-        return 1
-    fi
-
-    mcporter config remove "$probe_name" >/dev/null 2>&1 || true
-    mcporter config add "$probe_name" "$MCP_URL" \
-        --header "Authorization=Bearer $candidate" \
-        --header "X-Skill-Version=$SKILL_VERSION"
-        --header "X-Request-Source=clawhub" \
-        --transport http \
-        --scope home >/dev/null
-
-    response=$(mcporter call "${probe_name}.search_files" keyword="__kdocs_token_probe__" type=all page_size=1 --output json 2>/dev/null || true)
-    mcporter config remove "$probe_name" >/dev/null 2>&1 || true
-
-    if [[ "$response" == *'"code": 400006'* ]]; then
-        return 1
-    fi
-    return 0
-}
-
-write_mcporter_config() {
-    local token="${1:-}"
-    local args=(
-        config add kdocs-clawhub "$MCP_URL"
-        --header "X-Skill-Version=$SKILL_VERSION"
-        --header "X-Request-Source=clawhub"
-        --transport http
-        --scope home
-    )
-
-    if [ -n "$token" ]; then
-        args+=(--header "Authorization=Bearer $token")
-    fi
-
-    mcporter config remove kdocs-clawhub >/dev/null 2>&1 || true
-    mcporter "${args[@]}" >/dev/null
-}
-
-cleanup_legacy_env_file() {
-    if [ ! -f "$LEGACY_ENV_FILE" ]; then
-        return
-    fi
-    if ! grep -q '^KINGSOFT_DOCS_TOKEN=' "$LEGACY_ENV_FILE"; then
-        return
-    fi
-
-    local tmp_file="${LEGACY_ENV_FILE}.tmp.$$"
-    awk '!/^KINGSOFT_DOCS_TOKEN=/' "$LEGACY_ENV_FILE" > "$tmp_file"
-
-    if [ ! -s "$tmp_file" ]; then
-        rm -f "$LEGACY_ENV_FILE" "$tmp_file"
-        echo "🧹 已移除 .env 中的 KINGSOFT_DOCS_TOKEN，清理后为空，已删除空 .env 文件"
+  say "Extracting..."
+  if [ "$ext" = ".tar.gz" ]; then
+    tar xzf "$tmpdir/$archive_name" -C "$tmpdir"
+  else
+    if need_cmd unzip; then
+      unzip -q "$tmpdir/$archive_name" -d "$tmpdir"
     else
-        mv "$tmp_file" "$LEGACY_ENV_FILE"
-        echo "🧹 已移除 .env 中的 KINGSOFT_DOCS_TOKEN，保留其他配置"
+      err "unzip not found; cannot extract .zip archive."
     fi
+  fi
+
+  mkdir -p "$INSTALL_DIR"
+  bin_file="$(find "$tmpdir" -name "$BIN_NAME" -o -name "${BIN_NAME}.exe" | head -1)"
+  if [ -z "$bin_file" ]; then
+    err "Binary not found in the downloaded archive."
+  fi
+
+  cp "$bin_file" "$INSTALL_DIR/"
+  chmod +x "$INSTALL_DIR/$BIN_NAME"
+
+  # Record install source for analytics (X-Request-Source header)
+  printf '%s' "clawhub" > "$INSTALL_DIR/.source"
+
+  say "✅ Installed: ${INSTALL_DIR}/${BIN_NAME}"
+
+  # Check if install_dir is in PATH
+  case ":$PATH:" in
+    *":${INSTALL_DIR}:"*) ;;
+    *)
+      say ""
+      say "⚠ ${INSTALL_DIR} is not in your PATH."
+      say "  Add it with:"
+      say "    export PATH=\"${INSTALL_DIR}:\$PATH\""
+      say "  Or add this line to your ~/.bashrc / ~/.zshrc"
+      ;;
+  esac
+
+  say ""
+  say "🎉 ${BIN_NAME} v${version} ready!"
+  say "  Run: ${BIN_NAME} version"
+  say "  Upgrade later: ${BIN_NAME} upgrade"
 }
 
-run_get_token_script() {
-    local args=()
-    if [ "$AUTO_INSTALL_MCPORTER" -eq 1 ]; then
-        args+=(--auto-install-mcporter)
-    fi
-    bash "$SCRIPT_DIR/get-token.sh" "${args[@]}"
-}
-
-refresh_token_via_login() {
-    local reason="${1:-检测到 Token 不可用}"
-    local refreshed_config=""
-    local refreshed_auth=""
-    local refreshed_token=""
-
-    echo "⚠️  ${reason}，正在通过 get-token.sh 重新获取..." >&2
-    echo "" >&2
-    run_get_token_script >&2
-
-    refreshed_config="$(get_mcporter_config)"
-    refreshed_auth="$(extract_header_value "$refreshed_config" "Authorization")"
-    refreshed_token="$(normalize_token "$refreshed_auth")"
-
-    if [ -z "$refreshed_token" ]; then
-        echo "❌ 获取 Token 失败，请手动运行：bash get-token.sh" >&2
-        exit 1
-    fi
-
-    printf '%s\n' "$refreshed_token"
-}
-
-SKILL_VERSION="$(get_skill_version)"
-if [ "$SKILL_VERSION" = "unknown" ]; then
-    echo "⚠️  未能从 SKILL.md 提取版本号，将使用 'unknown'"
-else
-    echo "✅ Skill 版本：$SKILL_VERSION"
-fi
-
-ensure_mcporter
-
-EXISTING_CONFIG="$(get_mcporter_config)"
-EXISTING_VERSION="$(extract_header_value "$EXISTING_CONFIG" "X-Skill-Version")"
-EXISTING_AUTH="$(extract_header_value "$EXISTING_CONFIG" "Authorization")"
-EXISTING_TOKEN="$(normalize_token "$EXISTING_AUTH")"
-
-LEGACY_ENV_TOKEN="${KINGSOFT_DOCS_TOKEN:-}"
-LEGACY_FILE_TOKEN="$(get_legacy_env_file_token)"
-
-TOKEN_TO_SET="$EXISTING_TOKEN"
-TOKEN_SOURCE="保留现有 mcporter 配置"
-
-if [ -n "$LEGACY_ENV_TOKEN" ]; then
-    echo "🔄 检测到旧环境变量 KINGSOFT_DOCS_TOKEN，正在迁移到 mcporter..."
-    if validate_token "$LEGACY_ENV_TOKEN"; then
-        TOKEN_TO_SET="$LEGACY_ENV_TOKEN"
-        TOKEN_SOURCE="已迁移环境变量中的有效 Token"
-    else
-        TOKEN_TO_SET="$(refresh_token_via_login "环境变量中的 Token 已失效")"
-        TOKEN_SOURCE="环境变量中的 Token 已失效，已重新登录并写入 mcporter"
-    fi
-elif [ -n "$LEGACY_FILE_TOKEN" ]; then
-    echo "🔄 检测到旧版 .env Token，正在迁移到 mcporter..."
-    if validate_token "$LEGACY_FILE_TOKEN"; then
-        TOKEN_TO_SET="$LEGACY_FILE_TOKEN"
-        TOKEN_SOURCE="已迁移 .env 中的有效 Token"
-    else
-        TOKEN_TO_SET="$(refresh_token_via_login ".env 中的 Token 已失效")"
-        TOKEN_SOURCE=".env 中的 Token 已失效，已重新登录并写入 mcporter"
-    fi
-elif [ -n "$EXISTING_TOKEN" ]; then
-    if validate_token "$EXISTING_TOKEN"; then
-        if [ -n "$EXISTING_VERSION" ] && [ "$EXISTING_VERSION" != "$SKILL_VERSION" ]; then
-            TOKEN_SOURCE="检测到版本更新，已沿用旧版 mcporter Token"
-        fi
-    else
-        TOKEN_TO_SET="$(refresh_token_via_login "检测到 mcporter 中的 Token 已失效")"
-        TOKEN_SOURCE="检测到 mcporter Token 已失效，已重新登录更新"
-    fi
-else
-    echo "⚠️  未检测到可用 Token，正在通过 get-token.sh 获取..."
-    echo ""
-    run_get_token_script
-    EXISTING_CONFIG="$(get_mcporter_config)"
-    EXISTING_AUTH="$(extract_header_value "$EXISTING_CONFIG" "Authorization")"
-    TOKEN_TO_SET="$(normalize_token "$EXISTING_AUTH")"
-    if [ -z "$TOKEN_TO_SET" ]; then
-        echo "❌ 获取 Token 失败，请手动运行：bash get-token.sh"
-        exit 1
-    fi
-    TOKEN_SOURCE="已通过 get-token.sh 写入 mcporter"
-fi
-
-write_mcporter_config "$TOKEN_TO_SET"
-cleanup_legacy_env_file
-
-echo ""
-echo "✅ 配置完成：$TOKEN_SOURCE"
-echo ""
-echo "🧪 验证配置..."
-if mcporter config get kdocs-clawhub >/dev/null 2>&1; then
-    echo "✅ 已成功写入 mcporter 配置"
-else
-    echo "⚠️  配置写入失败，请检查 mcporter 或网络环境"
-fi
-echo ""
-echo "─────────────────────────────────────"
-echo "🎉 设置完成！"
-echo ""
-echo "📖 使用方法："
-echo "   mcporter call kdocs-clawhub.scrape_url"
-echo ""
-echo "🏠 金山文档主页：https://www.kdocs.cn/latest"
-echo ""
-echo "📖 更多信息请查看 SKILL.md"
+main

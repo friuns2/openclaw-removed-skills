@@ -29,8 +29,8 @@
 5. `otl.insert_content` 写入整理后的结构化内容
 
 **按时间筛选归档**（如"一年前的文档移入归档知识库"）：
-1. `kwiki.list_items` 遍历知识库，收集所有条目的 `kuid` 和 `ctime`
+1. `kwiki.list_items` 遍历知识库，收集所有条目的 `file_id`、`ctime` 和 `drive_id`
 2. 按 `ctime` 筛选出早于指定时间的文档（如 `ctime < 当前时间戳 - 365*86400`）
-3. `kwiki.get_knowledge_view(name="归档")` 定位目标知识库（不存在则 `kwiki.create_knowledge_view` 创建）
-4. `kwiki.move_items(file_kuids=[筛选出的kuid列表], dest_drive_id=归档库drive_id, dest_parent_id="0")` 批量移入
+3. `kwiki.get_knowledge_view(name="归档")` 定位目标知识库（不存在则 `kwiki.create_knowledge_view` 创建），获取归档库 `drive_id`
+4. `move_file(drive_id=原知识库drive_id, file_ids=[筛选出的file_id列表], dst_drive_id=归档库drive_id, dst_parent_id="0")` 批量移入归档库
 5. ⚠️ 批量移动前需向用户确认文件列表
