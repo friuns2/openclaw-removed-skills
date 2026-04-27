@@ -3,11 +3,16 @@
   "slug": "plisio",
   "displayName": "Plisio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168628060,
-    "commit": "https://github.com/openclaw/skills/commit/d2fe43f39b6aa307b2c6c069ce421c4e398b76ad"
+    "version": "1.0.3",
+    "publishedAt": 1776862858487,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168628060,
+      "commit": "https://github.com/openclaw/skills/commit/d2fe43f39b6aa307b2c6c069ce421c4e398b76ad"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774667075340,
