@@ -3,9 +3,15 @@
   "slug": "workiz",
   "displayName": "Workiz",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775264628795,
-    "commit": "https://github.com/openclaw/skills/commit/745fd96bd56a59949496d5537088bd4bafd46d6d"
+    "version": "1.0.1",
+    "publishedAt": 1776882115895,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775264628795,
+      "commit": "https://github.com/openclaw/skills/commit/745fd96bd56a59949496d5537088bd4bafd46d6d"
+    }
+  ]
 }
