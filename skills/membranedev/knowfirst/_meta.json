@@ -3,11 +3,16 @@
   "slug": "knowfirst",
   "displayName": "Knowfirst",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168258359,
-    "commit": "https://github.com/openclaw/skills/commit/c80066871e7b440a6bdd0e097209650cbdcef363"
+    "version": "1.0.3",
+    "publishedAt": 1776852183195,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168258359,
+      "commit": "https://github.com/openclaw/skills/commit/c80066871e7b440a6bdd0e097209650cbdcef363"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774591364767,
