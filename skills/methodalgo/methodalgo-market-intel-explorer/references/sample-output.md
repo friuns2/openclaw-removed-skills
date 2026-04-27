@@ -22,7 +22,7 @@ The following are real structured output examples from various `methodalgo` CLI 
     "description": { "en": "...", "zh": "..." },
     "analysis": {
       "en": "Coinbase disabling Ronin trading may signal temporary disruption...",
-      "zh": "Coinbase因Ronin进入L2迁移阶段而禁用交易，可能预示..."
+      "zh": "Coinbase因Ronin进入L2迁移阶段授权而禁用交易，可能预示..."
     },
     "publish_date": "2026-03-30T19:35:00.865+00:00",
     "url": "https://ambcrypto.com/coinbase-disables-ronin-trading-..."
@@ -271,6 +271,99 @@ methodalgo calendar --countries US --json
     "source_url": "http://www.bls.gov/"
   }
 ]
+```
+
+---
+
+## 🏦 Federal Reserve Data (FRED)
+
+### 1. fred dashboard
+```json
+{
+  "command": "dashboard",
+  "sections": {
+    "RATES": {
+      "FEDFUNDS": { "value": 5.33, "date": "2024-03-01", "title": "Federal Funds Effective Rate" },
+      "DGS10": { "value": 4.25, "date": "2024-03-25", "title": "10-Year Treasury Constant Maturity Rate" }
+    },
+    "INFLATION": {
+      "T10YIE": { "value": 2.32, "date": "2024-03-25", "title": "10-Year Breakeven Inflation Rate" }
+    }
+  },
+  "liquidity": {
+    "WALCL": { "value_billions": 7450.21 },
+    "RRPONTSYD": { "value_billions": 450.12 },
+    "WTREGEN": { "value_billions": 750.45 },
+    "NET_LIQ": { "value_billions": 6249.64 }
+  },
+  "inflation_yoy": {
+    "CPI YoY": 3.15,
+    "Core PCE YoY": 2.82
+  }
+}
+```
+
+### 2. fred recession
+```json
+{
+  "command": "recession",
+  "signals": [
+    { "signal": "Yield Curve (10Y-2Y)", "status": "INVERTED", "reading": "-0.42%" },
+    { "signal": "Sahm Rule", "status": "CLEAR", "reading": "0.15pp" },
+    { "signal": "Financial Conditions (NFCI)", "status": "LOOSE", "reading": "-0.520" }
+  ],
+  "warnings": 1,
+  "total": 6
+}
+```
+
+### 3. fred liquidity (Net Liquidity Analysis)
+```json
+[
+  {
+    "date": "2024-03-20",
+    "WALCL": 7490.5,
+    "RRPONTSYD": 480.2,
+    "WTREGEN": 720.1,
+    "NET_LIQ": 6290.2
+  },
+  {
+    "date": "2024-03-27",
+    "WALCL": 7450.2,
+    "RRPONTSYD": 450.1,
+    "WTREGEN": 750.4,
+    "NET_LIQ": 6249.7
+  }
+]
+```
+> **Formula**: `NET_LIQ = WALCL - RRPONTSYD - WTREGEN`. Values in Billions of USD.
+
+### 4. fred latest
+```json
+{
+  "series_id": "FEDFUNDS",
+  "title": "Federal Funds Effective Rate",
+  "units": "Percent",
+  "date": "2024-03-01",
+  "value": 5.33
+}
+```
+
+### 5. fred zscore
+```json
+{
+  "series_id": "CPIAUCSL",
+  "title": "Consumer Price Index for All Urban Consumers: All Items in U.S. City Average",
+  "lookback": "10y",
+  "observations": 120,
+  "current": 312.23,
+  "mean": 270.45,
+  "std": 25.12,
+  "zscore": 1.66,
+  "percentile": 92.5,
+  "min": 236.12,
+  "max": 312.23
+}
 ```
 
 ---

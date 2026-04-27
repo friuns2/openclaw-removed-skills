@@ -1,12 +1,13 @@
 ---
 name: methodalgo-market-intel-explorer
-version: 1.1.1
-description: Fetches cryptocurrency news, chart snapshots, macroeconomic events data, and trading signals. Use this skill when the user wants to check the latest crypto news, market snapshots, chart screenshots, trading signals, token unlocks, ETF flows, Fear & Greed indices, and other market data.
+version: 1.2.0
+description: Fetches cryptocurrency news, chart snapshots, macroeconomic events data, federal reserve indicators (FRED), and trading signals. Use this skill when the user wants to check the latest crypto news, market snapshots, chart screenshots, trading signals, token unlocks, ETF flows, Fear & Greed indices, and macro-economic data (GDP, CPI, Liquidity, etc.).
 metadata:
   openclaw:
     requires:
       env:
-        - METHODALGO_API_KEY # Recommended for non-interactive AI environments (Highest Priority)
+        - METHODALGO_API_KEY
+        - FRED_API_KEY
       bins:
         - methodalgo
       anyBins:
@@ -23,6 +24,9 @@ credentials:
   - name: METHODALGO_API_KEY
     description: API key for the Methodalgo service. Obtain one at https://account.methodalgo.com/account/api-keys
     required: true
+  - name: FRED_API_KEY
+    description: (Optional) Your personal FRED API key for higher rate limits on macro data. Get one at https://fred.stlouisfed.org/docs/api/api_key.html
+    required: false
 provenance:
   cli: https://www.npmjs.com/package/methodalgo-cli
   source: https://github.com/methodalgo/methodalgo-market-intel-explorer
@@ -117,6 +121,9 @@ methodalgo snapshot <symbol> [tf] --url --json
 
 # Calendar
 methodalgo calendar --countries <codes> [options] --json
+
+# Federal Reserve Data (FRED)
+methodalgo fred <subcommand> [options] --json
 ```
 
 ---
@@ -347,6 +354,67 @@ methodalgo calendar --countries <codes> [options] --json
 
  ---
 
+---
+
+## 🏦 Federal Reserve Data (FRED) Command
+
+Access 800,000+ macro economic time series from FRED (Federal Reserve Economic Data) maintained by the St. Louis Fed.
+
+```bash
+methodalgo fred <subcommand> [options] --json
+```
+
+### Subcommands
+
+| Subcommand | Description | Example |
+|------------|-------------|---------|
+| `dashboard` | Full macro overview (Rates, Inflation, Liquidity, Employment, etc.) | `methodalgo fred dashboard --json` |
+| `recession` | Recession indicator scorecard (6 classic signals) | `methodalgo fred recession --json` |
+| `liquidity` | Net liquidity analysis (Fed Assets - RRP - TGA) | `methodalgo fred liquidity --json` |
+| `latest <id>`| Get the latest value for a specific series ID | `methodalgo fred latest FEDFUNDS --json` |
+| `search <q>` | Search for FRED series by keywords | `methodalgo fred search "gold price" --json` |
+| `compare <ids>`| Compare multiple series (comma-separated IDs) | `methodalgo fred compare DGS10,DGS2 --json` |
+| `changes <id>` | Show recent changes and trends for a series | `methodalgo fred changes WALCL --json` |
+| `spread <i1,i2>`| Compute difference between two series | `methodalgo fred spread T10Y2Y,T10Y3M --json` |
+| `zscore <id>` | Z-score and percentile analysis vs historical data | `methodalgo fred zscore CPIAUCSL --json` |
+
+### 💡 High-Alpha Series IDs for Crypto Traders
+
+| Category | Series ID | Name | Trading Relevance |
+|----------|-----------|------|-----------|
+| **Policy** | `FEDFUNDS` | Fed Funds Rate | Baseline for risk assets discount rate |
+| **Liquidity**| `WALCL` | Fed Total Assets | The "Money Printer" (Direct correlation with BTC) |
+| **Liquidity**| `M2SL` | M2 Money Supply | Global liquidity pool size |
+| **Liquidity**| `RRPONTSYD`| Reverse Repo | Liquidity drain (Higher = Bad for Crypto) |
+| **Liquidity**| `WTREGEN` | Treasury General Account | Gov cash (Lower = More market liquidity) |
+| **Inflation**| `CPIAUCSL` | CPI (All Items) | Inflation core driver for Fed pivots |
+| **Inflation**| `PCEPILFE` | Core PCE | Fed's internal favorite inflation gauge |
+| **Yields** | `DGS10` / `DGS2`| 10Y / 2Y Treasury | Risk-free rate (Higher = Pressure on BTC) |
+| **Real Rate**| `REAINTRATREARAT10Y` | 10Y Real Interest Rate | The true cost of money (Negative = Crypto Moon) |
+| **Currency** | `DTWEXBGS` | Dollar Index (DXY) | Inverse correlation: Strong Dollar = Weak BTC |
+| **Risk** | `VIXCLS` | VIX Fear Index | Market stress indicator |
+
+### 📈 Macro Impact Logic (Quick Guide)
+
+| Indicator | Direction | Typical Impact on Crypto |
+|-----------|-----------|--------------------------|
+| **Interest Rates** (`FEDFUNDS`, `DGS10`) | ⬆️ Increasing | **Bearish** (Higher cost of capital, attracts liquidity to bonds) |
+| **Inflation** (`CPIAUCSL`, `PCEPILFE`) | ⬆️ Above Target | **Bearish** (Forces Fed to keep rates high or hike further) |
+| **Net Liquidity** (`fred liquidity`) | ⬆️ Expanding | **Bullish** (More "excess" cash flowing into risk assets) |
+| **US Dollar** (`DTWEXBGS`) | ⬆️ Strengthening | **Bearish** (Inverse correlation with BTC price) |
+| **Real Rates** (`REAINTRATREARAT10Y`) | ⬇️ Falling/Negative| **Bullish** (Incentivizes holding non-yielding assets like Gold/BTC) |
+
+> **Macro Pro-Tip**: `methodalgo fred liquidity` automatically calculates **Net Liquidity** using `Fed Assets - RRP - TGA`. This is the single most important macro driver for Bitcoin's medium-term price action.
+### Parameters
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `--lookback` | Lookback window for trend analysis | `--lookback 5y` / `24m` / `365d` |
+| `--tail` | Show only the last N observations | `--tail 10` |
+| `--json` | Outputs structured JSON data | `--json` |
+
+---
+
 ## 🎯 Scenario Quick Look
 
 | User Intent | Command |
@@ -362,6 +430,14 @@ methodalgo calendar --countries <codes> [options] --json
 | Check Golden Pit signals | `methodalgo signals golden-pit-mtf --limit 10 --json` |
 | Check macroeconomic data (US) | `methodalgo calendar --countries US --json` |
 | Check upcoming macro events | `methodalgo calendar --countries US,EU,CN --from 2026-04-01 --json` |
+| Check global macro dashboard | `methodalgo fred dashboard --json` |
+| Check US recession risk | `methodalgo fred recession --json` |
+| Analyze macro liquidity impact on BTC | `methodalgo fred liquidity --lookback 1y --json` |
+| Compare DXY and 10Y Yields | `methodalgo fred compare DTWEXBGS,DGS10 --json` |
+| Analyze Real Interest Rate impact | `methodalgo fred zscore REAINTRATREARAT10Y --json` |
+| Compare 10Y and 2Y Treasury (Recession Warning) | `methodalgo fred spread T10Y2Y,T10Y3M --json` |
+| Search for specific economic data (e.g. Gold) | `methodalgo fred search 'Gold London Fix' --json` |
+| Get specific macro indicator (e.g. CPI) | `methodalgo fred latest CPIAUCSL --json` |
 | Get chart snapshots | `methodalgo snapshot BTCUSDT.P 60 --url --json` |
 | Incremental fetch for more signals (except token-unlock) | `methodalgo signals <channel> --limit 100 --after "msgId" --json` |
 
@@ -378,6 +454,7 @@ methodalgo calendar --countries <codes> [options] --json
 5. **Structural Inconsistency Alert**: `token-unlock` returns an object (containing a `signals` array), while other channels return an array. The AI must determine processing logic based on the `channel`.
 6. **Snapshot Screenshots**: `snapshot` returns image links via `--url` by default. Please access the visualized market charts through these links. 
 7. **Authentication Failure**: If commands fail with 401/403 errors, verify your API key at **https://account.methodalgo.com/account/api-keys** and re-run `methodalgo login`.
+8. **FRED API Key**: While Methodalgo provides macro data, you can set your own FRED key for higher limits: `methodalgo config set fred-api-key <key>`.
 
 > Github: https://github.com/methodalgo/methodalgo-market-intel-explorer
 > ClawHub: https://clawhub.ai/methodalgo/methodalgo-market-intel-explorer

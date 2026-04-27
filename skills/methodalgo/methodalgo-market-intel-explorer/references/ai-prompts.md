@@ -47,7 +47,17 @@ This document provides a series of optimized prompt examples designed to help AI
 > Note: This command returns an object; please extract `symbol`, `perc` (unlock percentage), `countDown`, and `unlockTokenVal` (unlock value) from the `signals` array. `ts` is the scheduled unlock time.
 > Highlight projects with unlock proportions exceeding 1% of the circulating supply and analyze the potential downward pressure on price.
 
-### 5. Macroeconomic Data and Volatility Analysis
+### 5. Macroeconomic Data & FRED Deep Analysis
+**Prompt**:
+> I need a comprehensive macroeconomic analysis:
+> 1. Get the global macro dashboard: `methodalgo fred dashboard --json`.
+> 2. Check the US recession scorecard: `methodalgo fred recession --json`.
+> 3. Analyze crypto-related net liquidity: `methodalgo fred liquidity --json`.
+> 4. Search for "Gold" related indicators: `methodalgo fred search 'Gold' --json`.
+>
+> Summarize the current macro environment, highlighting any "warning" or "danger" signals. Explain how current liquidity levels and recession risks might impact Bitcoin's mid-term price action.
+
+### 6. Real-time Volatility Analysis (Calendar)
 **Quick Tip**: Since macro events happen at precise times, you should fetch the latest data **immediately after the release time** (e.g., exactly at 8:30 AM ET for NFP) to capture the `actual` values for real-time volatility analysis.
 
 **Prompt Template**:
