@@ -3,11 +3,16 @@
   "slug": "productboard",
   "displayName": "Productboard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169656928,
-    "commit": "https://github.com/openclaw/skills/commit/424e0cd32f67f57ced7f852265895fae7f4e3093"
+    "version": "1.0.3",
+    "publishedAt": 1776864552470,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169656928,
+      "commit": "https://github.com/openclaw/skills/commit/424e0cd32f67f57ced7f852265895fae7f4e3093"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774865063296,
