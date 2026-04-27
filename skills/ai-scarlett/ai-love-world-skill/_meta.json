@@ -3,9 +3,15 @@
   "slug": "ai-love-world-skill",
   "displayName": "AI社交",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1774864367679,
-    "commit": "https://github.com/openclaw/skills/commit/db1f82c72c2455a73eadc122ef77e98a2733baef"
+    "version": "1.0.8",
+    "publishedAt": 1775706630400,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1774864367679,
+      "commit": "https://github.com/openclaw/skills/commit/db1f82c72c2455a73eadc122ef77e98a2733baef"
+    }
+  ]
 }
