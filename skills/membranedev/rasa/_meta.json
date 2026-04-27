@@ -3,11 +3,16 @@
   "slug": "rasa",
   "displayName": "Rasa",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168489178,
-    "commit": "https://github.com/openclaw/skills/commit/71d6305158bd4c252611dd3dac39e5bd2e847d36"
+    "version": "1.0.3",
+    "publishedAt": 1776852660670,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168489178,
+      "commit": "https://github.com/openclaw/skills/commit/71d6305158bd4c252611dd3dac39e5bd2e847d36"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774648980265,
