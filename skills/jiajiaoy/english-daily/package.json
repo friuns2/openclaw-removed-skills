@@ -1,7 +1,7 @@
 {
   "name": "english-daily",
-  "version": "1.0.0",
-  "description": "English Daily — 每日英语学习 Skill。内置A1-B2单词库，SRS间隔重复，每日推送，测验练习，进度追踪连续打卡。Built-in A1-B2 word bank, spaced repetition, daily push, quiz, streaks.",
+  "version": "1.0.2",
+  "description": "Daily English learning with spaced repetition — built-in A1–B2 word bank, new words daily, quiz mode (MCQ/fill-in/spelling), streak tracking, level progression.",
   "keywords": [
     "学英语",
     "英语单词",

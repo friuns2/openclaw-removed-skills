@@ -1,6 +1,6 @@
 ---
 name: english-daily
-description: 每日英语学习 Skill — 词汇、句子、语法训练，内置单词库（A1-B2），间隔重复记忆算法，每日推送单词+句子，测验练习，进度追踪连续打卡。触发词：学英语、英语单词、今日单词、英语练习、测验、我的进度、开启推送。/ Daily English learning: vocabulary, sentences, grammar. Built-in A1-B2 word bank, spaced repetition, daily push, quiz, progress tracking, streaks.
+description: "Daily English learning with spaced repetition — built-in A1–B2 word bank, new words daily, quiz mode (MCQ/fill-in/spelling), streak tracking, level progression."
 keywords: 学英语, 英语单词, 今日单词, 英语练习, 英语学习, 词汇, 测验, 打卡, 连续学习, 进度, 间隔重复, 每日推送, English learning, vocabulary, daily words, quiz, streak, spaced repetition, English practice, CEFR, word bank
 metadata:
   openclaw:

@@ -1,11 +1,17 @@
 {
   "owner": "jiajiaoy",
   "slug": "english-daily",
-  "displayName": "Daily English",
+  "displayName": "English Daily",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774949336755,
-    "commit": "https://github.com/openclaw/skills/commit/bfd879bb62b3be56044166c29b4c53eb1a907e7b"
+    "version": "1.0.2",
+    "publishedAt": 1777286798554,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774949336755,
+      "commit": "https://github.com/openclaw/skills/commit/bfd879bb62b3be56044166c29b4c53eb1a907e7b"
+    }
+  ]
 }
