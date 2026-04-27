@@ -3,11 +3,16 @@
   "slug": "jw-player",
   "displayName": "Jw Player",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168541476,
-    "commit": "https://github.com/openclaw/skills/commit/1a0deb4814898c125ce1c3a0afd7c324dc0acd6a"
+    "version": "1.0.3",
+    "publishedAt": 1776852686628,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168541476,
+      "commit": "https://github.com/openclaw/skills/commit/1a0deb4814898c125ce1c3a0afd7c324dc0acd6a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774656160954,
