@@ -1,11 +1,17 @@
 {
   "owner": "xuxuclassmate",
   "slug": "ai-testcase-generator",
-  "displayName": "Ai Testcase Generator Pro",
+  "displayName": "AI Test Case Generator",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775195305979,
-    "commit": "https://github.com/openclaw/skills/commit/19969cb27acb4bc27a6e64a70200cf67f8a9e700"
+    "version": "1.0.1",
+    "publishedAt": 1776836646209,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775195305979,
+      "commit": "https://github.com/openclaw/skills/commit/19969cb27acb4bc27a6e64a70200cf67f8a9e700"
+    }
+  ]
 }

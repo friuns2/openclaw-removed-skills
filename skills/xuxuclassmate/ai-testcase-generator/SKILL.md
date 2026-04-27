@@ -1,92 +1,48 @@
 ---
-name: ai-testcase-generator-pro
-version: 1.0.0
-description: AI-powered test case generator with three-persona review loop. Supports PDF, Word, TXT, images, video. Exports Excel, Markdown, XMind.
-author: XuXuClassMate
-license: MIT
-tags: [testing, qa, testcases, ai-testing, automation, openclaw]
-category: Development
-metadata:
-  openclaw:
-    requires:
-      env:
-        - ANTHROPIC_API_KEY
-      bins:
-        - node
-        - npm
-    primaryEnv: ANTHROPIC_API_KEY
-    emoji: 🧪
-    homepage: https://github.com/XuXuClassMate/testcase-generator
+name: ai-testcase-generator
+description: Use when turning requirements, screenshots, or other QA inputs into structured test cases and review questions with an AI-assisted workflow.
+tags: [testing, qa, testcases, ai, automation, review]
+version: 1.0.1
 ---
 
-# AI Test Case Generator Skill
+# AI Test Case Generator
 
-## What this skill does
+This ClawHub package is documentation-only. It does not embed runtime binaries, install scripts, or package manifests.
 
-Automatically generates structured test cases from requirement documents, UI screenshots, videos, or plain text. Supports a multi-model review loop where **Test Manager**, **Dev Manager**, and **Product Manager** personas review and score the output iteratively until quality ≥ 90/100.
+## When to use
 
-## Trigger phrases
+- A user wants test cases from a PRD, specification, screenshot, or plain text brief.
+- You need a structured review loop for QA coverage before implementation or release.
+- You want a checklist for turning requirements into executable test work.
 
-Use this skill when the user says anything like:
+## Inputs to collect
 
-- "generate test cases for …"
-- "write test cases / QA cases / test suite for …"
-- "create test plan from this requirement"
-- "review my test cases"
-- "需求评审 / 测试用例 / 生成用例"
-- Uploads a `.pdf`, `.docx`, `.txt`, image, or video file and asks about testing
+- Requirement text or a file path
+- Product stage: requirement review, implementation, or pre-release
+- Preferred output language
+- Any focus area such as security, edge cases, compatibility, or accessibility
 
-## Parameters
+## Recommended workflow
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `text` | string | — | Requirement description text |
-| `file_path` | string | — | Path to uploaded requirement file |
-| `prompt` | string | — | Custom focus hint, e.g. "focus on security" |
-| `stage` | enum | `development` | `requirement` \| `development` \| `prerelease` |
-| `language` | enum | `en` | `en` \| `zh` |
-| `enable_review` | boolean | `true` | Run multi-model review loop |
+1. Extract the core flows.
+   Identify user journeys, rules, dependencies, and constraints.
+2. Group coverage by module.
+   Organize cases by feature area, API, UI surface, or role.
+3. Add negative and edge paths.
+   Include invalid input, permission boundaries, failures, and concurrency where relevant.
+4. Run a review pass.
+   Check coverage, clarity, execution readiness, and security impact.
 
-## Output
+## Recommended outputs
 
-Returns a Markdown-formatted test case report including:
+- Test scope summary
 - Test points grouped by module
-- Full test cases with ID, steps, expected results, priority
-- Quality score (0–100) after review loop
-- Review comments from 3 reviewer personas
+- Detailed cases with steps and expected results
+- Priority or severity labels
+- Open questions for product or engineering
 
-Also saves:
-- `.xlsx` — Excel test suite (3 sheets: cases / points / stats)
-- `.xmind` — XMind mind map of test points
-- `.md` — Markdown report
+## Guardrails
 
-## Example invocations
-
-```
-Generate test cases for user login:
-- Phone + password login
-- OAuth (GitHub, Google)
-- Lock account after 5 failed attempts
-- Remember me (7-day token)
-```
-
-```
-/testgen /uploads/requirements.pdf --prompt focus on edge cases and security
-```
-
-```
-Generate Chinese test cases for the pre-release stage from this PRD
-[attaches file]
-```
-
-## Review loop scoring (100 pts)
-
-| Dimension | Max | Reviewer Focus |
-|-----------|-----|----------------|
-| Coverage | 30 | Test Manager |
-| Logic Integrity | 20 | Dev Manager |
-| Executability | 20 | Test Manager |
-| Clarity | 15 | Product Manager |
-| Security | 15 | Dev Manager |
-
-Terminates when: score ≥ 90 · OR · no new issues · OR · 5 rounds max
+- Keep uploaded requirements confidential.
+- State clearly when a case depends on missing product detail.
+- Do not claim that spreadsheet, XMind, or binary exports were produced unless an actual generator runtime was used outside this skill bundle.
