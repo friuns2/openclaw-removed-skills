@@ -3,9 +3,15 @@
   "slug": "scrapinghub",
   "displayName": "Scrapinghub",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775199866972,
-    "commit": "https://github.com/openclaw/skills/commit/b62e3345125d989f2b37bc98d12412b549d44fa8"
+    "version": "1.0.1",
+    "publishedAt": 1776881253362,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775199866972,
+      "commit": "https://github.com/openclaw/skills/commit/b62e3345125d989f2b37bc98d12412b549d44fa8"
+    }
+  ]
 }
