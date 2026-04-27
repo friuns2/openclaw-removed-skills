@@ -1,0 +1,11 @@
+{
+  "owner": "encryptshawn",
+  "slug": "n8n-qdrant",
+  "displayName": "N8N QDrant workflow expert",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775255737157,
+    "commit": null
+  },
+  "history": []
+}
