@@ -3,11 +3,16 @@
   "slug": "timewax",
   "displayName": "Timewax",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168561169,
-    "commit": "https://github.com/openclaw/skills/commit/6865f75815ea5918fd2c4ce09e5592cc5614d65b"
+    "version": "1.0.3",
+    "publishedAt": 1776870597925,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168561169,
+      "commit": "https://github.com/openclaw/skills/commit/6865f75815ea5918fd2c4ce09e5592cc5614d65b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774663395711,
