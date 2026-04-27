@@ -3,11 +3,16 @@
   "slug": "aqilla",
   "displayName": "Aqilla",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169007012,
-    "commit": "https://github.com/openclaw/skills/commit/f0deeeb8f859f6cafd037daee60c3813434bbe4b"
+    "version": "1.0.3",
+    "publishedAt": 1776885033157,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169007012,
+      "commit": "https://github.com/openclaw/skills/commit/f0deeeb8f859f6cafd037daee60c3813434bbe4b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774749802528,
