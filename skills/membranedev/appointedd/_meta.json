@@ -3,11 +3,16 @@
   "slug": "appointedd",
   "displayName": "Appointedd",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167978650,
-    "commit": "https://github.com/openclaw/skills/commit/b0db4dc3d778b6da4d4d9d5934e6702d2d1f607c"
+    "version": "1.0.3",
+    "publishedAt": 1776851736322,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167978650,
+      "commit": "https://github.com/openclaw/skills/commit/b0db4dc3d778b6da4d4d9d5934e6702d2d1f607c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774558951155,
