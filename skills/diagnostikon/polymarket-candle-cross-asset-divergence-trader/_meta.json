@@ -1,11 +1,17 @@
 {
   "owner": "diagnostikon",
   "slug": "polymarket-candle-cross-asset-divergence-trader",
-  "displayName": "Candle Cross-Asset Divergence Trader",
+  "displayName": "Polymarket Candle Cross Asset Divergence Trader",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774768544493,
-    "commit": "https://github.com/openclaw/skills/commit/71ae979c2d1f184fb20f1f65a61661b9c8c5a496"
+    "version": "0.0.2",
+    "publishedAt": 1776513198351,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774768544493,
+      "commit": "https://github.com/openclaw/skills/commit/71ae979c2d1f184fb20f1f65a61661b9c8c5a496"
+    }
+  ]
 }
