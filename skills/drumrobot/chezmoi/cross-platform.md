@@ -76,6 +76,19 @@ cat | jq '...'
 cat | jq '...' | tr -d '\r'
 ```
 
+> **Warning: Do NOT use `tr -d '\r'` when the original file is CRLF!**
+> Windows-native apps (e.g. SourceGit `preference.json`) write CRLF. Stripping `\r` causes every line to show as changed.
+>
+> **Check original line endings:**
+> ```bash
+> xxd <target_file> | head -3  # 0d0a = CRLF, 0a = LF
+> ```
+>
+> | Original | Action |
+> |----------|--------|
+> | LF (`0a`) | Add `\| tr -d '\r'` |
+> | CRLF (`0d0a`) | Do NOT add `tr -d '\r'` — jq CRLF output matches the original |
+
 ### 3. Template Output Function Paths
 
 When chezmoi template's `output` function directly executes `.sh` scripts, it fails on Windows.
@@ -148,14 +161,28 @@ echo "${INPUT:-{\}}" | jq '...'
 {{- if eq .chezmoi.os "windows" }}
 # Ignore macOS-only paths
 */darwin_*
+karabiner
 Library
 {{- end }}
 
 {{- if ne .chezmoi.os "windows" }}
 # Ignore Windows-only paths
 AppData
+OneDrive
 {{- end }}
 ```
+
+**OS-specific top-level directory mapping:**
+
+| Source Directory | OS | .chezmoiignore Entry |
+|---|---|---|
+| `private_Library/` | macOS | `Library` (ignored on Windows) |
+| `AppData/` | Windows | `AppData` (ignored on macOS) |
+| `OneDrive/` | Windows | `OneDrive` (ignored on macOS) |
+| `*/darwin_*` | macOS | chezmoiscripts etc. (ignored on Windows) |
+| `karabiner` | macOS | (ignored on Windows) |
+
+**When adding a new OS-specific top-level directory, it must be registered in `.chezmoiignore`.** See procedure below.
 
 ## Adding a New App Workflow
 
@@ -189,9 +216,25 @@ mkdir -p ~/.local/share/chezmoi/AppData/Local/AppName
 # Syncthing has a different API path, so a separate script is needed
 ```
 
-### 4. Check .chezmoiignore
+### 4. Update .chezmoiignore
 
-If macOS paths are under `Library` and Windows paths are under `AppData`, existing ignore rules handle them automatically.
+If a new top-level directory is **OS-specific**, it must be registered in `.chezmoiignore`.
+
+**Auto-check commands:**
+```bash
+# List top-level directories in chezmoi source
+ls -d ~/.local/share/chezmoi/*/ | sed 's|.*/chezmoi/||;s|/$||' \
+  | sed 's/^private_//;s/^dot_/./;s/^exact_//'
+
+# Check paths registered in .chezmoiignore
+chezmoi execute-template < ~/.local/share/chezmoi/.chezmoiignore
+```
+
+Compare the two outputs:
+- macOS-specific directories (`Library`, `karabiner`, etc.) should be in the `if eq .chezmoi.os "windows"` block
+- Windows-specific directories (`AppData`, `OneDrive`, etc.) should be in the `if ne .chezmoi.os "windows"` block
+
+Insert missing entries in **alphabetical order** within the appropriate block.
 
 ### 5. Verification
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# SourceGit Custom Action: 특정 폴더를 추가해서 Claude Code 실행
+# SourceGit Custom Action: Launch Claude Code with a specific folder added
 
 REPO="$1"
 CMD="cd \$HOME/works/.vscode && claude --add-dir '$REPO' --dangerously-skip-permissions --resume"
@@ -26,7 +26,7 @@ end tell
 EOF
 }
 
-# Tabby 설치 확인 후 실행, 없으면 Terminal fallback
+# Run Tabby if installed, otherwise fallback to Terminal
 if open -Ra "Tabby" 2>/dev/null; then
     run_tabby
 else

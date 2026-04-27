@@ -65,9 +65,18 @@ chezmoi diff
 chezmoi apply
 ```
 
+## Immediate Consolidation Principle
+
+**When copying a modify script via `cp` to a cross-platform path, if the content is identical, immediately extract to `.chezmoi-lib/` and convert to a thin wrapper.**
+
+- No "consolidate later" after `cp` — consolidate at the time of copy
+- If no existing `.chezmoi-lib/` script exists, create a new one
+- If already a wrapper calling a shared script, copy as-is
+
 ## Consolidation Checklist
 
 - [ ] Compare template hashes for duplicates
+- [ ] **If a newly copied file is identical to an existing file, immediately extract to shared script**
 - [ ] Extract common parts
 - [ ] Separate per-app differences via environment variables
 - [ ] Verify shared script execution permissions
@@ -82,3 +91,4 @@ chezmoi apply
 | `mcp-servers.sh` | MCP server injection | - |
 | `generate-utcp-config.sh` | UTCP config generation | - |
 | `sourcegit-preference.sh` | SourceGit CustomActions | `SOURCEGIT_EXECUTABLE` |
+| `powershell-profile.sh` | PowerShell profile (pwsh + WindowsPowerShell) | - |

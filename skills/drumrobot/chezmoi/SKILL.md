@@ -1,6 +1,6 @@
 ---
 name: chezmoi
-depends-on: [skill-toolkit]
+depends-on: [skill-kit]
 description: chezmoi dotfile management. consolidate - merge duplicate templates [consolidate.md], cross-platform - Windows/macOS compatibility [cross-platform.md], doctor - check required files and copy if missing [doctor.md], mcp-sync - MCP server synchronization [mcp-sync.md]. For commit splitting → commit-splitter. Use when "chezmoi consolidate", "duplicate templates", "MCP sync", "chezmoi Windows", "cross platform", "utcp to mcp", "move to global mcp", "chezmoi mcp migration", "chezmoi doctor", "missing script", "SourceGit".
 ---
 

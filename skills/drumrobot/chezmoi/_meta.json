@@ -1,11 +1,17 @@
 {
   "owner": "drumrobot",
   "slug": "chezmoi",
-  "displayName": "Chezmoi Dotfile Manager",
+  "displayName": "chezmoi",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774932168979,
-    "commit": "https://github.com/openclaw/skills/commit/359ec047c3f655d1d1df265e562176f40f991e7b"
+    "version": "0.1.1",
+    "publishedAt": 1775901709588,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774932168979,
+      "commit": "https://github.com/openclaw/skills/commit/359ec047c3f655d1d1df265e562176f40f991e7b"
+    }
+  ]
 }
