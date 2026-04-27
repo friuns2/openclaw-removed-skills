@@ -3,9 +3,15 @@
   "slug": "upkeep",
   "displayName": "Upkeep",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286455653,
-    "commit": "https://github.com/openclaw/skills/commit/5b738302c2e1c5112f0f10d7c0a2b796a84656c4"
+    "version": "1.0.1",
+    "publishedAt": 1776885660576,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286455653,
+      "commit": "https://github.com/openclaw/skills/commit/5b738302c2e1c5112f0f10d7c0a2b796a84656c4"
+    }
+  ]
 }
