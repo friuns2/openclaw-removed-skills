@@ -3,11 +3,16 @@
   "slug": "easyly",
   "displayName": "Easyly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167894012,
-    "commit": "https://github.com/openclaw/skills/commit/4a76ea866a0b43b7f3e84b9649957335fb34ea48"
+    "version": "1.0.3",
+    "publishedAt": 1776861883537,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167894012,
+      "commit": "https://github.com/openclaw/skills/commit/4a76ea866a0b43b7f3e84b9649957335fb34ea48"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774523012823,
