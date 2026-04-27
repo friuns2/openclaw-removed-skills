@@ -3,11 +3,16 @@
   "slug": "outfit",
   "displayName": "Outfit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169431470,
-    "commit": "https://github.com/openclaw/skills/commit/bd41ab2be6f0bda6305714604398ff23a2b5cd03"
+    "version": "1.0.3",
+    "publishedAt": 1776855230952,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169431470,
+      "commit": "https://github.com/openclaw/skills/commit/bd41ab2be6f0bda6305714604398ff23a2b5cd03"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774832576741,
