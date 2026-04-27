@@ -3,11 +3,16 @@
   "slug": "textline",
   "displayName": "Textline",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170529611,
-    "commit": "https://github.com/openclaw/skills/commit/9e40e498e8f05b089bcbdf8515719189e0004893"
+    "version": "1.0.3",
+    "publishedAt": 1776857429696,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170529611,
+      "commit": "https://github.com/openclaw/skills/commit/9e40e498e8f05b089bcbdf8515719189e0004893"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775041375091,
