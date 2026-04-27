@@ -3,11 +3,16 @@
   "slug": "alibabacloud-polardb-ai-assistant",
   "displayName": "Alibabacloud Polardb Ai Assistant",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775625012269,
-    "commit": "https://github.com/openclaw/skills/commit/8eacd518cc5a80e2cebc975c86ab8deb060f0267"
+    "version": "0.0.2",
+    "publishedAt": 1776825587154,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775625012269,
+      "commit": "https://github.com/openclaw/skills/commit/8eacd518cc5a80e2cebc975c86ab8deb060f0267"
+    },
     {
       "version": "0.0.1-beta.1",
       "publishedAt": 1775200462458,
