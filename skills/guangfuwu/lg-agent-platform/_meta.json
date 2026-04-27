@@ -1,13 +1,18 @@
 {
   "owner": "guangfuwu",
   "slug": "lg-agent-platform",
-  "displayName": "LG Data Stock Monitor",
+  "displayName": "Lg Agent Platform",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1775707360038,
-    "commit": "https://github.com/openclaw/skills/commit/b2ad6a6dd08a246369c3dff56f6632b35452e0d5"
+    "version": "1.0.11",
+    "publishedAt": 1776852561036,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1775707360038,
+      "commit": "https://github.com/openclaw/skills/commit/b2ad6a6dd08a246369c3dff56f6632b35452e0d5"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775130094291,
