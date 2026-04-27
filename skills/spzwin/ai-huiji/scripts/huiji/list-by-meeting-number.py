@@ -47,7 +47,7 @@ def setup_utf8_stdio():
 setup_utf8_stdio()
 
 
-API_URL = "https://sg-al-ai-voice-assistant.mediportal.com.cn/api/open-api/ai-huiji/meetingChat/listHuiJiIdsByMeetingNumber"
+API_URL = "https://sg-al-ai-voice-assistant.mediportal.com.cn/api/open-api/ai-huiji/meetingChat/listHuiJiIdsByMeetingNumberV2"
 MAX_RETRIES = 3
 RETRY_DELAY = 1
 
@@ -65,12 +65,12 @@ def ts_to_str(ts_ms):
         return str(ts_ms)
 
 
-def duration_to_str(ms_start, ms_end):
-    """两个毫秒时间戳之间的时长 → 人类可读"""
-    if ms_start is None or ms_end is None:
+def duration_to_str(ms):
+    """毫秒时长 → 人类可读"""
+    if ms is None:
         return "-"
     try:
-        total_sec = int((ms_end - ms_start) / 1000)
+        total_sec = int(ms / 1000)
         h, remainder = divmod(total_sec, 3600)
         m, s = divmod(remainder, 60)
         if h > 0:
@@ -131,24 +131,22 @@ def format_human(result: dict) -> str:
 
     lines = [f"共 {len(data)} 条记录：\n"]
 
+    # recordState 映射
+    RECORD_STATE = {0: ("🟢", "进行中"), 1: ("⏳", "处理中"), 2: ("✅", "已完成"), 3: ("❌", "失败")}
+
     for i, item in enumerate(data, 1):
-        chat_id = item.get("chatId", "")
-        is_open = item.get("open", False)
-        is_done = item.get("isDoneRecordingFile", False)
-        start = ts_to_str(item.get("startTime"))
-        stop = ts_to_str(item.get("stopTime"))
-        length = duration_to_str(item.get("startTime"), item.get("stopTime"))
+        chat_id = item.get("_id", "")
+        name = item.get("name", "（无名称）")
+        record_state = item.get("recordState", -1)
+        create = ts_to_str(item.get("createTime"))
+        finish = ts_to_str(item.get("finishTime"))
+        length = duration_to_str(item.get("meetingLength"))
 
-        if is_open:
-            status = "🟢 进行中"
-        elif is_done:
-            status = "✅ 已结束（录音完成）"
-        else:
-            status = "⏳ 已结束（录音处理中）"
+        icon, state_label = RECORD_STATE.get(record_state, ("❓", "未知"))
 
-        lines.append(f"{i}. {status}")
-        lines.append(f"   开始: {start} | 结束: {stop} | 时长: {length}")
-        lines.append(f"   chatId: {chat_id}")
+        lines.append(f"{i}. {icon} **{name}** ({state_label})")
+        lines.append(f"   开始: {create} | 结束: {finish} | 时长: {length}")
+        lines.append(f"   ID: {chat_id}")
         lines.append("")
 
     return "\n".join(lines)

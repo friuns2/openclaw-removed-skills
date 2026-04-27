@@ -7,7 +7,7 @@ huiji / split-record-list-v2 脚本
 使用方式：
   python3 scripts/huiji/split-record-list-v2.py [--body '<json>'] <meetingChatId> [lastStartTime]
 
-  # 基本用法（全量，等同于 4.4）
+  # 基本用法（全量，等同于 splitRecordList）
   python3 split-record-list-v2.py abc123
 
   # 增量（只拉 startTime > 120034 的分片）

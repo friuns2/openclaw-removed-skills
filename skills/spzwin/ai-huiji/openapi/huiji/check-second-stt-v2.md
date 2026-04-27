@@ -30,14 +30,14 @@
 | state | 含义 | 处理方式 |
 |---|---|---|
 | `2` | 成功 | 优先使用 `sttPartList` 作为原文（最优） |
-| `1` | 处理中 | 提示改写中，用缓存或 4.4 分片兜底 |
-| `3` | 失败 | fallback 到 4.4 全量兜底 |
+| `1` | 处理中 | 提示改写中，用缓存或 splitRecordList 分片兜底 |
+| `3` | 失败 | fallback 到 splitRecordList 全量兜底 |
 
 ## ⚠️ 容错规则
 
-- **刚结束的会议**：改写可能尚未开始，4.8 可能返回空或 state=1。此时 **4.4 是唯一来源**，不可因 4.8 无数据而报错
-- **sttPartList 为空**：即使 state=2，若 `sttPartList` 为空或无法解析，仍 fallback 到 4.4
-- **永远不向用户报错**：4.8 失败时静默切换到 4.4
+- **刚结束的会议**：改写可能尚未开始，checkSecondSttV2 可能返回空或 state=1。此时 **splitRecordList 是唯一来源**，不可因 checkSecondSttV2 无数据而报错
+- **sttPartList 为空**：即使 state=2，若 `sttPartList` 为空或无法解析，仍 fallback 到 splitRecordList
+- **永远不向用户报错**：checkSecondSttV2 失败时静默切换到 splitRecordList
 
 ## 请求示例
 

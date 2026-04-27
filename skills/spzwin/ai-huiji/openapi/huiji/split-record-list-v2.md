@@ -2,7 +2,7 @@
 
 ## 作用
 
-增量查询指定慧记的分片转写原文。在 4.4 的基础上增加 `lastStartTime` 参数，传入时仅返回 `startTime` 大于该值的分片，用于减少重复传输。
+增量查询指定慧记的分片转写原文。在 splitRecordList 的基础上增加 `lastStartTime` 参数，传入时仅返回 `startTime` 大于该值的分片，用于减少重复传输。
 
 ## 鉴权
 
@@ -17,7 +17,7 @@
 
 ## 响应参数
 
-`data` 类型为 `List<SplitRecordVO>`，字段同 4.4：
+`data` 类型为 `List<SplitRecordVO>`，字段同 splitRecordList：
 
 | 字段 | 类型 | 说明 |
 |---|---|---|
@@ -28,14 +28,14 @@
 ## 使用说明
 
 - **增量模式**：传入 `lastStartTime`（取上次缓存中最大分片的 startTime），仅返回新分片
-- **全量模式**：不传 `lastStartTime`，行为与 4.4 一致
+- **全量模式**：不传 `lastStartTime`，行为与 splitRecordList 一致
 - `startTime` 为 null 的分片在增量模式下会被过滤掉
 - 适用于进行中会议的轮询拉取，配合本地缓存使用
 
 ## 请求示例
 
 ```bash
-# 全量（等同于 4.4）
+# 全量（等同于 splitRecordList）
 python3 scripts/huiji/split-record-list-v2.py abc123
 
 # 增量（只拉 startTime > 120034 的新分片）

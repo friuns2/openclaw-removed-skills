@@ -12,7 +12,7 @@
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
-| `meetingChatId` | String | 是 | 慧记 ID（来自 4.1 的 `_id` 或 4.11 的 `chatId`） |
+| `meetingChatId` | String | 是 | 慧记 ID（来自 chatListByPage 的 `_id` 或 listHuiJiIdsByMeetingNumberV2 的 `_id`） |
 
 ## 响应参数
 
@@ -27,7 +27,7 @@
 ## 使用说明
 
 - 返回的分片按 `startTime` 排序后拼接 `text`，即为完整的转写原文
-- `startTime` 是相对录音起点的毫秒偏移，用于 4.10 增量查询的游标
+- `startTime` 是相对录音起点的毫秒偏移，用于 splitRecordListV2 增量查询的游标
 - 适用于进行中会议的实时转写和已结束会议的兜底原文
 
 ## 请求示例

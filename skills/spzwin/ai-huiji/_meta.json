@@ -3,11 +3,16 @@
   "slug": "ai-huiji",
   "displayName": "AI慧记",
   "latest": {
-    "version": "2.5.1",
-    "publishedAt": 1776247539816,
-    "commit": "https://github.com/openclaw/skills/commit/ba0269faee9eb4399c80e70bea26ac00663b373c"
+    "version": "2.6.0",
+    "publishedAt": 1776744920625,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.5.1",
+      "publishedAt": 1776247539816,
+      "commit": "https://github.com/openclaw/skills/commit/ba0269faee9eb4399c80e70bea26ac00663b373c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774858541770,

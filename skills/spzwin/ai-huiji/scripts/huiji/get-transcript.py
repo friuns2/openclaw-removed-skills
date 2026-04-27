@@ -8,7 +8,7 @@ AI 只需调用此脚本，无需关心底层接口差异：
   python3 get-transcript.py <meetingChatId> [--name "会议名称"]
 
 双缓存机制：
-  - {chatId}_live.json  — 进行中的实时数据（4.4 全量 + 4.10 增量）
+  - {chatId}_live.json  — 进行中的实时数据（splitRecordList 全量 + splitRecordListV2 增量）
   - {chatId}_final.json — 结束后的二次改写数据（checkSecondSttV2，质量更高）
 
 优先级：_final > _live > 全量拉取
@@ -171,7 +171,7 @@ def build_full_text(fragments: list) -> str:
 
 
 def parse_live_fragments(raw_data) -> list:
-    """解析 4.4/4.10 返回的分片数据"""
+    """解析 splitRecordList/splitRecordListV2 返回的分片数据"""
     fragments = []
     if isinstance(raw_data, list):
         for f in raw_data:
@@ -347,7 +347,7 @@ def main():
 
     # ========== 优先级 3：实时拉取 ==========
     if live_cache and live_cache.get("lastStartTime") is not None:
-        # 有 _live 缓存 → 增量拉取（4.10）
+        # 有 _live 缓存 → 增量拉取（splitRecordListV2）
         result = call_api(API_INCR, {
             "meetingChatId": chat_id,
             "lastStartTime": live_cache["lastStartTime"]
@@ -356,7 +356,7 @@ def main():
         new_fragments = parse_live_fragments(result.get("data", []))
         all_fragments = merge_fragments(live_cache.get("fragments", []), new_fragments)
     else:
-        # 无缓存 → 全量拉取（4.4）
+        # 无缓存 → 全量拉取（splitRecordList）
         result = call_api(API_FULL, {"meetingChatId": chat_id})
         source = "full"
         all_fragments = parse_live_fragments(result.get("data", []))
