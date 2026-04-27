@@ -3,11 +3,16 @@
   "slug": "dyspatch",
   "displayName": "Dyspatch",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170909023,
-    "commit": "https://github.com/openclaw/skills/commit/0edfebfb80f4f6c5cc2609ee7a1be62d630ebd0f"
+    "version": "1.0.3",
+    "publishedAt": 1776898935417,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170909023,
+      "commit": "https://github.com/openclaw/skills/commit/0edfebfb80f4f6c5cc2609ee7a1be62d630ebd0f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775117088189,
