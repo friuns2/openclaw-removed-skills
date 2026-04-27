@@ -1,11 +1,17 @@
 {
   "owner": "141553",
   "slug": "long-term-plan",
-  "displayName": "长期计划推进",
+  "displayName": "Long Term Plan",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1774959899143,
-    "commit": "https://github.com/openclaw/skills/commit/25c9c5c90982f910aedc4ea8a91ab99336135cb5"
+    "version": "1.2.0",
+    "publishedAt": 1777110976876,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1774959899143,
+      "commit": "https://github.com/openclaw/skills/commit/25c9c5c90982f910aedc4ea8a91ab99336135cb5"
+    }
+  ]
 }
