@@ -3,11 +3,16 @@
   "slug": "pipefy",
   "displayName": "Pipefy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168307707,
-    "commit": "https://github.com/openclaw/skills/commit/6917c1f85276d5c021bda7c87af945020f2c87aa"
+    "version": "1.0.3",
+    "publishedAt": 1776862346435,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168307707,
+      "commit": "https://github.com/openclaw/skills/commit/6917c1f85276d5c021bda7c87af945020f2c87aa"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774602231928,
