@@ -3,11 +3,16 @@
   "slug": "zoho-assist",
   "displayName": "Zoho Assist",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168983375,
-    "commit": "https://github.com/openclaw/skills/commit/373fd0e5a4bd041d6396fbf46c47e4c0a6935aea"
+    "version": "1.0.3",
+    "publishedAt": 1776854051146,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168983375,
+      "commit": "https://github.com/openclaw/skills/commit/373fd0e5a4bd041d6396fbf46c47e4c0a6935aea"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774746154265,
