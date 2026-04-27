@@ -3,9 +3,15 @@
   "slug": "lucidworks",
   "displayName": "Lucidworks",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170073049,
-    "commit": "https://github.com/openclaw/skills/commit/9eda40f560927997ccb261f4a8e083438c467582"
+    "version": "1.0.3",
+    "publishedAt": 1776885710180,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170073049,
+      "commit": "https://github.com/openclaw/skills/commit/9eda40f560927997ccb261f4a8e083438c467582"
+    }
+  ]
 }
