@@ -3,11 +3,16 @@
   "slug": "neuronwriter",
   "displayName": "Neuronwriter",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168526156,
-    "commit": "https://github.com/openclaw/skills/commit/ed052ac7b83efcedb03ab7a47b32cd6fab3ad6b9"
+    "version": "1.0.3",
+    "publishedAt": 1776862731562,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168526156,
+      "commit": "https://github.com/openclaw/skills/commit/ed052ac7b83efcedb03ab7a47b32cd6fab3ad6b9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652703241,
