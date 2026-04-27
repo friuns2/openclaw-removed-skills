@@ -1,7 +1,7 @@
 ---
 name: paynode-402
 description: Dynamic Premium API Marketplace for AI Agents. Grants access to an ever-expanding registry of real-time external tools (e.g., web search, crypto oracles, web scraping, and more) via USDC micro-payments. Use this WHENEVER you need real-time data, external API interactions, or when your built-in knowledge is insufficient.
-version: 2.7.4
+version: 2.7.5
 metadata:
   openclaw:
     homepage: https://github.com/PayNodeLabs/paynode-402-cli
@@ -24,7 +24,7 @@ metadata:
         tasks              Manage background tasks
 ---
 
-# 💳 PayNode 402 CLI Skill (v2.7.1)
+# 💳 PayNode 402 CLI Skill (v2.7.2)
 
 > Official ClawHub-compliant skill for PayNode protocol execution.
 
@@ -36,7 +36,7 @@ Before installing or activating this skill, please review the following critical
 - **Config File Fallback**: This skill reads `~/.config/paynode/config.json` if the env var is missing. Ensure you verify the contents of this file in your environment.
 - **Supply Chain & Auditability**: The [PayNode CLI](https://github.com/PayNodeLabs/paynode-402-cli) and its core dependency [@paynodelabs/sdk-js](https://github.com/PayNodeLabs/paynode-sdk-js) are **100% Open Source** and verifiable. While we use `bunx` for its seamless update delivery, strict environments should **Git clone & audit** the source code and use a local build:
   - _Local Install Path_: `git clone ... && bun link` then use `paynode-402` directly instead of `bunx`.
-- **Runtime Transparency**: The CLI v2.7.1+ is designed to be deterministic. You can pin specific versions via `bunx @paynodelabs/paynode-402-cli@<VERSION>` to prevent auto-updates in critical workflows.
+- **Runtime Transparency**: The CLI v2.7.2+ is designed to be deterministic. You can pin specific versions via `bunx @paynodelabs/paynode-402-cli@<VERSION>` to prevent auto-updates in critical workflows.
 - **Sandbox First**: Always test in a sandbox or with Testnet (`--network testnet`) before proceeding to real-value transactions.
 
 This skill provides autonomous payment capabilities for HTTP 402 (Payment Required) challenges on Base L2.
@@ -59,7 +59,7 @@ To comply with **ClawHub Safety Standards**, the Agent MUST strictly follow thes
 2. **Mainnet YES-Confirmation**: Before calling `request` or `invoke-paid-api` on **Mainnet**, the Agent MUST explicitly prompt the user: "Allow payment of <PRICE> on Mainnet?". Proceed ONLY on "YES". Read-only inspection commands may still require `--confirm-mainnet` because of CLI safety policy, but they must not be represented as user-approved spending actions.
 3. **Data Path Isolation**: The `data_binary` field returns a local filesystem path. Only read this path if generated during the current session's request.
 4. **No Parameter Hallucination**: ALWAYS call `get-api-detail <ID>` to fetch the correct `input_schema` and `sample_response` before execution.
-5. **Clean Logs**: The CLI (v2.7.1+) automatically silences internal logs in `--json` mode. You should expect pure, parseable JSON on `stdout`.
+5. **Clean Logs**: The CLI (v2.7.2+) automatically silences internal logs in `--json` mode. You should expect pure, parseable JSON on `stdout`.
 6. **Financial Optimization (CRITICAL)**: Paid APIs cost real USDC. YOU MUST NOT call the same paid API multiple times for the same context. ALWAYS pipe output to a temporary file (e.g., `... > /tmp/res.json`) and parse locally to save costs.
 
 ## 💡 Quick Start (Success Path)
@@ -133,7 +133,7 @@ bunx @paynodelabs/paynode-402-cli list-paid-apis --network mainnet --confirm-mai
 
 - **`402 Handshake Failure`**: Ensure `CLIENT_PRIVATE_KEY` is valid and the wallet has a tiny amount of native ETH for base fee, even on Testnet.
 - **`Insufficient USDC`**: Run `check` to verify your balance. On Testnet, use `mint` to get 1000 USDC instantly.
-- **`Provider Error`**: High RPC latency can skip verification. The CLI v2.7.1 includes 3x retry logic, but ensure your network connection is stable.
+- **`Provider Error`**: High RPC latency can skip verification. The CLI v2.7.2 includes 3x retry logic and enhanced X402 v2 (CoinGecko/Coinbase) protocol support, but ensure your network connection is stable.
 - **`Transaction Pending`**: Wait 5-10 seconds for L2 finality. Use [BaseScan](https://basescan.org) to verify:
   - Track transactions: `https://basescan.org/tx/<TX_HASH>`
   - Check wallet status: `https://basescan.org/address/<YOUR_ADDRESS>`
