@@ -3,11 +3,16 @@
   "slug": "acquire",
   "displayName": "Acquire",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168043136,
-    "commit": "https://github.com/openclaw/skills/commit/69ed4fa10569563b9d46f674a893a57a0e2e59b3"
+    "version": "1.0.3",
+    "publishedAt": 1776851769552,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168043136,
+      "commit": "https://github.com/openclaw/skills/commit/69ed4fa10569563b9d46f674a893a57a0e2e59b3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774566151987,
