@@ -4,31 +4,53 @@
 /**
  * 二维码生成器（基于本地 qrcode.min.js，无外部依赖）
  * 返回 base64 格式的 PNG 图片
+ *
+ * 安全设计：
+ *  1. 短链接服务为可选功能，默认关闭，需通过 --short-url 标志显式开启
+ *  2. 生成的图片统一写入系统临时目录（os.tmpdir()），不写入当前工作目录
+ *  3. payUrl 必须以 https:// 开头才会被处理
  */
 
-const fs = require('fs');
+const fs   = require('fs');
 const path = require('path');
-const vm = require('vm');
+const os   = require('os');
+const vm   = require('vm');
 const zlib = require('zlib');
 
-
-const https = require('https');
+const https       = require('https');
 const querystring = require('querystring');
 
+// ─── payUrl 安全校验 ────────────────────────────────────────────────────────
+
 /**
- * 封装 dxmpay 短链接创建接口
- * @param {string} longUrl - 需要生成短链的原始URL
- * @returns {Promise<object>} 接口返回的JSON结果
+ * 校验 payUrl 安全性：
+ *  - 必须是 string 类型
+ *  - 必须以 https:// 开头
+ *  - 域名必须严格为 www.dxmpay.com（防止任意外部域名注入）
+ * @param {string} url
+ * @returns {boolean}
+ */
+function isSafePayUrl(url) {
+  if (typeof url !== 'string') return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && parsed.hostname === 'www.dxmpay.com';
+  } catch {
+    return false;
+  }
+}
+
+// ─── 可选：dxmpay 短链接接口（默认不调用）──────────────────────────────────
+
+/**
+ * 封装 dxmpay 短链接创建接口（仅在 --short-url 标志开启时调用）
+ * @param {string} longUrl - 需要生成短链的原始 URL（已通过安全校验）
+ * @returns {Promise<object>} 接口返回的 JSON 结果
  */
 async function createDxmShortUrl(longUrl) {
   return new Promise((resolve, reject) => {
-    // 接口参数
-    const postData = querystring.stringify({
-      version: '2',
-      url: longUrl
-    });
+    const postData = querystring.stringify({ version: '2', url: longUrl });
 
-    // 请求配置
     const options = {
       hostname: 'www.dxmpay.com',
       port: 443,
@@ -36,40 +58,28 @@ async function createDxmShortUrl(longUrl) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(postData)
+        'Content-Length': Buffer.byteLength(postData),
       },
-      secureOptions: require('crypto').constants.SSL_OP_LEGACY_SERVER_CONNECT                  
+      secureOptions: require('crypto').constants.SSL_OP_LEGACY_SERVER_CONNECT,
     };
 
-    // 发送请求
     const req = https.request(options, (res) => {
       let result = '';
-      res.on('data', (chunk) => {
-        result += chunk;
-      });
-
+      res.on('data', (chunk) => { result += chunk; });
       res.on('end', () => {
-        try {
-          // 解析JSON返回
-          const jsonRes = JSON.parse(result);
-          resolve(jsonRes);
-        } catch (e) {
-          resolve(result);
-        }
+        try { resolve(JSON.parse(result)); }
+        catch (e) { resolve(result); }
       });
     });
 
-    req.on('error', (e) => {
-      reject(e);
-    });
-
+    req.on('error', reject);
     req.write(postData);
     req.end();
   });
 }
 
 
-// ─── 加载本地 QRCode 库 ────────────────────────────────────────────────────
+// ─── 加载本地 QRCode 库 ─────────────────────────────────────────────────────
 
 function loadQRCodeLib() {
   const libPath = path.join(__dirname, 'qrcode.min.js');
@@ -148,29 +158,49 @@ function encodePNG(width, height, rgbaPixels) {
 
 /**
  * 生成二维码，返回统一结构
- * @param {string} text  要编码的内容
+ * @param {string} text  要编码的内容（必须通过 isSafePayUrl 校验）
  * @param {object} [options]
- * @param {number} [options.scale=8]              每个模块的像素大小
- * @param {number} [options.margin=4]             边距（模块单位）
- * @param {string} [options.errorCorrectionLevel] 'L'|'M'|'Q'|'H'，默认 'M'
- * @param {boolean} [options.saveToFile=false]    是否保存图片到文件
- * @param {string} [options.fileName]             文件名（默认：qrcode_时间戳.png）
- * @returns {{ success: boolean, message: string, data: { qrBase64: string, filePath?: string } | null }}
+ * @param {number}  [options.scale=8]               每个模块的像素大小
+ * @param {number}  [options.margin=4]              边距（模块单位）
+ * @param {string}  [options.errorCorrectionLevel]  'L'|'M'|'Q'|'H'，默认 'M'
+ * @param {boolean} [options.enableShortUrl=false]  是否调用 dxmpay 短链接服务（默认关闭）
+ * @param {string}  [options.outDir]                文件写入目录（默认 os.tmpdir()）
+ * @param {string}  [options.fileName]              文件名（默认：qrcode.png）
+ * @returns {{ success: boolean, message: string, data: { qr: string, fp: string } | null }}
  */
 async function generateQRCode(text, options = {}) {
   try {
+    // ── 安全校验：仅允许 https://www.dxmpay.com/ 域名 ───────────────────────
+    if (!isSafePayUrl(text)) {
+      return {
+        success: false,
+        message: '生成二维码失败: payUrl 必须以 https://www.dxmpay.com/ 开头',
+        data: null,
+      };
+    }
+
     const QRCode = loadQRCodeLib();
 
     const scale  = options.scale  || 8;
     const margin = options.margin !== undefined ? options.margin : 4;
     const ecl    = options.errorCorrectionLevel || 'M';
-    const shortUrlResult = await createDxmShortUrl(text);
-    if (shortUrlResult && shortUrlResult.content&&shortUrlResult.content.tinyurl) {
-      text = "https://www."+shortUrlResult.content.tinyurl;
+
+    // ── 可选短链接（默认不调用外部服务）───────────────────────────────────
+    if (options.enableShortUrl === true) {
+      try {
+        const shortUrlResult = await createDxmShortUrl(text);
+        if (shortUrlResult && shortUrlResult.content && shortUrlResult.content.tinyurl) {
+          text = 'https://www.' + shortUrlResult.content.tinyurl;
+        }
+      } catch (e) {
+        // 短链接失败不影响主流程，使用原始 URL 继续
+        process.stderr.write('[warn] 短链接服务不可用，使用原始 URL: ' + e.message + '\n');
+      }
     }
-    const qr = QRCode.create(text, { errorCorrectionLevel: ecl });
+
+    const qr      = QRCode.create(text, { errorCorrectionLevel: ecl });
     const modules = qr.modules;
-    const size    = modules.size;   // 模块矩阵边长
+    const size    = modules.size;
     const total   = size + margin * 2;
     const imgSize = total * scale;
 
@@ -195,20 +225,22 @@ async function generateQRCode(text, options = {}) {
       }
     }
 
-    const pngBuf = encodePNG(imgSize, imgSize, pixels);
+    const pngBuf  = encodePNG(imgSize, imgSize, pixels);
     const qrBase64 = 'data:image/png;base64,' + pngBuf.toString('base64');
-    const markText = '![PNG示例]('+qrBase64+')';
-    // 如果需要保存到文件
-    let filePath = undefined;
-    const filename = options.fileName || `qrcode.png`;
-    filePath = path.join(process.cwd(), filename);
+    const markText = '![PNG示例](' + qrBase64 + ')';
+
+    // ── 文件写入到系统临时目录，避免污染工作目录 ────────────────────────────
+    const filename  = options.fileName || 'qrcode.png';
+    const targetDir = options.outDir   || os.tmpdir();
+    // 防止路径穿越：只取文件名部分
+    const safeFilename = path.basename(filename);
+    const filePath  = path.join(targetDir, safeFilename);
     fs.writeFileSync(filePath, pngBuf);
-  
 
     return {
       success: true,
-      message: '已生成二维码' + (filePath ? '并保存到: ' + filePath : ''),
-      data: { qr:markText, fp:filePath },
+      message: '已生成二维码并保存到: ' + filePath,
+      data: { qr: markText, fp: filePath,url:text },
     };
   } catch (err) {
     return {
@@ -223,27 +255,43 @@ async function generateQRCode(text, options = {}) {
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-  let text = args[0];
-  let saveToFile = false;
-  let fileName = undefined;
+  let text         = undefined;
+  let enableShortUrl = false;
+  let fileName     = undefined;
+  let outDir       = undefined;
 
   // 检查参数
-  for (let i = 1; i < args.length; i++) {
-    if (args[i] === '--save' || args[i] === '-s') {
-      saveToFile = true;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--short-url') {
+      // 显式开启短链接服务（默认关闭）
+      enableShortUrl = true;
     } else if ((args[i] === '--filename' || args[i] === '-f') && args[i + 1]) {
       fileName = args[i + 1];
       i++;
+    } else if (args[i] === '--out-dir' && args[i + 1]) {
+      outDir = args[i + 1];
+      i++;
+    } else if (!text) {
+      text = args[i];
     }
   }
 
   if (!text) {
-    process.stderr.write('用法: node qrcode.js <字符串> [--save|-s] [--filename|-f <文件名>]\n');
+    process.stderr.write('用法: node qrcode.js <payUrl> --short-url [--filename|-f <文件名>] [--out-dir <目录>]\n');
+    process.stderr.write('  payUrl      必须为 https://www.dxmpay.com/ 开头\n');
+    process.stderr.write('  --short-url 必选：调用 dxmpay 短链接服务，生成短链后再编码二维码\n');
+    process.stderr.write('  --out-dir   可选：文件写入目录（默认系统临时目录）\n');
     process.exit(1);
   }
-  generateQRCode(text, { saveToFile, fileName }).then(result => {
+
+  if (!isSafePayUrl(text)) {
+    process.stderr.write('错误: payUrl 必须以 https://www.dxmpay.com/ 开头\n');
+    process.exit(1);
+  }
+
+  generateQRCode(text, { enableShortUrl, fileName, outDir }).then(result => {
     process.stdout.write(JSON.stringify(result, null, 2) + '\n');
   });
 }
 
-module.exports = { generateQRCode };
+module.exports = { generateQRCode, isSafePayUrl };
