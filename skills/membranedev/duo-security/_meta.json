@@ -3,9 +3,15 @@
   "slug": "duo-security",
   "displayName": "Duo Security",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775271851750,
-    "commit": "https://github.com/openclaw/skills/commit/bd69f2f1107be76ebf02033ff07e513cbfc3e627"
+    "version": "1.0.1",
+    "publishedAt": 1776882493114,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775271851750,
+      "commit": "https://github.com/openclaw/skills/commit/bd69f2f1107be76ebf02033ff07e513cbfc3e627"
+    }
+  ]
 }
