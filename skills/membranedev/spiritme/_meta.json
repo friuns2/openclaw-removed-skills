@@ -3,9 +3,15 @@
   "slug": "spiritme",
   "displayName": "Spiritme",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775275460131,
-    "commit": "https://github.com/openclaw/skills/commit/c940d02f09b1923a7a5d4492118cdfa8f3712276"
+    "version": "1.0.1",
+    "publishedAt": 1776882616749,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775275460131,
+      "commit": "https://github.com/openclaw/skills/commit/c940d02f09b1923a7a5d4492118cdfa8f3712276"
+    }
+  ]
 }
