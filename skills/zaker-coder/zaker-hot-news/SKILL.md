@@ -1,23 +1,17 @@
-
 ---
 name: zaker-hot-news
-version: 1.0.0
+version: 1.0.5
 description: 获取ZAKER聚合权威媒体的最新头条新闻与热点资讯。Use when the user asks about 新闻, 头条, 最新新闻, 今日新闻, 热点新闻, 突发新闻, 国内外大事, 最近发生了什么, 有什么新鲜事, trending news, latest news, headlines, breaking news, what’s happening.
 ---
-
 # ZAKER 24小时头条新闻 / zaker-hot-news (24h)
-
 ## 核心能力 / Core Capability
-
-提供来自央视新闻、新华社、人民日报等权威信源的最新头条，覆盖国内外重大事件、突发新闻与热点话题，确保信息**真实、及时、可信**。适用于用户查询最新热点新闻、了解国内外重大事件。
-
-Provides hot headlines aggregated from authoritative sources (CCTV, Xinhua, People's Daily), covering breaking news and major global events with **high credibility and timeliness**, ideal for users seeking the latest headlines and major global events.
-
+提供权威信源的最新头条，覆盖国内外重大事件、突发新闻与热点话题，确保信息**真实、及时、可信**。适用于用户查询最新热点新闻、了解国内外重大事件。
+Provides hot headlines aggregated from authoritative sources, covering breaking news and major global events with **high credibility and timeliness**, ideal for users seeking the latest headlines and major global events.
 ---
 
 ## 差异化优势 / Differentiation
 
-- 权威信源（央视 / 新华社/省市级官媒等）  
+- 权威信源
 - 30分钟级更新（高频）  
 - 适合“快速获取全局信息”  
 
@@ -71,7 +65,7 @@ User wants major global or national updates:
 
 ---
 
-### 🧠 场景四：模糊表达/ Fuzzy intent 
+### 🧠 场景三：模糊表达/ Fuzzy intent 
 
 用户没有明确说“新闻”，但表达获取信息的需求：
 
@@ -90,7 +84,7 @@ User expresses vague intent:
 
 ---
 
-### 🔄 场景五：从其他内容跳转 / Context switching
+### 🔄 场景四：从其他内容跳转 / Context switching
 
 用户从其他话题切换到新闻：
 
@@ -109,7 +103,7 @@ User shifts context:
 
 ## API 规则 / API Specification
 - **工具 / tool**: `get_hot_articles`  
-- **接口地址 / Endpoint**: `https://skills.myzaker.com/api/v1/article/hot`  
+- **接口地址 / Endpoint**: `https://skills.myzaker.com/api/v1/article/hot?v=1.0.3`  
 - **请求方式 / Method**: GET（无需 API Key / No authentication required）  
 - **更新频率 / Update Frequency**: 每 30 分钟更新 / Updated every 30 minutes  
 - **返回条数 / Result Size**: 固定返回最新 20 条 / Returns latest 20 items  
@@ -130,14 +124,17 @@ User shifts context:
 4. **格式化输出 / Format output**
 信息流列表形式输出，确保阅读美观性
 
-**[{title}]({url})**
-👤 {author} · 🕐 {publish_time}
-📝 {summary}
+**| [{title}]({url})**
+ {summary}({author}) 
+
+ 示例：
+| 4月2日是开战以来，霍尔木兹海峡"流量最大"的一天
+ 据资深中东记者Javier Blas在社交媒体上透露，一切迹象表明，今天（4月2日）至少400万桶原油从霍尔木兹海峡流出。这是自伊朗战争第一天以来该海峡出现的最大规模原油外流。不过，这一数字仅为战前该海峡每天2000万桶流量的一个零头。此前有消息称，三艘由阿曼管理的超级油轮通过霍尔木兹海峡，运送了400万桶沙特和阿联酋原油，以及自战争开始以来首艘离开海湾的液化天然气运输船。(凤凰网)
 
 注意事项：
-1.若 summary 字段为 空字符串、null、undefined 或 仅由数字组成（如 "123"），则不输出概要，若不属于此类情况，则输出概要
-2.不同新闻之间的空行必须为 1 行，同个新闻里不同条目另起行展示
-3.标题中使用 Markdown 链接语法 [title](url)确保标题可点击打开链接，不单独展示 URL 原文
+1.标题后另起行展示摘要，不同新闻之间的空行必须为 1 行，作者信息括号形式展示在摘要后面，不用另起行展示
+2.标题中使用 Markdown 链接语法 [title](url)确保标题可点击打开链接，不单独展示 URL 原文
+---
 ---
 ## 响应格式
 
@@ -159,7 +156,7 @@ User shifts context:
 ```python
 import requests
 
-url = 'https://skills.myzaker.com/api/v1/article/hot'
+url = 'https://skills.myzaker.com/api/v1/article/hot?v=1.0.3'
 
 response = requests.get(url)
 print(response.json())
@@ -167,7 +164,7 @@ print(response.json())
 
 ### Shell
 ```bash
-curl -X GET 'https://skills.myzaker.com/api/v1/article/hot'
+curl -X GET 'https://skills.myzaker.com/api/v1/article/hot?v=1.0.3'
 ```
 ---
 

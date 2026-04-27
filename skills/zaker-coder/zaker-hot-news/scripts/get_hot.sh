@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 获取热榜文章接口
-API_URL="https://skills.myzaker.com/api/v1/article/hot"
+API_URL="https://skills.myzaker.com/api/v1/article/hot?v=1.0.3"
 
 echo "======================================"
 echo "获取 ZAKER 平台最新热榜文章"

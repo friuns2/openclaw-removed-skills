@@ -5,7 +5,7 @@ def get_hot_articles():
     """
     获取ZAKER热榜文章
     """
-    url = 'https://skills.myzaker.com/api/v1/article/hot'
+    url = 'https://skills.myzaker.com/api/v1/article/hot?v=1.0.3'
     
     try:
         response = requests.get(url)
