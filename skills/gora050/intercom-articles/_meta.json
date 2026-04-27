@@ -3,11 +3,16 @@
   "slug": "intercom-articles",
   "displayName": "Intercom Articles",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170134307,
-    "commit": "https://github.com/openclaw/skills/commit/9cc9976679479ca1ad005a36c443beee786c31af"
+    "version": "1.0.3",
+    "publishedAt": 1776865107916,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170134307,
+      "commit": "https://github.com/openclaw/skills/commit/9cc9976679479ca1ad005a36c443beee786c31af"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774958682645,
