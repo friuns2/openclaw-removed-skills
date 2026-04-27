@@ -3,9 +3,15 @@
   "slug": "reapit",
   "displayName": "Reapit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170629806,
-    "commit": "https://github.com/openclaw/skills/commit/930392cd09046fcdf69e6bb969acf0dffd005a14"
+    "version": "1.0.3",
+    "publishedAt": 1776865922717,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170629806,
+      "commit": "https://github.com/openclaw/skills/commit/930392cd09046fcdf69e6bb969acf0dffd005a14"
+    }
+  ]
 }
