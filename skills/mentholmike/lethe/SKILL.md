@@ -9,9 +9,10 @@ metadata:
       bins: ["curl", "jq"]
       anyBins: ["docker"]
     notes:
-      - "LETHE_API is for future SaaS mode; leave unset for local Docker installations"
+      - "Lethe server runs LOCALLY ONLY — default http://localhost:18483. Do NOT expose externally."
       - "Docker is required to run the Lethe server container (ghcr.io/openlethe/lethe)"
-      - "lethe-log CLI (~/.openclaw/skills/lethe-memory/scripts/lethe-log) writes events to the local Lethe server"
+      - "lethe-log CLI is in the skill directory, NOT a scripts/ subdirectory"
+      - "LETHE_API is reserved for a future optional SaaS mode — leave unset for local installations. If set, data leaves your machine."
 ---
 
 # Lethe — Persistent Agent Memory
@@ -39,9 +40,13 @@ On every new session, orient yourself before answering the user.
 curl -s "http://localhost:18483/api/sessions/${SESSION_KEY}/summary"
 ```
 
-> **SESSION_KEY fallback:** If `SESSION_KEY` is empty or the API returns "session not found", use the Discord channel session ID directly:
-> `SESSION_KEY="86e09dc7-7ed9-4776-9b0e-d8c7678a0357"` (Archimedes Discord channel session)
-> The Lethe plugin should inject this automatically. If it's missing, fall back to the hardcoded ID — the server still has the history.
+> **SESSION_KEY handling:** The Lethe plugin injects `SESSION_KEY` automatically. If the variable is empty or the API returns "session not found", create a new session:
+> ```bash
+> curl -s -X POST "http://localhost:18483/api/sessions" \
+>   -H "Content-Type: application/json" \
+>   -d '{"agent_id": "archimedes", "project_id": "default"}'
+> ```
+> Use the returned `session_id` as your `SESSION_KEY`. Do not hardcode session IDs — they are session-specific and mixing them conflates unrelated conversations.
 
 **Step 2 — Check flags:**
 ```bash
@@ -105,10 +110,10 @@ User asks about prior context
 
 **Fastest path — use `lethe-log`:**
 ```bash
-~/.openclaw/workspace/skills/lethe-memory/scripts/lethe-log record "Decision: use X because Y"
-~/.openclaw/workspace/skills/lethe-memory/scripts/lethe-log log "Fixed: docker build failed because strings import was missing"
-~/.openclaw/workspace/skills/lethe-memory/scripts/lethe-log flag "This approach may not scale if user count grows"
-~/.openclaw/workspace/skills/lethe-memory/scripts/lethe-log task "Deploy v2" --status done
+~/.openclaw/workspace/skills/lethe-memory/lethe-log record "Decision: use X because Y"
+~/.openclaw/workspace/skills/lethe-memory/lethe-log log "Fixed: docker build failed because strings import was missing"
+~/.openclaw/workspace/skills/lethe-memory/lethe-log flag "This approach may not scale if user count grows"
+~/.openclaw/workspace/skills/lethe-memory/lethe-log task "Deploy v2" --status done
 ```
 
 Or via direct API:
@@ -250,8 +255,8 @@ Search returned no events
 ```
 GET /api/sessions/${KEY} returns 404
   → Session was completed or never existed
-  → Use the fallback SESSION_KEY (86e09dc7-7ed9-4776-9b0e-d8c7678a0357)
-  → Or create new session: POST /api/sessions
+  → Create a new session: POST /api/sessions with agent_id and project_id
+  → Use the returned session_id as SESSION_KEY going forward
 ```
 
 ### Flag surfaces from prior session
@@ -276,15 +281,37 @@ Flag from prior session still unresolved
 
 ---
 
+## Deployment & Trust Model
+
+- **Server runs locally only.** The Lethe server binds to `localhost:18483` — it does not expose an external port. Data never leaves the host machine.
+- **Container image:** `ghcr.io/openlethe/lethe` — open-source, auditable. Source at `github.com/openlethe/lethe`.
+- **No telemetry.** The server has no outbound network calls. It accepts inbound API requests and reads/writes a local SQLite file.
+- **LETHE_API (SaaS):** Reserved for a future optional cloud mode. If set, event data is sent to an external endpoint. **Do not set this variable unless you explicitly opt in and trust the external service's data policies.**
+
+---
+
+## Data Retention & Privacy
+
+- **Storage:** All data lives in a single SQLite file on the host filesystem. Default: `~/docker/lethe/lethe-data/lethe.db`.
+- **Retention:** Events persist indefinitely until manually deleted or compacted. Compaction synthesizes old events into summaries and prunes raw events older than the compaction window.
+- **Encryption:** The SQLite file is not encrypted at rest. Protect the host filesystem. If encryption is required, use filesystem-level encryption (FileVault, LUKS, etc.).
+- **Access control:** The API has no built-in authentication for local mode. It relies on localhost binding for security. Do not expose port 18483 beyond localhost.
+- **Sensitive data:** The agent logs actions, decisions, and observations. It does NOT log API keys, credentials, or secrets. If sensitive data is inadvertently logged, delete the event via the API or compact the session.
+- **Backups:** Daily hot-backups via `sqlite3 .backup`, gzip compressed, 7-day retention. Backup directory is local only.
+
+---
+
 ## Quick Reference
 
 ```bash
 # Orient — get full session state
 curl -s "http://localhost:18483/api/sessions/${SESSION_KEY}/summary"
 
-# Orient (with fallback SESSION_KEY)
-SID="86e09dc7-7ed9-4776-9b0e-d8c7678a0357"
-curl -s "http://localhost:18483/api/sessions/${SID}/summary"
+# Orient (if SESSION_KEY missing, create new session)
+# curl -s -X POST "http://localhost:18483/api/sessions" \
+#   -H "Content-Type: application/json" \
+#   -d '{"agent_id": "archimedes", "project_id": "default"}'
+curl -s "http://localhost:18483/api/sessions/${SESSION_KEY}/summary"
 
 # Check flags
 curl -s "http://localhost:18483/api/flags"
@@ -296,8 +323,8 @@ curl -s "http://localhost:18483/api/events/search?q=<terms>&limit=10"
 curl -s "http://localhost:18483/api/sessions/${SESSION_KEY}/events?limit=20"
 
 # Record / log / flag (fastest)
-~/.openclaw/workspace/skills/lethe-memory/scripts/lethe-log record "Decision: X because Y"
-~/.openclaw/workspace/skills/lethe-memory/scripts/lethe-log flag "This might not work because Z"
+~/.openclaw/workspace/skills/lethe-memory/lethe-log record "Decision: X because Y"
+~/.openclaw/workspace/skills/lethe-memory/lethe-log flag "This might not work because Z"
 
 # Compact session
 curl -s -X POST "http://localhost:18483/api/sessions/${SESSION_KEY}/compact"

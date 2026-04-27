@@ -3,11 +3,16 @@
   "slug": "lethe",
   "displayName": "Lethe Memory",
   "latest": {
-    "version": "0.1.7",
-    "publishedAt": 1776037625718,
-    "commit": "https://github.com/openclaw/skills/commit/6e6bc4814e8e4c8ec29ed8a7f9f96bf5670453e7"
+    "version": "0.1.8",
+    "publishedAt": 1776876561179,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.7",
+      "publishedAt": 1776037625718,
+      "commit": "https://github.com/openclaw/skills/commit/6e6bc4814e8e4c8ec29ed8a7f9f96bf5670453e7"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774679277296,
