@@ -3,11 +3,16 @@
   "slug": "escape",
   "displayName": "Escape",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169114690,
-    "commit": "https://github.com/openclaw/skills/commit/9c107a18c000d81828c9ade5553345ab1bbe7fb3"
+    "version": "1.0.3",
+    "publishedAt": 1776863832778,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169114690,
+      "commit": "https://github.com/openclaw/skills/commit/9c107a18c000d81828c9ade5553345ab1bbe7fb3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774760678042,
