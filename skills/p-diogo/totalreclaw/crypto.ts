@@ -15,10 +15,18 @@
  *     -> HKDF-SHA256(seed, salt, "openmemory-dedup-v1",           32) -> dedupKey
  */
 
-// Lazy-load WASM to avoid crash when npm install hasn't finished yet.
+// Lazy-load WASM. Uses createRequire so this module loads cleanly under bare
+// Node ESM — the shipped `dist/index.js` declares `"type":"module"`, where
+// the CJS `require` global is undefined at runtime. Prior to the rc.21 fix
+// this file called bare `require('@totalreclaw/core')` and every consumer
+// died with `require is not defined`. Matches the pattern already used by
+// claims-helper / consolidation / contradiction-sync / digest-sync / pin /
+// retype-setscope. See issue #124.
+import { createRequire } from 'node:module';
+const requireWasm = createRequire(import.meta.url);
 let _wasm: typeof import('@totalreclaw/core') | null = null;
 function getWasm() {
-  if (!_wasm) _wasm = require('@totalreclaw/core');
+  if (!_wasm) _wasm = requireWasm('@totalreclaw/core');
   return _wasm;
 }
 

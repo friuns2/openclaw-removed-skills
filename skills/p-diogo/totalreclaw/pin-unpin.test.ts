@@ -317,11 +317,16 @@ async function runTests(): Promise<void> {
     assert(typeof result.new_fact_id === 'string', 'unpin pinned: new_fact_id set');
     assertEq(state.submittedBatches.length, 1, 'unpin pinned: one batch submitted');
 
-    // The new canonical blob must NOT contain "st":"a" or any st field.
+    // v1.1 unpin: the new canonical blob is a v1 payload with
+    // pin_status=unpinned and superseded_by pointing to the old fact id.
     assert(capturedEncryptedHex !== null, 'unpin pinned: encrypted blob captured');
     const canonicalPlaintext = Buffer.from(capturedEncryptedHex!, 'hex').toString('utf8');
-    assert(!canonicalPlaintext.includes('"st":'), 'unpin pinned: st field omitted from canonical JSON');
-    assert(canonicalPlaintext.includes('"sup":"pinned-2"'), 'unpin pinned: sup field points to old id');
+    assert(canonicalPlaintext.includes('"schema_version":"1.0"'), 'unpin pinned: blob is v1 (schema_version 1.0)');
+    assert(canonicalPlaintext.includes('"pin_status":"unpinned"'), 'unpin pinned: v1 pin_status=unpinned');
+    assert(canonicalPlaintext.includes('"superseded_by":"pinned-2"'), 'unpin pinned: v1 superseded_by points to old id');
+    // v0 short-key fields MUST NOT leak into a v1 blob.
+    assert(!canonicalPlaintext.includes('"st":'), 'unpin pinned: no v0 st field on v1 blob');
+    assert(!canonicalPlaintext.includes('"sup":"'), 'unpin pinned: no v0 sup field on v1 blob');
   }
 
   // Unpin a non-pinned claim → idempotent no-op
@@ -362,9 +367,13 @@ async function runTests(): Promise<void> {
     assertEq(result.previous_status, 'active', 'pin legacy: previous_status active (legacy default)');
     assertEq(result.new_status, 'pinned', 'pin legacy: new_status pinned');
     assert(capturedNewBlob !== null, 'pin legacy: new blob captured');
-    assert(capturedNewBlob!.includes('"t":"Pedro lives in Lisbon"'), 'pin legacy: text lifted into canonical t');
-    assert(capturedNewBlob!.includes('"st":"p"'), 'pin legacy: status flipped to pinned');
-    assert(capturedNewBlob!.includes('"sup":"legacy-1"'), 'pin legacy: sup points to old id');
+    // v1.1: legacy blob is UPGRADED to a v1 payload on the pin path.
+    assert(capturedNewBlob!.includes('"text":"Pedro lives in Lisbon"'), 'pin legacy: text lifted into v1 text field');
+    assert(capturedNewBlob!.includes('"schema_version":"1.0"'), 'pin legacy: output is v1 (schema_version 1.0)');
+    assert(capturedNewBlob!.includes('"pin_status":"pinned"'), 'pin legacy: v1 pin_status=pinned');
+    assert(capturedNewBlob!.includes('"superseded_by":"legacy-1"'), 'pin legacy: v1 superseded_by points to old id');
+    // legacy v0 type "fact" upgrades to v1 type "claim" per the spec map.
+    assert(capturedNewBlob!.includes('"type":"claim"'), 'pin legacy: v0 fact → v1 claim type');
   }
 
   // Fact not found → error
@@ -553,11 +562,13 @@ async function runTests(): Promise<void> {
     const result = await executePinOperation('sup-link-1', 'pinned', deps);
     assertEq(result.success, true, 'sup-link: success');
     assert(capturedPlaintext !== null, 'sup-link: plaintext captured');
-    assert(capturedPlaintext!.includes('"sup":"sup-link-1"'), 'sup-link: sup field set to old id');
-    assert(capturedPlaintext!.includes('"st":"p"'), 'sup-link: st set to p');
-    // ea must be refreshed (non-empty)
-    const match = capturedPlaintext!.match(/"ea":"([^"]+)"/);
-    assert(match !== null && match![1] !== '2026-04-12T10:00:00.000Z', 'sup-link: ea refreshed to a new timestamp');
+    // v1.1: `sup` → `superseded_by`, `st` → `pin_status`, `ea` → `created_at`.
+    assert(capturedPlaintext!.includes('"superseded_by":"sup-link-1"'), 'sup-link: v1 superseded_by set to old id');
+    assert(capturedPlaintext!.includes('"pin_status":"pinned"'), 'sup-link: v1 pin_status=pinned');
+    assert(capturedPlaintext!.includes('"schema_version":"1.0"'), 'sup-link: output is v1');
+    // created_at must be refreshed (non-empty, different from source ea)
+    const match = capturedPlaintext!.match(/"created_at":"([^"]+)"/);
+    assert(match !== null && match![1] !== '2026-04-12T10:00:00.000Z', 'sup-link: created_at refreshed to a new timestamp');
   }
 
   // ── Slice 2f: pin → feedback.jsonl wiring ────────────────────────────────
@@ -976,6 +987,145 @@ async function runTests(): Promise<void> {
       typeof result.error === 'string' && !result.error!.includes('decisions.jsonl'),
       'pin-tombstone-real-corruption: error does NOT mention recovery (path not taken)',
     );
+  }
+
+  // ── v1.1 pin_status end-to-end ────────────────────────────────────────────
+
+  // A pin on a v1.1 source blob preserves all v1 fields + flips pin_status=pinned.
+  {
+    const state: MockState = { facts: new Map(), submittedBatches: [] };
+    const v1Claim = JSON.stringify({
+      id: '01900000-0000-7000-8000-000000000099',
+      text: 'prefers PostgreSQL over MongoDB for transactional workloads',
+      type: 'preference',
+      source: 'user',
+      created_at: '2026-04-19T10:00:00.000Z',
+      schema_version: '1.0',
+      scope: 'work',
+      volatility: 'stable',
+      reasoning: 'ACID guarantees matter for OrbitLedger',
+      importance: 9,
+      confidence: 0.95,
+    });
+    seedFact(state, 'v1-source-1', v1Claim);
+
+    let capturedBlob: string | null = null;
+    const deps = makeDeps(state, {
+      encryptBlob: (plaintext: string) => {
+        capturedBlob = plaintext;
+        return Buffer.from(plaintext, 'utf8').toString('hex');
+      },
+    });
+    const result = await executePinOperation('v1-source-1', 'pinned', deps);
+
+    assertEq(result.success, true, 'v1-pin: success');
+    assert(capturedBlob !== null, 'v1-pin: plaintext captured');
+    assert(capturedBlob!.includes('"schema_version":"1.0"'), 'v1-pin: output schema_version 1.0');
+    assert(capturedBlob!.includes('"pin_status":"pinned"'), 'v1-pin: pin_status=pinned');
+    assert(capturedBlob!.includes('"type":"preference"'), 'v1-pin: preserves v1 type');
+    assert(capturedBlob!.includes('"source":"user"'), 'v1-pin: preserves v1 source');
+    assert(capturedBlob!.includes('"scope":"work"'), 'v1-pin: preserves scope');
+    assert(capturedBlob!.includes('"volatility":"stable"'), 'v1-pin: preserves volatility');
+    assert(capturedBlob!.includes('"reasoning":"ACID guarantees'), 'v1-pin: preserves reasoning');
+    assert(capturedBlob!.includes('"importance":9'), 'v1-pin: preserves importance');
+    assert(capturedBlob!.includes('"superseded_by":"v1-source-1"'), 'v1-pin: superseded_by points to source fact');
+  }
+
+  // An unpin on a v1.1 pinned blob flips pin_status=unpinned and preserves fields.
+  {
+    const state: MockState = { facts: new Map(), submittedBatches: [] };
+    const v1PinnedClaim = JSON.stringify({
+      id: '01900000-0000-7000-8000-0000000000a0',
+      text: 'always use snake_case for database column names',
+      type: 'directive',
+      source: 'user',
+      created_at: '2026-04-19T10:00:00.000Z',
+      schema_version: '1.0',
+      scope: 'work',
+      pin_status: 'pinned',
+    });
+    seedFact(state, 'v1-pinned-1', v1PinnedClaim);
+
+    let capturedBlob: string | null = null;
+    const deps = makeDeps(state, {
+      encryptBlob: (plaintext: string) => {
+        capturedBlob = plaintext;
+        return Buffer.from(plaintext, 'utf8').toString('hex');
+      },
+    });
+    const result = await executePinOperation('v1-pinned-1', 'active', deps);
+
+    assertEq(result.success, true, 'v1-unpin: success');
+    assertEq(result.previous_status, 'pinned', 'v1-unpin: previous_status=pinned detected via pin_status');
+    assertEq(result.new_status, 'active', 'v1-unpin: new_status=active');
+    assert(capturedBlob !== null, 'v1-unpin: plaintext captured');
+    assert(capturedBlob!.includes('"pin_status":"unpinned"'), 'v1-unpin: pin_status=unpinned');
+    assert(capturedBlob!.includes('"type":"directive"'), 'v1-unpin: preserves directive type');
+    assert(capturedBlob!.includes('"superseded_by":"v1-pinned-1"'), 'v1-unpin: supersedes pinned fact');
+  }
+
+  // Idempotent pin: a v1.1 blob already pinned via pin_status is a no-op.
+  {
+    const state: MockState = { facts: new Map(), submittedBatches: [] };
+    const v1PinnedClaim = JSON.stringify({
+      id: '01900000-0000-7000-8000-0000000000a1',
+      text: 'already pinned',
+      type: 'claim',
+      source: 'user',
+      created_at: '2026-04-19T10:00:00.000Z',
+      schema_version: '1.0',
+      pin_status: 'pinned',
+    });
+    seedFact(state, 'v1-already-pinned', v1PinnedClaim);
+
+    const deps = makeDeps(state);
+    const result = await executePinOperation('v1-already-pinned', 'pinned', deps);
+
+    assertEq(result.success, true, 'v1-idempotent: success');
+    assertEq(result.idempotent, true, 'v1-idempotent: idempotent flag set');
+    assertEq(state.submittedBatches.length, 0, 'v1-idempotent: zero on-chain writes');
+  }
+
+  // Cross-impl parity: plugin output v1 JSON has the SAME canonical field
+  // ordering as core's validateMemoryClaimV1 produces. This is what makes the
+  // cross-client pin-in-plugin / unpin-in-mcp round-trip byte-stable.
+  {
+    const state: MockState = { facts: new Map(), submittedBatches: [] };
+    const v1Source = JSON.stringify({
+      id: '01900000-0000-7000-8000-0000000000b0',
+      text: 'cross-client parity test',
+      type: 'claim',
+      source: 'user',
+      created_at: '2026-04-19T10:00:00.000Z',
+      schema_version: '1.0',
+    });
+    seedFact(state, 'parity-src', v1Source);
+
+    let capturedBlob: string | null = null;
+    const deps = makeDeps(state, {
+      encryptBlob: (plaintext: string) => {
+        capturedBlob = plaintext;
+        return Buffer.from(plaintext, 'utf8').toString('hex');
+      },
+    });
+    const result = await executePinOperation('parity-src', 'pinned', deps);
+    assertEq(result.success, true, 'parity: success');
+    assert(capturedBlob !== null, 'parity: plaintext captured');
+    const parsed = JSON.parse(capturedBlob!);
+    // Required fields present.
+    assert(typeof parsed.id === 'string', 'parity: id present');
+    assert(typeof parsed.text === 'string', 'parity: text present');
+    assert(typeof parsed.type === 'string', 'parity: type present');
+    assert(typeof parsed.source === 'string', 'parity: source present');
+    assert(typeof parsed.created_at === 'string', 'parity: created_at present');
+    assertEq(parsed.schema_version, '1.0', 'parity: schema_version=1.0');
+    assertEq(parsed.pin_status, 'pinned', 'parity: pin_status=pinned');
+    assertEq(parsed.superseded_by, 'parity-src', 'parity: superseded_by points to src');
+    // Ensure no v0 leak.
+    assert(!Object.prototype.hasOwnProperty.call(parsed, 't'), 'parity: no v0 t field');
+    assert(!Object.prototype.hasOwnProperty.call(parsed, 'c'), 'parity: no v0 c field');
+    assert(!Object.prototype.hasOwnProperty.call(parsed, 'st'), 'parity: no v0 st field');
+    assert(!Object.prototype.hasOwnProperty.call(parsed, 'sup'), 'parity: no v0 sup field');
   }
 
   // Cleanup: remove the temp state dir.

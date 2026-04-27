@@ -1,21 +1,32 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
+    "module": "ES2022",
+    "moduleResolution": "node",
     "lib": ["ES2022"],
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
+    "rootDir": "./",
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "types": ["node", "jest"]
+    "allowJs": false,
+    "declaration": false,
+    "sourceMap": false,
+    "noEmitOnError": false,
+    "isolatedModules": false,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "include": [
+    "*.ts",
+    "import-adapters/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "pocv2-e2e-test.ts"
+  ]
 }

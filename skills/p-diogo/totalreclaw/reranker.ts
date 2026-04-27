@@ -507,3 +507,43 @@ export function rerank(
   // Preserve rrfScore and cosineSimilarity through MMR
   return mmrResults as RerankerResult[];
 }
+
+// ---------------------------------------------------------------------------
+// Relevance gate
+// ---------------------------------------------------------------------------
+
+/**
+ * Decide whether reranked results clear the relevance gate for surfacing to
+ * the user (recall tool) or auto-injecting into agent context (hooks).
+ *
+ * Plain cosine cut-off: at least one reranked result has cosine similarity
+ * with the query embedding >= `cosineThreshold`.
+ *
+ * History (rc.18 → rc.22):
+ *   rc.18 issue #116 surfaced as a recall miss for short queries against
+ *   the local Harrier-OSS-270m model — cosine alone produced false-negatives
+ *   even when every query token literally appeared in the candidate. rc.18
+ *   shipped a defensive "lexical-override" fallback (every meaningful query
+ *   token had to appear as a 4-char-prefix substring in the top result).
+ *   The override was always intended as a band-aid until the
+ *   source-weighted reranker hoisted from `totalreclaw-core` produced
+ *   honest cosine signals for short queries. rc.22 hoists that reranker
+ *   and drops the band-aid: the gate is now back to a single-signal cosine
+ *   cut-off, matching Hermes (Python client) and the canonical reranker
+ *   spec.
+ *
+ * @param query - the user's search query (raw string) — accepted for ABI
+ *   stability, no longer consulted post rc.22.
+ * @param reranked - reranked results (top first)
+ * @param cosineThreshold - the configured cosine cutoff (typically 0.15)
+ * @returns true if results should be surfaced; false to suppress
+ */
+export function passesRelevanceGate(
+  _query: string,
+  reranked: RerankerResult[],
+  cosineThreshold: number,
+): boolean {
+  if (reranked.length === 0) return false;
+  const maxCosine = Math.max(...reranked.map((r) => r.cosineSimilarity ?? 0));
+  return maxCosine >= cosineThreshold;
+}

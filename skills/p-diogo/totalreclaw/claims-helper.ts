@@ -96,6 +96,14 @@ export interface BuildClaimInput {
   sourceAgent: string;
   /** Creation timestamp. Defaults to now. */
   extractedAt?: string;
+  /**
+   * 3.3.1-rc.22 — optional embedding-model id stamped on the claim for
+   * forward-compat. Defaults to omitted (callers that already know the
+   * active embedder pass it in; legacy paths leave it unset). The field
+   * is plugin-scoped — it survives the core validator's strip pass via
+   * the same re-attach path used for `schema_version` / `volatility`.
+   */
+  embeddingModelId?: string;
 }
 
 /**
@@ -112,7 +120,7 @@ export interface BuildClaimInput {
  * payload (see `subgraph-store.ts::encodeFactProtobuf`).
  */
 export function buildCanonicalClaim(input: BuildClaimInput): string {
-  const { fact, importance, extractedAt } = input;
+  const { fact, importance, extractedAt, embeddingModelId } = input;
 
   // Defensive: ensure fact.source is always populated before v1 validation.
   // `applyProvenanceFilterLax` should have set this upstream; this is the
@@ -125,6 +133,7 @@ export function buildCanonicalClaim(input: BuildClaimInput): string {
     fact: factWithSource,
     importance,
     createdAt: extractedAt,
+    embeddingModelId,
   });
 }
 
@@ -142,6 +151,16 @@ export function buildCanonicalClaim(input: BuildClaimInput): string {
 
 export const V1_SCHEMA_VERSION = '1.0' as const;
 
+/**
+ * v1.1 pin state — `"pinned"` = user explicitly pinned (immune to
+ * auto-supersede); `"unpinned"` (or absence) = standard behavior.
+ *
+ * Surface of the `pin_status` field added in spec v1.1 (2026-04-19). Writers
+ * that understand v1.1 emit this field on the pin path; readers at 1.0 / 1.1
+ * that see it MUST honor `"pinned"` as immunity from auto-supersede.
+ */
+export type PinStatus = 'pinned' | 'unpinned';
+
 export interface BuildClaimV1Input {
   /** The extracted fact in v1 shape. Must have `type` as a MemoryTypeV1 token. */
   fact: ExtractedFact;
@@ -156,6 +175,21 @@ export interface BuildClaimV1Input {
   /** Stable claim ID. Defaults to crypto.randomUUID() at the call site; keep the
    *  same ID for both the blob and the on-chain fact id. */
   id?: string;
+  /**
+   * v1.1 pin state. When `"pinned"`, the claim is immune to auto-supersede.
+   * Omitted or `"unpinned"` both mean unpinned (field is additive — absence
+   * equivalent to `"unpinned"` on the wire). Surfaced in the final JSON only
+   * when provided.
+   */
+  pinStatus?: PinStatus;
+  /**
+   * 3.3.1-rc.22 — optional embedding-model id stamped on the claim for
+   * distillation forward-compat. Survives the core validator strip pass
+   * via the same re-attach path used for `schema_version` / `volatility`.
+   * When omitted the field is not emitted (legacy claims remain untagged
+   * and are read back as "unspecified").
+   */
+  embeddingModelId?: string;
 }
 
 /**
@@ -226,6 +260,10 @@ export function buildCanonicalClaimV1(input: BuildClaimV1Input): string {
   }
   if (expiresAt) corePayload.expires_at = expiresAt;
   if (supersededBy) corePayload.superseded_by = supersededBy;
+  // v1.1 pin_status — additive field; only emitted when the caller opts in.
+  if (input.pinStatus === 'pinned' || input.pinStatus === 'unpinned') {
+    corePayload.pin_status = input.pinStatus;
+  }
 
   // Validate through core — throws on invalid type / source / missing id.
   const validated = getWasm().validateMemoryClaimV1(JSON.stringify(corePayload)) as string;
@@ -236,7 +274,139 @@ export function buildCanonicalClaimV1(input: BuildClaimV1Input): string {
   if (fact.volatility && (VALID_MEMORY_VOLATILITIES as readonly string[]).includes(fact.volatility)) {
     canonical.volatility = fact.volatility;
   }
+  // 3.3.1-rc.22 — forward-compat embedder marker. Plugin-only field;
+  // survives the core validator via re-attach. Future distillation
+  // detects this on read to re-embed selectively without forcing a
+  // vault-wide rebuild.
+  if (typeof input.embeddingModelId === 'string' && input.embeddingModelId.length > 0) {
+    canonical.embedding_model_id = input.embeddingModelId;
+  }
 
+  return JSON.stringify(canonical);
+}
+
+// ---------------------------------------------------------------------------
+// buildV1ClaimBlob — lightweight v1 blob builder for pin / retype / set_scope
+//
+// Unlike buildCanonicalClaimV1 (which consumes a full ExtractedFact), this
+// helper takes raw primitives and is the right entry point when synthesizing
+// a new blob from a previously-decrypted one — e.g. the pin path rewrites the
+// blob with an updated pin_status field and everything else preserved.
+//
+// The output is a v1.1 JSON payload with schema_version "1.0" (v1.1 is
+// additive; on-wire schema_version is unchanged per spec). The outer protobuf
+// wrapper MUST be written at version 4 — see `subgraph-store.ts`.
+// ---------------------------------------------------------------------------
+
+export interface BuildV1ClaimBlobInput {
+  /** Human-readable fact text (5-512 UTF-8 chars). */
+  text: string;
+  /** v1 memory type. Must be one of the 6 canonical values. */
+  type: MemoryType;
+  /** Provenance per spec §provenance-filter. */
+  source: MemorySource;
+  /** Optional stable UUID; defaults to randomUUID(). */
+  id?: string;
+  /** Optional creation timestamp (ISO 8601 UTC); defaults to now. */
+  createdAt?: string;
+  /** Optional scope (defaults to omitted → "unspecified"). */
+  scope?: MemoryScope;
+  /** Optional volatility (defaults to omitted → "updatable"). */
+  volatility?: MemoryVolatility;
+  /** Optional reasoning clause for decision-style claims. */
+  reasoning?: string;
+  /** Optional structured entities. */
+  entities?: ExtractedEntity[];
+  /** Optional expiration timestamp. */
+  expiresAt?: string;
+  /** Optional importance (1-10, advisory). */
+  importance?: number;
+  /** Optional confidence (0-1). */
+  confidence?: number;
+  /** Optional superseded-by chain pointer. */
+  supersededBy?: string;
+  /**
+   * Optional v1.1 pin state.
+   *
+   * - `"pinned"` → user explicitly pinned; the claim MUST NOT be auto-superseded.
+   * - `"unpinned"` → explicit unpin (resets a previous pin).
+   * - Undefined/omitted → field not emitted; receivers treat as unpinned.
+   *
+   * Callers are free to pass `"unpinned"` to create an explicit un-pin
+   * supersede event, or to pass `undefined` to leave the field absent on a
+   * non-pin write.
+   */
+  pinStatus?: PinStatus;
+  /**
+   * 3.3.1-rc.22 — optional embedding-model id stamped on the claim for
+   * distillation forward-compat. See `BuildClaimV1Input.embeddingModelId`.
+   */
+  embeddingModelId?: string;
+}
+
+/**
+ * Build a v1.1 canonical claim JSON string, validated through the core
+ * `validateMemoryClaimV1` WASM export.
+ *
+ * Output is UTF-8 JSON ready for encryption as the inner blob of a
+ * protobuf-v4 fact (outer `version = 4`). Field ordering follows the core
+ * validator, so the result is byte-identical to what MCP's equivalent helper
+ * produces for the same inputs (cross-client parity).
+ *
+ * Throws on malformed input (missing required field, invalid enum value).
+ */
+export function buildV1ClaimBlob(input: BuildV1ClaimBlobInput): string {
+  if (!(VALID_MEMORY_SOURCES as readonly string[]).includes(input.source)) {
+    throw new Error(`buildV1ClaimBlob: invalid source "${input.source}"`);
+  }
+  if (!isValidMemoryType(input.type)) {
+    throw new Error(`buildV1ClaimBlob: invalid type "${input.type}"`);
+  }
+
+  const corePayload: Record<string, unknown> = {
+    id: input.id ?? crypto.randomUUID(),
+    text: input.text,
+    type: input.type,
+    source: input.source,
+    created_at: input.createdAt ?? new Date().toISOString(),
+  };
+
+  if (input.scope && (VALID_MEMORY_SCOPES as readonly string[]).includes(input.scope)) {
+    corePayload.scope = input.scope;
+  }
+  if (input.reasoning && input.reasoning.length > 0) {
+    corePayload.reasoning = input.reasoning.slice(0, 256);
+  }
+  if (input.entities && input.entities.length > 0) {
+    corePayload.entities = input.entities.slice(0, 8).map((e) => {
+      const entity: Record<string, unknown> = { name: e.name, type: e.type };
+      if (e.role) entity.role = e.role;
+      return entity;
+    });
+  }
+  if (typeof input.importance === 'number') {
+    corePayload.importance = Math.max(1, Math.min(10, Math.round(input.importance)));
+  }
+  if (typeof input.confidence === 'number') {
+    corePayload.confidence = Math.max(0, Math.min(1, input.confidence));
+  }
+  if (input.expiresAt) corePayload.expires_at = input.expiresAt;
+  if (input.supersededBy) corePayload.superseded_by = input.supersededBy;
+  if (input.pinStatus === 'pinned' || input.pinStatus === 'unpinned') {
+    corePayload.pin_status = input.pinStatus;
+  }
+
+  // Validate via core — throws on invalid shape.
+  const validated = getWasm().validateMemoryClaimV1(JSON.stringify(corePayload)) as string;
+  const canonical = JSON.parse(validated) as Record<string, unknown>;
+  canonical.schema_version = V1_SCHEMA_VERSION;
+  if (input.volatility && (VALID_MEMORY_VOLATILITIES as readonly string[]).includes(input.volatility)) {
+    canonical.volatility = input.volatility;
+  }
+  // 3.3.1-rc.22 — see `buildCanonicalClaimV1` comment.
+  if (typeof input.embeddingModelId === 'string' && input.embeddingModelId.length > 0) {
+    canonical.embedding_model_id = input.embeddingModelId;
+  }
   return JSON.stringify(canonical);
 }
 
@@ -289,6 +459,18 @@ export interface V1BlobReadResult {
   expiresAt?: string;
   supersededBy?: string;
   id?: string;
+  /**
+   * v1.1 pin state. Absent when the blob was written by a v1.0 client or
+   * when the writer explicitly omitted the field (treated as `"unpinned"`).
+   */
+  pinStatus?: PinStatus;
+  /**
+   * 3.3.1-rc.22 — embedder identity tag. Absent on claims written by
+   * older plugin versions. Forward-compat marker; consumers MAY use it
+   * to decide whether a claim's stored embedding matches the active
+   * embedder before letting cosine similarity make a relevance call.
+   */
+  embeddingModelId?: string;
 }
 
 export function readV1Blob(decrypted: string): V1BlobReadResult | null {
@@ -349,6 +531,18 @@ export function readV1Blob(decrypted: string): V1BlobReadResult | null {
     if (typeof obj.expires_at === 'string') result.expiresAt = obj.expires_at;
     if (typeof obj.superseded_by === 'string') result.supersededBy = obj.superseded_by;
     if (typeof obj.id === 'string') result.id = obj.id;
+    if (typeof obj.pin_status === 'string') {
+      const ps = obj.pin_status;
+      if (ps === 'pinned' || ps === 'unpinned') {
+        result.pinStatus = ps;
+      }
+    }
+    // 3.3.1-rc.22 — pull the embedder identity tag through. Plugin-only
+    // field added by `buildCanonicalClaimV1` / `buildV1ClaimBlob` after
+    // core validation.
+    if (typeof obj.embedding_model_id === 'string' && obj.embedding_model_id.length > 0) {
+      result.embeddingModelId = obj.embedding_model_id;
+    }
 
     return result;
   } catch {
@@ -484,6 +678,9 @@ export function readClaimFromBlob(decryptedJson: string): BlobReadResult {
           scope: typeof obj.scope === 'string' ? obj.scope : 'unspecified',
           volatility: typeof obj.volatility === 'string' ? obj.volatility : 'updatable',
           reasoning: typeof obj.reasoning === 'string' ? obj.reasoning : undefined,
+          // v1.1: surface pin_status verbatim for downstream (recall display +
+          // export). Absent ⇒ undefined (receivers treat as "unpinned").
+          pin_status: typeof obj.pin_status === 'string' ? obj.pin_status : undefined,
           importance: importance / 10,
           created_at: typeof obj.created_at === 'string' ? obj.created_at : '',
           schema_version: obj.schema_version,

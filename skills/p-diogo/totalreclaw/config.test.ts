@@ -49,12 +49,14 @@ function assertEq<T>(actual: T, expected: T, name: string): void {
 // ---------------------------------------------------------------------------
 
 {
+  // NOTE: TOTALRECLAW_SESSION_ID was previously here and is intentionally
+  // ABSENT — restored as a SUPPORTED env var (forwarded as the
+  // X-TotalReclaw-Session header on every relay call). See internal#127.
   const expected = [
     'TOTALRECLAW_CHAIN_ID',
     'TOTALRECLAW_EMBEDDING_MODEL',
     'TOTALRECLAW_STORE_DEDUP',
     'TOTALRECLAW_LLM_MODEL',
-    'TOTALRECLAW_SESSION_ID',
     'TOTALRECLAW_TAXONOMY_VERSION',
     'TOTALRECLAW_CLAIM_FORMAT',
     'TOTALRECLAW_DIGEST_MODE',
@@ -63,6 +65,13 @@ function assertEq<T>(actual: T, expected: T, name: string): void {
     [...__internal.REMOVED_ENV_VARS],
     expected,
     'REMOVED_ENV_VARS: matches env vars reference doc',
+  );
+  // Hard rail: ensure the var stays OUT of REMOVED_ENV_VARS even if someone
+  // re-adds it later (the v1.0.0 cleanup regression that broke Axiom QA
+  // tracing — internal#127).
+  assert(
+    !(__internal.REMOVED_ENV_VARS as readonly string[]).includes('TOTALRECLAW_SESSION_ID'),
+    'REMOVED_ENV_VARS: TOTALRECLAW_SESSION_ID is NOT in the removed list (internal#127)',
   );
 }
 
@@ -100,6 +109,33 @@ function assertEq<T>(actual: T, expected: T, name: string): void {
       (warned ?? '').includes('env-vars-reference'),
       'warnRemovedEnvVars: warning links to env vars reference',
     );
+    // rc.22 finding #4 — warning text MUST include a clickable migration URL,
+    // not just a relative repo path. Operators see this on stderr without the
+    // repo cloned; a relative path is useless to them.
+    assert(
+      (warned ?? '').includes('https://github.com/p-diogo/totalreclaw/blob/main/docs/guides/env-vars-reference.md'),
+      'warnRemovedEnvVars: warning includes full GitHub URL (rc.22 finding #4)',
+    );
+    assert(
+      (warned ?? '').toLowerCase().includes('migration'),
+      'warnRemovedEnvVars: warning labels the link as a migration guide (rc.22 finding #4)',
+    );
+    // rc.22 finding #4 — TOTALRECLAW_SESSION_ID must NOT trigger this warning.
+    // Even though we already keep it OUT of REMOVED_ENV_VARS (internal#127),
+    // belt-and-braces: explicit assertion that setting SESSION_ID by itself
+    // produces no warning naming it.
+    process.env.TOTALRECLAW_SESSION_ID = 'qa-rc.22-test-1';
+    let sessionWarned: string | null = null;
+    __internal.warnRemovedEnvVars((msg) => {
+      sessionWarned = msg;
+    });
+    delete process.env.TOTALRECLAW_SESSION_ID;
+    // sessionWarned is non-null only because CHAIN_ID is still set above —
+    // the assertion is that the message does not name SESSION_ID.
+    assert(
+      !(sessionWarned ?? '').includes('TOTALRECLAW_SESSION_ID'),
+      'warnRemovedEnvVars: SESSION_ID never appears in warning (rc.22 finding #4 / internal#127)',
+    );
   } finally {
     for (const [name, val] of Object.entries(originals)) {
       if (val === undefined) delete process.env[name];
@@ -122,18 +158,20 @@ function assertEq<T>(actual: T, expected: T, name: string): void {
   // Store dedup flag is always true.
   assertEq(CONFIG.storeDedupEnabled, true, 'STORE_DEDUP env ignored → always true');
 
-  // No llmModel / sessionId / embeddingModel fields on CONFIG.
+  // No llmModel / embeddingModel fields on CONFIG.
   assert(
     !('llmModel' in CONFIG),
     'CONFIG.llmModel: removed (no field for TOTALRECLAW_LLM_MODEL)',
   );
   assert(
-    !('sessionId' in CONFIG),
-    'CONFIG.sessionId: removed (no field for TOTALRECLAW_SESSION_ID)',
-  );
-  assert(
     !('embeddingModel' in CONFIG),
     'CONFIG.embeddingModel: removed (no field for TOTALRECLAW_EMBEDDING_MODEL)',
+  );
+  // CONFIG.sessionId IS present (restored in internal#127). Confirmed
+  // separately below via getSessionId() + relay-headers regression tests.
+  assert(
+    'sessionId' in CONFIG,
+    'CONFIG.sessionId: present (TOTALRECLAW_SESSION_ID restored — internal#127)',
   );
 
   delete process.env.TOTALRECLAW_CHAIN_ID;

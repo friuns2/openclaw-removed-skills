@@ -8,7 +8,14 @@
  *   Authorization: Bearer <hex-encoded-auth-key>
  *
  * The server hashes the auth key with SHA-256 to look up the user.
+ *
+ * Every outbound request goes through `buildRelayHeaders()` so the
+ * `X-TotalReclaw-Client` tag is set + the optional QA-tracing
+ * `X-TotalReclaw-Session` tag is forwarded when `TOTALRECLAW_SESSION_ID`
+ * is set. See `relay-headers.ts` and internal#127.
  */
+
+import { buildRelayHeaders } from './relay-headers.js';
 
 // ---------------------------------------------------------------------------
 // Request / Response Types
@@ -126,7 +133,7 @@ export function createApiClient(serverUrl: string) {
     ): Promise<{ user_id: string }> {
       const res = await fetch(`${baseUrl}/v1/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-TotalReclaw-Client': 'openclaw-plugin' },
+        headers: buildRelayHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ auth_key_hash: authKeyHash, salt: saltHex }),
       });
       await assertOk(res, 'register');
@@ -160,10 +167,10 @@ export function createApiClient(serverUrl: string) {
     ): Promise<{ ids: string[]; duplicate_ids?: string[] }> {
       const res = await fetch(`${baseUrl}/v1/store`, {
         method: 'POST',
-        headers: {
+        headers: buildRelayHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authKeyHex}`,
-        },
+        }),
         body: JSON.stringify({ user_id: userId, facts }),
       });
       await assertOk(res, 'store');
@@ -198,10 +205,10 @@ export function createApiClient(serverUrl: string) {
     ): Promise<SearchCandidate[]> {
       const res = await fetch(`${baseUrl}/v1/search`, {
         method: 'POST',
-        headers: {
+        headers: buildRelayHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authKeyHex}`,
-        },
+        }),
         body: JSON.stringify({
           user_id: userId,
           trapdoors,
@@ -229,9 +236,9 @@ export function createApiClient(serverUrl: string) {
     async deleteFact(factId: string, authKeyHex: string): Promise<void> {
       const res = await fetch(`${baseUrl}/v1/facts/${encodeURIComponent(factId)}`, {
         method: 'DELETE',
-        headers: {
+        headers: buildRelayHeaders({
           Authorization: `Bearer ${authKeyHex}`,
-        },
+        }),
       });
       await assertOk(res, 'deleteFact');
       const json = (await res.json()) as Record<string, unknown>;
@@ -254,10 +261,10 @@ export function createApiClient(serverUrl: string) {
     async batchDelete(factIds: string[], authKeyHex: string): Promise<number> {
       const res = await fetch(`${baseUrl}/v1/facts/batch-delete`, {
         method: 'POST',
-        headers: {
+        headers: buildRelayHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${authKeyHex}`,
-        },
+        }),
         body: JSON.stringify({ fact_ids: factIds }),
       });
       await assertOk(res, 'batchDelete');
@@ -290,9 +297,9 @@ export function createApiClient(serverUrl: string) {
 
       const res = await fetch(`${baseUrl}/v1/export?${params.toString()}`, {
         method: 'GET',
-        headers: {
+        headers: buildRelayHeaders({
           Authorization: `Bearer ${authKeyHex}`,
-        },
+        }),
       });
       await assertOk(res, 'exportFacts');
       const json = (await res.json()) as Record<string, unknown>;

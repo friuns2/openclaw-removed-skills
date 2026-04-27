@@ -465,7 +465,7 @@ assertEq(getSourceWeight('derived'), 0.7, 'sourceWeight: derived = 0.7');
 assertEq(getSourceWeight('external'), 0.7, 'sourceWeight: external = 0.7');
 assertEq(getSourceWeight('assistant'), 0.55, 'sourceWeight: assistant = 0.55');
 assertEq(getSourceWeight(undefined), 0.85, 'sourceWeight: missing = 0.85 (legacy fallback)');
-assertEq(getSourceWeight('unknown'), 0.85, 'sourceWeight: unknown = 0.85 (safe default)');
+assertEq(getSourceWeight('unknown'), 0.9, 'sourceWeight: unknown = 0.9 (core falls back to user-inferred via from_str_lossy)');
 
 // ---------------------------------------------------------------------------
 // rerank with applySourceWeights=true: user > assistant on tied content

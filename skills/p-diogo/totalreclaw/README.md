@@ -96,7 +96,36 @@ openclaw plugins install @totalreclaw/totalreclaw
 
 ### 2. Configure
 
-Set one environment variable:
+You have three ways to set up TotalReclaw, depending on where your OpenClaw gateway runs.
+
+**Local gateway (laptop / workstation):** run the CLI wizard on the same machine:
+
+```bash
+openclaw totalreclaw onboard
+```
+
+The wizard generates or accepts a 12-word BIP-39 TotalReclaw account key directly on your terminal. The phrase never touches the LLM, the chat transcript, or the network -- it's written straight to `~/.totalreclaw/credentials.json` (mode 0600).
+
+**Remote gateway (VPS, home server, shared / team):** use QR-pairing (new in v3.3.0).
+
+On the gateway host:
+
+```bash
+openclaw totalreclaw pair           # generate a new account key
+openclaw totalreclaw pair import    # import an existing TotalReclaw key
+```
+
+You'll see a QR code, a 6-digit secondary code, and a URL. Scan the QR with your phone's camera or open the URL on any modern browser. The browser page:
+
+1. Asks you to enter the 6-digit code (prevents a bystander from hijacking the session).
+2. Generates or accepts your 12-word account key in-page.
+3. Encrypts it end-to-end (x25519 + ChaCha20-Poly1305, key derived from a DH shared secret the relay never sees) and delivers it to your gateway.
+
+The phrase never enters the LLM, the chat transcript, or the relay server in plaintext. The pairing URL embeds the gateway's ephemeral public key in the URL fragment -- this is TLS-MITM resistant and invisible to any server on the path. See `CHANGELOG.md` §3.3.0 for the full threat model.
+
+Browser support: Safari 17+, Chrome 123+, Firefox 130+ (these ship WebCrypto x25519 + ChaCha20-Poly1305).
+
+**Legacy / self-hosted:** set the env var directly (useful for containers / CI):
 
 ```bash
 export TOTALRECLAW_RECOVERY_PHRASE="your twelve word recovery phrase here"
@@ -104,7 +133,7 @@ export TOTALRECLAW_RECOVERY_PHRASE="your twelve word recovery phrase here"
 
 **That's it.** v1 is the default extraction and write path. Extraction cadence, importance floor, candidate pool size, and dedup thresholds are all server-tuned via the relay's billing response -- no client env vars to set. See [env vars reference](../../docs/guides/env-vars-reference.md).
 
-For self-hosted deployments:
+For self-hosted relays:
 
 ```bash
 export TOTALRECLAW_SERVER_URL="http://your-totalreclaw-server:8080"

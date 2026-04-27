@@ -754,7 +754,12 @@ export async function extractFactsForCompaction(
     response = await chatCompletion(config, [
       { role: 'system', content: COMPACTION_SYSTEM_PROMPT },
       { role: 'user', content: userPrompt },
-    ]);
+    ], {
+      // 3.3.1-rc.2: retry transient 429 / timeout (same policy as extractFacts).
+      retry: { attempts: 3, baseDelayMs: 1000 },
+      timeoutMs: 30_000,
+      logger,
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     logger?.warn?.(`extractFactsForCompaction: chatCompletion threw: ${msg}`);
@@ -907,7 +912,11 @@ export async function extractDebrief(
     const response = await chatCompletion(config, [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: `Review this conversation and provide a debrief:\n\n${conversationText}` },
-    ]);
+    ], {
+      // 3.3.1-rc.2: retry transient 429 / timeout.
+      retry: { attempts: 3, baseDelayMs: 1000 },
+      timeoutMs: 30_000,
+    });
 
     if (!response) return [];
     return parseDebriefResponse(response);
@@ -1313,7 +1322,14 @@ export async function comparativeRescoreV1(
     response = await chatCompletion(config, [
       { role: 'system', content: COMPARATIVE_PROMPT_V1 },
       { role: 'user', content: userPrompt },
-    ]);
+    ], {
+      // 3.3.1-rc.2: retry transient 429 / timeout (rescore is an inner
+      // call after extractFacts — if extraction backs off successfully
+      // the rescore usually also passes on first try, but keep symmetry).
+      retry: { attempts: 3, baseDelayMs: 1000 },
+      timeoutMs: 30_000,
+      logger,
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     logger?.warn?.(`comparativeRescoreV1: chatCompletion threw: ${msg}`);
@@ -1422,7 +1438,15 @@ export async function extractFacts(
     response = await chatCompletion(config, [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
-    ]);
+    ], {
+      // 3.3.1-rc.2: the headline fix for the rc.1 QA NO-GO — 5/6 extraction
+      // windows failed on zai 429 + timeouts with no retry. 3 attempts with
+      // 1s → 2s → 4s backoff recovers virtually all transient rate-limit
+      // hiccups. Graceful timeout: per-attempt 30s, total worst-case 30+1+30+2+30+4≈97s.
+      retry: { attempts: 3, baseDelayMs: 1000 },
+      timeoutMs: 30_000,
+      logger,
+    });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     logger?.warn?.(`extractFacts: chatCompletion threw: ${msg}`);

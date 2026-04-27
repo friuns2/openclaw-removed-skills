@@ -74,6 +74,44 @@ export interface CompileDigestCoreInput {
 }
 
 // ---------------------------------------------------------------------------
+// Stub / tombstone blob detection
+// ---------------------------------------------------------------------------
+
+/**
+ * Is this subgraph-stored blob a supersede tombstone or other non-content
+ * stub? The 3.0.7-rc.1 QA found that 7 of 25 facts on the QA wallet had
+ * `encryptedBlob == "0x00"` — a 1-byte stub written as a supersede
+ * tombstone. The digest pipeline attempted to decrypt these unconditionally
+ * and produced 5 `Digest: decrypt failed … Encrypted data too short`
+ * warnings per QA window.
+ *
+ * We deliberately ONLY short-circuit shapes that cannot plausibly contain
+ * a real XChaCha20-Poly1305 payload — a valid ciphertext must be at
+ * least 40 bytes (24B nonce + 16B tag). We stay conservative about
+ * "short-but-non-stub" blobs: if someone's wire format changes and we
+ * see a 30-byte blob, that's a legitimate decrypt-failure case worth
+ * logging as a WARN, not silently skipping. So the check is:
+ *
+ *   - Empty string                        → stub
+ *   - Just the `0x` / `0X` prefix         → stub
+ *   - All-zero hex (e.g. "0x00", "00")    → stub (explicit tombstone)
+ *
+ * Anything else falls through to the decrypt attempt.
+ *
+ * Called from both `loadLatestDigest` (digest read path) and
+ * `fetchAllActiveClaims` (digest recompile path).
+ */
+export function isStubBlob(hex: string): boolean {
+  if (typeof hex !== 'string') return true;
+  const stripped = (hex.startsWith('0x') || hex.startsWith('0X')) ? hex.slice(2) : hex;
+  if (stripped.length === 0) return true;
+  // All-zero hex is the explicit tombstone shape the relay emits
+  // when marking a fact superseded (seen as "0x00" on the QA wallet,
+  // but any "00...00" of any length is semantically the same).
+  return /^0+$/i.test(stripped);
+}
+
+// ---------------------------------------------------------------------------
 // Recompile-in-progress guard (in-memory, per-process)
 // ---------------------------------------------------------------------------
 
@@ -217,16 +255,30 @@ export async function loadLatestDigest(
   }
   if (!results || results.length === 0) return null;
 
-  // Pick the highest createdAt (client-generated Unix seconds). Fall back to
-  // timestamp (block time) when createdAt is missing.
+  // Pick the highest createdAt (client-generated Unix seconds) among rows
+  // with a real (non-stub) blob. Stub blobs are supersede tombstones —
+  // see `isStubBlob` above; attempting to decrypt one produces a noisy
+  // `Digest: decrypt failed … Encrypted data too short` WARN. We filter
+  // them out pre-ranking so we prefer a slightly-older real digest over
+  // a newer tombstone. If EVERY candidate is a stub, return null quietly.
   let best: { id: string; encryptedBlob: string; createdAt: number } | null = null;
+  let stubCount = 0;
   for (const r of results) {
+    if (isStubBlob(r.encryptedBlob)) {
+      stubCount++;
+      continue;
+    }
     const createdAt = parseInt(r.createdAt ?? r.timestamp ?? '0', 10) || 0;
     if (!best || createdAt > best.createdAt) {
       best = { id: r.id, encryptedBlob: r.encryptedBlob, createdAt };
     }
   }
-  if (!best) return null;
+  if (!best) {
+    if (stubCount > 0) {
+      logger.info(`Digest: all ${stubCount} candidates were tombstone stubs — no digest available`);
+    }
+    return null;
+  }
 
   try {
     const decrypted = deps.decryptFromHex(best.encryptedBlob, encryptionKey);
@@ -349,6 +401,11 @@ export async function fetchAllActiveClaims(
   const claimsOut: unknown[] = [];
   for (const row of rows) {
     if (row.isActive === false) continue;
+    // Stub / tombstone blobs (encryptedBlob == "0x00") will always fail
+    // decrypt with `Encrypted data too short`. Skip pre-decrypt so we
+    // don't spin up a WASM call path per stub — the QA wallet had 7 of
+    // 25 facts as stubs, so this matters for recompile cost too.
+    if (isStubBlob(row.encryptedBlob)) continue;
     try {
       const decrypted = deps.decryptFromHex(row.encryptedBlob, encryptionKey);
       const canonicalJson = getWasm().parseClaimOrLegacy(decrypted);

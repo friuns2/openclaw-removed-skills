@@ -12,16 +12,29 @@
  *   3. Bulk consolidation — cluster all facts in the vault and identify
  *      groups of near-duplicates for cleanup (clusterFacts).
  *
- * This module intentionally has minimal dependencies (only reranker for
- * cosineSimilarity) so it can be tested without pulling in the full
- * plugin dependency graph.
+ * Delegates core computation to `@totalreclaw/core` Rust WASM module where
+ * bindings are available. `shouldSupersede` uses the core directly.
+ * `findNearDuplicate` and `clusterFacts` use the core's `findBestNearDuplicate`
+ * and `clusterFacts` WASM functions when available, falling back to local
+ * implementations that use WASM-backed `cosineSimilarity`.
+ *
+ * Threshold helpers remain local (they read process.env).
  */
 
+import { createRequire } from 'node:module';
 import { cosineSimilarity } from './reranker.js';
 
-// TODO: hoist findNearDuplicate, clusterFacts, pickRepresentative to
-// @totalreclaw/core WASM once findBestNearDuplicate / clusterFacts / pickRepresentative
-// bindings are published (pending core 1.5.0+ WASM bindings).
+// ---------------------------------------------------------------------------
+// Lazy-load WASM core (mirrors claims-helper.ts / contradiction-sync.ts
+// pattern — plays nicely under both the OpenClaw runtime (CJS-ish tsx) and
+// bare Node ESM used by tests).
+// ---------------------------------------------------------------------------
+const requireWasm = createRequire(import.meta.url);
+let _wasm: typeof import('@totalreclaw/core') | null = null;
+function getWasm(): typeof import('@totalreclaw/core') {
+  if (!_wasm) _wasm = requireWasm('@totalreclaw/core');
+  return _wasm!;
+}
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -110,6 +123,36 @@ export function findNearDuplicate(
   candidates: DecryptedCandidate[],
   threshold: number,
 ): NearDuplicateMatch | null {
+  const wasm = getWasm();
+
+  // Use core's findBestNearDuplicate if available (added in core >=1.5.0;
+  // guaranteed present in core >=2.0.0 which this plugin depends on).
+  if (typeof (wasm as any).findBestNearDuplicate === 'function') {
+    const existing = candidates
+      .filter((c) => c.embedding && c.embedding.length > 0)
+      .map((c) => ({ id: c.id, embedding: c.embedding! }));
+
+    if (existing.length === 0) return null;
+
+    const resultJs = (wasm as any).findBestNearDuplicate(
+      JSON.stringify(newFactEmbedding),
+      JSON.stringify(existing),
+      threshold,
+    );
+
+    if (resultJs == null) return null;
+
+    const result: { fact_id: string; similarity: number } =
+      typeof resultJs === 'string' ? JSON.parse(resultJs) : resultJs;
+
+    const matched = candidates.find((c) => c.id === result.fact_id);
+    if (!matched) return null;
+
+    return { existingFact: matched, similarity: result.similarity };
+  }
+
+  // Fallback: local loop using WASM-backed cosineSimilarity. Defensive only
+  // — core >=2.0.0 always exposes findBestNearDuplicate.
   let bestMatch: NearDuplicateMatch | null = null;
 
   for (const candidate of candidates) {
@@ -136,6 +179,8 @@ export function findNearDuplicate(
  * - Higher importance wins.
  * - Equal importance: new fact supersedes (newer is preferred).
  *
+ * Delegates to `@totalreclaw/core` WASM `shouldSupersede`.
+ *
  * @param newImportance - Importance score of the new fact
  * @param existingFact  - The existing near-duplicate candidate
  * @returns             - 'supersede' if new fact should replace, 'skip' otherwise
@@ -144,12 +189,126 @@ export function shouldSupersede(
   newImportance: number,
   existingFact: DecryptedCandidate,
 ): 'supersede' | 'skip' {
-  if (newImportance >= existingFact.importance) return 'supersede';
-  return 'skip';
+  const wasm = getWasm();
+  return wasm.shouldSupersede(newImportance, existingFact.importance) ? 'supersede' : 'skip';
 }
 
 // ---------------------------------------------------------------------------
 // Bulk consolidation
+// ---------------------------------------------------------------------------
+
+/**
+ * Cluster facts by semantic similarity using greedy single-pass clustering.
+ *
+ * Delegates to `@totalreclaw/core` WASM `clusterFacts` which performs the
+ * same greedy single-pass algorithm and representative selection. The WASM
+ * function returns ID-only clusters; this wrapper maps IDs back to full
+ * `DecryptedCandidate` objects for callers.
+ *
+ * Only returns clusters that have duplicates (i.e. more than one member).
+ * Facts without embeddings are not clustered.
+ *
+ * @param facts     - All facts to cluster
+ * @param threshold - Cosine similarity threshold (e.g. 0.88)
+ * @returns         - Clusters with duplicates (representative + duplicates)
+ */
+export function clusterFacts(
+  facts: DecryptedCandidate[],
+  threshold: number,
+): ConsolidationCluster[] {
+  const wasm = getWasm();
+
+  // Use core's clusterFacts if available (added in core >=1.5.0;
+  // guaranteed present in core >=2.0.0 which this plugin depends on).
+  if (typeof (wasm as any).clusterFacts === 'function') {
+    // Build ConsolidationCandidate JSON for WASM (snake_case fields).
+    const wasmCandidates = facts
+      .filter((f) => f.embedding && f.embedding.length > 0)
+      .map((f) => ({
+        id: f.id,
+        text: f.text,
+        embedding: f.embedding!,
+        importance: f.importance,
+        decay_score: f.decayScore,
+        created_at: f.createdAt,
+        version: f.version,
+      }));
+
+    if (wasmCandidates.length === 0) return [];
+
+    const resultJs = (wasm as any).clusterFacts(
+      JSON.stringify(wasmCandidates),
+      threshold,
+    );
+
+    // WASM returns a JSON string: [{ representative: string, duplicates: string[] }]
+    const wasmClusters: { representative: string; duplicates: string[] }[] =
+      typeof resultJs === 'string' ? JSON.parse(resultJs) : resultJs;
+
+    // Build a lookup map for fast ID -> DecryptedCandidate resolution.
+    const byId = new Map<string, DecryptedCandidate>();
+    for (const f of facts) byId.set(f.id, f);
+
+    // Map ID-only clusters back to full DecryptedCandidate objects.
+    // Filter out singleton clusters (no duplicates) to match the pre-WASM
+    // plugin contract — callers rely on `clusters.length === 0` when nothing
+    // duplicates anything.
+    const result: ConsolidationCluster[] = [];
+    for (const wc of wasmClusters) {
+      const rep = byId.get(wc.representative);
+      if (!rep) continue;
+
+      const dups = wc.duplicates
+        .map((id) => byId.get(id))
+        .filter((d): d is DecryptedCandidate => d !== undefined);
+
+      if (dups.length > 0) {
+        result.push({ representative: rep, duplicates: dups });
+      }
+    }
+
+    return result;
+  }
+
+  // Fallback: local greedy single-pass clustering using WASM-backed
+  // cosineSimilarity. Defensive only — core >=2.0.0 always exposes clusterFacts.
+  const clusters: { members: DecryptedCandidate[] }[] = [];
+
+  for (const fact of facts) {
+    if (!fact.embedding || fact.embedding.length === 0) continue;
+
+    let assigned = false;
+    for (const cluster of clusters) {
+      const seed = cluster.members[0];
+      if (!seed.embedding) continue;
+
+      const similarity = cosineSimilarity(fact.embedding, seed.embedding);
+      if (similarity >= threshold) {
+        cluster.members.push(fact);
+        assigned = true;
+        break;
+      }
+    }
+
+    if (!assigned) {
+      clusters.push({ members: [fact] });
+    }
+  }
+
+  const result: ConsolidationCluster[] = [];
+  for (const cluster of clusters) {
+    if (cluster.members.length < 2) continue;
+
+    const representative = pickRepresentative(cluster.members);
+    const duplicates = cluster.members.filter((m) => m !== representative);
+    result.push({ representative, duplicates });
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Local helpers (used only in fallback paths)
 // ---------------------------------------------------------------------------
 
 /**
@@ -173,59 +332,4 @@ function pickRepresentative(facts: DecryptedCandidate[]): DecryptedCandidate {
     }
   }
   return best;
-}
-
-/**
- * Cluster facts by semantic similarity using greedy single-pass clustering.
- *
- * For each fact (in order), assigns it to the first existing cluster whose
- * representative has cosine similarity >= threshold. If no cluster matches,
- * a new cluster is started.
- *
- * Only returns clusters that have duplicates (i.e. more than one member).
- * Facts without embeddings are not clustered.
- *
- * @param facts     - All facts to cluster
- * @param threshold - Cosine similarity threshold (e.g. 0.88)
- * @returns         - Clusters with duplicates (representative + duplicates)
- */
-export function clusterFacts(
-  facts: DecryptedCandidate[],
-  threshold: number,
-): ConsolidationCluster[] {
-  const clusters: { members: DecryptedCandidate[] }[] = [];
-
-  for (const fact of facts) {
-    if (!fact.embedding || fact.embedding.length === 0) continue;
-
-    let assigned = false;
-    for (const cluster of clusters) {
-      // Compare against the first member's embedding (cluster seed)
-      const seed = cluster.members[0];
-      if (!seed.embedding) continue;
-
-      const similarity = cosineSimilarity(fact.embedding, seed.embedding);
-      if (similarity >= threshold) {
-        cluster.members.push(fact);
-        assigned = true;
-        break;
-      }
-    }
-
-    if (!assigned) {
-      clusters.push({ members: [fact] });
-    }
-  }
-
-  // Only return clusters with duplicates, pick representative for each
-  const result: ConsolidationCluster[] = [];
-  for (const cluster of clusters) {
-    if (cluster.members.length < 2) continue;
-
-    const representative = pickRepresentative(cluster.members);
-    const duplicates = cluster.members.filter((m) => m !== representative);
-    result.push({ representative, duplicates });
-  }
-
-  return result;
 }

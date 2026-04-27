@@ -340,6 +340,120 @@ console.log('# clusterFacts');
 }
 
 // ---------------------------------------------------------------------------
+// Cross-impl parity: plugin wrappers delegate to the exact same WASM functions
+// that MCP (`mcp/src/consolidation.ts`) delegates to. This block re-executes
+// the same inputs against the raw WASM API and asserts the plugin wrapper
+// returns the same result, so any future drift between plugin and core is
+// caught at test time.
+// ---------------------------------------------------------------------------
+
+console.log('# cross-impl parity (raw WASM vs plugin wrapper)');
+
+{
+  // Use createRequire from node:module so this works under ESM (plugin's
+  // runtime mode). Mirrors the pattern the module under test uses.
+  const { createRequire } = await import('node:module');
+  const requireWasm = createRequire(import.meta.url);
+  const wasm = requireWasm('@totalreclaw/core') as typeof import('@totalreclaw/core');
+
+  // findNearDuplicate parity
+  const newEmb = [1, 0, 0, 0];
+  const candidates = [
+    makeCandidate({ id: 'low', embedding: [0.86, Math.sqrt(1 - 0.86 * 0.86), 0, 0] }),
+    makeCandidate({ id: 'high', embedding: [0.99, Math.sqrt(1 - 0.99 * 0.99), 0, 0] }),
+    makeCandidate({ id: 'mid', embedding: [0.90, Math.sqrt(1 - 0.90 * 0.90), 0, 0] }),
+  ];
+
+  const pluginMatch = findNearDuplicate(newEmb, candidates, 0.85);
+  const rawExisting = candidates
+    .filter((c) => c.embedding && c.embedding.length > 0)
+    .map((c) => ({ id: c.id, embedding: c.embedding! }));
+  const rawResultJs = (wasm as any).findBestNearDuplicate(
+    JSON.stringify(newEmb),
+    JSON.stringify(rawExisting),
+    0.85,
+  );
+  const rawMatch: { fact_id: string; similarity: number } | null =
+    rawResultJs == null
+      ? null
+      : typeof rawResultJs === 'string'
+      ? JSON.parse(rawResultJs)
+      : rawResultJs;
+
+  assert(
+    pluginMatch !== null && rawMatch !== null && pluginMatch.existingFact.id === rawMatch.fact_id,
+    'parity: findNearDuplicate picks same fact_id as raw WASM findBestNearDuplicate',
+  );
+  assert(
+    pluginMatch !== null && rawMatch !== null &&
+      Math.abs(pluginMatch.similarity - rawMatch.similarity) < 1e-9,
+    'parity: findNearDuplicate similarity equals raw WASM similarity',
+  );
+}
+
+{
+  // shouldSupersede parity — plugin wrapper is a thin pass-through. Test
+  // that equal importance returns 'supersede' from BOTH plugin and raw WASM.
+  const { createRequire } = await import('node:module');
+  const requireWasm = createRequire(import.meta.url);
+  const wasm = requireWasm('@totalreclaw/core') as typeof import('@totalreclaw/core');
+
+  const existing = makeCandidate({ id: 'e', importance: 5 });
+  for (const [newImp, label] of [[8, 'higher'], [3, 'lower'], [5, 'equal']] as const) {
+    const pluginAns = shouldSupersede(newImp, existing);
+    const rawAns = wasm.shouldSupersede(newImp, existing.importance) ? 'supersede' : 'skip';
+    assert(pluginAns === rawAns, `parity: shouldSupersede agrees with raw WASM (${label} importance)`);
+  }
+}
+
+{
+  // clusterFacts parity — compare plugin-wrapper output (IDs only) against a
+  // raw WASM call with the same JSON payload. The plugin filters singleton
+  // clusters; apply the same filter to the raw output before comparing.
+  const { createRequire } = await import('node:module');
+  const requireWasm = createRequire(import.meta.url);
+  const wasm = requireWasm('@totalreclaw/core') as typeof import('@totalreclaw/core');
+
+  const facts = [
+    makeCandidate({ id: 'a1', embedding: [1, 0, 0] }),
+    makeCandidate({ id: 'a2', embedding: [1, 0, 0] }),
+    makeCandidate({ id: 'b1', embedding: [0, 1, 0] }),
+    makeCandidate({ id: 'b2', embedding: [0, 1, 0] }),
+    makeCandidate({ id: 'c1', embedding: [0, 0, 1] }), // singleton
+  ];
+
+  const pluginClusters = clusterFacts(facts, 0.88).map((c) => ({
+    representative: c.representative.id,
+    duplicates: [...c.duplicates.map((d) => d.id)].sort(),
+  }));
+
+  const wasmCandidates = facts.map((f) => ({
+    id: f.id,
+    text: f.text,
+    embedding: f.embedding!,
+    importance: f.importance,
+    decay_score: f.decayScore,
+    created_at: f.createdAt,
+    version: f.version,
+  }));
+  const rawJs = (wasm as any).clusterFacts(JSON.stringify(wasmCandidates), 0.88);
+  const rawClusters: { representative: string; duplicates: string[] }[] =
+    typeof rawJs === 'string' ? JSON.parse(rawJs) : rawJs;
+  const rawFiltered = rawClusters
+    .filter((c) => c.duplicates.length > 0)
+    .map((c) => ({ representative: c.representative, duplicates: [...c.duplicates].sort() }));
+
+  // Sort both by representative for stable comparison.
+  const norm = (arr: { representative: string; duplicates: string[] }[]) =>
+    [...arr].sort((x, y) => x.representative.localeCompare(y.representative));
+
+  assert(
+    JSON.stringify(norm(pluginClusters)) === JSON.stringify(norm(rawFiltered)),
+    'parity: clusterFacts output (sans singletons) equals raw WASM clusterFacts output',
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 

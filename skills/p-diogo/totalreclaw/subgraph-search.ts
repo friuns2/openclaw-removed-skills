@@ -22,6 +22,7 @@
 
 import { getSubgraphConfig } from './subgraph-store.js';
 import { CONFIG } from './config.js';
+import { buildRelayHeaders } from './relay-headers.js';
 
 export interface SubgraphSearchFact {
   id: string;
@@ -48,13 +49,13 @@ async function gqlQuery<T>(
   authKeyHex?: string,
 ): Promise<T | null> {
   try {
-    const headers: Record<string, string> = {
+    const overrides: Record<string, string> = {
       'Content-Type': 'application/json',
-      'X-TotalReclaw-Client': 'openclaw-plugin',
     };
     if (authKeyHex) {
-      headers['Authorization'] = `Bearer ${authKeyHex}`;
+      overrides['Authorization'] = `Bearer ${authKeyHex}`;
     }
+    const headers = buildRelayHeaders(overrides);
     const response = await fetch(endpoint, {
       method: 'POST',
       headers,

@@ -3,11 +3,16 @@
   "slug": "totalreclaw",
   "displayName": "Plugin",
   "latest": {
-    "version": "3.0.4",
-    "publishedAt": 1776551198610,
-    "commit": "https://github.com/openclaw/skills/commit/5650a76b39f18df03ac7f2db4adc2028f2f1513a"
+    "version": "3.3.1-rc.22",
+    "publishedAt": 1777168694459,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.0.4",
+      "publishedAt": 1776551198610,
+      "commit": "https://github.com/openclaw/skills/commit/5650a76b39f18df03ac7f2db4adc2028f2f1513a"
+    },
     {
       "version": "2.5.1",
       "publishedAt": 1775866225707,

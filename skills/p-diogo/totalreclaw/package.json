@@ -1,19 +1,26 @@
 {
   "name": "@totalreclaw/totalreclaw",
-  "version": "3.0.4",
-  "description": "End-to-end encrypted memory for AI agents — portable, yours forever. Automatic extraction, semantic search, and on-chain storage",
+  "version": "3.3.1-rc.22",
+  "description": "End-to-end encrypted, agent-portable memory for OpenClaw and any LLM-agent runtime. XChaCha20-Poly1305 with protobuf v4 + on-chain Memory Taxonomy v1 (claim / preference / directive / commitment / episode / summary).",
   "type": "module",
   "keywords": [
     "totalreclaw",
     "openclaw",
     "ai-memory",
     "ai-agent",
+    "agent-memory",
+    "portable-memory",
     "e2e-encryption",
     "encryption",
     "e2ee",
+    "xchacha20-poly1305",
+    "bip39",
+    "erc-4337",
     "lsh",
     "semantic-search",
-    "memory"
+    "memory",
+    "memory-taxonomy",
+    "v1"
   ],
   "homepage": "https://totalreclaw.xyz",
   "repository": {
@@ -25,11 +32,23 @@
   "license": "MIT",
   "dependencies": {
     "@totalreclaw/client": "^1.2.0",
-    "@totalreclaw/core": "^2.0.0",
-    "@huggingface/transformers": "^4.0.1",
-    "onnxruntime-node": "^1.24.0"
+    "@totalreclaw/core": "^2.1.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/ws": "^8.5.12",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "ws": "^8.18.3"
   },
+  "//": "@huggingface/transformers + onnxruntime-node deliberately omitted from runtime deps. They are heavy native bundles (~700 MB peak install RAM) that OOM-killed the OpenClaw gateway on small VPS during `openclaw plugins install` in rc.21 (issue: 3.7 GB Hetzner host). rc.22 ships them via a lazy GitHub-Releases bundle (`embedder-v1.tar.gz`) downloaded on first call to embed(). See `embedder-network.ts` + `scripts/build-embedder-bundle.mjs`. The dev-deps below are for type-checking + bundle generation only; npm install of the plugin tarball never installs them.",
+  "devDependencies": {
+    "@huggingface/transformers": "^4.0.1",
+    "onnxruntime-node": "^1.24.0",
+    "typescript": "^5.5.0"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
+    "dist/",
     "*.ts",
     "import-adapters/",
     "!**/*.test.ts",
@@ -37,12 +56,26 @@
     "openclaw.plugin.json",
     "SKILL.md",
     "README.md",
+    "CHANGELOG.md",
     "CLAWHUB.md",
     "skill.json"
   ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json --noCheck",
+    "verify-tarball": "node ../scripts/verify-tarball.mjs",
+    "test": "npx tsx manifest-shape.test.ts && npx tsx config-schema.test.ts && npx tsx config.test.ts && npx tsx relay-headers.test.ts && npx tsx scope-address-visible.test.ts && npx tsx llm-profile-reader.test.ts && npx tsx llm-client.test.ts && npx tsx llm-client-retry.test.ts && npx tsx gateway-url.test.ts && npx tsx retype-setscope.test.ts && npx tsx tool-gating.test.ts && npx tsx onboarding-noninteractive.test.ts && npx tsx pair-cli-json.test.ts && npx tsx pair-qr.test.ts && npx tsx pair-remote-client.test.ts && npx tsx qa-bug-report.test.ts && npx tsx nonce-serialization.test.ts && npx tsx phrase-safety-registry.test.ts && npx tsx test_issue_92_onnx_download_ux.test.ts && npx tsx onboard-pair-only.test.ts && npx tsx import-time-smoke.test.ts && npx tsx install-staging-cleanup.test.ts && npx tsx partial-install-detection.test.ts && npx tsx install-reload-idempotency.test.ts && npx tsx json-stdout-cleanliness.test.ts",
+    "smoke:dist": "npx tsx dist-esm-smoke.test.ts",
+    "check-scanner": "node ../scripts/check-scanner.mjs",
+    "check-version-drift": "node ../scripts/check-version-drift.mjs",
+    "sync-version": "node ../scripts/sync-version.mjs",
+    "preinstall": "node -e \"try{require('fs').writeFileSync('.tr-partial-install','');}catch{}\"",
+    "postinstall": "node -e \"try{require('fs').unlinkSync('.tr-partial-install');}catch{}\"",
+    "prepack": "npm run build",
+    "prepublishOnly": "node ../scripts/check-scanner.mjs && node ../scripts/check-version-drift.mjs"
+  },
   "openclaw": {
     "extensions": [
-      "./index.ts"
+      "./dist/index.js"
     ]
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "totalreclaw",
-  "version": "1.6.1",
+  "version": "3.3.1-rc.22",
   "description": "End-to-end encrypted memory for AI agents — portable, yours forever. XChaCha20-Poly1305 E2EE: server never sees plaintext.",
   "author": "TotalReclaw Team",
   "license": "MIT",

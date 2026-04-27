@@ -7,10 +7,15 @@
  * Default parameters: 32 bits per table, 20 tables.
  */
 
-// Lazy-load WASM to avoid crash when npm install hasn't finished yet.
+// Lazy-load WASM via createRequire. The shipped `dist/index.js` is ESM-only
+// (`"type":"module"`) so the bare `require` global is undefined at runtime.
+// See issue #124 for the bug this avoids; matches the pattern in
+// claims-helper / consolidation / digest-sync / pin / retype-setscope.
+import { createRequire } from 'node:module';
+const requireWasm = createRequire(import.meta.url);
 let _WasmLshHasher: typeof import('@totalreclaw/core')['WasmLshHasher'] | null = null;
 function getWasmLshHasher() {
-  if (!_WasmLshHasher) _WasmLshHasher = require('@totalreclaw/core').WasmLshHasher;
+  if (!_WasmLshHasher) _WasmLshHasher = requireWasm('@totalreclaw/core').WasmLshHasher;
   return _WasmLshHasher!;
 }
 

@@ -1,346 +1,297 @@
-"use strict";
 /**
- * TotalReclaw Skill - Configuration Module
+ * Plugin configuration — centralized env var reads.
+ * This file ONLY reads process.env. No network calls, no I/O.
+ * Other modules import config values from here.
  *
- * Handles loading, merging, and validating configuration from multiple sources:
- * - skill.json defaults
- * - OpenClaw config (agents.defaults.totalreclaw.*)
- * - Environment variables (TOTALRECLAW_*)
+ * OpenClaw's security scanner flags files that contain BOTH process.env reads
+ * AND network calls. By centralizing all env reads here, no other file needs
+ * to touch process.env directly.
+ *
+ * v1 env var cleanup — see `docs/guides/env-vars-reference.md`.
+ * Removed user-facing vars: TOTALRECLAW_CHAIN_ID, TOTALRECLAW_EMBEDDING_MODEL,
+ * TOTALRECLAW_STORE_DEDUP, TOTALRECLAW_LLM_MODEL, TOTALRECLAW_TAXONOMY_VERSION.
+ *
+ * NOTE: ``TOTALRECLAW_SESSION_ID`` was in the removed list during the v1
+ * cleanup and silently rejected with a warning. That broke Axiom log tracing
+ * for QA — the qa-totalreclaw skill prescribes setting the var so relay logs
+ * are searchable by ``X-TotalReclaw-Session``. Restored as a SUPPORTED
+ * variable: read here, forwarded as the ``X-TotalReclaw-Session`` header on
+ * every outbound relay call. Mirrors the Python-side fix
+ * (`python/src/totalreclaw/agent/state.py`, v2.0.2). See internal#127.
+ * Removed legacy gates: TOTALRECLAW_CLAIM_FORMAT, TOTALRECLAW_DIGEST_MODE,
+ * TOTALRECLAW_AUTO_RESOLVE_MODE (the last one moved to an internal debug
+ * module; see `contradiction-sync.ts`).
+ *
+ * Tuning knobs (cosine threshold, min importance, cache TTL, etc.) are now
+ * delivered via the relay billing response. Env-var fallbacks are kept only
+ * for self-hosted deployments where the server may not surface those values.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadConfig = loadConfig;
-exports.validateConfig = validateConfig;
-exports.assertValidConfig = assertValidConfig;
-exports.createConfig = createConfig;
-const types_1 = require("./types");
+import path from 'node:path';
+const home = process.env.HOME ?? '/home/node';
 /**
- * Skill.json configuration defaults (extracted from skill.json)
+ * Removed env vars — warn once per process if still set so operators know
+ * their config is a no-op. The removal list matches `docs/guides/env-vars-reference.md`.
  */
-const SKILL_JSON_DEFAULTS = {
-    serverUrl: 'http://127.0.0.1:8080',
-    autoExtractEveryTurns: 5,
-    minImportanceForAutoStore: 6,
-    maxMemoriesInContext: 8,
-    forgetThreshold: 0.3,
-    rerankerModel: 'BAAI/bge-reranker-base',
+const REMOVED_ENV_VARS = [
+    'TOTALRECLAW_CHAIN_ID',
+    'TOTALRECLAW_EMBEDDING_MODEL',
+    'TOTALRECLAW_STORE_DEDUP',
+    'TOTALRECLAW_LLM_MODEL',
+    // NOTE: TOTALRECLAW_SESSION_ID was here before; restored as SUPPORTED
+    // (forwarded as X-TotalReclaw-Session header). Do NOT add it back to this
+    // list — see file header + internal#127.
+    'TOTALRECLAW_TAXONOMY_VERSION',
+    'TOTALRECLAW_CLAIM_FORMAT',
+    'TOTALRECLAW_DIGEST_MODE',
+];
+// Migration guide URL — kept as a constant so the regression test can assert
+// the exact link text in the warning. Pointing at GitHub raw-blob is more
+// useful than the relative repo path: operators copying the warning out of
+// stderr usually do not have the repo cloned. rc.22 finding #4.
+export const ENV_VARS_REFERENCE_URL = 'https://github.com/p-diogo/totalreclaw/blob/main/docs/guides/env-vars-reference.md';
+function warnRemovedEnvVars(warn = console.warn) {
+    const set = REMOVED_ENV_VARS.filter((name) => process.env[name] !== undefined);
+    if (set.length === 0)
+        return;
+    warn(`TotalReclaw: ignoring removed env var(s): ${set.join(', ')}. ` +
+        `Migration guide: ${ENV_VARS_REFERENCE_URL}`);
+}
+// Emit the warning once at import time. Safe because this module is loaded
+// exactly once per process.
+warnRemovedEnvVars();
+/** Runtime override for recovery phrase (set by hot-reload after setup). */
+let _recoveryPhraseOverride = null;
+export function setRecoveryPhraseOverride(phrase) {
+    _recoveryPhraseOverride = phrase;
+}
+export function getRecoveryPhrase() {
+    return _recoveryPhraseOverride ?? process.env.TOTALRECLAW_RECOVERY_PHRASE ?? '';
+}
+/**
+ * Read the QA / observability session tag from the environment.
+ *
+ * When set, every outbound relay call adds the ``X-TotalReclaw-Session``
+ * header so relay logs (and Axiom queries) can be filtered by this tag —
+ * this is what the qa-totalreclaw skill relies on to scope log searches per
+ * QA run. When unset, returns ``null`` and the header is omitted.
+ *
+ * Read via getter (not snapshotted) so operators / test harnesses can flip
+ * the var between calls without reloading the module.
+ *
+ * Mirrors the Python-side ``RelayClient._session_id`` resolution priority.
+ * See internal#127 / `docs/guides/env-vars-reference.md`.
+ */
+export function getSessionId() {
+    const raw = process.env.TOTALRECLAW_SESSION_ID;
+    if (raw === undefined)
+        return null;
+    const trimmed = raw.trim();
+    return trimmed.length > 0 ? trimmed : null;
+}
+/**
+ * Runtime override for chain ID, set after the relay billing response is
+ * read. Free tier stays on 84532 (Base Sepolia); Pro tier flips to 100
+ * (Gnosis mainnet). The relay routes Pro writes to Gnosis, so Pro-tier
+ * UserOps MUST be signed against chain 100 — otherwise the bundler rejects
+ * the signature with AA23.
+ *
+ * See index.ts: after the billing lookup completes, call
+ * `setChainIdOverride(100)` for Pro users. Free users can leave the
+ * override unset.
+ */
+let _chainIdOverride = null;
+export function setChainIdOverride(chainId) {
+    _chainIdOverride = chainId;
+}
+/** Reset the chain override — used by tests. */
+export function __resetChainIdOverrideForTests() {
+    _chainIdOverride = null;
+}
+export const CONFIG = {
+    // Core — recoveryPhrase reads from override first, then env var.
+    // Use getRecoveryPhrase() for dynamic access; this property is for
+    // backward-compat with code that reads CONFIG.recoveryPhrase at init time.
+    get recoveryPhrase() {
+        return getRecoveryPhrase();
+    },
+    /**
+     * Optional QA / observability session tag forwarded to the relay as
+     * ``X-TotalReclaw-Session``. See `getSessionId()` above. Getter form so
+     * tests + harnesses can flip the env between calls. ``null`` when unset
+     * (header omitted).
+     */
+    get sessionId() {
+        return getSessionId();
+    },
+    serverUrl: (process.env.TOTALRECLAW_SERVER_URL || 'https://api.totalreclaw.xyz').replace(/\/+$/, ''),
+    selfHosted: process.env.TOTALRECLAW_SELF_HOSTED === 'true',
+    credentialsPath: process.env.TOTALRECLAW_CREDENTIALS_PATH || path.join(home, '.totalreclaw', 'credentials.json'),
+    // 3.2.0 onboarding state file — separate from credentials.json so it
+    // never contains secrets. Loaded on every plugin init + on every
+    // before_tool_call gate check.
+    onboardingStatePath: process.env.TOTALRECLAW_STATE_PATH || path.join(home, '.totalreclaw', 'state.json'),
+    // 3.3.0 QR-pairing session store. Separate file from both credentials.json
+    // and state.json so the session-store module does not have to touch either
+    // (keeps scanner surface isolated). Contains ephemeral x25519 secret keys
+    // for 15-min TTL windows; 0600 mode.
+    pairSessionsPath: process.env.TOTALRECLAW_PAIR_SESSIONS_PATH || path.join(home, '.totalreclaw', 'pair-sessions.json'),
+    // 3.3.1-rc.11 — pair-flow transport selector. Mirrors the Python-side
+    // `TOTALRECLAW_PAIR_MODE` env (rc.10). `'relay'` (default) routes
+    // `totalreclaw_pair` through the universal-reachability WebSocket relay at
+    // `TOTALRECLAW_PAIR_RELAY_URL`. `'local'` preserves the rc.4–rc.10 loopback
+    // HTTP flow (the plugin serves `/plugin/totalreclaw/pair/*` via
+    // `pair-http.ts`). Air-gapped / self-hosted users can pin `'local'` here.
+    pairMode: (() => {
+        const v = (process.env.TOTALRECLAW_PAIR_MODE ?? '').trim().toLowerCase();
+        return v === 'local' ? 'local' : 'relay';
+    })(),
+    // 3.3.1-rc.11 — relay base URL for the WebSocket-brokered pair flow.
+    // `wss://` preferred; `https://` is rewritten in the remote-client.
+    pairRelayUrl: (process.env.TOTALRECLAW_PAIR_RELAY_URL
+        || 'wss://api-staging.totalreclaw.xyz').replace(/\/+$/, ''),
+    // Chain — chainId is no longer user-configurable. It is auto-detected from
+    // the relay billing response (free = Base Sepolia / 84532, Pro = Gnosis /
+    // 100). The default here is used only before the first billing lookup
+    // completes. Self-hosted users can still point at a custom DataEdge via
+    // TOTALRECLAW_DATA_EDGE_ADDRESS / TOTALRECLAW_ENTRYPOINT_ADDRESS /
+    // TOTALRECLAW_RPC_URL (undocumented; internal knobs).
+    //
+    // Reads the runtime override set by the billing auto-detect in index.ts.
+    // Falls back to 84532 (free tier / pre-billing-lookup). Must be a getter,
+    // not a literal — a literal would freeze all Pro-tier UserOps to the
+    // wrong chainId and AA23 at the bundler.
+    get chainId() {
+        return _chainIdOverride ?? 84532;
+    },
+    dataEdgeAddress: process.env.TOTALRECLAW_DATA_EDGE_ADDRESS || '',
+    entryPointAddress: process.env.TOTALRECLAW_ENTRYPOINT_ADDRESS || '',
+    rpcUrl: process.env.TOTALRECLAW_RPC_URL || '',
+    // Tuning knobs — default values used only as local fallback for
+    // self-hosted mode. Managed-service clients override these from the relay
+    // billing response via `resolveTuning(...)`.
+    // See: docs/specs/totalreclaw/client-consistency.md
+    cosineThreshold: parseFloat(process.env.TOTALRECLAW_COSINE_THRESHOLD ?? '0.15'),
+    extractInterval: parseInt(process.env.TOTALRECLAW_EXTRACT_INTERVAL ?? process.env.TOTALRECLAW_EXTRACT_EVERY_TURNS ?? '3', 10),
+    relevanceThreshold: parseFloat(process.env.TOTALRECLAW_RELEVANCE_THRESHOLD ?? '0.3'),
+    semanticSkipThreshold: parseFloat(process.env.TOTALRECLAW_SEMANTIC_SKIP_THRESHOLD ?? '0.85'),
+    cacheTtlMs: parseInt(process.env.TOTALRECLAW_CACHE_TTL_MS ?? String(5 * 60 * 1000), 10),
+    minImportance: Math.max(1, Math.min(10, Number(process.env.TOTALRECLAW_MIN_IMPORTANCE) || 6)),
+    trapdoorBatchSize: parseInt(process.env.TOTALRECLAW_TRAPDOOR_BATCH_SIZE ?? '5', 10),
+    pageSize: parseInt(process.env.TOTALRECLAW_SUBGRAPH_PAGE_SIZE ?? '1000', 10),
+    // Store-time dedup is always ON. TOTALRECLAW_STORE_DEDUP was removed in v1.
+    storeDedupEnabled: true,
+    // LLM provider API keys (read once, passed to llm-client). Model selection
+    // is entirely automatic via `deriveCheapModel(provider)` — the
+    // TOTALRECLAW_LLM_MODEL override was removed in v1.
+    llmApiKeys: {
+        zai: process.env.ZAI_API_KEY || '',
+        anthropic: process.env.ANTHROPIC_API_KEY || '',
+        openai: process.env.OPENAI_API_KEY || '',
+        gemini: process.env.GEMINI_API_KEY || '',
+        google: process.env.GOOGLE_API_KEY || '',
+        mistral: process.env.MISTRAL_API_KEY || '',
+        groq: process.env.GROQ_API_KEY || '',
+        deepseek: process.env.DEEPSEEK_API_KEY || '',
+        openrouter: process.env.OPENROUTER_API_KEY || '',
+        xai: process.env.XAI_API_KEY || '',
+        together: process.env.TOGETHER_API_KEY || '',
+        cerebras: process.env.CEREBRAS_API_KEY || '',
+    },
+    // 3.3.1-rc.3: zai base-URL override. Read via a getter so tests can
+    // mutate `process.env.ZAI_BASE_URL` between calls — the value is NOT
+    // frozen at module load. Default is the coding endpoint; the rc.3
+    // auto-fallback flips to the standard endpoint on an "Insufficient
+    // balance" 429.
+    get zaiBaseUrl() {
+        const override = process.env.ZAI_BASE_URL;
+        if (override && override.trim())
+            return override.trim().replace(/\/+$/, '');
+        return 'https://api.z.ai/api/coding/paas/v4';
+    },
+    // 3.3.1-rc.3: retry budget for chatCompletion. Default 60s covers
+    // multi-minute upstream outages. Read as a plain value (not getter)
+    // so tests that patch env need to reload the module — but the default
+    // suffices for production.
+    llmRetryBudgetMs: (() => {
+        const raw = process.env.TOTALRECLAW_LLM_RETRY_BUDGET_MS;
+        const parsed = raw ? parseInt(raw, 10) : NaN;
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : 60_000;
+    })(),
+    // 3.3.1-rc.3: GitHub personal-access token used by the RC-gated
+    // `totalreclaw_report_qa_bug` tool. `TOTALRECLAW_QA_GITHUB_TOKEN` is
+    // the dedicated variable; `GITHUB_TOKEN` is a fallback for CI-style
+    // setups where the same token is shared across tools. Read via getter
+    // so operators can set the var after the process starts (e.g. via a
+    // dotenv reload) and the next tool call picks it up.
+    get qaGithubToken() {
+        return process.env.TOTALRECLAW_QA_GITHUB_TOKEN || process.env.GITHUB_TOKEN || '';
+    },
+    // 3.3.1-rc.14: optional target-repo override for the RC-gated QA
+    // bug-report tool. The `qa-bug-report` module enforces a
+    // "slug ends in `-internal`" rule on whatever is resolved here, so
+    // this override is only useful for forks / mirrors of the internal
+    // tracker. Leaving unset uses the production default
+    // (`p-diogo/totalreclaw-internal`). Read via getter so operators can
+    // flip the var at runtime.
+    get qaRepoOverride() {
+        return process.env.TOTALRECLAW_QA_REPO || '';
+    },
+    // 3.3.1-rc.21 (issue #128): verbose-register flag. When enabled, the
+    // plugin emits opt-in `info`-level breadcrumbs after sensitive
+    // registerTool calls (currently `totalreclaw_pair`) to help ops/QA
+    // grep gateway logs for definitive proof the tool was declared.
+    // Default OFF — the breadcrumb is debug-grade and was bleeding into
+    // `openclaw agent --json` stdout, breaking programmatic parsers.
+    // Enable with either:
+    //   TOTALRECLAW_VERBOSE_REGISTER=1   (specific opt-in)
+    //   TOTALRECLAW_DEBUG=1              (general debug toggle)
+    // Read via getter so flipping the env at runtime takes effect on the
+    // next gateway start without a rebuild.
+    get verboseRegister() {
+        const specific = (process.env.TOTALRECLAW_VERBOSE_REGISTER ?? '').trim().toLowerCase();
+        if (specific === '1' || specific === 'true' || specific === 'yes')
+            return true;
+        const general = (process.env.TOTALRECLAW_DEBUG ?? '').trim().toLowerCase();
+        return general === '1' || general === 'true' || general === 'yes';
+    },
+    // Paths
+    home,
+    billingCachePath: path.join(home, '.totalreclaw', 'billing-cache.json'),
+    cachePath: process.env.TOTALRECLAW_CACHE_PATH || path.join(home, '.totalreclaw', 'cache.enc'),
+    openclawWorkspace: path.join(home, '.openclaw', 'workspace'),
+    // 3.3.1-rc.22 — lazy embedder bundle cache. The embedder
+    // (`@huggingface/transformers` + `onnxruntime-node` + the q4 ONNX
+    // model) is no longer shipped inside the plugin tarball; it is fetched
+    // on first `embed()` call from a versioned GitHub Release and cached
+    // here. Separate path from `cachePath` (encrypted vault cache) so the
+    // two never collide. See `embedder-loader.ts`.
+    embedderCachePath: process.env.TOTALRECLAW_EMBEDDER_CACHE_PATH || path.join(home, '.totalreclaw', 'embedder'),
+    // 3.3.1-rc.22 — override the GitHub-Releases URL templates. Only useful
+    // for air-gapped / mirror deployments and self-hosted CI. Empty string
+    // falls back to the static defaults baked into the embedder code path.
+    embedderBundleUrlTemplate: process.env.TOTALRECLAW_EMBEDDER_BUNDLE_URL || '',
+    embedderManifestUrlTemplate: process.env.TOTALRECLAW_EMBEDDER_MANIFEST_URL || '',
 };
-// ============================================================================
-// Environment Variable Mapping
-// ============================================================================
 /**
- * Maps environment variable names to config keys and their parsers
- */
-const ENV_VAR_MAPPING = {
-    TOTALRECLAW_SERVER_URL: {
-        key: 'serverUrl',
-        parser: (v) => v,
-    },
-    TOTALRECLAW_AUTO_EXTRACT_EVERY_TURNS: {
-        key: 'autoExtractEveryTurns',
-        parser: (v) => parseInt(v, 10),
-    },
-    TOTALRECLAW_MIN_IMPORTANCE: {
-        key: 'minImportanceForAutoStore',
-        parser: (v) => parseInt(v, 10),
-    },
-    TOTALRECLAW_MAX_MEMORIES: {
-        key: 'maxMemoriesInContext',
-        parser: (v) => parseInt(v, 10),
-    },
-    TOTALRECLAW_FORGET_THRESHOLD: {
-        key: 'forgetThreshold',
-        parser: (v) => parseFloat(v),
-    },
-    TOTALRECLAW_RERANKER_MODEL: {
-        key: 'rerankerModel',
-        parser: (v) => v,
-    },
-    TOTALRECLAW_MASTER_PASSWORD: {
-        key: 'masterPassword',
-        parser: (v) => v,
-    },
-    TOTALRECLAW_USER_ID: {
-        key: 'userId',
-        parser: (v) => v,
-    },
-};
-// ============================================================================
-// Configuration Loading
-// ============================================================================
-/**
- * Load configuration from environment variables
+ * Merge a billing-response tuning block with the local fallback values.
  *
- * @returns Partial config from environment variables
+ * Use this at the call-site that needs a threshold, passing the features
+ * blob from the billing cache. No I/O here — callers read the cache once
+ * and hand the features in.
  */
-function loadFromEnv() {
-    const config = {};
-    for (const [envVar, mapping] of Object.entries(ENV_VAR_MAPPING)) {
-        const value = process.env[envVar];
-        if (value !== undefined && value !== '') {
-            try {
-                config[mapping.key] = mapping.parser(value);
-            }
-            catch {
-                // Skip invalid values - validation will catch them
-                console.warn(`Failed to parse environment variable ${envVar}: ${value}`);
-            }
-        }
-    }
-    return config;
-}
-/**
- * Load configuration from OpenClaw config object
- *
- * @param openclawConfig - OpenClaw configuration object
- * @returns Partial config from OpenClaw
- */
-function loadFromOpenClaw(openclawConfig) {
-    return openclawConfig?.agents?.defaults?.totalreclaw ?? {};
-}
-/**
- * Load skill.json defaults
- *
- * @returns Default configuration from skill.json
- */
-function loadFromSkillJson() {
-    return { ...SKILL_JSON_DEFAULTS };
-}
-/**
- * Deep merge configuration objects
- * Later objects override earlier ones
- *
- * @param sources - Configuration sources to merge (in priority order, lowest first)
- * @returns Merged configuration
- */
-function mergeConfigs(...sources) {
-    const result = { ...types_1.DEFAULT_SKILL_CONFIG };
-    for (const source of sources) {
-        for (const [key, value] of Object.entries(source)) {
-            if (value !== undefined) {
-                result[key] = value;
-            }
-        }
-    }
-    return result;
-}
-/**
- * Load configuration from all sources with proper priority
- *
- * Priority order (highest last):
- * 1. skill.json defaults
- * 2. OpenClaw config (agents.defaults.totalreclaw.*)
- * 3. Environment variables (TOTALRECLAW_*)
- * 4. Explicit overrides (passed to this function)
- *
- * @param options - Loading options
- * @returns Complete, merged configuration
- */
-function loadConfig(options) {
-    const { openclawConfig, overrides } = options ?? {};
-    // Load from all sources (in priority order, lowest to highest)
-    const skillJsonDefaults = loadFromSkillJson();
-    const openclawPartial = loadFromOpenClaw(openclawConfig);
-    const envPartial = loadFromEnv();
-    // Merge all sources (later sources override earlier ones)
-    return mergeConfigs(skillJsonDefaults, openclawPartial, envPartial, overrides ?? {});
-}
-// ============================================================================
-// Configuration Validation
-// ============================================================================
-/**
- * Validate that a string is a valid URL
- *
- * @param value - String to validate
- * @returns true if valid URL
- */
-function isValidUrl(value) {
-    try {
-        const url = new URL(value);
-        return url.protocol === 'http:' || url.protocol === 'https:';
-    }
-    catch {
-        return false;
-    }
-}
-/**
- * Validate that a number is within a range (inclusive)
- *
- * @param value - Number to validate
- * @param min - Minimum value (inclusive)
- * @param max - Maximum value (inclusive)
- * @returns true if within range
- */
-function isInRange(value, min, max) {
-    return typeof value === 'number' && !isNaN(value) && value >= min && value <= max;
-}
-/**
- * Field validators for configuration
- */
-const FIELD_VALIDATORS = {
-    serverUrl: {
-        validate: (v) => typeof v === 'string' && isValidUrl(v),
-        getError: (v) => `Invalid serverUrl: "${v}" is not a valid HTTP/HTTPS URL`,
-        getWarning: (v) => {
-            if (typeof v === 'string' && v.startsWith('http://')) {
-                return 'Using HTTP (not HTTPS) for serverUrl - not recommended for production';
-            }
-            return null;
-        },
-        required: true,
-    },
-    autoExtractEveryTurns: {
-        validate: (v) => typeof v === 'number' && isInRange(v, 1, 100),
-        getError: (v) => `Invalid autoExtractEveryTurns: ${v} (must be 1-100)`,
-        required: true,
-    },
-    minImportanceForAutoStore: {
-        validate: (v) => typeof v === 'number' && isInRange(v, 1, 10),
-        getError: (v) => `Invalid minImportanceForAutoStore: ${v} (must be 1-10)`,
-        required: true,
-    },
-    maxMemoriesInContext: {
-        validate: (v) => typeof v === 'number' && isInRange(v, 1, 50),
-        getError: (v) => `Invalid maxMemoriesInContext: ${v} (must be 1-50)`,
-        getWarning: (v) => {
-            if (typeof v === 'number' && v > 20) {
-                return `High maxMemoriesInContext (${v}) may impact context window usage`;
-            }
-            return null;
-        },
-        required: true,
-    },
-    forgetThreshold: {
-        validate: (v) => typeof v === 'number' && isInRange(v, 0, 1),
-        getError: (v) => `Invalid forgetThreshold: ${v} (must be 0-1)`,
-        getWarning: (v) => {
-            if (typeof v === 'number') {
-                if (v < 0.1) {
-                    return `Very low forgetThreshold (${v}) may cause memory bloat`;
-                }
-                if (v > 0.8) {
-                    return `High forgetThreshold (${v}) may cause excessive memory loss`;
-                }
-            }
-            return null;
-        },
-        required: true,
-    },
-    rerankerModel: {
-        validate: (v) => v === undefined || (typeof v === 'string' && v.length > 0),
-        getError: (v) => `Invalid rerankerModel: ${v} (must be a non-empty string or undefined)`,
-        required: false,
-    },
-    masterPassword: {
-        validate: (v) => v === undefined || typeof v === 'string',
-        getError: (v) => `Invalid masterPassword: must be a string or undefined`,
-        required: false,
-    },
-    userId: {
-        validate: (v) => v === undefined || typeof v === 'string',
-        getError: (v) => `Invalid userId: must be a string or undefined`,
-        required: false,
-    },
-    salt: {
-        validate: (v) => v === undefined || Buffer.isBuffer(v),
-        getError: (v) => `Invalid salt: must be a Buffer or undefined`,
-        required: false,
-    },
-};
-/**
- * Validate configuration values
- *
- * @param config - Configuration to validate
- * @returns Validation result with errors and warnings
- */
-function validateConfig(config) {
-    const errors = [];
-    const warnings = [];
-    // Validate each field
-    for (const [field, validator] of Object.entries(FIELD_VALIDATORS)) {
-        const value = config[field];
-        // Check required fields
-        if (validator.required && value === undefined) {
-            errors.push({
-                field,
-                value,
-                message: `Missing required field: ${field}`,
-            });
-            continue;
-        }
-        // Skip validation for undefined optional fields
-        if (value === undefined && !validator.required) {
-            continue;
-        }
-        // Validate value
-        if (!validator.validate(value)) {
-            errors.push({
-                field,
-                value,
-                message: validator.getError(value),
-            });
-        }
-        // Check for warnings
-        if (validator.getWarning) {
-            const warning = validator.getWarning(value);
-            if (warning) {
-                warnings.push({
-                    field,
-                    value,
-                    message: warning,
-                });
-            }
-        }
-    }
-    // Additional cross-field validations
-    if (config.masterPassword &&
-        typeof config.masterPassword === 'string' &&
-        config.masterPassword.length < 12) {
-        warnings.push({
-            field: 'masterPassword',
-            value: '[REDACTED]',
-            message: 'masterPassword is shorter than recommended (12+ characters)',
-        });
-    }
+export function resolveTuning(features) {
     return {
-        valid: errors.length === 0,
-        errors,
-        warnings,
+        cosineThreshold: features?.cosine_threshold ?? CONFIG.cosineThreshold,
+        relevanceThreshold: features?.relevance_threshold ?? CONFIG.relevanceThreshold,
+        semanticSkipThreshold: features?.semantic_skip_threshold ?? CONFIG.semanticSkipThreshold,
+        minImportance: features?.min_importance ?? CONFIG.minImportance,
+        cacheTtlMs: features?.cache_ttl_ms ?? CONFIG.cacheTtlMs,
+        trapdoorBatchSize: features?.trapdoor_batch_size ?? CONFIG.trapdoorBatchSize,
+        pageSize: features?.subgraph_page_size ?? CONFIG.pageSize,
     };
 }
-// ============================================================================
-// Utility Functions
-// ============================================================================
-/**
- * Assert that configuration is valid, throwing on errors
- *
- * @param config - Configuration to validate
- * @throws Error if configuration is invalid
- */
-function assertValidConfig(config) {
-    const result = validateConfig(config);
-    if (!result.valid) {
-        const errorMessages = result.errors.map((e) => `  - ${e.field}: ${e.message}`).join('\n');
-        throw new Error(`Invalid TotalReclaw configuration:\n${errorMessages}`);
-    }
-    // Log warnings
-    for (const warning of result.warnings) {
-        console.warn(`[TotalReclaw] Config warning - ${warning.field}: ${warning.message}`);
-    }
-}
-/**
- * Create a configuration with defaults and validate it
- *
- * @param partial - Partial configuration to merge with defaults
- * @param options - Additional loading options
- * @returns Validated, complete configuration
- * @throws Error if resulting configuration is invalid
- */
-function createConfig(partial, options) {
-    const config = loadConfig({
-        ...options,
-        overrides: partial,
-    });
-    assertValidConfig(config);
-    return config;
-}
-//# sourceMappingURL=config.js.map
+// Exposed for tests that want to assert the removed-var warning behaviour.
+export const __internal = {
+    REMOVED_ENV_VARS,
+    warnRemovedEnvVars,
+};

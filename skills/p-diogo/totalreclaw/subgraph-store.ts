@@ -10,13 +10,18 @@
  * and chain RPCs. No viem, no permissionless.
  */
 
-// Lazy-load WASM to avoid crash when npm install hasn't finished yet.
+// Lazy-load WASM via createRequire — the shipped bundle is ESM-only and
+// the bare `require` global is undefined there (issue #124). Same pattern
+// as crypto / lsh / claims-helper / consolidation / digest-sync.
+import { createRequire } from 'node:module';
+const requireWasm = createRequire(import.meta.url);
 let _wasm: typeof import('@totalreclaw/core') | null = null;
 function getWasm() {
-  if (!_wasm) _wasm = require('@totalreclaw/core');
+  if (!_wasm) _wasm = requireWasm('@totalreclaw/core');
   return _wasm;
 }
 import { CONFIG } from './config.js';
+import { buildRelayHeaders } from './relay-headers.js';
 
 // ---------------------------------------------------------------------------
 // Pimlico 429 retry helper
@@ -231,6 +236,68 @@ export async function deriveSmartAccountAddress(mnemonic: string, chainId?: numb
  */
 const deployedAccounts = new Set<string>();
 
+// ---------------------------------------------------------------------------
+// Per-account submission mutex — 3.3.1-rc.3 AA25 serialization
+// ---------------------------------------------------------------------------
+//
+// Concurrent `submitFactOnChain` / `submitFactBatchOnChain` calls for the
+// SAME Smart Account used to race at the nonce-fetch step:
+//   - Call A: getNonce()=5, build UserOp, submit, wait for receipt.
+//   - Call B: getNonce()=5 (A not mined yet), build UserOp, submit → AA25.
+//
+// The fix: chain submissions per `sender` address through a single promise.
+// Each call awaits the previous in-flight submission before starting its
+// own nonce fetch. Fallback to public RPC for getNonce continues to work
+// because by the time B fetches, A's UserOp has been bundled AND mined.
+//
+// 16 AA25 occurrences were logged in rc.2 QA; this lock eliminates the
+// race condition at the plugin layer. Subsequent AA25s would indicate
+// nonce rot from another process (e.g. relay retrying the same UserOp)
+// and are handled by the existing single-retry with fresh-nonce path.
+const _senderSubmissionLocks = new Map<string, Promise<unknown>>();
+
+async function withSenderLock<T>(sender: string, fn: () => Promise<T>): Promise<T> {
+  const key = sender.toLowerCase();
+  const prev = _senderSubmissionLocks.get(key) ?? Promise.resolve();
+  let release: () => void = () => {};
+  const thisCallGate = new Promise<void>((resolve) => { release = resolve; });
+  _senderSubmissionLocks.set(key, prev.then(() => thisCallGate));
+  try {
+    await prev; // wait for previous submission to settle (success OR failure)
+  } catch {
+    // Prior submission threw — that's the caller's problem, not ours.
+    // The lock is still released below; we re-enter the chain.
+  }
+  try {
+    return await fn();
+  } finally {
+    release();
+    // If we're the tail of the chain, clean up to avoid unbounded memory.
+    // Use `===` to ensure we don't clobber a newer lock that joined while
+    // we were running.
+    const current = _senderSubmissionLocks.get(key);
+    // The lock we set above was `prev.then(() => thisCallGate)` — when
+    // `thisCallGate` resolves, the whole promise resolves. If nothing
+    // queued behind us, remove the entry.
+    if (current) {
+      current.then(() => {
+        if (_senderSubmissionLocks.get(key) === current) {
+          _senderSubmissionLocks.delete(key);
+        }
+      }).catch(() => {
+        if (_senderSubmissionLocks.get(key) === current) {
+          _senderSubmissionLocks.delete(key);
+        }
+      });
+    }
+  }
+}
+
+/** Exposed for tests — reset the per-account lock map. */
+export function __resetSenderLocksForTests(): void {
+  _senderSubmissionLocks.clear();
+}
+
 /**
  * Check if a Smart Account is deployed and return factory/factoryData if not.
  *
@@ -300,25 +367,39 @@ export async function submitFactOnChain(
   }
 
   if (!config.mnemonic) {
-    throw new Error('Mnemonic (TOTALRECLAW_RECOVERY_PHRASE) is required for on-chain submission');
+    throw new Error('Recovery phrase (TOTALRECLAW_RECOVERY_PHRASE) is required for on-chain submission');
   }
 
+  // Resolve sender up-front so we can serialize concurrent submissions for
+  // the SAME Smart Account (rc.3 AA25 fix). Derivation is CREATE2, so we
+  // don't need to hit the chain — WASM does it.
+  const eoa = getWasm().deriveEoa(config.mnemonic) as { private_key: string; address: string };
+  const sender = config.walletAddress || await deriveSmartAccountAddress(config.mnemonic, config.chainId);
+
+  return withSenderLock(sender, () => submitFactOnChainLocked(
+    protobufPayload, config, eoa, sender,
+  ));
+}
+
+async function submitFactOnChainLocked(
+  protobufPayload: Buffer,
+  config: SubgraphStoreConfig,
+  eoa: { private_key: string; address: string },
+  sender: string,
+): Promise<{ txHash: string; userOpHash: string; success: boolean }> {
   const bundlerUrl = `${config.relayUrl}/v1/bundler`;
-  const headers: Record<string, string> = {
+  const overrides: Record<string, string> = {
     'Content-Type': 'application/json',
-    'X-TotalReclaw-Client': 'openclaw-plugin',
   };
-  if (config.authKeyHex) headers['Authorization'] = `Bearer ${config.authKeyHex}`;
-  if (config.walletAddress) headers['X-Wallet-Address'] = config.walletAddress;
+  if (config.authKeyHex) overrides['Authorization'] = `Bearer ${config.authKeyHex}`;
+  if (config.walletAddress) overrides['X-Wallet-Address'] = config.walletAddress;
+  const headers = buildRelayHeaders(overrides);
 
   // Helper for JSON-RPC calls to relay bundler (with 429 retry)
   async function rpc(method: string, params: unknown[]): Promise<any> {
     return rpcWithRetry(bundlerUrl, headers, method, params);
   }
 
-  // 1. Derive EOA from mnemonic
-  const eoa = getWasm().deriveEoa(config.mnemonic) as { private_key: string; address: string };
-  const sender = config.walletAddress || await deriveSmartAccountAddress(config.mnemonic, config.chainId);
   const entryPoint = config.entryPointAddress || getWasm().getEntryPointAddress();
 
   // 2. Encode calldata (SimpleAccount.execute → DataEdge fallback)
@@ -505,24 +586,36 @@ export async function submitFactBatchOnChain(
     throw new Error('Relay URL (TOTALRECLAW_SERVER_URL) is required for on-chain submission');
   }
   if (!config.mnemonic) {
-    throw new Error('Mnemonic (TOTALRECLAW_RECOVERY_PHRASE) is required for on-chain submission');
+    throw new Error('Recovery phrase (TOTALRECLAW_RECOVERY_PHRASE) is required for on-chain submission');
   }
 
+  // Resolve sender up-front for the per-account mutex (rc.3 AA25 fix).
+  const eoa = getWasm().deriveEoa(config.mnemonic) as { private_key: string; address: string };
+  const sender = config.walletAddress || await deriveSmartAccountAddress(config.mnemonic, config.chainId);
+
+  return withSenderLock(sender, () => submitFactBatchOnChainLocked(
+    protobufPayloads, config, eoa, sender,
+  ));
+}
+
+async function submitFactBatchOnChainLocked(
+  protobufPayloads: Buffer[],
+  config: SubgraphStoreConfig,
+  eoa: { private_key: string; address: string },
+  sender: string,
+): Promise<{ txHash: string; userOpHash: string; success: boolean; batchSize: number }> {
   const bundlerUrl = `${config.relayUrl}/v1/bundler`;
-  const headers: Record<string, string> = {
+  const overrides: Record<string, string> = {
     'Content-Type': 'application/json',
-    'X-TotalReclaw-Client': 'openclaw-plugin',
   };
-  if (config.authKeyHex) headers['Authorization'] = `Bearer ${config.authKeyHex}`;
-  if (config.walletAddress) headers['X-Wallet-Address'] = config.walletAddress;
+  if (config.authKeyHex) overrides['Authorization'] = `Bearer ${config.authKeyHex}`;
+  if (config.walletAddress) overrides['X-Wallet-Address'] = config.walletAddress;
+  const headers = buildRelayHeaders(overrides);
 
   // Helper for JSON-RPC calls to relay bundler (with 429 retry)
   async function rpc(method: string, params: unknown[]): Promise<any> {
     return rpcWithRetry(bundlerUrl, headers, method, params);
   }
-
-  const eoa = getWasm().deriveEoa(config.mnemonic) as { private_key: string; address: string };
-  const sender = config.walletAddress || await deriveSmartAccountAddress(config.mnemonic, config.chainId);
   const entryPoint = config.entryPointAddress || getWasm().getEntryPointAddress();
 
   // Encode batch calldata (SimpleAccount.executeBatch)
