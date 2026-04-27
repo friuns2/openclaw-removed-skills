@@ -1,2 +1,4 @@
-yfinance>=0.2
-pandas>=2.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+yfinance>=0.2.40
+pandas>=2.0.0

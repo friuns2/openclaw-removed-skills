@@ -1,11 +1,17 @@
 {
   "owner": "temmyraharjo",
   "slug": "yfinance",
-  "displayName": "yfinance",
+  "displayName": "Yfinance",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774876976100,
-    "commit": "https://github.com/openclaw/skills/commit/04ab3e343e1d6e6f6e6656a2e28696be127caf23"
+    "version": "1.0.4",
+    "publishedAt": 1777164467590,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774876976100,
+      "commit": "https://github.com/openclaw/skills/commit/04ab3e343e1d6e6f6e6656a2e28696be127caf23"
+    }
+  ]
 }
