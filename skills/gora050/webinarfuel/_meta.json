@@ -3,11 +3,16 @@
   "slug": "webinarfuel",
   "displayName": "Webinarfuel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167804825,
-    "commit": "https://github.com/openclaw/skills/commit/a49cddcd87031f4032ec7291748007184180022c"
+    "version": "1.0.3",
+    "publishedAt": 1776864878418,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167804825,
+      "commit": "https://github.com/openclaw/skills/commit/a49cddcd87031f4032ec7291748007184180022c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774512175970,
