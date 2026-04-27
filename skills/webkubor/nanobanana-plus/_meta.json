@@ -3,11 +3,16 @@
   "slug": "nanobanana-plus",
   "displayName": "Nanobanana Plus",
   "latest": {
-    "version": "1.5.3",
-    "publishedAt": 1775526212471,
-    "commit": "https://github.com/openclaw/skills/commit/aa649444a15675c6637274044eab8e5e0f2892f7"
+    "version": "1.5.5",
+    "publishedAt": 1776926573972,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.3",
+      "publishedAt": 1775526212471,
+      "commit": "https://github.com/openclaw/skills/commit/aa649444a15675c6637274044eab8e5e0f2892f7"
+    },
     {
       "version": "1.5.2",
       "publishedAt": 1774497104909,

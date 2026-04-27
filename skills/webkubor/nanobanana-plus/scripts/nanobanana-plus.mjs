@@ -1,33 +1,32 @@
 #!/usr/bin/env node
 
-import fs from 'node:fs';
-import path from 'node:path';
-import process from 'node:process';
-import readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
-
-const DEFAULT_BASE_URL = 'http://localhost:3456';
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import process from "node:process";
 
 function usage() {
   console.log(`nanobanana-plus
 
 Usage:
-  node nanobanana-plus.mjs init [--base-url http://localhost:3456] [--token your-token]
+  node nanobanana-plus.mjs init
   node nanobanana-plus.mjs check
-  node nanobanana-plus.mjs check [--base-url http://localhost:3456]
-  node nanobanana-plus.mjs models [--token your-token]
-  node nanobanana-plus.mjs generate --prompt "..." [--filename out.png] [--aspect-ratio 16:9] [--model MODEL] [--output-count 1] [--token your-token]
+  node nanobanana-plus.mjs models
+  node nanobanana-plus.mjs generate --prompt "..." [--filename out.png] [--aspect-ratio 16:9] [--model MODEL] [--output-count 1]
 
 Options:
-  --base-url   Override service URL. Default: ${DEFAULT_BASE_URL}
-  --token      Explicit bearer token for private mode (never persisted)
+  --prompt       Image description (required for generate)
+  --filename     Output file path
+  --aspect-ratio  Image aspect ratio (16:9, 9:16, 1:1, 4:3, 3:4)
+  --model        Model to use (gemini-3.1-flash-image-preview, gemini-3-pro-image-preview, etc.)
+  --output-count Number of images to generate (1-8)
 `);
 }
 
 function parseArgs(argv) {
   const args = [...argv];
-  let command = 'generate';
-  if (args[0] && !args[0].startsWith('-')) {
+  let command = "generate";
+  if (args[0] && !args[0].startsWith("-")) {
     command = args.shift();
   }
 
@@ -38,18 +37,18 @@ function parseArgs(argv) {
       continue;
     }
 
-    if (current === '--help' || current === '-h') {
+    if (current === "--help" || current === "-h") {
       options.help = true;
       continue;
     }
 
-    if (!current.startsWith('--')) {
+    if (!current.startsWith("--")) {
       throw new Error(`Unknown argument: ${current}`);
     }
 
     const key = current.slice(2);
     const value = args.shift();
-    if (!value || value.startsWith('--')) {
+    if (!value || value.startsWith("--")) {
       throw new Error(`Missing value for --${key}`);
     }
     options[key] = value;
@@ -58,125 +57,95 @@ function parseArgs(argv) {
   return { command, options };
 }
 
-function trimSlash(input) {
-  return input.replace(/\/+$/, '');
-}
-
-async function promptForSession(seedOptions = {}) {
-  const rl = readline.createInterface({ input, output });
-  try {
-    const baseAnswer = await rl.question(
-      `nanobanana-plus service URL [${seedOptions.baseUrl || DEFAULT_BASE_URL}]: `,
-    );
-    const tokenAnswer = await rl.question('Private token (leave blank if service is public): ');
-
-    const session = {
-      baseUrl: trimSlash((baseAnswer || seedOptions.baseUrl || DEFAULT_BASE_URL).trim()),
-      privateToken: (tokenAnswer || seedOptions.privateToken || '').trim(),
-    };
-
-    return session;
-  } finally {
-    rl.close();
+function inferFileFormat(filename) {
+  if (!filename) {
+    return "png";
   }
+  const ext = path.extname(filename).toLowerCase();
+  if (ext === ".jpg" || ext === ".jpeg") {
+    return "jpeg";
+  }
+  return "png";
 }
 
-function resolveRuntimeConfig(options) {
-  return {
-    baseUrl: trimSlash(options['base-url'] || DEFAULT_BASE_URL),
-    privateToken: (options.token || '').trim(),
-  };
-}
+function resolveNanobanana() {
+  const scriptDir = path.dirname(path.resolve(process.argv[1]));
+  const skillDir = path.dirname(scriptDir);
+  const baseDir = path.dirname(skillDir);
+  const possibleBin = path.resolve(baseDir, "bin", "nanobanana-plus.js");
 
-function authHeaders(token) {
-  if (!token) {
-    return { 'Content-Type': 'application/json' };
+  if (fs.existsSync(possibleBin)) {
+    return possibleBin;
   }
 
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
+  return "nanobanana-plus";
 }
 
-async function fetchJson(url, options = {}) {
-  const response = await fetch(url, options);
-  const body = await response.text();
-  let data = {};
+function buildCliArgs(command, options) {
+  const args = [command];
 
-  try {
-    data = body ? JSON.parse(body) : {};
-  } catch {
-    data = { raw: body };
+  if (options.prompt) {
+    args.push("--prompt", options.prompt);
+  }
+  if (options.filename) {
+    args.push("--filename", options.filename);
+  }
+  if (options["aspect-ratio"]) {
+    args.push("--aspect-ratio", options["aspect-ratio"]);
+  }
+  if (options.model) {
+    args.push("--model", options.model);
+  }
+  if (options["output-count"]) {
+    args.push("--output-count", options["output-count"]);
+  }
+  if (options["file-format"]) {
+    args.push("--file-format", options["file-format"]);
+  }
+  if (options.seed) {
+    args.push("--seed", options.seed);
   }
 
-  if (!response.ok) {
-    const message = data.error || data.message || response.statusText || 'Request failed';
-    throw new Error(message);
-  }
-
-  return data;
+  return args;
 }
 
-function timestamp() {
-  const now = new Date();
-  const pad = (value) => String(value).padStart(2, '0');
-  return [
-    now.getFullYear(),
-    pad(now.getMonth() + 1),
-    pad(now.getDate()),
-    '-',
-    pad(now.getHours()),
-    pad(now.getMinutes()),
-    pad(now.getSeconds()),
-  ].join('');
-}
+async function runCli(command, options) {
+  return new Promise((resolve, reject) => {
+    const exePath = resolveNanobanana();
+    const args = buildCliArgs(command, options);
 
-function deriveOutputPaths(filename, imageCount, suggestedNames) {
-  const defaultName = filename || `nanobanana-${timestamp()}.png`;
-  const resolved = path.resolve(defaultName);
-  const dir = path.dirname(resolved);
-  const ext = path.extname(resolved) || '.png';
-  const base = ext ? path.basename(resolved, ext) : path.basename(resolved);
+    const child = spawn(process.execPath, [exePath, ...args], {
+      stdio: ["inherit", "pipe", "pipe"],
+      env: process.env,
+    });
 
-  if (imageCount <= 1) {
-    return [resolved];
-  }
+    let stdout = "";
+    let stderr = "";
 
-  return Array.from({ length: imageCount }, (_, index) => {
-    const suggested = suggestedNames[index];
-    if (suggested && !filename) {
-      return path.resolve(process.cwd(), suggested);
-    }
-    return path.join(dir, `${base}-${String(index + 1).padStart(2, '0')}${ext}`);
+    child.stdout.on("data", (data) => {
+      const text = data.toString();
+      stdout += text;
+      process.stdout.write(text);
+    });
+
+    child.stderr.on("data", (data) => {
+      const text = data.toString();
+      stderr += text;
+      process.stderr.write(text);
+    });
+
+    child.on("error", (error) => {
+      reject(new Error(`Failed to spawn nanobanana-plus: ${error.message}`));
+    });
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr, code });
+      } else {
+        reject(new Error(`nanobanana-plus exited with code ${code}`));
+      }
+    });
   });
-}
-
-function writeImages(data, filename) {
-  const images = Array.isArray(data.images) ? data.images : [];
-  if (images.length === 0) {
-    const files = Array.isArray(data.files) ? data.files : [];
-    if (files.length > 0) {
-      console.log(files.join('\n'));
-      return files;
-    }
-    throw new Error('No images returned by API');
-  }
-
-  const outputPaths = deriveOutputPaths(
-    filename,
-    images.length,
-    images.map((image) => image.filename).filter(Boolean),
-  );
-
-  outputPaths.forEach((filePath, index) => {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, Buffer.from(images[index].base64, 'base64'));
-    console.log(filePath);
-    console.log(`MEDIA:${filePath}`);
-  });
-
-  return outputPaths;
 }
 
 async function main() {
@@ -187,88 +156,52 @@ async function main() {
     return;
   }
 
-  if (command === 'init') {
-    const session = options['base-url'] || options.token
-      ? {
-          baseUrl: trimSlash(options['base-url'] || DEFAULT_BASE_URL),
-          privateToken: (options.token || '').trim(),
-        }
-      : await promptForSession({
-      baseUrl: options['base-url'],
-      privateToken: options.token,
-    });
-
-    console.log('Initialization complete. Credentials are not stored on disk.');
-    console.log('');
-    console.log('Use one of these commands:');
-    console.log(`  node nanobanana-plus.mjs check --base-url "${session.baseUrl}"`);
-    console.log(`  node nanobananana-plus.mjs models --base-url "${session.baseUrl}"${session.privateToken ? ' --token "<your-token>"' : ''}`);
-    console.log(`  node nanobananana-plus.mjs generate --base-url "${session.baseUrl}" --prompt "..." --filename "out.png"${session.privateToken ? ' --token "<your-token>"' : ''}`);
+  if (command === "init") {
+    const exePath = resolveNanobanana();
+    console.log("nanobanana-plus CLI is ready (no server needed).");
+    console.log("");
+    console.log("Usage:");
+    console.log(
+      `  node nanobanana-plus.mjs generate --prompt "a cat" --filename cat.png`,
+    );
+    console.log("");
+    console.log(
+      "The CLI will use NANOBANANA_GEMINI_API_KEY or GEMINI_API_KEY from environment.",
+    );
     return;
   }
 
-  const config = resolveRuntimeConfig(options);
-  const baseUrl = config.baseUrl;
-  const token = config.privateToken;
-
-  if (command === 'check') {
-    const data = await fetchJson(`${baseUrl}/health`);
-    console.log(JSON.stringify(data, null, 2));
+  if (command === "check") {
+    console.log("nanobanana-plus CLI is available.");
     return;
   }
 
-  if (command === 'models') {
-    const data = await fetchJson(`${baseUrl}/api/models`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    console.log(JSON.stringify(data, null, 2));
+  if (command === "models") {
+    console.log("Models (set via --model flag at generate time):");
+    console.log("  gemini-3.1-flash-image-preview  (Nano Banana 2 - default)");
+    console.log("  gemini-3-pro-image-preview     (Nano Banana Pro)");
+    console.log("  imagen-4.0-ultra-generate-001 (Imagen 4 Ultra)");
+    console.log("  imagen-4.0-fast-generate-001 (Imagen 4 Fast)");
     return;
   }
 
-  if (command === 'generate') {
+  if (command === "generate") {
     if (!options.prompt) {
-      throw new Error('--prompt is required for generate');
+      throw new Error("--prompt is required for generate");
     }
 
-    const payload = {
-      prompt: options.prompt,
-      model: options.model,
-      aspectRatio: options['aspect-ratio'],
-      outputCount: options['output-count'] ? Number(options['output-count']) : 1,
-      customFileName: options.filename ? path.basename(options.filename) : undefined,
-      fileFormat: options['file-format'] || inferFileFormat(options.filename),
-      format: 'both',
-      seed: options.seed ? Number(options.seed) : undefined,
-    };
-
-    const data = await fetchJson(`${baseUrl}/api/generate`, {
-      method: 'POST',
-      headers: authHeaders(token),
-      body: JSON.stringify(payload),
-    });
-    writeImages(data, options.filename);
+    await runCli("generate", options);
     return;
   }
 
-  if (command === 'edit' || command === 'restore') {
+  if (command === "edit" || command === "restore") {
     throw new Error(
-      `${command} is intentionally omitted from the ClawHub skill to avoid sending local file paths or file contents over HTTP. Use the local nanobanana-plus CLI/API directly for ${command}.`,
+      `${command} is not supported in CLI mode. Use MCP server for image editing features.`,
     );
   }
 
   usage();
   throw new Error(`Unknown command: ${command}`);
-}
-
-function inferFileFormat(filename) {
-  if (!filename) {
-    return 'png';
-  }
-  const ext = path.extname(filename).toLowerCase();
-  if (ext === '.jpg' || ext === '.jpeg') {
-    return 'jpeg';
-  }
-  return 'png';
 }
 
 main().catch((error) => {

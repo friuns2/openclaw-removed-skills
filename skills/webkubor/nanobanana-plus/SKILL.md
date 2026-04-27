@@ -1,7 +1,7 @@
 ---
 name: nanobanana-plus
-description: "Use nanobanana-plus over HTTP to generate images with per-call model switching and aspect ratio control. Best for OpenClaw / 小龙虾 users who have a running nanobanana-plus service. Run init for a guided setup, then use: node {baseDir}/scripts/nanobanana-plus.mjs generate --prompt 'desc' --filename 'out.png' [--aspect-ratio 16:9] [--model gemini-3.1-flash-image-preview]. Also supports check and models."
-version: 1.5.2
+description: "Use nanobanana-plus CLI to generate images with per-call model switching and aspect ratio control. Direct CLI invocation - no server required. Supports: node nanobanana-plus.mjs generate --prompt 'desc' --filename 'out.png' [--aspect-ratio 16:9] [--model gemini-3.1-flash-image-preview]. Also supports check and models."
+version: 1.5.4
 license: Apache-2.0
 homepage: https://github.com/webkubor/nanobanana-plus
 store: https://clawhub.ai/webkubor/nanobanana-plus
@@ -24,73 +24,82 @@ metadata:
 
 # nanobanana-plus for OpenClaw
 
-Use the bundled script to call a running `nanobanana-plus` HTTP service.
+Direct CLI invocation - no HTTP server required.
 
-Initialize once with a guided prompt:
+## Quick Start
 
 ```bash
-node {baseDir}/scripts/nanobanana-plus.mjs init
+# Set your API key (once)
+export NANOBANANA_GEMINI_API_KEY="your_key_here"
+
+# Generate an image
+node nanobanana-plus.mjs generate --prompt "a cute cat" --filename cat.png
 ```
 
-Or pass the values explicitly:
+## Commands
+
+### Generate Image
 
 ```bash
-node {baseDir}/scripts/nanobanana-plus.mjs init \
-  --base-url "http://localhost:3456" \
-  --token "your-private-token"
-```
-
-Default service URL:
-
-```bash
-http://localhost:3456
-```
-
-`init` does not store credentials on disk. It only prints the exact commands to run next.
-
-Health check:
-
-```bash
-node {baseDir}/scripts/nanobanana-plus.mjs check --base-url "http://localhost:3456"
-```
-
-List models:
-
-```bash
-node {baseDir}/scripts/nanobanana-plus.mjs models \
-  --base-url "http://localhost:3456" \
-  --token "your-private-token"
-```
-
-Generate one image:
-
-```bash
-node {baseDir}/scripts/nanobanana-plus.mjs generate \
-  --base-url "http://localhost:3456" \
+node nanobanana-plus.mjs generate \
   --prompt "一只橘猫坐在雨天窗台上" \
   --filename "cat-window.png" \
-  --aspect-ratio "16:9" \
-  --token "your-private-token"
+  --aspect-ratio "16:9"
 ```
 
-Generate multiple images:
+**Options:**
+
+| Flag             | Description                                 |
+| ---------------- | ------------------------------------------- |
+| `--prompt`       | Image description (required)                |
+| `--filename`     | Output file path                            |
+| `--aspect-ratio` | `16:9`, `9:16`, `1:1`, `4:3`, `3:4`, `21:9` |
+| `--model`        | Model name (see below)                      |
+| `--output-count` | Number of images (1-8)                      |
+
+### List Available Models
 
 ```bash
-node {baseDir}/scripts/nanobanana-plus.mjs generate \
-  --base-url "http://localhost:3456" \
-  --prompt "cinematic sci-fi alley at night" \
-  --filename "alley.png" \
-  --output-count 2 \
-  --model "gemini-3-pro-image-preview" \
-  --token "your-private-token"
+node nanobanana-plus.mjs models
 ```
 
-Notes:
+### Health Check
 
-- `generate` works with local or remote nanobanana-plus services.
-- This skill intentionally requires explicit `--token` for private services instead of reading environment variables or local config files.
-- `edit` and `restore` are intentionally omitted from the ClawHub skill so it does not send local file paths or local file contents over HTTP.
-- The script writes image files locally and prints `MEDIA:` lines so supported chat providers can auto-attach the outputs.
-- The script no longer reads tokens from environment variables and no longer stores credentials on disk.
-- Use `init`, `--token`, or `--base-url` to control credentials and endpoint.
-- If the service is not running, start it separately with `nanobanana-plus api --port 3456`.
+```bash
+node nanobanana-plus.mjs check
+```
+
+## Models
+
+| Model                            | Description                                               |
+| -------------------------------- | --------------------------------------------------------- |
+| `gemini-3.1-flash-image-preview` | Nano Banana 2 (default) - fast, quota-efficient           |
+| `gemini-3-pro-image-preview`     | Nano Banana Pro - higher quality                          |
+| `imagen-4.0-ultra-generate-001`  | Imagen 4 Ultra - best realism (requires Pro key)          |
+| `imagen-4.0-fast-generate-001`   | Imagen 4 Fast - balanced speed/quality (requires Pro key) |
+
+Example with specific model:
+
+```bash
+node nanobanana-plus.mjs generate \
+  --prompt "majestic snowy mountain, photorealistic" \
+  --filename mountain.png \
+  --model "gemini-3-pro-image-preview" \
+  --aspect-ratio "16:9"
+```
+
+## Environment
+
+The CLI uses these environment variables (set once in your shell):
+
+```bash
+export NANOBANANA_GEMINI_API_KEY="your_key"  # Recommended
+# or
+export GEMINI_API_KEY="your_key"  # Fallback
+```
+
+## Notes
+
+- No server needed - CLI generates images directly
+- `edit` and `restore` are not supported in CLI mode (use MCP server for these features)
+- Image files are saved locally and printed with `MEDIA:` prefix for chat providers
