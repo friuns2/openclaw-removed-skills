@@ -8,8 +8,6 @@ metadata:
     requires:
       env:
         - ZHIPU_API_KEY
-      bins:
-        - python
     primaryEnv: ZHIPU_API_KEY
     emoji: "✍️"
     homepage: https://github.com/zai-org/GLM-V/tree/main/skills/glmv-doc-based-writing
@@ -21,7 +19,7 @@ Comprehend the given document(s) and write a textual content (paper/article/essa
 
 ## When to Use
 
-- Write a textual content according to specified requirements, AFTER reading provided document(s) 
+- Write a textual content according to specified requirements, AFTER reading provided document(s)
 - User mentions "基于文档的写作", "文章撰写", "文档解读", "新闻稿撰写", "简报撰写", "影评/书评撰写", "内容总结", "内容创作", "评论写作", "文档续写", "文档翻译", "方案策划", "发言稿撰写", "document-based writing", "article writing", "document reading", "press release writing", "brief writing", "film/book review writing", "content summarization", "content creation", "commentary writing", "document continuation", "document translation", "proposal planning ", "speech writing"
 
 ## Supported Input Types
