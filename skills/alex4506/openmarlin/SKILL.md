@@ -1,7 +1,7 @@
 ---
 name: openmarlin
 description: "Use OpenMarlin from OpenClaw to answer questions, run tasks, and manage OpenMarlin account setup and billing flows."
-metadata: {"openclaw":{"skillKey":"openmarlin","requires":{"bins":["python3"]},"primaryEnv":"OPENMARLIN_PLATFORM_API_KEY"}}
+metadata: {"openclaw":{"skillKey":"openmarlin","requires":{"bins":["python3"]}}}
 ---
 
 # OpenMarlin
@@ -24,6 +24,8 @@ Activate this skill for requests such as:
 - "ask openmarlin to summarize this page"
 - "use openmarlin to find today's USD/CNY exchange rate"
 - "use openmarlin to execute this task"
+- "use openmarlin to generate a video"
+- "use openmarlin to submit an async video task"
 - "register OpenMarlin"
 - "check OpenMarlin balance"
 
@@ -32,8 +34,13 @@ When routing the request:
 - treat "use openmarlin ..." as an OpenMarlin intent, not generic chat
 - prefer `/v1/executions` for normal tasks such as answering, searching,
   summarizing, extracting, or translating
-- do not reject activation just because the user did not provide `provider_id`,
-  labels, or an exact model ref in the first sentence
+- prefer `/v1/tasks` for video generation and other artifact-oriented jobs even
+  when the user did not explicitly say "async"
+- treat requests mentioning video, rendering, long-running generation, or
+  background execution as `/v1/tasks` by default unless the user explicitly
+  asks for synchronous execution
+- do not reject activation just because the user did not provide an exact model
+  ref in the first sentence
 
 ## Core Constraints
 
@@ -50,12 +57,17 @@ When routing the request:
   registration state must come from the registration session.
 - Treat `OPENMARLIN_SERVER_URL` as the only trusted API origin and keep it as a
   bare origin without `/v1`.
+- Do not use `https://openmarlin.ai` as `OPENMARLIN_SERVER_URL`; that is the
+  browser-facing website. Use `https://api.openmarlin.ai` unless the user is
+  targeting a custom deployment.
 - Use server-provided `handoff.authorization_url` directly. Do not reconstruct
   WorkOS or browser URLs locally.
 - Store platform API keys in OpenClaw auth-profile storage when available, not
   in ordinary skill config.
 - Treat `OPENMARLIN_PLATFORM_API_KEY` as a temporary override for debugging,
   not the preferred steady-state storage path.
+- If no platform key is available yet, start registration/bootstrap instead of
+  telling the user to manually provide an API key.
 - When balance information is incomplete, label local billing state as
   last-known or estimated instead of pretending it is authoritative.
 
@@ -100,6 +112,7 @@ After setup, the most common next actions are:
 - inspect available models
 - recover from a `402 Payment Required` response
 - inspect balance or recent billing activity
+- fetch the caller's referral code and invite link
 
 ## Request Model
 
@@ -161,8 +174,25 @@ Long-running jobs use:
 - `POST /v1/tasks`
 - `GET /v1/tasks/:taskId`
 
-Task requests follow the same routing shape as `/v1/executions`, but they are
-intended for work that should not wait on a synchronous response stream.
+Task requests do not use the same routing shape as `/v1/executions`.
+
+Task requests use:
+
+- `kind = video`
+- `input.prompt` required
+- `input.media_urls` optional
+- `input.media_ids` optional
+- `input.duration_ms` optional
+- `input.aspect_ratio` optional
+- `metadata` optional
+
+Task requests do not accept:
+
+- `instruction`
+- `provider_id`
+- `labels`
+- `model`
+- `stream`
 
 Prefer `/v1/tasks` when:
 
@@ -170,6 +200,10 @@ Prefer `/v1/tasks` when:
 - stream output is absent or not useful
 - the real result is expected to arrive later as artifact metadata such as an
   `artifact_url`
+- the request is for video generation, unless the user explicitly insists on a
+  synchronous execution path
+- when using `/v1/tasks` from inside OpenClaw, default to submitting with
+  watch-and-wait behavior instead of stopping after returning a `task_id`
 
 Task states:
 
@@ -283,7 +317,7 @@ Submit a long-running job:
 ```bash
 python3 scripts/platform_request.py tasks-submit \
   --watch \
-  --body-json '{"instruction":"Generate a short plane video.","metadata":{"mode":"video"}}'
+  --body-json '{"kind":"video","input":{"prompt":"Generate a short plane video."}}'
 ```
 
 Fetch the current task state:
@@ -333,6 +367,12 @@ Show recent billing activity:
 python3 scripts/billing.py activity
 ```
 
+Fetch the caller's referral code, invite link, and attribution summary:
+
+```bash
+python3 scripts/billing.py referral-link
+```
+
 ## Operational Guidance
 
 ### Routing Failures
@@ -348,6 +388,8 @@ Translate common routing errors into plain language:
   the server needs narrower labels or an explicit provider override
 - `execution_kind_not_available`: the selected provider does not support the
   requested execution kind
+- `task_executor_not_found`: no configured task executor matched the current
+  long-running task request
 - `invalid_routing_labels`: labels were malformed
 
 When these happen:
@@ -357,11 +399,26 @@ When these happen:
   routing
 - do not invent hidden labels or undocumented routing fields
 
+For `/v1/tasks` specifically:
+
+- do not suggest provider overrides, labels, or model routing as a recovery
+  path
+- suggest validating `kind = video` and the `input` payload shape instead
+
 For long-running jobs:
 
 - prefer `tasks-submit --watch` over asking the user to manually follow up with
   `tasks-watch`
+- for video-generation requests, treat `tasks-submit --watch` as the default
+  completion path unless the user explicitly asks for fire-and-forget behavior
+- when repeating the exact same video submission shortly after a task was
+  already attempted, prefer reusing the recent `idempotency_key` so the server
+  returns the original task instead of creating a second `/v1/tasks` request
+- keep refreshing local task state while watching so long-running tasks remain
+  inside that short reuse window
 - acknowledge acceptance as soon as a `task_id` is returned
+- keep polling until the task reaches a terminal state or times out; do not
+  require the user to ask again just to continue watching the same task
 - surface final `output` and `metadata` when the task reaches `succeeded`
 
 ### Balance And Recovery
@@ -393,3 +450,8 @@ credential for OpenClaw.
 - store the key in the default OpenClaw auth profile when `--store` is used
 - avoid echoing raw secrets unless the active command explicitly returns them
 - when reporting success, show where the key was stored or loaded from
+- never ask the user to paste a platform API key into chat as the normal
+  registration path
+- if `openmarlin.ai` appears blocked by browser or Cloudflare protection,
+  verify that helpers are targeting `https://api.openmarlin.ai` before
+  suggesting manual browser actions

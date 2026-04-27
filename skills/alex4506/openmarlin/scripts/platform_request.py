@@ -4,13 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Any
+from uuid import uuid4
+from typing import Any, Callable
 
 from openclaw_skill_config import (
     DEFAULT_SERVER_URL,
@@ -21,6 +23,12 @@ from openclaw_skill_config import (
 )
 from openclaw_billing_state import record_balance_snapshot
 from openclaw_platform_auth import DEFAULT_AGENT_ID, DEFAULT_PROFILE_ID, resolve_platform_api_key
+from openclaw_task_state import (
+    fingerprint_api_key,
+    find_recent_matching_submission,
+    record_task_observation,
+    record_task_submission,
+)
 from billing import build_recovery_commands, parse_insufficient_balance
 
 
@@ -39,12 +47,14 @@ ERROR_HELP = {
     "execution_provider_not_found": "The server could not find any eligible execution provider for this request. Retry with different labels, a different model, or an explicit --provider override.",
     "execution_provider_ambiguous": "More than one eligible execution provider matched and the server could not choose automatically. Retry with narrower labels or an explicit --provider override.",
     "execution_kind_not_available": "The selected provider does not support the requested execution kind.",
-    "task_provider_not_found": "The server could not find any eligible provider for this long-running task. Retry with different labels, a different model, or an explicit --provider override.",
-    "task_provider_ambiguous": "More than one eligible provider matched this long-running task and the server could not choose automatically. Retry with narrower labels or an explicit --provider override.",
+    "task_executor_not_found": "The server could not find any configured task executor for this long-running task kind.",
+    "idempotency_conflict": "The same idempotency key was reused with a different task payload. Retry with a new idempotency key or remove the conflicting body.idempotency_key.",
     "invalid_request": "The request payload did not match the server contract.",
 }
 
 TASK_TERMINAL_STATUSES = {"succeeded", "failed"}
+TASK_RECENT_REUSABLE_STATUSES = {"submitting", "queued", "running", "succeeded", "failed"}
+DEFAULT_TASK_DEDUPE_WINDOW_SECONDS = 120.0
 
 
 def parse_args() -> argparse.Namespace:
@@ -66,7 +76,7 @@ def parse_args() -> argparse.Namespace:
     common.add_argument(
         "--provider",
         default=(default_provider or "").strip(),
-        help="Optional explicit provider override. Defaults to OPENMARLIN_DEFAULT_PROVIDER_ID, then OpenClaw skill config. For /v1/executions or /v1/tasks with both --provider and body.model, first confirm this provider advertises that exact model in `python3 scripts/platform_request.py models`.",
+        help="Optional explicit provider override for /v1/executions. Defaults to OPENMARLIN_DEFAULT_PROVIDER_ID, then OpenClaw skill config. /v1/tasks is now executor-routed and does not accept provider overrides.",
     )
     common.add_argument(
         "--label",
@@ -146,6 +156,24 @@ def parse_args() -> argparse.Namespace:
         default=1800.0,
         help="Maximum total wait time in seconds when --watch is set. Default: 1800.0.",
     )
+    task_submit.add_argument(
+        "--dedupe-window-seconds",
+        type=float,
+        default=DEFAULT_TASK_DEDUPE_WINDOW_SECONDS,
+        help=(
+            "When a matching task was submitted recently from this OpenClaw agent, "
+            "reuse its idempotency key instead of creating a duplicate. Default: 120.0."
+        ),
+    )
+    task_submit.add_argument(
+        "--allow-duplicate-submit",
+        action="store_true",
+        help="Always create a new /v1/tasks submission and bypass automatic idempotency-key reuse.",
+    )
+    task_submit.add_argument(
+        "--idempotency-key",
+        help="Optional explicit /v1/tasks idempotency key. By default the skill reuses a recent local key for matching submissions.",
+    )
 
     task_status = subparsers.add_parser(
         "tasks-status",
@@ -218,7 +246,45 @@ def normalize_execution_request(body: dict[str, Any]) -> None:
 def normalize_task_request(body: dict[str, Any]) -> None:
     if "stream" in body:
         raise SystemExit("Long-running task submission does not support body.stream. Use /v1/tasks without streaming.")
-    normalize_execution_request(body)
+    if "provider_id" in body or "providerId" in body:
+        raise SystemExit("Long-running task submission no longer accepts provider overrides in the request body.")
+    if "labels" in body:
+        raise SystemExit("Long-running task submission no longer accepts routing labels in the request body.")
+    if "model" in body or "model_provider" in body or "modelProvider" in body:
+        raise SystemExit("Long-running task submission no longer accepts execution-model routing fields.")
+    if body.get("idempotency_key") is not None:
+        if not isinstance(body.get("idempotency_key"), str) or not body["idempotency_key"].strip():
+            raise SystemExit("If body.idempotency_key is provided, it must be a non-empty string.")
+        body["idempotency_key"] = body["idempotency_key"].strip()
+    if body.get("kind") != "video":
+        raise SystemExit('Long-running task submission currently requires body.kind = "video".')
+    input_value = body.get("input")
+    if not isinstance(input_value, dict):
+        raise SystemExit("Long-running task submission requires body.input as a JSON object.")
+    prompt = input_value.get("prompt")
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise SystemExit("Long-running task submission requires body.input.prompt as a non-empty string.")
+    metadata_value = body.get("metadata")
+    if metadata_value is not None and not isinstance(metadata_value, dict):
+        raise SystemExit("If body.metadata is provided for long-running task submission, it must be a JSON object.")
+
+    allowed_keys = {"kind", "input", "metadata", "idempotency_key"}
+    unknown_keys = sorted(key for key in body.keys() if key not in allowed_keys)
+    if unknown_keys:
+        raise SystemExit(
+            "Long-running task submission only accepts body.kind, body.input, and optional body.metadata. "
+            f"Unexpected keys: {', '.join(unknown_keys)}."
+        )
+
+    allowed_input_keys = {"prompt", "media_urls", "media_ids", "duration_ms", "aspect_ratio"}
+    unknown_input_keys = sorted(key for key in input_value.keys() if key not in allowed_input_keys)
+    if unknown_input_keys:
+        raise SystemExit(
+            "Long-running task video input only accepts prompt, media_urls, media_ids, duration_ms, and aspect_ratio. "
+            f"Unexpected input keys: {', '.join(unknown_input_keys)}."
+        )
+
+    input_value["prompt"] = prompt.strip()
 
 
 def resolve_api_key(raw_api_key: str, profile_id: str, agent_id: str) -> tuple[str | None, str | None, str | None]:
@@ -231,7 +297,7 @@ def resolve_api_key(raw_api_key: str, profile_id: str, agent_id: str) -> tuple[s
 
     return None, None, (
         "Missing platform API key. Set OPENMARLIN_PLATFORM_API_KEY, pass --api-key, "
-        "or bootstrap with --store so the key is saved into OpenClaw auth-profiles.json."
+        "or register/bootstrap with --store so the key is saved into OpenClaw auth-profiles.json."
     )
 
 
@@ -467,6 +533,27 @@ def task_status(payload: JsonValue) -> str | None:
     return None
 
 
+def compute_task_request_fingerprint(server_url: str, api_key: str, body: dict[str, Any]) -> str:
+    normalized_body = dict(body)
+    normalized_body.pop("idempotency_key", None)
+    normalized = json.dumps(normalized_body, sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha256()
+    digest.update(server_url.rstrip("/").encode("utf-8"))
+    digest.update(b"\n")
+    digest.update(fingerprint_api_key(api_key).encode("utf-8"))
+    digest.update(b"\n")
+    digest.update(normalized.encode("utf-8"))
+    return digest.hexdigest()
+
+
+def note_reused_idempotency_key(idempotency_key: str, state_path: str) -> None:
+    print(
+        f"Reusing recent task idempotency key {idempotency_key} for the same submission. "
+        f"Local task state: {state_path}",
+        file=sys.stderr,
+    )
+
+
 def task_summary_lines(payload: JsonValue) -> list[str]:
     if not isinstance(payload, dict):
         return []
@@ -566,9 +653,9 @@ def print_dry_run(args: argparse.Namespace, server_url: str, provider: str | Non
         "server_url_source": args._server_url_source or "flag-or-arg",
         "api_key_source": api_key_source,
         "api_key_error": api_key_error,
-        "provider_override": provider,
-        "provider_source": args._provider_source or ("flag-or-arg" if provider else None),
-        "labels": labels or {},
+        "provider_override": provider if args.command == "executions" else None,
+        "provider_source": args._provider_source or ("flag-or-arg" if provider and args.command == "executions" else None),
+        "labels": labels or {} if args.command == "executions" else {},
         "connectivity": detail,
     }
     if args.command == "executions":
@@ -584,9 +671,9 @@ def print_dry_run(args: argparse.Namespace, server_url: str, provider: str | Non
         body = load_json_object_from_option(args.body_json, args.body_file, source_name="body")
         normalize_task_request(body)
         payload["request_preview"] = {
-            "kind": body.get("kind", "agent_run"),
-            "model": body.get("model"),
-            "has_instruction": isinstance(body.get("instruction"), str) and bool(body.get("instruction").strip()),
+            "kind": body.get("kind"),
+            "has_prompt": isinstance(body.get("input", {}).get("prompt"), str)
+            and bool(body.get("input", {}).get("prompt").strip()),
         }
         payload["watch"] = args.watch
     elif args.command == "tasks-status":
@@ -610,7 +697,7 @@ def print_dry_run(args: argparse.Namespace, server_url: str, provider: str | Non
             print(f"API key: missing ({api_key_error})")
         else:
             print(f"API key source: {api_key_source}")
-        if args.command != "models":
+        if args.command == "executions":
             print(f"Provider override: {provider or '<none; server-side automatic routing>'}")
             print(f"Routing labels: {json.dumps(labels or {}, sort_keys=True)}")
         if args.command == "executions":
@@ -621,9 +708,8 @@ def print_dry_run(args: argparse.Namespace, server_url: str, provider: str | Non
             print(f"Stream: {'yes' if preview.get('stream') else 'no'}")
         elif args.command == "tasks-submit":
             preview = payload["request_preview"]
-            print(f"Task kind: {preview.get('kind', 'agent_run')}")
-            print(f"Model: {preview.get('model') or '<server auto-select>'}")
-            print(f"Instruction present: {'yes' if preview.get('has_instruction') else 'no'}")
+            print(f"Task kind: {preview.get('kind') or '<missing>'}")
+            print(f"Prompt present: {'yes' if preview.get('has_prompt') else 'no'}")
             print(f"Watch after submit: {'yes' if payload.get('watch') else 'no'}")
         elif args.command == "tasks-status":
             print(f"Task ID: {args.task_id}")
@@ -659,10 +745,13 @@ def watch_task(
     task_id: str,
     interval_seconds: float,
     timeout_seconds: float,
+    on_observation: Callable[[dict[str, Any]], Any] | None = None,
 ) -> tuple[int, JsonValue, dict[str, str]]:
     deadline = time.monotonic() + timeout_seconds
     while True:
         status, payload, response_headers = fetch_task(server_url=server_url, api_key=api_key, task_id=task_id)
+        if on_observation is not None and status < 400 and isinstance(payload, dict):
+            on_observation(payload)
         current_status = task_status(payload)
         if status >= 400 or current_status in TASK_TERMINAL_STATUSES:
             return status, payload, response_headers
@@ -698,10 +787,39 @@ def main() -> int:
     elif args.command == "tasks-submit":
         body = load_json_object_from_option(args.body_json, args.body_file, source_name="body")
         normalize_task_request(body)
-        if provider:
-            body["provider_id"] = provider
-        if labels:
-            body["labels"] = labels
+        api_key_fingerprint = fingerprint_api_key(api_key)
+        request_fingerprint = compute_task_request_fingerprint(server_url, api_key, body)
+        idempotency_key = args.idempotency_key.strip() if isinstance(args.idempotency_key, str) and args.idempotency_key.strip() else None
+        if idempotency_key is None and isinstance(body.get("idempotency_key"), str) and body["idempotency_key"].strip():
+            idempotency_key = body["idempotency_key"].strip()
+        if idempotency_key is None and not args.allow_duplicate_submit:
+            existing_submission, task_state_path = find_recent_matching_submission(
+                server_url=server_url,
+                api_key_fingerprint=api_key_fingerprint,
+                request_fingerprint=request_fingerprint,
+                dedupe_window_seconds=args.dedupe_window_seconds,
+                reusable_statuses=TASK_RECENT_REUSABLE_STATUSES,
+                agent_id=args.agent_id,
+            )
+            if existing_submission and isinstance(existing_submission.get("idempotency_key"), str):
+                idempotency_key = existing_submission["idempotency_key"].strip()
+                if idempotency_key:
+                    note_reused_idempotency_key(idempotency_key, task_state_path)
+        if idempotency_key is None and not args.allow_duplicate_submit:
+            idempotency_key = f"openclaw-task-{uuid4().hex}"
+        if idempotency_key:
+            body["idempotency_key"] = idempotency_key
+            record_task_submission(
+                server_url=server_url,
+                api_key_fingerprint=api_key_fingerprint,
+                request_fingerprint=request_fingerprint,
+                idempotency_key=idempotency_key,
+                task_id=None,
+                kind=str(body.get("kind") or ""),
+                status="submitting",
+                prompt=str(body.get("input", {}).get("prompt") or "").strip(),
+                agent_id=args.agent_id,
+            )
         status, payload, response_headers = request(
             url=f"{server_url}/v1/tasks",
             method="POST",
@@ -710,6 +828,18 @@ def main() -> int:
             },
             payload=body,
         )
+        if idempotency_key and status < 400 and isinstance(payload, dict) and isinstance(payload.get("task_id"), str):
+            record_task_submission(
+                server_url=server_url,
+                api_key_fingerprint=api_key_fingerprint,
+                request_fingerprint=request_fingerprint,
+                idempotency_key=idempotency_key,
+                task_id=payload["task_id"].strip(),
+                kind=str(body.get("kind") or ""),
+                status=task_status(payload) or "queued",
+                prompt=str(body.get("input", {}).get("prompt") or "").strip(),
+                agent_id=args.agent_id,
+            )
         if (
             status < 400
             and args.watch
@@ -723,6 +853,12 @@ def main() -> int:
                 task_id=payload["task_id"].strip(),
                 interval_seconds=args.interval_seconds,
                 timeout_seconds=args.timeout_seconds,
+                on_observation=lambda task: record_task_observation(
+                    server_url=server_url,
+                    api_key_fingerprint=api_key_fingerprint,
+                    task=task,
+                    agent_id=args.agent_id,
+                ),
             )
     elif args.command == "tasks-status":
         status, payload, response_headers = fetch_task(
@@ -730,6 +866,13 @@ def main() -> int:
             api_key=api_key,
             task_id=args.task_id,
         )
+        if status < 400 and isinstance(payload, dict):
+            record_task_observation(
+                server_url=server_url,
+                api_key_fingerprint=fingerprint_api_key(api_key),
+                task=payload,
+                agent_id=args.agent_id,
+            )
     elif args.command == "tasks-watch":
         status, payload, response_headers = watch_task(
             server_url=server_url,
@@ -737,6 +880,12 @@ def main() -> int:
             task_id=args.task_id,
             interval_seconds=args.interval_seconds,
             timeout_seconds=args.timeout_seconds,
+            on_observation=lambda task: record_task_observation(
+                server_url=server_url,
+                api_key_fingerprint=fingerprint_api_key(api_key),
+                task=task,
+                agent_id=args.agent_id,
+            ),
         )
     elif args.command == "models":
         status, payload, response_headers = request_without_body(

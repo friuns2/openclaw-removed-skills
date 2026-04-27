@@ -3,9 +3,15 @@
   "slug": "openmarlin",
   "displayName": "OpenMarlin",
   "latest": {
-    "version": "0.1.14-main.1",
-    "publishedAt": 1775060488935,
-    "commit": "https://github.com/openclaw/skills/commit/42f34a2a5c294d3afc414dff7f16f2fc1ec19879"
+    "version": "0.1.22-main.1",
+    "publishedAt": 1776832151363,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.14-main.1",
+      "publishedAt": 1775060488935,
+      "commit": "https://github.com/openclaw/skills/commit/42f34a2a5c294d3afc414dff7f16f2fc1ec19879"
+    }
+  ]
 }

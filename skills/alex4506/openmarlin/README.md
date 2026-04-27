@@ -13,7 +13,10 @@ This repo covers the OpenClaw-first UX for:
 - registration and account linking
 - platform API key bootstrap and auth-profile storage
 - server-side automatic routing with optional provider overrides and labels
-- asynchronous task submission and polling for long-running jobs
+- asynchronous task submission and polling for long-running jobs, with video
+  generation treated as async by default and submitted with `kind + input`
+- automatic `/v1/tasks` idempotency-key reuse for short-window duplicate video
+  submissions from the same OpenClaw agent
 - structured `402 Payment Required` recovery
 - guided top-up and authoritative balance management
 
@@ -27,13 +30,13 @@ Primary entrypoints:
   long-running jobs
 - `scripts/billing.py` for structured 402 recovery guidance and
   authenticated top-up session handling, authoritative balance reads, local
-  balance snapshots, and tracked
-  top-up history
+  balance snapshots, tracked top-up history, and referral link retrieval
 
 Internal helpers:
 
 - `scripts/openclaw_platform_auth.py` for OpenClaw auth-profile storage
 - `scripts/openclaw_billing_state.py` for local billing-state persistence
+- `scripts/openclaw_task_state.py` for local task-submission idempotency state
 
 ## Installation
 
@@ -47,6 +50,10 @@ cd <your-openmarlin-skill-directory>
 By default the skill targets `https://api.openmarlin.ai`. Override
 `OPENMARLIN_SERVER_URL` only when you want a different deployment such as a
 local dev server, and use the bare origin without `/v1`.
+
+Do not set `OPENMARLIN_SERVER_URL` to `https://openmarlin.ai`; that is the
+browser-facing website and may be protected by browser checks. The helper
+scripts need the API origin, normally `https://api.openmarlin.ai`.
 
 To install it as a local OpenClaw skill, copy the repo contents into the
 default skills workspace:
@@ -90,11 +97,22 @@ Optional but commonly useful:
 - `OPENMARLIN_DEFAULT_PROVIDER_ID`
 - `OPENMARLIN_DEFAULT_ROUTING_LABELS`
 
+`OPENMARLIN_PLATFORM_API_KEY` is not a required install-time setting for this
+skill. Normal setup should go through registration bootstrap and OpenClaw auth
+profiles.
+
 These values do not have to come from a shell `export`. The helper scripts now
 resolve them in this order:
 
 1. process environment
 2. persisted OpenClaw skill config in `~/.openclaw/openclaw.json`
+
+If an older install already saved a plaintext
+`skills.entries["openmarlin"].apiKey` through OpenClaw's generic skill API-key
+UI, treat that as legacy state and migrate by re-running registration/bootstrap
+with `--store`. Runtime requests intentionally prefer the current
+agent/profile-scoped auth profile and do not silently fall back across
+credential scopes.
 
 The persisted OpenClaw config path is:
 
@@ -151,9 +169,13 @@ After install, the shortest safe path is:
 5. Bootstrap and store the workspace API key with `python3 scripts/registration_session.py bootstrap --session-id <session-id> --store`.
 6. Optionally discover exact models with `python3 scripts/platform_request.py models`.
 7. Send your first routed execution with `python3 scripts/platform_request.py executions --body-json '{"instruction":"hello"}'`.
-8. For long-running jobs such as video generation, prefer `python3 scripts/platform_request.py tasks-submit --watch ...` so submission and polling happen in one flow.
+8. For long-running jobs such as video generation, default to `python3 scripts/platform_request.py tasks-submit --watch ...` so submission and polling happen in one flow.
 
-If you plan to force a specific `provider_id` and also pass an exact `model`,
+Do not ask users to paste platform API keys into chat during setup. Registration
+should issue and store the key through the bootstrap flow above.
+
+If you plan to force a specific `provider_id` and also pass an exact `model`
+for `/v1/executions`,
 first confirm that the same `python3 scripts/platform_request.py models` result
 shows that provider under that exact model.
 
@@ -164,12 +186,13 @@ python3 scripts/registration_session.py create
 python3 scripts/registration_session.py --server-url https://your-server.example.com create --dry-run
 python3 scripts/platform_request.py models
 python3 scripts/platform_request.py executions --body-json '{"instruction":"hello"}'
-python3 scripts/platform_request.py tasks-submit --watch --body-json '{"instruction":"generate a short plane video","metadata":{"mode":"video"}}'
+python3 scripts/platform_request.py tasks-submit --watch --body-json '{"kind":"video","input":{"prompt":"generate a short plane video"}}'
 python3 scripts/platform_request.py tasks-watch --task-id <task-id>
 python3 scripts/platform_request.py executions --provider node-a --body-json '{"instruction":"hello"}'
 python3 scripts/platform_request.py executions --body-json '{"instruction":"hello","model":"openai-codex/gpt-5.4"}'
 python3 scripts/platform_request.py executions --dry-run --server-url https://your-server.example.com --api-key claw_wsk_placeholder --body-json '{"instruction":"hello"}'
 python3 scripts/billing.py activity
+python3 scripts/billing.py referral-link
 python3 scripts/billing.py explain-402 --response-file /path/to/402.json
 python3 scripts/billing.py explain-402 --auto-recover --response-file /path/to/402.json
 ```
@@ -180,10 +203,28 @@ python3 scripts/billing.py explain-402 --auto-recover --response-file /path/to/4
 - Store the issued workspace API key into OpenClaw auth profiles.
 - Send routed execution requests with automatic provider and model selection.
 - Submit long-running generation jobs and poll for final artifact metadata.
+- Treat video-generation requests as async tasks by default, even when the user
+  did not explicitly ask for async execution.
+- When OpenClaw submits a video task, it should prefer submit-and-watch
+  behavior by default instead of returning only a `task_id` and waiting for a
+  second user prompt.
+- `tasks-submit` now automatically attaches a body `idempotency_key` for video
+  tasks and reuses a recent matching key from the same OpenClaw agent.
+- With the latest server contract, same-key retries with the same payload
+  return the original task instead of starting a second external job.
+- The local reuse window applies to recent matching submissions, including
+  tasks that already reached a terminal state, unless you explicitly opt out.
+- Use `--allow-duplicate-submit` only when you intentionally want a second task
+  for the same payload.
+- Use `/v1/tasks` with `kind = "video"` and `input.prompt`; do not send
+  execution-routing fields such as `provider_id`, `labels`, `model`, or
+  `instruction`.
 - When you do pass `model`, use the full exact ref returned by `/v1/models`.
 - When forcing both `provider_id` and `model`, pair them from the same `/v1/models` result instead of guessing.
-- Override routing with an explicit provider id or simple labels.
+- Override routing with an explicit provider id or simple labels for
+  `/v1/executions`.
 - Inspect recent prepaid usage and ledger activity from the server APIs.
+- Fetch your current referral code, invite link, and attribution summary.
 - Recover from `402 Payment Required` by creating or resuming a top-up flow.
 
 For full behavior and flow guidance, use `SKILL.md`.

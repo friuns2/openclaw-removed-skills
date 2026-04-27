@@ -109,6 +109,12 @@ def parse_args() -> argparse.Namespace:
     )
     activity.add_argument("--limit", type=int, default=10, help="Maximum usage events and ledger entries to show. Default: 10.")
 
+    subparsers.add_parser(
+        "referral-link",
+        help="Fetch the caller's referral code, invite link, and current attribution summary.",
+        parents=[common],
+    )
+
     status = subparsers.add_parser("status", help="Fetch the current top-up session state.", parents=[common])
     status.add_argument("--session-id", required=True, help="Top-up session ID.")
 
@@ -147,7 +153,7 @@ def resolve_api_key(raw_api_key: str, profile_id: str, agent_id: str) -> tuple[s
 
     return None, None, (
         "Missing platform API key. Set OPENMARLIN_PLATFORM_API_KEY, pass --api-key, "
-        "or bootstrap and store a key first."
+        "or register/bootstrap and store a key first."
     )
 
 
@@ -326,6 +332,10 @@ def fetch_ledger_entries(server_url: str, auth_headers: dict[str, str]) -> tuple
     return request_json(f"{server_url}/v1/ledger", headers=auth_headers)
 
 
+def fetch_referral_link(server_url: str, auth_headers: dict[str, str]) -> tuple[int, dict[str, Any] | str]:
+    return request_json(f"{server_url}/v1/referrals/me", headers=auth_headers)
+
+
 def update_balance_from_completed_topup(
     session: dict[str, Any],
     *,
@@ -466,6 +476,29 @@ def trim_records(records: list[dict[str, Any]], *, limit: int) -> list[dict[str,
     return sort_records_by_created_at(records)[:limit]
 
 
+def format_amount_object(value: Any) -> str | None:
+    if not isinstance(value, dict):
+        return None
+    amount = value.get("amount")
+    unit = value.get("unit")
+    if isinstance(amount, (int, float)) and isinstance(unit, str) and unit.strip():
+        return f"{amount} {unit}"
+    return None
+
+
+def format_converted_final_debit(value: Any) -> str | None:
+    if not isinstance(value, dict):
+        return None
+    amount = value.get("amount")
+    unit = value.get("unit")
+    usd_per_credit = value.get("usdPerCredit")
+    if isinstance(amount, (int, float)) and isinstance(unit, str) and unit.strip():
+        if isinstance(usd_per_credit, (int, float)):
+            return f"{amount} {unit} (usdPerCredit={usd_per_credit})"
+        return f"{amount} {unit}"
+    return None
+
+
 def print_usage_events(events: list[dict[str, Any]]) -> None:
     if not events:
         print("Recent usage events: none")
@@ -474,15 +507,30 @@ def print_usage_events(events: list[dict[str, Any]]) -> None:
     for event in events:
         measured_units = event.get("measured_units")
         measured_text = "<unknown>"
-        if isinstance(measured_units, (int, float)):
+        if isinstance(measured_units, dict):
+            requests = measured_units.get("requests")
+            if isinstance(requests, (int, float)):
+                measured_text = f"requests={requests}"
+            else:
+                measured_text = json.dumps(measured_units, sort_keys=True)
+        elif isinstance(measured_units, (int, float)):
             measured_text = str(measured_units)
         settlement = event.get("settlement")
-        settlement_text = ""
+        settlement_parts: list[str] = []
         if isinstance(settlement, dict):
-            amount = settlement.get("amount")
-            unit = settlement.get("unit")
-            if isinstance(amount, (int, float)) and isinstance(unit, str):
-                settlement_text = f" settled={amount} {unit}"
+            converted_final_debit = format_converted_final_debit(settlement.get("convertedFinalDebit"))
+            if converted_final_debit:
+                settlement_parts.append(f"final_debit={converted_final_debit}")
+            final_total = format_amount_object(settlement.get("finalTotal"))
+            if final_total:
+                settlement_parts.append(f"final_total={final_total}")
+            provider_subtotal = format_amount_object(settlement.get("providerReportedSubtotal"))
+            if provider_subtotal:
+                settlement_parts.append(f"provider_subtotal={provider_subtotal}")
+            platform_fee_total = format_amount_object(settlement.get("platformFeeTotal"))
+            if platform_fee_total:
+                settlement_parts.append(f"platform_fee={platform_fee_total}")
+        settlement_text = f" {' '.join(settlement_parts)}" if settlement_parts else ""
         print(
             f"- {event.get('created_at', '<unknown>')} "
             f"capability={event.get('capability', '<unknown>')} "
@@ -512,6 +560,46 @@ def print_ledger_entries(entries: list[dict[str, Any]]) -> None:
         )
 
 
+def parse_referral_link(payload: dict[str, Any]) -> dict[str, Any] | None:
+    referral_code = payload.get("referral_code")
+    referral_link = payload.get("referral_link")
+    summary = payload.get("summary")
+    if not isinstance(referral_code, str) or not referral_code.strip():
+        return None
+    if referral_link is not None and not isinstance(referral_link, str):
+        return None
+    if not isinstance(summary, dict):
+        return None
+
+    signed_up_count = summary.get("signed_up_count")
+    qualified_count = summary.get("qualified_count")
+    rewarded_count = summary.get("rewarded_count")
+    if not all(isinstance(value, int) for value in (signed_up_count, qualified_count, rewarded_count)):
+        return None
+
+    return {
+        "referral_code": referral_code,
+        "referral_link": referral_link,
+        "summary": {
+            "signed_up_count": signed_up_count,
+            "qualified_count": qualified_count,
+            "rewarded_count": rewarded_count,
+        },
+    }
+
+
+def print_referral_link(payload: dict[str, Any]) -> None:
+    print(f"Referral code: {payload['referral_code']}")
+    print(f"Referral link: {payload.get('referral_link') or '<unavailable>'}")
+    summary = payload["summary"]
+    print(
+        "Attribution summary: "
+        f"signed_up={summary['signed_up_count']} "
+        f"qualified={summary['qualified_count']} "
+        f"rewarded={summary['rewarded_count']}"
+    )
+
+
 def print_dry_run(args: argparse.Namespace) -> int:
     server_url = require_server_url(args.server_url)
     reachable, detail = probe_server_openapi(server_url)
@@ -524,7 +612,7 @@ def print_dry_run(args: argparse.Namespace) -> int:
         "connectivity": detail,
     }
 
-    needs_api_key = args.command in {"create-topup", "status", "watch", "balance", "activity"} or (
+    needs_api_key = args.command in {"create-topup", "status", "watch", "balance", "activity", "referral-link"} or (
         args.command == "explain-402" and args.auto_recover
     )
     if needs_api_key:
@@ -557,6 +645,8 @@ def print_dry_run(args: argparse.Namespace) -> int:
     elif args.command == "activity":
         payload["limit"] = args.limit
         payload["operations"] = ["GET /v1/usage-events", "GET /v1/ledger"]
+    elif args.command == "referral-link":
+        payload["operations"] = ["GET /v1/referrals/me"]
 
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -585,6 +675,8 @@ def print_dry_run(args: argparse.Namespace) -> int:
         elif args.command == "activity":
             print(f"Limit: {payload['limit']}")
             print("Operations: GET /v1/usage-events, GET /v1/ledger")
+        elif args.command == "referral-link":
+            print("Operation: GET /v1/referrals/me")
     return 0 if payload["ok"] else 1
 
 
@@ -796,6 +888,54 @@ def main() -> int:
             print(f"API key source: {api_key_source}")
             print_usage_events(usage_events)
             print_ledger_entries(ledger_entries)
+        return 0
+
+    if args.command == "referral-link":
+        server_url = require_server_url(args.server_url)
+        api_key, api_key_source = resolve_api_key_or_exit(args.api_key, args.profile_id, args.agent_id)
+        auth_headers = {"Authorization": f"Bearer {api_key}"}
+
+        status, payload = fetch_referral_link(server_url, auth_headers)
+        if status >= 400:
+            if args.json:
+                print(
+                    json.dumps(
+                        {
+                            "ok": False,
+                            "status": status,
+                            "api_key_source": api_key_source,
+                            "response": payload,
+                        },
+                        indent=2,
+                        sort_keys=True,
+                    )
+                )
+            else:
+                raise SystemExit(f"Unable to fetch referral link (HTTP {status}): {payload}")
+            return 1
+
+        if not isinstance(payload, dict):
+            raise SystemExit("Server returned a non-object payload for GET /v1/referrals/me.")
+        referral = parse_referral_link(payload)
+        if not referral:
+            raise SystemExit("Server returned an invalid referral payload.")
+
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "ok": True,
+                        "status": status,
+                        "api_key_source": api_key_source,
+                        "referral": referral,
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+        else:
+            print(f"API key source: {api_key_source}")
+            print_referral_link(referral)
         return 0
 
     server_url = require_server_url(args.server_url)

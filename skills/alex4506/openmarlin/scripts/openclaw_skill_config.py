@@ -90,7 +90,6 @@ def get_skill_env(var_name: str) -> tuple[str | None, str | None]:
 
     return None, config_path
 
-
 def preferred_openclaw_config_path() -> str:
     return str(PRIMARY_CONFIG_PATH)
 
@@ -135,6 +134,17 @@ def require_server_url(raw: str) -> str:
     server_url = raw.strip().rstrip("/")
     if not server_url:
         raise SystemExit(build_server_url_setup_message())
+    parsed = urllib.parse.urlparse(server_url)
+    if parsed.scheme in {"http", "https"} and parsed.netloc.lower() == "openmarlin.ai":
+        raise SystemExit(
+            build_server_url_setup_message(
+                resolved_value=server_url,
+                reason=(
+                    "OPENMARLIN_SERVER_URL points at the OpenMarlin website frontend. "
+                    f"Use the API origin instead: {DEFAULT_SERVER_URL}"
+                ),
+            )
+        )
     return server_url
 
 
