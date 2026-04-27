@@ -3,9 +3,15 @@
   "slug": "maxxton",
   "displayName": "Maxxton",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775200024272,
-    "commit": "https://github.com/openclaw/skills/commit/b6e1c94b215c0c68f5c06a044d551098e8bf16a0"
+    "version": "1.0.1",
+    "publishedAt": 1776884971544,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775200024272,
+      "commit": "https://github.com/openclaw/skills/commit/b6e1c94b215c0c68f5c06a044d551098e8bf16a0"
+    }
+  ]
 }
