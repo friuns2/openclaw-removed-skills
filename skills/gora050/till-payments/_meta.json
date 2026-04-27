@@ -3,9 +3,15 @@
   "slug": "till-payments",
   "displayName": "Till Payments",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171083115,
-    "commit": "https://github.com/openclaw/skills/commit/91c40c70b3c37f4479d3583b6eac04086c6b1e0d"
+    "version": "1.0.3",
+    "publishedAt": 1776892544441,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171083115,
+      "commit": "https://github.com/openclaw/skills/commit/91c40c70b3c37f4479d3583b6eac04086c6b1e0d"
+    }
+  ]
 }
