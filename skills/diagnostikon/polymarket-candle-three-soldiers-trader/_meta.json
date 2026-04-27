@@ -3,11 +3,16 @@
   "slug": "polymarket-candle-three-soldiers-trader",
   "displayName": "Polymarket Candle Three Soldiers Trader",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775317061605,
-    "commit": "https://github.com/openclaw/skills/commit/db126dd4adadacae715d2387fe2bd47ef99b7afa"
+    "version": "0.0.2",
+    "publishedAt": 1776513245068,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775317061605,
+      "commit": "https://github.com/openclaw/skills/commit/db126dd4adadacae715d2387fe2bd47ef99b7afa"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774855939730,
