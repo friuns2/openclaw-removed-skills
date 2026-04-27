@@ -3,11 +3,16 @@
   "slug": "jelastic",
   "displayName": "Jelastic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170545844,
-    "commit": "https://github.com/openclaw/skills/commit/86e18a98dfdd50ac463cb133129a7ac26ec366e1"
+    "version": "1.0.3",
+    "publishedAt": 1776857654860,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170545844,
+      "commit": "https://github.com/openclaw/skills/commit/86e18a98dfdd50ac463cb133129a7ac26ec366e1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775041409994,
