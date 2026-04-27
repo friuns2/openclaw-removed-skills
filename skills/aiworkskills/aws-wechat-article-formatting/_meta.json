@@ -1,0 +1,11 @@
+{
+  "owner": "aiworkskills",
+  "slug": "aws-wechat-article-formatting",
+  "displayName": "公众号排版（Markdown → 微信 HTML）",
+  "latest": {
+    "version": "1.0.22",
+    "publishedAt": 1776900247323,
+    "commit": null
+  },
+  "history": []
+}
