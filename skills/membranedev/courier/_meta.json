@@ -3,11 +3,16 @@
   "slug": "courier",
   "displayName": "Courier",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170062229,
-    "commit": "https://github.com/openclaw/skills/commit/7b69c5a26d9629556b2750d4c5469f909b1bb314"
+    "version": "1.0.3",
+    "publishedAt": 1776856384565,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170062229,
+      "commit": "https://github.com/openclaw/skills/commit/7b69c5a26d9629556b2750d4c5469f909b1bb314"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774947790960,
