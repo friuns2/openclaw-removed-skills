@@ -3,11 +3,16 @@
   "slug": "nowsecure",
   "displayName": "Nowsecure",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169496254,
-    "commit": "https://github.com/openclaw/skills/commit/bc601910375ddeaf9d2b1602bc9d4943981eef5d"
+    "version": "1.0.3",
+    "publishedAt": 1776864375989,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169496254,
+      "commit": "https://github.com/openclaw/skills/commit/bc601910375ddeaf9d2b1602bc9d4943981eef5d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774839896028,
