@@ -3,11 +3,16 @@
   "slug": "farmdash-trail-intelligence",
   "displayName": "farmdash trail intelligence",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776120057171,
-    "commit": "https://github.com/openclaw/skills/commit/db9431dd2b00591ea658a7732b4dea141b4c3f6f"
+    "version": "1.0.4",
+    "publishedAt": 1777225807124,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776120057171,
+      "commit": "https://github.com/openclaw/skills/commit/db9431dd2b00591ea658a7732b4dea141b4c3f6f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774658798146,
