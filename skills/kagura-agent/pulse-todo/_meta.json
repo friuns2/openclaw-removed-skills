@@ -1,0 +1,11 @@
+{
+  "owner": "kagura-agent",
+  "slug": "pulse-todo",
+  "displayName": "Pulse TODO",
+  "latest": {
+    "version": "0.3.0",
+    "publishedAt": 1774926158156,
+    "commit": null
+  },
+  "history": []
+}
