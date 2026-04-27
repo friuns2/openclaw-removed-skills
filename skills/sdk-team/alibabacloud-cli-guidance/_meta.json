@@ -3,9 +3,15 @@
   "slug": "alibabacloud-cli-guidance",
   "displayName": "Alibabacloud Cli Guidance",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1774854221037,
-    "commit": "https://github.com/openclaw/skills/commit/abe957e304acce39ed2d9a7f3d56312cad186605"
+    "version": "0.0.2",
+    "publishedAt": 1777269353900,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1774854221037,
+      "commit": "https://github.com/openclaw/skills/commit/abe957e304acce39ed2d9a7f3d56312cad186605"
+    }
+  ]
 }
