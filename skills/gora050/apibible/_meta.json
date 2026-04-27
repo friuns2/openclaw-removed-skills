@@ -3,11 +3,16 @@
   "slug": "apibible",
   "displayName": "Apibible",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168362755,
-    "commit": "https://github.com/openclaw/skills/commit/3f291e6bc72464f9ee7d43edefb7cb5886c86191"
+    "version": "1.0.3",
+    "publishedAt": 1776862453219,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168362755,
+      "commit": "https://github.com/openclaw/skills/commit/3f291e6bc72464f9ee7d43edefb7cb5886c86191"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774609481729,
