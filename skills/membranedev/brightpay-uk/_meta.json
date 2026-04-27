@@ -3,11 +3,16 @@
   "slug": "brightpay-uk",
   "displayName": "Brightpay Uk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170806065,
-    "commit": "https://github.com/openclaw/skills/commit/baa5d2f7f2d474ae7c919191cf82a17c830ef8a1"
+    "version": "1.0.3",
+    "publishedAt": 1776858327645,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170806065,
+      "commit": "https://github.com/openclaw/skills/commit/baa5d2f7f2d474ae7c919191cf82a17c830ef8a1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775102589085,
