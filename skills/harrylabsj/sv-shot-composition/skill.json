@@ -1,0 +1,27 @@
+{
+  "slug": "sv-shot-composition",
+  "name": "Short Video Shot Composition Guide",
+  "description": "Teaches and applies shot composition principles — framing, angles, depth, and movement — specifically optimized for vertical short video formats.",
+  "type": "descriptive",
+  "requires_api": false,
+  "readiness": "stable",
+  "tags": [
+    "video",
+    "composition",
+    "framing",
+    "camera",
+    "shooting",
+    "descriptive"
+  ],
+  "trigger_keywords": [
+    "shot composition",
+    "video framing",
+    "camera angles",
+    "vertical video",
+    "filming guide",
+    "composition rules"
+  ],
+  "max_files": 4,
+  "language": "en",
+  "safety": "document-only informational guidance"
+}
