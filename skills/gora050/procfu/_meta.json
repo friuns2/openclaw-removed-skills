@@ -3,11 +3,16 @@
   "slug": "procfu",
   "displayName": "Procfu",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168387863,
-    "commit": "https://github.com/openclaw/skills/commit/7a8073eb63976b41cd5db2b111f9cba96bcdae5a"
+    "version": "1.0.3",
+    "publishedAt": 1776862513672,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168387863,
+      "commit": "https://github.com/openclaw/skills/commit/7a8073eb63976b41cd5db2b111f9cba96bcdae5a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774616662157,
