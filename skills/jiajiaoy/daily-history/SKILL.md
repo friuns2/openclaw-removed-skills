@@ -1,6 +1,6 @@
 ---
 name: daily-history
-description: "历史上的今天——展示今日历史上发生的重大事件，中英双语精美时间线呈现。Today in history: significant events on this date, bilingual EN/CN visual timeline. Trigger on：历史上的今天、今天发生了什么、大事记、today in history、this day in history、on this day、historical events today。"
+description: "Today in history — 3–5 major events on this date with context and lasting impact. Bilingual EN/CN timeline card. Daily morning push."
 keywords:
   - 历史上的今天
   - 今天发生了什么
