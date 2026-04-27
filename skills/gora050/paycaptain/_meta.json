@@ -3,11 +3,16 @@
   "slug": "paycaptain",
   "displayName": "Paycaptain",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171045528,
-    "commit": "https://github.com/openclaw/skills/commit/cf04c9af5f22c03ea5d5537341f7e4586435e454"
+    "version": "1.0.3",
+    "publishedAt": 1776870559971,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171045528,
+      "commit": "https://github.com/openclaw/skills/commit/cf04c9af5f22c03ea5d5537341f7e4586435e454"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775135128200,
