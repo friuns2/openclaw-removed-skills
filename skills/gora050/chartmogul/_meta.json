@@ -3,11 +3,16 @@
   "slug": "chartmogul",
   "displayName": "Chartmogul",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170281976,
-    "commit": "https://github.com/openclaw/skills/commit/973849280a9fc07200110dbb839e0f49846ec82a"
+    "version": "1.0.3",
+    "publishedAt": 1776893295729,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170281976,
+      "commit": "https://github.com/openclaw/skills/commit/973849280a9fc07200110dbb839e0f49846ec82a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775009004398,
