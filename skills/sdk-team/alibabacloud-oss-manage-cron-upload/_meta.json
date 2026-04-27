@@ -3,9 +3,15 @@
   "slug": "alibabacloud-oss-manage-cron-upload",
   "displayName": "Alibabacloud Oss Manage Cron Upload",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1774939942587,
-    "commit": "https://github.com/openclaw/skills/commit/1c080e17eba2054075d99ec5e8698095ff318cdd"
+    "version": "0.0.2",
+    "publishedAt": 1777018453995,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1774939942587,
+      "commit": "https://github.com/openclaw/skills/commit/1c080e17eba2054075d99ec5e8698095ff318cdd"
+    }
+  ]
 }
