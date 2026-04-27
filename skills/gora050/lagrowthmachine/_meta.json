@@ -3,11 +3,16 @@
   "slug": "lagrowthmachine",
   "displayName": "Lagrowthmachine",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168615700,
-    "commit": "https://github.com/openclaw/skills/commit/f77fb8488db33e93c02e24b5c289244afd133ba2"
+    "version": "1.0.3",
+    "publishedAt": 1776862809979,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168615700,
+      "commit": "https://github.com/openclaw/skills/commit/f77fb8488db33e93c02e24b5c289244afd133ba2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774667043069,
