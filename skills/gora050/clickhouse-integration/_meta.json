@@ -3,11 +3,16 @@
   "slug": "clickhouse-integration",
   "displayName": "Clickhouse",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168410258,
-    "commit": "https://github.com/openclaw/skills/commit/43edb82d9795f708594e31e82524273f3021dac7"
+    "version": "1.0.3",
+    "publishedAt": 1776863979246,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168410258,
+      "commit": "https://github.com/openclaw/skills/commit/43edb82d9795f708594e31e82524273f3021dac7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774639396928,
