@@ -3,9 +3,15 @@
   "slug": "zenler",
   "displayName": "Zenler",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775264754695,
-    "commit": "https://github.com/openclaw/skills/commit/23593d21a540810ca8e4b8e40fc46127928cabeb"
+    "version": "1.0.1",
+    "publishedAt": 1776885348807,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775264754695,
+      "commit": "https://github.com/openclaw/skills/commit/23593d21a540810ca8e4b8e40fc46127928cabeb"
+    }
+  ]
 }
