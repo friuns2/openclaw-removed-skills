@@ -3,11 +3,16 @@
   "slug": "cloudfill",
   "displayName": "Cloudfill",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167885175,
-    "commit": "https://github.com/openclaw/skills/commit/4a277d86258e5a30f3a8ef587baf3f45db70f994"
+    "version": "1.0.3",
+    "publishedAt": 1776861864264,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167885175,
+      "commit": "https://github.com/openclaw/skills/commit/4a277d86258e5a30f3a8ef587baf3f45db70f994"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774519437385,
