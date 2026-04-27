@@ -3,11 +3,16 @@
   "slug": "zeta",
   "displayName": "Zeta",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169221532,
-    "commit": "https://github.com/openclaw/skills/commit/42a0b5fd7753f08f01c68fe58e1a7f564db52177"
+    "version": "1.0.3",
+    "publishedAt": 1776863986975,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169221532,
+      "commit": "https://github.com/openclaw/skills/commit/42a0b5fd7753f08f01c68fe58e1a7f564db52177"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774775101346,
