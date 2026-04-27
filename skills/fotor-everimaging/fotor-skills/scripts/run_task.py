@@ -23,6 +23,7 @@ import argparse
 import asyncio
 import json
 import os
+from pathlib import Path
 import sys
 
 from fotor_sdk import (
@@ -50,26 +51,11 @@ _TASK_FN = {
     "multiple_image2video": multiple_image2video,
 }
 
-_FALLBACK_MODEL_BY_TASK = {
-    "text2image": {
-        "gemini-3.1-flash-image-preview": "seedream-5-0-260128",
-    },
-    "image2image": {
-        "gemini-3.1-flash-image-preview": "seedream-5-0-260128",
-    },
-    "text2video": {
-        "seedance-1-5-pro-251215": "kling-v3",
-    },
-    "single_image2video": {
-        "seedance-1-5-pro-251215": "kling-v3",
-    },
-    "start_end_frame2video": {
-        "kling-video-o1": "viduq2-turbo",
-    },
-    "multiple_image2video": {
-        "kling-v3-omni": "kling-video-o1",
-    },
-}
+_FALLBACK_MODEL_BY_TASK = json.loads(
+    (
+        Path(__file__).resolve().parent.parent / "references" / "fallback_models.json"
+    ).read_text(encoding="utf-8")
+)
 
 
 def _result_to_dict(r: TaskResult) -> dict:

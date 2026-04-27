@@ -1,7 +1,7 @@
 ---
 name: fotor-skills
 description: Fotor AI image generator and AI video generator for photo editing, background remover, background replacement, product photos, ad creatives, social media graphics, poster and banner design, image upscaling, photo restoration, portrait enhancement, text-to-video, and image-to-video. Built for e-commerce, marketing, branding, and content creation.
-version: 1.0.17
+version: 1.0.19
 metadata:
   author: fotor-ai
   openclaw:
@@ -238,14 +238,9 @@ Read these only when the user asks about installation, upgrade, workspace layout
 
 If the user asks to check account credits or remaining credits, read `references/credits-and-recharge.md` and use the SDK client flow described there instead of `run_task.py`.
 
-Built-in automatic fallback mappings:
+Built-in automatic fallback mappings are defined in `references/fallback_models.json`.
 
-- `text2image`: `gemini-3.1-flash-image-preview` -> `seedream-5-0-260128`
-- `image2image`: `gemini-3.1-flash-image-preview` -> `seedream-5-0-260128`
-- `text2video`: `seedance-1-5-pro-251215` -> `kling-v3`
-- `single_image2video`: `seedance-1-5-pro-251215` -> `kling-v3`
-- `start_end_frame2video`: `kling-video-o1` -> `viduq2-turbo`
-- `multiple_image2video`: `kling-v3-omni` -> `kling-video-o1`
+`run_task.py` reads that file directly. Keep exact fallback pairs there instead of duplicating them in `SKILL.md` or scenario references.
 
 ## Available Task Types
 

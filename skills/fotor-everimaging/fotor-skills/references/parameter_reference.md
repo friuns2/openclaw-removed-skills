@@ -15,7 +15,7 @@ await text2image(client, *, prompt, model_id, aspect_ratio="1:1", resolution="1k
 |-----------|------|----------|---------|-------|
 | prompt | str | Yes | -- | Text description of the image |
 | model_id | str | Yes | -- | See `image_models.md` |
-| aspect_ratio | str | No | `"1:1"` | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3`, `21:9` |
+| aspect_ratio | str | No | `"1:1"` | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `9:21` |
 | resolution | str | No | `"1k"` | `1k`, `2k`, `4k` |
 | on_poll | Callable | No | `None` | Called each poll cycle with current `TaskResult` |
 | **extra | Any | No | -- | Additional fields merged into the API payload |
@@ -31,7 +31,7 @@ await image2image(client, *, prompt, model_id, image_urls, aspect_ratio="1:1", r
 | prompt | str | Yes | -- | Edit instructions or style description |
 | model_id | str | Yes | -- | Must support I2I (see `image_models.md`) |
 | image_urls | list[str] | Yes | -- | 1 URL for single edit, 2-5 for multi-reference |
-| aspect_ratio | str | No | `"1:1"` | `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3`, `21:9` |
+| aspect_ratio | str | No | `"1:1"` | `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`, `9:21` |
 | resolution | str | No | `"1k"` | `1k`, `2k`, `4k` |
 | on_poll | Callable | No | `None` | Progress callback |
 | **extra | Any | No | -- | Additional payload fields |

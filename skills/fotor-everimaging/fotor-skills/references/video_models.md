@@ -9,6 +9,7 @@ Capability columns: **T2V** = Text-to-Video, **I2V** = Single-Image-to-Video,
 | Seedance 1.0 Pro Fast | `doubao-seedance-1-0-pro-fast-251015` | Y | Y | - | - | 5s, 10s, 12s | 480p, 720p, 1080p |
 | Seedance 1.0 Pro | `doubao-seedance-1-0-pro-250528` | Y | Y | - | - | 5s, 10s, 12s | 480p, 720p, 1080p |
 | Seedance 1.5 Pro | `seedance-1-5-pro-251215` | Y | Y | Y | - | 4-12s | 480p, 720p |
+| Seedance 2.0 | `doubao-seedance-2-0-260128` | Y | Y | Y | Y | 4-15s | 480p, 720p |
 | Kling 2.1 Master | `kling-v2-1-master` | Y | Y | Y | - | 5s, 10s | 1080p |
 | Kling 2.1 | `kling-v2-1` | - | Y | Y | - | 5s, 10s | 720p, 1080p |
 | Kling 2.5 Turbo | `kling-v2-5-turbo` | Y | Y | Y | - | 5s, 10s | 1080p |
@@ -94,6 +95,24 @@ Capability columns: **T2V** = Text-to-Video, **I2V** = Single-Image-to-Video,
 | T2V Ratios | 16:9, 4:3, 1:1, 3:4, 9:16, 21:9 |
 | I2V Ratios | 16:9, 4:3, 1:1, 3:4, 9:16, 21:9 |
 | SE Notes | Start/end frames must have identical dimensions; output ratio matches input image |
+
+---
+
+### `doubao-seedance-2-0-260128`
+
+| Constraint | Value |
+|-----------|-------|
+| Max Multi-Image Inputs | 9 |
+| Max Video Reference Inputs | 3 |
+| Max Audio Reference Inputs | 3 |
+| Duration | 4s, 5s, 6s, 7s, 8s, 9s, 10s, 11s, 12s, 13s, 14s, 15s |
+| Resolution | 480p, 720p |
+| Output FPS | 24 |
+| T2V Support | Text-to-video |
+| I2V Support | First-frame image-to-video |
+| MI Support | Multimodal reference video (image / video / audio references) |
+| SE Support | First-and-last-frame image-to-video |
+| Notes | Supports text/video generation, multimodal reference, and editing workflows. |
 
 ---
 

@@ -11,6 +11,7 @@
 | GPT Image 1 Low | `gpt-image-1-low` | Y | Y | 1K, 2K | 4 |
 | GPT Image 1 Medium | `gpt-image-1-medium` | Y | Y | 1K, 2K | 4 |
 | GPT Image 1 Mini | `gpt-image-1-mini` | Y | - | 1K, 2K | - |
+| GPT Image 2 | `gpt-image-2` | Y | Y | 1K, 2K | 4 |
 | Kling O1 | `kling-image-o1` | Y | Y | 1K, 2K | 4 |
 | Midjourney v7 | `midjourney-v7` | Y | Y | 1K, 2K | 5 |
 | Seedream 4.0 | `seedream-4-0-250828` | Y | Y | 1K, 2K, 4K | 4 |
@@ -153,6 +154,21 @@
 | Supported Resolution | 1K, 2K |
 | Frames per Request | 1 |
 | Supported Output Ratios | 1:1, 2:3, 3:2 |
+
+---
+
+### `gpt-image-2`
+
+| Constraint | Value |
+|-----------|-------|
+| Image Size Range | 64px - 4096px |
+| Max Image File Size | 10 MB |
+| Input Aspect Ratio Limit | 9:16 ~ 16:9 |
+| Max Multi-Image Inputs | 4 |
+| Output Formats | PNG, JPG, WEBP |
+| Supported Resolution | 1K, 2K |
+| Frames per Request | 1 |
+| Supported Output Ratios | 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9, 9:21 |
 
 ---
 

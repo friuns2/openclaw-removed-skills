@@ -3,11 +3,16 @@
   "slug": "fotor-skills",
   "displayName": "fotor-skills",
   "latest": {
-    "version": "1.0.17",
-    "publishedAt": 1776308814702,
-    "commit": "https://github.com/openclaw/skills/commit/ca26d775f647b2c573979fd3fb263dd70dc4c5da"
+    "version": "1.0.19",
+    "publishedAt": 1777014647416,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.17",
+      "publishedAt": 1776308814702,
+      "commit": "https://github.com/openclaw/skills/commit/ca26d775f647b2c573979fd3fb263dd70dc4c5da"
+    },
     {
       "version": "1.0.16",
       "publishedAt": 1775786729240,
