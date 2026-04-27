@@ -3,11 +3,16 @@
   "slug": "plance",
   "displayName": "Plance",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168401883,
-    "commit": "https://github.com/openclaw/skills/commit/e774d52c740ad91375a1513c2a2776481d42a0bd"
+    "version": "1.0.3",
+    "publishedAt": 1776863953476,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168401883,
+      "commit": "https://github.com/openclaw/skills/commit/e774d52c740ad91375a1513c2a2776481d42a0bd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774639362919,
