@@ -3,11 +3,16 @@
   "slug": "redcircle-api",
   "displayName": "Redcircle Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168006568,
-    "commit": "https://github.com/openclaw/skills/commit/23082f7458c9f0f7e16eacf5b17148e666b50296"
+    "version": "1.0.3",
+    "publishedAt": 1776861917042,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168006568,
+      "commit": "https://github.com/openclaw/skills/commit/23082f7458c9f0f7e16eacf5b17148e666b50296"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774559059151,
