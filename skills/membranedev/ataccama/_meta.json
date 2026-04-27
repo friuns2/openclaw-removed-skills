@@ -3,11 +3,16 @@
   "slug": "ataccama",
   "displayName": "Ataccama",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169414752,
-    "commit": "https://github.com/openclaw/skills/commit/2ab0c3613ef00165f430fd82b98ae3166c151ab2"
+    "version": "1.0.3",
+    "publishedAt": 1776855014415,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169414752,
+      "commit": "https://github.com/openclaw/skills/commit/2ab0c3613ef00165f430fd82b98ae3166c151ab2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774828973046,
