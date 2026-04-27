@@ -3,9 +3,15 @@
   "slug": "reamaze",
   "displayName": "Reamaze",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169578561,
-    "commit": "https://github.com/openclaw/skills/commit/c677db4ac59f78887e05c23e13a0262b57ca4d3b"
+    "version": "1.0.3",
+    "publishedAt": 1776855469120,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169578561,
+      "commit": "https://github.com/openclaw/skills/commit/c677db4ac59f78887e05c23e13a0262b57ca4d3b"
+    }
+  ]
 }
