@@ -4,14 +4,24 @@
 - Spot: `https://api.coinw.com`
 - Futures: `https://api.coinw.com`
 
-## Private Authentication (MD5 signature)
-CoinW private endpoints require an `api_key` and an `sign` parameter.
+## Private Authentication (Futures/Contract: HMAC-SHA256)
+CoinW contract private endpoints use header-based signature auth with `api_key`, `timestamp`, and `sign`.
 
-1. Include `api_key` and request parameters.
-2. Sort all parameters by key (ascending).
-3. Build query string `k1=v1&k2=v2...`.
-4. Append `&secret_key=$COINW_SECRET_KEY`.
-5. Compute MD5 hash, output in UPPERCASE.
-6. Use it as `sign` in the request.
+1. Build `timestamp` in milliseconds (for example `1713945600123`).
+2. Build the signing payload:
+   - GET: `{timestamp}{METHOD}{api_url}?{query_string}` (omit `?` when query is empty)
+   - POST/PUT/DELETE: `{timestamp}{METHOD}{api_url}{json_body}`
+3. Compute signature with HMAC-SHA256 using `secret_key`.
+4. Base64-encode the HMAC digest as `sign`.
+5. Send headers:
+   - `api_key: $COINW_API_KEY`
+   - `timestamp: <ms timestamp>`
+   - `sign: <base64 hmac signature>`
+   - `Content-type: application/json` for POST/PUT/DELETE
+
+## Important
+- Contract and Spot use different signing algorithms and payload formats.
+- Do not reuse Spot MD5 signing for Contract endpoints.
+- Spot/Common Account endpoints use MD5 uppercase signing (see Spot/Auth reference).
 
 See examples in each skill for a minimal signing template.

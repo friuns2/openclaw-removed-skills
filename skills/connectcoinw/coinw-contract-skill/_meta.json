@@ -3,11 +3,16 @@
   "slug": "coinw-contract-skill",
   "displayName": "Coinw Contract Skill",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1775118517077,
-    "commit": "https://github.com/openclaw/skills/commit/f3fcb87b777df305b35516d9de9d50c126ff14bf"
+    "version": "1.5.0",
+    "publishedAt": 1776998514287,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1775118517077,
+      "commit": "https://github.com/openclaw/skills/commit/f3fcb87b777df305b35516d9de9d50c126ff14bf"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775032603755,
