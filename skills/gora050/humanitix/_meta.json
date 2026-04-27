@@ -3,11 +3,16 @@
   "slug": "humanitix",
   "displayName": "Humanitix",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168167914,
-    "commit": "https://github.com/openclaw/skills/commit/a763d8f8f0e11139f50c0347b3f0851cb2c97c0a"
+    "version": "1.0.3",
+    "publishedAt": 1776862101411,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168167914,
+      "commit": "https://github.com/openclaw/skills/commit/a763d8f8f0e11139f50c0347b3f0851cb2c97c0a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580645859,
