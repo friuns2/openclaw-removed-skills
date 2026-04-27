@@ -3,9 +3,15 @@
   "slug": "mati",
   "displayName": "Mati",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286261776,
-    "commit": "https://github.com/openclaw/skills/commit/0d61c85f64c73bc1c9d86b80781f4e7f1a3df3e7"
+    "version": "1.0.1",
+    "publishedAt": 1776882843175,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286261776,
+      "commit": "https://github.com/openclaw/skills/commit/0d61c85f64c73bc1c9d86b80781f4e7f1a3df3e7"
+    }
+  ]
 }
