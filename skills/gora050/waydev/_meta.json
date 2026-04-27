@@ -3,11 +3,16 @@
   "slug": "waydev",
   "displayName": "Waydev",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169559446,
-    "commit": "https://github.com/openclaw/skills/commit/1980837586c5e631c208e8c7541246e3ff8f3ef2"
+    "version": "1.0.3",
+    "publishedAt": 1776864453717,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169559446,
+      "commit": "https://github.com/openclaw/skills/commit/1980837586c5e631c208e8c7541246e3ff8f3ef2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774847107476,
