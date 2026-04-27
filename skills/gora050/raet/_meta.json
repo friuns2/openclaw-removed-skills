@@ -3,11 +3,16 @@
   "slug": "raet",
   "displayName": "Raet",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169871670,
-    "commit": "https://github.com/openclaw/skills/commit/51333c828f1a6881c74d2c45999bad04f630817e"
+    "version": "1.0.3",
+    "publishedAt": 1776892875731,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169871670,
+      "commit": "https://github.com/openclaw/skills/commit/51333c828f1a6881c74d2c45999bad04f630817e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774922627697,
