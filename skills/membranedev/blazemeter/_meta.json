@@ -3,11 +3,16 @@
   "slug": "blazemeter",
   "displayName": "Blazemeter",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168047188,
-    "commit": "https://github.com/openclaw/skills/commit/d5d10de0da3c13547982fb4d4f65ab351ef9c573"
+    "version": "1.0.3",
+    "publishedAt": 1776851775178,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168047188,
+      "commit": "https://github.com/openclaw/skills/commit/d5d10de0da3c13547982fb4d4f65ab351ef9c573"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774566157811,
