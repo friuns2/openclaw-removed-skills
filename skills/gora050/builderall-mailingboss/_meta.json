@@ -3,11 +3,16 @@
   "slug": "builderall-mailingboss",
   "displayName": "Builderall Mailingboss",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169950647,
-    "commit": "https://github.com/openclaw/skills/commit/bd1213c5aea53e9aed17190b4f413eabae9211a6"
+    "version": "1.0.3",
+    "publishedAt": 1776865019259,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169950647,
+      "commit": "https://github.com/openclaw/skills/commit/bd1213c5aea53e9aed17190b4f413eabae9211a6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774926334945,
