@@ -3,11 +3,16 @@
   "slug": "recorded-future",
   "displayName": "Recorded Future",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170997862,
-    "commit": "https://github.com/openclaw/skills/commit/bd88602899ce3a923bcf5ed0946659b62e27df18"
+    "version": "1.0.3",
+    "publishedAt": 1776892316281,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170997862,
+      "commit": "https://github.com/openclaw/skills/commit/bd88602899ce3a923bcf5ed0946659b62e27df18"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775131487712,
