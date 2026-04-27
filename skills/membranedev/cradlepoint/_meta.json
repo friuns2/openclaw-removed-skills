@@ -3,9 +3,15 @@
   "slug": "cradlepoint",
   "displayName": "Cradlepoint",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775192653201,
-    "commit": "https://github.com/openclaw/skills/commit/62bc6f70aec5db8da22953a1f736c233342541d5"
+    "version": "1.0.1",
+    "publishedAt": 1776881006057,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775192653201,
+      "commit": "https://github.com/openclaw/skills/commit/62bc6f70aec5db8da22953a1f736c233342541d5"
+    }
+  ]
 }
