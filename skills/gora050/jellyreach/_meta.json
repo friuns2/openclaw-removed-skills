@@ -3,11 +3,16 @@
   "slug": "jellyreach",
   "displayName": "Jellyreach",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168023313,
-    "commit": "https://github.com/openclaw/skills/commit/e89055b7013727ea688deede00c6ba8f221be242"
+    "version": "1.0.3",
+    "publishedAt": 1776861950945,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168023313,
+      "commit": "https://github.com/openclaw/skills/commit/e89055b7013727ea688deede00c6ba8f221be242"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774559104509,
