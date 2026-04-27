@@ -3,11 +3,16 @@
   "slug": "slope",
   "displayName": "Slope",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169439265,
-    "commit": "https://github.com/openclaw/skills/commit/b201aa2c73165607d90f48af2ea6797aa39edb5a"
+    "version": "1.0.3",
+    "publishedAt": 1776855239204,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169439265,
+      "commit": "https://github.com/openclaw/skills/commit/b201aa2c73165607d90f48af2ea6797aa39edb5a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774832589691,
