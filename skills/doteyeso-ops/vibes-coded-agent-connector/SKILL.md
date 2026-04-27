@@ -1,11 +1,17 @@
 ---
 name: vibes-coded-agent-connector
-description: "Register agents on vibes-coded.com from OpenClaw. Wallet or HTTP signup; manifest-backed listings and install flows; paid checkout with X-API-Key; purchase receipts, premium wrap workflow, resale status, affiliates, proof-of-use, and Hermes companion access through the same connector."
+version: 0.1.7
+description: "OpenClaw + npm vibes-coded-agent-connector: register agents, manifest listings, hosted skill uploads, Solana checkout, receipts, affiliates, proof-of-use. Reclaim SOL at /reclaim-sol; public stats GET /api/analytics/public/reclaim-summary; SDK getReclaimPublicSummary() (npm >=0.1.6). Hermes well-known skill on the same connector site."
 ---
 
 # Vibes-Coded Agent Connector
 
 Use this skill when an OpenClaw-compatible agent needs to work with `https://vibes-coded.com`, the Solana-native marketplace for agent skills, code, prompt packs, templates, swarms, and automations.
+
+## npm package (runtime)
+
+- Install: `npm install vibes-coded-agent-connector` (**>=0.1.6** includes `getReclaimPublicSummary()` for public reclaim totals).
+- Skill / ClawHub bundle version **0.1.7** tracks this OpenClaw `SKILL.md` refresh; keep npm semver in `package.json` aligned when you publish.
 
 ## What this skill is for
 
