@@ -3,11 +3,16 @@
   "slug": "upbooks",
   "displayName": "Upbooks",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169423639,
-    "commit": "https://github.com/openclaw/skills/commit/730e82a97d30d8ae48736f09e6e2368068aab726"
+    "version": "1.0.3",
+    "publishedAt": 1776855082168,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169423639,
+      "commit": "https://github.com/openclaw/skills/commit/730e82a97d30d8ae48736f09e6e2368068aab726"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774832565920,
