@@ -1,6 +1,6 @@
 ---
 name: Douyin Creator Marketplace (Xingtu) API
-description: Analyze Douyin Creator Marketplace (Xingtu) workflows with JustOneAPI, including creator Profile, creator Link Structure, and creator Visibility Status across 43 operations.
+description: Analyze Douyin Creator Marketplace (Xingtu) workflows with JustOneAPI, including creator Profile, creator Link Structure, and creator Visibility Status across 46 operations.
 author: JustOneAPI
 homepage: https://api.justoneapi.com
 metadata: {"openclaw":{"homepage":"https://api.justoneapi.com","primaryEnv":"JUST_ONE_API_TOKEN","requires":{"bins":["node"],"env":["JUST_ONE_API_TOKEN"]},"skillKey":"justoneapi_douyin_xingtu"}}
@@ -8,13 +8,13 @@ metadata: {"openclaw":{"homepage":"https://api.justoneapi.com","primaryEnv":"JUS
 
 # Douyin Creator Marketplace (Xingtu)
 
-This skill wraps 43 Douyin Creator Marketplace (Xingtu) operations exposed by JustOneAPI. It is strongest for creator Profile, creator Link Structure, creator Visibility Status, and creator Channel Metrics. Expect common inputs such as `acceptCache`, `kolId`, `oAuthorId`, `platform`, `range`.
+This skill wraps 46 Douyin Creator Marketplace (Xingtu) operations exposed by JustOneAPI. It is strongest for creator Profile, creator Link Structure, creator Visibility Status, and creator Channel Metrics. Expect common inputs such as `oAuthorId`, `acceptCache`, `kolId`, `platform`, `range`.
 
 ## When To Use It
 
 - The user needs creator Profile or creator Link Structure on Douyin Creator Marketplace (Xingtu).
 - The task lines up with creator Visibility Status rather than a generic cross-platform workflow.
-- The user can provide identifiers or filters such as `acceptCache`, `kolId`, `oAuthorId`, `platform`.
+- The user can provide identifiers or filters such as `oAuthorId`, `acceptCache`, `kolId`, `platform`.
 - The user wants an exact API-backed answer instead of a freeform summary.
 
 ## Representative Operations
@@ -26,9 +26,9 @@ This skill wraps 43 Douyin Creator Marketplace (Xingtu) operations exposed by Ju
 
 ## Request Pattern
 
-- 43 operations are available in this skill.
+- 46 operations are available in this skill.
 - HTTP methods used here: `GET`.
-- The most common non-token parameters are `acceptCache`, `kolId`, `oAuthorId`, `platform`, `range`.
+- The most common non-token parameters are `oAuthorId`, `acceptCache`, `kolId`, `platform`, `range`.
 - All operations in this skill are parameter-driven requests; none require a request body.
 
 ## How To Work
@@ -56,5 +56,5 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 - Start with a plain-language answer tied to the Douyin Creator Marketplace (Xingtu) task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
 - When using `gwApiAuthorGetAuthorBaseInfoV1`, explain why the returned fields answer the user's question.
-- If the user gave filters such as `acceptCache`, `kolId`, `oAuthorId`, echo those back so the scope is explicit.
+- If the user gave filters such as `oAuthorId`, `acceptCache`, `kolId`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

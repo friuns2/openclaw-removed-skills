@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const manifest = {
   "baseUrl": "https://api.justoneapi.com",
-  "description": "Analyze Douyin Creator Marketplace (Xingtu) workflows with JustOneAPI, including creator Profile, creator Link Structure, and creator Visibility Status across 43 operations.",
+  "description": "Analyze Douyin Creator Marketplace (Xingtu) workflows with JustOneAPI, including creator Profile, creator Link Structure, and creator Visibility Status across 46 operations.",
   "displayName": "Douyin Creator Marketplace (Xingtu)",
   "openapi": "3.1.0",
   "platformKey": "douyin-xingtu",
@@ -56,8 +56,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Author Commerce Seeding Base Info",
@@ -102,8 +102,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Author Commerce Spread Info",
@@ -157,8 +157,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "KOL Content Keyword Analysis",
@@ -203,8 +203,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "KOL Comment Keyword Analysis",
@@ -249,8 +249,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Audience Distribution",
@@ -308,8 +308,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Conversion Analysis",
@@ -375,8 +375,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Conversion Resources",
@@ -421,8 +421,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Cost Performance Analysis",
@@ -485,8 +485,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Follower Growth Trend",
@@ -495,7 +495,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) follower Profile data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and marketplace research.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) follower distribution data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and marketplace research.",
       "method": "GET",
       "operationId": "getKolFansDistributionV1",
       "parameters": [
@@ -544,11 +544,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Follower Profile",
+      "summary": "Follower Distribution",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
@@ -556,7 +556,7 @@ const manifest = {
     {
       "description": "Get Douyin Creator Marketplace (Xingtu) creator Profile data, including audience and pricing data, for influencer vetting, benchmark analysis, and campaign planning.",
       "method": "GET",
-      "operationId": "getKolInfoV1",
+      "operationId": "getDouyinXingtuKolInfoV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -602,8 +602,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Profile",
@@ -657,8 +657,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Link Metrics",
@@ -703,8 +703,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Link Structure",
@@ -713,7 +713,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) marketing Rates data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) marketing metrics data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.",
       "method": "GET",
       "operationId": "getKolMarketingInfoV1",
       "parameters": [
@@ -761,17 +761,17 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Marketing Rates",
+      "summary": "Marketing Metrics",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) kOL Content Performance data, including video performance metrics, for creator evaluation, campaign planning, and marketplace research.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) recommended videos data, including video performance metrics, for creator evaluation, campaign planning, and marketplace research.",
       "method": "GET",
       "operationId": "getKolRecVideosV1",
       "parameters": [
@@ -807,17 +807,17 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "KOL Content Performance",
+      "summary": "Recommended Videos",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) video Performance data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and marketplace research.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) showcase items data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and marketplace research.",
       "method": "GET",
       "operationId": "getKolShowItemsV2V1",
       "parameters": [
@@ -862,17 +862,17 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Video Performance",
+      "summary": "Showcase Items",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) creator Performance Overview data, including audience, content performance, and commercial indicators, for quick evaluation.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) spread metrics data, including audience, content performance, and commercial indicators, for quick evaluation.",
       "method": "GET",
       "operationId": "getKolSpreadInfoV1",
       "parameters": [
@@ -950,17 +950,17 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Creator Performance Overview",
+      "summary": "Spread Metrics",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) audience Source Distribution data, including segment breakdowns, audience composition, and distribution signals, for traffic analysis and existing integration compatibility.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) audience touchpoint distribution data, including segment breakdowns, audience composition, and distribution signals, for traffic analysis and existing integration compatibility.",
       "method": "GET",
       "operationId": "getKolTouchDistributionV1",
       "parameters": [
@@ -996,11 +996,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Audience Source Distribution",
+      "summary": "Audience Touchpoint Distribution",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
@@ -1008,7 +1008,7 @@ const manifest = {
     {
       "description": "Get Douyin Creator Marketplace (Xingtu) video Details data, including performance fields from the legacy Douyin Xingtu endpoint, for content review and integration compatibility.",
       "method": "GET",
-      "operationId": "getVideoDetailV1",
+      "operationId": "getDouyinXingtuVideoDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -1042,11 +1042,97 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Details",
+      "tags": [
+        "Douyin Creator Marketplace (Xingtu)"
+      ]
+    },
+    {
+      "description": "Get Douyin Creator Marketplace (Xingtu) author Commerce Seeding Base Info data, including baseline metrics, commercial signals, and seeding indicators, for product seeding analysis, creator vetting, and campaign planning.",
+      "method": "GET",
+      "operationId": "gwApiAggregatorGetAuthorCommerceSeedBaseInfoV1",
+      "parameters": [
+        {
+          "defaultValue": null,
+          "description": "User authentication token.",
+          "enumValues": [],
+          "location": "query",
+          "name": "token",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "Author's unique ID.",
+          "enumValues": [],
+          "location": "query",
+          "name": "oAuthorId",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": "DAY_90",
+          "description": "Time range.\n\nAvailable Values:\n- `DAY_30`: Last 30 days\n- `DAY_90`: Last 90 days",
+          "enumValues": [
+            "DAY_30",
+            "DAY_90"
+          ],
+          "location": "query",
+          "name": "range",
+          "required": false,
+          "schemaType": "string"
+        }
+      ],
+      "path": "/api/douyin-xingtu/gw/api/aggregator/get_author_commerce_seed_base_info/v1",
+      "requestBody": null,
+      "responses": [
+        {
+          "description": "OK",
+          "statusCode": "200"
+        }
+      ],
+      "summary": "Author Commerce Seeding Base Info",
+      "tags": [
+        "Douyin Creator Marketplace (Xingtu)"
+      ]
+    },
+    {
+      "description": "Get Douyin Creator Marketplace (Xingtu) author Commerce Spread Info data, including spread metrics, for creator evaluation for campaign planning and media buying.",
+      "method": "GET",
+      "operationId": "gwApiAggregatorGetAuthorCommerceSpreadInfoV1",
+      "parameters": [
+        {
+          "defaultValue": null,
+          "description": "User authentication token.",
+          "enumValues": [],
+          "location": "query",
+          "name": "token",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "Author's unique ID.",
+          "enumValues": [],
+          "location": "query",
+          "name": "oAuthorId",
+          "required": true,
+          "schemaType": "string"
+        }
+      ],
+      "path": "/api/douyin-xingtu/gw/api/aggregator/get_author_commerce_spread_info/v1",
+      "requestBody": null,
+      "responses": [
+        {
+          "description": "OK",
+          "statusCode": "200"
+        }
+      ],
+      "summary": "Author Commerce Spread Info",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
@@ -1091,8 +1177,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Order Experience",
@@ -1142,8 +1228,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Profile",
@@ -1152,7 +1238,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) marketing Rates data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) marketing metrics data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.",
       "method": "GET",
       "operationId": "gwApiAuthorGetAuthorMarketingInfoV1",
       "parameters": [
@@ -1193,11 +1279,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Marketing Rates",
+      "summary": "Marketing Metrics",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
@@ -1244,8 +1330,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Channel Metrics",
@@ -1316,8 +1402,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Showcase Items",
@@ -1382,8 +1468,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Audience Distribution",
@@ -1433,8 +1519,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Cost Performance Analysis",
@@ -1484,8 +1570,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Link Structure",
@@ -1535,8 +1621,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Recommended Videos",
@@ -1586,8 +1672,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Audience Touchpoint Distribution",
@@ -1637,8 +1723,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Distribution",
@@ -1688,8 +1774,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Visibility Status",
@@ -1751,8 +1837,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Conversion Analysis",
@@ -1879,11 +1965,66 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Conversion Resources",
+      "tags": [
+        "Douyin Creator Marketplace (Xingtu)"
+      ]
+    },
+    {
+      "description": "Get Douyin Creator Marketplace (Xingtu) follower Growth Trend data, including historical audience changes over time, for creator evaluation, campaign planning, and marketplace research.",
+      "method": "GET",
+      "operationId": "gwApiDataSpGetAuthorDailyFansV1",
+      "parameters": [
+        {
+          "defaultValue": null,
+          "description": "User authentication token.",
+          "enumValues": [],
+          "location": "query",
+          "name": "token",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "Author's unique ID.",
+          "enumValues": [],
+          "location": "query",
+          "name": "oAuthorId",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "Start Date (yyyy-MM-dd).",
+          "enumValues": [],
+          "location": "query",
+          "name": "startDate",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "End Date (yyyy-MM-dd).",
+          "enumValues": [],
+          "location": "query",
+          "name": "endDate",
+          "required": true,
+          "schemaType": "string"
+        }
+      ],
+      "path": "/api/douyin-xingtu/gw/api/data_sp/get_author_daily_fans/v1",
+      "requestBody": null,
+      "responses": [
+        {
+          "description": "OK",
+          "statusCode": "200"
+        }
+      ],
+      "summary": "Follower Growth Trend",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
@@ -1928,8 +2069,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Follower Distribution",
@@ -2023,8 +2164,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Link Metrics",
@@ -2033,7 +2174,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Douyin Creator Marketplace (Xingtu) distribution Metrics data, including exposure, spread, and related performance indicators, for creator evaluation, campaign planning, and marketplace research.",
+      "description": "Get Douyin Creator Marketplace (Xingtu) spread metrics data, including exposure, spread, and related performance indicators, for creator evaluation, campaign planning, and marketplace research.",
       "method": "GET",
       "operationId": "gwApiDataSpGetAuthorSpreadInfoV1",
       "parameters": [
@@ -2119,11 +2260,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Distribution Metrics",
+      "summary": "Spread Metrics",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
@@ -2156,8 +2297,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Item Report Details",
@@ -2193,8 +2334,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Item Report Analysis",
@@ -2230,11 +2371,85 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Item Report Trend",
+      "summary": "Item Report Trends",
+      "tags": [
+        "Douyin Creator Marketplace (Xingtu)"
+      ]
+    },
+    {
+      "description": "Get Douyin Creator Marketplace (Xingtu) kOL Comment Keyword Analysis data, including core metrics, trend signals, and performance indicators, for audience language analysis and comment-topic research.",
+      "method": "GET",
+      "operationId": "gwApiDataGetAuthorHotCommentTokensV1",
+      "parameters": [
+        {
+          "defaultValue": null,
+          "description": "User authentication token.",
+          "enumValues": [],
+          "location": "query",
+          "name": "token",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "Author's unique ID.",
+          "enumValues": [],
+          "location": "query",
+          "name": "oAuthorId",
+          "required": true,
+          "schemaType": "string"
+        }
+      ],
+      "path": "/api/douyin-xingtu/gw/api/data/get_author_hot_comment_tokens/v1",
+      "requestBody": null,
+      "responses": [
+        {
+          "description": "OK",
+          "statusCode": "200"
+        }
+      ],
+      "summary": "KOL Comment Keyword Analysis",
+      "tags": [
+        "Douyin Creator Marketplace (Xingtu)"
+      ]
+    },
+    {
+      "description": "Get Douyin Creator Marketplace (Xingtu) kOL Content Keyword Analysis data, including core metrics, trend signals, and performance indicators, for content theme analysis and creator positioning research.",
+      "method": "GET",
+      "operationId": "gwApiGauthorGetAuthorContentHotKeywordsV1",
+      "parameters": [
+        {
+          "defaultValue": null,
+          "description": "User authentication token.",
+          "enumValues": [],
+          "location": "query",
+          "name": "token",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "Author's unique ID.",
+          "enumValues": [],
+          "location": "query",
+          "name": "oAuthorId",
+          "required": true,
+          "schemaType": "string"
+        }
+      ],
+      "path": "/api/douyin-xingtu/gw/api/gauthor/get_author_content_hot_keywords/v1",
+      "requestBody": null,
+      "responses": [
+        {
+          "description": "OK",
+          "statusCode": "200"
+        }
+      ],
+      "summary": "KOL Content Keyword Analysis",
       "tags": [
         "Douyin Creator Marketplace (Xingtu)"
       ]
@@ -2338,107 +2553,6 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
-        }
-      ],
-      "summary": "Creator Search",
-      "tags": [
-        "Douyin Creator Marketplace (Xingtu)"
-      ]
-    },
-    {
-      "description": "Get Douyin Creator Marketplace (Xingtu) legacy KOL Search data, including preserving the request format, for creator evaluation, campaign planning, and marketplace research.",
-      "method": "GET",
-      "operationId": "searchDouyinKolV1",
-      "parameters": [
-        {
-          "defaultValue": null,
-          "description": "User authentication token.",
-          "enumValues": [],
-          "location": "query",
-          "name": "token",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": null,
-          "description": "JSON request body.",
-          "enumValues": [],
-          "location": "query",
-          "name": "body",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": false,
-          "description": "Enable cache.",
-          "enumValues": [],
-          "location": "query",
-          "name": "acceptCache",
-          "required": false,
-          "schemaType": "boolean"
-        }
-      ],
-      "path": "/api/douyin-xingtu/search-douyin-kol/v1",
-      "requestBody": null,
-      "responses": [
-        {
-          "description": "OK",
-          "statusCode": "200"
-        }
-      ],
-      "summary": "Legacy KOL Search",
-      "tags": [
-        "Douyin Creator Marketplace (Xingtu)"
-      ]
-    },
-    {
-      "description": "Get Douyin Creator Marketplace (Xingtu) creator Search data, including filters, returning profile, and audience, for discovery, comparison, and shortlist building.",
-      "method": "GET",
-      "operationId": "searchForAuthorSquareV3",
-      "parameters": [
-        {
-          "defaultValue": null,
-          "description": "User authentication token.",
-          "enumValues": [],
-          "location": "query",
-          "name": "token",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": null,
-          "description": "Page number.",
-          "enumValues": [],
-          "location": "query",
-          "name": "page",
-          "required": true,
-          "schemaType": "integer"
-        },
-        {
-          "defaultValue": null,
-          "description": "Minimum fans count.",
-          "enumValues": [],
-          "location": "query",
-          "name": "fansLow",
-          "required": true,
-          "schemaType": "integer"
-        },
-        {
-          "defaultValue": null,
-          "description": "Maximum fans count.",
-          "enumValues": [],
-          "location": "query",
-          "name": "fansHigh",
-          "required": true,
-          "schemaType": "integer"
-        }
-      ],
-      "path": "/api/douyin-xingtu/search-for-author-square/v3",
-      "requestBody": null,
-      "responses": [
-        {
           "description": "OK",
           "statusCode": "200"
         }
@@ -2507,8 +2621,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "KOL Keyword Search",

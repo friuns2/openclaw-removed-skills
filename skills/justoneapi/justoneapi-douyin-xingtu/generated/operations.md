@@ -25,7 +25,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getAuthorCommerceSpreadInfoV1`
 
@@ -49,7 +49,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getAuthorContentHotKeywordsV1`
 
@@ -74,7 +74,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getAuthorHotCommentTokensV1`
 
@@ -98,7 +98,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolAudienceDistributionV1`
 
@@ -122,7 +122,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolConvertAbilityV1`
 
@@ -153,7 +153,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolConvertVideosOrProductsV1`
 
@@ -184,7 +184,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolCpInfoV1`
 
@@ -208,7 +208,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolDailyFansV1`
 
@@ -234,14 +234,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolFansDistributionV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-kol-fans-distribution/v1`
-- Summary: Follower Profile
-- Description: Get Douyin Creator Marketplace (Xingtu) follower Profile data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and marketplace research.
+- Summary: Follower Distribution
+- Description: Get Douyin Creator Marketplace (Xingtu) follower distribution data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and marketplace research.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -265,9 +265,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getKolInfoV1`
+## `getDouyinXingtuKolInfoV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-kol-info/v1`
@@ -295,7 +295,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolLinkInfoV1`
 
@@ -320,7 +320,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolLinkStructV1`
 
@@ -344,14 +344,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolMarketingInfoV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-kol-marketing-info/v1`
-- Summary: Marketing Rates
-- Description: Get Douyin Creator Marketplace (Xingtu) marketing Rates data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.
+- Summary: Marketing Metrics
+- Description: Get Douyin Creator Marketplace (Xingtu) marketing metrics data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -374,14 +374,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolRecVideosV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-kol-rec-videos/v1`
-- Summary: KOL Content Performance
-- Description: Get Douyin Creator Marketplace (Xingtu) kOL Content Performance data, including video performance metrics, for creator evaluation, campaign planning, and marketplace research.
+- Summary: Recommended Videos
+- Description: Get Douyin Creator Marketplace (Xingtu) recommended videos data, including video performance metrics, for creator evaluation, campaign planning, and marketplace research.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -398,14 +398,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolShowItemsV2V1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-kol-show-items-v2/v1`
-- Summary: Video Performance
-- Description: Get Douyin Creator Marketplace (Xingtu) video Performance data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and marketplace research.
+- Summary: Showcase Items
+- Description: Get Douyin Creator Marketplace (Xingtu) showcase items data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and marketplace research.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -423,14 +423,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolSpreadInfoV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-kol-spread-info/v1`
-- Summary: Creator Performance Overview
-- Description: Get Douyin Creator Marketplace (Xingtu) creator Performance Overview data, including audience, content performance, and commercial indicators, for quick evaluation.
+- Summary: Spread Metrics
+- Description: Get Douyin Creator Marketplace (Xingtu) spread metrics data, including audience, content performance, and commercial indicators, for quick evaluation.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -461,14 +461,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolTouchDistributionV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-kol-touch-distribution/v1`
-- Summary: Audience Source Distribution
-- Description: Get Douyin Creator Marketplace (Xingtu) audience Source Distribution data, including segment breakdowns, audience composition, and distribution signals, for traffic analysis and existing integration compatibility.
+- Summary: Audience Touchpoint Distribution
+- Description: Get Douyin Creator Marketplace (Xingtu) audience touchpoint distribution data, including segment breakdowns, audience composition, and distribution signals, for traffic analysis and existing integration compatibility.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -485,9 +485,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getVideoDetailV1`
+## `getDouyinXingtuVideoDetailV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/get-video-detail/v1`
@@ -509,7 +509,59 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
+
+## `gwApiAggregatorGetAuthorCommerceSeedBaseInfoV1`
+
+- Method: `GET`
+- Path: `/api/douyin-xingtu/gw/api/aggregator/get_author_commerce_seed_base_info/v1`
+- Summary: Author Commerce Seeding Base Info
+- Description: Get Douyin Creator Marketplace (Xingtu) author Commerce Seeding Base Info data, including baseline metrics, commercial signals, and seeding indicators, for product seeding analysis, creator vetting, and campaign planning.
+- Tags: `Douyin Creator Marketplace (Xingtu)`
+
+### Parameters
+
+| Name | In | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- | --- |
+| `token` | `query` | yes | `string` | n/a | User authentication token. |
+| `oAuthorId` | `query` | yes | `string` | n/a | Author's unique ID. |
+| `range` | `query` | no | `string` | `DAY_90` | Time range.
+
+Available Values:
+- `DAY_30`: Last 30 days
+- `DAY_90`: Last 90 days |
+| enum | values | no | n/a | n/a | `DAY_30`, `DAY_90` |
+
+### Request body
+
+No request body.
+
+### Responses
+
+- `200`: OK
+
+## `gwApiAggregatorGetAuthorCommerceSpreadInfoV1`
+
+- Method: `GET`
+- Path: `/api/douyin-xingtu/gw/api/aggregator/get_author_commerce_spread_info/v1`
+- Summary: Author Commerce Spread Info
+- Description: Get Douyin Creator Marketplace (Xingtu) author Commerce Spread Info data, including spread metrics, for creator evaluation for campaign planning and media buying.
+- Tags: `Douyin Creator Marketplace (Xingtu)`
+
+### Parameters
+
+| Name | In | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- | --- |
+| `token` | `query` | yes | `string` | n/a | User authentication token. |
+| `oAuthorId` | `query` | yes | `string` | n/a | Author's unique ID. |
+
+### Request body
+
+No request body.
+
+### Responses
+
+- `200`: OK
 
 ## `gwApiAggregatorGetAuthorOrderExperienceV1`
 
@@ -538,7 +590,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiAuthorGetAuthorBaseInfoV1`
 
@@ -569,14 +621,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiAuthorGetAuthorMarketingInfoV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/gw/api/author/get_author_marketing_info/v1`
-- Summary: Marketing Rates
-- Description: Get Douyin Creator Marketplace (Xingtu) marketing Rates data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.
+- Summary: Marketing Metrics
+- Description: Get Douyin Creator Marketplace (Xingtu) marketing metrics data, including rate card details and commercial service metrics, for creator evaluation, campaign planning, and marketplace research.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -600,7 +652,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiAuthorGetAuthorPlatformChannelInfoV2V1`
 
@@ -631,7 +683,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiAuthorGetAuthorShowItemsV2V1`
 
@@ -669,7 +721,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpAuthorAudienceDistributionV1`
 
@@ -709,7 +761,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpAuthorCpInfoV1`
 
@@ -740,7 +792,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpAuthorLinkStructV1`
 
@@ -771,7 +823,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpAuthorRecVideosV2V1`
 
@@ -802,7 +854,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpAuthorTouchDistributionV1`
 
@@ -833,7 +885,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpAuthorVideoDistributionV1`
 
@@ -864,7 +916,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpCheckAuthorDisplayV1`
 
@@ -895,7 +947,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpGetAuthorConvertAbilityV1`
 
@@ -932,7 +984,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpGetAuthorConvertVideosOrProductsV1`
 
@@ -1014,7 +1066,32 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
+
+## `gwApiDataSpGetAuthorDailyFansV1`
+
+- Method: `GET`
+- Path: `/api/douyin-xingtu/gw/api/data_sp/get_author_daily_fans/v1`
+- Summary: Follower Growth Trend
+- Description: Get Douyin Creator Marketplace (Xingtu) follower Growth Trend data, including historical audience changes over time, for creator evaluation, campaign planning, and marketplace research.
+- Tags: `Douyin Creator Marketplace (Xingtu)`
+
+### Parameters
+
+| Name | In | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- | --- |
+| `token` | `query` | yes | `string` | n/a | User authentication token. |
+| `oAuthorId` | `query` | yes | `string` | n/a | Author's unique ID. |
+| `startDate` | `query` | yes | `string` | n/a | Start Date (yyyy-MM-dd). |
+| `endDate` | `query` | yes | `string` | n/a | End Date (yyyy-MM-dd). |
+
+### Request body
+
+No request body.
+
+### Responses
+
+- `200`: OK
 
 ## `gwApiDataSpGetAuthorFansDistributionV1`
 
@@ -1043,7 +1120,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpGetAuthorLinkInfoV1`
 
@@ -1112,14 +1189,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpGetAuthorSpreadInfoV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/gw/api/data_sp/get_author_spread_info/v1`
-- Summary: Distribution Metrics
-- Description: Get Douyin Creator Marketplace (Xingtu) distribution Metrics data, including exposure, spread, and related performance indicators, for creator evaluation, campaign planning, and marketplace research.
+- Summary: Spread Metrics
+- Description: Get Douyin Creator Marketplace (Xingtu) spread metrics data, including exposure, spread, and related performance indicators, for creator evaluation, campaign planning, and marketplace research.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
 ### Parameters
@@ -1162,7 +1239,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpItemReportDetailV1`
 
@@ -1185,7 +1262,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpItemReportThAnalysisV1`
 
@@ -1208,13 +1285,13 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `gwApiDataSpItemReportTrendV1`
 
 - Method: `GET`
 - Path: `/api/douyin-xingtu/gw/api/data_sp/item_report_trend/v1`
-- Summary: Item Report Trend
+- Summary: Item Report Trends
 - Description: Get Douyin Creator Marketplace (Xingtu) item Report Trend data, including time-based changes in item performance metrics, for creator evaluation, campaign planning, and marketplace research.
 - Tags: `Douyin Creator Marketplace (Xingtu)`
 
@@ -1231,7 +1308,53 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
+
+## `gwApiDataGetAuthorHotCommentTokensV1`
+
+- Method: `GET`
+- Path: `/api/douyin-xingtu/gw/api/data/get_author_hot_comment_tokens/v1`
+- Summary: KOL Comment Keyword Analysis
+- Description: Get Douyin Creator Marketplace (Xingtu) kOL Comment Keyword Analysis data, including core metrics, trend signals, and performance indicators, for audience language analysis and comment-topic research.
+- Tags: `Douyin Creator Marketplace (Xingtu)`
+
+### Parameters
+
+| Name | In | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- | --- |
+| `token` | `query` | yes | `string` | n/a | User authentication token. |
+| `oAuthorId` | `query` | yes | `string` | n/a | Author's unique ID. |
+
+### Request body
+
+No request body.
+
+### Responses
+
+- `200`: OK
+
+## `gwApiGauthorGetAuthorContentHotKeywordsV1`
+
+- Method: `GET`
+- Path: `/api/douyin-xingtu/gw/api/gauthor/get_author_content_hot_keywords/v1`
+- Summary: KOL Content Keyword Analysis
+- Description: Get Douyin Creator Marketplace (Xingtu) kOL Content Keyword Analysis data, including core metrics, trend signals, and performance indicators, for content theme analysis and creator positioning research.
+- Tags: `Douyin Creator Marketplace (Xingtu)`
+
+### Parameters
+
+| Name | In | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- | --- |
+| `token` | `query` | yes | `string` | n/a | User authentication token. |
+| `oAuthorId` | `query` | yes | `string` | n/a | Author's unique ID. |
+
+### Request body
+
+No request body.
+
+### Responses
+
+- `200`: OK
 
 ## `gwApiGsearchSearchForAuthorSquareV1`
 
@@ -1281,55 +1404,6 @@ No request body.
 
 ### Responses
 
-- `default`: default response
-
-## `searchDouyinKolV1`
-
-- Method: `GET`
-- Path: `/api/douyin-xingtu/search-douyin-kol/v1`
-- Summary: Legacy KOL Search
-- Description: Get Douyin Creator Marketplace (Xingtu) legacy KOL Search data, including preserving the request format, for creator evaluation, campaign planning, and marketplace research.
-- Tags: `Douyin Creator Marketplace (Xingtu)`
-
-### Parameters
-
-| Name | In | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- | --- |
-| `token` | `query` | yes | `string` | n/a | User authentication token. |
-| `body` | `query` | yes | `string` | n/a | JSON request body. |
-| `acceptCache` | `query` | no | `boolean` | `false` | Enable cache. |
-
-### Request body
-
-No request body.
-
-### Responses
-
-- `200`: OK
-
-## `searchForAuthorSquareV3`
-
-- Method: `GET`
-- Path: `/api/douyin-xingtu/search-for-author-square/v3`
-- Summary: Creator Search
-- Description: Get Douyin Creator Marketplace (Xingtu) creator Search data, including filters, returning profile, and audience, for discovery, comparison, and shortlist building.
-- Tags: `Douyin Creator Marketplace (Xingtu)`
-
-### Parameters
-
-| Name | In | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- | --- |
-| `token` | `query` | yes | `string` | n/a | User authentication token. |
-| `page` | `query` | yes | `integer` | n/a | Page number. |
-| `fansLow` | `query` | yes | `integer` | n/a | Minimum fans count. |
-| `fansHigh` | `query` | yes | `integer` | n/a | Maximum fans count. |
-
-### Request body
-
-No request body.
-
-### Responses
-
 - `200`: OK
 
 ## `searchKolSimpleV1`
@@ -1362,4 +1436,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
