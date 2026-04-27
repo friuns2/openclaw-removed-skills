@@ -3,11 +3,16 @@
   "slug": "broadridge",
   "displayName": "Broadridge",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170168314,
-    "commit": "https://github.com/openclaw/skills/commit/f2ada4d1f25110f19e88aaccdd79e6b2571fdda0"
+    "version": "1.0.3",
+    "publishedAt": 1776865396705,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170168314,
+      "commit": "https://github.com/openclaw/skills/commit/f2ada4d1f25110f19e88aaccdd79e6b2571fdda0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774962388112,
