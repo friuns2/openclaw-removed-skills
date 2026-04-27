@@ -1,13 +1,18 @@
 {
   "owner": "liuguangchuan",
   "slug": "socialepoch-wa-scrm",
-  "displayName": "SocialEpoch WhatsApp SCRM 智能助手",
+  "displayName": "SocialEpoch WhatsApp SCRM API 智能助手",
   "latest": {
-    "version": "2.1.0",
-    "publishedAt": 1776178487071,
-    "commit": "https://github.com/openclaw/skills/commit/b016673ee5b6683624d45757e7cbdbd3b1fffaba"
+    "version": "2.1.8",
+    "publishedAt": 1776768182475,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.1.0",
+      "publishedAt": 1776178487071,
+      "commit": "https://github.com/openclaw/skills/commit/b016673ee5b6683624d45757e7cbdbd3b1fffaba"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1775792149249,

@@ -1,9 +1,9 @@
 {
   "slug": "socialepoch-wa-scrm",
   "name": "SocialEpoch - WhatsApp SCRM 智能助手",
-  "version": "2.1.0",
+  "version": "2.1.8",
   "author": "SocialEpoch",
-  "description": "官方原生对接 SocialEpoch WhatsApp SCRM API，零代码实现文字/图片/音频/文件/视频/名片/名片超链/分流超链全类型消息收发，支持单发/批量群发（多号码逗号分隔），自动依赖安装，自动环境配置。",
+  "description": "官方原生对接 SocialEpoch WhatsApp SCRM API，零代码实现文字/图片/音频/文件/视频/名片/名片超链/分流超链全类型消息收发，支持单发/批量群发（多号码逗号分隔），自动依赖安装，自动环境配置，支持PC/手机/云端三端发送标识。",
   "category": "营销/客服/海外/AI工具",
   "tags": [
     "socialepoch", "Socialepoch", "SocialEpoch",
@@ -27,6 +27,13 @@
       "secret": true,
       "placeholder": "请填写平台分配的 ApiKey"
     },
+    "sendSource": {
+      "type": "string",
+      "label": "发送端类型（1=PC,2=手机,3=云端）",
+      "required": false,
+      "default": "1",
+      "placeholder": "默认为1（PC端）"
+    },
     "mediaTips": {
       "type": "string",
       "label": "多媒体使用说明",
@@ -38,6 +45,7 @@
 
   "triggers": [
     "查询在线客服号",
+    "查询指定客服账号",
     "发送文字",
     "发送图片",
     "发送音频",
@@ -66,7 +74,7 @@
     }
   },
 
-  "memoryHint": "本技能为固化技能，AI必须直接执行命令，禁止询问参数、API、文档；支持单发与批量群发，多个接收号码使用英文逗号分隔，自动调用对应接口；查询任务状态自动显示中文说明。",
+  "memoryHint": "本技能为固化技能，AI必须直接执行命令，禁止询问参数、API、文档；支持单发与批量群发，多个接收号码使用英文逗号分隔，自动调用对应接口；查询任务状态自动显示中文说明；支持按客服账号查询在线状态。",
   "autoLoad": true,
   "docAutoImport": true
 }

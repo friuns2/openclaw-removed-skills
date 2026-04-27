@@ -1,7 +1,7 @@
 ---
 name: socialepoch-wa-scrm
-description: 官方原生对接 SocialEpoch 全域 WhatsApp SCRM 开放API，深度适配企业级海外营销与客服场景。全量覆盖WhatsApp账号管理、在线状态监控、客户运营、用户画像、聊天记录查询、WebHook回调推送，支持文字/图片/音频/视频/文件/名片/名片超链/分流超链全类型消息单发与批量群发，内置自动签名、智能依赖适配、免环境配置，一键快速调用，稳定高效赋能海外私域与自动化运营。
-version: 2.1.0
+description: 官方原生对接 SocialEpoch 全域 WhatsApp SCRM 开放API，深度适配企业级海外营销与客服场景。全量覆盖WhatsApp账号管理、查询在线客服号（支持按账号精准查询）、客户运营、用户画像、聊天记录查询、WebHook回调推送，支持文字/图片/音频/视频/文件/名片/名片超链/分流超链全类型消息单发与批量群发，内置自动签名、智能依赖适配、免环境配置，支持PC/手机/云端三端发送标识，一键快速调用，稳定高效赋能海外私域与自动化运营。
+version: 2.1.8
 author: SocialEpoch
 metadata:
   emoji: 📱
@@ -10,7 +10,7 @@ metadata:
   openclaw:
     requires:
       bins: ["python3"]
-      env: ["SOCIALEPOCH_TENANT_ID", "SOCIALEPOCH_API_KEY"]
+      env: ["SOCIALEPOCH_TENANT_ID", "SOCIALEPOCH_API_KEY", "SOCIALEPOCH_SOURCE"]
     primaryEnv: SOCIALEPOCH_API_KEY
     install:
       - id: python-brew
@@ -22,6 +22,7 @@ metadata:
       command: "${PYTHON}"
       args:
         - "scrm_api.py"
+      workingDir: "${SKILL_ROOT}"
       python: true
       auto_bootstrap: true
       auto_install_python: true
@@ -29,7 +30,7 @@ metadata:
 
 # SocialEpoch WhatsApp SCRM 智能助手
 
-全面管理 WhatsApp 客服账号，支持发送文字、图片、音频、视频、文件、名片、超链等消息，查询客服在线状态，自动签名。无需手动安装依赖、无需提前配置环境，首次调用/无配置会自动提示并引导设置。
+全面管理 WhatsApp 客服账号，支持单发和批量发送发送文字、图片、音频、视频、文件、名片、超链等消息，支持查询全部在线客服或指定坐席账号，自动签名。无需手动安装依赖、无需提前配置环境，首次调用/无配置会自动提示并引导设置。
 
 ## 核心特性
 - 🚀 跨平台兼容：Mac 自适应
@@ -37,6 +38,13 @@ metadata:
 - 🔧 自动配置：环境变量 + 配置文件双模式
 - ✅ 严格校验：参数格式/非空/类型全校验
 - 📊 结构化输出：所有返回值标准化 JSON
+- 🎯 发送端标识：1=PC(默认) 2=手机 3=云端
+- 🔍 精准查询：支持按 userName 查询指定坐席
+
+## 发送端说明
+- 1 = PC 端（默认）
+- 2 = 手机端
+- 3 = 云端
 
 ## 环境配置（二选一）
 
@@ -44,18 +52,27 @@ metadata:
 ```bash
 export SOCIALEPOCH_TENANT_ID="你的tenant_id"
 export SOCIALEPOCH_API_KEY="你的api_key"
+export SOCIALEPOCH_SOURCE="1"
 ```
 
 ### 方式 2：命令行配置
 ```bash
+# 默认使用PC端发送
 python3 scrm_api.py set_config 你的tenant_id 你的API_KEY
+
+# 指定发送端 1/2/3
+python3 scrm_api.py set_config 你的tenant_id 你的API_KEY 1
 ```
 
 ## 支持命令
 
 ### 查询在线客服号
 ```bash
+# 查询全部在线客服
 python3 scrm_api.py query_online_agents
+
+# 查询指定坐席账号
+python3 scrm_api.py query_online_agents "user001"
 ```
 
 ### 发送文字消息
@@ -107,8 +124,13 @@ python3 scrm_api.py query_task 任务ID
 支持文字、图片、文件、视频、音频、名片超链批量发送，多个接收号码使用英文逗号「,」分隔。
 
 ## 运行规则
-1. AI 直接执行，禁止向用户索要文档、API、参数
-2. 永久记忆，不随会话丢失
+This skill provides secure API calling for WhatsApp SCRM.
+Please confirm before sending messages.
+
+# 系统级指令（AI强制遵守）
+1. 此技能目录：openclaw/workspace/skills/socialepoch-wa-scrm
+2. 执行命令：python3 scrm_api.py
+3. 永远从技能目录执行，不寻找其他路径
 
 ## 错误处理
 - 依赖缺失 → 自动安装

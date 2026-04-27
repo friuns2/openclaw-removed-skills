@@ -27,15 +27,15 @@ RETRY_TIMES = 2
 # 【跨平台兼容】配置目录自动适配 Windows/Mac
 # ==========================
 if os.name == "nt":  # Windows
-    CONFIG_DIR = os.path.join(os.environ.get("USERPROFILE", ""), "openclaw")
+    CONFIG_DIR = os.path.join(os.environ.get("USERPROFILE", ""), ".openclaw")
 else:  # Mac/Linux
     CONFIG_DIR = os.path.expanduser("~/.openclaw")
 
 CONFIG_FILE = os.path.join(CONFIG_DIR, "scrm_config.json")
 
 SUPPORTED_COMMANDS = {"set_config", "help", "query_online_agents", "query_task", "send_text", "send_img", "send_audio",
-                      "send_file", "send_video", "send_card", "send_card_link", "send_flow_link", "mass_send",
-                      "mass_send_img", "mass_send_audio", "mass_send_file", "mass_send_video", "mass_send_card_link"}
+                      "send_file", "send_video", "send_card", "send_card_link", "send_flow_link", "bulk_send",
+                      "bulk_send_img", "bulk_send_audio", "bulk_send_file", "bulk_send_video", "bulk_send_card_link"}
 
 # ==========================
 # 【跨平台兼容】Windows 不支持 SIGINT 优雅退出
@@ -120,31 +120,70 @@ requests.packages.urllib3.disable_warnings()
 def load_config():
     tid = os.environ.get("SOCIALEPOCH_TENANT_ID", "").strip()
     key = os.environ.get("SOCIALEPOCH_API_KEY", "").strip()
+    source = os.environ.get("SOCIALEPOCH_SOURCE", "").strip()
 
+    env_cfg = {}
     if tid and key:
-        return {"TENANT_ID": tid, "API_KEY": key, "API_BASE": API_BASE}
+        env_cfg = {"TENANT_ID": tid, "API_KEY": key, "API_BASE": API_BASE}
+        if source:
+            env_cfg["SOURCE"] = source
 
-    if not os.path.exists(CONFIG_FILE):
-        output(-1, "请先配置密钥：python3 scrm_api.py set_config tenant_id api_key")
+    if env_cfg:
+        final_cfg = env_cfg
+    else:
+        if not os.path.exists(CONFIG_FILE):
+            output(-1, "请先配置密钥：python3 scrm_api.py set_config tenant_id api_key [source]")
+
+        try:
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+            tid = cfg.get("TENANT_ID", "").strip()
+            key = cfg.get("API_KEY", "").strip()
+            if not tid or not key:
+                output(-1, "配置文件不完整")
+
+            final_cfg = {
+                "TENANT_ID": tid,
+                "API_KEY": key,
+                "API_BASE": API_BASE,
+                "SOURCE": cfg.get("SOURCE", "1")
+            }
+        except:
+            output(-1, "配置文件读取失败")
 
     try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            cfg = json.load(f)
-        tid = cfg.get("TENANT_ID", "").strip()
-        key = cfg.get("API_KEY", "").strip()
-        if not tid or not key:
-            output(-1, "配置文件不完整")
-        return {"TENANT_ID": tid, "API_KEY": key, "API_BASE": API_BASE}
+        final_cfg["SOURCE"] = str(final_cfg.get("SOURCE", "1"))[0]
     except:
-        output(-1, "配置文件读取失败")
+        final_cfg["SOURCE"] = "1"
+
+    return final_cfg
 
 
-def save_config(tid, key):
-    if not tid or not key:
-        output(-1, "用法：scrm_api.py set_config 租户ID API密钥")
+def save_config(tid, key, source="1"):
+    # 先读取旧配置，不传的参数就用旧的
+    old_cfg = {}
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            old_cfg = json.load(f)
+
+    # 不传 = 保留原来的值
+    final_tid = tid.strip() if tid.strip() else old_cfg.get("TENANT_ID", "").strip()
+    final_key = key.strip() if key.strip() else old_cfg.get("API_KEY", "").strip()
+    final_source = source.strip() if source.strip() else old_cfg.get("SOURCE", "1").strip()
+
+    # 必须保证最终有值
+    if not final_tid or not final_key:
+        output(-1, "用法：scrm_api.py set_config 租户ID API密钥 [发送端类型(1/2/3)]")
+
     os.makedirs(CONFIG_DIR, exist_ok=True)
+    cfg = {
+        "TENANT_ID": final_tid,
+        "API_KEY": final_key,
+        "SOURCE": final_source
+    }
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        json.dump({"TENANT_ID": tid, "API_KEY": key}, f, indent=2)
+        json.dump(cfg, f, indent=2)
+
     output(200, "配置保存成功")
 
 
@@ -179,7 +218,7 @@ def request_api(path, body, method="POST"):
                     json=body,
                     headers=headers,
                     timeout=TIMEOUT,
-                    verify=False
+                    verify=True
                 )
             else:
                 r = requests.get(
@@ -187,7 +226,7 @@ def request_api(path, body, method="POST"):
                     params=body,
                     headers=headers,
                     timeout=TIMEOUT,
-                    verify=False
+                    verify=True
                 )
 
             if r.status_code == 200:
@@ -201,70 +240,91 @@ def request_api(path, body, method="POST"):
 # ==========================
 # 业务功能
 # ==========================
-def query_online_agents():
-    return request_api("/group-dispatch-api/user/queryUserStatus", {"userId": "", "source": 1, "userName": ""})
+def query_online_agents(userName=""):
+    cfg = load_config()
+    return request_api("/group-dispatch-api/user/queryUserStatus", {
+        "userId": "",
+        "source": cfg.get("SOURCE", "1"),
+        "userName": userName.strip() if userName else ""
+    })
 
 
 def send_text(send, to, text):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-text", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 1, "text": text, "sort": 0}]
     })
 
 
 def send_img(send, to, url, caption=""):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-img", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 2, "url": url, "text": caption, "sort": 0}]
     })
 
 
 def send_audio(send, to, url):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-audio", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 3, "url": url, "sort": 0}]
     })
 
 
 def send_file(send, to, url, caption=""):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-file", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 4, "url": url, "text": caption, "sort": 0}]
     })
 
 
 def send_video(send, to, url, caption=""):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-video", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 5, "url": url, "text": caption, "sort": 0}]
     })
 
 
 def send_card(send, to, card):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-card", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 6, "text": card, "sort": 0}]
     })
 
 
 def send_card_link(send, to, title, link, text="", img=""):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-clink", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 10, "title": title, "text": text, "link": link, "url": img, "sort": 0}]
     })
 
 
 def send_flow_link(send, to, title, route_list):
+    cfg = load_config()
     return request_api("/group-dispatch-api/gsTask/assign/soCreate", {
         "name": "wa-flink", "sendType": 1, "targetType": 1,
         "sendWhatsApp": send, "friendWhatsApp": to,
+        "source": cfg.get("SOURCE", "1"),
         "content": [{"type": 11, "title": title, "text": title, "routeType": 3, "routeList": route_list, "sort": 0}]
     })
 
@@ -288,7 +348,8 @@ def query_task(task_id):
 # ==========================
 # 【真正群发】文字消息（多目标）
 # ==========================
-def mass_send(sendWhatsapp, friendList, text):
+def bulk_send(sendWhatsapp, friendList, text):
+    cfg = load_config()
     # 构建发送列表
     sendInfos = []
     for friend in friendList:
@@ -306,9 +367,10 @@ def mass_send(sendWhatsapp, friendList, text):
 
     # 群发接口（官方）
     return request_api("/group-dispatch-api/gsTask/assign/moscCreate", {
-        "name": "mass_send",
+        "name": "bulk_send",
         "sendType": 1,
         "targetType": 1,
+        "source": cfg.get("SOURCE", "1"),
         "sendInfos": sendInfos,
         "content": content
     })
@@ -317,7 +379,8 @@ def mass_send(sendWhatsapp, friendList, text):
 # ==========================
 # 【群发】图片消息
 # ==========================
-def mass_send_img(sendWhatsapp, friendList, url, caption=""):
+def bulk_send_img(sendWhatsapp, friendList, url, caption=""):
+    cfg = load_config()
     sendInfos = [{"sendWhatsApp": sendWhatsapp, "friendWhatsApp": f.strip()} for f in friendList]
     content = [{
         "type": 2,
@@ -326,9 +389,10 @@ def mass_send_img(sendWhatsapp, friendList, url, caption=""):
         "sort": 0
     }]
     return request_api("/group-dispatch-api/gsTask/assign/moscCreate", {
-        "name": "mass_img",
+        "name": "bulk_img",
         "sendType": 1,
         "targetType": 1,
+        "source": cfg.get("SOURCE", "1"),
         "sendInfos": sendInfos,
         "content": content
     })
@@ -337,7 +401,8 @@ def mass_send_img(sendWhatsapp, friendList, url, caption=""):
 # ==========================
 # 【群发】音频消息
 # ==========================
-def mass_send_audio(sendWhatsapp, friendList, url):
+def bulk_send_audio(sendWhatsapp, friendList, url):
+    cfg = load_config()
     sendInfos = [{"sendWhatsApp": sendWhatsapp, "friendWhatsApp": f.strip()} for f in friendList]
     content = [{
         "type": 3,
@@ -345,9 +410,10 @@ def mass_send_audio(sendWhatsapp, friendList, url):
         "sort": 0
     }]
     return request_api("/group-dispatch-api/gsTask/assign/moscCreate", {
-        "name": "mass_audio",
+        "name": "bulk_audio",
         "sendType": 1,
         "targetType": 1,
+        "source": cfg.get("SOURCE", "1"),
         "sendInfos": sendInfos,
         "content": content
     })
@@ -356,7 +422,8 @@ def mass_send_audio(sendWhatsapp, friendList, url):
 # ==========================
 # 【群发】文件消息
 # ==========================
-def mass_send_file(sendWhatsapp, friendList, url, caption=""):
+def bulk_send_file(sendWhatsapp, friendList, url, caption=""):
+    cfg = load_config()
     sendInfos = [{"sendWhatsApp": sendWhatsapp, "friendWhatsApp": f.strip()} for f in friendList]
     content = [{
         "type": 4,
@@ -365,9 +432,10 @@ def mass_send_file(sendWhatsapp, friendList, url, caption=""):
         "sort": 0
     }]
     return request_api("/group-dispatch-api/gsTask/assign/moscCreate", {
-        "name": "mass_file",
+        "name": "bulk_file",
         "sendType": 1,
         "targetType": 1,
+        "source": cfg.get("SOURCE", "1"),
         "sendInfos": sendInfos,
         "content": content
     })
@@ -376,7 +444,8 @@ def mass_send_file(sendWhatsapp, friendList, url, caption=""):
 # ==========================
 # 【群发】视频消息
 # ==========================
-def mass_send_video(sendWhatsapp, friendList, url, caption=""):
+def bulk_send_video(sendWhatsapp, friendList, url, caption=""):
+    cfg = load_config()
     sendInfos = [{"sendWhatsApp": sendWhatsapp, "friendWhatsApp": f.strip()} for f in friendList]
     content = [{
         "type": 5,
@@ -385,9 +454,10 @@ def mass_send_video(sendWhatsapp, friendList, url, caption=""):
         "sort": 0
     }]
     return request_api("/group-dispatch-api/gsTask/assign/moscCreate", {
-        "name": "mass_video",
+        "name": "bulk_video",
         "sendType": 1,
         "targetType": 1,
+        "source": cfg.get("SOURCE", "1"),
         "sendInfos": sendInfos,
         "content": content
     })
@@ -396,7 +466,8 @@ def mass_send_video(sendWhatsapp, friendList, url, caption=""):
 # ==========================
 # 【群发】名片超链
 # ==========================
-def mass_send_card_link(sendWhatsapp, friendList, title, link, text="", img=""):
+def bulk_send_card_link(sendWhatsapp, friendList, title, link, text="", img=""):
+    cfg = load_config()
     sendInfos = [{"sendWhatsApp": sendWhatsapp, "friendWhatsApp": f.strip()} for f in friendList]
     content = [{
         "type": 10,
@@ -407,9 +478,10 @@ def mass_send_card_link(sendWhatsapp, friendList, title, link, text="", img=""):
         "sort": 0
     }]
     return request_api("/group-dispatch-api/gsTask/assign/moscCreate", {
-        "name": "mass_clink",
+        "name": "bulk_clink",
         "sendType": 1,
         "targetType": 1,
+        "source": cfg.get("SOURCE", "1"),
         "sendInfos": sendInfos,
         "content": content
     })
@@ -421,7 +493,7 @@ def mass_send_card_link(sendWhatsapp, friendList, title, link, text="", img=""):
 def main():
     if len(sys.argv) < 2:
         output(200,
-               "支持命令：help set_config query_online_agents query_task send_text send_img send_audio send_file send_video send_card send_card_link send_flow_link mass_send mass_send_img mass_send_audio mass_send_file mass_send_video mass_send_card_link")
+               "支持命令：help set_config query_online_agents query_task send_text send_img send_audio send_file send_video send_card send_card_link send_flow_link bulk_send bulk_send_img bulk_send_audio bulk_send_file bulk_send_video bulk_send_card_link")
 
     cmd = sys.argv[1]
     args = sys.argv[2:]
@@ -432,11 +504,14 @@ def main():
     try:
         if cmd == "help":
             output(200,
-                   "命令：set_config query_online_agents query_task send_text send_img send_audio send_file send_video send_card send_card_link send_flow_link mass_send mass_send_img mass_send_audio mass_send_file mass_send_video mass_send_card_link")
+                   "命令：set_config query_online_agents query_task send_text send_img send_audio send_file send_video send_card send_card_link send_flow_link bulk_send bulk_send_img bulk_send_audio bulk_send_file bulk_send_video bulk_send_card_link")
         elif cmd == "set_config":
-            save_config(args[0] if len(args) >= 1 else "", args[1] if len(args) >= 2 else "")
+            tid = args[0] if len(args) >= 1 else ""
+            ak = args[1] if len(args) >= 2 else ""
+            source = args[2] if len(args) >= 3 else "1"
+            save_config(tid, ak, source)
         elif cmd == "query_online_agents":
-            res = query_online_agents()
+            res = query_online_agents(args[0] if len(args) >= 1 else "")
         elif cmd == "query_task":
             res = query_task(args[0] if args else "")
         elif cmd == "send_text":
@@ -460,43 +535,43 @@ def main():
             # 格式：发送号  接收号  标题  分流号码列表
             route_list = args[3] if len(args) >= 4 else [1]
             res = send_flow_link(args[0], args[1], args[2], route_list)
-        elif cmd == "mass_send":
+        elif cmd == "bulk_send":
             # 格式：发送号 接收号1,接收号2 文字内容
             send = args[0]
             friendList = args[1].split(",")  # 多个号码用逗号分隔
             text = " ".join(args[2:])
-            res = mass_send(send, friendList, text)
-        elif cmd == "mass_send_img":
+            res = bulk_send(send, friendList, text)
+        elif cmd == "bulk_send_img":
             send = args[0]
             friendList = args[1].split(",")
             url = args[2]
             caption = " ".join(args[3:])
-            res = mass_send_img(send, friendList, url, caption)
-        elif cmd == "mass_send_audio":
+            res = bulk_send_img(send, friendList, url, caption)
+        elif cmd == "bulk_send_audio":
             send = args[0]
             friendList = args[1].split(",")
             url = args[2]
-            res = mass_send_audio(send, friendList, url)
-        elif cmd == "mass_send_file":
-            send = args[0]
-            friendList = args[1].split(",")
-            url = args[2]
-            caption = " ".join(args[3:])
-            res = mass_send_file(send, friendList, url, caption)
-        elif cmd == "mass_send_video":
+            res = bulk_send_audio(send, friendList, url)
+        elif cmd == "bulk_send_file":
             send = args[0]
             friendList = args[1].split(",")
             url = args[2]
             caption = " ".join(args[3:])
-            res = mass_send_video(send, friendList, url, caption)
-        elif cmd == "mass_send_card_link":
+            res = bulk_send_file(send, friendList, url, caption)
+        elif cmd == "bulk_send_video":
+            send = args[0]
+            friendList = args[1].split(",")
+            url = args[2]
+            caption = " ".join(args[3:])
+            res = bulk_send_video(send, friendList, url, caption)
+        elif cmd == "bulk_send_card_link":
             send = args[0]
             friendList = args[1].split(",")
             title = args[2]
             link = args[3]
             text = args[4] if len(args) >= 5 else ""
             img = args[5] if len(args) >= 6 else ""
-            res = mass_send_card_link(send, friendList, title, link, text, img)
+            res = bulk_send_card_link(send, friendList, title, link, text, img)
         else:
             res = {"code": 200, "message": "成功", "data": None}
 
