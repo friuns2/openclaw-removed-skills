@@ -169,38 +169,7 @@ async function runDoctorFix(cmd: string): Promise<CommandRunResult> {
 export async function handleUpdateCommand(_ctx: WTTCommandExecutionContext): Promise<string> {
   const cmd = process.env.OPENCLAW_BIN?.trim() || "openclaw";
 
-  // Path A: preferred and idempotent for existing installs
-  let update = await runUpdate(cmd);
-  if (update.code !== 0 && hasUnknownWttChannelError(update)) {
-    const repair = await runDoctorFix(cmd);
-    if (repair.code === 0) {
-      update = await runUpdate(cmd);
-    } else {
-      const detail = compactOutput(outputOf(repair), 800);
-      return [
-        "WTT 插件升级失败：自动修复配置未成功。",
-        detail ? `doctor 详情: ${detail}` : "doctor 详情: 无",
-        "请手动执行：openclaw doctor --fix，然后重试 /wtt update",
-      ].join("\n");
-    }
-  }
-
-  if (update.code === 0) {
-    const cleanup = await cleanupLegacyWttLoadPath();
-    scheduleGatewayRestart();
-    const summary = compactOutput(outputOf(update), 260);
-    const lines = [
-      "WTT 插件已升级（update 模式）。",
-      "网关将在约 2 秒后自动重启。",
-      "重启期间短暂离线属正常，恢复后可用 /wtt help 验证。",
-    ];
-    if (cleanup.changed) lines.push("已清理 legacy load.path: /opt/wtt-plugin（避免 duplicate plugin id 警告）。");
-    else if (cleanup.error) lines.push(`配置清理提示: ${cleanup.error}`);
-    if (summary) lines.push(`update: ${summary}`);
-    return lines.join("\n");
-  }
-
-  // Path B: fallback for old/non-tracked installs
+  // Path A (preferred): install latest from npm package path first
   let install = await runInstall(cmd);
   let installMode: "install" | "npm-pack" = "install";
 
@@ -234,7 +203,59 @@ export async function handleUpdateCommand(_ctx: WTTCommandExecutionContext): Pro
     }
   }
 
-  if (install.code !== 0 && isPluginAlreadyExistsError(install)) {
+  if (install.code === 0) {
+    const cleanup = await cleanupLegacyWttLoadPath();
+    scheduleGatewayRestart();
+
+    const installSummary = compactOutput(outputOf(install), 260);
+    const modeLabel = installMode === "npm-pack" ? "npm pack fallback 模式" : "install 模式";
+    const lines = [
+      `WTT 插件已升级到 latest（${modeLabel}，npm 优先路径）。`,
+      "网关将在约 2 秒后自动重启。",
+      "重启期间短暂离线属正常，恢复后可用 /wtt help 验证。",
+    ];
+    if (cleanup.changed) lines.push("已清理 legacy load.path: /opt/wtt-plugin（避免 duplicate plugin id 警告）。");
+    else if (cleanup.error) lines.push(`配置清理提示: ${cleanup.error}`);
+    if (installSummary) lines.push(`install: ${installSummary}`);
+    return lines.join("\n");
+  }
+
+  // Path B: fallback to update mode (compatible with legacy/local installs)
+  let update = await runUpdate(cmd);
+  if (update.code !== 0 && hasUnknownWttChannelError(update)) {
+    const repair = await runDoctorFix(cmd);
+    if (repair.code === 0) {
+      update = await runUpdate(cmd);
+    } else {
+      const detail = compactOutput(outputOf(repair), 800);
+      return [
+        "WTT 插件升级失败：自动修复配置未成功。",
+        detail ? `doctor 详情: ${detail}` : "doctor 详情: 无",
+        "请手动执行：openclaw doctor --fix，然后重试 /wtt update",
+      ].join("\n");
+    }
+  }
+
+  if (update.code === 0) {
+    const cleanup = await cleanupLegacyWttLoadPath();
+    scheduleGatewayRestart();
+
+    const installSummary = compactOutput(outputOf(install), 220);
+    const updateSummary = compactOutput(outputOf(update), 220);
+    const lines = [
+      "WTT 插件已升级（update 回退模式；npm 优先安装失败后自动切换）。",
+      "网关将在约 2 秒后自动重启。",
+      "重启期间短暂离线属正常，恢复后可用 /wtt help 验证。",
+    ];
+    if (cleanup.changed) lines.push("已清理 legacy load.path: /opt/wtt-plugin（避免 duplicate plugin id 警告）。");
+    else if (cleanup.error) lines.push(`配置清理提示: ${cleanup.error}`);
+    if (installSummary) lines.push(`install(失败): ${installSummary}`);
+    if (updateSummary) lines.push(`update: ${updateSummary}`);
+    return lines.join("\n");
+  }
+
+  // Path C: final recovery for duplicate install state
+  if (isPluginAlreadyExistsError(install)) {
     const uninstall = await runCommand(cmd, ["plugins", "uninstall", "wtt"], 120_000);
     if (uninstall.code === 0) {
       install = await runInstall(cmd);
@@ -253,6 +274,23 @@ export async function handleUpdateCommand(_ctx: WTTCommandExecutionContext): Pro
           ].join("\n");
         }
       }
+
+      if (install.code === 0) {
+        const cleanup = await cleanupLegacyWttLoadPath();
+        scheduleGatewayRestart();
+
+        const installSummary = compactOutput(outputOf(install), 260);
+        const modeLabel = installMode === "npm-pack" ? "npm pack fallback 模式" : "install 模式";
+        const lines = [
+          `WTT 插件已升级到 latest（${modeLabel}，卸载重装恢复路径）。`,
+          "网关将在约 2 秒后自动重启。",
+          "重启期间短暂离线属正常，恢复后可用 /wtt help 验证。",
+        ];
+        if (cleanup.changed) lines.push("已清理 legacy load.path: /opt/wtt-plugin（避免 duplicate plugin id 警告）。");
+        else if (cleanup.error) lines.push(`配置清理提示: ${cleanup.error}`);
+        if (installSummary) lines.push(`install: ${installSummary}`);
+        return lines.join("\n");
+      }
     } else {
       const detail = compactOutput(outputOf(uninstall), 800);
       return [
@@ -263,30 +301,20 @@ export async function handleUpdateCommand(_ctx: WTTCommandExecutionContext): Pro
     }
   }
 
-  if (install.code !== 0) {
-    const reason = install.timedOut
-      ? "超时（180s）"
-      : `退出码 ${install.code}`;
-    const detail = compactOutput(outputOf(install), 800);
-    return [
-      `WTT 插件升级失败：${reason}`,
-      detail ? `详情: ${detail}` : "详情: 无",
-      "你可以稍后重试：/wtt update",
-    ].join("\n");
-  }
+  const installReason = install.timedOut
+    ? "install 超时（180s）"
+    : `install 退出码 ${install.code}`;
+  const updateReason = update.timedOut
+    ? "update 超时（180s）"
+    : `update 退出码 ${update.code}`;
 
-  const cleanup = await cleanupLegacyWttLoadPath();
-  scheduleGatewayRestart();
+  const installDetail = compactOutput(outputOf(install), 400);
+  const updateDetail = compactOutput(outputOf(update), 400);
 
-  const installSummary = compactOutput(outputOf(install), 260);
-  const modeLabel = installMode === "npm-pack" ? "npm pack fallback 模式" : "install 模式";
-  const lines = [
-    `WTT 插件已升级到 latest（${modeLabel}）。`,
-    "网关将在约 2 秒后自动重启。",
-    "重启期间短暂离线属正常，恢复后可用 /wtt help 验证。",
-  ];
-  if (cleanup.changed) lines.push("已清理 legacy load.path: /opt/wtt-plugin（避免 duplicate plugin id 警告）。");
-  else if (cleanup.error) lines.push(`配置清理提示: ${cleanup.error}`);
-  if (installSummary) lines.push(`install: ${installSummary}`);
-  return lines.join("\n");
+  return [
+    `WTT 插件升级失败：${installReason}；${updateReason}`,
+    installDetail ? `install 详情: ${installDetail}` : "install 详情: 无",
+    updateDetail ? `update 详情: ${updateDetail}` : "update 详情: 无",
+    "你可以稍后重试：/wtt update",
+  ].join("\n");
 }

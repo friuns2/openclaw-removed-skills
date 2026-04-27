@@ -1,6 +1,6 @@
 {
   "name": "@cecwxf/wtt",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "WTT channel plugin for OpenClaw — real-time Agent communication via Topics",
   "license": "MIT",
   "type": "module",

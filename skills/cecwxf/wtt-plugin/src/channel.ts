@@ -1428,81 +1428,6 @@ function resolveTopicMemoryDir(): string {
   return joinPath(resolveOpenClawHomeDir(), "topic-memory");
 }
 
-// ── Knowledge Base local cache ──
-
-function resolveKBCacheDir(taskId: string): string {
-  return joinPath(resolveOpenClawHomeDir(), "knowledge-base", taskId);
-}
-
-async function ensureKBCacheDir(taskId: string): Promise<string> {
-  const dir = resolveKBCacheDir(taskId);
-  try { await mkdir(dir, { recursive: true }); } catch { /* exists */ }
-  return dir;
-}
-
-/**
- * Sync KB index from server to local cache.
- * Fetches TOC and writes _index.md for agent reference.
- */
-async function syncKBIndex(taskId: string, apiBase: string): Promise<string | null> {
-  const dir = await ensureKBCacheDir(taskId);
-  const indexPath = joinPath(dir, "_index.md");
-  try {
-    const resp = await fetch(`${apiBase}/tasks/${taskId}/kb/toc`);
-    if (!resp.ok) return null;
-    const toc = (await resp.json()) as { article_count?: number; categories?: Record<string, any[]>; index_entries?: any[] };
-    const lines: string[] = [`# Knowledge Base Index — ${taskId}\n`];
-    lines.push(`Total articles: ${toc.article_count ?? 0}\n`);
-    for (const [cat, articles] of Object.entries(toc.categories ?? {})) {
-      lines.push(`\n## ${cat}\n`);
-      for (const a of articles as any[]) {
-        lines.push(`- **${a.title}** (${a.slug}) v${a.version}`);
-        if (a.summary) lines.push(`  > ${a.summary}`);
-        if (a.tags) lines.push(`  Tags: ${a.tags}`);
-      }
-    }
-    if (toc.index_entries?.length) {
-      lines.push(`\n## Concepts & Entities\n`);
-      for (const e of toc.index_entries) {
-        lines.push(`- [${e.entry_type}] **${e.key}**: ${e.summary || '(no summary)'}`);
-      }
-    }
-    await writeFile(indexPath, lines.join("\n"), "utf-8");
-    return indexPath;
-  } catch (e) {
-    return null;
-  }
-}
-
-/**
- * Build KB context block for injection into agent inference.
- * Reads local _index.md, extracts relevant summaries based on message content.
- */
-async function buildKBContextBlock(taskId: string, messageContent: string): Promise<string> {
-  const dir = resolveKBCacheDir(taskId);
-  const indexPath = joinPath(dir, "_index.md");
-  try {
-    const indexContent = await readFile(indexPath, "utf-8");
-    if (!indexContent || indexContent.length < 50) return "";
-
-    // Provide index summary + file path for agent to dig deeper
-    const truncated = indexContent.length > 8000
-      ? indexContent.slice(0, 8000) + "\n...(truncated, read full index file for more)"
-      : indexContent;
-
-    return (
-      `\n\n[KB_CONTEXT]\n` +
-      `This task has a Knowledge Base. Here is the index:\n\n` +
-      `${truncated}\n\n` +
-      `[KB_INDEX_FILE] ${indexPath}\n` +
-      `Use wtt_kb_search and wtt_kb_read MCP tools to access full articles.\n` +
-      `[/KB_CONTEXT]`
-    );
-  } catch {
-    return "";
-  }
-}
-
 function compactDiscussionContent(raw: string): string {
   const source = String(raw || "");
   return source
@@ -2237,6 +2162,8 @@ function normalizeSlashForWttCommandRouter(text: string, account: ResolvedWTTAcc
     help: "help",
     update: "update",
     upgrade: "update",
+    version: "version",
+    ver: "version",
   };
 
   const match = trimmed.match(/^\/([a-z][a-z0-9_:-]*)(?:\s+([\s\S]*))?$/i);
@@ -3087,47 +3014,7 @@ export async function routeInboundWsMessage(params: {
     ? `任务标题: ${taskTitleCandidate}\n\n用户消息: ${normalized.text}`
     : normalized.text;
 
-  // Inject KB context for research tasks (async, best-effort)
-  let kbContextBlock = "";
-  if (inboundTaskId && params.account.cloudUrl) {
-    try {
-      const apiBase = params.account.cloudUrl.replace(/\/$/, "");
-      // Sync KB index on each inference (lightweight — just TOC)
-      await syncKBIndex(inboundTaskId, apiBase);
-      kbContextBlock = await buildKBContextBlock(inboundTaskId, normalized.text);
-    } catch (e) {
-      params.log?.("warn", `[wtt] KB context injection failed task=${inboundTaskId}`, e);
-    }
-  }
-
-  // Inject project context for local file tasks (async, best-effort)
-  let projectContextBlock = "";
-  if (inboundTaskId && params.account.cloudUrl) {
-    try {
-      const apiBase = params.account.cloudUrl.replace(/\/$/, "");
-      const pcResp = await fetch(`${apiBase}/tasks/${inboundTaskId}/project-context`);
-      if (pcResp.ok) {
-        const pc = (await pcResp.json()) as Record<string, any>;
-        if (pc && (pc.file_count as number) > 0) {
-          const statsStr = Object.entries((pc.language_stats as Record<string, number>) || {}).slice(0, 6).map(([k, v]) => `${k}: ${v}`).join(", ");
-          const keysStr = ((pc.key_files as string[]) || []).slice(0, 8).join(", ");
-          projectContextBlock =
-            `\n\n[PROJECT_CONTEXT]\n` +
-            `Local project: ${(pc.project_root as string) || "unknown"}\n` +
-            `Files: ${pc.file_count as number} (${statsStr})\n` +
-            `Key files: ${keysStr}\n` +
-            `Use wtt_local_read(task_id='${inboundTaskId}', file_path='...') to read files.\n` +
-            `Use wtt_local_tree(task_id='${inboundTaskId}') for the full file tree.\n` +
-            `Use wtt_local_write(task_id='${inboundTaskId}', file_path='...', content='...') to create/edit files.\n` +
-            `[/PROJECT_CONTEXT]\n`;
-        }
-      }
-    } catch (e) {
-      params.log?.("warn", `[wtt] Project context injection failed task=${inboundTaskId}`, e);
-    }
-  }
-
-  const bodyForAgent = `${mentionDirective}${discussionContextBlock ? `${discussionContextBlock}\n\n` : ""}${kbContextBlock}${projectContextBlock}${bodyCore}`;
+  const bodyForAgent = `${mentionDirective}${discussionContextBlock ? `${discussionContextBlock}\n\n` : ""}${bodyCore}`;
 
   const ctxPayload = runtime.reply.finalizeInboundContext({
     // Keep Body plain so downstream task/title extraction uses user text directly.
