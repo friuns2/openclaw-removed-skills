@@ -3,11 +3,16 @@
   "slug": "thena",
   "displayName": "Thena",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168991593,
-    "commit": "https://github.com/openclaw/skills/commit/08774cf359ededadb0e161a428f05f8871a2b000"
+    "version": "1.0.3",
+    "publishedAt": 1776854206220,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168991593,
+      "commit": "https://github.com/openclaw/skills/commit/08774cf359ededadb0e161a428f05f8871a2b000"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774746173248,
