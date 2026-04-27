@@ -3,11 +3,16 @@
   "slug": "pandle",
   "displayName": "Pandle",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169551155,
-    "commit": "https://github.com/openclaw/skills/commit/a852323e8b732ace6b411ca40c84457e6e7d3ff1"
+    "version": "1.0.3",
+    "publishedAt": 1776864437455,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169551155,
+      "commit": "https://github.com/openclaw/skills/commit/a852323e8b732ace6b411ca40c84457e6e7d3ff1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774847092061,
