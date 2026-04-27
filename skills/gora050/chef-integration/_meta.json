@@ -3,11 +3,16 @@
   "slug": "chef-integration",
   "displayName": "Chef",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168746077,
-    "commit": "https://github.com/openclaw/skills/commit/eea2f3f04305569d7cf9ca0e6cb0e2e35f6999b6"
+    "version": "1.0.3",
+    "publishedAt": 1776877608352,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168746077,
+      "commit": "https://github.com/openclaw/skills/commit/eea2f3f04305569d7cf9ca0e6cb0e2e35f6999b6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774685063798,
