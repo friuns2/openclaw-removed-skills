@@ -3,11 +3,16 @@
   "slug": "jumpseller",
   "displayName": "Jumpseller",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168484701,
-    "commit": "https://github.com/openclaw/skills/commit/446ac9ea54e8d10b46c79cd339858737326b0f2a"
+    "version": "1.0.3",
+    "publishedAt": 1776852652839,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168484701,
+      "commit": "https://github.com/openclaw/skills/commit/446ac9ea54e8d10b46c79cd339858737326b0f2a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774648973369,
