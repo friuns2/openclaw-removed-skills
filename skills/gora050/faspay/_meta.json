@@ -3,11 +3,16 @@
   "slug": "faspay",
   "displayName": "Faspay",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169246436,
-    "commit": "https://github.com/openclaw/skills/commit/d50a88c694fa62d2032dd3384650e293829b5240"
+    "version": "1.0.3",
+    "publishedAt": 1776864093874,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169246436,
+      "commit": "https://github.com/openclaw/skills/commit/d50a88c694fa62d2032dd3384650e293829b5240"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774782276418,
