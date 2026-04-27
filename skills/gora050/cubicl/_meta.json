@@ -3,11 +3,16 @@
   "slug": "cubicl",
   "displayName": "Cubicl",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169200583,
-    "commit": "https://github.com/openclaw/skills/commit/43dcad96952e91730d561c27f8772a80b1213abf"
+    "version": "1.0.3",
+    "publishedAt": 1776863911487,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169200583,
+      "commit": "https://github.com/openclaw/skills/commit/43dcad96952e91730d561c27f8772a80b1213abf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774775049350,
