@@ -3,11 +3,16 @@
   "slug": "psigen-software",
   "displayName": "Psigen Software",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170222803,
-    "commit": "https://github.com/openclaw/skills/commit/742a8f0b66ec716e6f4fca40db676ef3803abb59"
+    "version": "1.0.3",
+    "publishedAt": 1776865227593,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170222803,
+      "commit": "https://github.com/openclaw/skills/commit/742a8f0b66ec716e6f4fca40db676ef3803abb59"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774991135981,
