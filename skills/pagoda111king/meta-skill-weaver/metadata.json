@@ -1,7 +1,7 @@
 {
   "id": "meta-skill-weaver",
   "name": "元技能编织器",
-  "version": "v2.3.1",
+  "version": "v2.4.0",
   "status": "published",
   "category": "orchestration",
   "funnel_layer": "layer2_ecosystem",
@@ -69,13 +69,13 @@
     }
   ],
   "scoring": {
-    "T": 0.70,
+    "T": 0.75,
     "C": 0.65,
     "O": 0.80,
-    "E": 0.62,
-    "M": 0.55,
+    "E": 0.75,
+    "M": 0.70,
     "U": 0.58,
-    "average": 0.65
+    "average": 0.71
   },
   "evidence": [
     {

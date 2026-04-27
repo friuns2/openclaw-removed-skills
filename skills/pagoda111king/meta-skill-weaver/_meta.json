@@ -1,13 +1,18 @@
 {
   "owner": "pagoda111king",
   "slug": "meta-skill-weaver",
-  "displayName": "Meta Skill Weaver - 元技能编织器",
+  "displayName": "Meta Skill Weaver",
   "latest": {
-    "version": "0.3.0",
-    "publishedAt": 1776406477366,
-    "commit": "https://github.com/openclaw/skills/commit/7669e81d49bcbca66c0385091b64b9891c8375cc"
+    "version": "2.5.0",
+    "publishedAt": 1777255361409,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.3.0",
+      "publishedAt": 1776406477366,
+      "commit": "https://github.com/openclaw/skills/commit/7669e81d49bcbca66c0385091b64b9891c8375cc"
+    },
     {
       "version": "0.4.1",
       "publishedAt": 1775478974875,
