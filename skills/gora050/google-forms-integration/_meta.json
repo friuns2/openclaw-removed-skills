@@ -3,11 +3,16 @@
   "slug": "google-forms-integration",
   "displayName": "Google Forms",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169023775,
-    "commit": "https://github.com/openclaw/skills/commit/df8bd50305b98ab2540981712d9cdab4d9ebefe7"
+    "version": "1.0.3",
+    "publishedAt": 1776885065429,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169023775,
+      "commit": "https://github.com/openclaw/skills/commit/df8bd50305b98ab2540981712d9cdab4d9ebefe7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774749849284,
