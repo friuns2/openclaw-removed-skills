@@ -3,11 +3,16 @@
   "slug": "alibabacloud-find-skills",
   "displayName": "Alibabacloud Find Skills",
   "latest": {
-    "version": "0.0.3",
-    "publishedAt": 1776339757017,
-    "commit": "https://github.com/openclaw/skills/commit/0a2b0c6d5123fb48a80180a3567db57b831c1ffa"
+    "version": "0.0.4",
+    "publishedAt": 1776844570059,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.3",
+      "publishedAt": 1776339757017,
+      "commit": "https://github.com/openclaw/skills/commit/0a2b0c6d5123fb48a80180a3567db57b831c1ffa"
+    },
     {
       "version": "0.0.2",
       "publishedAt": 1775097865004,
