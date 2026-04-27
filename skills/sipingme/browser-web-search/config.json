@@ -1,19 +1,19 @@
 {
   "name": "browser-web-search",
-  "version": "0.3.7",
+  "version": "0.4.3",
   "requiredEnvVars": [],
   "requires": {
     "runtime": {
       "node": ">=18.0.0"
     },
-    "binaries": ["openclaw"],
+    "binaries": ["openclaw", "bws"],
     "packages": {
-      "npm": "browser-web-search@0.3.7"
+      "npm": "browser-web-search@0.4.3"
     }
   },
   "skill": {
     "name": "browser-web-search",
-    "version": "0.3.7",
+    "version": "0.4.3",
     "enabled": true,
     "autoInvoke": false
   },
@@ -51,15 +51,16 @@
     "optional": []
   },
   "install": {
-    "type": "npx",
+    "type": "npm-global",
     "package": "browser-web-search",
-    "version": "0.3.7",
-    "execution": "npx --yes browser-web-search@0.3.7",
-    "global": false,
+    "version": "0.4.3",
+    "command": "npm install -g browser-web-search@0.4.3",
+    "binary": "bws",
+    "global": true,
     "autoInstall": false,
     "autoUpdate": false,
-    "riskLevel": "high",
-    "riskReason": "通过 npx 动态拉取并执行第三方 npm 包，该包会在浏览器页面上下文中执行 JavaScript，可访问站点认证数据。存在供应链风险，使用前请审计源码。",
+    "riskLevel": "medium",
+    "riskReason": "通过 npm 全局安装第三方包，该包会在浏览器页面上下文中执行 JavaScript。安装前请审计源码。",
     "requiresApproval": true,
     "source": {
       "type": "npm",
@@ -70,20 +71,18 @@
       "audit": "https://github.com/sipingme/browser-web-search/blob/main/src/index.ts"
     },
     "verification": {
-      "command": "npx --yes browser-web-search@0.3.7 --version",
-      "expectedOutput": "0.3.7",
-      "integrity": "sha512-TTZteIIILK9Hh[...]IKh6DqEiuvUHg==",
-      "shasum": "70c9a13d71efd64005c71193e9876ea325c8aaae"
+      "command": "bws --version",
+      "expectedOutput": "0.4.3"
     }
   },
   "dependencies": {
     "npm": [
-      "browser-web-search@0.3.7"
+      "browser-web-search@0.4.3"
     ],
     "binaries": [
       "openclaw"
     ],
-    "note": "Package is executed via npx at runtime. Requires OpenClaw CLI for browser automation."
+    "note": "Package is installed globally via npm. Requires OpenClaw CLI for browser automation."
   },
   "permissions": {
     "filesystem": {
@@ -93,6 +92,7 @@
     "network": {
       "domains": [
         "registry.npmjs.org",
+        "*.npmjs.com",
         "*.zhihu.com",
         "*.xiaohongshu.com",
         "*.bilibili.com",
@@ -110,7 +110,53 @@
         "*.google.com",
         "*.csdn.net",
         "*.cnblogs.com",
-        "*.zhipin.com"
+        "*.zhipin.com",
+        "*.juejin.cn",
+        "*.v2ex.com",
+        "*.infoq.cn",
+        "*.huxiu.com",
+        "api-search.huxiu.com",
+        "*.wallstreetcn.com",
+        "api-one-wscn.awtmt.com",
+        "*.xueqiu.com",
+        "*.x.com",
+        "*.twitter.com",
+        "*.reddit.com",
+        "*.ycombinator.com",
+        "hn.algolia.com",
+        "*.github.com",
+        "api.github.com",
+        "*.theverge.com",
+        "*.arstechnica.com",
+        "*.engadget.com",
+        "*.douban.com",
+        "*.eastmoney.com",
+        "*.jike.ruguoapp.com",
+        "*.hupu.com",
+        "*.linkedin.com",
+        "*.youtube.com",
+        "*.googleapis.com",
+        "*.arxiv.org",
+        "*.bbc.com",
+        "*.bbc.co.uk",
+        "*.reuters.com",
+        "*.dev.to",
+        "*.stackoverflow.com",
+        "*.pypi.org",
+        "*.imdb.com",
+        "*.genius.com",
+        "*.gsmarena.com",
+        "*.producthunt.com",
+        "*.wikipedia.org",
+        "*.openlibrary.org",
+        "*.yahoo.com",
+        "*.youdao.com",
+        "*.smzdm.com",
+        "*.qidian.com",
+        "*.duckduckgo.com",
+        "*.ctrip.com",
+        "*.thehackernews.com",
+        "*.duckduckgo.com"
       ],
       "note": "访问支持的平台域名，通过 OpenClaw 浏览器执行"
     },
