@@ -12,7 +12,7 @@ Usage:
       --presentation-params '{"targets": ["PD-1"]}'
 
   python scripts/search_chained.py \
-      --conference-params '{"series_area": ["hematology"]}' \
+      --conference-params '{"series_name": "ASH"}' \
       --presentation-params '{"drugs": ["bispecific antibody"], "institutions": ["Roche"]}' \
       --raw --output results.json
 
@@ -98,8 +98,8 @@ def search_conferences(params):
 def format_conferences(data):
     lines = []
     results = data.get("results", [])
-    from_n = data.get("from_n", 0)
-    lines.append(f"=== Conferences: {len(results)} found (offset: {from_n}) ===\n")
+    total = data.get("total_count", "unknown")
+    lines.append(f"=== Conferences: {total} total, showing {len(results)} ===\n")
 
     if not results:
         lines.append("No conferences found. Try:")
@@ -147,8 +147,8 @@ def search_presentations(params):
 def format_presentations(data):
     lines = []
     results = data.get("results", [])
-    from_n = data.get("from_n", 0)
-    lines.append(f"=== Presentations: {len(results)} found (offset: {from_n}) ===\n")
+    total = data.get("total_count", "unknown")
+    lines.append(f"=== Presentations: {total} total, showing {len(results)} ===\n")
 
     if not results:
         lines.append("No presentations found. Try:")
@@ -277,9 +277,9 @@ Examples:
       --conference-params '{"series_name": "ASCO", "conference_start_date": "2024-01-01", "conference_end_date": "2024-12-31"}' \\
       --presentation-params '{"targets": ["PD-1"]}'
 
-  # Roche bispecific antibodies at hematology conferences
+  # Roche bispecific antibodies at ASH conferences
   python scripts/search_chained.py \\
-      --conference-params '{"series_area": ["hematology"]}' \\
+      --conference-params '{"series_name": "ASH"}' \\
       --presentation-params '{"drugs": ["bispecific antibody"], "institutions": ["Roche"]}'
 
   # Save raw JSON output

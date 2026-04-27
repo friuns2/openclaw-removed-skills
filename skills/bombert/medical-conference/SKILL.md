@@ -41,7 +41,6 @@ python scripts/search_conferences.py --params '<JSON>' --output results.json
 | `conference_location` | `str` | City, country, or venue | `"Chicago"` |
 | `series_name` | `str` | Conference series name | `"ASCO"` |
 | `series_organization` | `str` | Organizing body | `"American Society of Clinical Oncology"` |
-| `series_area` | `List[str]` | Therapeutic area(s) | `["oncology", "cardiology"]` |
 | `from_n` | `int` | Pagination offset | `0` |
 | `size` | `int` | Results per page | `50` |
 
@@ -51,15 +50,15 @@ python scripts/search_conferences.py --params '<JSON>' --output results.json
 # Find all ASCO conferences
 python scripts/search_conferences.py --params '{"series_name": "ASCO"}'
 
-# Oncology conferences in Chicago in 2024
-python scripts/search_conferences.py --params '{"series_area": ["oncology"], "conference_location": "Chicago", "conference_start_date": "2024-01-01", "conference_end_date": "2024-12-31"}'
+# Conferences in Chicago in 2024
+python scripts/search_conferences.py --params '{"conference_location": "Chicago", "conference_start_date": "2024-01-01", "conference_end_date": "2024-12-31"}'
 
-# Cardiology conferences, raw JSON
-python scripts/search_conferences.py --params '{"series_area": ["cardiology"]}' --raw
+# ESMO conferences, raw JSON
+python scripts/search_conferences.py --params '{"series_name": "ESMO"}' --raw
 ```
 
 ### Result fields
-`conference_name`, `conference_abbreviation`, `conference_website`, `conference_description`, `conference_start_date`, `conference_end_date`, `conference_location`, `series_id`, `series_name`, `series_abbreviation`, `series_website`, `series_organization`, `series_area`
+`conference_name`, `conference_abbreviation`, `conference_website`, `conference_description`, `conference_start_date`, `conference_end_date`, `conference_location`, `series_id`, `series_name`, `series_abbreviation`, `series_website`, `series_organization`
 
 ---
 
@@ -138,9 +137,9 @@ python scripts/search_chained.py \
     --conference-params '{"series_name": "ASCO", "conference_start_date": "2024-01-01", "conference_end_date": "2024-12-31"}' \
     --presentation-params '{"targets": ["PD-1"]}'
 
-# Roche bispecific antibodies at hematology conferences
+# Roche bispecific antibodies at ASH conferences
 python scripts/search_chained.py \
-    --conference-params '{"series_area": ["hematology"]}' \
+    --conference-params '{"series_name": "ASH"}' \
     --presentation-params '{"drugs": ["bispecific antibody"], "institutions": ["Roche"]}'
 ```
 
@@ -266,7 +265,7 @@ Query returns results?
 
 No (conferences) →
       Strategy 1: try series abbreviation ↔ full name swap
-      └── Still no → broaden series_area or remove location filter
+      └── Still no → try different series_name or remove location filter
 
 Any step hits HTTP 429?
 └── Pause entire chain 30s → resume from current strategy
@@ -300,7 +299,7 @@ python scripts/search_presentations.py \
 
 ```bash
 python scripts/search_conferences.py \
-  --params '{"series_area": ["oncology"], "conference_location": "Chicago", "conference_start_date": "2024-01-01", "conference_end_date": "2024-12-31"}'
+  --params '{"conference_location": "Chicago", "conference_start_date": "2024-01-01", "conference_end_date": "2024-12-31"}'
 ```
 
 ---
@@ -314,11 +313,11 @@ python scripts/search_presentations.py \
 
 ---
 
-**User:** "Roche bispecific antibody data at hematology conferences"
+**User:** "Roche bispecific antibody data at ASH conferences"
 
 ```bash
 python scripts/search_chained.py \
-  --conference-params '{"series_area": ["hematology"]}' \
+  --conference-params '{"series_name": "ASH"}' \
   --presentation-params '{"drugs": ["bispecific antibody"], "institutions": ["Roche"]}'
 ```
 

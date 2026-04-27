@@ -119,8 +119,8 @@ def format_json(data, indent=0):
 def format_results(data):
     lines = []
     results = data.get("results", [])
-    from_n = data.get("from_n", 0)
-    lines.append(f"=== Presentations: {len(results)} found (offset: {from_n}) ===\n")
+    total = data.get("total_count", "unknown")
+    lines.append(f"=== Presentations: {total} total, showing {len(results)} ===\n")
 
     if not results:
         lines.append("No presentations found. Try:")

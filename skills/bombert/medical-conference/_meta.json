@@ -3,11 +3,16 @@
   "slug": "medical-conference",
   "displayName": "NoahAI medical conference query",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1775285315660,
-    "commit": "https://github.com/openclaw/skills/commit/945eb24ae8c626066f7a4a11b777c4eba8d30758"
+    "version": "1.0.8",
+    "publishedAt": 1776611123583,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1775285315660,
+      "commit": "https://github.com/openclaw/skills/commit/945eb24ae8c626066f7a4a11b777c4eba8d30758"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774508824680,
