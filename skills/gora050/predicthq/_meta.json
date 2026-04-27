@@ -3,11 +3,16 @@
   "slug": "predicthq",
   "displayName": "Predicthq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169749560,
-    "commit": "https://github.com/openclaw/skills/commit/a2f45f502a9eefe8b61e45c4cec34b082ce3e3ae"
+    "version": "1.0.3",
+    "publishedAt": 1776865811763,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169749560,
+      "commit": "https://github.com/openclaw/skills/commit/a2f45f502a9eefe8b61e45c4cec34b082ce3e3ae"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774898648590,
