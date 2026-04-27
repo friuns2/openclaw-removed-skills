@@ -3,11 +3,16 @@
   "slug": "newsletter-integration",
   "displayName": "Newsletter",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168163562,
-    "commit": "https://github.com/openclaw/skills/commit/d75a403d7e4a69379015234c6e1b657e49e5a09b"
+    "version": "1.0.3",
+    "publishedAt": 1776862092974,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168163562,
+      "commit": "https://github.com/openclaw/skills/commit/d75a403d7e4a69379015234c6e1b657e49e5a09b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580638577,
