@@ -3,11 +3,16 @@
   "slug": "bigtincan",
   "displayName": "Bigtincan",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169615026,
-    "commit": "https://github.com/openclaw/skills/commit/03f41f8e2789f92c3ec4d7faf540423e2c9ea740"
+    "version": "1.0.3",
+    "publishedAt": 1776885455084,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169615026,
+      "commit": "https://github.com/openclaw/skills/commit/03f41f8e2789f92c3ec4d7faf540423e2c9ea740"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774857851279,
