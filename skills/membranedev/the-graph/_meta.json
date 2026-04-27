@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "the-graph",
+  "displayName": "The Graph",
+  "latest": {
+    "version": "1.0.3",
+    "publishedAt": 1776858072125,
+    "commit": null
+  },
+  "history": []
+}
