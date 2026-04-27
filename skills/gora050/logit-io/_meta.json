@@ -3,11 +3,16 @@
   "slug": "logit-io",
   "displayName": "Logit Io",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169766124,
-    "commit": "https://github.com/openclaw/skills/commit/3bb5856e0edddf206bb2c6ffb16201a8b51d276b"
+    "version": "1.0.3",
+    "publishedAt": 1776864770165,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169766124,
+      "commit": "https://github.com/openclaw/skills/commit/3bb5856e0edddf206bb2c6ffb16201a8b51d276b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774904656670,
