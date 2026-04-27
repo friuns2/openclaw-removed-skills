@@ -3,11 +3,16 @@
   "slug": "hokodo",
   "displayName": "Hokodo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169002796,
-    "commit": "https://github.com/openclaw/skills/commit/dc7fa17b866f819abe536616c81c97eb2e4abee2"
+    "version": "1.0.3",
+    "publishedAt": 1776885025508,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169002796,
+      "commit": "https://github.com/openclaw/skills/commit/dc7fa17b866f819abe536616c81c97eb2e4abee2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774749786986,
