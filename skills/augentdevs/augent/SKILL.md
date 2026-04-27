@@ -1,13 +1,26 @@
 ---
 name: augent
-description: Audio intelligence toolkit. Transcribe, search by keyword or meaning, take notes, detect chapters, identify speakers, separate audio, export clips, tag, highlights, visual context, and text-to-speech — all local, all private. 21 MCP tools for audio and video.
+description: The audio & video layer for agents. 22 local MCP tools. No cloud, no API keys.
 homepage: https://github.com/AugentDevs/Augent
-metadata: {"openclaw":{"emoji":"🎙","os":["darwin","linux","win32"],"requires":{"bins":["augent-mcp","ffmpeg"]},"install":[{"id":"uv","kind":"uv","package":"augent","bins":["augent-mcp","augent","augent-web"],"label":"Install augent (uv)"},{"id":"pip","kind":"pip","package":"augent[all]","bins":["augent-mcp","augent","augent-web"],"label":"Install augent (pip)"}]}}
+env:
+  AUGENT_AUTH_TOKEN:
+    description: Optional. Path to Twitter/X auth token file for Spaces recording. Default ~/.augent/auth.json. Only needed for X/Twitter Spaces.
+    required: false
+  AUGENT_DOWNLOAD_DIR:
+    description: Directory for downloaded audio files. Default ~/Downloads/
+    required: false
+  AUGENT_NOTES_DIR:
+    description: Directory for notes, clips, and TTS output. Default ~/Desktop/
+    required: false
+  AUGENT_MEMORY_DIR:
+    description: Directory for persistent transcription memory. Default ~/.augent/memory/
+    required: false
+metadata: {"openclaw":{"emoji":"🎙","os":["darwin","linux","win32"],"requires":{"bins":["augent-mcp","ffmpeg","yt-dlp","aria2c"]},"install":[{"id":"uv","kind":"uv","package":"augent","bins":["augent-mcp","augent","augent-web"],"label":"Install augent (uv)"},{"id":"pip","kind":"pip","package":"augent[all]","bins":["augent-mcp","augent","augent-web"],"label":"Install augent (pip)"}]}}
 ---
 
-# Augent — Audio Intelligence for AI Agents
+# Augent — Audio & Video Intelligence for AI Agents
 
-Augent is an MCP server that gives your agent all audio intelligence tools. Transcribe, search, take notes, identify speakers, detect chapters, separate audio, export clips, and generate speech — fully local, fully private.
+Augent is an MCP server that gives your agent 22 tools for audio and video intelligence. Download from 1000+ sites via yt-dlp and aria2c, transcribe in 99 languages via faster-whisper, search by keyword or meaning via sentence-transformers, take notes, identify speakers via pyannote-audio, detect chapters, separate audio via Demucs v4, export clips, extract visual frames, record X/Twitter Spaces (requires user-configured auth token in `~/.augent/auth.json`), and generate speech via Kokoro TTS. All processing runs locally. Downloads are saved to `~/Downloads/`, notes and clips to `~/Desktop/`, transcription memory to `~/.augent/memory/`.
 
 ## Config
 
@@ -21,50 +34,15 @@ Augent is an MCP server that gives your agent all audio intelligence tools. Tran
 }
 ```
 
-If `augent-mcp` is not in PATH, use the full Python module path:
-
-```json
-{
-  "mcpServers": {
-    "augent": {
-      "command": "python3",
-      "args": ["-m", "augent.mcp"]
-    }
-  }
-}
-```
+If `augent-mcp` is not in PATH, use `python3 -m augent.mcp` as the command instead.
 
 ## Install
 
-**One-liner (recommended):** Installs augent, FFmpeg, yt-dlp, aria2, and configures MCP automatically.
-
-```bash
-curl -fsSL https://augent.app/install.sh | bash
-```
-
-**Via uv:**
-
-```bash
-uv tool install augent
-```
-
-For all features (semantic search, speaker diarization, TTS, source separation):
-
-```bash
-uv tool install "augent[all]"
-```
-
-**Via pip:**
-
-```bash
-pip install "augent[all]"
-```
-
-**System dependencies:** FFmpeg is required. Install with `brew install ffmpeg` (macOS) or `apt install ffmpeg` (Linux). For fast audio downloads, also install yt-dlp and aria2.
+Install via the ClawHub install button above, or use `uv tool install augent` for the base package or `uv tool install "augent[all]"` for all features. FFmpeg is required for audio processing.
 
 ## Tools
 
-Augent exposes 21 MCP tools:
+Augent exposes 22 MCP tools:
 
 ### Core
 
@@ -101,6 +79,7 @@ Augent exposes 21 MCP tools:
 | `highlights` | Export the best moments from a transcription. Auto mode picks top moments; focused mode finds moments matching a topic. |
 | `visual` | Extract visual context from video at moments that matter. Query, auto, manual, and assist modes. Frames saved to Obsidian vault. |
 | `rebuild_graph` | Rebuild Obsidian graph view data for all transcriptions. Migrates files, computes wikilinks, generates MOC hubs. |
+| `spaces` | Download or live-record X/Twitter Spaces. Start, check status, or stop recordings. |
 
 ## Usage Examples
 
@@ -170,18 +149,51 @@ When using `take_notes`, the `style` parameter controls formatting:
 | medium | Slow | Outstanding |
 | large | Slowest | Maximum |
 
-## Memory
+## File Paths
 
-Transcriptions are stored by file content hash + model size. Same file = instant results on repeat searches. Memory persists at `~/.augent/memory/transcriptions.db`. Source URLs from any platform are permanently stored by file hash. Use `memory_stats` to check usage and `clear_memory` to free space.
+Augent reads and writes to these locations on your machine:
+
+| Path | Purpose |
+|------|---------|
+| `~/Downloads/` | Default directory for downloaded audio files |
+| `~/Desktop/` | Default directory for notes, clips, and TTS output |
+| `~/.augent/memory/transcriptions.db` | SQLite database for persistent transcription memory |
+| `~/.augent/memory/transcriptions/` | Markdown files for each stored transcription |
+| `~/.augent/config.yaml` | User configuration (optional) |
+| `~/.augent/auth.json` | Twitter/X authentication cookies for Spaces recording (optional, user-created) |
+
+If Obsidian is installed, visual frames are saved to the Obsidian vault's `External Files/visual/` directory. The vault path is auto-detected from Obsidian's config.
+
+## Network Access
+
+Network access is used for two purposes only:
+
+1. Downloading media from user-provided URLs via yt-dlp and aria2c
+2. Downloading ML models on first use (Whisper, sentence-transformers, pyannote, Demucs, Kokoro) from Hugging Face
+
+No telemetry. No background network activity. No data is uploaded.
+
+## ML Dependencies
+
+The `augent[all]` install includes these local ML components:
+
+| Component | Purpose | Size |
+|-----------|---------|------|
+| faster-whisper | Speech-to-text transcription | ~75MB (tiny model) |
+| sentence-transformers | Semantic search, auto-tagging, chapter detection | ~90MB |
+| pyannote-audio | Speaker diarization | ~29MB |
+| Demucs v4 | Audio source separation (vocals from noise) | ~80MB |
+| Kokoro | Text-to-speech (54 voices, 9 languages) | ~200MB |
+
+All models run locally. None require API keys or cloud services.
 
 ## Requirements
 
 - Python 3.10+
 - FFmpeg (audio processing)
-- yt-dlp + aria2 (optional, for audio downloads)
+- yt-dlp + aria2c (for audio downloads)
 
 ## Links
 
 - [GitHub](https://github.com/AugentDevs/Augent)
 - [Documentation](https://docs.augent.app)
-- [Install Script](https://augent.app/install.sh)
