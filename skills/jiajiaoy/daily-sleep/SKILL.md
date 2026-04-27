@@ -1,6 +1,6 @@
 ---
 name: daily-sleep
-description: "每日睡眠助手 — 晨间唤醒引导+睡眠质量回顾，晚间睡前放松程序+助眠技巧，帮助改善睡眠质量、对抗失眠。Daily sleep coach — morning wake-up routine and sleep quality review, evening wind-down and sleep tips. Trigger on: 失眠、睡不好、助眠、睡眠、睡前放松、入睡困难、睡眠质量、sleep、insomnia、sleep aid、bedtime routine、can't sleep。"
+description: "Sleep better tonight — personalized wind-down routine, breathing exercises, bedtime stories, and sleep hygiene tips. Daily evening push for better rest."
 keywords:
   - 失眠
   - 睡不好

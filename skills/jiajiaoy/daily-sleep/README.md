@@ -1,6 +1,9 @@
-# Daily Sleep / 每日睡眠助手
+# Daily Sleep — Sleep Coach Skill
 
-> 睡眠助手 — 晨间唤醒 · 睡前放松 · 助眠引导 · 失眠改善
+> Morning wake-up routine + evening wind-down — science-backed tips for better sleep and insomnia relief.
+
+[![clawhub](https://img.shields.io/badge/clawhub-daily--sleep-blue)](https://clawhub.ai/skills/daily-sleep)
+[![openclaw](https://img.shields.io/badge/openclaw-skill-orange)](https://openclaw.ai)
 
 An [OpenClaw](https://openclaw.ai) skill that acts as your personal sleep coach — a morning wake-up routine to start the day energized, and an evening wind-down program to fall asleep naturally. Covers the largest health pain point: insomnia and poor sleep quality.
 
@@ -42,3 +45,11 @@ Supported channels: `telegram` / `feishu` / `slack` / `discord`
 ---
 
 *MIT License · OpenClaw Skill*
+
+## Keywords
+
+sleep · insomnia · sleep aid · bedtime routine · daily sleep · sleep coach · 失眠 · 睡不好 · 助眠 · 睡前放松 · 睡眠质量 · 入睡困难
+
+---
+
+Built for [OpenClaw](https://openclaw.ai) · Published on [clawhub.ai](https://clawhub.ai/skills/daily-sleep)

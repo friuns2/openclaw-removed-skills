@@ -3,9 +3,15 @@
   "slug": "daily-sleep",
   "displayName": "Daily Sleep",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775210145554,
-    "commit": "https://github.com/openclaw/skills/commit/4646ca644520861eeccc1852f0eb1aeda5772bce"
+    "version": "1.0.3",
+    "publishedAt": 1777287250013,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775210145554,
+      "commit": "https://github.com/openclaw/skills/commit/4646ca644520861eeccc1852f0eb1aeda5772bce"
+    }
+  ]
 }
