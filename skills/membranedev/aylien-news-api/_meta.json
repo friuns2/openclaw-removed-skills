@@ -3,11 +3,16 @@
   "slug": "aylien-news-api",
   "displayName": "Aylien News Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168201224,
-    "commit": "https://github.com/openclaw/skills/commit/e019d7ff28aaf4a84b2401c1c5fc9bd83f5a0011"
+    "version": "1.0.3",
+    "publishedAt": 1776852135078,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168201224,
+      "commit": "https://github.com/openclaw/skills/commit/e019d7ff28aaf4a84b2401c1c5fc9bd83f5a0011"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774584154283,
