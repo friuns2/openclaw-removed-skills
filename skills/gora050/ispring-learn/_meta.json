@@ -3,11 +3,16 @@
   "slug": "ispring-learn",
   "displayName": "Ispring Learn",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170474937,
-    "commit": "https://github.com/openclaw/skills/commit/7e478a6e9af728d9558101f9c74ba0785da5a065"
+    "version": "1.0.3",
+    "publishedAt": 1776893366476,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170474937,
+      "commit": "https://github.com/openclaw/skills/commit/7e478a6e9af728d9558101f9c74ba0785da5a065"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775030674379,
