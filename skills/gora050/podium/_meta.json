@@ -3,11 +3,16 @@
   "slug": "podium",
   "displayName": "Podium",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170649753,
-    "commit": "https://github.com/openclaw/skills/commit/af872fa1d51bf209ccf789623966078ae62b025a"
+    "version": "1.0.3",
+    "publishedAt": 1776865972281,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170649753,
+      "commit": "https://github.com/openclaw/skills/commit/af872fa1d51bf209ccf789623966078ae62b025a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775088229589,
