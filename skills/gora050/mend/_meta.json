@@ -3,11 +3,16 @@
   "slug": "mend",
   "displayName": "Mend",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168277957,
-    "commit": "https://github.com/openclaw/skills/commit/a0f8b3baf58cafc2194464540e671403ca9dcc47"
+    "version": "1.0.3",
+    "publishedAt": 1776865588058,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168277957,
+      "commit": "https://github.com/openclaw/skills/commit/a0f8b3baf58cafc2194464540e671403ca9dcc47"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774598618012,
