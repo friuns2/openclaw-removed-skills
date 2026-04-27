@@ -3,9 +3,15 @@
   "slug": "tripetto",
   "displayName": "Tripetto",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286411770,
-    "commit": "https://github.com/openclaw/skills/commit/eff586b7d7015843114fc0d3bb2862fe4fa50042"
+    "version": "1.0.1",
+    "publishedAt": 1776885642179,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286411770,
+      "commit": "https://github.com/openclaw/skills/commit/eff586b7d7015843114fc0d3bb2862fe4fa50042"
+    }
+  ]
 }
