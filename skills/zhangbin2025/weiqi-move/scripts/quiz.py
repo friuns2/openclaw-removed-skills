@@ -399,7 +399,10 @@ def generate_quiz_html(problems: List[Problem], game_info: Dict, sgf_content: st
             })
         
         # 随机打乱选项顺序，使正确答案位置不固定
-        random.shuffle(options)
+        # 使用基于题目内容的确定性种子，确保相同数据生成相同结果
+        shuffle_seed = p.move_num + sum(ord(c) for c in (options[0]['coord'] if options else 'A'))
+        rng = random.Random(shuffle_seed)
+        rng.shuffle(options)
         
         # 重新分配字母标签
         for j, opt in enumerate(options):
@@ -462,10 +465,21 @@ def generate_quiz_html(problems: List[Problem], game_info: Dict, sgf_content: st
     board_size = int(game_info.get('board_size', 19))
     handicap_stones = game_info.get('handicap_stones', [])
     
+    # 标题优先使用比赛名称(GN)，如果没有则使用棋手对局
+    game_name = game_info.get('game_name', '').strip()
+    if not game_name or game_name == '围棋棋谱':
+        game_title = f"{game_info.get('black', '黑棋')} vs {game_info.get('white', '白棋')}"
+    else:
+        game_title = game_name
+    
+    # 副标题显示棋手和结果信息
+    players = f"{game_info.get('black', '黑棋')} vs {game_info.get('white', '白棋')}"
+    date_result = f"{game_info.get('date', '')} {game_info.get('result', '')}".strip()
+    
     template_vars = {
-        'GAME_NAME': game_info.get('game_name', '围棋实战选点'),
-        'GAME_TITLE': f"{game_info.get('black', '黑棋')} vs {game_info.get('white', '白棋')}",
-        'GAME_INFO': f"{game_info.get('date', '')} {game_info.get('result', '')}",
+        'GAME_NAME': game_title,
+        'GAME_TITLE': game_title,
+        'GAME_INFO': f"{players} {date_result}".strip(),
         'BLACK_NAME': game_info.get('black', '黑棋'),
         'WHITE_NAME': game_info.get('white', '白棋'),
         'BOARD_SIZE': board_size,
@@ -556,6 +570,7 @@ def main():
         print(f"解析警告: {parse_info['errors']}")
     
     print(f"棋局: {game_info.get('black', '黑棋')} vs {game_info.get('white', '白棋')}")
+    print(f"结果: {game_info.get('result', '')}")
     print(f"主分支手数: {len(moves)}")
     print(f"变化图数量: {sum(len(v) for v in variations.values())}")
     

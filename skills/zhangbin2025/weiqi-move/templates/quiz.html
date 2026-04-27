@@ -18,44 +18,110 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding: 6px;
+            padding: 0;
         }
         .container {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            padding: 8px;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 4px;
             max-width: 100%;
             width: 100%;
+            min-height: 100vh;
         }
         .header {
             text-align: center;
             margin-bottom: 8px;
         }
         .header h1 {
-            font-size: 15px;
+            font-size: 18px;
             color: #333;
-            margin-bottom: 2px;
-            line-height: 1.2;
+            margin-bottom: 4px;
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .header .info {
             color: #666;
-            font-size: 11px;
-            line-height: 1.3;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .player-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #555;
+        }
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .player-stone {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .player-stone.black {
+            background: radial-gradient(circle at 30% 30%, #666, #000);
+        }
+        .player-stone.white {
+            background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+            border: 1px solid #ddd;
+        }
+        .player-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
         }
         .problem-info {
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin-top: 6px;
+            margin-top: 10px;
             flex-wrap: wrap;
         }
         .tag {
             display: inline-block;
-            padding: 2px 8px;
+            padding: 3px 10px;
             border-radius: 10px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
+        }
+        /* 行棋方指示器标签 */
+        .turn-indicator-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #333;
+            color: white;
+        }
+        .turn-indicator-tag.white-turn {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .turn-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .turn-dot.black {
+            background: radial-gradient(circle at 30% 30%, #666, #000);
+        }
+        .turn-dot.white {
+            background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+            border: 1px solid #ddd;
         }
         .tag-phase-layout { background: #4CAF50; color: white; }
         .tag-phase-middle { background: #2196F3; color: white; }
@@ -67,9 +133,10 @@
         .board-container {
             display: flex;
             justify-content: center;
-            margin: 10px 0;
+            margin: 8px 0;
             position: relative;
             width: 100%;
+            padding: 0;
         }
         #board {
             border-radius: 4px;
@@ -137,12 +204,12 @@
             color: #333;
         }
         .btn-icon {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             padding: 0;
-            font-size: 16px;
-            min-width: 36px;
+            font-size: 14px;
+            min-width: 32px;
         }
         
         /* 主面板 */
@@ -151,30 +218,64 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            margin: 12px 0;
-            flex-wrap: wrap;
+            margin: 8px 0;
+            flex-wrap: nowrap;
+            overflow-x: auto;
         }
         .main-panel-left {
             display: flex;
             align-items: center;
-            gap: 6px;
-            flex: 1;
-            min-width: 140px;
+            gap: 4px;
+            flex: 0 0 auto;
         }
         .main-panel-center {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        .main-panel-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 0 0 auto;
         }
         #moveSlider {
             flex: 1;
-            min-width: 80px;
+            min-width: 40px;
+            width: 100%;
+        }
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            transition: gap 0.2s ease;
+        }
+        .nav-buttons.expanded {
+            gap: 8px;
+        }
+        .extra-buttons {
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .extra-buttons.visible {
+            display: flex;
+        }
+        #moreBtn {
+            background: #f0f0f0;
+            transition: all 0.2s ease;
+        }
+        #moreBtn.active {
+            background: #667eea;
+            color: white;
         }
         
         /* 变化图面板 */
         .variation-panel {
             display: none;
-            margin: 12px 0;
+            margin: 8px 0;
         }
         .variation-panel.active {
             display: block;
@@ -182,7 +283,7 @@
         .variation-header {
             display: flex;
             align-items: flex-start;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 12px;
         }
         .variation-options {
@@ -195,14 +296,62 @@
         .variation-controls {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-around;
+            padding: 0 20px;
+        }
+        
+        /* 变化图提示 */
+        .variation-hint {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 8px;
+            animation: slideDown 0.3s ease;
+        }
+        .variation-hint.hidden {
+            display: none;
+        }
+        .variation-hint-text {
+            flex: 1;
+        }
+        .variation-hint-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .variation-hint-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         /* 试下模式面板 */
         .tryplay-panel {
             display: none;
-            margin: 12px 0;
+            margin: 8px 0;
         }
         .tryplay-panel.active {
             display: block;
@@ -211,7 +360,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 24px;
         }
         
         .progress-text {
@@ -223,9 +372,9 @@
         .legend {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-top: 10px;
-            padding-top: 10px;
+            align-items: center;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 1px solid #eee;
         }
         .legend-item {
@@ -235,9 +384,38 @@
             font-size: 14px;
             color: #555;
         }
+        .problem-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .problem-nav .progress-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+        .problem-nav .btn-text {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .problem-nav .btn-text:hover {
+            background: #e0e0e0;
+        }
+        .problem-nav .btn-text:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .stone-black, .stone-white {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
         }
         .stone-black {
@@ -248,12 +426,106 @@
             border: 1px solid #ddd;
         }
         @media (min-width: 600px) {
+            body {
+                padding: 8px;
+            }
             .container {
                 max-width: 500px;
                 padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            }
+            .header {
+                margin-bottom: 20px;
             }
             .header h1 {
-                font-size: 18px;
+                font-size: 22px;
+                margin-bottom: 6px;
+            }
+            .header .info {
+                font-size: 13px;
+                line-height: 1.5;
+                margin-bottom: 10px;
+            }
+            .player-info {
+                gap: 24px;
+                margin-bottom: 10px;
+                font-size: 14px;
+            }
+            .player-stone {
+                width: 16px;
+                height: 16px;
+            }
+            .player-name {
+                max-width: 180px;
+            }
+            .problem-info {
+                gap: 10px;
+                margin-top: 12px;
+            }
+            .tag {
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 13px;
+            }
+            .turn-indicator-tag {
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 13px;
+                gap: 6px;
+            }
+            .turn-dot {
+                width: 14px;
+                height: 14px;
+            }
+            .btn-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+                min-width: 36px;
+            }
+            .board-container {
+                margin: 20px 0;
+            }
+            .main-panel {
+                margin: 20px 0;
+                gap: 12px;
+            }
+            .nav-buttons {
+                gap: 12px;
+            }
+            .legend {
+                margin-top: 20px;
+                padding-top: 20px;
+                gap: 20px;
+            }
+            .legend-item {
+                font-size: 15px;
+                gap: 10px;
+            }
+            .problem-nav .progress-text {
+                font-size: 15px;
+            }
+            .problem-nav .btn-text {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            .stone-black, .stone-white {
+                width: 24px;
+                height: 24px;
+            }
+            .variation-panel, .tryplay-panel {
+                margin: 16px 0;
+            }
+            .variation-header {
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            .variation-options {
+                gap: 10px;
+            }
+            .variation-controls {
+                gap: 12px;
             }
         }
     </style>
@@ -263,9 +535,24 @@
         <div class="header">
             <h1 id="gameTitle">{{GAME_TITLE}}</h1>
             <div class="info" id="gameInfo"> </div>
+            <div class="player-info" id="playerInfo">
+                <div class="player-item">
+                    <div class="player-stone black"></div>
+                    <span class="player-name" id="blackName">{{BLACK_NAME}}</span>
+                </div>
+                <div class="player-item">
+                    <div class="player-stone white"></div>
+                    <span class="player-name" id="whiteName">{{WHITE_NAME}}</span>
+                </div>
+            </div>
             <div class="problem-info" id="problemInfo">
                 <span class="tag tag-phase-middle" id="phaseTag">中盘</span>
                 <span class="tag tag-difficulty-medium" id="difficultyTag">中等</span>
+                <span style="flex: 1;"></span>
+                <span class="turn-indicator-tag" id="turnIndicatorTag">
+                    <span class="turn-dot black" id="turnDot"></span>
+                    <span id="turnTagText">黑下</span>
+                </span>
             </div>
         </div>
 
@@ -275,20 +562,17 @@
 
         <!-- 主面板 -->
         <div class="main-panel" id="mainPanel">
-            <div class="main-panel-left">
-                <button class="btn btn-icon" onclick="prevMove()" title="上一手">◀</button>
+            <div class="main-panel-center" style="flex: 1;">
                 <input type="range" id="moveSlider" min="0" max="0" value="0" oninput="goToMove(this.value)">
-                <button class="btn btn-icon" onclick="nextMove()" title="下一手">▶</button>
-            </div>
-            <div class="main-panel-center">
-                <button class="btn btn-icon" onclick="prevProblem()" id="prevProblemBtn" title="上一题">⬅️</button>
-                <span class="progress-text" id="progressText">1 / {{TOTAL_PROBLEMS}}</span>
-                <button class="btn btn-icon" onclick="nextProblem()" id="nextProblemBtn" title="下一题">➡️</button>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span id="turnIndicator" style="font-size: 12px; color: #666; white-space: nowrap;">当前：黑棋下</span>
-                <button class="btn btn-icon" id="soundToggleBtn" onclick="toggleSound()" title="音效开关" style="background: #f0f0f0;">🔊</button>
-                <button class="btn btn-icon" onclick="saveToSGF()" title="保存SGF" style="background: #f0f0f0;">💾</button>
+                <div class="nav-buttons" id="navButtons">
+                    <button class="btn btn-icon" onclick="prevMove()" title="上一手">◀</button>
+                    <button class="btn btn-icon" onclick="nextMove()" title="下一手">▶</button>
+                    <div class="extra-buttons" id="extraButtons">
+                        <button class="btn btn-icon" id="soundToggleBtn" onclick="toggleSound()" title="音效开关">🔊</button>
+                        <button class="btn btn-icon" onclick="saveToSGF()" title="保存SGF">💾</button>
+                    </div>
+                    <button class="btn btn-icon" id="moreBtn" onclick="toggleMorePanel()" title="更多">⋮</button>
+                </div>
             </div>
         </div>
 
@@ -298,7 +582,12 @@
                 <div class="variation-options" id="variationOptions" style="flex: 1; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start;"></div>
                 <button class="btn btn-icon btn-danger" onclick="backToMain()" title="返回主面板" style="flex-shrink: 0;">↩</button>
             </div>
-            <div class="variation-controls" id="variationControls" style="display: none; justify-content: center; align-items: center; gap: 8px;">
+            <!-- 变化图提示 -->
+            <div class="variation-hint" id="variationHint">
+                <span class="variation-hint-text">👆 点击上方按钮查看变化图</span>
+                <button class="variation-hint-close" onclick="hideVariationHint()" title="知道了">✕</button>
+            </div>
+            <div class="variation-controls" id="variationControls" style="display: none;">
                 <button class="btn btn-icon" onclick="varPrev()" title="上一步">◀</button>
                 <span id="varProgress">0 / 0</span>
                 <button class="btn btn-icon" onclick="varNext()" title="下一步">▶</button>
@@ -319,13 +608,10 @@
         </div>
 
         <div class="legend">
-            <div class="legend-item">
-                <div class="stone-black"></div>
-                <span id="blackName">{{BLACK_NAME}}</span>
-            </div>
-            <div class="legend-item">
-                <div class="stone-white"></div>
-                <span id="whiteName">{{WHITE_NAME}}</span>
+            <div class="problem-nav">
+                <span class="progress-text" id="progressText">1 / {{TOTAL_PROBLEMS}}</span>
+                <button class="btn-text" onclick="prevProblem()" id="prevProblemBtn">上一题</button>
+                <button class="btn-text" onclick="nextProblem()" id="nextProblemBtn">下一题</button>
             </div>
         </div>
     </div>
@@ -511,6 +797,10 @@
         let currentProblemIndex = 0;
         let currentProblem = problems[0];
         
+        // 变化图提示状态
+        const VARIATION_HINT_KEY = 'weiqi_move_variation_hint_seen';
+        let variationHintShown = localStorage.getItem(VARIATION_HINT_KEY) === 'true';
+        
         // 状态管理
         const STATE_MAIN = 'main';        // 主面板状态
         const STATE_VARIATION = 'variation';  // 变化图状态
@@ -609,16 +899,38 @@
 
         function resizeCanvas() {
             const container = document.querySelector('.board-container');
-            const isMobile = window.innerWidth < 768;
-            const margin = isMobile ? 4 : 20;
-            const availableWidth = Math.min(container.clientWidth, window.innerWidth) - margin;
-            const availableHeight = window.innerHeight - 350;
-            const maxSize = Math.min(availableWidth, availableHeight, isMobile ? 760 : 600);
-            const size = Math.max(isMobile ? 320 : 400, maxSize);
-            canvas.width = size;
-            canvas.height = size;
-            canvas.style.width = size + 'px';
-            canvas.style.height = size + 'px';
+            const isMobile = window.innerWidth < 600;
+            
+            // 获取容器宽度
+            const containerWidth = container.clientWidth;
+            const windowWidth = window.innerWidth;
+            
+            // 计算可用空间
+            // 小屏幕：几乎不留边距，最大化棋盘
+            const sideMargin = isMobile ? 0 : 20;
+            const availableWidth = Math.min(containerWidth, windowWidth) - sideMargin;
+            
+            // 计算高度空间：减去头部、控制面板、图例等预估高度
+            // 小屏幕：头部约 50px，主面板约 40px，图例约 30px，其他间距约 20px
+            const reservedHeight = isMobile ? 140 : 220;
+            const availableHeight = window.innerHeight - reservedHeight;
+            
+            // 取宽高中较小值，确保棋盘完整显示
+            let boardSize = Math.min(availableWidth, availableHeight);
+            
+            // 限制最大尺寸（大屏幕）
+            if (!isMobile && boardSize > 600) {
+                boardSize = 600;
+            }
+            
+            // 确保最小尺寸
+            const minSize = isMobile ? 300 : 400;
+            boardSize = Math.max(minSize, boardSize);
+            
+            canvas.width = boardSize;
+            canvas.height = boardSize;
+            canvas.style.width = boardSize + 'px';
+            canvas.style.height = boardSize + 'px';
             updateDisplay();
         }
 
@@ -711,7 +1023,7 @@
             const cx = margin + x * gridSize;
             const cy = margin + y * gridSize;
             
-            const fontSize = Math.floor(gridSize * 0.9);
+            const fontSize = Math.floor(gridSize * 0.8);
             ctx.font = `bold ${fontSize}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -799,7 +1111,13 @@
                 // 应用所有试下着法到棋盘
                 for (let i = 0; i < tryIndex && i < tryMoves.length; i++) {
                     const move = tryMoves[i];
-                    applyMove(board, move);
+                    board[move.y][move.x] = move.color;
+                    // 使用记录的提子位置移除被提棋子
+                    if (move.capturedPositions) {
+                        for (const cap of move.capturedPositions) {
+                            board[cap.y][cap.x] = null;
+                        }
+                    }
                 }
                 // 记录每个试下位置的状态（用于手数标记）
                 tryMoveMap = new Map();
@@ -815,43 +1133,15 @@
                 }
             }
             
-            // 绘制所有棋子（基于应用完所有着法后的 board 状态）
-            for (let y = 0; y < BOARD_SIZE; y++) {
-                for (let x = 0; x < BOARD_SIZE; x++) {
-                    if (board[y][x]) {
-                        const key = `${x},${y}`;
-                        
-                        if (currentState === STATE_VARIATION && varMoveMap) {
-                            // 变化图状态：检查是否是变化图着法
-                            const varMove = varMoveMap.get(key);
-                            if (varMove && varMove.color === board[y][x]) {
-                                drawStone(x, y, board[y][x], varMove.moveNum === varIndex, varMove.moveNum.toString());
-                            } else {
-                                // 题目棋子
-                                const isLast = lastStonePos && lastStonePos.x === x && lastStonePos.y === y;
-                                drawStone(x, y, board[y][x], isLast);
-                            }
-                        } else if (currentState === STATE_TRYPLAY && tryMoveMap) {
-                            // 试下状态：检查是否是试下着法
-                            const tryMove = tryMoveMap.get(key);
-                            if (tryMove && tryMove.color === board[y][x]) {
-                                drawStone(x, y, board[y][x], tryMove.moveNum === tryIndex, tryMove.moveNum.toString());
-                            } else {
-                                // 题目棋子
-                                const isLast = lastStonePos && lastStonePos.x === x && lastStonePos.y === y;
-                                drawStone(x, y, board[y][x], isLast);
-                            }
-                        } else {
-                            // 主面板状态
-                            const isLast = lastStonePos && lastStonePos.x === x && lastStonePos.y === y;
-                            drawStone(x, y, board[y][x], isLast);
-                        }
-                    }
-                }
-            }
+            // 绘制ABCD标记（在当前做题局面显示，浏览历史时不显示）
+            // 变化图选择界面也显示ABCD，进入具体变化图后隐藏
+            // 注意：ABCD在棋子之前绘制，让棋子覆盖在文字上
+            const isVariationSelection = currentState === STATE_VARIATION && 
+                document.getElementById('variationOptions').style.display !== 'none';
+            const shouldShowOptions = (currentState === STATE_MAIN || currentState === STATE_TRYPLAY || isVariationSelection) && currentMove === position.length;
             
-            // 绘制ABCD标记（仅在当前做题局面显示，浏览历史时不显示）
-            if ((currentState === STATE_MAIN || currentState === STATE_TRYPLAY) && currentMove === position.length) {
+            // 先绘制ABCD标记（在棋子下方）
+            if (shouldShowOptions) {
                 currentProblem.options.forEach((opt, idx) => {
                     const pos = coordToPos(opt.coord);
                     if (pos) {
@@ -867,6 +1157,36 @@
                     }
                 });
             }
+            
+            // 再绘制棋子（覆盖在ABCD上）
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                for (let x = 0; x < BOARD_SIZE; x++) {
+                    if (board[y][x]) {
+                        const key = `${x},${y}`;
+                        
+                        if (currentState === STATE_VARIATION && varMoveMap) {
+                            const varMove = varMoveMap.get(key);
+                            if (varMove && varMove.color === board[y][x]) {
+                                drawStone(x, y, board[y][x], varMove.moveNum === varIndex, varMove.moveNum.toString());
+                            } else {
+                                const isLast = lastStonePos && lastStonePos.x === x && lastStonePos.y === y;
+                                drawStone(x, y, board[y][x], isLast);
+                            }
+                        } else if (currentState === STATE_TRYPLAY && tryMoveMap) {
+                            const tryMove = tryMoveMap.get(key);
+                            if (tryMove && tryMove.color === board[y][x]) {
+                                drawStone(x, y, board[y][x], tryMove.moveNum === tryIndex, tryMove.moveNum.toString());
+                            } else {
+                                const isLast = lastStonePos && lastStonePos.x === x && lastStonePos.y === y;
+                                drawStone(x, y, board[y][x], isLast);
+                            }
+                        } else {
+                            const isLast = lastStonePos && lastStonePos.x === x && lastStonePos.y === y;
+                            drawStone(x, y, board[y][x], isLast);
+                        }
+                    }
+                }
+            }
         }
 
         function coordToPos(coord) {
@@ -879,8 +1199,10 @@
 
         // ==================== 当前行棋方显示 ====================
         function updateTurnIndicator() {
-            const indicator = document.getElementById('turnIndicator');
-            if (!indicator) return;
+            const tag = document.getElementById('turnIndicatorTag');
+            const dot = document.getElementById('turnDot');
+            const text = document.getElementById('turnTagText');
+            if (!tag || !dot || !text) return;
             
             const position = currentProblem ? currentProblem.position : [];
             let nextColor = 'B'; // B=黑, W=白
@@ -900,10 +1222,16 @@
                 }
             }
             
-            // 简洁显示：棋子图标 + 黑先/白先
-            const stoneIcon = nextColor === 'B' ? '⚫' : '⚪';
-            const turnText = nextColor === 'B' ? '黑下' : '白下';
-            indicator.innerHTML = `${stoneIcon} ${turnText}`;
+            // 更新行棋方指示器标签
+            if (nextColor === 'B') {
+                tag.className = 'turn-indicator-tag';
+                dot.className = 'turn-dot black';
+                text.textContent = '黑下';
+            } else {
+                tag.className = 'turn-indicator-tag white-turn';
+                dot.className = 'turn-dot white';
+                text.textContent = '白下';
+            }
         }
 
         // ==================== 音效开关 ====================
@@ -913,6 +1241,16 @@
             if (btn) {
                 btn.textContent = soundEnabled ? '🔊' : '🔇';
             }
+        }
+
+        // ==================== 更多按钮面板 ====================
+        function toggleMorePanel() {
+            const panel = document.getElementById('extraButtons');
+            const btn = document.getElementById('moreBtn');
+            const navButtons = document.getElementById('navButtons');
+            panel.classList.toggle('visible');
+            btn.classList.toggle('active');
+            navButtons.classList.toggle('expanded');
         }
 
         // ==================== 打谱控制 ====================
@@ -989,8 +1327,33 @@
             if (document.getElementById('variationHeader')) {
                 document.getElementById('variationHeader').style.display = 'flex';
             }
+            
+            // 显示或隐藏变化图提示
+            updateVariationHint();
 
             updateDisplay();
+        }
+        
+        // 更新变化图提示显示
+        function updateVariationHint() {
+            const hint = document.getElementById('variationHint');
+            if (hint) {
+                if (variationHintShown) {
+                    hint.classList.add('hidden');
+                } else {
+                    hint.classList.remove('hidden');
+                }
+            }
+        }
+        
+        // 隐藏变化图提示
+        function hideVariationHint() {
+            const hint = document.getElementById('variationHint');
+            if (hint) {
+                hint.classList.add('hidden');
+            }
+            variationHintShown = true;
+            localStorage.setItem(VARIATION_HINT_KEY, 'true');
         }
 
         function showTryplayPanel() {
@@ -1037,13 +1400,26 @@
                 }
                 practicalBtn.className = practicalClass;
                 
-                // 构建按钮文字：实战 (胜率%) [✗如果是恶手]
+                // 检查实战落子是否命中ABCD选点
+                const practicalCoord = currentProblem.practical_move.coord;
+                let matchedLetter = null;
+                for (const opt of currentProblem.options) {
+                    if (opt.coord === practicalCoord) {
+                        matchedLetter = opt.letter;
+                        break;
+                    }
+                }
+                
+                // 构建按钮文字
                 let practicalMark = currentProblem.practical_move.is_blunder ? ' ✗' : '';
                 // 检查胜率是否有效（不是N/A、不是空字符串、不是undefined）
                 const winrate = currentProblem.practical_move.winrate;
                 const hasValidWinrate = winrate && winrate !== 'N/A' && winrate !== '';
                 const practicalWinrateText = hasValidWinrate ? ` ${winrate}` : '';
-                practicalBtn.textContent = `实战${practicalWinrateText}${practicalMark}`;
+                
+                // 如果命中选点，显示"实战A/B/C/D"，否则显示"实战"
+                const practicalLabel = matchedLetter ? `实战${matchedLetter}` : '实战';
+                practicalBtn.textContent = `${practicalLabel}${practicalWinrateText}${practicalMark}`;
                 practicalBtn.onclick = () => loadPracticalVariation();
                 container.appendChild(practicalBtn);
             }
@@ -1084,6 +1460,7 @@
         // 加载实战变化图
         function loadPracticalVariation() {
             if (!currentProblem.practical_move) return;
+            hideVariationHint();  // 用户点击后隐藏提示
             
             // 计算变化图着法的提子情况
             const board = createBoard();
@@ -1134,6 +1511,7 @@
         }
 
         function loadVariation(idx) {
+            hideVariationHint();  // 用户点击后隐藏提示
             const opt = currentProblem.options[idx];
             currentVariationOption = idx;
 
@@ -1206,6 +1584,7 @@
             currentVariationOption = null;
             tryMoves = [];
             tryIndex = 0;
+            tryKoPosition = null;
             showMainPanel();
         }
 
@@ -1238,8 +1617,105 @@
         }
 
         // ==================== 试下功能 ====================
-        // 获取当前试下状态的棋盘（包含题目棋子和已试下的棋子）
-        function getTryPlayBoard() {
+        // 试下状态变量
+        let tryKoPosition = null;  // 记录打劫位置
+        
+        // 在棋盘上查找棋子组
+        function findGroupOnBoard(board, startX, startY, color) {
+            const group = [];
+            const visited = new Set();
+            const stack = [{x: startX, y: startY}];
+            while (stack.length > 0) {
+                const {x, y} = stack.pop();
+                const key = `${x},${y}`;
+                if (visited.has(key)) continue;
+                visited.add(key);
+                if (board[y][x] === color) {
+                    group.push({x, y});
+                    for (const [nx, ny] of getNeighbors(x, y)) {
+                        stack.push({x: nx, y: ny});
+                    }
+                }
+            }
+            return group;
+        }
+        
+        // 计算棋子组的气数
+        function countLibertiesOnBoard(board, group) {
+            const liberties = new Set();
+            for (const stone of group) {
+                const neighbors = getNeighbors(stone.x, stone.y);
+                for (const [nx, ny] of neighbors) {
+                    if (ny >= 0 && ny < BOARD_SIZE && nx >= 0 && nx < BOARD_SIZE) {
+                        if (board[ny][nx] === null) {
+                            liberties.add(`${nx},${ny}`);
+                        }
+                    }
+                }
+            }
+            return liberties.size;
+        }
+        
+        // 在棋盘上移除死棋
+        function removeDeadStonesOnBoard(board, x, y, color) {
+            const opponent = color === 'black' ? 'white' : 'black';
+            const captured = [];
+            const checked = new Set();
+            for (const [nx, ny] of getNeighbors(x, y)) {
+                if (board[ny][nx] === opponent) {
+                    const key = `${nx},${ny}`;
+                    if (checked.has(key)) continue;
+                    const group = findGroupOnBoard(board, nx, ny, opponent);
+                    for (const s of group) checked.add(`${s.x},${s.y}`);
+                    if (countLibertiesOnBoard(board, group) === 0) {
+                        for (const s of group) {
+                            captured.push({x: s.x, y: s.y});
+                            board[s.y][s.x] = null;
+                        }
+                    }
+                }
+            }
+            return captured;
+        }
+        
+        // 检查是否是禁入点（自杀）
+        function isSuicideOnBoard(board, x, y, color) {
+            const opponent = color === 'black' ? 'white' : 'black';
+            board[y][x] = color;
+            let canCapture = false;
+            const checked = new Set();
+            for (const [nx, ny] of getNeighbors(x, y)) {
+                if (board[ny][nx] === opponent) {
+                    const key = `${nx},${ny}`;
+                    if (!checked.has(key)) {
+                        const group = findGroupOnBoard(board, nx, ny, opponent);
+                        for (const s of group) checked.add(`${s.x},${s.y}`);
+                        if (countLibertiesOnBoard(board, group) === 0) canCapture = true;
+                    }
+                }
+            }
+            const myGroup = findGroupOnBoard(board, x, y, color);
+            const myLiberties = countLibertiesOnBoard(board, myGroup);
+            board[y][x] = null;
+            return myLiberties === 0 && !canCapture;
+        }
+        
+        // 检查打劫
+        function checkKoOnBoard(board, x, y, color, captured) {
+            if (captured.length !== 1) return null;
+            const opponent = color === 'black' ? 'white' : 'black';
+            const capturedPos = captured[0];
+            board[capturedPos.y][capturedPos.x] = opponent;
+            const myGroup = findGroupOnBoard(board, x, y, color);
+            const myLiberties = countLibertiesOnBoard(board, myGroup);
+            const canBeCaptured = myLiberties === 0 && myGroup.length === 1;
+            board[capturedPos.y][capturedPos.x] = null;
+            if (canBeCaptured) return {x: capturedPos.x, y: capturedPos.y};
+            return null;
+        }
+        
+        // 从题目着法和试下着法构建完整棋盘
+        function buildBoardFromMoves() {
             const board = createBoard();
             const position = currentProblem ? currentProblem.position : [];
             
@@ -1249,14 +1725,27 @@
                 const color = move.color === 'B' ? 'black' : 'white';
                 const pos = coordToPos(move.coord);
                 if (pos) {
-                    applyMove(board, { color, x: pos.x, y: pos.y });
+                    board[pos.y][pos.x] = color;
+                    removeDeadStonesOnBoard(board, pos.x, pos.y, color);
                 }
             }
+            
+            return board;
+        }
+        
+        // 获取当前试下状态的棋盘（包含题目棋子和已试下的棋子）
+        function getTryPlayBoard() {
+            const board = buildBoardFromMoves();
             
             // 应用已试下的棋子
             for (let i = 0; i < tryIndex && i < tryMoves.length; i++) {
                 const move = tryMoves[i];
-                applyMove(board, move);
+                board[move.y][move.x] = move.color;
+                if (move.capturedPositions) {
+                    for (const cap of move.capturedPositions) {
+                        board[cap.y][cap.x] = null;
+                    }
+                }
             }
             
             return board;
@@ -1268,44 +1757,47 @@
         }
         
         function startTryPlay(x, y) {
-            // 检查位置是否已有棋子
-            const board = createBoard();
-            const position = currentProblem.position;
-
-            // 应用题目棋子到棋盘
-            for (let i = 0; i < position.length; i++) {
-                const move = position[i];
-                const color = move.color === 'B' ? 'black' : 'white';
-                const pos = coordToPos(move.coord);
-                if (pos) {
-                    applyMove(board, { color, x: pos.x, y: pos.y });
-                }
-            }
-
+            // 使用完整棋盘状态检查
+            const board = buildBoardFromMoves();
+            
             // 检查目标位置是否为空
             if (board[y][x] !== null) {
                 return; // 位置已有棋子，不能试下
             }
-
+            
             // 获取当前要下的颜色
+            const position = currentProblem.position;
             const lastColor = position.length > 0 ? position[position.length - 1].color : 'B';
             const nextColor = lastColor === 'B' ? 'white' : 'black';
-
-            // 应用第一手并获取提子数量
-            const result = applyMove(board, { color: nextColor, x, y });
-
+            
+            // 检查禁入点（自杀）
+            if (isSuicideOnBoard(board, x, y, nextColor)) {
+                return; // 禁入点，不能落子
+            }
+            
+            // 落子并获取提子
+            board[y][x] = nextColor;
+            const captured = removeDeadStonesOnBoard(board, x, y, nextColor);
+            
+            // 检查打劫
+            const koPos = checkKoOnBoard(board, x, y, nextColor, captured);
+            if (koPos) {
+                tryKoPosition = koPos;
+            }
+            
             tryMoves = [{
                 color: nextColor,
                 x: x,
                 y: y,
-                captured: result.captured
+                captured: captured.length,
+                capturedPositions: captured.map(c => ({x: c.x, y: c.y}))
             }];
             tryIndex = 1;
             document.getElementById('tryProgress').textContent = `${tryIndex}/${tryMoves.length}`;
 
             // 播放音效
-            if (result.captured > 0) {
-                if (result.captured >= 3) playMultiCaptureSound(result.captured);
+            if (captured.length > 0) {
+                if (captured.length >= 3) playMultiCaptureSound(captured.length);
                 else playCaptureSound();
             } else {
                 playStoneSound();
@@ -1322,6 +1814,11 @@
             if (!isEmptyPosition(board, x, y)) {
                 return; // 位置已有棋子，不能落子
             }
+            
+            // 检查打劫
+            if (tryKoPosition && tryKoPosition.x === x && tryKoPosition.y === y) {
+                return; // 打劫位置，不能立即回提
+            }
 
             // 获取下一手颜色
             let nextColor;
@@ -1334,43 +1831,41 @@
                 const lastMove = tryMoves[tryIndex - 1];
                 nextColor = lastMove.color === 'black' ? 'white' : 'black';
             }
+            
+            // 检查禁入点（自杀）
+            if (isSuicideOnBoard(board, x, y, nextColor)) {
+                return; // 禁入点，不能落子
+            }
 
             // 如果当前不是在最后一步，则清除后续着法
-            // 当 tryIndex=0 时，清除所有旧着法，开始新的试下序列
             if (tryIndex < tryMoves.length) {
                 tryMoves = tryMoves.slice(0, tryIndex);
+                tryKoPosition = null; // 清除打劫记录，因为分支改变了
             }
 
-            // 应用落子并获取提子数量
-            const boardCopy = createBoard();
-            const position = currentProblem.position;
-            for (let i = 0; i < position.length; i++) {
-                const move = position[i];
-                const color = move.color === 'B' ? 'black' : 'white';
-                const pos = coordToPos(move.coord);
-                if (pos) {
-                    applyMove(boardCopy, { color, x: pos.x, y: pos.y });
-                }
-            }
-            // 使用 tryIndex 而不是 tryMoves.length，因为前面可能已经截断了数组
-            for (let i = 0; i < tryIndex && i < tryMoves.length; i++) {
-                applyMove(boardCopy, tryMoves[i]);
-            }
-            const result = applyMove(boardCopy, { color: nextColor, x, y });
+            // 落子并获取提子（使用board的副本，因为函数会修改board）
+            const boardCopy = getTryPlayBoard();
+            boardCopy[y][x] = nextColor;
+            const captured = removeDeadStonesOnBoard(boardCopy, x, y, nextColor);
+            
+            // 检查打劫
+            const koPos = checkKoOnBoard(boardCopy, x, y, nextColor, captured);
+            tryKoPosition = koPos || null;
 
             // 添加新着法
             tryMoves.push({
                 color: nextColor,
                 x: x,
                 y: y,
-                captured: result.captured
+                captured: captured.length,
+                capturedPositions: captured.map(c => ({x: c.x, y: c.y}))
             });
             tryIndex = tryMoves.length;
             document.getElementById('tryProgress').textContent = `${tryIndex}/${tryMoves.length}`;
 
             // 播放音效
-            if (result.captured > 0) {
-                if (result.captured >= 3) playMultiCaptureSound(result.captured);
+            if (captured.length > 0) {
+                if (captured.length >= 3) playMultiCaptureSound(captured.length);
                 else playCaptureSound();
             } else {
                 playStoneSound();
@@ -1382,6 +1877,7 @@
         function exitTryPlay() {
             tryMoves = [];
             tryIndex = 0;
+            tryKoPosition = null;  // 重置打劫记录
             showMainPanel();
         }
 
@@ -1534,14 +2030,16 @@
             difficultyTag.textContent = difficultyNames[currentProblem.difficulty] || currentProblem.difficulty;
             difficultyTag.className = `tag tag-difficulty-${currentProblem.difficulty}`;
             
-            // 恶手题标签
+            // 恶手题标签 - 插入到弹性空间之前（即中间位置）
+            const problemInfo = document.getElementById('problemInfo');
+            const spacer = problemInfo.children[2]; // 弹性空间元素
             if (currentProblem.is_blunder) {
                 if (!document.getElementById('blunderTag')) {
                     const blunderTag = document.createElement('span');
                     blunderTag.id = 'blunderTag';
                     blunderTag.className = 'tag tag-blunder';
                     blunderTag.textContent = '恶手题';
-                    document.getElementById('problemInfo').appendChild(blunderTag);
+                    problemInfo.insertBefore(blunderTag, spacer);
                 }
             } else {
                 const blunderTag = document.getElementById('blunderTag');
@@ -1596,8 +2094,8 @@
                     }
                 }
                 
-                // 如果没有点击选项，进入试下模式
-                if (!clickedOption) {
+                // 如果没有点击选项，且当前显示到题目最后一步，才允许进入试下模式
+                if (!clickedOption && currentMove === currentProblem.position.length) {
                     startTryPlay(bx, by);
                 }
             }

@@ -3,9 +3,15 @@
   "slug": "weiqi-move",
   "displayName": "围棋实战选点",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775201218019,
-    "commit": "https://github.com/openclaw/skills/commit/6faf92a093a1c90ad5b94099349ec64e91b36b11"
+    "version": "1.1.0",
+    "publishedAt": 1776859024543,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775201218019,
+      "commit": "https://github.com/openclaw/skills/commit/6faf92a093a1c90ad5b94099349ec64e91b36b11"
+    }
+  ]
 }
