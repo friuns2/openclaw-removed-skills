@@ -3,11 +3,16 @@
   "slug": "recruitis",
   "displayName": "Recruitis",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168366728,
-    "commit": "https://github.com/openclaw/skills/commit/c03dd4dadc2255d0390aaed589d4c741b90b2e44"
+    "version": "1.0.3",
+    "publishedAt": 1776862468131,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168366728,
+      "commit": "https://github.com/openclaw/skills/commit/c03dd4dadc2255d0390aaed589d4c741b90b2e44"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774616609106,
