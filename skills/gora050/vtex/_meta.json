@@ -3,9 +3,15 @@
   "slug": "vtex",
   "displayName": "Vtex",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775210771873,
-    "commit": "https://github.com/openclaw/skills/commit/567a7646ca56c5abd62e7cdb3ed71e50d5ab1f1d"
+    "version": "1.0.1",
+    "publishedAt": 1776885125817,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775210771873,
+      "commit": "https://github.com/openclaw/skills/commit/567a7646ca56c5abd62e7cdb3ed71e50d5ab1f1d"
+    }
+  ]
 }
