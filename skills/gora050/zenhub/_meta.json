@@ -3,11 +3,16 @@
   "slug": "zenhub",
   "displayName": "Zenhub",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170671044,
-    "commit": "https://github.com/openclaw/skills/commit/b4911b4294b55db3ed4055b15b58e8c7e5824100"
+    "version": "1.0.3",
+    "publishedAt": 1776866013444,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170671044,
+      "commit": "https://github.com/openclaw/skills/commit/b4911b4294b55db3ed4055b15b58e8c7e5824100"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775170669083,
