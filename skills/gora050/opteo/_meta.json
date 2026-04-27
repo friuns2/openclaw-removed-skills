@@ -3,11 +3,16 @@
   "slug": "opteo",
   "displayName": "Opteo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169623398,
-    "commit": "https://github.com/openclaw/skills/commit/5f75749e4921de2f047ea00918a7d4267ef14817"
+    "version": "1.0.3",
+    "publishedAt": 1776885479674,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169623398,
+      "commit": "https://github.com/openclaw/skills/commit/5f75749e4921de2f047ea00918a7d4267ef14817"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774857868504,
