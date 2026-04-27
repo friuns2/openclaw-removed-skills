@@ -3,11 +3,16 @@
   "slug": "switchboard",
   "displayName": "Switchboard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167754587,
-    "commit": "https://github.com/openclaw/skills/commit/d6677969a612c4ac94f41235e85a2829e3871e86"
+    "version": "1.0.3",
+    "publishedAt": 1776861719334,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167754587,
+      "commit": "https://github.com/openclaw/skills/commit/d6677969a612c4ac94f41235e85a2829e3871e86"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774501451559,
