@@ -3,9 +3,15 @@
   "slug": "rainforest-qa",
   "displayName": "Rainforest Qa",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775261100664,
-    "commit": "https://github.com/openclaw/skills/commit/93e6f878c5e2400613a8d72e780a3a359aa4a546"
+    "version": "1.0.1",
+    "publishedAt": 1776893110836,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775261100664,
+      "commit": "https://github.com/openclaw/skills/commit/93e6f878c5e2400613a8d72e780a3a359aa4a546"
+    }
+  ]
 }
