@@ -3,11 +3,16 @@
   "slug": "webinarjam",
   "displayName": "Webinarjam",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170675087,
-    "commit": "https://github.com/openclaw/skills/commit/c11342d8861c2c2cef8468e9b602aafcb16d3f8b"
+    "version": "1.0.3",
+    "publishedAt": 1776866021281,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170675087,
+      "commit": "https://github.com/openclaw/skills/commit/c11342d8861c2c2cef8468e9b602aafcb16d3f8b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775088288590,
