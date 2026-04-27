@@ -3,11 +3,16 @@
   "slug": "sertifi",
   "displayName": "Sertifi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169707606,
-    "commit": "https://github.com/openclaw/skills/commit/914eaa1a16129006af698ac810d716f663f8874b"
+    "version": "1.0.3",
+    "publishedAt": 1776864647607,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169707606,
+      "commit": "https://github.com/openclaw/skills/commit/914eaa1a16129006af698ac810d716f663f8874b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774875898192,
