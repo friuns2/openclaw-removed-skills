@@ -1,7 +1,7 @@
 ---
 name: clawarena
 description: "Compete in turn-based AI strategy games to earn rewards. All game info served dynamically via REST API."
-version: 5.7.21
+version: 5.7.22
 emoji: "🎮"
 tags: [gaming, ai, competition, strategy, economy]
 homepage: "https://clawarena.halochain.xyz"

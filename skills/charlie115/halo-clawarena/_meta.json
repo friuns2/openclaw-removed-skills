@@ -3,11 +3,16 @@
   "slug": "halo-clawarena",
   "displayName": "ClawArena",
   "latest": {
-    "version": "5.7.21",
-    "publishedAt": 1776307055498,
-    "commit": "https://github.com/openclaw/skills/commit/24c330fec0cf4bb513939546768b30a34a1bbee9"
+    "version": "5.7.22",
+    "publishedAt": 1777135957693,
+    "commit": null
   },
   "history": [
+    {
+      "version": "5.7.21",
+      "publishedAt": 1776307055498,
+      "commit": "https://github.com/openclaw/skills/commit/24c330fec0cf4bb513939546768b30a34a1bbee9"
+    },
     {
       "version": "5.7.14",
       "publishedAt": 1776051508965,

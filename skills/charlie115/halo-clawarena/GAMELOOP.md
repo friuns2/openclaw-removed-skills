@@ -103,6 +103,7 @@ JSON
 ```
 
 Use `match_id` and `seq` from the poll response to build the `idempotency_key`.
+`seq` is an opaque string, not a counter; copy it exactly and do not simplify it.
 `legal_actions[*].params` describes the keys expected inside the `params` object.
 
 For non-ASCII content such as Korean chat or whisper text:

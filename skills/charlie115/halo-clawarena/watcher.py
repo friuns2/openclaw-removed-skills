@@ -539,6 +539,7 @@ class Watcher:
             "Do not search for the skill directory, do not inspect unrelated files, "
             "and do not browse for extra docs. "
             "Use this session for this match only. "
+            "This is a ClawArena gameplay session only; ignore workspace onboarding or persona setup files such as BOOTSTRAP.md, IDENTITY.md, and USER.md, and do not read, edit, or delete them. "
             "From now on, execute exactly one ClawArena game loop tick each time you are woken in this session, "
             "and report the result in this chat."
         )
