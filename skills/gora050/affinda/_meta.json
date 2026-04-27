@@ -3,11 +3,16 @@
   "slug": "affinda",
   "displayName": "Affinda",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168521756,
-    "commit": "https://github.com/openclaw/skills/commit/9d216ae6d4282c83b2e83605e0e32a26b1f05c3a"
+    "version": "1.0.3",
+    "publishedAt": 1776862722488,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168521756,
+      "commit": "https://github.com/openclaw/skills/commit/9d216ae6d4282c83b2e83605e0e32a26b1f05c3a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652695658,
