@@ -3,9 +3,15 @@
   "slug": "alibabacloud-polardbx-sql",
   "displayName": "Alibabacloud Polardbx Sql",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775182469592,
-    "commit": "https://github.com/openclaw/skills/commit/3390848a46a40f65f9472819326e5e170e7dcac6"
+    "version": "0.0.2",
+    "publishedAt": 1776750659581,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775182469592,
+      "commit": "https://github.com/openclaw/skills/commit/3390848a46a40f65f9472819326e5e170e7dcac6"
+    }
+  ]
 }
