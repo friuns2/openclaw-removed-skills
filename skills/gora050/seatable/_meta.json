@@ -3,11 +3,16 @@
   "slug": "seatable",
   "displayName": "Seatable",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170493379,
-    "commit": "https://github.com/openclaw/skills/commit/777bdd1ed398cf96563cb5bde4da9c4847f52bab"
+    "version": "1.0.3",
+    "publishedAt": 1776886016102,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170493379,
+      "commit": "https://github.com/openclaw/skills/commit/777bdd1ed398cf96563cb5bde4da9c4847f52bab"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775037823524,
