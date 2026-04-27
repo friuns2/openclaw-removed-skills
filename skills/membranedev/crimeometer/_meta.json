@@ -3,11 +3,16 @@
   "slug": "crimeometer",
   "displayName": "Crimeometer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167788253,
-    "commit": "https://github.com/openclaw/skills/commit/d19225959d420065701d83bdbdc35d29549c346e"
+    "version": "1.0.3",
+    "publishedAt": 1776851499217,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167788253,
+      "commit": "https://github.com/openclaw/skills/commit/d19225959d420065701d83bdbdc35d29549c346e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774504950143,
