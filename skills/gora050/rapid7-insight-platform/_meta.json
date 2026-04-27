@@ -3,11 +3,16 @@
   "slug": "rapid7-insight-platform",
   "displayName": "Rapid7 Insight Platform",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167880785,
-    "commit": "https://github.com/openclaw/skills/commit/8e0fd80ac51a53fd0e63347c01b0db22b8f0bb2c"
+    "version": "1.0.3",
+    "publishedAt": 1776861856775,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167880785,
+      "commit": "https://github.com/openclaw/skills/commit/8e0fd80ac51a53fd0e63347c01b0db22b8f0bb2c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774519428793,
