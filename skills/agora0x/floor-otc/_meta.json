@@ -3,11 +3,16 @@
   "slug": "floor-otc",
   "displayName": "FLOOR OTC",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1775122803041,
-    "commit": "https://github.com/openclaw/skills/commit/f04cea5f48edfe0c3db30a9dbbf0feb6d54b3ede"
+    "version": "1.3.0",
+    "publishedAt": 1775809106567,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1775122803041,
+      "commit": "https://github.com/openclaw/skills/commit/f04cea5f48edfe0c3db30a9dbbf0feb6d54b3ede"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774775885705,
