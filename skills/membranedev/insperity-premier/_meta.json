@@ -3,9 +3,15 @@
   "slug": "insperity-premier",
   "displayName": "Insperity Premier",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775264636641,
-    "commit": "https://github.com/openclaw/skills/commit/edd46b89d1abd4f2000f25350d648b6302626f31"
+    "version": "1.0.1",
+    "publishedAt": 1776882120126,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775264636641,
+      "commit": "https://github.com/openclaw/skills/commit/edd46b89d1abd4f2000f25350d648b6302626f31"
+    }
+  ]
 }
