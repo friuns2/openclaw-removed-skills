@@ -3,9 +3,15 @@
   "slug": "ibanity",
   "displayName": "Ibanity",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775293442856,
-    "commit": "https://github.com/openclaw/skills/commit/9e95722e2d2476053e7b785d503892aaea57ffbc"
+    "version": "1.0.1",
+    "publishedAt": 1776883056119,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775293442856,
+      "commit": "https://github.com/openclaw/skills/commit/9e95722e2d2476053e7b785d503892aaea57ffbc"
+    }
+  ]
 }
