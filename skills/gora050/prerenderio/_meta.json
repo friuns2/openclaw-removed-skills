@@ -3,11 +3,16 @@
   "slug": "prerenderio",
   "displayName": "Prerenderio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170146523,
-    "commit": "https://github.com/openclaw/skills/commit/54a8c649f18eb2a0809f66471d60157d21fe0aa7"
+    "version": "1.0.3",
+    "publishedAt": 1776865260889,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170146523,
+      "commit": "https://github.com/openclaw/skills/commit/54a8c649f18eb2a0809f66471d60157d21fe0aa7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774962304471,
