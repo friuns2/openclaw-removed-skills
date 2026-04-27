@@ -3,11 +3,16 @@
   "slug": "stacks",
   "displayName": "Stacks",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170110242,
-    "commit": "https://github.com/openclaw/skills/commit/a9628a4fbc140725b5e0bfd74e01f63e729f76ac"
+    "version": "1.0.3",
+    "publishedAt": 1776865075499,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170110242,
+      "commit": "https://github.com/openclaw/skills/commit/a9628a4fbc140725b5e0bfd74e01f63e729f76ac"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774958626095,
