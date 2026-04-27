@@ -3,11 +3,16 @@
   "slug": "tomtom",
   "displayName": "Tomtom",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170264297,
-    "commit": "https://github.com/openclaw/skills/commit/342eac75f8cac5b7a03c3af1a29fbf240be73b15"
+    "version": "1.0.3",
+    "publishedAt": 1776865476718,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170264297,
+      "commit": "https://github.com/openclaw/skills/commit/342eac75f8cac5b7a03c3af1a29fbf240be73b15"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998330779,
