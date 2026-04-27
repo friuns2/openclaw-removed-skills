@@ -3,11 +3,16 @@
   "slug": "fondy",
   "displayName": "Fondy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170993839,
-    "commit": "https://github.com/openclaw/skills/commit/372fa1399a4d59120fcb61e825655a8e05e652ca"
+    "version": "1.0.3",
+    "publishedAt": 1776892309011,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170993839,
+      "commit": "https://github.com/openclaw/skills/commit/372fa1399a4d59120fcb61e825655a8e05e652ca"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775131476771,
