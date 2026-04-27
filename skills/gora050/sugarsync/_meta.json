@@ -3,9 +3,15 @@
   "slug": "sugarsync",
   "displayName": "Sugarsync",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775279169847,
-    "commit": "https://github.com/openclaw/skills/commit/caba14e2469c9b54b6283532e920dd945d9a7a54"
+    "version": "1.0.1",
+    "publishedAt": 1776893540841,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775279169847,
+      "commit": "https://github.com/openclaw/skills/commit/caba14e2469c9b54b6283532e920dd945d9a7a54"
+    }
+  ]
 }
