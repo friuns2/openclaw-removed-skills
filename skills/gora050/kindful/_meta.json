@@ -3,11 +3,16 @@
   "slug": "kindful",
   "displayName": "Kindful",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170985171,
-    "commit": "https://github.com/openclaw/skills/commit/bed5c7e1b67e521680158a8ac489f0166f5643c0"
+    "version": "1.0.3",
+    "publishedAt": 1776892287106,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170985171,
+      "commit": "https://github.com/openclaw/skills/commit/bed5c7e1b67e521680158a8ac489f0166f5643c0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775131446148,
