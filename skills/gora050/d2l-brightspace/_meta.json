@@ -3,11 +3,16 @@
   "slug": "d2l-brightspace",
   "displayName": "D2L Brightspace",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169466731,
-    "commit": "https://github.com/openclaw/skills/commit/1898f7c1511e30f7606a45ac5bf190519cb84697"
+    "version": "1.0.3",
+    "publishedAt": 1776885387723,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169466731,
+      "commit": "https://github.com/openclaw/skills/commit/1898f7c1511e30f7606a45ac5bf190519cb84697"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774836257183,
