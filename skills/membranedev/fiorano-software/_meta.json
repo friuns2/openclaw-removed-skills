@@ -3,9 +3,15 @@
   "slug": "fiorano-software",
   "displayName": "Fiorano Software",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775196212393,
-    "commit": "https://github.com/openclaw/skills/commit/d0028298c601d47aec004cedac83286ac3491e9b"
+    "version": "1.0.1",
+    "publishedAt": 1776881116103,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775196212393,
+      "commit": "https://github.com/openclaw/skills/commit/d0028298c601d47aec004cedac83286ac3491e9b"
+    }
+  ]
 }
