@@ -3,11 +3,16 @@
   "slug": "labsmobile",
   "displayName": "Labsmobile",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168773104,
-    "commit": "https://github.com/openclaw/skills/commit/4d2208f50ebb0bcf381071b2d0d91062067434e7"
+    "version": "1.0.3",
+    "publishedAt": 1776863188795,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168773104,
+      "commit": "https://github.com/openclaw/skills/commit/4d2208f50ebb0bcf381071b2d0d91062067434e7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774688667235,
