@@ -3,11 +3,16 @@
   "slug": "sheetdb",
   "displayName": "Sheetdb",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169387612,
-    "commit": "https://github.com/openclaw/skills/commit/46d3b42a0854c78e7aa9c4901c60452c0b2a237f"
+    "version": "1.0.3",
+    "publishedAt": 1776864301297,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169387612,
+      "commit": "https://github.com/openclaw/skills/commit/46d3b42a0854c78e7aa9c4901c60452c0b2a237f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774825489748,
