@@ -3,11 +3,16 @@
   "slug": "ipbase",
   "displayName": "Ipbase",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167732568,
-    "commit": "https://github.com/openclaw/skills/commit/8ecb2550d8cc31b651a8f22e9613ef11157bc094"
+    "version": "1.0.3",
+    "publishedAt": 1776865212157,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167732568,
+      "commit": "https://github.com/openclaw/skills/commit/8ecb2550d8cc31b651a8f22e9613ef11157bc094"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774494311280,
