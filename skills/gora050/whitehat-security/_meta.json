@@ -3,11 +3,16 @@
   "slug": "whitehat-security",
   "displayName": "Whitehat Security",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169631660,
-    "commit": "https://github.com/openclaw/skills/commit/878064ba3f33f7e856aa82c4920e67e989de6801"
+    "version": "1.0.3",
+    "publishedAt": 1776864463061,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169631660,
+      "commit": "https://github.com/openclaw/skills/commit/878064ba3f33f7e856aa82c4920e67e989de6801"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774865004294,
