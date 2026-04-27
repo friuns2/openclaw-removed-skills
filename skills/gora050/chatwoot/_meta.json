@@ -3,11 +3,16 @@
   "slug": "chatwoot",
   "displayName": "Chatwoot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169313896,
-    "commit": "https://github.com/openclaw/skills/commit/518e04ed7b88fe983c5f3ab05e6b76b51de71957"
+    "version": "1.0.3",
+    "publishedAt": 1776865268116,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169313896,
+      "commit": "https://github.com/openclaw/skills/commit/518e04ed7b88fe983c5f3ab05e6b76b51de71957"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812268394,
