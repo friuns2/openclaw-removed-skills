@@ -3,9 +3,15 @@
   "slug": "problem-mapper",
   "displayName": "Problem Mapper",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1774863174283,
-    "commit": "https://github.com/openclaw/skills/commit/a2764031ee1dbbcb634ff3a14e5f55d332c2666a"
+    "version": "2.0.0",
+    "publishedAt": 1776304143732,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1774863174283,
+      "commit": "https://github.com/openclaw/skills/commit/a2764031ee1dbbcb634ff3a14e5f55d332c2666a"
+    }
+  ]
 }

@@ -215,4 +215,46 @@ problem-mapper/
 
 *问题图谱不是寻找答案，而是澄清问题。问题清晰了，答案往往自然浮现。*
 
+---
+
+## 📄 许可证
+
+本项目采用 [MIT 许可证](LICENSE)。
+
+**Copyright (c) 2026 燃冰 (燃冰 & ant)**
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+**简单来说：**
+- ✅ 你可以自由使用、修改、分发、商用
+- ✅ 需要保留原作者版权和许可证声明
+- ❌ 不提供任何担保，使用风险自负
+
+详见 [LICENSE](LICENSE) 和 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+---
+
+## 🔗 相关资源
+
+- `references/five-clarifying-questions.md` - 五大澄清问题详解
+- `references/risk-mapping.md` - 三维度风险评估指南
+- `examples/case-study.md` - 实战案例分析
+- `templates/problem-map-template.md` - 问题地图模板
+
 🔗
