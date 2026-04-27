@@ -3,11 +3,16 @@
   "slug": "templated",
   "displayName": "Templated",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170239649,
-    "commit": "https://github.com/openclaw/skills/commit/845ffdcb98c7e65a360f11aed6903817f346bc24"
+    "version": "1.0.3",
+    "publishedAt": 1776865413357,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170239649,
+      "commit": "https://github.com/openclaw/skills/commit/845ffdcb98c7e65a360f11aed6903817f346bc24"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998255167,
