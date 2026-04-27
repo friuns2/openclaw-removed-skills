@@ -3,11 +3,16 @@
   "slug": "salestown",
   "displayName": "Salestown",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167821444,
-    "commit": "https://github.com/openclaw/skills/commit/e4e0549acd2c04f91a42ebb0c96df68e9f2709a4"
+    "version": "1.0.3",
+    "publishedAt": 1776864912161,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167821444,
+      "commit": "https://github.com/openclaw/skills/commit/e4e0549acd2c04f91a42ebb0c96df68e9f2709a4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774512216549,
