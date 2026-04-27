@@ -22,8 +22,6 @@ description: 通过华银康集团 PathClaw 服务对病理切片进行泛癌 AI
 curl -X POST https://pathclaw.pathologyunion.com/api/user/login
 ```
 
-<!--http://119.91.47.20:8111/api/user/login  -->
-
 从响应中提取 `data.token`。此 token 必须包含在后续请求的 `Authorization: Bearer <token>` 请求头中。
 
 ### 第二步：启动诊断任务
