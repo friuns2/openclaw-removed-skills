@@ -3,11 +3,16 @@
   "slug": "kong",
   "displayName": "Kong",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169627723,
-    "commit": "https://github.com/openclaw/skills/commit/1c2518735214f008c99590596ad00d1919962d7d"
+    "version": "1.0.3",
+    "publishedAt": 1776885486946,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169627723,
+      "commit": "https://github.com/openclaw/skills/commit/1c2518735214f008c99590596ad00d1919962d7d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774857876198,
