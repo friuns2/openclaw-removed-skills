@@ -3,9 +3,15 @@
   "slug": "inplayer",
   "displayName": "Inplayer",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775203652624,
-    "commit": "https://github.com/openclaw/skills/commit/d5a3a841476fae00359a0dc40ecaf09ce04a95c0"
+    "version": "1.0.1",
+    "publishedAt": 1776885085276,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775203652624,
+      "commit": "https://github.com/openclaw/skills/commit/d5a3a841476fae00359a0dc40ecaf09ce04a95c0"
+    }
+  ]
 }
