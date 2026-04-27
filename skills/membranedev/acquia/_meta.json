@@ -3,11 +3,16 @@
   "slug": "acquia",
   "displayName": "Acquia",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168987904,
-    "commit": "https://github.com/openclaw/skills/commit/6a6cd3538d07988c84a3cea0e7f8f973b5eac202"
+    "version": "1.0.3",
+    "publishedAt": 1776854199049,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168987904,
+      "commit": "https://github.com/openclaw/skills/commit/6a6cd3538d07988c84a3cea0e7f8f973b5eac202"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774746165618,
