@@ -3,11 +3,16 @@
   "slug": "chimp-rewriter",
   "displayName": "Chimp Rewriter",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170609198,
-    "commit": "https://github.com/openclaw/skills/commit/ed1676a567aef7e883da8269a7536d157cddbdab"
+    "version": "1.0.3",
+    "publishedAt": 1776865904229,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170609198,
+      "commit": "https://github.com/openclaw/skills/commit/ed1676a567aef7e883da8269a7536d157cddbdab"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775048784220,
