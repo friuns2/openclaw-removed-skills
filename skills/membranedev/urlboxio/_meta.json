@@ -3,11 +3,16 @@
   "slug": "urlboxio",
   "displayName": "Urlboxio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168924677,
-    "commit": "https://github.com/openclaw/skills/commit/26dd4f5d96c6b9a85a304780ff3973978fe50f0b"
+    "version": "1.0.3",
+    "publishedAt": 1776853983505,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168924677,
+      "commit": "https://github.com/openclaw/skills/commit/26dd4f5d96c6b9a85a304780ff3973978fe50f0b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774738967091,
