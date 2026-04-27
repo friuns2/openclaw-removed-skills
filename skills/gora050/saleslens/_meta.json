@@ -3,11 +3,16 @@
   "slug": "saleslens",
   "displayName": "Saleslens",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168645035,
-    "commit": "https://github.com/openclaw/skills/commit/0dac0c777ae36c4815d01848d7e8cee29dd0df5b"
+    "version": "1.0.3",
+    "publishedAt": 1776862945147,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168645035,
+      "commit": "https://github.com/openclaw/skills/commit/0dac0c777ae36c4815d01848d7e8cee29dd0df5b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774667127457,
