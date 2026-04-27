@@ -3,11 +3,16 @@
   "slug": "docebo",
   "displayName": "Docebo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171017098,
-    "commit": "https://github.com/openclaw/skills/commit/c69aabca60d07fffb66004c581fd1b10de741045"
+    "version": "1.0.3",
+    "publishedAt": 1776866738950,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171017098,
+      "commit": "https://github.com/openclaw/skills/commit/c69aabca60d07fffb66004c581fd1b10de741045"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775134980418,
