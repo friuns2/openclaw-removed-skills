@@ -3,11 +3,16 @@
   "slug": "leadsquared",
   "displayName": "Leadsquared",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170243554,
-    "commit": "https://github.com/openclaw/skills/commit/bde1bf8629a3efc4ffc6f414739793efef30e03b"
+    "version": "1.0.3",
+    "publishedAt": 1776865423033,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170243554,
+      "commit": "https://github.com/openclaw/skills/commit/bde1bf8629a3efc4ffc6f414739793efef30e03b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998263414,
