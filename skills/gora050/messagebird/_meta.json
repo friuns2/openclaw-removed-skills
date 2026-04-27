@@ -3,11 +3,16 @@
   "slug": "messagebird",
   "displayName": "Messagebird",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170341885,
-    "commit": "https://github.com/openclaw/skills/commit/bd4ffc148f2ba23d15ce934283c3de3e16d8dfd7"
+    "version": "1.0.3",
+    "publishedAt": 1776865494380,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170341885,
+      "commit": "https://github.com/openclaw/skills/commit/bd4ffc148f2ba23d15ce934283c3de3e16d8dfd7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012666457,
