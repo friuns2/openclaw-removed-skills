@@ -3,11 +3,16 @@
   "slug": "documint",
   "displayName": "Documint",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168550019,
-    "commit": "https://github.com/openclaw/skills/commit/e5d9c230311f1a8fe99b7a12681759999e1dfeda"
+    "version": "1.0.3",
+    "publishedAt": 1776852904614,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168550019,
+      "commit": "https://github.com/openclaw/skills/commit/e5d9c230311f1a8fe99b7a12681759999e1dfeda"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774656173994,
