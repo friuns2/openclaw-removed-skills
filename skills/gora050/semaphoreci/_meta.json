@@ -3,11 +3,16 @@
   "slug": "semaphoreci",
   "displayName": "Semaphoreci",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170506420,
-    "commit": "https://github.com/openclaw/skills/commit/bf752b053d9f5fb4096dd2507c0a9566687982cb"
+    "version": "1.0.3",
+    "publishedAt": 1776886040695,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170506420,
+      "commit": "https://github.com/openclaw/skills/commit/bf752b053d9f5fb4096dd2507c0a9566687982cb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775037853426,
