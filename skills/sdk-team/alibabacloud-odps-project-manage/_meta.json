@@ -3,9 +3,15 @@
   "slug": "alibabacloud-odps-project-manage",
   "displayName": "Alibabacloud Odps Project Manage",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775032302287,
-    "commit": "https://github.com/openclaw/skills/commit/7b33c65346aa8916b004d7a9f37b3ce8d1ace27e"
+    "version": "0.0.2",
+    "publishedAt": 1776828855768,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775032302287,
+      "commit": "https://github.com/openclaw/skills/commit/7b33c65346aa8916b004d7a9f37b3ce8d1ace27e"
+    }
+  ]
 }
