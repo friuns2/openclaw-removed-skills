@@ -3,11 +3,16 @@
   "slug": "shortpixel",
   "displayName": "Shortpixel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168107677,
-    "commit": "https://github.com/openclaw/skills/commit/c03601f1a69e4ce2aa2e8a41648c2f75d88e8e83"
+    "version": "1.0.3",
+    "publishedAt": 1776861999238,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168107677,
+      "commit": "https://github.com/openclaw/skills/commit/c03601f1a69e4ce2aa2e8a41648c2f75d88e8e83"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774576984403,
