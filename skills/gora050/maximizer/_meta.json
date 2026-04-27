@@ -3,9 +3,15 @@
   "slug": "maximizer",
   "displayName": "Maximizer",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775200033088,
-    "commit": "https://github.com/openclaw/skills/commit/6199acbdf018f42da6505d7f17023be84aed8689"
+    "version": "1.0.1",
+    "publishedAt": 1776885000704,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775200033088,
+      "commit": "https://github.com/openclaw/skills/commit/6199acbdf018f42da6505d7f17023be84aed8689"
+    }
+  ]
 }
