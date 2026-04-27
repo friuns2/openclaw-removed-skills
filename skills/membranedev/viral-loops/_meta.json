@@ -3,11 +3,16 @@
   "slug": "viral-loops",
   "displayName": "Viral Loops",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171013126,
-    "commit": "https://github.com/openclaw/skills/commit/89a1ed94cbd60f510020b75f99c02e22217de1ff"
+    "version": "1.0.3",
+    "publishedAt": 1776866731815,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171013126,
+      "commit": "https://github.com/openclaw/skills/commit/89a1ed94cbd60f510020b75f99c02e22217de1ff"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775134974228,
