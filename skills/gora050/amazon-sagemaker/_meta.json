@@ -1,0 +1,11 @@
+{
+  "owner": "gora050",
+  "slug": "amazon-sagemaker",
+  "displayName": "Amazon Sagemaker",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775178318510,
+    "commit": null
+  },
+  "history": []
+}
