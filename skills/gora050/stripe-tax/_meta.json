@@ -3,11 +3,16 @@
   "slug": "stripe-tax",
   "displayName": "Stripe Tax",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168294648,
-    "commit": "https://github.com/openclaw/skills/commit/5b0a0cd05ed1a72d362343b1111c7fc0660a36c5"
+    "version": "1.0.3",
+    "publishedAt": 1776865625120,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168294648,
+      "commit": "https://github.com/openclaw/skills/commit/5b0a0cd05ed1a72d362343b1111c7fc0660a36c5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774598650026,
