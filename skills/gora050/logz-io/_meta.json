@@ -3,11 +3,16 @@
   "slug": "logz-io",
   "displayName": "Logz Io",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170411374,
-    "commit": "https://github.com/openclaw/skills/commit/7a55c02d17d381d4b26cb0269b5ab3f08f60d83b"
+    "version": "1.0.3",
+    "publishedAt": 1776865659124,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170411374,
+      "commit": "https://github.com/openclaw/skills/commit/7a55c02d17d381d4b26cb0269b5ab3f08f60d83b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775019899516,
