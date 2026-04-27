@@ -3,11 +3,16 @@
   "slug": "cubejs",
   "displayName": "Cubejs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169083008,
-    "commit": "https://github.com/openclaw/skills/commit/7beb3e2345021b0d7726888fa4c8ece9f7579af6"
+    "version": "1.0.3",
+    "publishedAt": 1776854342674,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169083008,
+      "commit": "https://github.com/openclaw/skills/commit/7beb3e2345021b0d7726888fa4c8ece9f7579af6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774756970031,
