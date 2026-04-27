@@ -3,11 +3,16 @@
   "slug": "marriott-ai",
   "displayName": "MarriottAI, Marriott Hotel & Best Offers Search and Booking",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1775131113420,
-    "commit": "https://github.com/openclaw/skills/commit/89dd23d73e1202a8f2fde81ce390d22ae4a49f81"
+    "version": "1.0.6",
+    "publishedAt": 1777215859393,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1775131113420,
+      "commit": "https://github.com/openclaw/skills/commit/89dd23d73e1202a8f2fde81ce390d22ae4a49f81"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1775038927610,

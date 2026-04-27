@@ -5,10 +5,8 @@
 ### Parameters
 
 - **--dest-name** (required): Destination name (country, province, city, district)
-- **--key-words** (optional): Search keywords
+- **--key-words** (optional): Search keywords (hotel name, brand)
 - **--poi-name** (optional): Nearby POI name
-- **--hotel-brands** (optional): Hotel brands (multiple selection, separated by commas)
-- **--hotel-name** (optional): Hotel name
 - **--hotel-bed-types** (optional): Hotel bed types (multiple selection, separated by commas)
   - Values: `大床房` (king bed) · `双床房` (twin beds) · `多床房` (multiple beds)
 - **--max-price** (optional): Maximum price in RMB

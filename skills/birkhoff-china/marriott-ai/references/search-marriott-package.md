@@ -4,16 +4,21 @@
 
 ### Parameters
 
-- **--keyword** (required): Search keyword
-  - Supported dimensions: province (e.g., `江苏`), city (e.g., `三亚`), brand (e.g., `喜来登`), hotel name (e.g., `西溪喜来登度假大酒店`), selling point (e.g., `通兑套餐`, `儿童娱乐`, `藏地文化`)
-  - Note: Only one dimension can be searched at a time, different dimensions cannot be combined
+- **--keyword** (optional): Search keyword
+- **--hotel-name** (optional): Hotel name
+- **--province-or-city** (optional): Province or city name
 - **--sort-type** (optional): Sorting method
-  - Values: `price_asc` (price low to high) · `price_desc` (price high to low)
+  - Values: `price_asc` (low price priority) · `price_desc` (high price priority) · `score_desc` (score priority)
+
+### Validation Rules
+
+- At least one of the following parameters must be provided: `--keyword`, `--hotel-name`, `--province-or-city`. They cannot all be empty at the same time.
 
 ### Examples
 
 ```bash
-flyai search-marriott-package --keyword "三亚" --sort-type "price_asc"
+flyai search-marriott-package --keyword "通兑" --sort-type "price_asc"
+flyai search-marriott-package --hotel-name "西溪喜来登" --province-or-city "杭州"
 ```
 
 ### Output Example
