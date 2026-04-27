@@ -3,11 +3,16 @@
   "slug": "crowdstrike",
   "displayName": "Crowdstrike",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170005501,
-    "commit": "https://github.com/openclaw/skills/commit/0d51773bf9f6d4876875c96f238945a871733515"
+    "version": "1.0.3",
+    "publishedAt": 1776856336847,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170005501,
+      "commit": "https://github.com/openclaw/skills/commit/0d51773bf9f6d4876875c96f238945a871733515"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774936978027,
