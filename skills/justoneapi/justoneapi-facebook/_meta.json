@@ -3,11 +3,16 @@
   "slug": "justoneapi-facebook",
   "displayName": "Facebook API",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1776239966686,
-    "commit": "https://github.com/openclaw/skills/commit/7653724f3417c5c797e49b08e6e5196583287895"
+    "version": "1.0.9",
+    "publishedAt": 1776924444347,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1776239966686,
+      "commit": "https://github.com/openclaw/skills/commit/7653724f3417c5c797e49b08e6e5196583287895"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1775375318587,

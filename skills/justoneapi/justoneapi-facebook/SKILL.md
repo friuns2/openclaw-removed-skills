@@ -19,7 +19,7 @@ This skill wraps 3 Facebook operations exposed by JustOneAPI. It is strongest fo
 
 ## Representative Operations
 
-- `searchV1`: Post Search — Get Facebook post Search data, including matched results, metadata, and ranking signals, for discovering relevant public posts for specific keywords and analyzing engagement and reach of public content on facebook
+- `searchFacebookPostsV1`: Post Search — Get Facebook post Search data, including matched results, metadata, and ranking signals, for discovering relevant public posts for specific keywords and analyzing engagement and reach of public content on facebook
 - `getProfileIdV1`: Get Profile ID — Retrieve the unique Facebook profile ID from a given profile URL
 - `getProfilePostsV1`: Get Profile Posts — Get public posts from a specific Facebook profile using its profile ID
 
@@ -33,7 +33,7 @@ This skill wraps 3 Facebook operations exposed by JustOneAPI. It is strongest fo
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `searchV1`, `getProfileIdV1`, `getProfilePostsV1`.
+2. Start with one of these operations when it matches the user's request: `searchFacebookPostsV1`, `getProfileIdV1`, `getProfilePostsV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -54,6 +54,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the Facebook task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `searchV1`, explain why the returned fields answer the user's question.
+- When using `searchFacebookPostsV1`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `cursor`, `endDate`, `keyword`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

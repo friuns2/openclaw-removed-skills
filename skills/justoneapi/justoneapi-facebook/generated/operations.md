@@ -23,7 +23,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getProfilePostsV1`
 
@@ -47,9 +47,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchV1`
+## `searchFacebookPostsV1`
 
 - Method: `GET`
 - Path: `/api/facebook/search-post/v1`
@@ -73,4 +73,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
