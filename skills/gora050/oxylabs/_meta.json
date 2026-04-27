@@ -3,11 +3,16 @@
   "slug": "oxylabs",
   "displayName": "Oxylabs",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168324925,
-    "commit": "https://github.com/openclaw/skills/commit/74f5bd99b6a18e4023d255151a2e181afa1fb730"
+    "version": "1.0.3",
+    "publishedAt": 1776862384247,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168324925,
+      "commit": "https://github.com/openclaw/skills/commit/74f5bd99b6a18e4023d255151a2e181afa1fb730"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774602268189,
