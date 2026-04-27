@@ -3,11 +3,16 @@
   "slug": "leadgenius-integration",
   "displayName": "Leadgenius",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170723136,
-    "commit": "https://github.com/openclaw/skills/commit/d35cf98f43f6905808f3a1597e3cde9904174e37"
+    "version": "1.0.3",
+    "publishedAt": 1776866090054,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170723136,
+      "commit": "https://github.com/openclaw/skills/commit/d35cf98f43f6905808f3a1597e3cde9904174e37"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775091924241,
