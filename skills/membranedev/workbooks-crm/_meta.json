@@ -3,11 +3,16 @@
   "slug": "workbooks-crm",
   "displayName": "Workbooks Crm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169078770,
-    "commit": "https://github.com/openclaw/skills/commit/b78f0b8bf9aed0a6cd80f3e512293ca4f472c279"
+    "version": "1.0.3",
+    "publishedAt": 1776854229127,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169078770,
+      "commit": "https://github.com/openclaw/skills/commit/b78f0b8bf9aed0a6cd80f3e512293ca4f472c279"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774756965029,
