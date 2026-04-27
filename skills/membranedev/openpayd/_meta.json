@@ -3,11 +3,16 @@
   "slug": "openpayd",
   "displayName": "Openpayd",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170443030,
-    "commit": "https://github.com/openclaw/skills/commit/8b15112bd3619f544954607f43c9f016679e5bd0"
+    "version": "1.0.3",
+    "publishedAt": 1776857406962,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170443030,
+      "commit": "https://github.com/openclaw/skills/commit/8b15112bd3619f544954607f43c9f016679e5bd0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775023381827,
