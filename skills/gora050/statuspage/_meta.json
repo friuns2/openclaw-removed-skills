@@ -3,11 +3,16 @@
   "slug": "statuspage",
   "displayName": "Statuspage",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168298817,
-    "commit": "https://github.com/openclaw/skills/commit/112424740bbbda560b53637899f00313da1bf609"
+    "version": "1.0.3",
+    "publishedAt": 1776862179407,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168298817,
+      "commit": "https://github.com/openclaw/skills/commit/112424740bbbda560b53637899f00313da1bf609"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774602217383,
