@@ -3,11 +3,16 @@
   "slug": "tools4ever",
   "displayName": "Tools4Ever",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169119089,
-    "commit": "https://github.com/openclaw/skills/commit/1c9f79bae4e70b8ab809f1aca30b82b1bb5c390e"
+    "version": "1.0.3",
+    "publishedAt": 1776863845152,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169119089,
+      "commit": "https://github.com/openclaw/skills/commit/1c9f79bae4e70b8ab809f1aca30b82b1bb5c390e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774760685687,
