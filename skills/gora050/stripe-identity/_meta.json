@@ -1,0 +1,11 @@
+{
+  "owner": "gora050",
+  "slug": "stripe-identity",
+  "displayName": "Stripe Identity",
+  "latest": {
+    "version": "1.0.3",
+    "publishedAt": 1776865947122,
+    "commit": null
+  },
+  "history": []
+}
