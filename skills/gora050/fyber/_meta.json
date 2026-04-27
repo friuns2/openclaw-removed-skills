@@ -3,11 +3,16 @@
   "slug": "fyber",
   "displayName": "Fyber",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170355162,
-    "commit": "https://github.com/openclaw/skills/commit/9767f9ebde97f5acdad21a21d2cc9195214e066a"
+    "version": "1.0.3",
+    "publishedAt": 1776865520539,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170355162,
+      "commit": "https://github.com/openclaw/skills/commit/9767f9ebde97f5acdad21a21d2cc9195214e066a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012690964,
