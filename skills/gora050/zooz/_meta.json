@@ -3,11 +3,16 @@
   "slug": "zooz",
   "displayName": "Zooz",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170206100,
-    "commit": "https://github.com/openclaw/skills/commit/40c8e2aa0652d754365d0eb986c878a932cf040d"
+    "version": "1.0.3",
+    "publishedAt": 1776865113231,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170206100,
+      "commit": "https://github.com/openclaw/skills/commit/40c8e2aa0652d754365d0eb986c878a932cf040d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774991092838,
