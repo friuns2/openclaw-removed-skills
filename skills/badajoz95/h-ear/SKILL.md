@@ -1,6 +1,6 @@
 ---
 name: h-ear
-description: "H-ear.world transforms sound into an actionable, meaningful translation layer of the world around you. Describe, share and act upon audio as a spatiotemporal annotated soundscape that empowers you, your business and your AI flow."
+description: "H-ear.world transforms sound into an actionable, meaningful translation layer of the world around you. Describe, share and act upon environmental audio as a machine sensor that empowers you, your business and your AI flow."
 version: 0.1.0
 author: H-ear World
 homepage: https://h-ear.world
@@ -9,7 +9,7 @@ metadata: {"openclaw": {"requires": {"env": ["HEAR_API_KEY", "HEAR_ENV"], "bins"
 
 # H-ear — Sound Intelligence for AI Agents
 
-H-ear.world transforms sound into an actionable, meaningful translation layer of the world around you. Describe, share and act upon audio as a spatiotemporal annotated soundscape that empowers you, your business and your AI flow.
+H-ear.world transforms sound into an actionable, meaningful translation layer of the world around you. Describe, share and act upon environmental audio as a machine sensor that empowers you, your business and your AI flow.
 
 ## Commands
 
