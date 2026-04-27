@@ -1,150 +1,78 @@
 ---
 name: vocabulary-anti-forgetting
-version: 2.0.0
-description: >-
-  Anti-forgetting vocabulary review using spaced repetition. Selects 10 words
-  from asset/vocabulary_bank.md and presents each with English, Chinese
-  translation, usage notes, and synonyms. Records review history to memory.
-  Use when the user says "单词复习", "复习", "review words", or any similar
-  command indicating they want to do vocabulary review or practice.
+version: 3.0.0
 ---
 
-# Vocabulary Anti-Forgetting
+# Vocabulary Anti-Forgetting Skill
 
-Daily vocabulary review using spaced repetition. Selects 10 words per session and presents each with full details: English, Chinese translation, usage notes, and synonyms. No quiz.
-
----
+Use **spaced repetition** (based on the Ebbinghaus forgetting curve) to help the user memorize English phrases from the vocabulary bank.
 
 ## Trigger
 
-Activate when user says: `单词复习` / `复习` / `review` / `开始复习` / `背单词` / `单词练习`
+Activate this skill when the user says any of: `复习`, `单词复习`, `review vocabulary`, `review words`.
 
----
-
-## Session Flow
-
-```
-1. Load vocabulary bank + review history
-2. Select 10 words (spaced repetition logic)
-3. Present all 10 words with full details
-4. Save session record to memory
-```
-
----
-
-## Step 1 — Load Data
-
-**Vocabulary bank:** Read `asset/vocabulary_bank.md` from this skill.
-
-**Review history:** Read `memory/vocab_history.md` from current agent workspace (create if absent).
-
-Review history format:
-```markdown
-# Vocabulary Review History
-
-| Word | Review Count | Last Review | Next Review | Interval (days) |
-|------|--------------|-------------|-------------|-----------------|
-| resilience | 2 | 2026-03-25 | 2026-04-01 | 7 |
-```
-
----
-
-## Step 2 — Select 10 Words
-
-1. From review history, find words where `Next Review <= today` → these are **due words** (sorted by Next Review ascending)
-2. If due words < 10: fill remaining slots from vocabulary bank words **not yet in review history** (take in order from the bank, starting from lowest entry number)
-3. Pick exactly **10 words** total
-
----
-
-## Step 3 — Present Words
-
-Output each word as a card. Present all 10 in a single reply:
-
-```
-📚 今日复习单词 (10个) — YYYY-MM-DD
-
----
-
-**1. resilience** *n.*
-
-🇨🇳 **中文：** 韧性；恢复力
-
-📖 **用法：**
-She showed remarkable resilience in the face of adversity.
-（她在逆境中展现出非凡的韧性。）
-
-🔗 **近义词：** tenacity, perseverance, fortitude, grit
-
----
-
-**2. take the high road** *短语*
-
-🇨🇳 **中文：** 采取高姿态；走正道；以德报怨
-
-📖 **用法：**
-Even when criticized unfairly, she chose to take the high road and remained professional.
-（即使受到不公平的批评，她仍选择以大局为重，保持专业。）
-
-🔗 **近义词：** rise above it, turn the other cheek, be the bigger person
-
----
-
-... (cards 3–10) ...
-
----
-
-✅ 今日复习完成！下次复习：[date of soonest next review]
-```
-
----
-
-## Step 4 — Save Session Record
-
-### 4a — Update review history
-
-For each of the 10 reviewed words, upsert a row in `memory/vocab_history.md`:
-
-| Review Count (after session) | Next Review Interval |
-|------------------------------|----------------------|
-| 1 | 3 days |
-| 2 | 7 days |
-| 3 | 14 days |
-| 4 | 30 days |
-| ≥ 5 | 60 days |
-
-Update fields: `Review Count += 1`, `Last Review = today`, `Next Review = today + interval`, `Interval = new interval`
-
-### 4b — Append to session log
-
-Append to `memory/vocab_sessions.md` (create if absent):
-
-```markdown
-## Session: YYYY-MM-DD
-
-**Words reviewed:** word1, word2, word3, word4, word5, word6, word7, word8, word9, word10
-```
-
----
-
-## Memory Files Reference
+## Files
 
 | File | Purpose |
-|------|---------|
-| `memory/vocab_history.md` | Per-word spaced repetition tracking |
-| `memory/vocab_sessions.md` | Session log (date, words reviewed) |
+|---|---|
+| `vocabulary-anti-forgetting/asset/vocabulary_bank.md` | Master list of 2087 English phrases with Chinese translations |
+| `<workspace>/memory/review_log.md` | Tracks every word's review history, level, and next review date (stored in the workspace memory folder, outside skill folder to survive upgrades) |
+| `vocabulary-anti-forgetting/review.py` | CLI script for non-interactive spaced-repetition review sessions |
 
-Both files are relative to the **current working directory** (not the skill directory).
+## Spaced Repetition Algorithm
 
----
+Each word has a **level** that determines when it should be reviewed next:
 
-## Rules
+| Level | Interval | Status |
+|---|---|---|
+| 0 | New word, never reviewed | new |
+| 1 | Review again in **1 day** | learning |
+| 2 | Review again in **2 days** | learning |
+| 3 | Review again in **4 days** | reviewing |
+| 4 | Review again in **7 days** | reviewing |
+| 5 | Review again in **15 days** | reviewing |
+| 6 | Review again in **30 days** | mastered |
+| 7 | Review again in **60 days** | mastered |
 
-- Always **read** files before writing to avoid overwriting existing content
-- The vocabulary bank path is absolute: `/Users/hushenglang/Development/workspace/2026/claude-skills/vocabulary-anti-forgetting/asset/vocabulary_bank.md`
-- For phrases/idioms in the bank (e.g. "take the high road"), treat the full phrase as the vocabulary item
-- If a word/phrase has a type hint in the bank (e.g. "devour v"), use it; otherwise infer from context
-- Use your knowledge to provide Chinese meanings, usage examples, and synonyms — the bank lists only the English entries
-- If `memory/` directory does not exist in cwd, create it before writing
-- Usage example must include both English sentence and Chinese translation
-- Synonyms should be 3–5 closely related words or phrases
+Each time a word is shown (studied), it counts as a correct review: level + 1, schedule next review per the interval table.
+
+## Daily Review Session Flow (10 words)
+
+When triggered, run the review script directly:
+
+```bash
+python vocabulary-anti-forgetting/review.py
+```
+
+This handles everything in one step: reads state, selects 10 words (due reviews first, then new words), displays them all at once, updates `review_log.md` with incremented levels and next review dates, and prints a session summary.
+
+For custom word count: `python vocabulary-anti-forgetting/review.py --count 5`
+
+Show the script output to the user as-is.
+
+## review_log.md Format
+
+The file uses a markdown table with these columns:
+
+```markdown
+| id | vocabulary | level | review_count | last_reviewed | next_review_date |
+```
+
+- `id`: matches the # column in `vocabulary_bank.md`
+- `vocabulary`: the English word/phrase
+- `level`: current spaced repetition level (0-7)
+- `review_count`: total number of times reviewed
+- `last_reviewed`: YYYY-MM-DD of last review
+- `next_review_date`: YYYY-MM-DD when this word is next due
+
+The file header also stores:
+- `total_sessions`: running count of completed sessions
+- `last_session_date`: date of the most recent session
+
+## Important Rules
+
+- NEVER skip the update to `review_log.md` — this is the memory of the system.
+- The review log lives at `<workspace>/memory/review_log.md` (the skill folder's parent `memory/` directory), NOT in the skill folder. The script resolves this path automatically.
+- If the user only wants a partial session (e.g., 5 words), that's fine — update only those words.
+- If the user asks for stats (e.g., "复习统计"), read `review_log.md` and report: total words reviewed, mastered count, learning count, upcoming due words.
+- The user can also run `python vocabulary-anti-forgetting/review.py` for a non-interactive session, or `python vocabulary-anti-forgetting/review.py --stats` for stats.
