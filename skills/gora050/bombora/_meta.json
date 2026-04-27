@@ -3,11 +3,16 @@
   "slug": "bombora",
   "displayName": "Bombora",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170197627,
-    "commit": "https://github.com/openclaw/skills/commit/64c6c9e7b6f10c93013432dc7a95e2881d0a7258"
+    "version": "1.0.3",
+    "publishedAt": 1776866195998,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170197627,
+      "commit": "https://github.com/openclaw/skills/commit/64c6c9e7b6f10c93013432dc7a95e2881d0a7258"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774985091276,
