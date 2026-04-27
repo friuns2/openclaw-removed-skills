@@ -3,9 +3,15 @@
   "slug": "clawdy-selfie",
   "displayName": "Clawdy Selfie",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774761066842,
-    "commit": "https://github.com/openclaw/skills/commit/816307475d4f4a2bfaceafb5cf3764f15eede41d"
+    "version": "1.0.1",
+    "publishedAt": 1777022613231,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774761066842,
+      "commit": "https://github.com/openclaw/skills/commit/816307475d4f4a2bfaceafb5cf3764f15eede41d"
+    }
+  ]
 }

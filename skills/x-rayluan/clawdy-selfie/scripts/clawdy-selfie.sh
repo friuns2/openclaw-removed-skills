@@ -1,6 +1,7 @@
 #!/bin/bash
+# clawdy-selfie.sh
 # Clawdy images must ALWAYS be generated from the same male reference image.
-# Uses fal.ai xAI Grok Imagine EDIT endpoint only. No text-to-image fallback.
+# No text-to-image fallback. If reference-edit fails, fail loudly.
 
 set -euo pipefail
 
@@ -41,6 +42,7 @@ if [ ! -f "$REFERENCE_PATH" ]; then
   exit 1
 fi
 
+# Always lock to the same male identity.
 BASE_LOCK="same exact person as the reference image; preserve the exact same male identity, same face, same eyes, same nose, same eyebrows, same hairstyle, same skin tone, same jawline, same facial structure, same age, same vibe. clearly male. handsome young man. do not change identity. do not feminize. not female. not woman. not a different model. not a different person."
 
 MODE="direct"
@@ -55,6 +57,10 @@ if [ "$MODE" = "mirror" ]; then
 else
   EDIT_PROMPT="Edit this SAME exact person into a direct selfie. ${BASE_LOCK} Requested variation: ${PROMPT_RAW}. Keep it realistic and tasteful."
 fi
+
+log_info "Generating Clawdy image from fixed male reference only"
+log_info "Mode: $MODE"
+log_info "Prompt: $PROMPT_RAW"
 
 DATA_URL=$(python3 - <<'PY' "$REFERENCE_PATH"
 import base64, mimetypes, sys
