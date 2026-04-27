@@ -3,11 +3,16 @@
   "slug": "even-financial",
   "displayName": "Even Financial",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169880498,
-    "commit": "https://github.com/openclaw/skills/commit/da46695f7315412f89df426f4d361675a120b9e0"
+    "version": "1.0.3",
+    "publishedAt": 1776892891322,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169880498,
+      "commit": "https://github.com/openclaw/skills/commit/da46695f7315412f89df426f4d361675a120b9e0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774922647011,
