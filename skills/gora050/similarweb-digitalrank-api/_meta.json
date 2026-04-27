@@ -3,11 +3,16 @@
   "slug": "similarweb-digitalrank-api",
   "displayName": "Similarweb Digitalrank Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168456739,
-    "commit": "https://github.com/openclaw/skills/commit/9f94e0bd7b6aef48d052717ebefe88dd68e4bcb4"
+    "version": "1.0.3",
+    "publishedAt": 1776862663306,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168456739,
+      "commit": "https://github.com/openclaw/skills/commit/9f94e0bd7b6aef48d052717ebefe88dd68e4bcb4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774645508283,
