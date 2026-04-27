@@ -3,11 +3,16 @@
   "slug": "vmware-pilot",
   "displayName": "Vmware Pilot",
   "latest": {
-    "version": "1.5.3",
-    "publishedAt": 1776143207748,
-    "commit": "https://github.com/openclaw/skills/commit/be82042395e92f159360196e7b2d2340f2d24ebd"
+    "version": "1.5.14",
+    "publishedAt": 1776774059320,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.3",
+      "publishedAt": 1776143207748,
+      "commit": "https://github.com/openclaw/skills/commit/be82042395e92f159360196e7b2d2340f2d24ebd"
+    },
     {
       "version": "1.5.1",
       "publishedAt": 1776039070152,
