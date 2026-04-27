@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "nhost",
+  "displayName": "Nhost",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776870224084,
+    "commit": null
+  },
+  "history": []
+}
