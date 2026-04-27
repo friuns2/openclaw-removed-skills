@@ -1,18 +1,22 @@
 {
   "name": "fbt-travel",
-  "version": "1.1.0",
-  "description": "分贝通旅行助手 - 一站式酒店预订、机票预订服务。支持酒店搜索、房型查询、预订下单；航班搜索、舱位查询、机票预订、改期、退票。",
-  "author": "OpenClaw",
+  "display_name": "分贝通 — 企业差旅预订助手",
+  "version": "2.7.0",
+  "description": "一站式企业差旅服务，提供酒店搜索预订、机票查询预订、改期退票等全流程服务。智能需求确认、后台静默认证、图片内嵌展示。基于分贝通官方数据，实时准确可靠。",
+  "author": "Fenbeitong",
+  "homepage": "https://www.fenbeitong.com",
   "license": "MIT",
   "metadata": {
     "openclaw": {
       "emoji": "🧳",
       "category": "travel",
-      "tags": ["分贝通", "酒店", "机票", "航班", "预订", "旅行"],
+      "priority": 85,
+      "tags": ["分贝通", "酒店", "机票", "航班", "预订", "差旅", "企业"],
       "requires": {
         "bins": ["python3"]
       },
-      "required": true
+      "intents": ["hotel_search", "hotel_booking", "flight_search", "flight_booking", "flight_change", "flight_refund", "order_query", "order_cancel"],
+      "auth_files": ["~/.fbt_auth.json", "~/.fbt-auth.json"]
     }
   }
 }
