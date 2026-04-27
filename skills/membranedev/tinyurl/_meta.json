@@ -3,11 +3,16 @@
   "slug": "tinyurl",
   "displayName": "Tinyurl",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169519616,
-    "commit": "https://github.com/openclaw/skills/commit/984e559da2937bb159b5cfdd546297ecd4aab568"
+    "version": "1.0.3",
+    "publishedAt": 1776855252694,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169519616,
+      "commit": "https://github.com/openclaw/skills/commit/984e559da2937bb159b5cfdd546297ecd4aab568"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774846974594,
