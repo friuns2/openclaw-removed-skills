@@ -3,11 +3,16 @@
   "slug": "triggre",
   "displayName": "Triggre",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169058160,
-    "commit": "https://github.com/openclaw/skills/commit/15620c75e6e9839a0ea9922b604835d8035619f5"
+    "version": "1.0.3",
+    "publishedAt": 1776863789562,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169058160,
+      "commit": "https://github.com/openclaw/skills/commit/15620c75e6e9839a0ea9922b604835d8035619f5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774753509614,
