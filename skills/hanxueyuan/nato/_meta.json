@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "nato",
-  "displayName": "nato",
+  "displayName": "Nato",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774853959888,
-    "commit": "https://github.com/openclaw/skills/commit/119eff5e33eae3a1a30bd51179e845eea31c51c2"
+    "version": "0.1.3",
+    "publishedAt": 1776533862078,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774853959888,
+      "commit": "https://github.com/openclaw/skills/commit/119eff5e33eae3a1a30bd51179e845eea31c51c2"
+    }
+  ]
 }

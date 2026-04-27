@@ -1,38 +1,48 @@
 ---
-name: nato
-description: "Information assistant for NATO 北约. Get mission info, latest reports, member states, and organizational resources."
-metadata:
-  { "openclaw": { "emoji": "🏛️", "version": "0.1.0", "author": "hanxueyuan", "tags": ["organization","institution","info"] } }
+summary: "NATO——全球最大的军事联盟、32 个成员国、集体防御原则下的跨大西洋安全架构"
+read_when:
+  - 查询NATO · 北大西洋公约组织相关信息
+  - 了解相关行业发展
 ---
 
-# 🏛️ NATO 北约 — Organization Info Assistant
+# NATO · 北大西洋公约组织
 
-Get comprehensive information about NATO 北约.
+---
 
-## About
+## 发展历程
 
-- **Organization**: NATO 北约
-- **Focus**: Military alliance
-- **Official Website**: https://www.nato.int
+| 时期 | 关键事件 |
+|:----:|--------|
+| **1949 年** | 12 个国家签署《北大西洋公约》——第五条规定'对一个成员国的攻击就是对全体的攻击' |
+| **1955 年** | 西德加入——冷战时期西方防线的核心 |
+| **1991 年** | 冷战结束，苏联解体——NATO 转型为集体安全组织 |
+| **1999-2004** | 东扩——波兰、匈牙利、捷克、波罗的海三国加入 |
+| **2022 年** | 俄罗斯入侵乌克兰后，芬兰和瑞典申请加入 |
+| **2023-2024** | 芬兰和瑞典正式成为成员国——NATO 达到 32 个成员国 |
 
-## What This Skill Does
+---
 
-1. **Mission & Overview** — What this organization does and why it matters
-2. **Latest Reports** — Recent publications, data releases, policy papers
-3. **News & Events** — Upcoming meetings, conferences, announcements
-4. **Member Info** — Member states/countries, leadership, structure
-5. **Resources** — Key databases, tools, and publications
+## 核心特点
 
-## Example Queries
+集体防御、军事演习、维和行动、反恐合作
 
-- "What does NATO do?"
-- "Latest NATO report"
-- "Who leads NATO?"
-- "NATO member countries"
+## 核心优势
 
-## How It Works
+全球最大军事联盟（32 国、军费总和超过全球 50%）+ 核威慑 + 美国的军事承诺
 
-Uses web search to fetch information from official organizational websites and news sources.
+---
 
-## Author
-Created by hanxueyuan | License: MIT
+## 关键数据
+
+| 指标 | 数值 |
+|------|------|
+| 成员国 | 32 个 |
+| 总军费 | 超过 1.3 万亿美元/年 |
+| 总部 | 比利时布鲁塞尔 |
+| 秘书长 | Mark Rutte（2024 年起） |
+
+---
+
+## 值得了解
+
+NATO 第五条（集体防御）只被援引过一次——2001 年 9/11 恐怖袭击后
