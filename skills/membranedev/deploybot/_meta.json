@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "deploybot",
+  "displayName": "Deploybot",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776898550004,
+    "commit": null
+  },
+  "history": []
+}
