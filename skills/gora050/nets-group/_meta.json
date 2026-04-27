@@ -3,9 +3,15 @@
   "slug": "nets-group",
   "displayName": "Nets Group",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170085395,
-    "commit": "https://github.com/openclaw/skills/commit/4e81ded21f6240e6133517ebe8385647d0305c7d"
+    "version": "1.0.3",
+    "publishedAt": 1776885757500,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170085395,
+      "commit": "https://github.com/openclaw/skills/commit/4e81ded21f6240e6133517ebe8385647d0305c7d"
+    }
+  ]
 }
