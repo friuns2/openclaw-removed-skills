@@ -335,7 +335,9 @@ If this returns “Could not find Collection”, use Option B.
 
 ### Option B: Custom TDL (recommended fallback)
 
-If the required report/collection doesn’t exist, send custom TDL in the request (pattern below). This is also how you build **special-purpose reports** for CA automation.
+If the required report/collection doesn’t exist, send a full TDL Report/Form/Part/Line/Field/Collection definition. This is also how you build **special-purpose reports** for CA automation.
+
+The following template is **verified working** for listing companies:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -344,7 +346,7 @@ If the required report/collection doesn’t exist, send custom TDL in the reques
     <VERSION>1</VERSION>
     <TALLYREQUEST>Export</TALLYREQUEST>
     <TYPE>Data</TYPE>
-    <ID>Custom Company List</ID>
+    <ID>CompanyListReport</ID>
   </HEADER>
   <BODY>
     <DESC>
@@ -353,13 +355,34 @@ If the required report/collection doesn’t exist, send custom TDL in the reques
       </STATICVARIABLES>
       <TDL>
         <TDLMESSAGE>
-          <!-- Put TDL definitions here (Report/Collection) -->
+          <REPORT NAME="CompanyListReport">
+            <FORMS>CompanyListForm</FORMS>
+          </REPORT>
+          <FORM NAME="CompanyListForm">
+            <PARTS>CompanyListPart</PARTS>
+          </FORM>
+          <PART NAME="CompanyListPart">
+            <LINES>CompanyListLine</LINES>
+            <REPEAT>CompanyListLine : CompanyCollection</REPEAT>
+            <SCROLL>Vertical</SCROLL>
+          </PART>
+          <LINE NAME="CompanyListLine">
+            <FIELDS>CompanyNameField</FIELDS>
+          </LINE>
+          <FIELD NAME="CompanyNameField">
+            <SET>$Name</SET>
+          </FIELD>
+          <COLLECTION NAME="CompanyCollection">
+            <TYPE>Company</TYPE>
+          </COLLECTION>
         </TDLMESSAGE>
       </TDL>
     </DESC>
   </BODY>
 </ENVELOPE>
 ```
+
+Response format: `<COMPANYNAMEFIELD>` elements, one per company.
 
 ## Export as HTML (for human viewing / quick preview)
 

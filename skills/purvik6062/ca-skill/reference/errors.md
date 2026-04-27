@@ -17,6 +17,8 @@ This file is a practical troubleshooting guide for CA automation using TallyPrim
 |---|---|---|
 | Connection refused / timeout | TallyPrime not running or wrong port | Open TallyPrime; confirm port; check `$TALLY_URL` |
 | Response doesn’t contain “Server is Running” | Wrong URL or Tally integration not enabled | Verify TallyPrime is running and integration is enabled |
+| XML parser throws `ParseError` / "no element found" | Export Data responses are XML fragments (no single root) — this is by design | Use Python regex instead of `xml.etree.ElementTree`; see parsing guide in `reference/reports.md` |
+| `curl ... > file` produces truncated or empty file | Shell redirect can silently truncate in compound commands | Use `curl --output /tmp/file.xml` (the `-o` flag) |
 | `Could not find Report 'X'` | Wrong `REPORTNAME` | Use report names in `reference/reports.md`; if still failing, verify in TallyPrime Developer |
 | `Could not find Collection 'X'` | Collection not available | Use custom TDL pattern (see `reference/reports.md`) |
 | `Ledger 'X' does not exist` | Missing ledger master | Create ledger first (see `reference/masters.md`) |

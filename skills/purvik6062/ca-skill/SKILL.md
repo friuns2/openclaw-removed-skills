@@ -1,7 +1,7 @@
 ---
 emoji: 🧾
 name: tally-prime-ca
-version: 2.0.0
+version: 1.0.6
 author: Maxxit
 description: >-
   Full-service CA skill for TallyPrime running locally. Read accounting reports
@@ -59,6 +59,23 @@ Use when the user asks to:
 7. **Posting is write operation**: confirm intent (and company) before any create/alter/cancel.
 8. **Prefer bill-wise allocations** for party ledgers to keep outstandings correct (see `reference/vouchers.md`).
 9. **Accounting-only vouchers (no inventory items)**: set `<ISINVOICE>No</ISINVOICE>` and place the **party ledger entry first** in the `ALLLEDGERENTRIES.LIST` sequence. This makes the Day Book "Particulars" column show the party name (not the expense/purchase ledger) and defaults the voucher to the clean "As Voucher" view. Only use `ISINVOICE=Yes` for item invoices that go through `reference/inventory.md`.
+10. **Accounting Invoice Mode — always use `LEDGERENTRIES.LIST`**: when `OBJVIEW="Invoice Voucher View"` is set (Modes 1 and 2 in `reference/vouchers.md`), every ledger block **must** use `<LEDGERENTRIES.LIST>`, not `<ALLLEDGERENTRIES.LIST>`. Tally silently ignores `ALLLEDGERENTRIES` in this view, causing the voucher to be saved with no entries and the error "No accounting or inventory entries are available."
+11. **Voucher class decision — confirm before posting**: before posting any Purchase or Sales voucher, check whether the company's voucher type uses a class for GST splitting. Run the preflight checklist in the "Preflight checklist before posting" section below. If class mode is confirmed, set `<CLASSNAME>EXACT_CLASS_NAME</CLASSNAME>` in the voucher header and include all four GST header fields (`CMPGSTIN`, `PARTYGSTIN`, `GSTREGISTRATIONTYPE`, `PLACEOFSUPPLY`). **If class existence is unconfirmed, stop and ask — do not post without it.** Full decision rules and templates are in the "Voucher class — decision rules" section of `reference/vouchers.md`.
+
+## Preflight checklist before posting
+
+Run through every item before sending any Create/Alter/Delete request. **Stop at the first unresolved item and ask the user.**
+
+| # | Check | How to verify | Block if… |
+|---|---|---|---|
+| 1 | **Company confirmed** | User stated it explicitly | Name not given — ask |
+| 2 | **Server reachable** | `curl -s --max-time 5 "$TALLY_URL"` | No response / wrong port |
+| 3 | **Voucher type uses a class?** | Export voucher type masters or ask user | Unknown — ask before posting |
+| 4 | **Class name confirmed** (if class mode) | List voucher type via masters export; match exact class name in Tally | Class not found — ask, never guess |
+| 5 | **Party ledger exists** | Ledger existence check (`reference/masters.md`) | Missing — create first |
+| 6 | **Purchase/Sales/GST ledgers exist** | Same as above | Missing — create first |
+| 7 | **GST header fields available** (if class mode) | `CMPGSTIN`, `PARTYGSTIN`, `GSTREGISTRATIONTYPE`, `PLACEOFSUPPLY` | Any missing — ask user |
+| 8 | **Voucher totals balance** | Sum all `AMOUNT` values = 0 | Mismatch — fix before posting |
 
 ## Step 0: Check TallyPrime server
 
@@ -82,7 +99,19 @@ To list companies, use the template in `reference/reports.md` (“Company list�
 
 ## Step 2: Verify/create required ledgers (masters)
 
-Ledger existence checks and master creation templates are in `reference/masters.md` (includes ledgers, groups, and GST/address fields).
+Ledger existence checks and master creation templates are in `reference/masters.md` (includes ledgers, groups, GST/address fields, and party ledger creation with required field prompts).
+
+**New company?** Run the "New Company Setup — Standard GST Ledgers" block in `reference/masters.md` first. It creates the seven minimum ledgers every GST-registered company needs:
+
+| # | Ledger | Type |
+|---|---|---|
+| 1 | `Input Sgst @ 9 %` | Input GST |
+| 2 | `Input Cgst @ 9 %` | Input GST |
+| 3 | `Input IGST @ 18 %` | Input GST |
+| 4 | `Purchase @ 18 %` | Purchase ledger |
+| 5 | `Round Off` | Rounding |
+| 6 | `Output Sgst @ 9 %` | Output GST |
+| 7 | `Output Cgst @ 9 %` | Output GST |
 
 Quick group defaults (common CA mapping):
 
