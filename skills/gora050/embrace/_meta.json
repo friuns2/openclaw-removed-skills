@@ -3,11 +3,16 @@
   "slug": "embrace",
   "displayName": "Embrace",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171037153,
-    "commit": "https://github.com/openclaw/skills/commit/734347932a00b48d19dca99f6a4d51a2e0f55160"
+    "version": "1.0.3",
+    "publishedAt": 1776870545075,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171037153,
+      "commit": "https://github.com/openclaw/skills/commit/734347932a00b48d19dca99f6a4d51a2e0f55160"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775135086565,
