@@ -3,11 +3,16 @@
   "slug": "decision-journal-integration",
   "displayName": "Decision Journal",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168254012,
-    "commit": "https://github.com/openclaw/skills/commit/78ea23b8bdfc7ecaa823a180ac6df34f04ee4ace"
+    "version": "1.0.3",
+    "publishedAt": 1776852176093,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168254012,
+      "commit": "https://github.com/openclaw/skills/commit/78ea23b8bdfc7ecaa823a180ac6df34f04ee4ace"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774591358807,
