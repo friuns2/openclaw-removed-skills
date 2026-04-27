@@ -3,9 +3,15 @@
   "slug": "hr-partner",
   "displayName": "Hr Partner",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775275406222,
-    "commit": "https://github.com/openclaw/skills/commit/d31b7f71d5a0c51872285841e3cb61a445db37bd"
+    "version": "1.0.1",
+    "publishedAt": 1776882597467,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775275406222,
+      "commit": "https://github.com/openclaw/skills/commit/d31b7f71d5a0c51872285841e3cb61a445db37bd"
+    }
+  ]
 }
