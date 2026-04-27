@@ -3,11 +3,16 @@
   "slug": "firehydrant",
   "displayName": "Firehydrant",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170928604,
-    "commit": "https://github.com/openclaw/skills/commit/d3d9ac4fb8c96a28a312eab300545de19a2c0f85"
+    "version": "1.0.3",
+    "publishedAt": 1776866709646,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170928604,
+      "commit": "https://github.com/openclaw/skills/commit/d3d9ac4fb8c96a28a312eab300545de19a2c0f85"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775120574325,
