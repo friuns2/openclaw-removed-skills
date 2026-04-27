@@ -3,11 +3,16 @@
   "slug": "fountain",
   "displayName": "Fountain",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169343028,
-    "commit": "https://github.com/openclaw/skills/commit/a2d954f5e531f645f813a90d50dc9d4de7df48d1"
+    "version": "1.0.3",
+    "publishedAt": 1776864260491,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169343028,
+      "commit": "https://github.com/openclaw/skills/commit/a2d954f5e531f645f813a90d50dc9d4de7df48d1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774818322249,
