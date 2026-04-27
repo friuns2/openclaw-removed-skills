@@ -3,9 +3,15 @@
   "slug": "typingdna",
   "displayName": "Typingdna",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170101951,
-    "commit": "https://github.com/openclaw/skills/commit/6eb855906f1b3c612980a07e4f65209be04f88b8"
+    "version": "1.0.3",
+    "publishedAt": 1776885803746,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170101951,
+      "commit": "https://github.com/openclaw/skills/commit/6eb855906f1b3c612980a07e4f65209be04f88b8"
+    }
+  ]
 }
