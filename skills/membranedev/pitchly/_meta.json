@@ -3,9 +3,15 @@
   "slug": "pitchly",
   "displayName": "Pitchly",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775210650704,
-    "commit": "https://github.com/openclaw/skills/commit/b8ab82574f9b512b1c6e496a571ef9b32e1f5973"
+    "version": "1.0.1",
+    "publishedAt": 1776881616197,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775210650704,
+      "commit": "https://github.com/openclaw/skills/commit/b8ab82574f9b512b1c6e496a571ef9b32e1f5973"
+    }
+  ]
 }
