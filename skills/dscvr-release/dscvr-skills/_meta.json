@@ -1,0 +1,11 @@
+{
+  "owner": "dscvr-release",
+  "slug": "dscvr-skills",
+  "displayName": "DSCVR Intelligence Skill",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776767171950,
+    "commit": null
+  },
+  "history": []
+}
