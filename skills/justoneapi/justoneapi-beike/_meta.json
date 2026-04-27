@@ -3,11 +3,16 @@
   "slug": "justoneapi-beike",
   "displayName": "Beike API",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776239944718,
-    "commit": "https://github.com/openclaw/skills/commit/7924a7cb802121e23171d750f97873692bc46b4a"
+    "version": "1.0.10",
+    "publishedAt": 1776924415612,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776239944718,
+      "commit": "https://github.com/openclaw/skills/commit/7924a7cb802121e23171d750f97873692bc46b4a"
+    },
     {
       "version": "1.0.7",
       "publishedAt": 1775375298455,

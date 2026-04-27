@@ -56,8 +56,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Community List",
@@ -102,8 +102,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Resale Housing Details",
@@ -157,8 +157,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Resale Housing List",

@@ -25,7 +25,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `ershoufangDetailV1`
 
@@ -49,7 +49,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getErshoufangListV1`
 
@@ -74,4 +74,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

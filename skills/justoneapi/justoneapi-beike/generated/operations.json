@@ -50,8 +50,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Community List",
@@ -96,8 +96,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Resale Housing Details",
@@ -151,8 +151,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Resale Housing List",
