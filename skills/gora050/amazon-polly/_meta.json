@@ -3,11 +3,16 @@
   "slug": "amazon-polly",
   "displayName": "Amazon Polly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169229717,
-    "commit": "https://github.com/openclaw/skills/commit/cedd12d4b7bf773dd2dcedb6979dc4ebb31af744"
+    "version": "1.0.3",
+    "publishedAt": 1776864050048,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169229717,
+      "commit": "https://github.com/openclaw/skills/commit/cedd12d4b7bf773dd2dcedb6979dc4ebb31af744"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774782234535,
