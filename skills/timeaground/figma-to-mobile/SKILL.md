@@ -53,14 +53,42 @@ For example, if the user says "Android XML, the 3 cards are a RecyclerView list"
 
 ### Step 1: Fetch & Analyze
 
-When user provides a Figma link:
+When user provides Figma link(s):
 
-1. Run `scripts/figma_fetch.py "<url>"` to get design data
-   If the user provides multiple Figma links (different states of the same page), use `--compare` mode to fetch all and get a diff summary. This helps generate multi-state code (selector drawables, conditional styling, etc.)
-2. Analyze the structure: identify sections, repeated patterns, component types
-3. Note INSTANCE nodes — they indicate reusable components. Check `variantProperties` for component state (e.g. State=Default, Size=Large) — these map to multi-state code
-4. Note gradient/shadow data — flag for the user if complex
-5. Apply Figma node interpretation rules before generating code
+1. **Determine the input type:**
+
+   **A. Link without specific node-id** (no `node-id`, or `node-id=0-1`):
+   This link points to the entire page, not a specific frame. Tell the user:
+   > This link points to the whole page. Please select the frame you want in Figma, right-click it, and choose "Copy link to selection", then send that link.
+   > If you want to convert multiple frames, send multiple links.
+
+   **B. Single frame link** (has specific `node-id`):
+   Run `scripts/figma_fetch.py "<url>"` → returns that frame's design data.
+   Proceed to analysis.
+
+   **C. Multiple links** (user sends 2+ URLs):
+   First, determine the relationship by examining frame names and user context:
+
+   - **Same page, different visual states** (e.g. "首页-有banner" and "首页-无banner"): Use `--compare` mode to fetch all and get a diff summary. Generate multi-state code (conditional visibility, state switching).
+
+   - **Parent page + overlay/drawer** (e.g. "首页" + "首页-抽屉-xxx"): Generate each as an **independent layout file**. Then tell the user the relationship:
+     > Frame 1 ("首页") and Frame 2 ("首页-抽屉") look like a main page + side drawer.
+     > I've generated two separate layout files. How you wire them together (DrawerLayout, Navigation, etc.) depends on your project architecture.
+
+     The Skill's job is generating UI layout code, not deciding architecture (Activity vs Fragment vs Navigation).
+
+   - **Different independent pages** (e.g. "首页" + "设置页" + "个人中心"): Process each independently. Fetch them **one at a time** with a pause between requests to avoid rate limiting. Present a summary of all pages, then ask which to convert first (or convert all sequentially).
+
+   - **Not sure**: Ask the user — "These frames look related but I'm not sure how. Are they different states of the same page, a page with an overlay, or independent pages?"
+
+   **Rate limit protection for multiple links**: When fetching multiple nodes, wait 2-3 seconds between requests. Never fire more than 2 requests in parallel.
+
+2. **If the link has no specific node-id**, ask the user to re-copy from the specific frame (see A above). Do NOT call the API.
+
+3. Analyze the structure: identify sections, repeated patterns, component types
+4. Note INSTANCE nodes — they indicate reusable components. Check `variantProperties` for component state (e.g. State=Default, Size=Large) — these map to multi-state code
+5. Note gradient/shadow data — flag for the user if complex
+6. Apply Figma node interpretation rules before generating code
 
 **Detailed interpretation rules**: Read `references/figma-interpretation.md`
 

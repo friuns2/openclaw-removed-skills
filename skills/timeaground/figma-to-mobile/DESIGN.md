@@ -1,4 +1,4 @@
-# figma-to-mobile 设计方案 v0.3
+# figma-to-mobile 设计方案 v0.4
 
 ## 核心目标
 
@@ -57,6 +57,7 @@ references 文件是 **Figma 属性→代码属性的映射表**：
 | Phase | 内容 | 状态 |
 |-------|------|------|
 | 1 | Skill 交互式确认流程 | ✅ v0.3 |
+| 1.1 | 简化链接处理（砂概览模式）+ 限流诊断 | ✅ v0.4 |
 | 1.5 | 资源生成（shape drawable + SVG 导出 + Vector Drawable） | ✅ |
 | 2 | project_scan（扫描项目已有资源/组件） | 待做 |
 | 3 | MCP Server（给 VS Code 用） | 待做 |

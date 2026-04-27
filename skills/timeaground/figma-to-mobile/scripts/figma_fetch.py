@@ -85,7 +85,7 @@ def extract_fills(fills: list) -> dict:
 
 def simplify_node(node: dict, parent_pos: dict = None) -> dict:
     """Simplify a Figma node to only the info needed for code generation."""
-    bbox = node.get("absoluteBoundingBox", {})
+    bbox = node.get("absoluteBoundingBox") or {}
     node_type = node.get("type")
     result = {
         "id": node.get("id"),
@@ -229,7 +229,7 @@ def has_truncated_children(node: dict) -> bool:
     ntype = node.get("type")
     children = node.get("children", [])
     if ntype in ("FRAME", "GROUP", "INSTANCE", "COMPONENT", "COMPONENT_SET") and not children:
-        bbox = node.get("absoluteBoundingBox", {})
+        bbox = node.get("absoluteBoundingBox") or {}
         w = bbox.get("width", 0)
         h = bbox.get("height", 0)
         if w > 10 and h > 10:
@@ -240,12 +240,57 @@ def has_truncated_children(node: dict) -> bool:
     return False
 
 
+def _request_with_retry(url: str, headers: dict, timeout: int = 30, max_retries: int = 3) -> requests.Response:
+    """Make a GET request with retry on 429/SSL errors."""
+    import time
+    for attempt in range(max_retries):
+        try:
+            resp = requests.get(url, headers=headers, timeout=timeout)
+            if resp.status_code == 429:
+                raw_wait = int(resp.headers.get("Retry-After", 10 * (attempt + 1)))
+                plan_tier = resp.headers.get("X-Figma-Plan-Tier", "unknown")
+                limit_type = resp.headers.get("X-Figma-Rate-Limit-Type", "unknown")
+                MAX_RETRY_WAIT = 120  # Never wait more than 2 minutes
+                if raw_wait > MAX_RETRY_WAIT:
+                    hours = raw_wait // 3600
+                    mins = (raw_wait % 3600) // 60
+                    msg = f"Figma API rate limited for {raw_wait}s ({hours}h {mins}m)."
+                    if plan_tier.lower() in ("starter",) or limit_type == "monthly":
+                        msg += (" Your Figma seat (View/Collab) only allows ~6 API calls per month."
+                                " Ask your Figma admin to upgrade your seat to Dev or Full "
+                                "for much higher limits (10-20 requests/minute).")
+                    else:
+                        msg += f" Plan tier: {plan_tier}, limit type: {limit_type}."
+                    print(json.dumps({
+                        "status": "error",
+                        "error": "RATE_LIMIT_EXCEEDED",
+                        "message": msg,
+                        "retry_after_seconds": raw_wait,
+                        "plan_tier": plan_tier,
+                        "limit_type": limit_type
+                    }))
+                    sys.exit(1)
+                print(f"  Rate limited (429), waiting {raw_wait}s...", file=sys.stderr)
+                time.sleep(raw_wait)
+                continue
+            return resp
+        except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            if attempt < max_retries - 1:
+                wait = 5 * (attempt + 1)
+                print(f"  Connection error, retrying in {wait}s... ({e.__class__.__name__})", file=sys.stderr)
+                time.sleep(wait)
+            else:
+                raise
+    # Final attempt after all retries exhausted
+    return requests.get(url, headers=headers, timeout=timeout)
+
+
 def fetch_node(file_key: str, node_id: str, token: str, depth: int = 5) -> dict:
     """Fetch a node from Figma API with adaptive depth."""
     api_node_id = node_id.replace(":", "-")
     url = f"https://api.figma.com/v1/files/{file_key}/nodes?ids={api_node_id}&depth={depth}"
     headers = {"X-Figma-Token": token}
-    resp = requests.get(url, headers=headers, timeout=30)
+    resp = _request_with_retry(url, headers)
     resp.raise_for_status()
     data = resp.json()
 
@@ -262,9 +307,14 @@ def fetch_node(file_key: str, node_id: str, token: str, depth: int = 5) -> dict:
     if depth < 15 and has_truncated_children(document):
         new_depth = min(depth + 5, 15)
         print(f"Depth {depth} may be insufficient, retrying with depth={new_depth}...", file=sys.stderr)
+        import time
+        time.sleep(1)  # Brief pause before depth retry to avoid rate limit
         return fetch_node(file_key, node_id, token, new_depth)
 
     return document
+
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -500,8 +550,8 @@ def main():
     if not args:
         print("Usage: python figma_fetch.py <figma_url> [<figma_url2> ...] [options]")
         print("")
-        print("Single node (original):")
-        print("  python figma_fetch.py '<url>' [--depth N] [--export-svg id1,id2]")
+        print("Single node:")
+        print("  python figma_fetch.py '<url_with_node_id>' [--depth N] [--export-svg id1,id2]")
         print("")
         print("Multi-state compare:")
         print("  python figma_fetch.py '<url1>' '<url2>' --compare")
@@ -611,7 +661,7 @@ def main():
         return
 
     # -----------------------------------------------------------------------
-    # Original single-URL mode (fully backwards-compatible)
+    # Single-URL mode
     # -----------------------------------------------------------------------
     url = url_args[0]
 
@@ -627,10 +677,15 @@ def main():
         print(json.dumps(svgs, indent=2, ensure_ascii=False))
         return
 
-    # Normal fetch mode
-    if not node_id:
-        print("ERROR: URL must contain a node-id parameter.")
-        print("Open a specific frame in Figma and copy the URL.")
+    # Require a specific node-id (not the root canvas 0:1)
+    if not node_id or node_id in ("0:1", "0-1"):
+        print(json.dumps({
+            "status": "error",
+            "error": "NO_SPECIFIC_NODE",
+            "message": "This link points to the entire page, not a specific frame. "
+                       "Please select the frame you want in Figma, right-click it, "
+                       "and choose 'Copy link to selection', then send that link."
+        }))
         sys.exit(1)
 
     print(f"Fetching node {node_id} from file {file_key} (depth={depth})...", file=sys.stderr)
