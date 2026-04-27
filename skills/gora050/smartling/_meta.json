@@ -3,11 +3,16 @@
   "slug": "smartling",
   "displayName": "Smartling",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170189360,
-    "commit": "https://github.com/openclaw/skills/commit/ff7a58a4f30a45c55afbef09a85a66bccf2d1039"
+    "version": "1.0.3",
+    "publishedAt": 1776866180722,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170189360,
+      "commit": "https://github.com/openclaw/skills/commit/ff7a58a4f30a45c55afbef09a85a66bccf2d1039"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774985070891,
