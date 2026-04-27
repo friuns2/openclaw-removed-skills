@@ -3,11 +3,16 @@
   "slug": "foundriesio",
   "displayName": "Foundriesio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169304838,
-    "commit": "https://github.com/openclaw/skills/commit/3ba1398edccf3efdce3803c4b9f04a2347071321"
+    "version": "1.0.3",
+    "publishedAt": 1776865239590,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169304838,
+      "commit": "https://github.com/openclaw/skills/commit/3ba1398edccf3efdce3803c4b9f04a2347071321"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812231250,
