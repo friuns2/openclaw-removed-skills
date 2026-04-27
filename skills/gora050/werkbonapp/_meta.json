@@ -3,9 +3,15 @@
   "slug": "werkbonapp",
   "displayName": "Werkbonapp",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775210809808,
-    "commit": "https://github.com/openclaw/skills/commit/20e4d9bd017f9b800a711f95fa7931d9a2b576c6"
+    "version": "1.0.1",
+    "publishedAt": 1776885208952,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775210809808,
+      "commit": "https://github.com/openclaw/skills/commit/20e4d9bd017f9b800a711f95fa7931d9a2b576c6"
+    }
+  ]
 }
