@@ -3,11 +3,16 @@
   "slug": "finmei",
   "displayName": "Finmei",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168435855,
-    "commit": "https://github.com/openclaw/skills/commit/f939d205ef4c155febadc14cd7eb6ceb327bf306"
+    "version": "1.0.3",
+    "publishedAt": 1776862581577,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168435855,
+      "commit": "https://github.com/openclaw/skills/commit/f939d205ef4c155febadc14cd7eb6ceb327bf306"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774645451258,
