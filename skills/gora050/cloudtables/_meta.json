@@ -3,11 +3,16 @@
   "slug": "cloudtables",
   "displayName": "Cloudtables",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168512880,
-    "commit": "https://github.com/openclaw/skills/commit/b181fdfb41d0615906f0d0ecac2bb9ea45ee5f60"
+    "version": "1.0.3",
+    "publishedAt": 1776862703500,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168512880,
+      "commit": "https://github.com/openclaw/skills/commit/b181fdfb41d0615906f0d0ecac2bb9ea45ee5f60"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652681566,
