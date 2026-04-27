@@ -3,9 +3,15 @@
   "slug": "payment-rails",
   "displayName": "Payment Rails",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169067033,
-    "commit": "https://github.com/openclaw/skills/commit/27a8d3d043c99d9fb538a2cf1eab9e3121069b6f"
+    "version": "1.0.3",
+    "publishedAt": 1776863807973,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169067033,
+      "commit": "https://github.com/openclaw/skills/commit/27a8d3d043c99d9fb538a2cf1eab9e3121069b6f"
+    }
+  ]
 }
