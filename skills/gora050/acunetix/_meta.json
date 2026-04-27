@@ -1,0 +1,11 @@
+{
+  "owner": "gora050",
+  "slug": "acunetix",
+  "displayName": "Acunetix",
+  "latest": {
+    "version": "1.0.2",
+    "publishedAt": 1775170568649,
+    "commit": null
+  },
+  "history": []
+}
