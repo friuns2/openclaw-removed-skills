@@ -3,11 +3,16 @@
   "slug": "thanksio",
   "displayName": "Thanksio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167739363,
-    "commit": "https://github.com/openclaw/skills/commit/46106418bd0ae8ad3850b683d7946a229e366d00"
+    "version": "1.0.3",
+    "publishedAt": 1776851414029,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167739363,
+      "commit": "https://github.com/openclaw/skills/commit/46106418bd0ae8ad3850b683d7946a229e366d00"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774497749695,
