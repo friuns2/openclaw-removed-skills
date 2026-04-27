@@ -3,11 +3,16 @@
   "slug": "webinarkit",
   "displayName": "Webinarkit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170976857,
-    "commit": "https://github.com/openclaw/skills/commit/e4d3ef674e591c2ca419ce1ba4a20c87d29fc373"
+    "version": "1.0.3",
+    "publishedAt": 1776892272113,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170976857,
+      "commit": "https://github.com/openclaw/skills/commit/e4d3ef674e591c2ca419ce1ba4a20c87d29fc373"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775131427355,
