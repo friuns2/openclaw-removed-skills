@@ -3,11 +3,16 @@
   "slug": "rapidoc",
   "displayName": "Rapidoc",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169958699,
-    "commit": "https://github.com/openclaw/skills/commit/56e1589946a69356990be843d1e2e5dd34023218"
+    "version": "1.0.3",
+    "publishedAt": 1776865030414,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169958699,
+      "commit": "https://github.com/openclaw/skills/commit/56e1589946a69356990be843d1e2e5dd34023218"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774933479559,
