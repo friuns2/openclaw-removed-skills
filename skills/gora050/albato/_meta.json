@@ -3,9 +3,15 @@
   "slug": "albato",
   "displayName": "Albato",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171078897,
-    "commit": "https://github.com/openclaw/skills/commit/20d7314df9fd5410ff7044df90949a8290973405"
+    "version": "1.0.3",
+    "publishedAt": 1776892537203,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171078897,
+      "commit": "https://github.com/openclaw/skills/commit/20d7314df9fd5410ff7044df90949a8290973405"
+    }
+  ]
 }
