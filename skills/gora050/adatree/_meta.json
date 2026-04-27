@@ -3,11 +3,16 @@
   "slug": "adatree",
   "displayName": "Adatree",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169458056,
-    "commit": "https://github.com/openclaw/skills/commit/bad50030d9a82b86e7cab65ab12cb30cd0a8056a"
+    "version": "1.0.3",
+    "publishedAt": 1776885371045,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169458056,
+      "commit": "https://github.com/openclaw/skills/commit/bad50030d9a82b86e7cab65ab12cb30cd0a8056a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774836234373,
