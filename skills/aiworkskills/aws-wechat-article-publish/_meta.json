@@ -1,0 +1,11 @@
+{
+  "owner": "aiworkskills",
+  "slug": "aws-wechat-article-publish",
+  "displayName": "公众号草稿 / 发布(微信 API)",
+  "latest": {
+    "version": "1.0.22",
+    "publishedAt": 1776900263931,
+    "commit": null
+  },
+  "history": []
+}
