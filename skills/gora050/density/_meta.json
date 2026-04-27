@@ -3,9 +3,15 @@
   "slug": "density",
   "displayName": "Density",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775271959220,
-    "commit": "https://github.com/openclaw/skills/commit/af6bbf86d1e83b509363b4aa89eebc03bc890b9c"
+    "version": "1.0.1",
+    "publishedAt": 1776885541514,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775271959220,
+      "commit": "https://github.com/openclaw/skills/commit/af6bbf86d1e83b509363b4aa89eebc03bc890b9c"
+    }
+  ]
 }
