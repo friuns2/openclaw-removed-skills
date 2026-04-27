@@ -54,6 +54,11 @@ _EXTRACT_OUTPUT_FILES: set[str] = set()
 # 格式：{输出文件名: [字段名列表]}  例：{"hotel1.txt": ["民宿名字", "评分", "价格"]}
 _EXTRACT_FIELD_REGISTRY: dict[str, list[str]] = {}
 
+# 本次 session 是否已有 python_snippet 成功使用了 page.evaluate 提取列表行型数据。
+# 为 True 时，后续 python_snippet 的结构性卡口（_parse_field 要求）自动豁免——
+# 因为数据通道是 page.evaluate → JSON 文件，而非 extract_text → _parse_field。
+_SESSION_HAS_PAGE_EVALUATE: bool = False
+
 # 本次 session 的临时文件目录：/tmp/{task_slug}/
 # 每次 record-start 由 server_main() 设置，隔离不同任务的提取文件互不干扰
 _TASK_TMP_DIR: Path = Path("/tmp") / "rpa_default"
@@ -68,11 +73,13 @@ def _slugify_for_path(text: str) -> str:
 
 
 def _reset_extract_output_tracking() -> None:
-    global _EXTRACT_OUTPUT_FILES, _EXTRACT_FIELD_REGISTRY, _VISION_SESSION, _VISION_STEPS
+    global _EXTRACT_OUTPUT_FILES, _EXTRACT_FIELD_REGISTRY, _VISION_SESSION, _VISION_STEPS, \
+           _SESSION_HAS_PAGE_EVALUATE
     _EXTRACT_OUTPUT_FILES = set()
     _EXTRACT_FIELD_REGISTRY = {}
     _VISION_SESSION = {}
     _VISION_STEPS = []
+    _SESSION_HAS_PAGE_EVALUATE = False
 
 
 _UA = (
@@ -810,12 +817,20 @@ def _check_snippet_reads_extract_files(code: str) -> Optional[str]:
     - 代码必须调用 _parse_field(...)
     - 且引用的文件名至少包含一个已注册的提取文件
 
+    豁免条件（任一满足则直接放行）：
+    - 本次 session 无提取步骤（_EXTRACT_OUTPUT_FILES 为空）
+    - 本次 session 已有 page.evaluate 成功步骤（_SESSION_HAS_PAGE_EVALUATE = True）：
+      此时数据通道为 page.evaluate → JSON 文件，与 _parse_field 无关
+
     这不检测"写了什么坏代码"，而是验证"走了正确的数据通道"。
     兼容中英文字段名与文件名。
     Returns: 错误消息；None 表示通过。
     """
     if not _EXTRACT_OUTPUT_FILES:
         return None  # 本次 session 无提取步骤，不约束
+
+    if _SESSION_HAS_PAGE_EVALUATE:
+        return None  # page.evaluate 流：数据通道不经过 _parse_field，豁免
 
     # 1. 必须调用 _parse_field
     if "_parse_field" not in code:
@@ -870,32 +885,53 @@ def _check_snippet_reads_extract_files(code: str) -> Optional[str]:
     return None
 
 
+class _PageEvaluateOnly:
+    """python_snippet 沙箱中的限制性页面代理。
+
+    仅开放 page.evaluate(JS)，用于列表行型数据一次性行对齐提取。
+    其他所有页面方法（locator / click / fill / goto 等）仍被阻断——
+    交互操作必须使用专用 action，不应在 python_snippet 里内联。
+    """
+
+    def __init__(self, real_page):
+        object.__setattr__(self, "_real_page", real_page)
+
+    def evaluate(self, *args, **kwargs):
+        """Proxy to real Playwright page.evaluate() — returns an awaitable coroutine."""
+        real = object.__getattribute__(self, "_real_page")
+        return real.evaluate(*args, **kwargs)
+
+    def __getattr__(self, name: str):
+        raise RuntimeError(
+            f"\n❌  python_snippet: page.{name}() 不可用。\n"
+            f"\n"
+            f"python_snippet 里只允许 page.evaluate(JS字符串) 用于列表行型数据提取。\n"
+            f"其他交互（点击/填写/导航）请用专用 action：click / fill / goto 等。\n"
+            f"\n"
+            f"/ python_snippet: only page.evaluate(JS) is allowed for list-row extraction.\n"
+            f"  Use dedicated actions (click / fill / goto) for browser interaction.\n"
+        )
+
+    def __bool__(self):
+        return True
+
+
 class _MockPage:
-    """python_snippet 验证沙箱中的占位页面对象。
+    """python_snippet 沙箱降级用：无浏览器上下文时的完全阻断占位对象。
 
-    当 AI 在 python_snippet 里尝试访问 DOM（page.evaluate / page.locator 等），
-    立刻抛出清晰的 RuntimeError，告知正确做法：改用 extract_text action。
-
-    NOTE: 生成脚本中 python_snippet 代码运行于真实 async def run() 内，
-    彼时 page 是真实 Playwright 对象。但 python_snippet 的设计意图是
-    「文件读写 + 数据处理」，DOM 提取应使用专用的 extract_text action。
+    正常录制流程应使用 _PageEvaluateOnly（传入真实 page）。
+    仅当 page 不可用时（非浏览器任务）回退到此对象。
     """
 
     _MSG = (
         "\n"
-        "❌  python_snippet 不能访问 DOM（page 对象在验证沙箱中不可用）。\n"
+        "❌  python_snippet 无法访问页面（当前任务无浏览器上下文）。\n"
         "\n"
-        "正确做法：\n"
-        "  1. 为每个需要提取的字段单独发送一个 extract_text action，\n"
-        "     将结果写入桌面 txt 文件（如 hotel1_raw.txt）。\n"
-        "     例：{\"action\":\"extract_text\",\"target\":\"h1\",\n"
-        "          \"value\":\"hotel1_raw.txt\",\"field\":\"房间名称\"}\n"
-        "  2. 在 python_snippet 里用 Path(...).read_text() 读取上述 txt 文件，\n"
-        "     解析数据，再调用 datetime.datetime.now() 生成时间，\n"
-        "     最后用 python-docx 写入 Word。\n"
+        "如需提取网页数据，请在 python_snippet 之前先发送：\n"
+        "  - extract_text action（SSR 页面单字段提取）\n"
+        "  - extract_by_vision action（视觉提取，适合 SPA 或列表行型）\n"
         "\n"
         "python_snippet 只能做：文件读写 / 数据解析 / datetime / openpyxl / docx。\n"
-        "DOM 提取必须用 extract_text（或 click / fill 等专用 action）。\n"
     )
 
     def __getattr__(self, name: str):
@@ -905,19 +941,23 @@ class _MockPage:
         return False
 
 
-def _python_snippet_run(code: str) -> Optional[str]:
-    """在录制时执行 python_snippet 代码，验证依赖和逻辑正确性。
+async def _python_snippet_run(code: str, page) -> Optional[str]:
+    """在录制时 async 执行 python_snippet 代码，验证依赖和逻辑正确性。
 
-    构建与生成脚本 run() 函数体完全同构的执行命名空间：
-      - CONFIG["output_dir"] = ~/Desktop（录制期间的输出目录）
-      - 标准库：Path, json, os, datetime, re
-      - openpyxl: Workbook, load_workbook, get_column_letter（若已安装）
-      - python-docx: Document（若已安装）
-      - page = _MockPage()（DOM 访问会立即给出明确错误与正确做法提示）
+    代码被包裹进 async def __snippet__() 中执行，因此：
+      - await page.evaluate(JS)  ✅ 支持（列表行型提取）
+      - 普通同步文件读写           ✅ 支持
+      - page.locator / page.click 等  ❌ 仍被 _PageEvaluateOnly 阻断
 
     返回错误字符串；None 表示成功。
     """
     import traceback as _tb
+
+    # Wrap original code in async function so `await` is valid at any level
+    indented_lines = []
+    for line in code.splitlines():
+        indented_lines.append(("    " + line) if line.strip() else "")
+    async_code = "async def __snippet__():\n" + "\n".join(indented_lines) + "\n"
 
     ns: dict = {
         "Path": Path,
@@ -930,8 +970,8 @@ def _python_snippet_run(code: str) -> Optional[str]:
         "os": __import__("os"),
         "re": __import__("re"),
         "datetime": __import__("datetime"),
-        "page": _MockPage(),
-        "_parse_field": _parse_field,   # 标准 kv 读取函数，python_snippet 必须通过它读取提取数据
+        "page": _PageEvaluateOnly(page) if page is not None else _MockPage(),
+        "_parse_field": _parse_field,
     }
 
     # openpyxl
@@ -965,15 +1005,17 @@ def _python_snippet_run(code: str) -> Optional[str]:
         return (f"python_snippet 缺少依赖：{pkgs}。请先执行：python3 rpa_manager.py deps-install {cap}"
                 f" / python_snippet missing deps: {pkgs}. Run: python3 rpa_manager.py deps-install {cap}")
 
-    # Compile (syntax check)
+    # Compile (syntax check on wrapped code; adjust reported line by -1 for wrapper)
     try:
-        compiled = compile(code, "<python_snippet>", "exec")
+        compiled = compile(async_code, "<python_snippet>", "exec")
     except SyntaxError as e:
-        return f"python_snippet 语法错误 / syntax error: {e}"
+        lineno = max(1, (e.lineno or 1) - 1)
+        return f"python_snippet 语法错误 / syntax error: line {lineno}: {e.msg}"
 
-    # Execute
+    # Execute: define __snippet__ then await it
     try:
-        exec(compiled, ns)  # noqa: S102
+        exec(compiled, ns)          # noqa: S102  — defines __snippet__ in ns
+        await ns["__snippet__"]()   # run the async snippet
         print("[recorder] python_snippet 验证通过 / validation passed ✓", flush=True)
         return None
     except ImportError as e:
@@ -994,7 +1036,8 @@ def _word_write_run(data: dict) -> Optional[str]:
     except ImportError:
         return "缺少 python-docx：请执行 python3 rpa_manager.py deps-install C 或 pip install python-docx / Missing python-docx: run 'python3 rpa_manager.py deps-install C' or 'pip install python-docx'"
 
-    rel = (data.get("path") or data.get("value") or "").strip()
+    # Accept "path", "target" (common AI alias), or legacy fallback "value" for the file path.
+    rel = (data.get("path") or data.get("target") or data.get("value") or "").strip()
     if not rel:
         return "word_write 需要 path（或 value）/ word_write requires 'path' (or 'value')"
 
@@ -1085,7 +1128,8 @@ def _expand_para_placeholders(para: str) -> str:
 
 
 def _word_write_codegen_lines(data: dict) -> list[str]:
-    rel = (data.get("path") or data.get("value") or "").strip()
+    # Accept "path", "target" (common AI alias), or legacy fallback "value".
+    rel = (data.get("path") or data.get("target") or data.get("value") or "").strip()
     paragraphs = data.get("paragraphs") or []
     table_def = data.get("table")
     mode = (data.get("mode") or "new").lower()
@@ -1246,18 +1290,25 @@ def _parse_field(filepath, field_name: str, index: int = 0):
 
 # ── DOM snapshot ─────────────────────────────────────────────────────────────
 
-async def _snapshot(page) -> list[dict]:
-    """Return interactive elements with usable CSS selectors for LLM decision.
+async def _snapshot(page) -> dict:
+    """Return DOM intelligence for LLM selector decisions.
 
-    Selector priority:
+    Always returns three layers:
+      items       – interactive + heading elements (navigation / interaction layer)
+      sections    – named content regions (structure layer)
+      data_groups – auto-detected repeating data containers with sampled field
+                    selectors (data layer).  The LLM uses these to write correct
+                    page.evaluate() JS without guessing.  Works on any website;
+                    detection is pure DOM structural analysis, no site-specific
+                    knowledge required.
+
+    Selector priority for items:
       1. Own  #id / [data-testid] / [aria-label] / tag[name]
       2. Ancestor walk (max 4 levels) — produces  [data-testid="X"] tag
       3. :nth-of-type fallback inside nearest sectioning parent
-    Also returns a separate 'sections' list showing content containers
-    so the LLM can scope selectors to specific page areas.
     """
     try:
-        return await page.evaluate("""() => {
+        result = await page.evaluate("""() => {
             // ── helpers ──────────────────────────────────────────────────────
             function ownSel(el) {
                 if (el.id) return '#' + el.id;
@@ -1271,16 +1322,11 @@ async def _snapshot(page) -> list[dict]:
             }
 
             function ancestorSel(el) {
-                // Walk up max 4 levels; return composite like [data-testid="X"] a h3
-                // IMPORTANT: intermediate tags are included to preserve real DOM nesting
-                // order, so LLM cannot confuse "a h3" with "h3 a".
                 let cur = el.parentElement;
-                const midTags = [];   // intermediate tag names (nearest → farthest)
+                const midTags = [];
                 for (let d = 0; d < 4 && cur; d++, cur = cur.parentElement) {
                     const s = ownSel(cur);
                     if (s) {
-                        // midTags are collected nearest-first; reverse so they read
-                        // parent→child in CSS order: ancestor > mid1 > mid2 > el
                         const mid = midTags.slice().reverse().join(' ');
                         return mid ? `${s} ${mid} ${el.tagName.toLowerCase()}`
                                    : `${s} ${el.tagName.toLowerCase()}`;
@@ -1291,7 +1337,6 @@ async def _snapshot(page) -> list[dict]:
             }
 
             function nthSel(el) {
-                // Fallback: find position among siblings of same tag inside nearest section
                 const parent = el.parentElement;
                 if (!parent) return null;
                 const siblings = Array.from(parent.children)
@@ -1302,29 +1347,30 @@ async def _snapshot(page) -> list[dict]:
                 return null;
             }
 
-            // ── collect interactive + heading elements ────────────────────
+            function isVisible(el) {
+                const r = el.getBoundingClientRect();
+                return r.width > 0 && r.height > 0;
+            }
+
+            // ── Layer 1: interactive + heading elements ───────────────────
             const TAGS = [
                 'input', 'button', 'select', 'textarea', 'a[href]',
                 '[role="button"]', '[role="link"]', '[role="searchbox"]',
                 '[role="tab"]', 'h1', 'h2', 'h3', 'li'
             ].join(',');
 
-            const visible = Array.from(document.querySelectorAll(TAGS))
-                .filter(el => {
-                    const r = el.getBoundingClientRect();
-                    return r.width > 0 && r.height > 0;
-                })
-                .slice(0, 100);
+            const items = Array.from(document.querySelectorAll(TAGS))
+                .filter(isVisible)
+                .slice(0, 100)
+                .map(el => {
+                    const tag  = el.tagName.toLowerCase();
+                    const ph   = el.getAttribute('placeholder') || null;
+                    const text = (el.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 70);
+                    const sel  = ownSel(el) || ancestorSel(el) || nthSel(el);
+                    return { tag, sel: sel || null, ph, text: text || null };
+                }).filter(e => e.sel || e.text);
 
-            const items = visible.map(el => {
-                const tag  = el.tagName.toLowerCase();
-                const ph   = el.getAttribute('placeholder') || null;
-                const text = (el.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 70);
-                const sel  = ownSel(el) || ancestorSel(el) || nthSel(el);
-                return { tag, sel: sel || null, ph, text: text || null };
-            }).filter(e => e.sel || e.text);
-
-            // ── collect content sections (for scoped extraction) ──────────
+            // ── Layer 2: named content sections ──────────────────────────
             const SECTION_TAGS = [
                 'section', 'article', '[data-testid]', '[id]'
             ].join(',');
@@ -1343,17 +1389,240 @@ async def _snapshot(page) -> list[dict]:
                 .filter(Boolean)
                 .filter((v, i, a) => a.findIndex(x => x.sel === v.sel) === i);
 
-            return { items, sections };
+            // ── Layer 3: repeating data containers ───────────────────────
+            //
+            // Universal detection — works on any website, no site-specific knowledge.
+            // Any website's list data is structurally: sibling elements sharing the
+            // same pattern under a common parent.  Two complementary strategies:
+            //
+            //  A) Semantic-attribute groups — elements sharing the same data-* /
+            //     itemtype / role attribute value, repeated 3+ times.
+            //     Covers: Amazon (data-component-type), React/Vue (data-cy,
+            //     data-item-id), schema.org (itemtype), ARIA lists (role="listitem").
+            //
+            //  B) Structural-similarity groups — siblings under the same parent
+            //     with the same tagName + first CSS class, repeated 4+ times.
+            //     Covers: class-based lists (ul > li.card, div.grid > div.item).
+            //
+            // First element of each group is sampled to extract visible text-bearing
+            // and link descendants with relative selectors.
+            // The LLM uses sample_fields to write correct page.evaluate() JS directly
+            // without guessing or needing a separate dom_inspect step.
+
+            // ── helper: build a minimal CSS selector string for an element ──
+            function elSel(el) {
+                if (el.id) return '#' + CSS.escape(el.id);
+                // semantic data attributes (most specific first)
+                for (const attr of ['data-component-type','data-testid','data-cy',
+                                     'data-type','data-item-id','data-asin','itemtype']) {
+                    const v = el.getAttribute(attr);
+                    if (v) return `${el.tagName.toLowerCase()}[${attr}="${v}"]`;
+                }
+                // class-based fallback
+                const cls = Array.from(el.classList).slice(0,2).join('.');
+                return cls ? `${el.tagName.toLowerCase()}.${cls}` : el.tagName.toLowerCase();
+            }
+
+            // ── helper: selector relative to a container ancestor ──────────
+            function relSel(container, child) {
+                const parts = [];
+                let cur = child;
+                while (cur && cur !== container) {
+                    // prefer distinguishing attr/class over plain tag
+                    let part = null;
+                    for (const attr of ['data-testid','data-cy','aria-label','name','itemprop']) {
+                        const v = cur.getAttribute(attr);
+                        if (v) { part = `[${attr}="${v}"]`; break; }
+                    }
+                    if (!part) {
+                        const cls = cur.classList[0];
+                        part = cls ? `${cur.tagName.toLowerCase()}.${CSS.escape(cls)}`
+                                   : cur.tagName.toLowerCase();
+                    }
+                    parts.unshift(part);
+                    cur = cur.parentElement;
+                }
+                return parts.join(' > ');
+            }
+
+            // ── helper: sample visible text/link fields from a container ──
+            function sampleFields(container) {
+                const fields = [];
+                const seen = new Set();
+                // Walk text-bearing and link children (ordered by DOM position)
+                const candidates = Array.from(
+                    container.querySelectorAll('h1,h2,h3,h4,h5,h6,span,p,a,img,[itemprop]')
+                );
+                for (const child of candidates) {
+                    if (!isVisible(child)) continue;
+                    // skip deeply nested duplicates already covered by ancestor
+                    const rSel = relSel(container, child);
+                    if (!rSel || seen.has(rSel)) continue;
+                    seen.add(rSel);
+
+                    const tag  = child.tagName.toLowerCase();
+                    const text = (child.textContent||'').replace(/\\s+/g,' ').trim().slice(0,80);
+                    // Use .href property (absolute URL) for <a> elements; fall back to attribute
+                    const rawHref = child.href || child.getAttribute('href') || '';
+                    // Skip javascript: voids and empty anchors — they are UI chrome, not data links
+                    const href = (rawHref && !rawHref.startsWith('javascript:')) ? rawHref : '';
+                    const alt  = child.getAttribute('alt');
+                    const itemprop = child.getAttribute('itemprop');
+
+                    // only include nodes that carry meaningful content
+                    if (!text && !href && !alt) continue;
+                    if (text.length < 2 && !href) continue;
+
+                    const field = { sel: rSel, tag };
+                    if (text)      field.text     = text;
+                    if (href)      field.href      = href.slice(0, 200);   // full absolute URL
+                    if (alt)       field.alt       = alt.slice(0, 60);
+                    if (itemprop)  field.itemprop  = itemprop;
+                    fields.push(field);
+                    if (fields.length >= 12) break;
+                }
+                return fields;
+            }
+
+            // ── Strategy A: semantic-attribute groups ─────────────────────
+            const SEMANTIC_ATTRS = [
+                'data-component-type', 'data-asin', 'data-cy', 'data-type',
+                'data-item-id', 'data-item', 'data-row', 'data-index',
+                'itemtype', 'role'
+            ];
+            const semGroups = {};   // key → [el, ...]
+            for (const attr of SEMANTIC_ATTRS) {
+                document.querySelectorAll(`[${attr}]`).forEach(el => {
+                    const val = el.getAttribute(attr);
+                    // skip generic roles that are not list-item roles
+                    if (attr === 'role' && !['listitem','row','gridcell','article','option'].includes(val)) return;
+                    const key = `${el.tagName.toLowerCase()}[${attr}="${val}"]`;
+                    if (!semGroups[key]) semGroups[key] = [];
+                    semGroups[key].push(el);
+                });
+            }
+
+            // ── Strategy B: structural-similarity groups ──────────────────
+            // Group same-parent children by (tagName + firstClass) combos
+            const structGroups = {};
+            document.querySelectorAll('ul > *,ol > *,tbody > tr,[class] > [class]').forEach(el => {
+                const parent = el.parentElement;
+                if (!parent) return;
+                const firstCls = el.classList[0] || '';
+                if (!firstCls && el.tagName === 'LI') {
+                    // plain <li> without class: group by parent
+                    const key = `parent:${elSel(parent)} > li`;
+                    if (!structGroups[key]) structGroups[key] = [];
+                    if (!structGroups[key].includes(el)) structGroups[key].push(el);
+                    return;
+                }
+                if (!firstCls) return;
+                const key = `parent:${elSel(parent)} > ${el.tagName.toLowerCase()}.${CSS.escape(firstCls)}`;
+                if (!structGroups[key]) structGroups[key] = [];
+                if (!structGroups[key].includes(el)) structGroups[key].push(el);
+            });
+
+            // ── data richness scorer ──────────────────────────────────────
+            // Ranks groups by how useful they are as data containers.
+            // Goal: surface the actual "data row" (e.g. product card, article card)
+            // rather than sub-components (title slot, add-to-cart button, rating icon).
+            // Known non-data component type patterns: tracking, analytics, ads, chrome.
+            // Groups whose container_sel key contains these strings are penalised heavily.
+            const TRACKER_PATTERNS = [
+                'impression', 'logger', 'counter', 'tracker', 'analytics',
+                'beacon', 'pixel', 'sponsor', 'ad-slot', 'carousel-slide',
+            ];
+
+            function scoreGroup(key, g, fields) {
+                let score = 0;
+                const count = g.els.length;
+
+                // Semantic attr groups (Strategy A) are far more likely to be
+                // meaningful data containers than class-based structural groups (B).
+                if (key.startsWith('A:')) score += 5;
+
+                // Tracker/analytics component penalty — these are never data containers.
+                const lowerKey = key.toLowerCase();
+                if (TRACKER_PATTERNS.some(p => lowerKey.includes(p))) score -= 8;
+
+                // Count scoring: prefer lists in the 20-100 range.
+                // Very small (3-10) might be anything; very large (200+) are sub-components.
+                if      (count >= 20  && count <= 100) score += 5;  // ideal data list
+                else if (count >= 10  && count <  20)  score += 3;
+                else if (count >= 101 && count <= 200)  score += 1;
+                else if (count > 200)                   score -= 3;  // sub-component
+                else                                    score += 1;  // count 3-9
+
+                // Field diversity: links + varied text = rich data container
+                const hasHref    = fields.some(f => f.href);
+                const hasText    = fields.some(f => f.text && f.text.length > 5);
+                const textValues = fields.map(f => (f.text || '').trim()).filter(Boolean);
+                const uniqueTexts = new Set(textValues).size;
+                // UI widget: all fields carry the same text (button label, nav item…)
+                const isUIWidget = textValues.length >= 2 && uniqueTexts <= 1;
+
+                if (hasHref)            score += 3;   // URLs are extractable data
+                if (hasText)            score += 1;
+                if (fields.length >= 3) score += 2;   // multiple distinct fields
+                if (fields.length >= 6) score += 1;   // extra rich
+                if (isUIWidget)         score -= 6;   // heavy penalty for button/nav groups
+
+                return score;
+            }
+
+            // ── merge & score groups ──────────────────────────────────────
+            const allGroups = {};
+            Object.entries(semGroups).forEach(([k, els])    => { allGroups['A:' + k] = { els, strategy: 'semantic' }; });
+            Object.entries(structGroups).forEach(([k, els]) => { allGroups['B:' + k] = { els, strategy: 'structural' }; });
+
+            const MIN_COUNT = 3;
+
+            // First pass: sample fields and compute score for every candidate group
+            const scored = Object.entries(allGroups)
+                .filter(([, g]) => g.els.length >= MIN_COUNT)
+                .map(([key, g]) => {
+                    const firstEl = g.els.find(isVisible) || g.els[0];
+                    const fields  = sampleFields(firstEl);
+                    const score   = scoreGroup(key, g, fields);
+                    return { key, g, fields, score, _elSet: new Set(g.els) };
+                })
+                .filter(c => c.fields.length > 0)         // must have at least one field
+                .sort((a, b) => b.score - a.score);        // best containers first
+
+            // Second pass: deduplicate — skip if all elements already in a higher-scored group
+            const data_groups = scored
+                .reduce((acc, c) => {
+                    const alreadyCovered = acc.some(existing =>
+                        c.g.els.every(el => existing._elSet.has(el))
+                    );
+                    if (!alreadyCovered) acc.push(c);
+                    return acc;
+                }, [])
+                .slice(0, 10)                              // return up to 10 groups
+                .map(({ key, g, fields }) => ({
+                    container_sel: elSel(g.els.find(isVisible) || g.els[0]),
+                    count:         g.els.length,
+                    strategy:      g.strategy,
+                    sample_fields: fields,
+                }));
+
+            return { items, sections, data_groups };
         }""")
+        return result if isinstance(result, dict) else {"items": result or [], "sections": [], "data_groups": []}
     except Exception:
-        return {"items": [], "sections": []}
+        return {"items": [], "sections": [], "data_groups": []}
 
 
 # ── Action executor ──────────────────────────────────────────────────────────
 
 async def _do_action(page, data: dict, step_n: int, shots_dir: Path) -> dict:
+    # seq=0 means a brand-new recording session started; reset all session-level globals
+    # to prevent stale state from a previous run bleeding into this session.
+    if data.get("seq", -1) == 0:
+        _reset_extract_output_tracking()
+
     action  = data.get("action", "")
-    target  = data.get("target", "")
+    target  = data.get("target") or data.get("url", "")   # "url" is a common LLM alias for "target"
     value   = data.get("value", "")
     context = data.get("context") or f"步骤 {step_n}"
 
@@ -1783,10 +2052,15 @@ async def _do_action(page, data: dict, step_n: int, shots_dir: Path) -> dict:
             if not raw_code.strip():
                 error = "python_snippet 需要非空的 code 字段 / python_snippet requires a non-empty 'code' field"
             else:
-                error = _python_snippet_run(raw_code)
+                error = await _python_snippet_run(raw_code, page)
                 if not error:
-                    # 结构性卡口：验证代码通过 _parse_field 读取提取文件（不依赖值匹配）
-                    # Structural gate: verify code reads extract files via _parse_field
+                    # 若本步成功使用了 page.evaluate，标记 session 级别豁免标志
+                    # Mark session-level exemption when page.evaluate is used successfully
+                    if "page.evaluate" in raw_code:
+                        global _SESSION_HAS_PAGE_EVALUATE
+                        _SESSION_HAS_PAGE_EVALUATE = True
+                    # 结构性卡口：验证代码通过 _parse_field 读取提取文件（_SESSION_HAS_PAGE_EVALUATE 时内部豁免）
+                    # Structural gate (internally exempted when _SESSION_HAS_PAGE_EVALUATE is True)
                     error = _check_snippet_reads_extract_files(raw_code)
                 if not error:
                     code_block = _step_code(step_n, context, raw_code.splitlines())
@@ -1887,6 +2161,7 @@ async def _do_action(page, data: dict, step_n: int, shots_dir: Path) -> dict:
     shot_path: "Path | None" = None
     snap: list = []
     sections: list = []
+    data_groups: list = []
     url = ""
 
     if page is not None:
@@ -1905,25 +2180,23 @@ async def _do_action(page, data: dict, step_n: int, shots_dir: Path) -> dict:
         except Exception:
             shot_path = None
 
-        # Always return current DOM snapshot so LLM can choose next selector
+        # Run DOM snapshot — always includes all three layers (items / sections / data_groups)
         raw_snap = await _snapshot(page)
-        # _snapshot now returns {"items": [...], "sections": [...]}
-        if isinstance(raw_snap, dict):
-            snap     = raw_snap.get("items", [])
-            sections = raw_snap.get("sections", [])
-        else:
-            snap = raw_snap  # backward compat if something went wrong
+        snap        = raw_snap.get("items", [])
+        sections    = raw_snap.get("sections", [])
+        data_groups = raw_snap.get("data_groups", [])
 
         url = page.url
 
     out = {
-        "success":    error is None,
-        "error":      error,
-        "code_block": code_block,
-        "screenshot": str(shot_path) if shot_path else None,
-        "url":        url,
-        "snapshot":   snap,
-        "sections":   sections,
+        "success":      error is None,
+        "error":        error,
+        "code_block":   code_block,
+        "screenshot":   str(shot_path) if shot_path else None,
+        "url":          url,
+        "snapshot":     snap,
+        "sections":     sections,
+        "data_groups":  data_groups,
     }
     if inspect_children is not None:
         out["_inspect_children"] = inspect_children

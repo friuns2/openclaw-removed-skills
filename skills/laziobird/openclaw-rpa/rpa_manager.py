@@ -400,11 +400,229 @@ def cmd_plan_set(steps_json: str) -> int:
     }
     PLAN_FILE.write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # Unlock record-step: task description was received (multi-step path).
+    _lock = SESSION_REC_DIR / "waiting_for_task_description"
+    if _lock.exists():
+        _lock.unlink()
+
     print(f"📋 任务计划已创建 / Plan created ({len(steps)} steps):")
     for i, step in enumerate(steps, 1):
         marker = "▶️ " if i == 1 else "  "
         print(f"  {marker}{i}. {step}")
     print(f"\n当前执行 / Now executing: step 1/{len(steps)}")
+    return 0
+
+
+def cmd_probe_url(url: str) -> int:
+    """Probe a URL (no browser) and report SSR/SPA classification + recommended extraction method."""
+    import re
+    import urllib.request
+    import urllib.error
+    import urllib.parse
+    import html as _html
+
+    print(f"🔍 Probing: {url}")
+
+    # ── 1. HTTP request with browser-like headers ─────────────────────────────
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0.0.0 Safari/537.36"
+            ),
+            "Accept": "text/html,application/xhtml+xml,application/xhtml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+        },
+    )
+    try:
+        import ssl as _ssl
+        import gzip as _gzip
+        # Build SSL context: try certifi first, fall back to unverified (local tool only)
+        try:
+            import certifi as _certifi
+            _ctx = _ssl.create_default_context(cafile=_certifi.where())
+        except ImportError:
+            _ctx = _ssl.create_default_context()
+            _ctx.check_hostname = False
+            _ctx.verify_mode = _ssl.CERT_NONE
+        with urllib.request.urlopen(req, timeout=12, context=_ctx) as resp:
+            raw = resp.read()
+            enc = resp.headers.get("Content-Encoding", "")
+            body = _gzip.decompress(raw).decode("utf-8", errors="replace") if "gzip" in enc else raw.decode("utf-8", errors="replace")
+            status = resp.status
+            final_url = resp.url
+    except urllib.error.HTTPError as e:
+        # Try to read body anyway (some sites return useful HTML even in error responses)
+        try:
+            raw = e.read()
+            body = raw.decode("utf-8", errors="replace")
+            status = e.code
+            final_url = url
+            print(f"⚠️  HTTP {e.code} for plain request — site blocks bots at HTTP level.")
+            print(f"   Will analyze URL pattern + partial body to estimate render type.\n")
+        except Exception:
+            # Completely blocked — fall back to URL-only heuristics
+            parsed  = urllib.parse.urlparse(url)
+            hostname = parsed.hostname or ""
+            path    = parsed.path.lower()
+            query   = (parsed.query or "").lower()
+            print(f"⚠️  HTTP {e.code} — cannot read response body.")
+            # URL-pattern only verdict
+            ssr_url = any(p in path or p in query for p in [
+                "/s?", "search", "/gp/", "/dp/", "/products", "/category",
+                "/item", "/listing", "/shop/", "/detail", "/article", "/news",
+            ])
+            if ssr_url:
+                print(f"\n✅ Render type : SSR (server-side rendered) — inferred from URL pattern")
+                print(f"   Recommended  : extract_text  (open with Playwright first, then read DOM)")
+                print(f"   Note         : HTTP probe blocked by bot detection, but URL pattern strongly")
+                print(f"                  suggests server-rendered content (not SPA).")
+            else:
+                print(f"\n🔶 Render type : Unknown — HTTP probe blocked, URL pattern inconclusive")
+                print(f"   Recommended  : goto → snapshot → if class names semantic → extract_text")
+                print(f"                               → if class names hashed → extract_by_vision")
+            print(f"   Hostname     : {hostname}")
+            return 0
+    except Exception as e:
+        print(f"❌ Request failed: {e}")
+        print(f"   Recommendation: open with Playwright; check network connectivity.")
+        return 1
+
+    parsed = urllib.parse.urlparse(final_url or url)
+    hostname = parsed.hostname or ""
+
+    # ── 2. Signals ────────────────────────────────────────────────────────────
+    body_lower = body.lower()
+
+    # Signal A: visible text density (ratio of text inside tags to total HTML)
+    text_only  = re.sub(r"<[^>]+>", " ", body)
+    text_words = len(re.findall(r"\w{3,}", text_only))
+    html_size  = len(body)
+    text_ratio = text_words / max(html_size / 100, 1)   # words per 100 chars
+
+    # Signal B: hashed class names (3+ hex-like segments joined by _ or -)
+    hashed_classes = re.findall(r'class="[^"]*[a-z0-9]{5,}_[a-z0-9]{5,}[^"]*"', body)
+    hash_ratio = len(hashed_classes) / max(len(re.findall(r'class="', body)), 1)
+
+    # Signal C: SPA shell markers
+    spa_shells = [
+        bool(re.search(r'<div[^>]+id=["\']root["\']>\s*</div>', body)),
+        bool(re.search(r'<div[^>]+id=["\']app["\']>\s*</div>', body)),
+        bool(re.search(r'<noscript>[^<]{0,20}(enable|javascript)', body_lower)),
+        body_lower.count("<script") > body_lower.count("<p") * 3,
+    ]
+    spa_shell_score = sum(spa_shells)
+
+    # Signal D: structured data
+    has_json_ld  = bool(re.search(r'application/ld\+json', body_lower))
+    has_og_title = bool(re.search(r'og:title', body_lower))
+
+    # Signal E: meaningful content in initial HTML (product-like text blocks)
+    product_data_present = text_words > 200 and text_ratio > 2.0
+
+    # Signal F: URL pattern hints (check path + query together)
+    url_path  = parsed.path.lower()
+    url_query = (parsed.query or "").lower()
+    url_ssr_hints = any(p in url_path for p in [
+        "/search", "/products", "/category", "/listing",
+        "/gp/", "/dp/", "/item/", "/shop/", "/article", "/news", "/blog",
+    ]) or any(q in url_query for q in [
+        "k=", "q=", "query=", "keyword=", "search=", "cat=",
+    ]) or url_path in ("/s", "/search")
+    url_spa_hints = any(p in url_path for p in [
+        "/app/", "/dashboard/", "/feed", "/explore",
+    ]) or "#/" in url
+
+    # ── 3. Verdict ────────────────────────────────────────────────────────────
+    # When server blocked the HTTP probe (4xx/5xx with tiny body), trust URL hints more
+    _blocked = status >= 400 and text_words < 100
+    ssr_score = (
+        (2 if product_data_present else 0)
+        + (3 if url_ssr_hints and _blocked else 1 if url_ssr_hints else 0)
+        + (1 if has_json_ld else 0)
+        + (1 if has_og_title else 0)
+    )
+    spa_score = (
+        spa_shell_score * 2
+        + (2 if hash_ratio > 0.3 else 0)
+        + (1 if url_spa_hints else 0)
+    )
+
+    if ssr_score >= 3 and spa_score <= 1:
+        verdict       = "SSR（服务端渲染）"
+        verdict_en    = "SSR (server-side rendered)"
+        extract_rec   = "extract_text"
+        extract_note  = "DOM 中已含完整数据，无需视觉 API，无需滚动。"
+        extract_note_en = "Full data in initial HTML — no vision API, no scrolling needed."
+        symbol = "✅"
+    elif spa_score >= 3 or hash_ratio > 0.4:
+        verdict       = "重型 SPA（哈希 class / 客户端渲染）"
+        verdict_en    = "Heavy SPA (hashed classes / client-side rendered)"
+        extract_rec   = "extract_by_vision"
+        extract_note  = "CSS 选择器不可靠，需视觉识别提取字段。"
+        extract_note_en = "CSS selectors unreliable — use vision extraction."
+        symbol = "⚠️"
+    else:
+        verdict       = "轻型 SPA / 混合渲染（不确定）"
+        verdict_en    = "Light SPA / hybrid (uncertain)"
+        extract_rec   = "先用 extract_text；若返回 0 条再切 extract_by_vision"
+        extract_note  = "先用 DOM 提取，失败再切视觉识别。"
+        extract_note_en = "Try extract_text first; switch to vision if 0 results."
+        symbol = "🔶"
+
+    # ── 4. Output ─────────────────────────────────────────────────────────────
+    print(f"\n{'─'*60}")
+    print(f"{symbol} 渲染类型 / Render type : {verdict_en}")
+    print(f"   推荐提取方式 / Recommended: {extract_rec}")
+    print(f"   {extract_note_en}")
+    print(f"{'─'*60}")
+    print(f"📊 Signals:")
+    print(f"   Hostname           : {hostname}")
+    print(f"   HTTP status        : {status}")
+    print(f"   Text words in HTML : {text_words}  (ratio {text_ratio:.1f} words/100chars)")
+    print(f"   Hashed class ratio : {hash_ratio:.2f}  ({len(hashed_classes)} hashed / {len(re.findall(chr(34) + 'class=', body))} total class attrs)")
+    print(f"   SPA shell markers  : {spa_shell_score}/4")
+    print(f"   JSON-LD present    : {has_json_ld}")
+    print(f"   OG:title present   : {has_og_title}")
+    print(f"   URL path hints     : {'SSR-like' if url_ssr_hints else 'SPA-like' if url_spa_hints else 'neutral'}")
+    print(f"{'─'*60}")
+
+    # Hint: CSS selectors found in HTML
+    if extract_rec == "extract_text" or "先用" in extract_rec:
+        # Try to suggest selectors by finding common content patterns
+        candidates = []
+        for pat, sel in [
+            (r"<h[23][^>]*>(.{10,80})</h[23]>",          "h2 / h3"),
+            (r'class="[^"]*price[^"]*"',                  "[class*=price]"),
+            (r'class="[^"]*rating[^"]*"',                 "[class*=rating]"),
+            (r'class="[^"]*review[^"]*"',                 "[class*=review]"),
+            (r'data-testid="([^"]+)"',                    "data-testid attrs"),
+            (r'itemprop="name"',                          '[itemprop="name"]'),
+            (r'itemprop="price"',                         '[itemprop="price"]'),
+        ]:
+            if re.search(pat, body, re.IGNORECASE):
+                candidates.append(sel)
+        if candidates:
+            print(f"💡 Suggested CSS selectors to try:")
+            for c in candidates[:5]:
+                print(f"   {c}")
+            print(f"{'─'*60}")
+
+    return 0
+
+
+def cmd_record_task_ready() -> int:
+    """Confirm task description received; unlock record-step for single-step tasks."""
+    _lock = SESSION_REC_DIR / "waiting_for_task_description"
+    if _lock.exists():
+        _lock.unlink()
+        print("✅ Task description confirmed. record-step is now unlocked.")
+    else:
+        print("ℹ️  No pending lock (already unlocked or session not started).")
     return 0
 
 
@@ -835,6 +1053,10 @@ def cmd_record_start(
         json.dumps(task_payload, ensure_ascii=False, indent=2)
     )
 
+    # State lock: block record-step until task description is explicitly received.
+    # Removed by plan-set (multi-step) or record-task-ready (single-step).
+    (SESSION_REC_DIR / "waiting_for_task_description").touch()
+
     server_script = SKILL_DIR / "recorder_server.py"
     if not server_script.exists():
         print(f"❌ recorder_server.py 不存在：{server_script}", file=sys.stderr)
@@ -881,17 +1103,34 @@ def cmd_record_start(
     )
     print(f"   📝 Playwright 指令日志（每步追加）：{PLAYWRIGHT_CMD_LOG}")
     print()
-    if _needs_browser:
-        print("下一步建议：先发一条 snapshot 了解页面元素，再执行 goto/fill/select_option/click 等操作。")
-        print('示例：python3 rpa_manager.py record-step \'{"action":"snapshot"}\'')
-    else:
-        print("下一步建议：直接发送 excel_write / word_write / api_call / python_snippet 等文件操作步骤。")
-        print('示例：python3 rpa_manager.py record-step \'{"action":"excel_write","path":"report.xlsx","sheet":"Sheet1","value":[["A","B"]]}\'')
+    print("⛔ [STATE LOCK ACTIVE — REC_WAIT]")
+    print("   Task description has NOT been received yet.")
+    print("   Agent MUST:")
+    print("     1. Output the verbatim 'Recording started' template from SKILL.md (no paraphrasing).")
+    print("     2. STOP completely — do NOT call record-step, do NOT take a snapshot.")
+    print("     3. Wait silently for the user to send a complete task description.")
+    print("   record-step is BLOCKED until plan-set or record-task-ready is called.")
     return 0
 
 
 def cmd_record_step(step_json: Optional[str], from_file: Optional[str] = None) -> int:
     """Send one step command to the recorder server and print result."""
+    # ── State lock ──────────────────────────────────────────────────────────────
+    # Reject if task description has not been confirmed yet.
+    _lock = SESSION_REC_DIR / "waiting_for_task_description"
+    if _lock.exists():
+        print(
+            "❌ [STATE LOCK] record-step is blocked: task description not yet received.\n"
+            "   record-start succeeded — the agent MUST:\n"
+            "     1. Output the 'Recording started' confirmation message and STOP.\n"
+            "     2. Wait for the user to send an explicit, detailed task description.\n"
+            "     3a. Multi-step task → call plan-set (auto-removes lock), then record-step.\n"
+            "     3b. Single-step task → call record-task-ready (removes lock), then record-step.\n"
+            "   NEVER infer steps from the task name alone.",
+            file=sys.stderr,
+        )
+        return 1
+    # ────────────────────────────────────────────────────────────────────────────
     if from_file:
         fp = Path(from_file).expanduser().resolve()
         if not fp.exists():
@@ -1079,9 +1318,16 @@ def cmd_record_end(abort: bool = False) -> int:
     if abort:
         if (SESSION_REC_DIR / "server.pid").exists():
             _rec_send_shutdown()
+        # Keep session for debugging — rename instead of delete.
+        # record-start will clean up recorder_session/ on the next run.
         if SESSION_REC_DIR.exists():
-            shutil.rmtree(SESSION_REC_DIR)
-        print("🗑️  录制已放弃，Recorder 已关闭。")
+            aborted_dir = SESSION_REC_DIR.parent / "recorder_session_aborted"
+            if aborted_dir.exists():
+                shutil.rmtree(aborted_dir)
+            SESSION_REC_DIR.rename(aborted_dir)
+            print(f"📂 Session kept for debugging: {aborted_dir}")
+        print("🛑 录制已中断，Recorder 进程已停止。浏览器已关闭。")
+        print("⛔ 本次录制结束。如需重新开始，请新建对话并发送 #rpa。")
         return 0
 
     pid_path  = SESSION_REC_DIR / "server.pid"
@@ -1548,8 +1794,13 @@ def main():
     p_ps = sub.add_parser("plan-set",    help="设置多步执行计划（防 LLM 超时）")
     p_ps.add_argument("steps_json", help='步骤 JSON 数组，如 \'["步骤1描述", "步骤2描述"]\'')
 
-    sub.add_parser("plan-next",   help="推进计划到下一步")
-    sub.add_parser("plan-status", help="查看计划当前进度")
+    sub.add_parser("plan-next",          help="推进计划到下一步")
+    sub.add_parser("plan-status",        help="查看计划当前进度")
+    sub.add_parser("record-task-ready",  help="(单步任务) 确认已收到任务描述，解除 record-step 锁")
+
+    # ── URL 探针 ──
+    p_probe = sub.add_parser("probe-url", help="探测 URL 的渲染类型（SSR/SPA），推荐提取方式，无需开浏览器")
+    p_probe.add_argument("url", help="要探测的完整 URL，如 https://www.amazon.com/s?k=shoes")
 
     # ── Legacy 模式 ──
     p_init = sub.add_parser("init",     help="[legacy] 初始化录制会话")
@@ -1575,7 +1826,27 @@ def main():
         help="检查 Python / playwright 包 / Chromium 是否可用（录制与运行前自检）",
     )
 
-    args = parser.parse_args()
+    args, _unknown = parser.parse_known_args()
+    # Friendly error: LLM sometimes calls `record-start TaskName A` (bare capability letter)
+    # instead of `record-start "TaskName" --profile A`.  Detect and guide.
+    if _unknown and getattr(args, "command", None) == "record-start":
+        import re as _re
+        _caps = [u for u in _unknown if _re.match(r'^[A-GNa-gn]$', u)]
+        if _caps:
+            _letter = _caps[0].upper()
+            _name   = getattr(args, "task_name", "YourTaskName")
+            print(
+                f'❌ Syntax error: capability letter "{_letter}" must be passed with --profile, '
+                f'not as a bare positional argument.\n'
+                f'   ✅ Correct: record-start "{_name}" --profile {_letter}\n'
+                f'   ❌ Wrong:   record-start {_name} {_letter}',
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        # Unknown args that are not capability letters → trigger the normal argparse error
+        parser.parse_args()
+    elif _unknown:
+        parser.parse_args()
     dispatch = {
         # 帮助 / Help
         "help":          cmd_help,
@@ -1598,9 +1869,11 @@ def main():
         "record-status": cmd_record_status,
         "record-end":    lambda: cmd_record_end(getattr(args, "abort", False)),
         # 计划管理
-        "plan-set":      lambda: cmd_plan_set(args.steps_json),
-        "plan-next":     cmd_plan_next,
-        "plan-status":   cmd_plan_status,
+        "plan-set":           lambda: cmd_plan_set(args.steps_json),
+        "plan-next":          cmd_plan_next,
+        "plan-status":        cmd_plan_status,
+        "record-task-ready":  cmd_record_task_ready,
+        "probe-url":          lambda: cmd_probe_url(args.url),
         # Legacy 模式
         "init":          lambda: cmd_init(args.task_name),
         "add":           lambda: cmd_add(args.action_json, args.proof),

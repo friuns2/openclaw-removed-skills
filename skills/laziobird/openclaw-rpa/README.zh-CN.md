@@ -12,6 +12,7 @@
 ---
 
 ## 💡 为什么选择 OpenClaw-RPA？
+https://github.com/user-attachments/assets/e3ed5b34-1ddb-43a6-af42-2d1a907d3564
 
 目前的 AI 网页、Computer Use Agent 虽然强大，但在生产环境中存在**本质缺陷**：
 * **“大模型税” (LLM Tax)：** 为什么要为了 Agent 点击一个它已经点过 100 次的“下载”按钮而重复支付 Token 费用？
@@ -42,7 +43,8 @@
 
 ![shopping-hd-960p](https://github.com/user-attachments/assets/4c30d799-803e-458b-a496-ee5f38513da8)
 
-### 竞争优势 
+<details>
+<summary><strong>竞争优势对比</strong></summary>
 
 | 特性 | 传统 RPA (UIPath 等) | 纯 LLM Agent (Browser-use 等) | **OpenClaw-RPA (编译器模式)** |
 | :--- | :--- | :--- | :--- |
@@ -53,6 +55,9 @@
 | **2FA 处理** | **极其复杂** | **昂贵** (需实时推理配合) | **简单 (Session 一次性捕获)** |
 | **部署环境** | **Windows & MS Office 依赖** | **灵活** (但运行成本高) | **云原生 (支持 Linux/Docker)** |
 | **技术架构** | 人工绘制流程图 | 实时在线推理 | **一次推理 → 编译 → 永久重放** |
+
+</details>
+
 
 ## 工作原理
 
@@ -85,28 +90,9 @@
 
 **openclaw-rpa 的做法：** 用 AI 录制一次、验证一次，之后所有重复执行走本地脚本——**不调模型、不烧 token、不怕幻觉、秒级完成**。
 
-## 快速开始
-
-```bash
-# 安装
-git clone https://github.com/laziobird/openclaw-rpa.git
-cd openclaw-rpa && ./scripts/install.sh
-
-# 在 OpenClaw 对话中，选择触发词：
-#rpa                   # 纯网页流程
-#rpa-api               # 含 HTTP API 的流程
-#rpa-login <url>       # 保存登录会话（Cookie）
-#rpa-list              # 列出所有已录制任务
-#rpa-run:<任务名>      # 回放已录制任务
-```
-
-完整协议与能力码（A–G）：**[SKILL.zh-CN.md](SKILL.zh-CN.md)**。
-
----
-
 ## 案例视频
 
-### 1、Sauce 电商购物网站 浏览器录屏
+### 1、电商购物网站 浏览器录屏
 
 **Sauce **（[saucedemo.com](https://www.saucedemo.com)）录屏：**登录 → 按价格排序 → 加购最贵两件 → 登出**。展示从触发到录制、生成脚本的一条完整流程。
 
@@ -129,6 +115,12 @@ https://github.com/user-attachments/assets/d368a81e-425a-4830-bc29-fe11e89eda92
 4. **退出登录**。
 
 录制协议（`record-start`、`record-step`、`plan-set`、`#end` 等）见 [**SKILL.zh-CN.md**](SKILL.zh-CN.md)。**先看有哪些已录好的 RPA 可用**：发 **`#rpa-list`**；**再跑其中一个**：`#rpa-run:{任务名}` 或 `python3 rpa_manager.py run <任务名>`。
+
+**真实电商进阶 — 亚马逊畅销榜数据提取** （[`rpa/amazonbestseller.py`](rpa/amazonbestseller.py)）
+
+同样的流程用在真实线上平台：抓取亚马逊搜索结果前 40 个商品的标题、价格、评分、评论数、链接，追加到桌面 Word 文档。`data_groups` DOM 分析层自动识别商品卡片容器和字段选择器，直接来自真实页面，无需依赖训练知识猜测。
+
+📖 **[完整教程（EN）→](articles/scenario-amazon-bestsellers.en-US.md)**
 
 <a id="douban-movie-demo"></a>
 
@@ -197,7 +189,7 @@ API Parameters
 - **说明：** 录制一次，自动生成 Python 脚本。以后每次运行直接跑底层代码，速度极快，且零 Token 消耗，不会产生 AI 幻觉。
 - **视觉模式处理 SPA：** Airbnb 是高度动态的单页应用（SPA），传统爬虫几乎无法处理。本案例引入**视觉识别**模式，AI 像人一样"看"页面来提取数据，无需依赖不稳定的 DOM 结构。视觉模型采用 [Qwen3-VL](https://github.com/QwenLM/Qwen3-VL)（阿里开源），Token 消耗极小，支持本地部署。
 
-### 4、OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 定时执行 RPA 自动化程序
+### 5、OpenClaw + 飞书/Lark：`#rpa-list`、`#rpa-run` 定时执行 RPA 自动化程序
 
 录屏演示在飞书/Lark 与 **OpenClaw-bot** 对话中的典型用法：
 
@@ -209,7 +201,7 @@ https://github.com/user-attachments/assets/514e2d74-f42a-4243-8d49-52931fe6c22e
 
 <a id="scenario-ap-reconciliation-zh"></a>
 
-### 5、自动登录（Cookie 复用）— 免验证码录制登录后页面
+### 6、自动登录（Cookie 复用）— 免验证码录制登录后页面
 
 **场景：** 携程、电商平台等含短信验证码 / 滑块的站点，手动登录一次后保存 Cookie，后续录制与回放**自动注入**，直接从业务页面开始，跳过登录流程。
 
@@ -233,7 +225,7 @@ https://github.com/user-attachments/assets/514e2d74-f42a-4243-8d49-52931fe6c22e
 
 ---
 
-### 6、应付对账 — 只拉接口数据 + 本地 Excel + Word 表格报告
+### 7、应付对账 — 只拉接口数据 + 本地 Excel + Word 表格报告
 
 **财务 / 应付：** 云端 Mock **仅 GET** 拉待对账数据；**不回写 ERP**；与桌面 **发票 Excel** 在本地对账；最终输出带**表格**的 **Word（`.docx`）**。
 
@@ -258,7 +250,15 @@ https://github.com/user-attachments/assets/514e2d74-f42a-4243-8d49-52931fe6c22e
 
 ## 快速安装（OpenClaw）
 
-技能目录：`**~/.openclaw/workspace/skills/openclaw-rpa`**
+**方式一 — OpenClaw 命令行（推荐）：**
+
+```bash
+openclaw skills install openclaw-rpa
+```
+
+**方式二 — 手动安装（git clone）：**
+
+技能目录：**`~/.openclaw/workspace/skills/openclaw-rpa`**
 
 ```bash
 mkdir -p ~/.openclaw/workspace/skills
@@ -276,9 +276,22 @@ python3 rpa_manager.py env-check
 
 **SSH 克隆：** `git@github.com:laziobird/openclaw-rpa.git`
 
-装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 `**SKILL.md`**。触发词见 `**SKILL.md**`（如 `#RPA`、`#rpa`）。
+装好后请**新开 OpenClaw 会话**（或重载技能），以便加载 **`SKILL.md`**。
 
-### `requirements.txt` 全量依赖是什么？
+**触发词 — 选一个开始录制：**
+
+```
+#rpa                   # 纯网页流程
+#rpa-api               # 含 HTTP API 的流程
+#rpa-login <url>       # 保存登录会话（Cookie）
+#rpa-list              # 列出所有已录制任务
+#rpa-run:<任务名>      # 回放已录制任务
+```
+
+完整协议与能力码（A–G）：**[SKILL.zh-CN.md](SKILL.zh-CN.md)**。
+
+<details>
+<summary><strong><code>requirements.txt</code> 全量依赖说明</strong></summary>
 
 **「全量」**指：与本技能配套的 **所有 Python 包**（见仓库根目录 `requirements.txt`）以及 **`playwright install chromium`** 所安装的 Chromium，都应装在 **同一个** 用于执行 `rpa_manager.py` / 录制的 Python 环境里（例如 `./scripts/install.sh` 创建的 `.venv`）。
 
@@ -291,6 +304,8 @@ python3 rpa_manager.py env-check
 | **Chromium** | 由 `python -m playwright install chromium` 下载，**不属于** `pip` 包 |
 
 未列在表里的系统库：一般只需本机已有 Python 3.8+；macOS/Linux 常见环境即可。若只做纯网页录制且确定不用 Excel/Word，技术上可只装 `playwright`+`httpx`，但**推荐**仍使用完整 `requirements.txt`，避免 `record-step excel_write` 时报缺包。
+
+</details>
 
 ---
 
@@ -315,15 +330,29 @@ python3 rpa_manager.py run wikipedia
 
 ## 示例脚本（`rpa/`）
 
+以下所有脚本均已注册在 **`registry.json`** 中，可通过 **`#rpa-list`** 查看，通过 **`#rpa-run:<名称>`** 或 `python3 rpa_manager.py run <名称>` 直接运行。
 
-| 脚本 | 说明 |
-|------|------|
-| `wikipedia.py` / `wiki.py` | 维基百科（英文） |
-| `获取豆瓣电影数据.py` 等 | 中文界面示例（遵守站点规则）；浏览器录屏案例见 [豆瓣电影（《霸王别姬》）](#douban-movie-demo) |
-| `电商网站购物v10.py` 等 | Sauce Demo 电商流程（与顶部 [演示视频](#演示视频) 同类） |
+<details>
+<summary>查看所有示例脚本</summary>
+
+| 脚本（`registry.json` 名称） | 说明 |
+|------------------------------|------|
+| `wiki.py`（`wiki`） | 维基百科搜索 → 提取文章摘要到桌面 |
+| `onlineshoppingv1.py`（`onlineShoppingV1`） | Sauce Demo — 登录 → 价格从高到低排序 → 加购最贵两件 → 登出（见[电商录屏案例](#1电商购物网站-浏览器录屏)） |
+| `电商网站购物v10.py`（`电商网站购物V10`） | Sauce Demo 中文版电商购物流程 |
+| `yahoonew.py`（`YahooNew`） | 雅虎财经 — 搜索 NVDA → 新闻标签页 → 保存前 5 条标题到桌面（见[雅虎财经案例](#2豆瓣电影霸王别姬-浏览器录屏)） |
+| `获取豆瓣电影数据.py`（`获取豆瓣电影数据`） | 豆瓣电影 — 搜索影片 → 打开详情页 → 提取片名、评分、剧情简介 → 保存到桌面（见[豆瓣电影案例](#douban-movie-demo)） |
+| `amazonbestseller.py`（`amazonbestseller`） | **亚马逊畅销榜** — 抓取前 40 个商品（标题、价格、评分、评论数、链接）→ 追加到桌面 Word 文档（见[教程](articles/scenario-amazon-bestsellers.en-US.md)） |
+| `airbnb民宿比价分析v11.py`（`airbnb民宿比价分析v11`） | **Airbnb 竞品比价** — 打开浏览器 → 视觉识别 → 提取竞品价格与评分 → 追加 Word 报告（见[案例文档](articles/scenario-airbnb-compare.md)） |
+| `携程酒店v3.py`（`携程酒店V3`） | **携程酒店** — 自动注入登录 Cookie → 打开酒店详情页 → 提取名称、评分、房型与价格 → 保存到 `hotel.docx`（见[自动登录教程](articles/autologin-tutorial.md)） |
+| `自动登录v3.py`（`自动登录V3`） | 自动登录演示 — 录制前注入已保存的会话 Cookie，跳过短信验证码 / 滑块 |
 | `apiv3.py`（`apiV3`） | **纯 API** — Alpha Vantage `TIME_SERIES_DAILY` 拉取 NVDA 日线数据 → 保存 `nvda_time_series_daily.json` 到桌面；无浏览器步骤 |
-| `reconciliationv2.py`（`reconciliationV2`） | **应付对账（英文版）** — Mock GET 拉待对账数据 → `ap_draft_thisweek.xlsx`（System / Invoices / Match Results，两阶段 po_ref + 金额匹配）→ `ap_reconciliation_YYYYMMDD.docx` Word 表格报告（见[案例文档](articles/scenario-ap-reconciliation.en-US.md)） |
-| `会计记账v2.py`（`会计记账V2`） | **应付对账（中文版）** — 同上流程中文化：Mock GET → `对账底稿_本周.xlsx`（系统侧 / 发票侧 / 匹配结果）→ `对账报告_YYYYMMDD.docx` Word 表格报告（见[案例文档](articles/scenario-ap-reconciliation.md)） |
+| `api_demov3.py`（`api_demoV3`） | **API + 浏览器** — Alpha Vantage 行情数据 + 新浪财经新闻 → 合并成本地简报文件 |
+| `hotelv2.py`（`hotelv2`） | Mock GET 酒店数据接口 → 保存响应到 `hotel.txt`；极简无浏览器 API 演示 |
+| `reconciliationv2.py`（`reconciliationV2`） | **应付对账（英文版）** — Mock GET 拉待对账数据 → `ap_draft_thisweek.xlsx`（System / Invoices / Match Results，两阶段匹配）→ `ap_reconciliation_YYYYMMDD.docx` Word 表格报告（见[案例文档](articles/scenario-ap-reconciliation.en-US.md)） |
+| `会计记账v2.py`（`会计记账V2`） | **应付对账（中文版）** — 同上流程中文化：Mock GET → `对账底稿_本周.xlsx` → `对账报告_YYYYMMDD.docx` Word 表格报告（见[案例文档](articles/scenario-ap-reconciliation.md)） |
+
+</details>
 
 ---
 
@@ -342,6 +371,29 @@ python3 rpa_manager.py run wikipedia
 
 - **合规**：请遵守各网站服务条款与使用政策；本仓库不鼓励绕过风控或在禁止场景下抓取数据。
 - **强风控站点（如 LinkedIn）**：即便支持自动登录或会话复用，仍可能遇到 **2FA、设备验证、验证码、风控拦截**，需要**人工介入**。
+
+---
+
+## 作者联系方式
+
+<details>
+<summary><strong>商业与行业场景定制</strong></summary>
+
+本仓库以 **开源技能 + 通用录制协议** 为主，适合个人与团队快速落地常见网页 / 文件自动化。若你的需求属于下列一类，欢迎通过下方联系方式说明 **行业、系统边界、合规要求与期望交付形态**，我们可以讨论 **按需定制** 的方案（非义务报价，视复杂度与排期而定）：
+
+| 场景类型 | 说明 |
+|----------|------|
+| **复杂业务流程** | 多分支审批、异常回滚、与人协作的半自动流程、长链路对账或合并多数据源 |
+| **行业专属** | 财务 / 供应链 / 电商运营 / 通用比价系统、内部 ERP / OA 与外部站点组合等，需要贴合字段口径与审计留痕 |
+| **集成与运维** | 与现有网关、队列、监控、密钥管理对接；定时任务集群化；私有化或指定环境部署 |
+| **稳定性与扩展** | 强风控站点策略、视觉 + DOM 混合、定制校验与报表模板、性能与可观测性要求更高时 |
+
+</details>
+
+**联系方式（咨询开源使用或商业定制均可）：**
+
+- 微信号：`nizhanali`
+- Gmail：`greentim2049@gmail.com`
 
 ---
 

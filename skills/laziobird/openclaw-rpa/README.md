@@ -42,7 +42,8 @@ Current AI Web、Computer、Workflow Agents are amazing but **fundamentally flaw
 | 💸 **Cost:** $$$ (Tokens) | 💰 **Cost:** $0.00 (Pure Python) |
 | 🐢 **Speed:** Slow (Reasoning) | 🚀 **Speed:** Instant (Execution) |
 
-### **Competitive Analysis: The RPA Evolution**
+<details>
+<summary><strong>Competitive Analysis: The RPA Evolution</strong></summary>
 
 | Feature | Legacy RPA (UIPath, etc.) | Pure LLM Agents (Browser-use) | **OpenClaw-RPA (The Compiler)** |
 | :--- | :--- | :--- | :--- |
@@ -53,6 +54,8 @@ Current AI Web、Computer、Workflow Agents are amazing but **fundamentally flaw
 | **2FA Handling** | Extremely Complex | Costly (Requires live reasoning) | **Simple (One-time session capture)** |
 | **Environment** | Windows & MS Office | Flexible (But expensive) | **Cloud-Native (Linux/Docker ready)** |
 | **Architecture** | Manual Flowcharts | Real-time Reasoning | **Reason Once → Compile → Replay** |
+
+</details>
 
 
 ## What you can automate
@@ -95,28 +98,9 @@ You (plain language)
 
 **What openclaw-rpa does instead:** use AI to record and verify once, then replay with a local script — **no model call, no token burn, no hallucination risk, runs in seconds**.
 
-## Quick start
-
-```bash
-# Install
-git clone https://github.com/laziobird/openclaw-rpa.git
-cd openclaw-rpa && ./scripts/install.sh
-
-# In an OpenClaw chat — pick your trigger:
-#RPA                   # browser-only flow
-#rpa-api               # flow that includes an HTTP API call
-#rpa-login <url>       # save a login session (cookies)
-#rpa-list              # list all recorded tasks
-#rpa-run:<task name>   # replay a recorded task
-```
-
-Full protocol and capability codes (A–G): **[SKILL.en-US.md](SKILL.en-US.md)**.
-
----
-
 ## Case videos
 
-### 1. Sauce (Online Shopping WebSite) Demo (browser recording)
+### 1. E-Commerce Demo — browser recording
 
 **Sauce Demo** ([saucedemo.com](https://www.saucedemo.com)): **sign in → sort by price → add two most expensive → sign out**.  
 Shows the full flow from trigger through recording to a generated script.
@@ -134,6 +118,12 @@ https://github.com/user-attachments/assets/965fbecc-a0fc-4795-9f63-a5ef126f97f8
 2. Sort **price high → low**.  
 3. Add the **two most expensive** items to the cart.  
 4. **Log out**.
+
+**Real-world variant — Amazon Best Sellers data extraction** ([`rpa/amazonbestseller.py`](rpa/amazonbestseller.py))
+
+Same flow on a live production site: scrape the first 40 products (title, price, rating, review count, URL) from Amazon search results and append a timestamped Word table to the Desktop. The `data_groups` DOM analysis layer auto-detects product card containers and field selectors from the real page — no hardcoded selectors, no guessing.
+
+📖 **[Full tutorial →](articles/scenario-amazon-bestsellers.en-US.md)**
 
 <a id="yahoo-finance-nvda-demo"></a>
 
@@ -203,7 +193,7 @@ Merge nvda_time_series_daily.json and nvda_news.txt into nvda.txt.
 > Airbnb is a heavily dynamic **SPA**; traditional crawlers fail here. This case introduces **vision mode** — the AI reads the screen like a human, powered by **[Qwen3-VL](https://github.com/QwenLM/Qwen3-VL)** (Alibaba open-source, ultra-low token cost, local-deploy friendly).
 > Record **once** → auto-generate a Python script → all future runs execute the script directly: **zero Token cost, zero hallucinations, deterministic results.**
 >
-> 📖 **[Full step-by-step tutorial →](articles/scenario-airbnb-compare.md)**
+> 📖 **[Full step-by-step tutorial (EN) →](articles/scenario-airbnb-compare.en-US.md)** · **[中文 →](articles/scenario-airbnb-compare.md)**
 
 ### 5. OpenClaw + Feishu/Lark: `#rpa-list`, `#rpa-run`, and scheduled run
 
@@ -267,6 +257,14 @@ Full protocol: [**SKILL.en-US.md**](SKILL.en-US.md) (ONBOARDING, RECORDING). **S
 
 ## Quick install (OpenClaw)
 
+**Option 1 — OpenClaw CLI (recommended):**
+
+```bash
+openclaw skills install openclaw-rpa
+```
+
+**Option 2 — Manual (git clone):**
+
 Put the skill here: **`~/.openclaw/workspace/skills/openclaw-rpa`**
 
 ```bash
@@ -285,9 +283,22 @@ If your flow uses **Excel / Word** (capability **B–G** in **SKILL.en-US.md** /
 
 **SSH clone:** `git@github.com:laziobird/openclaw-rpa.git`
 
-After install, **start a new OpenClaw chat** (or reload skills) so the agent reads **`SKILL.md`**. Triggers and keywords: **`SKILL.md`** (e.g. `#RPA`, `#automation robot`).
+After install, **start a new OpenClaw chat** (or reload skills) so the agent reads **`SKILL.md`**.
 
-### What “full” `requirements.txt` means
+**Triggers — pick one to start:**
+
+```
+#RPA                   # browser-only flow
+#rpa-api               # flow that includes an HTTP API call
+#rpa-login <url>       # save a login session (cookies)
+#rpa-list              # list all recorded tasks
+#rpa-run:<task name>   # replay a recorded task
+```
+
+Full protocol and capability codes (A–G): **[SKILL.en-US.md](SKILL.en-US.md)**.
+
+<details>
+<summary><strong>What “full” <code>requirements.txt</code> means</strong></summary>
 
 **Full stack** = every Python package listed in `requirements.txt` **plus** Chromium from `playwright install chromium`, all in the **same** environment as `rpa_manager.py` (e.g. `.venv` from `./scripts/install.sh`).
 
@@ -300,6 +311,8 @@ After install, **start a new OpenClaw chat** (or reload skills) so the agent rea
 | **Chromium** | Installed by `playwright install chromium`, not via `pip` |
 
 See comment block at the top of `requirements.txt` for the same breakdown.
+
+</details>
 
 ---
 
@@ -324,15 +337,29 @@ Recorder: `record-start` → `record-step` → `record-end` (see `rpa_manager.py
 
 ## Sample scripts (`rpa/`)
 
-| Script | Notes |
-|--------|--------|
-| `wikipedia.py` / `wiki.py` | Wikipedia (English) |
-| `获取豆瓣电影数据.py` | Chinese UI demo (follow site rules) |
-| `onlineshoppingv1.py` (and related) | Sauce Demo flow (same as the [demo video](#demo-video) at the top) |
-| `yahoonew.py` (`YahooNew` in **`registry.json`**) | Yahoo Finance quote → **News** tab → top 5 headlines to Desktop (see [Yahoo Finance demo](#yahoo-finance-nvda-demo)) |
+All scripts below are registered in **`registry.json`** and can be listed with **`#rpa-list`** or run with **`#rpa-run:<name>`** / `python3 rpa_manager.py run <name>`.
+
+<details>
+<summary>View all sample scripts</summary>
+
+| Script (`registry.json` name) | Notes |
+|-------------------------------|-------|
+| `wiki.py` (`wiki`) | Wikipedia search → extract article summary to Desktop |
+| `onlineshoppingv1.py` (`onlineShoppingV1`) | Sauce Demo — sign in → sort by price → add two most expensive to cart → log out (see [E-Commerce Demo](#1-e-commerce-demo--browser-recording)) |
+| `电商网站购物v10.py` (`电商网站购物V10`) | Sauce Demo — Chinese-language variant of the shopping flow |
+| `yahoonew.py` (`YahooNew`) | Yahoo Finance — search NVDA → News tab → save top 5 headlines to Desktop (see [Yahoo Finance demo](#yahoo-finance-nvda-demo)) |
+| `获取豆瓣电影数据.py` (`获取豆瓣电影数据`) | Douban Movie — search a film → open detail page → extract title, rating, synopsis → save to Desktop (see [Douban demo](#2-yahoo-finance-nvda-news--browser-recording)) |
+| `amazonbestseller.py` (`amazonbestseller`) | **Amazon Best Sellers** — scrape first 40 products (title, price, rating, reviews, URL) → append Word table to Desktop (see [tutorial](articles/scenario-amazon-bestsellers.en-US.md)) |
+| `airbnb民宿比价分析v11.py` (`airbnb民宿比价分析v11`) | **Airbnb price tracker** — open browser → vision recognition → extract competitor prices & ratings → append Word report (see [scenario](articles/scenario-airbnb-compare.en-US.md)) |
+| `携程酒店v3.py` (`携程酒店V3`) | **Ctrip hotel** — auto-login with saved cookies → open hotel detail page → extract name, rating, room types & prices → save to `hotel.docx` (see [auto-login tutorial](articles/autologin-tutorial.en-US.md)) |
+| `自动登录v3.py` (`自动登录V3`) | Auto-login demo — inject saved session cookies before recording; skip OTP / CAPTCHA on every subsequent run |
 | `apiv3.py` (`apiV3`) | **API only** — Alpha Vantage `TIME_SERIES_DAILY` for NVDA → saves `nvda_time_series_daily.json` to Desktop; no browser steps |
-| `reconciliationv2.py` (`reconciliationV2`) | **AP reconciliation (EN)** — Mock GET open payables → `ap_draft_thisweek.xlsx` (System / Invoices / Match Results sheets, two-stage po_ref + amount matching) → `ap_reconciliation_YYYYMMDD.docx` Word table report (see [scenario](articles/scenario-ap-reconciliation.en-US.md)) |
-| `会计记账v2.py` (`会计记账V2`) | **AP reconciliation (CN)** — same flow in Chinese: Mock GET → `对账底稿_本周.xlsx`（系统侧 / 发票侧 / 匹配结果）→ `对账报告_YYYYMMDD.docx` Word table report (see [scenario](articles/scenario-ap-reconciliation.md)) |
+| `api_demov3.py` (`api_demoV3`) | **API + browser** — Alpha Vantage market data + Sina Finance news → merge into a local brief file |
+| `hotelv2.py` (`hotelv2`) | Mock GET hotel data API → save response to `hotel.txt`; minimal browser-free API demo |
+| `reconciliationv2.py` (`reconciliationV2`) | **AP reconciliation (EN)** — Mock GET open payables → `ap_draft_thisweek.xlsx` (System / Invoices / Match Results, two-stage matching) → `ap_reconciliation_YYYYMMDD.docx` Word report (see [scenario](articles/scenario-ap-reconciliation.en-US.md)) |
+| `会计记账v2.py` (`会计记账V2`) | **AP reconciliation (CN)** — same flow in Chinese: Mock GET → `对账底稿_本周.xlsx` → `对账报告_YYYYMMDD.docx` Word report (see [scenario](articles/scenario-ap-reconciliation.md)) |
+
+</details>
 
 ---
 
@@ -350,6 +377,29 @@ Full guide — key embedding strategy, env field, examples:
 
 - **Compliance:** Follow each site's terms of service and policies. This repo does not endorse evading safeguards or scraping where it isn't allowed.
 - **High-friction sites (e.g. LinkedIn):** Even with auto sign-in or session reuse, you may still hit **2FA, device checks, CAPTCHAs, and risk blocks** that require **human steps**.
+
+---
+
+## Author Contact
+
+<details>
+<summary><strong>Enterprise &amp; industry-specific customization</strong></summary>
+
+This repo ships as an **open-source skill** with a **general recording protocol**—great for individuals and teams automating typical browser and local-file workflows. If your needs look more like the table below, reach out via the channels at the bottom with **industry context, system boundaries, compliance constraints, and how you want it delivered**. We can discuss **tailored builds** for complex commercial scenarios (scope, timeline, and pricing depend on the engagement—no obligation to quote).
+
+| Scenario | What we can shape together |
+|----------|----------------------------|
+| **Deep workflows** | Multi-branch logic, exception handling, human-in-the-loop steps, long reconciliation chains, or merging several data sources |
+| **Vertical / industry fit** | Finance, supply chain, e-commerce ops, general price-comparison systems, internal ERP/OA plus external sites—field definitions, audit trails, and report layouts aligned to your org |
+| **Integration & operations** | Hooks into your gateway, queues, secrets management, scheduling at scale, private or air-gapped-style deployments |
+| **Reliability at scale** | High-friction sites, vision + DOM hybrid flows, custom validation and document templates, stronger performance and observability |
+
+</details>
+
+**Contact (open-source questions or commercial inquiries):**
+
+- WeChat: `nizhanali`
+- Gmail: `greentim2049@gmail.com`
 
 ---
 

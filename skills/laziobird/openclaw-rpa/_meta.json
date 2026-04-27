@@ -3,11 +3,16 @@
   "slug": "openclaw-rpa",
   "displayName": "OpenClaw RPA",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1776165048824,
-    "commit": "https://github.com/openclaw/skills/commit/d670c1a5510a328962f3c04a766d5dde97cd42e8"
+    "version": "1.3.0",
+    "publishedAt": 1776792537610,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1776165048824,
+      "commit": "https://github.com/openclaw/skills/commit/d670c1a5510a328962f3c04a766d5dde97cd42e8"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1775618284947,

@@ -289,7 +289,9 @@ Recording flow (after entering recording mode):
 
 Common commands:
 • `#end` → generate a standalone RPA program
-• `#abort` → close browser and discard this recording session
+• **`#abort` → emergency stop: immediately kills the browser and stops the recorder process.
+  Session files are kept under `recorder_session_aborted/` for debugging.
+  After `#abort`, AI will NOT process further RPA commands — start a new chat and send `#rpa`.**
 • For multi-step plans, to move forward you can send: **continue**, **1**, or **next** (same as "ok", "y", "go")
 • Need HTTP API calls in the task? Start a **new chat** and send **`#rpa-api`** to enter the dedicated recording flow (`#rpa-api` is an IDLE trigger, not an in-recording step command)
 • Help or all available commands: **`#rpa-help`**; list recorded tasks: **`#rpa-list`** (different purposes)
@@ -314,7 +316,7 @@ Please send: task name + capability letter (e.g. `reconciliation F`)
 python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py deps-check {LETTER}
 ```
 
-- **Exit 0** → start recording (below) with `--profile`.  
+- **Exit 0** → **Output nothing to the user.** Silently run `record-start` (below) with `--profile`, then output **only** the verbatim RECORDING template. Do NOT say "Dependencies checked", "browser is open", or any custom message between deps-check and the recording template.  
 - **Non-zero** → explain what’s missing in plain language, then tell the user there are **exactly two** allowed replies — nothing else counts.
 
 **Fixed options only** (verbatim; copy-paste recommended)
@@ -336,7 +338,27 @@ Do **not** run `deps-install` unless the trimmed message equals **`AGREE`** igno
 
 ## RECORDING (Recorder mode — headed browser)
 
+### State Machine — verify your current state before EVERY response
+
+| State | How you entered | ✅ Only allowed action | ⛔ Strictly forbidden |
+|-------|----------------|------------------------|----------------------|
+| **REC_WAIT** | `record-start` printed `✅ Recorder ready` | Output "Recording started" message → STOP | `record-step`, `plan-set`, `record-task-ready`, any browser action |
+| **REC_TASK** | User sent a task description | Multi-step: `plan-set` → `record-step` / Single-step: `record-task-ready` → `record-step` | Calling `record-step` without `plan-set` or `record-task-ready` first |
+| **REC_EXEC** | `plan-set` or `record-task-ready` confirmed | `record-step` (one step only) | Auto-continuing to next step without user confirmation |
+| **STEP_WAIT** | A `record-step` completed | Output progress message → STOP | Calling next `record-step` without user confirmation |
+
+> ⛔ **The task name is NOT a task description.** "AmazonBestSellersV3" or any other task name gives zero information about what steps to record. The LLM MUST wait for the user to type a full description — do not infer steps from world knowledge.
+
+---
+
 ### Start recording (after DEPS_CHECK passes)
+
+> ⚠️ **`record-start` command syntax — strictly enforced:**
+> - Always **quote the task name**, even if it is a single word.
+> - The capability letter **MUST use the `--profile` named flag** — never append it as a bare positional argument.
+> - ✅ Correct: `record-start "AmazonBestSellersV2" --profile A`
+> - ❌ Wrong:   `record-start AmazonBestSellersV2 A`  → argparse error: unrecognized arguments
+> - ❌ Wrong:   `record-start "AmazonBestSellersV2 A"` → entire string treated as task name
 
 Run (**always pass `--profile`** matching the signup letter):
 
@@ -344,7 +366,12 @@ Run (**always pass `--profile`** matching the signup letter):
 python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-start "{task name}" --profile {LETTER}
 ```
 
-When the command prints `✅ Recorder ready`, reply one of the following based on the capability:
+> ⛔ **Anti-hallucination gate:** Do NOT output "Recording started" or "Chrome is now open"
+> unless this `record-start` shell call just printed `✅ Recorder ready` in its output.
+> If the command exits with a non-zero code, **stop**, report the exact stderr text verbatim,
+> and do NOT substitute a different error message or claim that recording succeeded.
+
+When the command prints `✅ Recorder ready`, output the following text **VERBATIM** — character-for-character; only substitute `{task name}` with the actual task name. Do NOT paraphrase, summarize, rephrase, or merge with the deps-check output. Do NOT add greetings, status summaries, or custom sentences. Pick the block that matches the capability:
 
 **If capability includes a browser (A / D / E / G):**
 ```
@@ -378,6 +405,13 @@ Example:
 👉 You can also describe the task in plain natural language — AI will try to decompose it automatically.
 ```
 
+> ⛔ **MANDATORY STOP — REC_WAIT state:** Output the block above verbatim, then **STOP COMPLETELY**.
+> - Do NOT call `record-step`, `plan-set`, `record-task-ready`, or any other tool.
+> - Do NOT take a snapshot, navigate, or perform any browser action.
+> - Do NOT infer steps from the task name (task name ≠ task description).
+> - WAIT silently. Resume only when the user sends a full task description in their next message.
+> - When task description arrives → **REC_TASK**: multi-step → `plan-set` + `record-step`; single-step → `record-task-ready` + `record-step`.
+
 **If capability has NO browser (B / C / F / N):**
 ```
 ✅ Recording started: 「{task name}」
@@ -394,6 +428,12 @@ Capability saved in recorder_session/task.json (needs_excel / needs_word / needs
 👉 Plain natural language also works.
 ```
 
+> ⛔ **MANDATORY STOP — REC_WAIT state:** Output the block above verbatim, then **STOP COMPLETELY**.
+> - Do NOT call `record-step`, `plan-set`, `record-task-ready`, or any other tool.
+> - Do NOT infer steps from the task name.
+> - WAIT silently for the user to send a full task description.
+> - When task description arrives → **REC_TASK**: multi-step → `plan-set` + `record-step`; single-step → `record-task-ready` + `record-step`.
+
 ---
 
 ### Anti-timeout: multi-step instructions **must** be split — **one step per user turn**
@@ -406,18 +446,114 @@ Capability saved in recorder_session/task.json (needs_excel / needs_word / needs
 
 **First turn (multi-step instruction):**
 
-1. Decompose into atomic sub-tasks (each sub-task maps to ≤2 `record-step` calls). **During decomposition:** run **SPA / vision classification** on **every URL** you will visit (including links in `[var]`) against the **heavy SPA host list** (see §SPA detection below). If matched and the step extracts from the page, **state `extract_by_vision` in the sub-task text** — do not postpone that choice until execution. **Word append:** If the user asks to **append** to a Word file / `${output_path}` / “don’t overwrite the existing doc”, **state in that sub-task** that **`word_write` must use `mode: append`**; otherwise the agent often omits `mode` in JSON and the generator emits `_wmode='new'`, **overwriting** the whole file. **Excel append:** If the user asks to **append rows** to an existing `.xlsx`, **add rows at the end of an existing sheet**, or **keep existing sheet data**, **state that `excel_write` must use `replace_sheet: false`**; the default `true` **deletes and recreates** the same-named sheet, wiping old rows.
-2. Persist the plan with `plan-set` (step numbers must be consecutive from 1 to N, no gaps):
+0. **【Data model recognition — mandatory, do not skip】** Before decomposing any steps, classify the data model of this extraction task:
+
+   | Model type | Signal | Correct extraction strategy | ⛔ Forbidden |
+   |------------|--------|----------------------------|-------------|
+   | **List-row type** (N uniform records, each with multiple fields) | Task says "top N", "all products/results/items", "list"; or the page has N cards/rows with the same structure | `python_snippet` (`page.evaluate` to extract all fields per container in one pass) or `extract_by_vision` | ~~Field-by-field `extract_text` then zip~~ (unequal field counts cause row misalignment) |
+   | **Single-record type** (one URL = one data item, fields scattered across the page) | Task only needs one set of fields (title, price, description, …) from the page — no multiple records | One `extract_text` per field → three-layer pattern (normal) | — |
+   | **Unknown** | Cannot tell from task description | After `goto`, run `snapshot`; check `data_groups` for repeated containers — if present, list-row type; if empty, single-record type | — |
+
+   > **List-row type rule (iron law):**
+   > - When the task extracts N uniform records (products, articles, job listings, …) and each record has ≥2 fields, **it must be classified as list-row type**.
+   > - List-row type **forbids** the pattern "field A `extract_text` → field B `extract_text` → zip" — individual field lists will have different lengths (some records have no price, no rating, etc.) so zipping produces misaligned rows and completely wrong results.
+   > - List-row type correct approach: **extract all fields at the container level in one pass** to guarantee the same container's fields always correspond to the same row.
+
+   #### `data_groups` — automatic page data-layer analysis
+
+   After every `goto` / `snapshot`, the recorder automatically scans the live DOM and attaches a **`data_groups`** field to the action result.  It is produced by pure JS that detects repeating sibling patterns — no site-specific knowledge required; it works on any website.
+
+   **`data_groups` example (search-results page):**
+   ```json
+   "data_groups": [
+     {
+       "container_sel": "div[data-component-type='s-search-result']",
+       "count": 40,
+       "strategy": "semantic",
+       "sample_fields": [
+         { "sel": "h2 > span.a-text-normal", "tag": "span", "text": "Some Product Title" },
+         { "sel": "span.a-price-whole",       "tag": "span", "text": "19" },
+         { "sel": "span.a-icon-alt",          "tag": "span", "text": "4.5 out of 5 stars" },
+         { "sel": "a.a-link-normal",          "tag": "a",    "href": "/dp/B09XXXXX/..." }
+       ]
+     }
+   ]
+   ```
+
+   **`data_groups` usage rules (mandatory):**
+
+   > ⛔ **Iron law: whenever `data_groups` is non-empty, every selector inside `page.evaluate` JS must come exclusively from `data_groups` — from `container_sel` and `sample_fields[*].sel`. Using training knowledge, documentation examples, or prior familiarity with a website to "guess" or "fill in" any selector is strictly forbidden.**
+
+   - `container_sel` → copy verbatim as the `querySelectorAll` argument; do not replace with a selector you "know" from training.
+   - `sample_fields[*].sel` → copy verbatim as `el.querySelector(...)` arguments — **do not alter, do not guess alternatives**.
+   - `count` → verify the count meets the task requirement (e.g., "top 40" → `count` ≥ 40); if insufficient, `scroll` then re-run `snapshot` and use the updated `data_groups` — do not invent extra selectors.
+   - If `data_groups` is empty → no obvious repeated containers; the page is single-record type — switch to `extract_text`.
+   - If a field `sel` returns empty at runtime → use `dom_inspect` to inspect the container's real child structure, then use the selector `dom_inspect` returns — still forbidden to guess.
+   - If a needed field is absent from `data_groups` (not sampled) → use `dom_inspect` first; do not fall back to training knowledge.
+
+   **List-row type — standard `python_snippet` template (use selectors from `data_groups` directly):**
+   ```python
+   # ✅ Extract: page.evaluate in one row-aligned pass, write result to JSON immediately
+   # container_sel and child sels come from data_groups — do not guess
+   import json
+   results = await page.evaluate("""
+       () => Array.from(document.querySelectorAll('CONTAINER_SELECTOR')).map(el => ({
+           field1: el.querySelector('CHILD_SEL_1')?.textContent?.trim() || '',
+           field2: el.querySelector('CHILD_SEL_2')?.textContent?.trim() || '',
+           url:    el.querySelector('a[href]')?.href || '',
+       }))
+   """)
+   (CONFIG["output_dir"] / "rows.json").write_text(
+       json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8"
+   )
+   ```
+   > ⚠️ **`page.evaluate` results must be written to a file immediately (e.g. `rows.json`). Never store them in `CONFIG["anything"]`.**  
+   > Each `python_snippet` runs with an independent `CONFIG` object during recording validation — **`CONFIG` is not shared between steps**; any value stored in one snippet is gone by the next.  
+   > After writing to file, read in subsequent steps via `json.loads(Path(...).read_text())` or reference directly in `word_write` / `excel_write` using `rows_from_json`.
+
+1. Decompose into atomic sub-tasks (each sub-task maps to ≤2 `record-step` calls). **During decomposition:** for every URL where **data extraction is required** (i.e., the step reads text, prices, ratings, or any field from the page — skip pure navigation / click-only steps), **first run `probe-url`** to dynamically detect SSR vs SPA:
+   ```bash
+   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py probe-url "{url}"
+   ```
+   - `✅ SSR` → use **`extract_text`** with CSS selectors; no scrolling, no vision API needed.
+   - `⚠️ Heavy SPA` → use **`extract_by_vision`** for all field extraction on that URL.
+   - `🔶 Uncertain` → **two-phase runtime check** (see block below).
+   Only fall back to the static **heavy SPA host list** (§SPA detection) if `probe-url` cannot run.
+   **State the chosen extraction method in the sub-task text** so execution follows the plan — do not postpone that choice until execution.
+
+   > **🔶 Uncertain — two-phase runtime check**
+   > When `probe-url` returns `🔶 Uncertain`, plan the extraction sub-task as follows:
+   > **Phase 1 — snapshot class analysis (preferred, no wasted round-trip):**
+   > After `goto` the URL, run `snapshot`. Inspect the class names in the output:
+   > - Class names are **semantic** (`.price`, `.title`, `.rating`, `data-testid="…"`, `itemprop="…"`) → **SSR confirmed** → proceed with `extract_text`.
+   > - Class names are **hashed / randomised** (e.g. `_a1b2c3_`, `sc-xxxxx`, `css-1a2b3c`) → **Heavy SPA detected** → switch to `extract_by_vision`.
+   >
+   > **Phase 2 — fallback (only if Phase 1 is inconclusive):**
+   > Attempt `extract_text`; if it returns 0 matches on two consecutive tries → switch to `extract_by_vision`.
+   >
+   > ⛔ Do NOT skip Phase 1 and blindly try `extract_text` first. **Word append:** If the user asks to **append** to a Word file / `${output_path}` / “don’t overwrite the existing doc”, **state in that sub-task** that **`word_write` must use `mode: append`**; otherwise the agent often omits `mode` in JSON and the generator emits `_wmode='new'`, **overwriting** the whole file. **Excel append:** If the user asks to **append rows** to an existing `.xlsx`, **add rows at the end of an existing sheet**, or **keep existing sheet data**, **state that `excel_write` must use `replace_sheet: false`**; the default `true` **deletes and recreates** the same-named sheet, wiping old rows.
+2. **Before calling `plan-set`, output the decomposed plan in this exact format** so the user sees all steps:
+   ```
+   📋 Task decomposed into {N} steps:
+     1. [step 1 description]
+     2. [step 2 description]
+     ...
+
+   ▶️  Executing step 1 of {N} now...
+   ```
+   ⛔ Do NOT skip this output. The user must always see the full step list before execution begins.
+3. Persist the plan with `plan-set` (step numbers must be consecutive from 1 to N, no gaps):
    ```bash
    python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py plan-set '["subtask 1", "subtask 2", "subtask 3"]'
    ```
-3. Execute **step 1 only** (do not continue).
-4. End with:
+4. Execute **step 1 only** (do not continue).
+5. End with:
    ```
    📍 Progress: 1/{N} done
    ✅ [step description]
    📸 Screenshot: {path}
    Confirm the screenshot, then say **continue**, **1**, or **next** to run step 2/{N} (see shortcut confirmations below).
+   ⚠️  Something wrong? Send **`#abort`** to immediately stop recording (browser + process killed; session kept for debugging).
    ```
 
 > **Shortcut confirmations** (all mean “continue to the next step”): `continue`, `1`, `next`, `ok`, `y`, `go` (`next` is case-insensitive). The user may send **`1`** or **`next`** alone — no full sentence required.
@@ -511,7 +647,7 @@ Three formats, each with a distinct syntax:
 ```
 [var]
 query_time = ### current system time, precise to the minute, format MM/DD HH:MM ###
-output_path = '~/Desktop/Airbnb/hotelCompare.docx'
+output_path = '~/Desktop/report.docx'
 urls:
   https://www.example.com/room/123
   https://www.example.com/room/456
@@ -568,6 +704,7 @@ Once the user confirms, follow the **exact same protocol as the Anti-timeout rul
    ✅ {step description}
    📸 Screenshot: {path}
    Confirm the screenshot, then say "continue" or "1" to run step {next}/{N}.
+   ⚠️  Something wrong? Send **`#abort`** to immediately stop recording.
    ```
 3. **Stop. Do not execute the next step. Wait for user confirmation.**
 4. On receiving a shortcut confirmation, call `plan-next`, execute the next step. Repeat until complete.
@@ -583,6 +720,14 @@ Once the user confirms, follow the **exact same protocol as the Anti-timeout rul
 ---
 
 ### Single-step recording protocol (for every user instruction)
+
+> **Single-step unlock:** Before calling `record-step` on a single-step instruction (no `plan-set`),
+> you MUST first run:
+> ```bash
+> python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-task-ready
+> ```
+> This removes the state lock created by `record-start`. Calling `record-step` without this will
+> return a `[STATE LOCK]` error.
 
 > #### ⚠️ exec tool compatibility: `--from-file` rule
 >
@@ -641,6 +786,8 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 
 #### Step 3: Perform an action (pick one)
 
+> ⚠️ **`target` is the JSON field name, not a description.** The value in the `target` column is exactly what you put into the JSON `"target"` key; same for `value`. See **"Action JSON minimal format reference"** at the end of this section for copy-paste-ready examples.
+
 | action | target | value | Notes |
 |--------|--------|-------|--------|
 | `goto` | URL string | — | Navigate: `wait_until=domcontentloaded` + 1.5s SPA settle |
@@ -657,14 +804,55 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 | `api_call` | — | — | **HTTP** (independent of the page): either full **`url`**, or **`base_url` + `params`**. Optional **`method`** (default `GET`), **`headers`**, **`body`** (POST JSON), **`save_response_to`** (relative path under `~/Desktop`). **Secrets:** in `params` or `headers` string values, use **`__ENV:ENV_VAR_NAME__`** (e.g. `"apikey": "__ENV:ALPHAVANTAGE_API_KEY__"`). **If the step also has an `"env"` field** (e.g. `{"ALPHAVANTAGE_API_KEY":"real_key"}`), the key is **written directly into the generated script** — no `export` needed for replay; omitting `env` generates `os.environ.get("VAR", "")` and requires `export` before replay. |
 | `merge_files` | — | — | **Merge Desktop files** (pure local, no browser): **`sources`** (list of filenames under `~/Desktop`), **`target`** (output filename), optional **`separator`** (default `"\n\n"`). Typical use: combine an `api_call` JSON with an `extract_text` news file into a single brief. |
 | `excel_write` | — | — | **Write `.xlsx`** (openpyxl; **no Microsoft Excel required**). **⛔ Default `replace_sheet` omitted or `true`:** the same-named worksheet is **deleted and recreated** — all previous rows are lost. If the task requires **appending rows** to an existing workbook, **adding at the bottom of the sheet**, or **preserving existing sheet data**, the JSON **must** explicitly set **`"replace_sheet": false`** (top level, alongside `path` / `sheet` / `rows_from_json`) so new **`rows`** are **appended** after existing data; natural language alone does not flip this (same pitfall as Word `mode`). **`path`** or **`value`**: relative filename (recording writes under **~/Desktop**; generated script uses `CONFIG["output_dir"]`). **`sheet`**: worksheet name. **`headers`**: optional list of header strings. **Row data — pick one**: ① **`rows`**: static 2-D array of cell values; ② **`rows_from_json`**: `{"file":"x.json","outer_key":"batches","inner_key":"lines","fields":["f1","f2"],"parent_fields":["batch_id"]}` — dynamically flatten a nested JSON array from Desktop (`inner_key`/`parent_fields` optional); ③ **`rows_from_excel`**: `{"file":"发票导入_本周.xlsx","sheet":"发票侧","skip_header":true}` — copy data rows from another xlsx sheet. **`freeze_panes`**: optional e.g. `"A2"`. **`hidden_columns`**: optional list of **1-based** column indexes to hide (e.g. `[1]` hides column A). **`replace_sheet`**: `true` (default, delete same-named sheet then recreate) or `false` (**append `rows` after existing rows** when the sheet already exists). **If the user says "append rows", "add at the end of the table", or "keep existing data", always use `replace_sheet: false` — even if "create file" is also mentioned** (missing file still creates a new workbook). **Multi-source aggregation:** use a `python_snippet` to merge all intermediate data into a complete `rows` array first, then write with a **single** `excel_write`; do not call `excel_write` repeatedly to append one row at a time. |
-| `word_write` | — | — | **Write `.docx`** (python-docx; **no Word app required**). **⛔ Default when `mode` is omitted = `"new"`:** generated script uses `_wmode='new'` and **overwrites the entire file**. If the task requires **append**, **end of file**, **don’t overwrite**, or **append to `${output_path}`**, the JSON **must** explicitly set **`"mode":"append"`** — otherwise behaviour contradicts the task. **`path`** or **`value`**: relative filename (paths starting with `~/` are expanded as absolute). **`paragraphs`**: list of strings (one paragraph each). **⛔ like `rows`, `paragraphs` is a static literal** — codegen serialises the array verbatim into the script; whatever you write at record time is frozen forever on replay. **Never put the current timestamp, extracted values, or any dynamic data inside `paragraphs`.** For a dynamic timestamp use the **`{{now:fmt}}`** placeholder (e.g. `"Query time: {{now:%Y-%m-%d %H:%M}}"`); codegen replaces it with a `datetime.datetime.now().strftime(...)` call at runtime. For other dynamic values use `python_snippet` to build and write the docx directly. **`table`**: optional — inserts a table after paragraphs (auto-applies "Table Grid" style); **row data — pick one**: ① **`rows`**: 2-D array, **for truly static/template data only** (never fill in values extracted from web pages); ② **`rows_from_json`**: `{"file":"rows.json"}` — read a JSON file from Desktop (content must be a 2-D array), ideal for dynamically scraped data; **⚠️ if `rows_from_json.file` starts with `~/`, write the full path (e.g. `"~/Desktop/Airbnb/rows.json"`); without `~/` it is relative to `~/Desktop/`**. **`mode`**: `new` (default, create or overwrite) or `append` (**auto-creates if file does not exist; appends to the end if it does**, without overwriting existing content). **If the user says "append", "add to the end", or "don't overwrite", always use `append` — even if "create" is also mentioned**. **Multi-source aggregation:** use `python_snippet` to assemble all extracted data into a complete rows array and save as JSON, then use `word_write` + `rows_from_json`; **never fill scraped values into the static `rows` array**. |
-| `python_snippet` | — | — | **Inject Python code directly into the generated script.** **`code`**: multi-line string. Use for **file I/O, data parsing, datetime generation, openpyxl/docx writes** — operations that have no dedicated action. **The code is executed immediately at record time** to validate dependencies and logic. **⛔ NEVER access the DOM inside python_snippet** — the sandbox's `page` object raises an error by design; attempting to call `page.evaluate()` and then hardcoding the values you see on screen will make the generated script completely static (data never updates on replay). DOM extraction must use `extract_text` / `extract_by_vision` / `click` / `fill` actions. |
+| `word_write` | — | — | **Write `.docx`** (python-docx; **no Word app required**). **⛔ Default when `mode` is omitted = `"new"`:** generated script uses `_wmode='new'` and **overwrites the entire file**. If the task requires **append**, **end of file**, **don’t overwrite**, or **append to `${output_path}`**, the JSON **must** explicitly set **`"mode":"append"`** — otherwise behaviour contradicts the task. **`path`** (preferred), **`target`** (accepted alias), or **`value`** (legacy alias): file path — relative or `~/`-absolute. ⛔ **`"value"` / `"target"` in `word_write` is the FILE PATH, NOT content** — document content goes in `"paragraphs"` (string list) or `"table"`. Never put raw text, `${var}` references, or `###…###` templates into the path field. **`paragraphs`**: list of strings (one paragraph each). **⛔ like `rows`, `paragraphs` is a static literal** — codegen serialises the array verbatim into the script; whatever you write at record time is frozen forever on replay. **Never put the current timestamp, extracted values, or any dynamic data inside `paragraphs`.** For a dynamic timestamp use the **`{{now:fmt}}`** placeholder (e.g. `"Query time: {{now:%Y-%m-%d %H:%M}}"`); codegen replaces it with a `datetime.datetime.now().strftime(...)` call at runtime. For other dynamic values use `python_snippet` to build and write the docx directly. **`table`**: optional — inserts a table after paragraphs (auto-applies "Table Grid" style); **row data — pick one**: ① **`rows`**: 2-D array, **for truly static/template data only** (never fill in values extracted from web pages); ② **`rows_from_json`**: `{"file":"rows.json"}` — read a JSON file from Desktop (content must be a 2-D array), ideal for dynamically scraped data; **⚠️ if `rows_from_json.file` starts with `~/`, write the full path (e.g. `"~/Desktop/Airbnb/rows.json"`); without `~/` it is relative to `~/Desktop/`**. **`mode`**: `new` (default, create or overwrite) or `append` (**auto-creates if file does not exist; appends to the end if it does**, without overwriting existing content). **If the user says "append", "add to the end", or "don't overwrite", always use `append` — even if "create" is also mentioned**. **Multi-source aggregation:** use `python_snippet` to assemble all extracted data into a complete rows array and save as JSON, then use `word_write` + `rows_from_json`; **never fill scraped values into the static `rows` array**. |
+| `python_snippet` | — | — | **Inject Python code directly into the generated script.** **`code`**: multi-line string. Use for **file I/O, data parsing, datetime generation, openpyxl/docx writes**, and **list-row DOM extraction via `await page.evaluate(JS)`**. **The code is executed immediately at record time** to validate dependencies and logic. **Inside python_snippet: only `page.evaluate()` is permitted** — `page.locator`, `page.click`, and other Playwright APIs are blocked by the sandbox; use dedicated actions (`click` / `fill` / `goto`) for browser interaction. Write `page.evaluate` results to a JSON file and read them in downstream `word_write` / `excel_write` via `rows_from_json`. |
 | `wait` | — | milliseconds | Wait |
 
 > `extract_text` supports an optional **`"limit": N`** — only the first **N** matches.  
 > Optional **`"extract_ready_timeout_ms": 30000`** (default matches generated `CONFIG["extract_ready_timeout_ms"]`): **SPA content-ready wait** before `querySelector` extraction (same helper as `extract_by_vision`), reducing empty reads during skeleton phases. **`snapshot`** / **`dom_inspect`** also wait before DOM capture during recording.
 >
+> ⛔ **`extract_text` only extracts `textContent` (visible text). It cannot retrieve HTML attributes such as `href`, `src`, or `data-*`. Whenever a task requires URL / link fields, you MUST use `python_snippet` + `page.evaluate` and access `el.querySelector('a')?.href` to get the absolute URL. Never attempt to extract URLs with `extract_text`.**
+>
 > **⛔ Never fill web-extracted values into `word_write.table.rows` or `excel_write.rows`** — these static arrays are serialized as literals at record time and never update on replay. Web-extracted data must flow through the three-layer Extract → Aggregate → Write pattern (see §Universal task decomposition pattern).
+
+#### Action JSON minimal format reference
+
+> Each snippet below is the smallest **valid, ready-to-send JSON** for that action. Field names are exact — do **not** rename them (e.g. `goto` URL goes in `"target"`, never `"url"`).
+
+```jsonc
+// Navigate to a page
+{"action": "goto", "target": "https://example.com", "context": "open target page"}
+
+// Capture page structure (not logged to script)
+{"action": "snapshot"}
+
+// Fill a text input
+{"action": "fill", "target": "#search-input", "value": "keywords", "context": "fill search box"}
+
+// Click an element
+{"action": "click", "target": ".submit-btn", "context": "click submit"}
+
+// Press a key (e.g. Enter)
+{"action": "press", "target": "Enter", "context": "confirm with Enter"}
+
+// Scroll down by pixels
+{"action": "scroll", "value": "1000", "context": "scroll down 1000px"}
+
+// Wait (milliseconds)
+{"action": "wait", "value": "1000", "context": "wait 1s"}
+
+// Extract text from CSS-matched elements → ~/Desktop/output.txt
+{"action": "extract_text", "target": "main h3", "value": "output.txt", "field": "title", "limit": 10, "context": "extract titles"}
+
+// Inspect child structure of a container (not logged to script)
+{"action": "dom_inspect", "target": "[data-testid='results']", "context": "inspect list container"}
+
+// Native <select> dropdown
+{"action": "select_option", "target": "[name='sort']", "value": "price_asc", "context": "sort by price"}
+
+// Scroll element into view (trigger lazy-load)
+{"action": "scroll_to", "target": ".product-list", "context": "scroll to product list"}
+```
 
 ---
 
@@ -695,22 +883,22 @@ python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{"
 - Lowercase the hostname; **match if any**:
   - hostname **equals** an entry, or
   - hostname **ends with** `.<entry>` (subdomains, e.g. `www.airbnb.cn` matches `airbnb.cn`).
-- **Table (extend over time; matched hosts are treated as SPA by default):**
+- **Table (extend over time; matched hosts are treated as SPA by default; ⚠️ not on this list does not mean SSR — for unknown sites rely on `probe-url` or runtime class features to decide):**
 
-| Root / example host (lowercase) | Notes |
+| Root / example host (lowercase) | Technical reason |
 |--------------------------------|--------|
-| `airbnb.cn`, `airbnb.com`, any `*.airbnb.*` | Listings / travel |
-| `booking.com` | |
-| `hotels.com`, `agoda.com`, `expedia.com`, `expedia.*`, `trivago.com` | OTAs |
-| `trip.com`, `ctrip.com`, `fliggy.com`, `hotels.ctrip.com`, etc. | Ctrip / Trip / Fliggy |
-| `xiaohongshu.com`, `xhslink.com` | |
-| `douyin.com`, `iesdouyin.com` | |
-| `tiktok.com` | |
-| `instagram.com`, `facebook.com` | |
-| `linkedin.com` | |
-| `twitter.com`, `x.com` | |
-| `maps.google.com`; or `www.google.*` / `google.*` **with** `/maps` in the path | Google Maps |
-| `openrice.com`, `yelp.com`, `shein.com`, `shopee.*`, etc. | Large content / commerce SPAs (examples) |
+| `airbnb.cn`, `airbnb.com`, any `*.airbnb.*` | Heavy React SPA, hashed class names |
+| `booking.com` | Heavy React SPA, hashed class names |
+| `hotels.com`, `agoda.com`, `expedia.com`, `expedia.*`, `trivago.com` | Heavy React/Vue SPA, client-side rendering |
+| `trip.com`, `ctrip.com`, `fliggy.com`, `hotels.ctrip.com`, etc. | Heavy React SPA, hashed class names |
+| `xiaohongshu.com`, `xhslink.com` | Heavy Vue/React SPA, dynamic rendering |
+| `douyin.com`, `iesdouyin.com` | Heavy SPA, dynamic rendering |
+| `tiktok.com` | Heavy React SPA |
+| `instagram.com`, `facebook.com` | Heavy React SPA |
+| `linkedin.com` | Heavy React SPA |
+| `twitter.com`, `x.com` | Heavy React SPA |
+| `maps.google.com`; or `www.google.*` / `google.*` **with** `/maps` in the path | Map page dynamic rendering, treated as SPA |
+| `openrice.com`, `yelp.com`, `shein.com`, `shopee.*`, etc. | Large content / commerce SPAs (examples, extend as needed) |
 
 **When the host matches and the task includes extraction — say this in the opener:**
 
@@ -775,7 +963,7 @@ We will screenshot **the page already open in the recording browser** (no new br
 ```json
 {
   "action": "extract_by_vision",
-  "fields": ["listing_title", "price", "room_name"],
+  "fields": ["name", "price", "rating"],
   "value": "/tmp/rpa_step_vision.txt",
   "model_key": "qwen",
   "api_key": "sk-xxxxxxxx",
@@ -893,24 +1081,24 @@ Every recorded step follows three phases:
 `extract_text` writes a strict **kv format** temp file (UTF-8, bilingual field names and values supported):
 
 ```
-# Example: hotel1.txt (three extract_text calls appended to one file)
-民宿名字: 新今宮1号/Osaka Namba 1min
-评分: 4.91
-price: ¥368/晚
+# Example: page_1.txt (three extract_text calls appended to one file)
+title: Example result title
+rating: 4.5
+price: $19.99
 
 # Multi-value fields (selector matches multiple elements) use .N suffix
-tag.0: Entire rental
-tag.1: Boutique apartment
+tag.0: New arrival
+tag.1: Best seller
 ```
 
 **`_parse_field` — standard reader (auto-injected into generated scripts, no import needed):**
 
 ```python
 # index=0 (default): first value; index=-1: last; index=None: return list
-name  = _parse_field(CONFIG["output_dir"] / "hotel1.txt", "民宿名字")
-score = _parse_field(CONFIG["output_dir"] / "hotel1.txt", "评分")
-price = _parse_field(CONFIG["output_dir"] / "hotel1.txt", "price")
-tags  = _parse_field(CONFIG["output_dir"] / "hotel1.txt", "tag", index=None)  # → list
+name  = _parse_field(CONFIG["output_dir"] / "page_1.txt", "title")
+score = _parse_field(CONFIG["output_dir"] / "page_1.txt", "rating")
+price = _parse_field(CONFIG["output_dir"] / "page_1.txt", "price")
+tags  = _parse_field(CONFIG["output_dir"] / "page_1.txt", "tag", index=None)  # → list
 ```
 
 > `_parse_field` raises `RuntimeError` when a field is missing — it **never** returns `None`.
@@ -995,6 +1183,7 @@ name = 'Some Specific Product Name ...'   # ← this line must never appear in g
 | Are all output files written to disk? | Each `page_{N}.txt` exists and is non-empty | Check upstream extraction step results |
 | Any hardcoded page data in python_snippet? | All dynamic data read via `_parse_field` | Replace literals with `_parse_field` calls |
 | Does word_write.paragraphs contain dynamic data? | Timestamps → use `{{now:fmt}}` placeholder; other dynamic values → use `python_snippet` to write docx | Literal strings baked in at record time → replay always shows stale data |
+| Does `word_write` JSON use `"target"` or put content in `"value"`? | Use `"path"` for file path; put text in `"paragraphs"`; put timestamp via `{{now:fmt}}`; load table data via `"rows_from_json"` | Using `"target"` as path key is auto-corrected, but `"value"` as content (wrong) creates a file named after the content string |
 | Does word_write.rows contain web data? | If yes, must switch to `rows_from_json` | Add an aggregate python_snippet step |
 | Does the task require **appending** to an existing Word file? | `word_write` JSON includes **`"mode":"append"`** (top level, alongside `path`) | Omitting it yields `_wmode='new'` and **overwrites** the docx |
 | Does the task require **appending rows** to an existing Excel sheet? | `excel_write` JSON includes **`"replace_sheet": false`** (top level) | Default `true` **recreates** the sheet and **wipes** prior rows |
@@ -1198,7 +1387,337 @@ Confirm this step, then reply **continue**, **1**, or **next** for the following
   ```bash
   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-end --abort
   ```
-  → back to **IDLE**
+  Then output **verbatim**:
+  ```
+  🛑 Recording aborted. The recorder process and browser have been stopped.
+  Session files are kept at recorder_session_aborted/ for debugging.
+
+  ⛔ AI will NOT process any further RPA commands in this session.
+  Please start a new chat and send #rpa to begin a new recording.
+  ```
+  → **IDLE**. After outputting the above message, do **NOT** respond to any further
+  RPA-related instructions or browser actions in this conversation.
+- **`continue`** / **`1`** / **`next`** / **`ok`** / **`y`** / **`go`** → continue the **current** multi-step plan step (see anti-timeout rules and shortcut confirmations above)
+
+---
+
+## GENERATING
+
+Execute in order — **do not skip steps**:
+
+1. Reply: "⏳ Saving and compiling recording…"
+
+2. Run:
+   ```bash
+   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-end
+   ```
+   → Close browser → compile real steps into a full Playwright script → save `rpa/{filename}.py` → update registry
+
+3. ⚠️ **Output the template below verbatim. Do NOT rephrase, do NOT add offers like "Want me to run it for you?", do NOT improvise.**
+
+   On success, print:
+   ```
+   ✨ RPA script generated! (from real recording; selectors verified in browser)
+
+   📄 File: ~/.openclaw/workspace/skills/openclaw-rpa/rpa/{filename}.py
+   📋 Recorded steps: {N}
+   📸 Screenshots: ~/.openclaw/workspace/skills/openclaw-rpa/recorder_session/screenshots/
+
+   Known limitations:
+   • [If login was involved, remind user to log in before replay]
+   • [Other caveats inferred from the recording; **do NOT** mention API keys or `export` commands — the generated script already checks for missing env vars at startup and prints instructions]
+
+   To run this RPA later: if unsure what’s registered, send **`#rpa-list`** first to see **which recorded tasks are available**; then **`#rpa-run:{task name}`** (new chat) or **`run:{task name}`** (same chat).
+   ```
+
+4. **Do not LLM-rewrite the generated script** (agents must obey)
+   - After successful `record-end`, `rpa/{filename}.py` is assembled by `recorder_server` `_build_final_script()` from real `code_block` segments — same source as `recorder_session/script_log.py`.
+   - **Do not** generate a full replacement Playwright script from the task description alone; that drops recorder-validated selectors and `evaluate` semantics and often reintroduces `get_by_*` / `networkidle` patterns that diverge from the pipeline.
+   - For behavior changes: **prefer** `record-start` and re-record the bad steps, then `record-end`; for tiny edits, patch **`rpa/*.py` locally** only, staying consistent with [playwright-templates.md](playwright-templates.md) (`CONFIG`, `_EXTRACT_JS`, `_wait_for_content`, `page.locator` + `page.evaluate`).
+
+5. **Excel / Word — finalized layout**
+   - **Primary path:** Use **`record-step`** **`excel_write`** / **`word_write`** during recording. After `record-end`, `recorder_server._build_final_script()` emits **one** `rpa/{filename}.py` with Office code **inside** `async def run()` (same `try` as Playwright / `api_call` / `merge_files`) and adds **top-level** `openpyxl` / `docx` imports when needed. **No** separate `rpa/*_office.py`.
+   - **Fallback only:** If `task.json` flags Excel/Word but the recording has no `excel_write`/`word_write` steps, and the user gave explicit structure in chat, the agent may **append** supplemental code **only at the end** of that `.py` file — **never** replace recorder output.
+   - **If details are missing:** do not invent business data; list required CONFIG / headers in the success message.
+
+---
+
+## RUN
+
+Trigger: user message matches the **RUN** table above (`#rpa-run:` or `run:`); parsed `{task name}` is passed to `rpa_manager.py run` (**must match a registered name**; if unclear, user should **`#rpa-list`** first).
+
+Meaning: **run an already-recorded script again** (repeat the same steps)—**not** start a new recording.
+
+1. Reply: "▶️ Running 「{task name}」…"
+2. Run:
+   ```bash
+   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py run "{task name}"
+   ```
+3. Capture stdout and summarize when done:
+   ```
+   ✅ Finished: 「{task name}」
+   [stdout summary]
+   ```
+4. On error "task not found", list tasks:
+   ```bash
+   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list
+   ```
+
+---
+
+## LIST
+
+Trigger: **order 2** above — the whole message is only `#rpa-list` (case-insensitive).
+
+Meaning: answer **“which recorded RPA scripts can I use right now?”** — same output as `rpa_manager.py list` / `registry.json`.
+
+1. Reply: "📋 Listing recorded RPA tasks you can run…"
+2. Run:
+   ```bash
+   python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py list
+   ```
+3. Show **stdout** (light formatting OK); close with a short note that the names listed are **what’s available to run now**, and to execute one use **`#rpa-run:{task name}`** (new chat) or **`run:{task name}`** (this chat).
+
+---
+
+## Generated code quality (Recorder mode)
+
+Because recording uses real CSS from a headed browser:
+
+1. **Selectors are real** — every `target` comes from snapshot DOM, not guessed.
+2. **Errors** — each step uses `try/except`, screenshot on failure, then re-raise.
+3. **Paths** — outputs use `CONFIG["output_dir"]`.
+4. **Portability** — generated `.py` runs standalone without OpenClaw.
+
+---
+
+## Recorder command log (audit: Playwright mapping per step)
+
+- **During recording:** each `record-step` appends **one JSON line** (JSONL) to `recorder_session/playwright_commands.jsonl`.
+- **Each line:** `command` (same JSON sent to the recorder: `action` / `target` / `value` / `seq`, …), `success`, `error`, `code_block` (Python fragment for the final RPA), `url`, `screenshot`.
+- **Session bounds:** first line `type: session, event: start`; before successful `record-end`, append `event: end`, and copy the full log to `rpa/{task_slug}_playwright_commands.jsonl` for cross-check with `rpa/{task_slug}.py`.
+- **`record-end --abort`:** deletes the whole `recorder_session` including the log.
+
+---
+
+## Example dialogue
+
+```
+User: #RPA
+Agent: (ONBOARDING) … sign-up prompt…
+
+User: Daily news scrape A
+Agent: (deps-check A → record-start … --profile A) ✅ Chrome open…
+
+User: Open example-news.com, search "AI", save the top 5 titles from the results to Desktop titles.txt
+Agent:
+  (multi-step: 3 sub-tasks → split)
+  (plan-set '["Open site", "Search AI", "Save top 5 titles"]')
+  (step 1 only: record-step goto) → screenshot
+  📍 Progress: 1/3 done ✅ Open site
+  📸 Screenshot: step_01_....png
+  Reply continue / 1 / next for step 2/3: Search AI
+
+User: 1
+Agent:
+  (plan-status → step 2)
+  (record-step snapshot → find search input in 📋, e.g. input[name="q"])
+  (record-step fill … AI)
+  (record-step press Enter)
+  (plan-next)
+  📍 Progress: 2/3 done ✅ Search AI
+  📸 Screenshot: step_03_....png
+  Reply continue / 1 / next for step 3/3: Save top 5 titles
+
+User: next
+Agent:
+  (plan-status → step 3)
+  (record-step scroll value=1200 → lazy-load results)
+  (record-step wait value=1200)
+  (record-step snapshot → find results container in 🗂️ e.g. [data-testid="results"])
+  (record-step extract_text [data-testid="results"] h3 a titles.txt limit=5)
+  (plan-next → all done)
+  🎉 All 3 steps done! titles.txt written to Desktop.
+  Say `#end` to generate the RPA script.
+
+User: #end
+Agent: ✨ Generated: rpa/daily_news_scrape.py (5 steps, real recording, selectors verified)
+
+User: #rpa-run:Daily news scrape
+Agent: ▶️ Running… ✅ Finished.
+
+User: run:Daily news scrape
+Agent: ▶️ Running… ✅ Finished.
+
+User: #rpa-list
+Agent: 📋 Listing… (shows `rpa_manager.py list` output)
+```
+
+---
+
+## Other resources
+
+- Synthesis guidance: [synthesis-prompt.md](synthesis-prompt.md) (Recorder assembly vs legacy LLM synthesis; both must align with [playwright-templates.md](playwright-templates.md) / `recorder_server._build_final_script` — do not use old `get_by_role` + `networkidle` minimal skeletons as the main path)
+- Playwright templates: [playwright-templates.md](playwright-templates.md) (same atoms as `recorder_server.py` `_build_final_script` / `_do_action`: `CONFIG`, `_EXTRACT_JS`, `_wait_for_content`, `page.locator` + `page.evaluate`)
+- `rpa_manager.py` commands:
+
+  **Plan (anti-timeout):**  
+  `plan-set '<json>'` | `plan-next` | `plan-status`
+
+  **Recorder (recommended):**  
+  `record-start <task> [--profile A-N]` | `deps-check <A-N>` | `deps-install <A-N>` | `record-step '<json>'` | `record-status` | `record-end [--abort]`
+
+  **General:**  
+  `run <task>` | `list` (in chat, **`#rpa-list`** triggers LIST)
+
+  **Legacy:**  
+  `init <task>` | `add --proof <file> '<json>'` | `generate` | `status` | `reset`### Progressive probing (default; replaces "one snapshot is enough")
+
+**Use for:** SPAs, long pages, sites where the nav fills the first snapshot lines, and lists below the fold. **Core idea:** **snapshot first to understand structure, then scroll only if needed** — multiple rounds of **snapshot → if target not in viewport, scroll + wait → snapshot again (and `dom_inspect` if needed)**, then **`extract_text` with a scoped selector** or **`python_snippet`** — **never** use bare global `h3` / `a` for "headline list" style tasks.
+
+**Why one snapshot is not "the whole page":** the 📋 list is a **sample** (about 100 visible interactive nodes, ~20 section blocks) to cap tokens; **unrendered or unsampled regions** need **scroll + snapshot again** or **`dom_inspect`**.
+
+**Standard flow (before extracting a block / list / titles):**
+
+1. **`goto`** URL (SPA settle is built in).
+2. **`snapshot`** — **run immediately, do not scroll first**. Check 📋 / 🗂️:
+   - Target container/block **already in the first viewport** → skip to step 5 (no scroll needed).
+   - Target **not visible** → continue to step 3.
+3. **`scroll`** `value=800~1200`, trigger below-the-fold and lazy load.
+4. **`wait`** `value=600~2000`, then **`snapshot`** again → return to step 2.
+5. **If target container found but children are unclear** → run **`dom_inspect`** on that container and derive `target` from children (`a`, `h3`, testids).
+6. Based on the data model type (see §Data model recognition above):
+   - **Single-record type** → **`extract_text`**: `target` **must include a container prefix**, e.g. `"[data-testid=\"…\"] h3 a"`, `main h3`; use **`limit`** for first N.
+   - **List-row type** → **`python_snippet`** (`page.evaluate` row-by-row) or **`extract_by_vision`**; do not use field-by-field `extract_text`.
+
+**Short recipe:**
+```
+goto → snapshot (check structure first) → target already in viewport?
+    ├─ Yes → dom_inspect (if needed) → extract
+    └─ No  → scroll + wait → snapshot → target found? extract; else keep scrolling
+```
+
+> Lazy-load timing varies; if the target still does not appear, scroll ~800px, **`snapshot` again**, retry.
+> ⛔ **Do not scroll blindly before taking a snapshot** — the target may already be in the first viewport; always check structure before deciding whether to scroll.
+
+### Reading the `snapshot` output
+
+`snapshot` returns two parts:
+
+**1. `📋 Interactive elements`** — each line:
+```
+CSS selector  [placeholder=...]  「text preview」
+```
+- Use `sel` directly as the next `target`.
+- If the element has no id/aria/testid, **the nearest parent** may be prepended, e.g. `[data-testid="news-panel"] h3`.
+
+**2. `🗂️ Content blocks`** — each line:
+```
+[data-testid="block-id"]  ← heading 「Block title」
+```
+- To scope extraction, combine the block selector with a child selector:
+  ```
+  target = "[data-testid=\"target-block\"] h3 a"   ← only that block, not other sections
+  ```
+- Without `data-testid`, you can use Playwright text filters, e.g. `section:has(h2:text("Section title")) li`.
+
+### Selector strength rules (extract_text target must follow)
+
+**Bare tags (`h3`, `a`, `li`, …) are never unique** — they appear in navs, sidebars, footers, and modals. A selector must **combine multiple signals** to pin the real target.
+
+**Ranked by strength. When building `target`, use at least one strategy above “bare tag”:**
+
+| Priority | Strategy | Generic pattern | When to use |
+|:--------:|----------|----------------|-------------|
+| 1 | **`main` / `[role="main"]` + child** | `main h3`, `main article h3`, `[role="main"] li a` | Almost every modern site has `<main>`; simplest universal scope |
+| 2 | **Snapshot block id / data-testid + child** | `#content h3`, `[data-testid="…"] li` | When snapshot 🗂️ shows a clear container |
+| 3 | **Attribute filter** | `a[href*="/news/"]`, `li[class*="item"]` | Link paths with keywords, or list items with recognizable class fragments |
+| 4 | **Semantic tag nesting** | `article h2`, `section ul > li`, `[role="list"] a` | No id / testid — rely on HTML5 semantic tags |
+| 5 | **Text anchor (Playwright `:has`)** | `section:has(h2:text("…")) li` | Snapshot has a visible section heading but the container has no id |
+| 6 | **Exclude noise** | `h3:not(nav h3):not(header h3)` | Fallback when none of the above work |
+| **Banned** | **Bare tag** | ~~`h3`~~, ~~`a`~~, ~~`li`~~ | **Never** use alone; even the engine’s `main` fallback may still hit nav areas |
+
+**Workflow (universal):**
+1. Run **snapshot**; find the container holding target content in the 🗂️ block list (check heading / sel).
+2. Container has `id` / `data-testid` → use **strategy 2**.
+3. Container has no identifiers → check for `<main>` → use **strategy 1**.
+4. Still unclear → run **`dom_inspect`** on the candidate container; derive **strategy 3–5** from children’s tag / class / href.
+5. Compose, then `extract_text`.
+
+**Recorder fallback:** If `target` is still a bare tag (letters only, no `#` `.` `[`, or space), the engine scopes to `<main>` / `[role="main"]` when present — but this is a **last resort**, not a substitute for the composite selectors above.
+
+### Common scenarios
+
+| Scenario | Suggested approach |
+|----------|-------------------|
+| Content blocks (news/list/comments) | scroll → wait → snapshot → pick selector from 🗂️ |
+| Target not in snapshot | Not rendered or not sampled — scroll ~800px → snapshot again; or **`dom_inspect`** a likely parent |
+| Repeating list/card rows | `extract_text` + `limit` for first N |
+| “Load more” / expand | click → wait → snapshot → `extract_text` |
+
+Example (navigate):
+```bash
+python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
+  "action": "goto",
+  "target": "https://example.com",
+  "context": "Open target page"
+}'
+```
+
+Example (fill search box; selector from snapshot):
+```bash
+python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
+  "action": "fill",
+  "target": "#search-input",
+  "value": "keyword",
+  "context": "Type keyword in search (selector from snapshot)"
+}'
+```
+
+Example (extract list after scroll / lazy-load):
+```bash
+python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-step '{
+  "action": "extract_text",
+  "target": "[data-testid=\"content-list\"] h3 a",
+  "value": "output.txt",
+  "limit": 5,
+  "field": "titles",
+  "context": "First 5 titles (selector from snapshot block)"
+}'
+```
+
+#### Step 4: Report to the user (fixed format)
+```
+✅ [Step N] {context}
+📸 Screenshot: {screenshot_path} (browser state is visible on screen)
+🔗 Current URL: {url}
+Confirm this step, then reply **continue**, **1**, or **next** for the following step.
+```
+
+#### Step 5: On failure
+- Explain the error to the user.
+- Optionally `snapshot` again for fresh selectors and retry.
+- **Do not record failed steps** (no `code_block` on failure — script stays clean).
+
+---
+
+### State transitions (check every message)
+
+- **`#end`** → **GENERATING**
+- **`#abort`** → run:
+  ```bash
+  python3 ~/.openclaw/workspace/skills/openclaw-rpa/rpa_manager.py record-end --abort
+  ```
+  Then output **verbatim**:
+  ```
+  🛑 Recording aborted. The recorder process and browser have been stopped.
+  Session files are kept at recorder_session_aborted/ for debugging.
+
+  ⛔ AI will NOT process any further RPA commands in this session.
+  Please start a new chat and send #rpa to begin a new recording.
+  ```
+  → **IDLE**. After outputting the above message, do **NOT** respond to any further
+  RPA-related instructions or browser actions in this conversation.
 - **`continue`** / **`1`** / **`next`** / **`ok`** / **`y`** / **`go`** → continue the **current** multi-step plan step (see anti-timeout rules and shortcut confirmations above)
 
 ---

@@ -35,7 +35,31 @@ metadata:
 | **Auto-login** | Save cookies once with `#rpa-login`, auto-inject on every recording and replay — skip OTP / CAPTCHA / QR-code flows |
 | **Mixed flows** | Any combination above in a single recorded task (e.g. API + Excel + Word, or browser + login + extract) |
 
-**Recorded example scripts** (under `rpa/`): `onlineshoppingv1.py` e-commerce · `yahoonew.py` Yahoo Finance news · `apiv3.py` Alpha Vantage API (NVDA daily JSON, no browser) · `reconciliationv2.py` / `会计记账v2.py` AP reconciliation (GET → Excel match → Word table report) — full write-up: **[EN](articles/scenario-ap-reconciliation.en-US.md)** · **[CN](articles/scenario-ap-reconciliation.md)**.
+---
+
+## 🚀 Real-world cases — already recorded, ready to run
+
+> **These scripts are registered in `registry.json`. Run any of them instantly — no re-recording, no tokens.**
+> ```
+> #rpa-list                          ← see all registered tasks
+> #rpa-run:amazonbestseller          ← run one directly
+> python3 rpa_manager.py run <name>  ← or via CLI
+> ```
+
+| # | Case | What it does | Run name |
+|---|------|-------------|----------|
+| 🛒 | **[Amazon Best Sellers Scraper](articles/scenario-amazon-bestsellers.en-US.md)** | Scrape top 40 products (title, price, rating, reviews, URL) → Word table | `amazonbestseller` |
+| 🏨 | **[Airbnb Competitor Price Tracker](articles/scenario-airbnb-compare.en-US.md)** | Open browser → vision recognition → extract prices & ratings → Word report | `airbnb民宿比价分析v11` |
+| 🏦 | **[AP Reconciliation (EN)](articles/scenario-ap-reconciliation.en-US.md)** | Mock GET open payables → Excel match → Word table report | `reconciliationV2` |
+| 🔑 | **[Auto-login: Ctrip Hotel](articles/autologin-tutorial.en-US.md)** | Save cookies once → skip OTP forever → extract hotel info → Word doc | `携程酒店V3` |
+| 📈 | **Yahoo Finance News** | Search NVDA → News tab → save top 5 headlines to Desktop | `YahooNew` |
+| 🎬 | **Douban Movie** | Search a film → detail page → title, rating, synopsis → Desktop file | `获取豆瓣电影数据` |
+| 🌐 | **Alpha Vantage API** | `TIME_SERIES_DAILY` for NVDA → `nvda_time_series_daily.json` (no browser) | `apiV3` |
+| 🛍️ | **Sauce Demo Shopping** | Sign in → sort by price → add two most expensive → log out | `onlineShoppingV1` |
+
+📖 **[Full case gallery & videos → README.md](README.md)**
+
+---
 
 ## When to use
 
@@ -112,7 +136,7 @@ After a locale change, the agent should **re-read** the matching `SKILL.*.md` in
 
 - **SKILL.md** (this file): short router + **when to use** + **quick start** for listings like [ClawHub](https://clawhub.ai/).
 - **SKILL.zh-CN.md** / **SKILL.en-US.md**: full **onboarding**, **recording**, **RUN/LIST**, and anti-timeout rules.
-- **Scenario doc:** [articles/scenario-ap-reconciliation.en-US.md](articles/scenario-ap-reconciliation.en-US.md) · [CN](articles/scenario-ap-reconciliation.md) — AP reconciliation (GET-only mock API, local Excel, Word table output).
+- **Scenario docs:** [Amazon Best Sellers](articles/scenario-amazon-bestsellers.en-US.md) · [Airbnb Price Tracker](articles/scenario-airbnb-compare.en-US.md) · [AP Reconciliation EN](articles/scenario-ap-reconciliation.en-US.md) · [AP Reconciliation CN](articles/scenario-ap-reconciliation.md) · [Auto-login](articles/autologin-tutorial.en-US.md).
 
 ## Relative paths
 
