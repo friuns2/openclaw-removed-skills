@@ -3,9 +3,15 @@
   "slug": "documo",
   "displayName": "Documo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170077238,
-    "commit": "https://github.com/openclaw/skills/commit/e6c28e029db2454e868368265b1a9f4edcc65012"
+    "version": "1.0.3",
+    "publishedAt": 1776885720097,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170077238,
+      "commit": "https://github.com/openclaw/skills/commit/e6c28e029db2454e868368265b1a9f4edcc65012"
+    }
+  ]
 }
