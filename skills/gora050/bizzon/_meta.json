@@ -3,9 +3,15 @@
   "slug": "bizzon",
   "displayName": "Bizzon",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169036700,
-    "commit": "https://github.com/openclaw/skills/commit/7c906d031841bb0254a2e8f0e5c0a47aa8019984"
+    "version": "1.0.3",
+    "publishedAt": 1776863747336,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169036700,
+      "commit": "https://github.com/openclaw/skills/commit/7c906d031841bb0254a2e8f0e5c0a47aa8019984"
+    }
+  ]
 }
