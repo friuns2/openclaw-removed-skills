@@ -3,9 +3,15 @@
   "slug": "fenergo",
   "displayName": "Fenergo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169054121,
-    "commit": "https://github.com/openclaw/skills/commit/4f46510eb6447634bb3baf6c8932db2befc64e12"
+    "version": "1.0.3",
+    "publishedAt": 1776863781673,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169054121,
+      "commit": "https://github.com/openclaw/skills/commit/4f46510eb6447634bb3baf6c8932db2befc64e12"
+    }
+  ]
 }
