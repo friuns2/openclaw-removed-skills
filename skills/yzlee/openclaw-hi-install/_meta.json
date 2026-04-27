@@ -3,11 +3,16 @@
   "slug": "openclaw-hi-install",
   "displayName": "OpenClaw Hi Install",
   "latest": {
-    "version": "0.1.41",
-    "publishedAt": 1776054277835,
-    "commit": "https://github.com/openclaw/skills/commit/40d21168a4c41cab981bd40401323e8362b2f558"
+    "version": "0.1.45",
+    "publishedAt": 1777274748698,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.41",
+      "publishedAt": 1776054277835,
+      "commit": "https://github.com/openclaw/skills/commit/40d21168a4c41cab981bd40401323e8362b2f558"
+    },
     {
       "version": "0.1.22",
       "publishedAt": 1775499846974,
