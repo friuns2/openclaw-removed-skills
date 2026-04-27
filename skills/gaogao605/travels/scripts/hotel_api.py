@@ -12,6 +12,12 @@ import requests
 import json
 import sys
 import time
+try:
+    from scripts.cache_price import save_price_cache
+except ImportError:
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from scripts.cache_price import save_price_cache
 import os
 from typing import List, Dict, Optional, Any
 from pathlib import Path
@@ -315,7 +321,11 @@ class FbHotelApi:
             "payment_type": payment_type,
             "nation_type": nation_type
         }
-        return self._request("queryHotelPrice", data)
+        result = self._request("queryHotelPrice", data)
+        # 保存价格缓存，加快预订速度
+        if result.get("success"):
+            save_price_cache(hotel_id, "", check_in_date, check_out_date, result.get("data", {}).get("rooms", []))
+        return result
     
     def query_hotel_detail(self, hotel_id: str) -> Dict:
         """
@@ -439,45 +449,148 @@ class FbHotelApi:
     
     # ==================== 格式化输出 ====================
     
-    def format_hotel_list(self, data: Dict, check_in_date: str = None) -> str:
-        """格式化酒店列表"""
+    def format_hotel_list(self, data: Dict, check_in_date: str = None, budget: float = None, star_level: str = None, keywords: str = None) -> str:
+        """格式化酒店列表 - 支持图片内嵌展示，按价格排序，显示推荐理由"""
         hotel_list = data.get("data", {}).get("hotel_list", [])
         if not hotel_list:
-            return "未找到符合条件的酒店"
+            return "🔍 未找到符合条件的酒店，建议调整搜索关键词"
+        
+        # 按价格排序（低价优先）
+        hotel_list = sorted(hotel_list, key=lambda x: float(x.get('min_price', 999999) or 999999))
+        
+        # 过滤预算范围（如果有）
+        if budget and budget > 0:
+            hotel_list = [h for h in hotel_list if float(h.get('min_price', 999999) or 999999) <= budget]
+        
+        # 过滤酒店等级（如果有）
+        if star_level:
+            star_map = {
+                '经济型': ['经济型'],
+                '舒适型': ['舒适型'],
+                '豪华型': ['豪华型', '高档型', '五星级', '四星级']
+            }
+            allowed_stars = star_map.get(star_level, [star_level])
+            hotel_list = [h for h in hotel_list if h.get('star_level_name', '') in allowed_stars]
+        
+        if not hotel_list:
+            return f"🔍 未找到符合条件（{star_level or '不限'}、预算{budget or '不限'}元）的酒店，建议调整筛选条件"
         
         lines = []
         date_str = f"（{check_in_date}入住）" if check_in_date else ""
-        lines.append(f"🏨 酒店列表{date_str}\n")
-        lines.append("| 序号 | 酒店名称 | 星级 | 区域 | 最低价 |")
-        lines.append("|:---:|---------|:---:|------|---:|")
+        budget_str = f"、预算≤¥{int(budget)}" if budget and budget > 0 else ""
+        star_str = f"、{star_level}" if star_level else ""
+        lines.append(f"## 🏨 酜店列表 {date_str}{star_str}{budget_str}\n")
+        lines.append(f"找到 **{len(hotel_list[:5])}** 家酒店（分贝通实时数据，按价格排序）\n")
         
         for i, h in enumerate(hotel_list[:5], 1):
             name = h.get('name', '-')
             star = h.get('star_level_name', '-')
             district = h.get('district_name', '-')
-            price = h.get('min_price', '-')
-            if price and price != '-':
-                price = f"¥{int(price)}"
-            lines.append(f"| {i} | {name} | {star} | {district} | {price} |")
+            price = h.get('min_price', 0)
+            score = h.get('score', '-')
+            main_logo = h.get('main_logo', '')
+            
+            # 图片内嵌展示
+            if main_logo:
+                lines.append(f"![]({main_logo})")
+            
+            # 酒店信息行
+            price_str = f"¥{int(price)}" if price and price > 0 else "暂无报价"
+            score_str = f"**{score}分（分贝通真实评分）**" if score and score != '-' else ""
+            star_str_display = f"**{star}（分贝通星级）**" if star and star != '-' else ""
+            
+            # 预算符合标记
+            budget_mark = ""
+            if budget and price and price <= budget:
+                budget_mark = "✅符合预算"
+            
+            lines.append(f"**{i}. {name}**")
+            if star_str_display:
+                lines.append(f"   🏷️ {star_str_display} | 📍 {district}")
+            if score_str:
+                lines.append(f"   ⭐ {score_str}")
+            lines.append(f"   💰 {price_str}起 {budget_mark}")
+            
+            # 推荐理由（根据酒店特征自动生成）
+            reasons = []
+            
+            # 预算符合
+            if budget and price and price <= budget:
+                reasons.append("✅预算范围内")
+            
+            # 高评分
+            if score and float(score) >= 4.7:
+                reasons.append("⭐评分优秀")
+            
+            # 连锁品牌（亚朵、全季、秋果等）
+            chain_brands = ['亚朵', '全季', '秋果', '如家', '汉庭', '希尔顿', '万豪', '洲际']
+            if any(brand in name for brand in chain_brands):
+                reasons.append("🏷️知名连锁品牌")
+            
+            # 地铁附近（关键词包含地铁）
+            if '地铁' in name or (keywords and '地铁' in keywords):
+                reasons.append("🚇临近地铁")
+            
+            # 价格优势
+            if price and price <= 200:
+                reasons.append("💰性价比超高")
+            elif price and price <= 500:
+                reasons.append("💰价格适中")
+            
+            # 新装修（关键词或名称包含新）
+            if '新' in name or keywords and '新' in keywords:
+                reasons.append("🆕装修较新")
+            
+            # 显示推荐理由
+            if reasons:
+                lines.append(f"   📌 推荐理由：{' | '.join(reasons[:3])}")
+            
+            lines.append("")
         
-        lines.append("")
-        lines.append("💡 回复序号查看房型价格，如 \"1\"")
-        lines.append("💡 回复 \"序号-详情\" 查看酒店信息和评论，如 \"1-详情\"")
+        lines.append("---")
+        lines.append("💡 回复 **序号** 查看房型价格，如 **1**")
+        lines.append("💡 回复 **序号-详情** 查看酒店信息和评论，如 **1-详情**")
         
         return "\n".join(lines)
     
     def format_hotel_price(self, data: Dict, check_in: str, check_out: str) -> str:
-        """格式化酒店价格详情"""
+        """格式化酒店价格详情 - 支持图片内嵌展示"""
         hotel = data.get("data", {}).get("hotel", {})
         rooms = data.get("data", {}).get("rooms", [])
         
         if not rooms:
-            return "暂无可用房型"
+            return "🔍 暂无可用房型，建议调整入住日期"
         
         lines = []
-        lines.append(f"🏨 {hotel.get('name', '-')}")
-        lines.append(f"📍 {hotel.get('address', '-')} | ⭐{hotel.get('score', '-')}分 | {hotel.get('star_level_name', '-')}")
-        lines.append(f"📅 入住：{check_in} → 退房：{check_out}\n")
+        
+        # 酒店图片
+        main_logo = hotel.get('main_logo', '')
+        if main_logo:
+            lines.append(f"![]({main_logo})")
+        
+        # 酒店基本信息
+        name = hotel.get('name', '-')
+        address = hotel.get('address', '-')
+        score = hotel.get('score', '-')
+        star = hotel.get('star_level_name', '-')
+        phone = hotel.get('phone', '')
+        
+        lines.append(f"## 🏨 {name}\n")
+        
+        # 数据真实性标注
+        score_str = f"**{score}分（分贝通真实评分）**" if score and score != '-' else ""
+        star_str = f"**{star}（分贝通星级）**" if star and star != '-' else ""
+        
+        lines.append(f"📍 {address}")
+        if star_str:
+            lines.append(f"🏷️ {star_str}")
+        if score_str:
+            lines.append(f"⭐ {score_str}")
+        if phone:
+            lines.append(f"📞 {phone}")
+        
+        lines.append(f"\n📅 入住：{check_in} → 退房：{check_out}\n")
+        lines.append("---\n")
         
         # 过滤有效房型
         valid_rooms = []
@@ -500,23 +613,38 @@ class FbHotelApi:
             window_type = room.get('window_type', '-')
             area = room.get('area', '-')
             
-            lines.append(f"**房型{i}：{room_name}**")
-            lines.append(f"床型：{bed_type} | 窗户：{window_type} | 面积：{area}")
-            lines.append("| 序号 | 价格 | 早餐 | 取消政策 | 取消详情 |")
-            lines.append("|:---:|---:|:---:|:---:|---|")
+            lines.append(f"### 房型 {i}：{room_name}\n")
+            lines.append(f"- 🛏️ 床型：{bed_type}")
+            lines.append(f"- 🪟 窗户：{window_type}")
+            lines.append(f"- 📐 面积：{area}")
+            lines.append("")
+            
+            lines.append("| 序号 | 价格 | 早餐 | 取消政策 |")
+            lines.append("|:---:|---:|:---:|:---:|")
             
             for j, p in enumerate(room.get('_valid_plans', [])[:5], 1):
                 price = float(p.get('total_price', 0))
                 breakfast = p.get('breakfast', {}).get('value', '无早')
                 cancel_type = p.get('cancel_type', {}).get('value', '-')
-                cancel_rule = p.get('cancel_rule', '-')
+                cancel_rule = p.get('cancel_rule', '')
                 
-                emoji = '✅' if '限时' in cancel_type or '免费' in cancel_type else ''
-                lines.append(f"| {i}-{j} | ¥{int(price)} | {breakfast} | {emoji}{cancel_type} | {cancel_rule[:30]}... |")
+                # 取消政策简化展示
+                cancel_display = cancel_type
+                if '限时' in cancel_type or '免费' in cancel_type:
+                    cancel_display = f"✅ {cancel_type}"
+                elif '不可' in cancel_type:
+                    cancel_display = f"❌ {cancel_type}"
+                
+                lines.append(f"| **{i}-{j}** | ¥{int(price)}（实时价格） | {breakfast} | {cancel_display} |")
             
             lines.append("")
         
-        lines.append("💡 回复 \"房型序号-产品序号\" 预订，如 \"1-1\"")
+        lines.append("---")
+        lines.append("💡 回复 **房型序号-产品序号 + 入住人信息** 预订")
+        lines.append("   示例：**1-1 郜文彬 13800138000**")
+        
+        # 预订链接提示
+        lines.append("\n👉 选择房型后可直接预订，支付链接将在订单创建后提供")
         
         return "\n".join(lines)
     
@@ -527,23 +655,31 @@ class FbHotelApi:
         last_cancel_time = order_data.get("last_cancel_time", "")
         
         lines = []
-        lines.append("✅ 订单创建成功！\n")
-        lines.append(f"🏨 订单号：{order_id}")
-        lines.append(f"📅 入住：{check_in} → 退房：{check_out}")
-        lines.append(f"🛏️ 房型：{room_name}")
-        lines.append(f"💰 价格：¥{int(total_price)}")
+        lines.append("## ✅ 订单创建成功！\n")
+        
+        # 订单信息表格
+        lines.append("| 项目 | 详情 |")
+        lines.append("|:---:|:---:|")
+        lines.append(f"| **订单号** | {order_id} |")
+        lines.append(f"| **入住** | {check_in} → {check_out} |")
+        lines.append(f"| **房型** | {room_name} |")
+        lines.append(f"| **价格** | ¥{int(total_price)}（分贝通实时价格） |")
         
         if last_cancel_time:
-            lines.append(f"📋 最晚取消时间：{last_cancel_time}")
+            lines.append(f"| **最晚取消** | {last_cancel_time} |")
         
         lines.append("")
         
-        # 支付链接
+        # 支付链接（标准格式）
         pay_url = f"{self.base_url}/business/hotel/open/push/redirect?orderId={order_id}&type=0&token={self.access_token}"
         detail_url = f"{self.base_url}/business/hotel/open/push/redirect?orderId={order_id}&type=1&token={self.access_token}"
         
-        lines.append(f"🔗 [立即支付]({pay_url})")
+        lines.append(f"👉 [立即支付]({pay_url})")
         lines.append(f"🔗 [查看订单详情]({detail_url})")
+        
+        lines.append("")
+        lines.append("---")
+        lines.append("⚠️ 请尽快完成支付，超时订单将自动取消！")
         
         return "\n".join(lines)
 
@@ -601,21 +737,28 @@ def print_usage():
 用法: python3 hotel_api.py <命令> [参数]
 
 命令:
-  search <城市> <关键词> [入住日期] [退房日期]  搜索酒店
+  search <城市> <关键词> [入住日期] [退房日期] [预算] [等级]
+                                                搜索酒店（支持预算过滤、等级筛选、价格排序）
   price <酒店ID> <入住日期> <退房日期>          查询房型价格
   detail <酒店ID>                               查询酒店详情
   comment <酒店ID>                              查询酒店评论
   query <订单ID>                                查询订单
   cancel <订单ID> [原因]                        取消订单
+  book <酒店ID> <房型> <入住人> <手机号>         快速预订（从缓存读取）
 
 示例:
-  python3 hotel_api.py search 北京市 三元桥附近 2026-03-26 2026-03-27
+  python3 hotel_api.py search 北京市 三元桥附近 2026-03-26 2026-03-27 500 舒适型
   python3 hotel_api.py price 5a39df2fbbfdc4732360e860 2026-03-26 2026-03-27
 ================================================================================
 """)
 
 
 if __name__ == "__main__":
+    # 导入缓存模块
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from scripts.cache_price import load_price_cache, get_room_plan
+    
     if len(sys.argv) < 2:
         print_usage()
         sys.exit(0)
@@ -626,15 +769,17 @@ if __name__ == "__main__":
     try:
         if command == "search":
             if len(sys.argv) < 4:
-                print("用法: hotel_api.py search <城市> <关键词> [入住日期] [退房日期]")
+                print("用法: hotel_api.py search <城市> <关键词> [入住日期] [退房日期] [预算] [等级]")
                 sys.exit(1)
             city_name = sys.argv[2]
             keywords = sys.argv[3]
             check_in = sys.argv[4] if len(sys.argv) > 4 else None
             check_out = sys.argv[5] if len(sys.argv) > 5 else None
+            budget = float(sys.argv[6]) if len(sys.argv) > 6 else None
+            star_level = sys.argv[7] if len(sys.argv) > 7 else None
             
             result = api.search_hotel_list(city_name=city_name, keywords=keywords)
-            print(api.format_hotel_list(result, check_in))
+            print(api.format_hotel_list(result, check_in, budget, star_level, keywords))
             
         elif command == "price":
             if len(sys.argv) < 5:
@@ -676,6 +821,52 @@ if __name__ == "__main__":
             reason = sys.argv[3] if len(sys.argv) > 3 else "用户主动取消"
             result = api.cancel_order(order_id, reason)
             print(json.dumps(result, ensure_ascii=False, indent=2))
+            
+        elif command == "book":
+            # 快速预订 - 从缓存读取room_id和plan_id
+            if len(sys.argv) < 6:
+                print("用法: hotel_api.py book <酒店ID> <房型名称> <入住人> <手机号>")
+                sys.exit(1)
+            
+            hotel_id = sys.argv[2]
+            room_name = sys.argv[3]
+            guest_name = sys.argv[4]
+            guest_phone = sys.argv[5]
+            
+            cache = load_price_cache()
+            if not cache or cache.get("hotel_id") != hotel_id:
+                print("错误: 无价格缓存，请先查询价格")
+                sys.exit(1)
+            
+            check_in = cache.get("check_in")
+            check_out = cache.get("check_out")
+            
+            # 从缓存获取room_id和plan_id
+            room_id, plan_id, total_price = get_room_plan(hotel_id, room_name)
+            
+            if not room_id:
+                print(f"错误: 未找到房型 '{room_name}'")
+                sys.exit(1)
+            
+            # 快速创建订单
+            result = api.create_order(
+                hotel_id=hotel_id,
+                room_id=room_id,
+                plan_id=plan_id,
+                check_in_date=check_in,
+                check_out_date=check_out,
+                total_price=total_price,
+                contact={'name': guest_name, 'phone': guest_phone},
+                guest_list=[[guest_name]]
+            )
+            
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            
+            if result.get("success"):
+                order_id = result['data']['order_id']
+                token = load_auth_token()
+                print(f"订单号: {order_id}")
+                print(f"[点击支付](https://app-gate.fenbeitong.com/business/hotel/open/push/redirect?orderId={order_id}&type=0&token={token})")
             
         else:
             print(f"未知命令: {command}")
