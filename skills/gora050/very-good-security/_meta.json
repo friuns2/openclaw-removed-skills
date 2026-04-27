@@ -3,11 +3,16 @@
   "slug": "very-good-security",
   "displayName": "Very Good Security",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169943165,
-    "commit": "https://github.com/openclaw/skills/commit/0b42a91de13b308562c7cea5a5dab0af286ac553"
+    "version": "1.0.3",
+    "publishedAt": 1776865008844,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169943165,
+      "commit": "https://github.com/openclaw/skills/commit/0b42a91de13b308562c7cea5a5dab0af286ac553"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774926315432,
