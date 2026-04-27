@@ -3,11 +3,16 @@
   "slug": "zendesk-sell",
   "displayName": "Zendesk Sell",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169106472,
-    "commit": "https://github.com/openclaw/skills/commit/4e4d1ef4c09bf721afa05d5b1ca46171bc0fbfdc"
+    "version": "1.0.3",
+    "publishedAt": 1776863815253,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169106472,
+      "commit": "https://github.com/openclaw/skills/commit/4e4d1ef4c09bf721afa05d5b1ca46171bc0fbfdc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774760657813,
