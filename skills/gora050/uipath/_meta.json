@@ -3,9 +3,15 @@
   "slug": "uipath",
   "displayName": "Uipath",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775246786874,
-    "commit": "https://github.com/openclaw/skills/commit/8e5dda1fd2ba48e8a62fe0291c26a1b526f7e511"
+    "version": "1.0.1",
+    "publishedAt": 1776899276326,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775246786874,
+      "commit": "https://github.com/openclaw/skills/commit/8e5dda1fd2ba48e8a62fe0291c26a1b526f7e511"
+    }
+  ]
 }
