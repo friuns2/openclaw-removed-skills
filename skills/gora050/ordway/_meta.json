@@ -3,11 +3,16 @@
   "slug": "ordway",
   "displayName": "Ordway",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169876229,
-    "commit": "https://github.com/openclaw/skills/commit/d3030441f2706992c191f914ffa902b5d2243043"
+    "version": "1.0.3",
+    "publishedAt": 1776892883471,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169876229,
+      "commit": "https://github.com/openclaw/skills/commit/d3030441f2706992c191f914ffa902b5d2243043"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774922635702,
