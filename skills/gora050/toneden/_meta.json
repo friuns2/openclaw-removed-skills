@@ -3,11 +3,16 @@
   "slug": "toneden",
   "displayName": "Toneden",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169665481,
-    "commit": "https://github.com/openclaw/skills/commit/e4ead757a701c4cc0f047df89dc8b8b4f65743f5"
+    "version": "1.0.3",
+    "publishedAt": 1776864622324,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169665481,
+      "commit": "https://github.com/openclaw/skills/commit/e4ead757a701c4cc0f047df89dc8b8b4f65743f5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774868627826,
