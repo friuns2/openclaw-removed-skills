@@ -3,11 +3,16 @@
   "slug": "snipe-it",
   "displayName": "Snipe It",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169355312,
-    "commit": "https://github.com/openclaw/skills/commit/9512337cd0fffd733e633c50ca6bef5fabd7fefe"
+    "version": "1.0.3",
+    "publishedAt": 1776864284032,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169355312,
+      "commit": "https://github.com/openclaw/skills/commit/9512337cd0fffd733e633c50ca6bef5fabd7fefe"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774818353103,
