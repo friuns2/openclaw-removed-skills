@@ -3,11 +3,16 @@
   "slug": "justoneapi-douban",
   "displayName": "Douban Movie API",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776239952692,
-    "commit": "https://github.com/openclaw/skills/commit/c76f78edf30072b31947bf01513e1ced9f12e2ad"
+    "version": "1.0.10",
+    "publishedAt": 1776924425152,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776239952692,
+      "commit": "https://github.com/openclaw/skills/commit/c76f78edf30072b31947bf01513e1ced9f12e2ad"
+    },
     {
       "version": "1.0.7",
       "publishedAt": 1775375307522,

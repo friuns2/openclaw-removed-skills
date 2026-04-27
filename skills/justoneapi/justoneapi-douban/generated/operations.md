@@ -30,7 +30,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getMovieReviewDetailsV1`
 
@@ -53,7 +53,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getMovieReviewsV1`
 
@@ -83,7 +83,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getRecentHotMovieV1`
 
@@ -106,7 +106,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getRecentHotTvV1`
 
@@ -129,7 +129,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getSubjectDetailV1`
 
@@ -152,4 +152,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
