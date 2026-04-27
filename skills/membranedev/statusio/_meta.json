@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "statusio",
+  "displayName": "Statusio",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776870369283,
+    "commit": null
+  },
+  "history": []
+}
