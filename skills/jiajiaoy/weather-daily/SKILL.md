@@ -1,14 +1,6 @@
 ---
 name: weather-daily
-description: |
-  每日天气推送 Skill — 早晨推送今日天气（温度/穿衣/出行建议），晚间推送明日预告，
-  支持一周预报、极端天气预警、空气质量监测。基于城市设置，无需 API Key，
-  通过 WebSearch 实时获取天气数据。
-  触发词：今天天气、天气预报、明天天气、本周天气、穿衣建议、下雨吗、天气怎么样、
-  开启推送、空气质量问题、台风预警、暴雨预警。/ 
-  Daily weather push: morning briefing (today's weather, outfit/commute tips), 
-  evening preview (tomorrow), weekly forecast, extreme weather alerts, air quality monitoring. 
-  City-based, no API key needed, uses WebSearch.
+description: "Daily weather briefing for any city — morning conditions, what to wear, umbrella forecast, evening preview, extreme weather alerts. No API key. Works worldwide."
 keywords: 
   - 天气
   - 今天天气

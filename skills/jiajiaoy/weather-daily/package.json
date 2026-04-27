@@ -1,7 +1,7 @@
 {
   "name": "weather-daily",
-  "version": "1.0.0",
-  "description": "weather-daily — 每日天气推送 Skill。早间今日天气（温度/穿衣/出行），晚间明日预告，一周预报，极端天气预警。无需 API Key，通过 WebSearch 实时获取。Daily weather push skill: morning briefing, evening preview, weekly forecast, weather alerts. No API key needed.",
+  "version": "1.0.2",
+  "description": "Daily weather briefing for any city — morning conditions, what to wear, umbrella forecast, evening preview, extreme weather alerts. No API key. Works worldwide.",
   "keywords": [
     "天气",
     "今天天气",
