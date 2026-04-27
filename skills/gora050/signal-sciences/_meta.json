@@ -3,11 +3,16 @@
   "slug": "signal-sciences",
   "displayName": "Signal Sciences",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170155579,
-    "commit": "https://github.com/openclaw/skills/commit/164a7e0de7b4d076da9ddac47006af5abdc1b3ea"
+    "version": "1.0.3",
+    "publishedAt": 1776865366005,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170155579,
+      "commit": "https://github.com/openclaw/skills/commit/164a7e0de7b4d076da9ddac47006af5abdc1b3ea"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774962340656,
