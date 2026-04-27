@@ -3,11 +3,16 @@
   "slug": "demodesk",
   "displayName": "Demodesk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169728782,
-    "commit": "https://github.com/openclaw/skills/commit/13317fff141fa61d4dc7c6d12c6a1412bb4c1ebf"
+    "version": "1.0.3",
+    "publishedAt": 1776864748776,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169728782,
+      "commit": "https://github.com/openclaw/skills/commit/13317fff141fa61d4dc7c6d12c6a1412bb4c1ebf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774875972798,
