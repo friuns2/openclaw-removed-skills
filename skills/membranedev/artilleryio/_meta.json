@@ -3,11 +3,16 @@
   "slug": "artilleryio",
   "displayName": "Artilleryio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169515466,
-    "commit": "https://github.com/openclaw/skills/commit/1265821d79d9f6451a6757a3993b15f7782fcc93"
+    "version": "1.0.3",
+    "publishedAt": 1776855245765,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169515466,
+      "commit": "https://github.com/openclaw/skills/commit/1265821d79d9f6451a6757a3993b15f7782fcc93"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774846967781,
