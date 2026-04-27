@@ -3,11 +3,16 @@
   "slug": "clover",
   "displayName": "Clover",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168281934,
-    "commit": "https://github.com/openclaw/skills/commit/c6b6b66dfd72b16f93db3a397e03d9ef6c663ba3"
+    "version": "1.0.3",
+    "publishedAt": 1776865596135,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168281934,
+      "commit": "https://github.com/openclaw/skills/commit/c6b6b66dfd72b16f93db3a397e03d9ef6c663ba3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774598625482,
