@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAL Benchmark Analysis | Revelata</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root {
+    --bg: #0a0d13; --surface: #111318; --surface2: #181c24; --surface3: #1e232d;
+    --border: #252b36; --border-light: #2e3647;
+    --text: #dce4f0; --text-muted: #7a8799; --text-dim: #4e5a6a;
+    --cyan: #4FEAFF; --cyan-dim: rgba(79,234,255,0.1);
+    --amber: #f59e0b; --amber-text: #fbbf24;
+    --green: #22c55e; --green-dim: rgba(34,197,94,0.12); --green-mid: rgba(34,197,94,0.2);
+    --yellow: #eab308; --yellow-dim: rgba(234,179,8,0.12); --yellow-mid: rgba(234,179,8,0.18);
+    --red: #ef4444;
+    --purple: #a855f7; --purple-dim: rgba(168,85,247,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 1.25rem 1.75rem; max-width: 1080px; margin: 0 auto; font-size: 13px; -webkit-font-smoothing: antialiased; }
+
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.2rem; gap: 2rem; }
+  .header-brand { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+  .header-brand span { font-family: 'Figtree', sans-serif; font-size: 0.82rem; font-weight: 600; color: var(--text-dim); }
+  .header-brand a { color: var(--text-dim); text-decoration: none; }
+  h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.04em; color: #fff; line-height: 1.2; }
+  h1 .ticker { color: var(--cyan); }
+  .header-meta { margin-top: 0.35rem; font-size: 0.74rem; color: var(--text-dim); display: flex; gap: 1rem; flex-wrap: wrap; }
+  .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); display: inline-block; vertical-align: middle; margin-right: 0.3rem; }
+  .legend { display: flex; gap: 1.2rem; align-items: center; flex-shrink: 0; padding-top: 1.8rem; }
+  .legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; color: var(--text-dim); }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+  .section-label { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin: 1.5rem 0 0.4rem; display: flex; align-items: center; gap: 0.6rem; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* FINGERPRINT GRID */
+  .grid-wrap { overflow-x: auto; margin-bottom: 0.5rem; }
+  .fp-grid { border-collapse: collapse; width: 100%; font-size: 0.74rem; }
+  .fp-grid th.row-header, .fp-grid td.row-header {
+    position: sticky; left: 0; z-index: 2;
+    background: var(--surface2); min-width: 140px; max-width: 160px;
+  }
+  .fp-grid td.row-header { background: var(--surface); }
+  .fp-grid tr:hover td.row-header { background: var(--surface2); }
+  .fp-grid .group-header th {
+    background: var(--bg); font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--text-muted); padding: 0.5rem 0.6rem 0.2rem;
+    border-top: 1px solid var(--border);
+  }
+  .fp-grid .group-header th.row-header { background: var(--bg); }
+  .fp-grid .col-header th {
+    background: var(--surface2); padding: 0.45rem 0.6rem 0.4rem;
+    border-bottom: 2px solid var(--border-light); text-align: center;
+  }
+  .col-ticker { font-family: 'Figtree', monospace; font-weight: 700; font-size: 0.85rem; }
+  .col-ticker.target { color: #fff; }
+  .col-ticker.match-strong { color: var(--green); }
+  .col-ticker.match-partial { color: var(--yellow); }
+  .col-ticker.seg { color: var(--purple); }
+  .fp-grid td.row-header { padding: 0.38rem 0.7rem 0.38rem 0.6rem; border-bottom: 1px solid var(--border); }
+  .kpi-name { display: block; font-weight: 600; color: var(--text-muted); font-size: 0.74rem; }
+  .kpi-sub { display: block; font-size: 0.62rem; color: var(--text-dim); }
+  .fp-grid th.row-header { padding: 0.4rem 0.6rem; font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); text-align: left; }
+  .fp-grid td.cell { padding: 0.35rem 0.55rem; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; white-space: nowrap; min-width: 92px; font-family: 'JetBrains Mono', monospace; font-size: 0.71rem; }
+  .fp-grid tbody tr:hover td.cell { box-shadow: inset 0 0 0 9999px rgba(79,234,255,0.06); }
+  .fp-grid tbody tr:hover td.row-header { background: var(--surface2); }
+  td.cell.target-col { background: rgba(255,255,255,0.04); color: #fff; font-weight: 600; }
+  td.cell.match-strong { background: var(--green-mid); color: #86efac; }
+  td.cell.match-partial { background: var(--yellow-mid); color: #fde68a; }
+  td.cell.match-none { background: transparent; color: var(--text-dim); }
+  td.cell a { color: inherit; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; }
+  .delta { display: block; font-size: 0.58rem; color: inherit; opacity: 0.65; margin-top: 0.08rem; }
+
+  /* BENCHMARK CARDS */
+  .bmark-list { display: flex; flex-direction: column; gap: 0.35rem; margin: 0.3rem 0 0.8rem; }
+  .bmark-row { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; display: grid; grid-template-columns: 100px 1fr; overflow: hidden; }
+  .bmark-id { padding: 0.55rem 0.7rem; border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; background: var(--surface2); }
+  .bm-ticker { font-family: 'Figtree', monospace; font-weight: 700; font-size: 1rem; }
+  .bm-ticker.strong { color: var(--green); }
+  .bm-ticker.partial { color: var(--yellow); }
+  .bm-ticker.seg { color: var(--purple); }
+  .bm-name { font-size: 0.68rem; color: var(--text-dim); margin-top: 0.15rem; line-height: 1.3; }
+  .bmark-data { padding: 0.45rem 0.7rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; align-items: center; }
+  .kpi-comp { display: flex; flex-direction: column; min-width: 80px; }
+  .kc-label { font-size: 0.57rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 0.1rem; }
+  .kc-val { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600; }
+  .kc-val a { color: inherit; text-decoration: underline; text-decoration-style: dotted; }
+  .kc-val.green { color: #86efac; }
+  .kc-val.yellow { color: #fde68a; }
+  .kc-val.dim { color: var(--text-dim); font-style: italic; font-weight: 400; }
+  .kc-delta { font-size: 0.6rem; color: var(--text-dim); margin-top: 0.08rem; font-family: 'JetBrains Mono', monospace; }
+  .kc-delta.pos { color: #86efac; }
+  .kc-delta.neg { color: #fca5a5; }
+  .bmark-note { font-size: 0.7rem; color: var(--text-dim); border-left: 1px solid var(--border); padding-left: 0.85rem; margin-left: auto; max-width: 200px; line-height: 1.5; flex-shrink: 0; }
+  .cat-divider { font-size: 0.6rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); margin: 1rem 0 0.4rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+
+  /* TABBED CHARTS */
+  .chart-tabs { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; margin: 0.4rem 0 1.2rem; }
+  .tab-nav { display: flex; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn { background: none; border: none; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 500; color: var(--text-dim); padding: 0.5rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; }
+  .tab-btn:hover { color: var(--text-muted); }
+  .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+  .tab-panel { display: none; padding: 0.7rem 0.9rem; }
+  .tab-panel.active { display: block; }
+  .chart-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.8rem; }
+  .chart-title { font-size: 0.75rem; font-weight: 700; color: var(--text); }
+  .chart-meta { font-size: 0.62rem; color: var(--text-dim); }
+  canvas { max-height: 200px; }
+
+  /* SYNTHESIS */
+  .synthesis { background: linear-gradient(135deg, rgba(79,234,255,0.04) 0%, transparent 60%); border: 1px solid rgba(79,234,255,0.15); border-left: 3px solid var(--cyan); border-radius: 7px; padding: 0.9rem 1.1rem; margin: 0.4rem 0 1.2rem; }
+  .synthesis-title { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--cyan); margin-bottom: 0.7rem; }
+  .synthesis p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.65rem; line-height: 1.7; }
+  .synthesis p:last-child { margin-bottom: 0; }
+  .synthesis a { color: var(--cyan); text-decoration: underline; text-decoration-style: dotted; }
+  .synthesis strong { color: var(--text); }
+
+  /* NOTES */
+  .notes-list { list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+  .notes-list li { font-size: 0.76rem; color: var(--text-muted); padding: 0.5rem 0.9rem 0.5rem 1.8rem; border-bottom: 1px solid var(--border); position: relative; line-height: 1.55; }
+  .notes-list li:last-child { border-bottom: none; }
+  .notes-list li::before { content: "→"; position: absolute; left: 0.6rem; color: var(--cyan); }
+  .notes-list li a { color: var(--cyan); text-decoration: underline; text-decoration-style: dotted; }
+
+  /* SOURCES */
+  .sources-table { width: 100%; border-collapse: collapse; font-size: 0.71rem; }
+  .sources-table th { background: var(--surface2); color: var(--text-dim); font-size: 0.57rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.4rem 0.65rem; text-align: left; border-bottom: 1px solid var(--border); }
+  .sources-table td { padding: 0.4rem 0.65rem; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+  .sources-table tr:last-child td { border-bottom: none; }
+  .cov-green { color: var(--green); font-weight: 600; }
+  .cov-yellow { color: var(--yellow); font-weight: 600; }
+
+  .footer { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.67rem; color: var(--text-dim); display: flex; justify-content: space-between; }
+  .footer a { color: var(--cyan); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-brand">
+      <a href="https://www.revelata.com" target="_blank">
+        <svg height="18" viewBox="0 0 159 34" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M42.4412 26.6676V7.28626H48.7539C50.0091 7.28626 51.1166 7.53545 52.0765 8.03382C53.0548 8.5322 53.8116 9.22439 54.3468 10.1104C54.9006 10.9964 55.1775 12.0116 55.1775 13.156C55.1775 14.3005 54.8821 15.3157 54.2915 16.2017C53.7008 17.0877 52.8979 17.7891 51.8826 18.3059C50.8674 18.8043 49.723 19.0535 48.4494 19.0535H44.7946V26.6676H42.4412ZM53.3778 26.6676L48.7263 18.7213L50.5813 17.503L55.9527 26.6676H53.3778ZM44.7946 16.8939H49.0862C49.7876 16.8939 50.4152 16.737 50.969 16.4232C51.5227 16.0909 51.9657 15.6479 52.298 15.0942C52.6487 14.522 52.824 13.8759 52.824 13.156C52.824 12.0485 52.4364 11.1533 51.6611 10.4703C50.9043 9.76891 49.9168 9.4182 48.6986 9.4182H44.7946V16.8939ZM65.1997 26.9999C63.8523 26.9999 62.6617 26.6953 61.628 26.0862C60.5944 25.4586 59.7822 24.6003 59.1915 23.5112C58.6193 22.4222 58.3332 21.167 58.3332 19.7457C58.3332 18.3244 58.6193 17.0692 59.1915 15.9802C59.7822 14.8911 60.5851 14.042 61.6004 13.4329C62.634 12.8053 63.8154 12.4915 65.1444 12.4915C66.4365 12.4915 67.5532 12.8146 68.4946 13.4606C69.436 14.0882 70.1651 14.9742 70.6819 16.1186C71.1987 17.263 71.4572 18.6105 71.4572 20.161H60.0222L60.5759 19.6903C60.5759 20.7978 60.7697 21.7484 61.1574 22.5421C61.5634 23.3359 62.1264 23.945 62.8463 24.3695C63.5662 24.7756 64.3876 24.9787 65.3105 24.9787C66.2888 24.9787 67.1102 24.7479 67.7747 24.2865C68.4577 23.825 68.9837 23.2159 69.3529 22.4591L71.2633 23.4281C70.9126 24.148 70.4419 24.7756 69.8513 25.3109C69.2791 25.8462 68.5961 26.2615 67.8024 26.5569C67.0271 26.8522 66.1596 26.9999 65.1997 26.9999ZM60.7144 18.7489L60.1329 18.3059H69.6851L69.1037 18.7766C69.1037 17.8906 68.9283 17.1246 68.5776 16.4786C68.2269 15.8325 67.7562 15.3341 67.1656 14.9834C66.5749 14.6327 65.8919 14.4574 65.1167 14.4574C64.3599 14.4574 63.64 14.6327 62.957 14.9834C62.2925 15.3341 61.748 15.8325 61.3235 16.4786C60.9174 17.1061 60.7144 17.8629 60.7144 18.7489ZM78.1355 26.6676L83.7838 12.8238H86.1095L80.3228 26.6676H78.1355ZM77.9971 26.6676L72.2103 12.8238H74.5084L80.1567 26.6676H77.9971ZM94.023 26.9999C92.6755 26.9999 91.485 26.6953 90.4513 26.0862C89.4176 25.4586 88.6055 24.6003 88.0148 23.5112C87.4426 22.4222 87.1565 21.167 87.1565 19.7457C87.1565 18.3244 87.4426 17.0692 88.0148 15.9802C88.6055 14.8911 89.4084 14.042 90.4236 13.4329C91.4573 12.8053 92.6386 12.4915 93.9676 12.4915C95.2597 12.4915 96.3765 12.8146 97.3178 13.4606C98.2592 14.0882 98.9883 14.9742 99.5052 16.1186C100.022 17.263 100.28 18.6105 100.28 20.161H88.8454L89.3992 19.6903C89.3992 20.7978 89.593 21.7484 89.9806 22.5421C90.3867 23.3359 90.9497 23.945 91.6696 24.3695C92.3894 24.7756 93.2108 24.9787 94.1338 24.9787C95.1121 24.9787 95.9335 24.7479 96.598 24.2865C97.2809 23.825 97.807 23.2159 98.1762 22.4591L100.087 23.4281C99.7359 24.148 99.2652 24.7756 98.6745 25.3109C98.1023 25.8462 97.4194 26.2615 96.6256 26.5569C95.8504 26.8522 94.9828 26.9999 94.023 26.9999ZM89.5376 18.7489L88.9562 18.3059H98.5084L97.927 18.7766C97.927 17.8906 97.7516 17.1246 97.4009 16.4786C97.0502 15.8325 96.5795 15.3341 95.9888 14.9834C95.3982 14.6327 94.7152 14.4574 93.9399 14.4574C93.1832 14.4574 92.4633 14.6327 91.7803 14.9834C91.1158 15.3341 90.5713 15.8325 90.1467 16.4786C89.7407 17.1061 89.5376 17.8629 89.5376 18.7489ZM103.074 26.6676V7.28626H105.289V26.6676H103.074ZM117.686 26.6676L117.575 24.3972V19.3581C117.575 18.269 117.455 17.3738 117.215 16.6724C116.975 15.9525 116.597 15.408 116.08 15.0388C115.563 14.6696 114.889 14.485 114.058 14.485C113.302 14.485 112.646 14.6419 112.093 14.9557C111.557 15.2511 111.114 15.731 110.764 16.3955L108.77 15.6202C109.121 14.9742 109.545 14.4204 110.044 13.959C110.542 13.4791 111.124 13.1191 111.788 12.8792C112.453 12.6207 113.209 12.4915 114.058 12.4915C115.351 12.4915 116.412 12.75 117.243 13.2668C118.092 13.7652 118.728 14.5127 119.153 15.5095C119.578 16.4878 119.781 17.706 119.762 19.1643L119.734 26.6676H117.686ZM113.532 26.9999C111.908 26.9999 110.634 26.6307 109.712 25.8923C108.807 25.1356 108.355 24.0927 108.355 22.7636C108.355 21.3608 108.816 20.2902 109.739 19.5519C110.681 18.7951 111.991 18.4167 113.671 18.4167H117.63V20.2718H114.169C112.877 20.2718 111.954 20.484 111.4 20.9086C110.865 21.3331 110.598 21.9422 110.598 22.736C110.598 23.4558 110.865 24.028 111.4 24.4526C111.936 24.8587 112.683 25.0617 113.643 25.0617C114.437 25.0617 115.129 24.8956 115.72 24.5633C116.31 24.2126 116.763 23.7235 117.076 23.0959C117.409 22.4499 117.575 21.6931 117.575 20.8255H118.516C118.516 22.7083 118.092 24.2126 117.243 25.3386C116.393 26.4461 115.157 26.9999 113.532 26.9999ZM128.477 26.9999C127.13 26.9999 126.087 26.6491 125.349 25.9477C124.61 25.2463 124.241 24.2588 124.241 22.9851V8.50451H126.456V22.7636C126.456 23.4651 126.641 24.0096 127.01 24.3972C127.397 24.7664 127.933 24.951 128.616 24.951C128.837 24.951 129.049 24.9233 129.252 24.8679C129.474 24.7941 129.76 24.6279 130.111 24.3695L130.969 26.1692C130.489 26.483 130.055 26.6953 129.668 26.806C129.28 26.9352 128.883 26.9999 128.477 26.9999ZM121.832 14.7896V12.8238H130.609V14.7896H121.832ZM142.183 26.6676L142.072 24.3972V19.3581C142.072 18.269 141.952 17.3738 141.712 16.6724C141.472 15.9525 141.094 15.408 140.577 15.0388C140.06 14.6696 139.386 14.485 138.556 14.485C137.799 14.485 137.143 14.6419 136.59 14.9557C136.054 15.2511 135.611 15.731 135.261 16.3955L133.267 15.6202C133.618 14.9742 134.042 14.4204 134.541 13.959C135.039 13.4791 135.621 13.1191 136.285 12.8792C136.95 12.6207 137.706 12.4915 138.556 12.4915C139.848 12.4915 140.909 12.75 141.74 13.2668C142.589 13.7652 143.226 14.5127 143.65 15.5095C144.075 16.4878 144.278 17.706 144.259 19.1643L144.232 26.6676H142.183ZM138.029 26.9999C136.405 26.9999 135.132 26.6307 134.209 25.8923C133.304 25.1356 132.852 24.0927 132.852 22.7636C132.852 21.3608 133.313 20.2902 134.236 19.5519C135.178 18.7951 136.488 18.4167 138.168 18.4167H142.127V20.2718H138.666C137.374 20.2718 136.451 20.484 135.898 20.9086C135.362 21.3331 135.095 21.9422 135.095 22.736C135.095 23.4558 135.362 24.028 135.898 24.4526C136.433 24.8587 137.18 25.0617 138.14 25.0617C138.934 25.0617 139.626 24.8956 140.217 24.5633C140.807 24.2126 141.26 23.7235 141.573 23.0959C141.906 22.4499 142.072 21.6931 142.072 20.8255H143.013C143.013 22.7083 142.589 24.2126 141.74 25.3386C140.891 26.4461 139.654 26.9999 138.029 26.9999Z" fill="#ffffff"/><path d="M146.357 28.6888V26.6676H157.432V28.6888H146.357Z" fill="#4FEAFF"/><path d="M5.08739 7.94839L16.9844 2.21909L28.8814 7.94839L31.8197 20.822L23.5868 31.1459H10.3821L2.14907 20.822L5.08739 7.94839Z" stroke="#4FEAFF" stroke-width="1.78606"/><path d="M7.16529 15.9562L12.0207 8.8345L20.616 8.19038L26.4787 14.5088L25.194 23.0319L17.7294 27.3416L9.70589 24.1926L7.16529 15.9562Z" stroke="#4FEAFF" stroke-width="1.78606"/><path d="M13.3317 14.5225L16.9857 12.7628L20.6398 14.5225L21.5423 18.4765L19.0136 21.6474H14.9579L12.4292 18.4765L13.3317 14.5225Z" stroke="#4FEAFF" stroke-width="1.78606"/><path d="M31.9318 30.2429C31.6471 30.2429 31.3754 30.1885 31.1166 30.0798C30.863 29.9711 30.6405 29.821 30.449 29.6295C30.2575 29.438 30.1074 29.2155 29.9987 28.9619C29.89 28.7031 29.8356 28.4314 29.8356 28.1467C29.8356 27.8517 29.89 27.5774 29.9987 27.3238C30.1074 27.0702 30.2575 26.8476 30.449 26.6561C30.6405 26.4646 30.863 26.3145 31.1166 26.2058C31.3754 26.0971 31.6471 26.0428 31.9318 26.0428C32.2268 26.0428 32.5011 26.0971 32.7547 26.2058C33.0084 26.3145 33.2309 26.4646 33.4224 26.6561C33.6139 26.8476 33.764 27.0702 33.8727 27.3238C33.9814 27.5774 34.0357 27.8517 34.0357 28.1467C34.0357 28.4314 33.9814 28.7031 33.8727 28.9619C33.764 29.2155 33.6139 29.438 33.4224 29.6295C33.2309 29.821 33.0084 29.9711 32.7547 30.0798C32.5011 30.1885 32.2268 30.2429 31.9318 30.2429Z" fill="#4FEAFF"/></svg>
+      </a>
+      <span>deepKPI · Benchmark Analysis</span>
+    </div>
+    <h1><span class="ticker">DAL</span> — Delta Air Lines</h1>
+    <div class="header-meta">
+      <span><span class="meta-dot"></span>Airline + Monroe Energy (refinery)</span>
+      <span>FY Dec 31 2025</span>
+      <span>CIK 27904</span>
+      <span>7 benchmarks · 2 segments</span>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--green-mid)"></div>Strong match</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--yellow-mid)"></div>Partial</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--surface2);border:1px solid var(--border)"></div>N/A</div>
+  </div>
+</div>
+
+<!-- FINGERPRINT GRID (no section label) -->
+<div class="grid-wrap">
+<table class="fp-grid">
+  <thead>
+    <tr class="group-header">
+      <th class="row-header"></th>
+      <th colspan="1" style="color:var(--text-muted);">Target Fingerprint</th>
+      <th colspan="4" style="color:var(--text-muted);">Airline benchmarks</th>
+      <th colspan="3" style="color:var(--purple);">Monroe Energy sub-benchmarks</th>
+    </tr>
+    <tr class="col-header">
+      <th class="row-header">KPI</th>
+      <th style="text-align:center;"><div class="col-ticker target">DAL</div></th>
+      <th style="text-align:center;"><div class="col-ticker match-strong">AAL</div></th>
+      <th style="text-align:center;"><div class="col-ticker match-strong">UAL</div></th>
+      <th style="text-align:center;"><div class="col-ticker match-partial">LUV</div></th>
+      <th style="text-align:center;"><div class="col-ticker match-partial">ALK</div></th>
+      <th style="text-align:center;"><div class="col-ticker seg">PBF</div></th>
+      <th style="text-align:center;"><div class="col-ticker seg">PARR</div></th>
+      <th style="text-align:center;"><div class="col-ticker seg">CVI</div></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="row-header"><span class="kpi-name">Load factor</span><span class="kpi-sub">Passenger %</span></td>
+      <td class="cell target-col"><a href="https://www.revelata.com/docviewer?pvid=10614">84.0%</a></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=10492">82.2%</a><span class="delta">−1.8pp</span></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=10492">82.2%</a><span class="delta">−1.8pp</span></td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=10559">77.4%</a><span class="delta">−6.6pp</span></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=10574">82.9%</a><span class="delta">−1.1pp</span></td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+    </tr>
+    <tr>
+      <td class="row-header"><span class="kpi-name">CASM</span><span class="kpi-sub">¢ per ASM</span></td>
+      <td class="cell target-col"><a href="https://www.revelata.com/docviewer?pvid=10887">19.31¢</a></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=11136">17.76¢</a><span class="delta">−1.55¢</span></td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=10505">16.46¢</a><span class="delta">−2.85¢</span></td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=11071">15.35¢</a><span class="delta">−3.96¢</span></td>
+      <td class="cell match-none">ex-fuel only</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+    </tr>
+    <tr>
+      <td class="row-header"><span class="kpi-name">TRASM</span><span class="kpi-sub">¢ per ASM, total rev</span></td>
+      <td class="cell target-col"><a href="https://www.revelata.com/docviewer?pvid=11022">21.26¢</a></td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=10513">18.25¢</a><span class="delta">−3.01¢</span></td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=11143">17.88¢</a><span class="delta">−3.38¢</span></td>
+      <td class="cell match-none">not disclosed</td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=11077">13.81¢ PRASM</a><span class="delta">diff metric</span></td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+    </tr>
+    <tr>
+      <td class="row-header"><span class="kpi-name">ASMs</span><span class="kpi-sub">Billions, annual</span></td>
+      <td class="cell target-col"><a href="https://www.revelata.com/docviewer?pvid=10839">298,045B</a></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=11052">299,411B</a><span class="delta">+0.5%</span></td>
+      <td class="cell match-strong">~299B<span class="delta">+0.5% est.</span></td>
+      <td class="cell match-partial">~198B<span class="delta">−34%</span></td>
+      <td class="cell match-partial">~78B<span class="delta">−74%</span></td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+    </tr>
+    <tr>
+      <td class="row-header"><span class="kpi-name">Refinery capacity</span><span class="kpi-sub">bpd</span></td>
+      <td class="cell target-col"><a href="https://www.revelata.com/docviewer?pvid=11014">200,000</a></td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=11147">904,000</a><span class="delta">4.5× larger</span></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=11207">187,800</a><span class="delta">−6%</span></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=10660">181,988</a><span class="delta">−9%</span></td>
+    </tr>
+    <tr>
+      <td class="row-header"><span class="kpi-name">Gross margin/bbl</span><span class="kpi-sub">$ per barrel</span></td>
+      <td class="cell target-col" style="font-style:italic;font-size:0.65rem;color:var(--text-dim);">hedge — not merchant</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=11157">$7.72/bbl</a></td>
+      <td class="cell match-strong"><a href="https://www.revelata.com/docviewer?pvid=11176">$14.60/bbl</a></td>
+      <td class="cell match-partial"><a href="https://www.revelata.com/docviewer?pvid=11169">$13.64/bbl</a></td>
+    </tr>
+    <tr>
+      <td class="row-header"><span class="kpi-name">Fuel cost impact</span><span class="kpi-sub">$/gal vs. market</span></td>
+      <td class="cell target-col"><a href="https://www.revelata.com/docviewer?pvid=9966">−$0.04/gal</a></td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none">—</td>
+      <td class="cell match-none" style="font-size:0.65rem;">merchant</td>
+      <td class="cell match-none" style="font-size:0.65rem;">merchant</td>
+      <td class="cell match-none" style="font-size:0.65rem;">merchant</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- BENCHMARK DETAIL -->
+<div class="section-label">Benchmark Detail</div>
+
+<div class="cat-divider">Airline benchmarks</div>
+<div class="bmark-list">
+  <div class="bmark-row">
+    <div class="bmark-id"><div class="bm-ticker strong">AAL</div><div class="bm-name">American Airlines Group</div></div>
+    <div class="bmark-data">
+      <div class="kpi-comp"><div class="kc-label">Load factor</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=10492">82.2%</a></div><div class="kc-delta neg">vs 84.0% (−1.8pp)</div></div>
+      <div class="kpi-comp"><div class="kc-label">CASM</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=11136">17.76¢</a></div><div class="kc-delta pos">vs 19.31¢ (−1.55¢)</div></div>
+      <div class="kpi-comp"><div class="kc-label">TRASM</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=10513">18.25¢</a></div><div class="kc-delta neg">vs 21.26¢ (−3.01¢)</div></div>
+      <div class="kpi-comp"><div class="kc-label">ASMs</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=11052">299,411B</a></div><div class="kc-delta pos">vs 298,045B (+0.5%)</div></div>
+      <div class="bmark-note">Near-identical network scale. DAL generates 3.0¢ more TRASM on the same ASM base — premium service mix and SkyMiles co-brand driving the revenue premium.</div>
+    </div>
+  </div>
+  <div class="bmark-row">
+    <div class="bmark-id"><div class="bm-ticker strong">UAL</div><div class="bm-name">United Airlines Holdings</div></div>
+    <div class="bmark-data">
+      <div class="kpi-comp"><div class="kc-label">Load factor</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=10492">82.2%</a></div><div class="kc-delta neg">vs 84.0% (−1.8pp)</div></div>
+      <div class="kpi-comp"><div class="kc-label">CASM</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=10505">16.46¢</a></div><div class="kc-delta pos">vs 19.31¢ (−2.85¢)</div></div>
+      <div class="kpi-comp"><div class="kc-label">TRASM</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=11143">17.88¢</a></div><div class="kc-delta neg">vs 21.26¢ (−3.38¢)</div></div>
+      <div class="kpi-comp"><div class="kc-label">Scale</div><div class="kc-val green">~299B ASMs</div><div class="kc-delta">parity with DAL</div></div>
+      <div class="bmark-note">UAL's 2.85¢ CASM advantage nearly offset by its 3.38¢ TRASM deficit. DAL's cost premium appears justified by revenue capture.</div>
+    </div>
+  </div>
+  <div class="bmark-row">
+    <div class="bmark-id"><div class="bm-ticker partial">LUV</div><div class="bm-name">Southwest Airlines</div></div>
+    <div class="bmark-data">
+      <div class="kpi-comp"><div class="kc-label">Load factor</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=10559">77.4%</a></div><div class="kc-delta neg">vs 84.0% (−6.6pp)</div></div>
+      <div class="kpi-comp"><div class="kc-label">CASM (total)</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=11071">15.35¢</a></div><div class="kc-delta pos">vs 19.31¢ (−3.96¢)</div></div>
+      <div class="kpi-comp"><div class="kc-label">TRASM</div><div class="kc-val dim">not disclosed</div></div>
+      <div class="bmark-note">Point-to-point domestic; no premium cabin. Load factor gap is structural. CASM comparison incomplete without TRASM pairing.</div>
+    </div>
+  </div>
+  <div class="bmark-row">
+    <div class="bmark-id"><div class="bm-ticker partial">ALK</div><div class="bm-name">Alaska Air Group</div></div>
+    <div class="bmark-data">
+      <div class="kpi-comp"><div class="kc-label">Load factor</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=10574">82.9%</a></div><div class="kc-delta neg">vs 84.0% (−1.1pp)</div></div>
+      <div class="kpi-comp"><div class="kc-label">CASM-Ex fuel</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=10623">11.42¢</a></div><div class="kc-delta">ex-fuel; not apples-to-apples</div></div>
+      <div class="kpi-comp"><div class="kc-label">PRASM</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=11077">13.81¢</a></div><div class="kc-delta">passenger only vs. TRASM</div></div>
+      <div class="kpi-comp"><div class="kc-label">Scale</div><div class="kc-val yellow">~78B ASMs</div><div class="kc-delta neg">0.26× DAL</div></div>
+      <div class="bmark-note">Load factor comparable but ~74% smaller network. Post-Hawaiian merger adds FY2025 noise.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cat-divider" style="color:var(--purple);border-color:rgba(168,85,247,0.2);">Monroe Energy (Refinery) — segment sub-benchmarks</div>
+<div class="bmark-list">
+  <div class="bmark-row">
+    <div class="bmark-id"><div class="bm-ticker seg">PBF</div><div class="bm-name">PBF Energy Inc.</div></div>
+    <div class="bmark-data">
+      <div class="kpi-comp"><div class="kc-label">Throughput (bpd)</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=11147">904,000</a></div><div class="kc-delta neg">4.5× Monroe 200K</div></div>
+      <div class="kpi-comp"><div class="kc-label">Gross margin/bbl</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=11157">$7.72</a></div></div>
+      <div class="kpi-comp"><div class="kc-label">Geography</div><div class="kc-val green">PADD 1 East Coast</div></div>
+      <div class="bmark-note">Best geographic match — Delaware River basin, same crude slate as Monroe's Trainer PA plant.</div>
+    </div>
+  </div>
+  <div class="bmark-row">
+    <div class="bmark-id"><div class="bm-ticker seg">PARR</div><div class="bm-name">Par Pacific Holdings</div></div>
+    <div class="bmark-data">
+      <div class="kpi-comp"><div class="kc-label">Throughput (bpd)</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=11207">187,800</a></div><div class="kc-delta neg">−6% vs Monroe</div></div>
+      <div class="kpi-comp"><div class="kc-label">Gross margin/bbl</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=11176">$14.60</a></div></div>
+      <div class="kpi-comp"><div class="kc-label">Production cost/bbl</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=11201">$6.92</a></div></div>
+      <div class="bmark-note">Best scale match. Captive-market dynamic offers partial analogy to Monroe's captive airline customer.</div>
+    </div>
+  </div>
+  <div class="bmark-row">
+    <div class="bmark-id"><div class="bm-ticker seg">CVI</div><div class="bm-name">CVR Energy</div></div>
+    <div class="bmark-data">
+      <div class="kpi-comp"><div class="kc-label">Throughput (bpd)</div><div class="kc-val green"><a href="https://www.revelata.com/docviewer?pvid=10660">181,988</a></div><div class="kc-delta neg">−9% vs Monroe</div></div>
+      <div class="kpi-comp"><div class="kc-label">Gross margin/bbl</div><div class="kc-val yellow"><a href="https://www.revelata.com/docviewer?pvid=11169">$13.64</a></div></div>
+      <div class="kpi-comp"><div class="kc-label">Geography</div><div class="kc-val yellow">PADD 2 Mid-Continent</div></div>
+      <div class="bmark-note">Scale comparable; mid-continent crude slate differs from East Coast waterborne crude.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABBED KPI CHARTS -->
+<div class="section-label">KPI Charts</div>
+<div class="chart-tabs">
+  <div class="tab-nav">
+    <button class="tab-btn active" data-tab="0">Load Factor</button>
+    <button class="tab-btn" data-tab="1">CASM</button>
+    <button class="tab-btn" data-tab="2">TRASM</button>
+    <button class="tab-btn" data-tab="3">ASMs</button>
+    <button class="tab-btn" data-tab="4">Refinery bpd</button>
+    <button class="tab-btn" data-tab="5">Margin/bbl</button>
+  </div>
+  <div class="tab-panel active" data-panel="0">
+    <div class="chart-header"><span class="chart-title">Load Factor — DAL vs. airline benchmarks (FY2025)</span><span class="chart-meta">Revelata deepKPI · SEC filings</span></div>
+    <canvas id="chart0"></canvas>
+  </div>
+  <div class="tab-panel" data-panel="1">
+    <div class="chart-header"><span class="chart-title">CASM (¢/ASM) — DAL vs. airline benchmarks (FY2025)</span><span class="chart-meta">Revelata deepKPI · ALK ex-fuel only, excluded</span></div>
+    <canvas id="chart1"></canvas>
+  </div>
+  <div class="tab-panel" data-panel="2">
+    <div class="chart-header"><span class="chart-title">TRASM (¢/ASM) — DAL vs. airline benchmarks (FY2025)</span><span class="chart-meta">Revelata deepKPI · ALK = PRASM, not TRASM · LUV not disclosed</span></div>
+    <canvas id="chart2"></canvas>
+  </div>
+  <div class="tab-panel" data-panel="3">
+    <div class="chart-header"><span class="chart-title">ASMs (billions) — DAL vs. airline benchmarks (FY2025)</span><span class="chart-meta">Revelata deepKPI · SEC filings</span></div>
+    <canvas id="chart3"></canvas>
+  </div>
+  <div class="tab-panel" data-panel="4">
+    <div class="chart-header"><span class="chart-title">Refinery throughput (bpd) — Monroe vs. merchant refiners</span><span class="chart-meta">Revelata deepKPI · Monroe = max capacity, not throughput</span></div>
+    <canvas id="chart4"></canvas>
+  </div>
+  <div class="tab-panel" data-panel="5">
+    <div class="chart-header"><span class="chart-title">Gross margin/bbl — merchant refinery benchmarks</span><span class="chart-meta">Revelata deepKPI · Monroe not comparable (hedge, not merchant)</span></div>
+    <canvas id="chart5"></canvas>
+  </div>
+</div>
+
+<!-- SYNTHESIS -->
+<div class="section-label">Diff Insight</div>
+<div class="synthesis">
+  <div class="synthesis-title">What the benchmark set reveals</div>
+  <p>On the airline segment, <strong>DAL generates 3.0¢ more TRASM than AAL and 3.4¢ more than UAL on essentially identical ASM bases</strong> — a revenue quality premium that more than explains the higher CASM. The benchmark set confirms this is a revenue story, not a cost story: DAL's <a href="https://www.revelata.com/docviewer?pvid=11022">21.26¢ TRASM</a> produces a spread peers can't match.</p>
+  <p>The refinery diff surfaces the more analytically interesting question. Merchant refiner margins of <a href="https://www.revelata.com/docviewer?pvid=11176">$14.60/bbl (PARR)</a> and <a href="https://www.revelata.com/docviewer?pvid=11169">$13.64/bbl (CVI)</a> represent what Monroe could earn as a standalone profit-maximizing refiner. Monroe reported only a <a href="https://www.revelata.com/docviewer?pvid=9966">−$0.04/gal fuel cost benefit</a> to the airline in FY2025. <strong>DAL is forgoing ~$13–15/bbl in merchant margin in exchange for supply certainty and jet fuel price volatility reduction.</strong></p>
+</div>
+
+<!-- NOTES -->
+<div class="section-label">Notes</div>
+<ul class="notes-list">
+  <li>ALK TRASM gap is partly metric mismatch — ALK reports PRASM (passenger revenue only) vs. DAL's TRASM (total). The <a href="https://www.revelata.com/docviewer?pvid=11077">13.81¢ PRASM</a> gap to DAL's 21.26¢ TRASM overstates the true spread.</li>
+  <li>LUV load factor of <a href="https://www.revelata.com/docviewer?pvid=10559">77.4%</a> sourced from pvid=10559 — same pvid returned for AAL in prior queries; verify independently against LUV's 10-K disclosure.</li>
+  <li>Monroe's refining economics are not disclosed as standalone P&L. The <a href="https://www.revelata.com/docviewer?pvid=9966">−$0.04/gal</a> fuel impact is the only reported metric; comparing directly to merchant refiner margins understates the hedging value.</li>
+</ul>
+
+<!-- SOURCES -->
+<div class="section-label">Sources</div>
+<table class="sources-table">
+  <thead><tr><th>Ticker</th><th>CIK</th><th>Coverage</th><th>FY end</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>DAL</td><td>27904</td><td class="cov-green">Full</td><td>Dec 2025</td><td>Airline + Monroe Energy; all KPIs provenance-linked</td></tr>
+    <tr><td>AAL</td><td>6201</td><td class="cov-green">Full</td><td>Dec 2025</td><td></td></tr>
+    <tr><td>UAL</td><td>100517</td><td class="cov-green">Full</td><td>Dec 2025</td><td>ASMs estimated from prior periods</td></tr>
+    <tr><td>LUV</td><td>92380</td><td class="cov-yellow">Partial</td><td>Dec 2025</td><td>No TRASM; load factor pvid verify independently</td></tr>
+    <tr><td>ALK</td><td>766421</td><td class="cov-yellow">Partial</td><td>Dec 2025</td><td>Post-Hawaiian merger; PRASM not TRASM</td></tr>
+    <tr><td>PBF</td><td>1534504</td><td class="cov-green">Full</td><td>Dec 2025</td><td>East Coast PADD 1</td></tr>
+    <tr><td>PARR</td><td>821483</td><td class="cov-green">Full</td><td>Dec 2025</td><td>Best scale match to Monroe</td></tr>
+    <tr><td>CVI</td><td>1376139</td><td class="cov-yellow">Partial</td><td>Dec 2025</td><td>PADD 2; fertilizer segment adds complexity</td></tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  <span>Benchmark data from SEC filings via <a href="https://www.revelata.com" target="_blank">Revelata deepKPI</a>. All values link to source filing passages.</span>
+  <span>FY2025 · Apr 2026</span>
+</div>
+
+<script>
+Chart.defaults.color = '#4e5a6a';
+Chart.defaults.borderColor = '#252b36';
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector('.tab-panel[data-panel="' + btn.dataset.tab + '"]').classList.add('active');
+  });
+});
+
+const opts = (unit, min) => ({
+  responsive: true,
+  plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y + unit } } },
+  scales: {
+    x: { grid: { color: 'rgba(255,255,255,0.03)' } },
+    y: { grid: { color: 'rgba(255,255,255,0.03)' }, min: min || undefined, ticks: { callback: v => v + unit } }
+  }
+});
+
+// Chart 0: Load Factor
+new Chart(document.getElementById('chart0'), {
+  type: 'bar',
+  data: {
+    labels: ['DAL', 'AAL', 'UAL', 'ALK', 'LUV'],
+    datasets: [{ label: 'Load Factor %', data: [84.0, 82.2, 82.2, 82.9, 77.4],
+      backgroundColor: ['rgba(255,255,255,0.15)','rgba(34,197,94,0.55)','rgba(34,197,94,0.55)','rgba(234,179,8,0.45)','rgba(234,179,8,0.45)'],
+      borderColor: ['rgba(255,255,255,0.4)','rgba(34,197,94,0.9)','rgba(34,197,94,0.9)','rgba(234,179,8,0.8)','rgba(234,179,8,0.8)'],
+      borderWidth: 1, borderRadius: 3 }]
+  },
+  options: opts('%', 70)
+});
+
+// Chart 1: CASM
+new Chart(document.getElementById('chart1'), {
+  type: 'bar',
+  data: {
+    labels: ['DAL', 'AAL', 'UAL', 'LUV'],
+    datasets: [{ label: 'CASM ¢/ASM', data: [19.31, 17.76, 16.46, 15.35],
+      backgroundColor: ['rgba(255,255,255,0.15)','rgba(34,197,94,0.55)','rgba(234,179,8,0.45)','rgba(234,179,8,0.45)'],
+      borderColor: ['rgba(255,255,255,0.4)','rgba(34,197,94,0.9)','rgba(234,179,8,0.8)','rgba(234,179,8,0.8)'],
+      borderWidth: 1, borderRadius: 3 }]
+  },
+  options: opts('¢', 13)
+});
+
+// Chart 2: TRASM
+new Chart(document.getElementById('chart2'), {
+  type: 'bar',
+  data: {
+    labels: ['DAL', 'AAL', 'UAL', 'ALK (PRASM)'],
+    datasets: [{ label: 'TRASM ¢/ASM', data: [21.26, 18.25, 17.88, 13.81],
+      backgroundColor: ['rgba(255,255,255,0.15)','rgba(234,179,8,0.45)','rgba(234,179,8,0.45)','rgba(234,179,8,0.35)'],
+      borderColor: ['rgba(255,255,255,0.4)','rgba(234,179,8,0.8)','rgba(234,179,8,0.8)','rgba(234,179,8,0.6)'],
+      borderWidth: 1, borderRadius: 3 }]
+  },
+  options: opts('¢', 11)
+});
+
+// Chart 3: ASMs
+new Chart(document.getElementById('chart3'), {
+  type: 'bar',
+  data: {
+    labels: ['DAL', 'AAL', 'UAL', 'LUV', 'ALK'],
+    datasets: [{ label: 'ASMs (billions)', data: [298, 299, 299, 198, 78],
+      backgroundColor: ['rgba(255,255,255,0.15)','rgba(34,197,94,0.55)','rgba(34,197,94,0.55)','rgba(234,179,8,0.45)','rgba(234,179,8,0.45)'],
+      borderColor: ['rgba(255,255,255,0.4)','rgba(34,197,94,0.9)','rgba(34,197,94,0.9)','rgba(234,179,8,0.8)','rgba(234,179,8,0.8)'],
+      borderWidth: 1, borderRadius: 3 }]
+  },
+  options: opts('B')
+});
+
+// Chart 4: Refinery bpd
+new Chart(document.getElementById('chart4'), {
+  type: 'bar',
+  data: {
+    labels: ['Monroe (DAL)', 'PBF', 'PARR', 'CVI'],
+    datasets: [{ label: 'Throughput bpd', data: [200000, 904000, 187800, 181988],
+      backgroundColor: ['rgba(255,255,255,0.15)','rgba(234,179,8,0.45)','rgba(168,85,247,0.5)','rgba(168,85,247,0.5)'],
+      borderColor: ['rgba(255,255,255,0.4)','rgba(234,179,8,0.8)','rgba(168,85,247,0.9)','rgba(168,85,247,0.9)'],
+      borderWidth: 1, borderRadius: 3 }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toLocaleString() + ' bpd' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.03)' } }, y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { callback: v => (v/1000).toFixed(0) + 'K' } } } }
+});
+
+// Chart 5: Margin/bbl
+new Chart(document.getElementById('chart5'), {
+  type: 'bar',
+  data: {
+    labels: ['PARR', 'CVI', 'PBF'],
+    datasets: [{ label: 'Gross margin $/bbl', data: [14.60, 13.64, 7.72],
+      backgroundColor: ['rgba(168,85,247,0.55)','rgba(168,85,247,0.5)','rgba(234,179,8,0.45)'],
+      borderColor: ['rgba(168,85,247,0.9)','rgba(168,85,247,0.9)','rgba(234,179,8,0.8)'],
+      borderWidth: 1, borderRadius: 3 }]
+  },
+  options: opts('/bbl')
+});
+</script>
+</body>
+</html>

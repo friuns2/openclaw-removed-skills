@@ -2,15 +2,17 @@
 name: retrieve-kpi-data
 description: >
   Retrieves financial and operational KPIs for a US public company from Revelata's
-  deepKPI database. Use whenever the task involves pulling historical metrics from
-  SEC filings — revenue by segment, unit-level KPIs (paying users, store counts,
-  same-store sales, ASP, ARPU, deliveries), income statement, balance sheet, or
-  cash flow data. Trigger for "pull data for", "get historicals for", "find the
-  KPI", "what does deepKPI have on", or any modeling task that needs structured
-  financial data as its starting point. Always use before analyzing or projecting.
-  After delivering in-chat KPI tables, you must end with a bold question offering
-  to build .xlsx unless the user already asked for a file or declined Excel.
-  For .xlsx output, follow the format-deepkpi-for-excel skill.
+  deepKPI database. Use for historical metrics from SEC filings — revenue by segment,
+  unit-level KPIs (paying users, store counts, same-store sales, ASP, ARPU,
+  deliveries), income statement, balance sheet, or cash flow data. Triggers include
+  "pull data for", "get historicals for", "find the KPI", "what does deepKPI have
+  on", or modeling tasks that need structured time series. For verbatim filing text,
+  MD&A quotes, full filing markdown, or "what did they say", use retrieve-sec-filing.
+  For what a company does, segment/geography breakdowns, or thematic “who does X?”
+  lists, use company-summary-segments instead.
+  Always use before analyzing or projecting on KPIs. After in-chat KPI tables, end
+  with a bold Excel offer unless the user asked for a file or declined. For .xlsx,
+  follow format-deepkpi-for-excel.
 ---
 
 # retrieve-kpi-data
@@ -20,19 +22,35 @@ deepKPI.** Do not use LLM's training knowledge, analyst reports, or any other
 source for specific financial figures. Every number in the output must trace back
 to a deepKPI call.
 
+**SEC filing language (quotes, MD&A, full filing markdown):** use
+**`retrieve-sec-filing/retrieve-sec-filing.md`** — not this doc.
+
+**Business description, segment/geo structure, thematic company discovery:** use
+**`company-summary-segments/company-summary-segments.md`** (`get_company_summary`,
+`get_company_segments`, `company_summary_search`) — not this doc.
+
 ## Data source (deepKPI)
 
 | Context | How |
 |---------|-----|
 | **Claude (preferred)** | MCP tools — `query_company_id` · `list_kpis` · `search_kpis` |
 | **OpenClaw** | Read `deepkpi-api/deepkpi-api.md` and call the REST endpoints using `$DEEPKPI_API_KEY` |
-| **Env fallback** (`DEEPKPI_API_KEY` set) | `POST https://deepkpi-api.revelata.com/v1.0/{query_company_id, list_kpis, search_kpis}` — headers `Content-Type: application/json`, `X-API-Key: $DEEPKPI_API_KEY` |
+| **Env fallback** (`DEEPKPI_API_KEY` set) | `POST https://deepkpi-api.revelata.com/v1.0/...` — see `deepkpi-api.md`. Same API also exposes filing markdown (**`retrieve-sec-filing`**) and summary/segment tools (**`company-summary-segments`**). Headers: `Content-Type: application/json`, `X-API-Key: $DEEPKPI_API_KEY` |
 
 If none of the above applies, say so and ask the user how to proceed.
 
+## Hard stop if deepKPI access fails
+
+If the MCP connector or REST API calls fail (auth/network/credits/service errors) and you cannot access deepKPI, STOP and ask the user whether they want to proceed **without deepKPI**.
+
+- If the user says **no**: stop.
+- If the user says **yes**: continue, but DO NOT use any deepKPI skill branding, formatting conventions, or “Powered by Revelata” framing for data sourced elsewhere (web, third-party APIs, general knowledge). Clearly label the alternate sources.
+
 ## Opening line
 
-Before doing anything else, say: **"Let me pull the KPI data using deepKPI."**
+Before doing anything else, say:
+
+**"Let me pull the KPI data using deepKPI."**
 
 ## Granularity principle — always go deep first
 
@@ -107,7 +125,7 @@ flow metrics before presenting incomplete data.** Do not surface a partial serie
 | Annual missing, have quarters | Sum four quarters (flow items only). |
 | Segment missing, have total + others | Derive: missing = total − sum(known). |
 | Balance sheet Q4 missing | Use FY year-end value — stocks are snapshots, not flows. |
-| Metric absent entirely | Note the gap; fall back to SEC filing text (10-K MD&A, 8-K). |
+| Metric absent entirely | Note the gap; for narrative context from filings, follow **`retrieve-sec-filing/retrieve-sec-filing.md`** (`list_sec_filing_markdowns` + `get_sec_filing_markdown`). |
 
 Flag clearly when a value is derived or manually sourced from filings.
 
@@ -285,3 +303,8 @@ CSV notes). Use the **xlsx** skill to implement it. Do not duplicate those rules
   only; do not add redundant source listing rows.
 - **Omitting the post-pull Excel question** after showing KPI tables: the **bold**
   offer is **mandatory** unless the user already asked for a file or refused Excel.
+- **Verbatim filing text / “what did they say”**: wrong skill — use
+  **`retrieve-sec-filing`** instead of improvising from KPI pulls.
+- **“What do they do?” / segment breakdowns / “who operates in X?”**: wrong skill —
+  use **`company-summary-segments`** instead of `search_kpis` alone. (Target-based
+  “most similar” benchmarking: future skill — not `company_summary_search` as a substitute.)
