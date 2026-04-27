@@ -3,11 +3,16 @@
   "slug": "surveybot",
   "displayName": "Surveybot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168312317,
-    "commit": "https://github.com/openclaw/skills/commit/b112fbe4dc2ded110446fedc964cd2a4dbcdab10"
+    "version": "1.0.3",
+    "publishedAt": 1776862354469,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168312317,
+      "commit": "https://github.com/openclaw/skills/commit/b112fbe4dc2ded110446fedc964cd2a4dbcdab10"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774602239862,
