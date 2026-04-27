@@ -3,11 +3,16 @@
   "slug": "zerossl",
   "displayName": "Zerossl",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168963879,
-    "commit": "https://github.com/openclaw/skills/commit/f24355f185286fde9ca57c3effef22825df3dbbc"
+    "version": "1.0.3",
+    "publishedAt": 1776863592218,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168963879,
+      "commit": "https://github.com/openclaw/skills/commit/f24355f185286fde9ca57c3effef22825df3dbbc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774739095822,
