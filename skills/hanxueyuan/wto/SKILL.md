@@ -1,38 +1,45 @@
 ---
-name: wto
-description: "Information assistant for WTO 世界贸易组织. Get mission info, latest reports, member states, and organizational resources."
-metadata:
-  { "openclaw": { "emoji": "🏛️", "version": "0.1.0", "author": "hanxueyuan", "tags": ["organization","institution","info"] } }
+summary: "WTO——全球贸易规则制定者、164 个成员国、贸易争端的仲裁者"
+read_when:
+  - 查询WTO · 世界贸易组织相关信息
+  - 了解相关行业发展
 ---
 
-# 🏛️ WTO 世界贸易组织 — Organization Info Assistant
+# WTO · 世界贸易组织
 
-Get comprehensive information about WTO 世界贸易组织.
+---
 
-## About
+## 发展历程
 
-- **Organization**: WTO 世界贸易组织
-- **Focus**: International trade rules
-- **Official Website**: https://www.wto.org
+| 时期 | 关键事件 |
+|:----:|--------|
+| **1995 年** | 关贸总协定（GATT）升级为 WTO |
+| **2001 年** | 多哈回合谈判启动 |
+| **2001 年** | 中国加入 WTO——全球贸易格局改变 |
+| **2019 年** | 上诉机构停摆——危机 |
 
-## What This Skill Does
+---
 
-1. **Mission & Overview** — What this organization does and why it matters
-2. **Latest Reports** — Recent publications, data releases, policy papers
-3. **News & Events** — Upcoming meetings, conferences, announcements
-4. **Member Info** — Member states/countries, leadership, structure
-5. **Resources** — Key databases, tools, and publications
+## 核心特点
 
-## Example Queries
+贸易规则制定 + 贸易争端解决 + 贸易政策审查
 
-- "What does WTO do?"
-- "Latest WTO report"
-- "Who leads WTO?"
-- "WTO member countries"
+## 核心优势
 
-## How It Works
+全球唯一处理国家间贸易规则的国际组织
 
-Uses web search to fetch information from official organizational websites and news sources.
+---
 
-## Author
-Created by hanxueyuan | License: MIT
+## 关键数据
+
+| 指标 | 数值 |
+|------|------|
+| 成员国 | 164 个 |
+| 总部 | 日内瓦 |
+| 总干事 | Ngozi Okonjo-Iweala |
+
+---
+
+## 值得了解
+
+WTO 的争端解决机制被称为'国际贸易的最高法院'

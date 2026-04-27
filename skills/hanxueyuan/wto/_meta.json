@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "wto",
-  "displayName": "wto",
+  "displayName": "Wto",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774853947588,
-    "commit": "https://github.com/openclaw/skills/commit/923b68479bac74d35e4e177f743f24e0208ab35b"
+    "version": "0.1.3",
+    "publishedAt": 1776533982633,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774853947588,
+      "commit": "https://github.com/openclaw/skills/commit/923b68479bac74d35e4e177f743f24e0208ab35b"
+    }
+  ]
 }
