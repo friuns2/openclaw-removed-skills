@@ -3,11 +3,16 @@
   "slug": "diabatix-coldstream",
   "displayName": "Diabatix Coldstream",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168286226,
-    "commit": "https://github.com/openclaw/skills/commit/b622a2f4486e8ddc523a3552f0cb5d37ce266172"
+    "version": "1.0.3",
+    "publishedAt": 1776865606829,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168286226,
+      "commit": "https://github.com/openclaw/skills/commit/b622a2f4486e8ddc523a3552f0cb5d37ce266172"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774598632397,
