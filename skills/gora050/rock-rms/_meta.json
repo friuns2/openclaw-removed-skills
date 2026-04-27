@@ -3,11 +3,16 @@
   "slug": "rock-rms",
   "displayName": "Rock Rms",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169225753,
-    "commit": "https://github.com/openclaw/skills/commit/cec5dc452d049d4395c0d56f70529f70fec73432"
+    "version": "1.0.3",
+    "publishedAt": 1776864041809,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169225753,
+      "commit": "https://github.com/openclaw/skills/commit/cec5dc452d049d4395c0d56f70529f70fec73432"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774782225661,
