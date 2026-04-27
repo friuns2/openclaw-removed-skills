@@ -3,11 +3,16 @@
   "slug": "campaign-cleaner",
   "displayName": "Campaign Cleaner",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168760840,
-    "commit": "https://github.com/openclaw/skills/commit/8635627da3043ba18a81b188d9b706080e464a04"
+    "version": "1.0.3",
+    "publishedAt": 1776863144601,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168760840,
+      "commit": "https://github.com/openclaw/skills/commit/8635627da3043ba18a81b188d9b706080e464a04"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774688643407,
