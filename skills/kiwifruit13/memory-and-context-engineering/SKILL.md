@@ -1,6 +1,6 @@
 ---
 name: agent-memory
-description: 当智能体涉及"memory"与"Context"的操作时触发skill；智能体底层记忆基础设施，完整实现Context Engineering五大核心能力：选择（噪声过滤+相关性筛选）、压缩（因果结构提取+工具结果压缩）、检索（结果重排序+多样性保证）、状态（任务进度追踪+目标对齐）、记忆（冲突检测+跨会话关联）；认知模型层支持认知模型构建、因果链提取、知识缺口识别、检索时机决策、质量评估、状态一致性校验、状态推理、跨会话关联、遗忘机制；作为元技能强制常驻运行
+description: 用户与模型之间的任何交互行为都可触发；提供Context Engineering五大核心能力（选择、压缩、检索、状态、记忆）及认知模型层支持；作为元技能强制常驻运行
 always: true
 dependency:
   python:
@@ -28,10 +28,74 @@ author: kiwifruit
 - 触发条件：**元技能，强制常驻运行**（`always: true`）
 - 核心能力：
   - **选择**：噪声过滤 + 相关性筛选
-  - **压缩**：因果结构提取 + 工具结果压缩
+  - **压缩**：链结构提取（因果/逻辑/操作/叙事/时间）+ 工具结果压缩
   - **检索**：结果重排序 + 多样性保证
   - **状态**：任务进度追踪 + 目标对齐
   - **记忆**：冲突检测 + 跨会话关联
+
+### 架构概述
+
+本 Skill 采用**四层架构**，以认知模型层为核心，**ContextOrchestrator 为统一入口和总控中心**：
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  顶层：总控层（统一入口）                         │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │           ContextOrchestrator（总控中心）                   │  │
+│  │  • Token预算管理  • 检索决策  • 多源协调  • 结果压缩        │  │
+│  │  • 认知模型构建  • 全局调度  • 可观测性管理                │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  中间层：协调层                                 │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │           认知模型层（核心业务逻辑）                       │  │
+│  │  • CognitiveModelBuilder  • CausalChainExtractor          │  │
+│  │  • KnowledgeGapIdentifier • RetrievalDecisionEngine       │  │
+│  │  • ...（其他5个组件）                                    │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │        双轨架构（认知模型的具体实现层）                    │  │
+│  │  • 轨道A：语义桶提炼  • 轨道B：链提取  • 融合层          │  │
+│  │  • 5种链类型：因果/逻辑/操作/叙事/时间                    │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  基础层：存储层                                 │
+│  • ShortTermMemory  • LongTermMemory  • MemoryIndexer          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  底层：基础设施层                               │
+│  • type_defs  • encryption  • privacy  • monitoring            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**ContextOrchestrator 是系统的总控中心和统一入口**（顶层），负责：
+- Token 预算管理
+- 检索决策
+- 多源协调（认知模型、双轨、存储层）
+- 结果压缩
+- 全局调度
+
+**认知模型层是协调层的核心**（中间层），负责：
+- 认知模型构建
+- 链提取（5种）
+- 知识缺口识别
+- 检索决策
+- 状态推理
+
+**双轨架构是协调层的子层**（中间层），为认知模型层提供技术实现：
+- 轨道A：语义桶提炼
+- 轨道B：链提取（因果/逻辑/操作/叙事/时间）
+- 融合层：关联、验证、摘要
+
+详见：[架构总览](references/architecture_overview.md)、[双轨架构总览](references/dual_track_architecture_overview.md)
 
 ## 前置准备
 
@@ -63,101 +127,76 @@ if redis_adapter.is_available():
     print("Redis 连接成功")
 ```
 
-## 操作步骤
+## 核心流程
 
-### Step 1: 隐私配置（必需）
-
-在使用记忆功能前，必须初始化隐私管理器并获取用户同意。
+### 1. 隐私配置（必需）
 
 ```python
 from scripts import PrivacyManager, ConsentStatus
 
 privacy_manager = PrivacyManager(user_id="user_123")
-if privacy_manager.get_consent_status("memory_storage") == ConsentStatus.NOT_REQUESTED:
-    privacy_manager.request_consent(
+
+# 检查隐私同意状态
+status = privacy_manager.get_consent_status("memory_storage")
+
+if status != ConsentStatus.GRANTED:
+    # 创建同意请求（返回 PENDING 状态的记录）
+    record = privacy_manager.request_consent(
         consent_type="memory_storage",
-        description="是否允许存储交互记忆以提供个性化服务？"
+        description="是否允许存储交互记忆？"
     )
+
+    # 智能体负责向用户呈现描述信息并获取同意
+    # 例如：向用户展示 "是否允许存储交互记忆？"
+    # 如果用户同意，调用以下方法授予同意：
+    # privacy_manager.grant_consent(record.consent_id)
+
+    # 注意：request_consent() 不会弹窗，智能体需要负责与用户交互
 ```
 
-### Step 2: 感知与短期记忆
-
-感知记忆用于实时对话存储，短期记忆用于语义分类存储。
+### 2. 初始化核心模块
 
 ```python
-from scripts import PerceptionMemoryStore, ShortTermMemoryManager, SemanticBucketType
+from scripts import (
+    PerceptionMemoryStore,
+    ShortTermMemoryManager,
+    LongTermMemoryManager,
+    ContextReconstructor,
+)
 
-# 感知记忆
 perception = PerceptionMemoryStore()
+short_term = ShortTermMemoryManager()
+long_term = LongTermMemoryManager()
+reconstructor = ContextReconstructor()
+```
+
+### 3. 处理对话
+
+```python
+# 创建会话
 session_id = perception.create_session()
+perception.store_conversation(session_id, user_message, system_response)
 
 # 短期记忆
-short_term = ShortTermMemoryManager()
-item_id = short_term.store_with_semantics(
-    content="用户想要实现登录功能",
-    bucket_type=SemanticBucketType.USER_INTENT,
-    topic_label="用户登录",
-    relevance_score=0.85,
+from scripts import SemanticBucketType
+short_term.store_with_semantics(
+    user_message,
+    SemanticBucketType.USER_INTENT,
+    "话题",
+    0.8
 )
 ```
 
-### Step 3: 长期记忆
-
-长期记忆用于持久化用户画像和程序性知识。
+### 4. 上下文重构
 
 ```python
-from scripts import LongTermMemoryManager
-
-long_term = LongTermMemoryManager()
-long_term.update_user_profile(profile_data)
-long_term.apply_heat_policy()
-```
-
-### Step 4: 上下文重构与洞察
-
-从记忆中重构上下文，并生成洞察。
-
-```python
-from scripts import ContextReconstructor, InsightModule
-
-reconstructor = ContextReconstructor()
-insight_module = InsightModule()
-
 context = reconstructor.reconstruct(situation, long_term.get_all_memories())
-insights = insight_module.process(context, long_term.get_all_memories())
 ```
 
-### Step 5: 全局状态捕捉（LangGraph集成）
-
-捕捉和同步全局状态，支持 LangGraph 集成。
+### 5. 使用统一入口（推荐）
 
 ```python
-from scripts import GlobalStateCapture, StateEventType
-
-capture = GlobalStateCapture(
-    user_id="user_123",
-    storage_path="./state_storage",
-)
-
-# 从 LangGraph 同步
-checkpoint_id = capture.sync_from_langgraph(
-    state={"phase": "executing", "current_task": "create_memory"},
-    node_name="executor",
-)
-
-# 事件订阅
-subscription_id = capture.subscribe(
-    event_types=[StateEventType.PHASE_CHANGE, StateEventType.TASK_SWITCH],
-    callback=on_phase_change,
-)
-```
-
-### Step 6: Context Orchestrator（总控层）
-
-使用上下文编排器统一管理记忆和上下文准备。
-
-```python
-from scripts import create_context_orchestrator, SemanticBucketType
+from scripts import create_context_orchestrator
 
 orchestrator = create_context_orchestrator(
     user_id="user_123",
@@ -165,69 +204,79 @@ orchestrator = create_context_orchestrator(
     max_context_tokens=32000,
 )
 
-# 存储记忆
-orchestrator.store_memory(
-    content="用户想要实现登录功能",
-    bucket_type=SemanticBucketType.USER_INTENT,
-    topic_label="用户登录",
-)
-
 # 准备上下文
-context = orchestrator.prepare_context(
-    user_input="帮我分析这段代码的性能问题",
-    system_instruction="你是一个代码分析专家",
-    retrieval_results=["性能优化最佳实践"],
-    tool_results=["代码分析结果..."],
+prepared = orchestrator.prepare_context(
+    user_input="用户输入",
+    system_instruction="系统指令",
 )
-
-# 结束会话
-final_stats = orchestrator.end_session()
 ```
 
-### 更多功能模块
+> **重要说明**：`ContextOrchestrator` 是系统的**总控中心和统一入口**（顶层），负责协调所有层级的执行。推荐始终使用 `ContextOrchestrator` 而非直接调用内部模块。
 
-以下功能模块提供高级能力，详细使用示例请参阅 [references/usage_guide.md](references/usage_guide.md)：
+## 高级功能
 
-- **认知模型构建**：构建任务认知模型
-- **因果链提取**：提取因果关系
-- **知识缺口识别**：识别知识缺口
-- **检索决策与评估**：决定是否检索
-- **结果压缩**：压缩长文本
-- **任务进度追踪**：追踪任务进度
-- **链式推理增强**：增强推理反思能力
+### 上下文压缩
 
-## 资源索引
+本系统提供完整的上下文压缩能力，支持 5 种压缩策略和自动压缩。
 
-### 核心参考文档
+```python
+# 启用上下文压缩
+orchestrator.enable_context_compression(
+    enable_auto_compress=True,
+    auto_compress_threshold=0.8,
+    default_strategy="priority_based",
+)
 
-| 文档 | 用途 | 何时读取 |
-|------|------|----------|
-| [architecture_overview.md](references/architecture_overview.md) | 架构总览 | 需要全局架构视角 |
-| [architecture_execution_model.md](references/architecture_execution_model.md) | 执行模型说明 | 理解 Skill 运行方式和执行模型 |
-| [module_index.md](references/module_index.md) | 模块索引 | 查看所有模块和分类 |
-| [usage_guide.md](references/usage_guide.md) | 使用指南 | 查看详细使用示例 |
-| [api_enums.md](references/api_enums.md) | 枚举参考 | 查阅枚举类型定义 |
-| [api_class_reference.md](references/api_class_reference.md) | API 类参考 | 查看所有导出类名和职责 |
+# 手动压缩
+compressed_blocks = orchestrator.compress_context(
+    blocks=blocks,
+    compression_ratio=0.7,
+    strategy="priority_based"
+)
+```
 
-### 专题参考文档
+详细说明：[上下文压缩 API](references/api_reference.md#上下文压缩-api)、[压缩规则](references/context_compaction_rules.md)
 
-| 文档 | 主题 | 何时读取 |
-|------|------|----------|
-| [memory_types.md](references/memory_types.md) | 记忆结构 | 深入理解记忆结构 |
-| [chain_reasoning_guide.md](references/chain_reasoning_guide.md) | 链式推理 | 链式推理增强集成 |
-| [encryption_guide.md](references/encryption_guide.md) | 数据加密 | 了解数据加密机制 |
-| [privacy_guide.md](references/privacy_guide.md) | 隐私配置 | 隐私配置和合规要求 |
-| [insight_design.md](references/insight_design.md) | 洞察生成 | 洞察生成机制设计 |
-| [activation_mechanism.md](references/activation_mechanism.md) | 记忆激活 | 记忆激活机制 |
+### 质量评估与监控
 
-### 集成参考文档
+本系统提供完整的 metadata 质量评估、自定义类型生命周期管理和使用监控能力。
 
-| 文档 | 主题 | 何时读取 |
-|------|------|----------|
-| [agent_loops_integration.md](references/agent_loops_integration.md) | 智能体循环集成 | 与 Agent Loop 集成 |
-| [agent_loops_advanced.md](references/agent_loops_advanced.md) | Agent Loop 架构演进 | 深入理解架构演进 |
-| [index_sync_guide.md](references/index_sync_guide.md) | 索引同步 | 索引同步机制 |
-| [short_term_insight_guide.md](references/short_term_insight_guide.md) | 短期记忆洞察 | 短期记忆洞察分析 |
+```python
+# 启用质量评估
+orchestrator.enable_quality_assessment(
+    storage_path="usage_stats.json",
+    enable_monitoring=True,
+)
+
+# 评估 metadata 质量
+assessment = orchestrator.assess_metadata_quality(metadata, ContextSource.CUSTOM)
+print(f"质量评分: {assessment.score}")
+```
+
+详细说明：[质量评估与监控 API](references/api_reference.md#质量评估与监控-api)
+
+### 上下文类型扩展
+
+本系统支持通过 **混合方案** 处理已知和未知类型的上下文信息：
+- **已知类型**：使用标准来源 + `subtype` 字段
+- **未知类型**：使用 `CUSTOM` 来源 + `custom_type` 字段
+
+```python
+# 注册自定义类型
+orchestrator.register_custom_type(
+    custom_type="workflow_step",
+    priority=ContextPriority.HIGH,
+    required_fields=["step_id", "status"]
+)
+```
+
+详细说明：[上下文类型扩展](references/architecture_overview.md#十七上下文类型扩展混合方案)
+
+### 错误处理与纠正机制
+
+本系统内置错误处理和纠正机制，支持 Agent 工具调用的可靠性规范。
+
+详细说明：[工具调用可靠性规则](references/agent_tools_use_rules.md)
 
 ## 注意事项
 
@@ -239,58 +288,7 @@ final_stats = orchestrator.end_session()
 6. **降级策略**：模块故障时自动降级，保证核心流程可用
 7. **统一入口**：推荐使用 `ContextOrchestrator` 作为统一入口，避免直接调用内部模块
 8. **Skill 定位**：本 Skill 是能力扩展包，由智能体动态加载，非独立应用
-
-## 快速开始
-
-```python
-from scripts import (
-    PerceptionMemoryStore,
-    ShortTermMemoryManager,
-    LongTermMemoryManager,
-    ContextReconstructor,
-    SemanticBucketType,
-    PrivacyManager,
-    ConsentStatus,
-)
-
-# 1. 隐私配置
-privacy_manager = PrivacyManager(user_id="user_123")
-if privacy_manager.get_consent_status("memory_storage") != ConsentStatus.GRANTED:
-    privacy_manager.request_consent(
-        consent_type="memory_storage",
-        description="是否允许存储交互记忆？"
-    )
-
-# 2. 初始化核心模块
-perception = PerceptionMemoryStore()
-short_term = ShortTermMemoryManager()
-long_term = LongTermMemoryManager()
-reconstructor = ContextReconstructor()
-
-# 3. 处理对话
-session_id = perception.create_session()
-perception.store_conversation(session_id, user_message, system_response)
-
-# 4. 短期记忆
-short_term.store_with_semantics(
-    user_message,
-    SemanticBucketType.USER_INTENT,
-    "话题",
-    0.8
-)
-
-# 5. 上下文重构
-context = reconstructor.reconstruct(situation, long_term.get_all_memories())
-
-# 6. 推荐使用统一入口（可选）
-from scripts import create_context_orchestrator
-
-orchestrator = create_context_orchestrator(
-    user_id="user_123",
-    session_id="session_456",
-    max_context_tokens=32000,
-)
-```
+9. **隐私同意流程**：`request_consent()` 不会弹窗，智能体需要负责向用户呈现描述信息并调用 `grant_consent()` 授予同意
 
 ## 常见问题
 
@@ -321,3 +319,103 @@ orchestrator = create_context_orchestrator(
 **A**: 本 Skill 是智能体的能力扩展包，由智能体动态加载和执行。不需要独立启动服务器或监听端口。所有交互通过智能体与用户的对话完成。
 
 详见 [architecture_execution_model.md](references/architecture_execution_model.md)。
+
+## 资源索引
+
+### 参考文档
+
+| 文档 | 用途 | 何时读取 |
+|------|------|----------|
+| **核心参考** | | |
+| [module_index.md](references/module_index.md) | 模块索引 | 查找特定模块和功能（67 个模块完整索引） |
+| [usage_guide.md](references/usage_guide.md) | 使用指南 | 学习各模块的详细使用方法 |
+| [api_reference.md](references/api_reference.md) | API 参考 | 查询所有公开 API 的详细文档 |
+| [best_practices.md](references/best_practices.md) | 最佳实践 | 学习架构设计、性能优化、安全性等最佳实践 |
+| [troubleshooting.md](references/troubleshooting.md) | 故障排查 | 解决常见问题和错误 |
+| **架构与设计** | | |
+| [architecture_overview.md](references/architecture_overview.md) | 架构概览 | 理解整体架构设计理念 |
+| [architecture_execution_model.md](references/architecture_execution_model.md) | 执行模型 | 了解 Skill 的执行模型和工作流程 |
+| [dual_track_architecture_overview.md](references/dual_track_architecture_overview.md) | 双轨架构总览 | 理解语义桶与链提取的双轨并行架构 |
+| [dual_track_module_design.md](references/dual_track_module_design.md) | 双轨模块设计 | 查看双轨架构的数据结构、接口定义、类图和关键算法 |
+| [dual_track_implementation_guide.md](references/dual_track_implementation_guide.md) | 双轨实施指南 | 按步骤实施双轨架构的完整指南 |
+| **功能参考** | | |
+| [context_compaction_rules.md](references/context_compaction_rules.md) | 上下文压缩规则 | 学习压缩规则、错误记忆机制、最佳实践 |
+| [chain_aware_compression_stage1.md](references/chain_aware_compression_stage1.md) | 链感知压缩（阶段1） | 学习链元数据增强、链感知压缩策略 |
+| [agent_tools_use_rules.md](references/agent_tools_use_rules.md) | 工具调用规范 | 集成外部工具时遵循的规范 |
+| **Agent 集成** | | |
+| [agent_loops_integration.md](references/agent_loops_integration.md) | Agent 循环集成 | 学习如何将记忆系统集成到 Agent 循环中 |
+
+### 核心模块
+
+本系统包含 **67 个脚本模块**，按四层架构分类为总控层、协调层、存储层、基础设施层。
+
+| 模块 | 路径 | 功能 | 层级 |
+|------|------|------|------|
+| **总控层** | | | |
+| ContextOrchestrator | `scripts/context_orchestrator.py` | 上下文编排器（统一入口、总控中心） | 总控层 |
+| TokenBudgetManager | `scripts/token_budget.py` | Token 预算管理 | 总控层 |
+| **协调层：认知模型层** | | | |
+| CognitiveModelBuilder | `scripts/cognitive_model_builder.py` | 认知模型构建器 | 协调层 |
+| CausalChainExtractor | `scripts/causal_chain_extractor.py` | 因果链提取器 | 协调层 |
+| KnowledgeGapIdentifier | `scripts/knowledge_gap_identifier.py` | 知识缺口识别器 | 协调层 |
+| RetrievalDecisionEngine | `scripts/retrieval_decision_engine.py` | 检索决策引擎 | 协调层 |
+| **协调层：双轨架构** | | | |
+| BaseExtractedChain | `scripts/chains/base_chain.py` | 链基类 | 协调层 |
+| ExtractedCausalChain | `scripts/chains/causal_chain.py` | 因果链 | 协调层 |
+| ExtractedLogicChain | `scripts/chains/logic_chain.py` | 逻辑链 | 协调层 |
+| ExtractedOperationChain | `scripts/chains/operation_chain.py` | 操作链 | 协调层 |
+| ExtractedNarrativeChain | `scripts/chains/narrative_chain.py` | 叙事链 | 协调层 |
+| ExtractedTimeChain | `scripts/chains/time_chain.py` | 时间链 | 协调层 |
+| ChainBuffer | `scripts/chains/chain_buffer.py` | 链缓冲区 | 协调层 |
+| TopicCluster | `scripts/buckets/topic_cluster.py` | 话题簇 | 协调层 |
+| BucketChainLinker | `scripts/fusion/bucket_chain_linker.py` | 桶-链关联器 | 协调层 |
+| CrossValidator | `scripts/fusion/cross_validator.py` | 交叉验证器 | 协调层 |
+| MultiDimensionSummaryGenerator | `scripts/fusion/multi_dimension_summary.py` | 多维摘要生成器 | 协调层 |
+| BucketChainFusion | `scripts/fusion/bucket_chain_fusion.py` | 融合层总控 | 协调层 |
+| CoordinatedExtractionTrigger | `scripts/triggers/coordinated_extraction_trigger.py` | 协同提取触发器 | 协调层 |
+| **存储层** | | | |
+| ShortTermMemoryRedis | `scripts/short_term_redis.py` | 短期记忆（Redis） | 存储层 |
+| LongTermMemoryManager | `scripts/long_term.py` | 长期记忆管理 | 存储层 |
+| MemoryIndexer | `scripts/memory_indexer.py` | 记忆索引 | 存储层 |
+| **基础设施层** | | | |
+| PrivacyManager | `scripts/privacy.py` | 隐私管理 | 基础设施层 |
+| Encryption | `scripts/encryption.py` | 加密解密 | 基础设施层 |
+| MonitoringSystem | `scripts/monitoring_system.py` | 监控系统 | 基础设施层 |
+
+> **查看完整模块索引**：详见 [module_index.md](references/module_index.md)（包含所有 67 个模块的详细信息、用途和使用建议）
+
+### 阶段实施总结
+
+本 Skill 采用四层架构，分阶段实施：
+
+- **阶段 1**：基础架构（CUSTOM 枚举值、MetadataValidator、PriorityResolver）
+- **阶段 2**：高级功能（自定义类型注册、动态优先级规则、批量解析、缓存机制）
+- **阶段 3**：质量评估与生命周期管理（MetadataQualityAssessor、CustomTypeLifecycleManager、UsageMonitor、QualityReportGenerator）
+- **阶段 4**：性能优化（LRUCache、PerformanceMonitor、BatchProcessor）
+- **阶段 5.1**：上下文压缩（ContextCompressor、CompressionStrategy、/compact 命令、自动压缩）
+- **阶段 5.2**：链感知压缩（链元数据增强、CHAIN_AWARE 压缩策略、链类型权重配置）
+- **阶段 6**：双轨架构（协调层子层，为认知模型层提供技术实现）
+  - 轨道A：语义桶提炼
+  - 轨道B：链提取（5种链类型：因果/逻辑/操作/叙事/时间）
+  - 融合层：关联、验证、摘要
+  - 触发器：协同提取触发
+- **阶段 7**：四层架构澄清与文档完善
+  - 明确ContextOrchestrator为顶层总控中心和统一入口
+  - 明确认知模型层为协调层核心业务逻辑
+  - 明确双轨架构为协调层子层，为认知模型层提供技术实现
+  - 完善架构总览、API参考文档、双轨架构文档
+- **阶段 8**：文档完善（API 参考文档、最佳实践、故障排查指南、上下文压缩规则、链感知压缩文档）
+
+### 性能特性
+
+- **LRU 缓存**：优先级解析缓存，提升 40x 性能
+- **批量处理**：优化的批量验证、解析、评估
+- **性能监控**：实时监控操作延迟、吞吐量、缓存命中率
+- **上下文压缩**：减少 token 数量，提升上下文利用率
+
+### 质量保证
+
+- **质量评估**：多维度评分（完整性、准确性、一致性、实用性）
+- **生命周期管理**：自定义类型的创建、使用、废弃、清理
+- **使用监控**：统计 metadata 使用情况，生成改进建议
+- **压缩质量**：压缩质量评分，确保关键内容不丢失

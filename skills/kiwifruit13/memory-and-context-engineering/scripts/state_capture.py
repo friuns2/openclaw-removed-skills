@@ -55,6 +55,9 @@ from .type_defs import (
     PhaseType,
     ScenarioType,
     UserStateType,
+    LayerType,
+    StateConflict,
+    LayerStateSnapshot,
 )
 
 
@@ -1135,4 +1138,412 @@ class GlobalStateCapture:
                 })
 
         return diffs
+
+
+# ============================================================================
+# 四层架构状态协调器
+# ============================================================================
+
+
+class LayerStateSync:
+    """
+    四层架构状态协调器
+    
+    负责：
+    - 维护各层级的状态快照
+    - 提供跨层级状态查询接口
+    - 执行状态传播和一致性检查
+    - 检测和解决状态冲突
+    
+    架构层级：
+    - 总控层（Orchestrator）
+    - 协调层（CognitiveModel、DualTrack）
+    - 存储层（Storage）
+    - 基础设施层（Infrastructure）
+    """
+
+    def __init__(self, event_bus: StateEventBus):
+        """
+        初始化层级状态协调器
+
+        Args:
+            event_bus: 状态事件总线
+        """
+        self._event_bus = event_bus
+
+        # 维护各层级的状态快照
+        self._layer_snapshots: dict[LayerType, LayerStateSnapshot] = {
+            LayerType.ORCHESTRATOR: LayerStateSnapshot(
+                layer=LayerType.ORCHESTRATOR,
+                state={},
+                state_version=0,
+                checksum="",
+            ),
+            LayerType.COGNITIVE_MODEL: LayerStateSnapshot(
+                layer=LayerType.COGNITIVE_MODEL,
+                state={},
+                state_version=0,
+                checksum="",
+            ),
+            LayerType.DUAL_TRACK: LayerStateSnapshot(
+                layer=LayerType.DUAL_TRACK,
+                state={},
+                state_version=0,
+                checksum="",
+            ),
+            LayerType.STORAGE: LayerStateSnapshot(
+                layer=LayerType.STORAGE,
+                state={},
+                state_version=0,
+                checksum="",
+            ),
+            LayerType.INFRASTRUCTURE: LayerStateSnapshot(
+                layer=LayerType.INFRASTRUCTURE,
+                state={},
+                state_version=0,
+                checksum="",
+            ),
+        }
+
+        # 状态冲突列表
+        self._conflicts: list[StateConflict] = []
+
+        # 状态传播规则（定义哪些层级之间可以传播状态）
+        self._propagation_rules = {
+            LayerType.ORCHESTRATOR: [
+                LayerType.COGNITIVE_MODEL,  # 总控层 → 认知模型层
+                LayerType.DUAL_TRACK,  # 总控层 → 双轨架构
+            ],
+            LayerType.COGNITIVE_MODEL: [
+                LayerType.DUAL_TRACK,  # 认知模型层 → 双轨架构
+                LayerType.STORAGE,  # 认知模型层 → 存储层
+            ],
+            LayerType.DUAL_TRACK: [
+                LayerType.STORAGE,  # 双轨架构 → 存储层
+            ],
+            LayerType.STORAGE: [
+                LayerType.COGNITIVE_MODEL,  # 存储层 → 认知模型层（上行反馈）
+                LayerType.ORCHESTRATOR,  # 存储层 → 总控层（上行反馈）
+            ],
+            LayerType.INFRASTRUCTURE: [
+                LayerType.STORAGE,  # 基础设施层 → 存储层（监控上报）
+                LayerType.ORCHESTRATOR,  # 基础设施层 → 总控层（监控上报）
+            ],
+        }
+
+    def sync_layer_state(
+        self,
+        layer: LayerType,
+        state: dict[str, Any],
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        """
+        同步指定层级的状态
+
+        Args:
+            layer: 层级类型
+            state: 状态字典
+            metadata: 元数据（可选）
+        """
+        # 1. 更新层级状态快照
+        snapshot = self._layer_snapshots[layer]
+        previous_state = snapshot.state.copy()
+        snapshot.state = state.copy()
+        snapshot.state_version += 1
+        snapshot.timestamp = datetime.now()
+        snapshot.checksum = self._compute_checksum(state)
+
+        # 2. 检测状态变化
+        changes = self._detect_changes(previous_state, state)
+
+        # 3. 发布状态变化事件
+        event = StateChangeEvent(
+            event_id=f"evt_{uuid.uuid4().hex[:8]}",
+            event_type=StateEventType.LAYER_STATE_CHANGE,
+            checkpoint_id="",
+            thread_id=f"layer_{layer}",
+            previous_state=previous_state,
+            current_state=state,
+            changes=changes,
+            metadata=metadata or {},
+        )
+        self._event_bus.emit(event)
+
+        # 4. 执行状态传播
+        self._propagate_state(layer, state)
+
+        # 5. 检查状态一致性
+        self._check_consistency_async()
+
+    def get_layer_state(self, layer: LayerType) -> dict[str, Any]:
+        """
+        获取指定层级的状态
+
+        Args:
+            layer: 层级类型
+
+        Returns:
+            状态字典
+        """
+        return self._layer_snapshots[layer].state.copy()
+
+    def get_all_layer_states(self) -> dict[LayerType, dict[str, Any]]:
+        """
+        获取所有层级的状态
+
+        Returns:
+            所有层级的状态字典
+        """
+        return {
+            layer: snapshot.state.copy()
+            for layer, snapshot in self._layer_snapshots.items()
+        }
+
+    def _propagate_state(self, source_layer: LayerType, state: dict[str, Any]) -> None:
+        """
+        执行状态传播
+
+        Args:
+            source_layer: 源层级
+            state: 状态字典
+        """
+        # 获取允许传播的目标层级
+        target_layers = self._propagation_rules.get(source_layer, [])
+
+        for target_layer in target_layers:
+            # 根据传播规则过滤状态
+            filtered_state = self._filter_state_for_propagation(
+                source_layer=source_layer,
+                target_layer=target_layer,
+                state=state,
+            )
+
+            # 同步到目标层级（触发目标层级的状态更新）
+            # 注意：这里不直接修改目标层级的状态，而是发布事件让目标层级自行更新
+            event = StateChangeEvent(
+                event_id=f"evt_{uuid.uuid4().hex[:8]}",
+                event_type=StateEventType.STATE_SYNC_COMPLETED,
+                checkpoint_id="",
+                thread_id=f"prop_{source_layer}_to_{target_layer}",
+                changes=filtered_state,
+                metadata={
+                    "source_layer": source_layer,
+                    "target_layer": target_layer,
+                },
+            )
+            self._event_bus.emit(event)
+
+    def _filter_state_for_propagation(
+        self,
+        source_layer: LayerType,
+        target_layer: LayerType,
+        state: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        根据传播规则过滤状态
+
+        Args:
+            source_layer: 源层级
+            target_layer: 目标层级
+            state: 状态字典
+
+        Returns:
+            过滤后的状态字典
+        """
+        # 定义各层级需要的状态字段
+        state_fields = {
+            LayerType.ORCHESTRATOR: [
+                "user_input",
+                "system_instruction",
+                "token_count",
+                "retrieval_plan",
+                "current_phase",
+            ],
+            LayerType.COGNITIVE_MODEL: [
+                "task_context",
+                "known_facts",
+                "knowledge_gaps",
+                "decision_items",
+                "completed_paths",
+                "hypotheses",
+                "constraints",
+                "chain_set",
+            ],
+            LayerType.DUAL_TRACK: [
+                "semantic_buckets",
+                "extracted_chains",
+                "fusion_result",
+                "trigger_status",
+            ],
+            LayerType.STORAGE: [
+                "memory_count",
+                "index_status",
+                "storage_stats",
+            ],
+            LayerType.INFRASTRUCTURE: [
+                "metrics",
+                "errors",
+                "performance_stats",
+            ],
+        }
+
+        # 获取目标层级需要的状态字段
+        target_fields = state_fields.get(target_layer, [])
+
+        # 过滤状态
+        filtered_state = {}
+        for field in target_fields:
+            if field in state:
+                filtered_state[field] = state[field]
+
+        return filtered_state
+
+    def _check_consistency_async(self) -> None:
+        """
+        异步检查状态一致性
+        """
+        # TODO: 实现异步一致性检查
+        # 当前暂时不执行，避免性能开销
+        pass
+
+    def check_consistency(self) -> list[StateConflict]:
+        """
+        检查各层级状态一致性
+
+        Returns:
+            状态冲突列表
+        """
+        conflicts: list[StateConflict] = []
+
+        # 检查认知模型层与双轨架构的一致性
+        if not self._check_cognitive_dual_track_consistency():
+            conflicts.append(StateConflict(
+                conflict_id=f"conf_{uuid.uuid4().hex[:8]}",
+                layer1=LayerType.COGNITIVE_MODEL,
+                layer2=LayerType.DUAL_TRACK,
+                conflict_type="CHAIN_INCONSISTENCY",
+                description="认知模型层的链集与双轨架构的提取链不一致",
+                state1=self._layer_snapshots[LayerType.COGNITIVE_MODEL].state,
+                state2=self._layer_snapshots[LayerType.DUAL_TRACK].state,
+            ))
+
+        # 检查协调层与存储层的一致性
+        if not self._check_coordination_storage_consistency():
+            conflicts.append(StateConflict(
+                conflict_id=f"conf_{uuid.uuid4().hex[:8]}",
+                layer1=LayerType.COGNITIVE_MODEL,
+                layer2=LayerType.STORAGE,
+                conflict_type="MEMORY_INCONSISTENCY",
+                description="协调层的记忆引用与存储层的实际记忆不一致",
+                state1=self._layer_snapshots[LayerType.COGNITIVE_MODEL].state,
+                state2=self._layer_snapshots[LayerType.STORAGE].state,
+            ))
+
+        return conflicts
+
+    def _check_cognitive_dual_track_consistency(self) -> bool:
+        """
+        检查认知模型层与双轨架构的一致性
+
+        Returns:
+            是否一致
+        """
+        cognitive_state = self._layer_snapshots[LayerType.COGNITIVE_MODEL].state
+        dual_track_state = self._layer_snapshots[LayerType.DUAL_TRACK].state
+
+        # 检查链集是否一致
+        cognitive_chains = cognitive_state.get("chain_set", [])
+        dual_track_chains = dual_track_state.get("extracted_chains", [])
+
+        # 简化检查：只检查链数量
+        return len(cognitive_chains) == len(dual_track_chains)
+
+    def _check_coordination_storage_consistency(self) -> bool:
+        """
+        检查协调层与存储层的一致性
+
+        Returns:
+            是否一致
+        """
+        cognitive_state = self._layer_snapshots[LayerType.COGNITIVE_MODEL].state
+        storage_state = self._layer_snapshots[LayerType.STORAGE].state
+
+        # 检查记忆引用数量是否一致
+        cognitive_memory_refs = cognitive_state.get("memory_references", [])
+        storage_memory_count = storage_state.get("memory_count", 0)
+
+        # 简化检查：只检查数量是否匹配
+        return len(cognitive_memory_refs) == storage_memory_count
+
+    def _detect_changes(
+        self,
+        previous_state: dict[str, Any],
+        current_state: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        检测状态变化
+
+        Args:
+            previous_state: 之前的状态
+            current_state: 当前的状态
+
+        Returns:
+            变化的字典
+        """
+        return self.compute_state_diff(previous_state, current_state)
+
+    @staticmethod
+    def _compute_checksum(state: dict[str, Any]) -> str:
+        """
+        计算状态校验和
+
+        Args:
+            state: 状态字典
+
+        Returns:
+            校验和字符串
+        """
+        import hashlib
+        state_str = str(sorted(state.items()))
+        return hashlib.md5(state_str.encode()).hexdigest()
+
+    def get_conflicts(self) -> list[StateConflict]:
+        """
+        获取所有状态冲突
+
+        Returns:
+            状态冲突列表
+        """
+        return self._conflicts.copy()
+
+    def resolve_conflict(self, conflict_id: str, resolution: str) -> bool:
+        """
+        解决状态冲突
+
+        Args:
+            conflict_id: 冲突ID
+            resolution: 解决方案描述
+
+        Returns:
+            是否成功解决
+        """
+        for conflict in self._conflicts:
+            if conflict.conflict_id == conflict_id:
+                conflict.resolved = True
+                conflict.resolved_at = datetime.now()
+                conflict.resolution = resolution
+
+                # 发布冲突解决事件
+                event = StateChangeEvent(
+                    event_id=f"evt_{uuid.uuid4().hex[:8]}",
+                    event_type=StateEventType.STATE_CONFLICT_RESOLVED,
+                    checkpoint_id="",
+                    thread_id="",
+                    current_state={"conflict_id": conflict_id, "resolution": resolution},
+                )
+                self._event_bus.emit(event)
+
+                return True
+
+        return False
 

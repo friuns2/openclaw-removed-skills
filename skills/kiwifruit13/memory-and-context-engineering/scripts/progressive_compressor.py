@@ -47,7 +47,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from importance_scorer import ImportanceScorer, ScoreBreakdown, WeightPresets
+from .importance_scorer import ImportanceScorer, ScoreBreakdown, WeightPresets
 
 
 class CompressionLevel(Enum):

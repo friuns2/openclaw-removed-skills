@@ -1168,6 +1168,7 @@ class AsyncTask(BaseModel):
 class StateEventType(str, Enum):
     """状态事件类型"""
 
+    # ========== 通用状态事件 ==========
     STATE_CHANGE = "state_change"           # 通用状态变化
     PHASE_CHANGE = "phase_change"           # 阶段变化
     TASK_COMPLETE = "task_complete"         # 任务完成
@@ -1175,6 +1176,81 @@ class StateEventType(str, Enum):
     CHECKPOINT_CREATED = "checkpoint_created"  # 检查点创建
     CHECKPOINT_RESTORED = "checkpoint_restored"  # 检查点恢复
     USER_STATE_CHANGE = "user_state_change"  # 用户状态变化
+
+    # ========== 四层架构状态事件 ==========
+    # 总控层状态事件
+    ORCHESTRATOR_STATE_CHANGE = "orchestrator_state_change"  # 总控层状态变化
+    TOKEN_BUDGET_UPDATE = "token_budget_update"  # Token预算更新
+    RETRIEVAL_DECISION_UPDATE = "retrieval_decision_update"  # 检索决策更新
+
+    # 协调层状态事件
+    COGNITIVE_MODEL_STATE_CHANGE = "cognitive_model_state_change"  # 认知模型层状态变化
+    DUAL_TRACK_STATE_CHANGE = "dual_track_state_change"  # 双轨架构状态变化
+
+    # 认知模型层子事件
+    MODEL_BUILT = "model_built"  # 认知模型构建完成
+    CHAIN_EXTRACTED = "chain_extracted"  # 链提取完成
+    KNOWLEDGE_GAP_IDENTIFIED = "knowledge_gap_identified"  # 知识缺口识别
+    STATE_INFERENCE_COMPLETE = "state_inference_complete"  # 状态推理完成
+
+    # 双轨架构子事件
+    BUCKET_REFINED = "bucket_refined"  # 语义桶提炼完成
+    LINKER_FUSED = "linker_fused"  # 融合层完成
+    TRIGGER_ACTIVATED = "trigger_activated"  # 触发器激活
+
+    # 存储层状态事件
+    STORAGE_STATE_CHANGE = "storage_state_change"  # 存储层状态变化
+    MEMORY_STORED = "memory_stored"  # 记忆存储完成
+    MEMORY_RETRIEVED = "memory_retrieved"  # 记忆检索完成
+    INDEX_UPDATED = "index_updated"  # 索引更新完成
+
+    # 基础设施层状态事件
+    INFRASTRUCTURE_STATE_CHANGE = "infrastructure_state_change"  # 基础设施层状态变化
+    METRIC_RECORDED = "metric_recorded"  # 指标记录
+    ERROR_OCCURRED = "error_occurred"  # 错误发生
+
+    # ========== 状态一致性事件 ==========
+    STATE_CONFLICT_DETECTED = "state_conflict_detected"  # 状态冲突检测
+    STATE_CONFLICT_RESOLVED = "state_conflict_resolved"  # 状态冲突解决
+    STATE_SYNC_COMPLETED = "state_sync_completed"  # 状态同步完成
+    STATE_CONSISTENCY_CHECK_PASSED = "state_consistency_check_passed"  # 状态一致性检查通过
+    STATE_CONSISTENCY_CHECK_FAILED = "state_consistency_check_failed"  # 状态一致性检查失败
+
+
+class LayerType(str, Enum):
+    """四层架构层级类型"""
+
+    ORCHESTRATOR = "orchestrator"  # 总控层
+    COGNITIVE_MODEL = "cognitive_model"  # 认知模型层（协调层子层）
+    DUAL_TRACK = "dual_track"  # 双轨架构（协调层子层）
+    STORAGE = "storage"  # 存储层
+    INFRASTRUCTURE = "infrastructure"  # 基础设施层
+
+
+class StateConflict(BaseModel):
+    """状态冲突"""
+
+    conflict_id: str
+    layer1: LayerType
+    layer2: LayerType
+    conflict_type: str  # 冲突类型（如"CHAIN_INCONSISTENCY"、"MEMORY_INCONSISTENCY"）
+    detected_at: datetime = Field(default_factory=datetime.now)
+    description: str
+    state1: dict[str, Any] = Field(default_factory=dict)
+    state2: dict[str, Any] = Field(default_factory=dict)
+    resolved: bool = False
+    resolved_at: Optional[datetime] = None
+    resolution: Optional[str] = None
+
+
+class LayerStateSnapshot(BaseModel):
+    """层级状态快照"""
+
+    layer: LayerType
+    state: dict[str, Any]
+    state_version: int  # 状态版本号（用于检测冲突）
+    timestamp: datetime = Field(default_factory=datetime.now)
+    checksum: str  # 状态校验和（用于快速比较）
 
 
 class CheckpointRecord(BaseModel):

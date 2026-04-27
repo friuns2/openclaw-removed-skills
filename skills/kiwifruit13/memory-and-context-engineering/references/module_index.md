@@ -8,8 +8,10 @@
 2. [存储层](#存储层)
 3. [协调层](#协调层)
 4. [编排层](#编排层)
-5. [性能优化模块（P0）](#性能优化模块p0)
-6. [性能优化模块（P1）](#性能优化模块p1)
+5. [双轨架构模块](#双轨架构模块)
+6. [性能优化模块（P0）](#性能优化模块p0)
+7. [性能优化模块（P1）](#性能优化模块p1)
+8. [模块映射说明](#模块映射说明)
 
 ---
 
@@ -79,6 +81,55 @@
 
 ---
 
+## 双轨架构模块
+
+双轨架构实现语义桶提炼与链提取的并行处理，包含链类型、桶-链融合、性能优化和触发机制。
+
+### 链模块（chains/）
+
+| 脚本 | 用途 | 说明 |
+|------|------|------|
+| `chains/base_chain.py` | 链基类 | 定义所有链类型的统一接口和基类 |
+| `chains/causal_chain.py` | 因果链 | 问题-原因-解决方案结构 |
+| `chains/logic_chain.py` | 逻辑链 | 前提-推理-结论结构 |
+| `chains/operation_chain.py` | 操作链 | 步骤序列和预期结果 |
+| `chains/narrative_chain.py` | 叙事链 | 事件序列和时间线 |
+| `chains/time_chain.py` | 时间链 | 时间点和时间线管理 |
+| `chains/chain_buffer.py` | 链缓冲区 | 链的TTL管理和容量控制 |
+
+### 桶模块（buckets/）
+
+| 脚本 | 用途 | 说明 |
+|------|------|------|
+| `buckets/topic_cluster.py` | 话题簇 | 关键词提取和内聚性计算 |
+
+### 融合层模块（fusion/）
+
+| 脚本 | 用途 | 说明 |
+|------|------|------|
+| `fusion/bucket_chain_fusion.py` | 融合层总控 | 整合关联、验证、摘要功能 |
+| `fusion/bucket_chain_linker.py` | 桶-链关联器 | 建立3种类型的桶-链关联 |
+| `fusion/cross_validator.py` | 交叉验证器 | 5种验证类型（一致性、逻辑、事实、时效、完整性） |
+| `fusion/multi_dimension_summary.py` | 多维摘要生成器 | 生成语义、结构、关联、综合摘要 |
+
+### 处理器模块（processors/）
+
+| 脚本 | 用途 | 说明 |
+|------|------|------|
+| `processors/optimized_dual_track_processor.py` | 优化双轨处理器 | 异步并行处理、缓存、性能监控 |
+| `processors/chain_cache_manager.py` | 链缓存管理器 | LRU缓存策略、类型索引、TTL管理 |
+| `processors/monitoring_system.py` | 监控系统 | 指标收集、健康检查、性能统计 |
+| `processors/dual_track_integration_adapter.py` | 集成适配器 | 与现有系统的集成接口、降级模式 |
+| `processors/chain_aware_context_reconstructor.py` | 链感知上下文重构器 | 基于链信息的上下文选择和压缩 |
+
+### 触发器模块（triggers/）
+
+| 脚本 | 用途 | 说明 |
+|------|------|------|
+| `triggers/coordinated_extraction_trigger.py` | 协同提取触发器 | 多因素决策触发提炼动作 |
+
+---
+
 ## 性能优化模块（P0）
 
 | 脚本 | 用途 | 说明 |
@@ -134,5 +185,55 @@
 - `cross_session_memory_linker.py`, `memory_forgetting_mechanism.py`
 - `multi_source_coordinator.py`, `context_lazy_loader.py`
 - `permission_boundary_controller.py`, `observability_manager.py`
+
+---
+
+## 模块映射说明
+
+### 双轨架构模块与层级的映射关系
+
+双轨架构模块按功能职责分别归属于不同层级，以下是其映射关系：
+
+| 双轨模块目录 | 模块 | 所属层级 | 职责说明 |
+|------------|------|---------|---------|
+| **chains/** | base_chain.py | 编排层 | 定义所有链类型的统一接口和基类 |
+| **chains/** | causal_chain.py | 编排层 | 问题-原因-解决方案结构 |
+| **chains/** | logic_chain.py | 编排层 | 前提-推理-结论结构 |
+| **chains/** | operation_chain.py | 编排层 | 步骤序列和预期结果 |
+| **chains/** | narrative_chain.py | 编排层 | 事件序列和时间线 |
+| **chains/** | time_chain.py | 编排层 | 时间点和时间线管理 |
+| **chains/** | chain_buffer.py | 存储层 | 链的TTL管理和容量控制 |
+| **buckets/** | topic_cluster.py | 存储层 | 关键词提取和内聚性计算（语义桶提炼） |
+| **fusion/** | bucket_chain_fusion.py | 协调层 | 融合层总控，整合关联、验证、摘要功能 |
+| **fusion/** | bucket_chain_linker.py | 协调层 | 建立3种类型的桶-链关联（内容匹配、时间窗口、语义相似度） |
+| **fusion/** | cross_validator.py | 协调层 | 5种验证类型（一致性、逻辑、事实、时效、完整性） |
+| **fusion/** | multi_dimension_summary.py | 编排层 | 生成语义、结构、关联、综合摘要 |
+| **processors/** | optimized_dual_track_processor.py | 编排层 | 异步并行处理、缓存、性能监控 |
+| **processors/** | chain_cache_manager.py | 存储层 | LRU缓存策略、类型索引、TTL管理 |
+| **processors/** | monitoring_system.py | 基础设施层 | 指标收集、健康检查、性能统计 |
+| **processors/** | dual_track_integration_adapter.py | 编排层 | 与现有系统的集成接口、降级模式 |
+| **processors/** | chain_aware_context_reconstructor.py | 编排层 | 基于链信息的上下文选择和压缩 |
+| **triggers/** | coordinated_extraction_trigger.py | 协调层 | 多因素决策触发提炼动作 |
+
+### 层级职责说明
+
+| 层级 | 职责 | 双轨模块贡献 |
+|------|------|------------|
+| **基础设施层** | 提供底层支撑能力 | MonitoringSystem（监控） |
+| **存储层** | 数据存储和管理 | ChainBuffer、TopicCluster、ChainCacheManager |
+| **协调层** | 协调各模块交互 | BucketChainFusion、BucketChainLinker、CrossValidator、CoordinatedExtractionTrigger |
+| **编排层** | 业务逻辑和流程控制 | 链提取、多维摘要、处理器、集成适配器、上下文重构 |
+
+### 模块总数统计
+
+| 统计维度 | 数量 | 说明 |
+|---------|------|------|
+| 基础设施层 | 9 | 类型定义、配置、工具类 |
+| 存储层 | 8 | 短期记忆、长期记忆、Redis、链缓冲、缓存等 |
+| 协调层 | 12 | 关联、验证、触发器、融合等 |
+| 编排层 | 32 | 链、桶、处理器、压缩器等 |
+| 性能优化（P0） | 3 | LRUCache、PerformanceMonitor、BatchProcessor |
+| 性能优化（P1） | 3 | CustomTypeLifecycleManager、UsageMonitor、QualityReportGenerator |
+| **总计** | **67** | 不包含 __init__.py |
 
 详细使用示例请参阅 [usage_guide.md](usage_guide.md)

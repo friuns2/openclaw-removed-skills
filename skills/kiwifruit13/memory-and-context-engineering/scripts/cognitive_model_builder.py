@@ -108,7 +108,7 @@ class TaskContext(BaseModel):
     """任务上下文 - 模型需要知道的"我在哪里、我要去哪里" """
 
     # 目标层
-    goal: str = Field(description="最终目标")
+    goal: str = Field(default="", description="最终目标")
     sub_goals: list[str] = Field(default_factory=list, description="子目标列表")
     success_criteria: list[str] = Field(default_factory=list, description="成功条件")
 

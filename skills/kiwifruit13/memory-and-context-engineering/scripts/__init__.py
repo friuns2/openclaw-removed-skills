@@ -27,6 +27,7 @@ __version__ = "3.0.0"
 
 # 核心模块
 from .type_defs import *
+from .type_defs import SemanticBucketType
 from .perception import PerceptionMemoryStore
 from .short_term import SemanticBucket, ShortTermMemoryManager, AsynchronousExtractor
 from .short_term_insight import (
@@ -169,6 +170,7 @@ __all__ = [
     "__version__",
     # 类型
     "types",
+    "SemanticBucketType",
     # 感知记忆
     "PerceptionMemoryStore",
     # 短期记忆
