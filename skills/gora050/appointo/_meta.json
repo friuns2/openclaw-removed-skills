@@ -3,11 +3,16 @@
   "slug": "appointo",
   "displayName": "Appointo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169254940,
-    "commit": "https://github.com/openclaw/skills/commit/753af19419231dbb7941437cb3f3b6df1ed08286"
+    "version": "1.0.3",
+    "publishedAt": 1776864129365,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169254940,
+      "commit": "https://github.com/openclaw/skills/commit/753af19419231dbb7941437cb3f3b6df1ed08286"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774782293585,
