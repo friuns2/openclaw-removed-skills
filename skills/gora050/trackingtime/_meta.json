@@ -3,11 +3,16 @@
   "slug": "trackingtime",
   "displayName": "Trackingtime",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169888778,
-    "commit": "https://github.com/openclaw/skills/commit/4b8d4b0290c7a67ab4d2fe5e8013c4df0c56c94e"
+    "version": "1.0.3",
+    "publishedAt": 1776892909190,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169888778,
+      "commit": "https://github.com/openclaw/skills/commit/4b8d4b0290c7a67ab4d2fe5e8013c4df0c56c94e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774922680673,
