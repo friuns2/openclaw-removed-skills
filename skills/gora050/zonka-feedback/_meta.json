@@ -3,11 +3,16 @@
   "slug": "zonka-feedback",
   "displayName": "Zonka Feedback",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170842677,
-    "commit": "https://github.com/openclaw/skills/commit/5813ca4ec07544552074c4e8995a7a2433b3bede"
+    "version": "1.0.3",
+    "publishedAt": 1776866237673,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170842677,
+      "commit": "https://github.com/openclaw/skills/commit/5813ca4ec07544552074c4e8995a7a2433b3bede"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775106299279,
