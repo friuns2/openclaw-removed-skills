@@ -1,11 +1,17 @@
 {
   "owner": "sundayslove",
   "slug": "testskillhhh",
-  "displayName": "testskill",
+  "displayName": "fff",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775126914708,
-    "commit": "https://github.com/openclaw/skills/commit/9b3fcf4e2b87937f2cc0d32f57e2d20da8201207"
+    "version": "2.0.0",
+    "publishedAt": 1776099031675,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775126914708,
+      "commit": "https://github.com/openclaw/skills/commit/9b3fcf4e2b87937f2cc0d32f57e2d20da8201207"
+    }
+  ]
 }
