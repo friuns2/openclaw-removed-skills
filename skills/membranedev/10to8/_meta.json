@@ -3,11 +3,16 @@
   "slug": "10to8",
   "displayName": "10To8",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167991615,
-    "commit": "https://github.com/openclaw/skills/commit/cf072c3f2ccd3aab270e9bbac385243d30317181"
+    "version": "1.0.3",
+    "publishedAt": 1776851753026,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167991615,
+      "commit": "https://github.com/openclaw/skills/commit/cf072c3f2ccd3aab270e9bbac385243d30317181"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774558968222,
