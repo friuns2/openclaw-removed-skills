@@ -3,11 +3,16 @@
   "slug": "emirates",
   "displayName": "Emirates",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1775400466387,
-    "commit": "https://github.com/openclaw/skills/commit/e52547927a678879764c4efec76818c3cdf8e8ef"
+    "version": "1.0.8",
+    "publishedAt": 1776238599862,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1775400466387,
+      "commit": "https://github.com/openclaw/skills/commit/e52547927a678879764c4efec76818c3cdf8e8ef"
+    },
     {
       "version": "0.1.0",
       "publishedAt": 1774771685154,
