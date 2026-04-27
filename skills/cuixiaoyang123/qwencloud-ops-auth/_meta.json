@@ -3,9 +3,15 @@
   "slug": "qwencloud-ops-auth",
   "displayName": "qwencloud-ops-auth",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774857091387,
-    "commit": "https://github.com/openclaw/skills/commit/61174c6606f6139d7261867871b8160a33cd063a"
+    "version": "0.2.0",
+    "publishedAt": 1776426589678,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774857091387,
+      "commit": "https://github.com/openclaw/skills/commit/61174c6606f6139d7261867871b8160a33cd063a"
+    }
+  ]
 }
