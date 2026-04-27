@@ -3,9 +3,15 @@
   "slug": "alibabacloud-sas-overview",
   "displayName": "Alibabacloud Sas Overview",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775111672410,
-    "commit": "https://github.com/openclaw/skills/commit/604440d1f56f6e28bcd0736e195a9ca1f27c7887"
+    "version": "0.0.2",
+    "publishedAt": 1777259846517,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775111672410,
+      "commit": "https://github.com/openclaw/skills/commit/604440d1f56f6e28bcd0736e195a9ca1f27c7887"
+    }
+  ]
 }
