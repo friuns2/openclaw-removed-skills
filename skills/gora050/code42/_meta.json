@@ -3,11 +3,16 @@
   "slug": "code42",
   "displayName": "Code42",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169538448,
-    "commit": "https://github.com/openclaw/skills/commit/3deae2214c4f1fe199e748d6058ad399a192a70f"
+    "version": "1.0.3",
+    "publishedAt": 1776864384064,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169538448,
+      "commit": "https://github.com/openclaw/skills/commit/3deae2214c4f1fe199e748d6058ad399a192a70f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774847060075,
