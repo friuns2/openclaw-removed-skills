@@ -3,11 +3,16 @@
   "slug": "f5-networks",
   "displayName": "F5 Networks",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169610729,
-    "commit": "https://github.com/openclaw/skills/commit/7df81251be2ec883369a81ee683dcfffb17f13b9"
+    "version": "1.0.3",
+    "publishedAt": 1776885444982,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169610729,
+      "commit": "https://github.com/openclaw/skills/commit/7df81251be2ec883369a81ee683dcfffb17f13b9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774857837372,
