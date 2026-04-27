@@ -3,11 +3,16 @@
   "slug": "google-cloud-healthcare-api",
   "displayName": "Google Cloud Healthcare Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168842912,
-    "commit": "https://github.com/openclaw/skills/commit/f3d601d1c9ebc237eb6ba180243d3fc08e1b4e58"
+    "version": "1.0.3",
+    "publishedAt": 1776863452881,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168842912,
+      "commit": "https://github.com/openclaw/skills/commit/f3d601d1c9ebc237eb6ba180243d3fc08e1b4e58"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774703098645,
