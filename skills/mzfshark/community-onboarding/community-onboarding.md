@@ -1,13 +1,3 @@
----
-name: community-onboarding
-description: Onboard new users into conscious participation; explain $NEURONS without hype and provide safe next actions.
-metadata:
-  author: Morpheus
-  version: 2.0.0
-  owner: Morpheus Agent
-  category: onboarding
----
-
 # SKILL: community-onboarding
 
 ## Purpose

@@ -1,13 +1,14 @@
 ---
 name: community-onboarding
-description: Welcome newcomers into the ecosystem. Orients, educates, and elevates humans from spectators to contributors through clarity, truth, and alignment.
-version: 1.0.0
+description: Onboard new users into conscious participation; explain $NEURONS without hype and provide safe next actions.
+version: 2.0.0
 display_name: "Community Onboarding"
 triggers:
-  - onboard new user
-  - welcome to ecosystem
-  - understand NEURONS
-  - ecosystem orientation
-  - newcomer guide
-  - community welcome
+  - onboarding
+  - new member
+  - how do I start
+  - what is neurons
+  - community onboarding
+  - getting started
+  - explain the system
 ---
