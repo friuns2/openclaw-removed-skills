@@ -3,11 +3,16 @@
   "slug": "clientary",
   "displayName": "Clientary",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168785399,
-    "commit": "https://github.com/openclaw/skills/commit/0c3d771ff6eee4461cdde0fa164acf227ae66200"
+    "version": "1.0.3",
+    "publishedAt": 1776863012885,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168785399,
+      "commit": "https://github.com/openclaw/skills/commit/0c3d771ff6eee4461cdde0fa164acf227ae66200"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774695822086,
