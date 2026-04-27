@@ -3,11 +3,16 @@
   "slug": "cloudfiles",
   "displayName": "Cloudfiles",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169411025,
-    "commit": "https://github.com/openclaw/skills/commit/82024dd0259b11b2ec75c422ae326d67de6fa9d1"
+    "version": "1.0.3",
+    "publishedAt": 1776855003969,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169411025,
+      "commit": "https://github.com/openclaw/skills/commit/82024dd0259b11b2ec75c422ae326d67de6fa9d1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774828968499,
