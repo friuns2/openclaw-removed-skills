@@ -1,11 +1,17 @@
 {
   "owner": "jiajiaoy",
   "slug": "dailyfinance",
-  "displayName": "Daily Finance",
+  "displayName": "Dailyfinance",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775108880840,
-    "commit": "https://github.com/openclaw/skills/commit/d8cf489733b9fae0d9ca6a37ab5df07524858d8c"
+    "version": "1.0.2",
+    "publishedAt": 1777287021706,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775108880840,
+      "commit": "https://github.com/openclaw/skills/commit/d8cf489733b9fae0d9ca6a37ab5df07524858d8c"
+    }
+  ]
 }

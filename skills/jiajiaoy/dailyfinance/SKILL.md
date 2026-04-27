@@ -1,6 +1,6 @@
 ---
-name: daily-finance
-description: 每日全球财经要闻速览，涵盖股市、加密货币、宏观经济，中英双语精美呈现。Daily global financial news briefing covering stock markets, crypto, and macro economy — bilingual EN/CN visual dashboard. Trigger on：今日财经、财经新闻、股市、market news、stock market、crypto news、加密货币、economic news、经济新闻、market update、市场动态、美联储、Fed news、earnings、财报、investment news。
+name: dailyfinance
+description: "Daily financial news briefing — stock markets, crypto, macro economy, Fed/PBOC policy, earnings reports. Bilingual EN/CN visual dashboard. Morning push + evening recap."
 keywords:
   - 今日财经
   - 财经新闻
