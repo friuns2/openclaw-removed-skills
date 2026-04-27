@@ -1,7 +1,7 @@
 ---
 name: jettyd
 description: Interact with IoT devices via the jettyd platform — read sensors, send commands, manage rules, and list devices
-version: 1.1.0
+version: 1.1.2
 tags:
   - iot
   - esp32
@@ -143,10 +143,3 @@ node skills/jettyd/scripts/jettyd-cli.js push_config <device-id> ./rules.json
 
 Supported trigger operators: `>` `<` `>=` `<=` `==` `!=`
 Supported action types: `alert` `webhook` `command`
-
-## MCP Server — Claude Desktop / Cursor
-
-A separate MCP server package (`@jettyd/mcp`) is available for Claude Desktop and Cursor users.
-See [jettyd.com/docs/mcp](https://jettyd.com/docs/mcp) for installation instructions.
-
-The MCP server exposes the same device, telemetry, command, and webhook tools so Claude can call them natively without the CLI wrapper.
