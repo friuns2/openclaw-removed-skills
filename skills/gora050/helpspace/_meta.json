@@ -3,11 +3,16 @@
   "slug": "helpspace",
   "displayName": "Helpspace",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168671928,
-    "commit": "https://github.com/openclaw/skills/commit/8dc6fd9fe26bb03c09f4c1ed1c3629acb9027379"
+    "version": "1.0.3",
+    "publishedAt": 1776863020824,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168671928,
+      "commit": "https://github.com/openclaw/skills/commit/8dc6fd9fe26bb03c09f4c1ed1c3629acb9027379"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774674269467,
