@@ -3,9 +3,15 @@
   "slug": "lookml",
   "displayName": "Lookml",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775200040523,
-    "commit": "https://github.com/openclaw/skills/commit/d1804ee5e2ef98953cb23d8731712f98d0c1d1b9"
+    "version": "1.0.1",
+    "publishedAt": 1776885005027,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775200040523,
+      "commit": "https://github.com/openclaw/skills/commit/d1804ee5e2ef98953cb23d8731712f98d0c1d1b9"
+    }
+  ]
 }
