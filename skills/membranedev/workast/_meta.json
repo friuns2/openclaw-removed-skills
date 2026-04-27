@@ -3,9 +3,15 @@
   "slug": "workast",
   "displayName": "Workast",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775196205697,
-    "commit": "https://github.com/openclaw/skills/commit/713e020fd42f47804179c60223934e20e5052ecb"
+    "version": "1.0.1",
+    "publishedAt": 1776881112578,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775196205697,
+      "commit": "https://github.com/openclaw/skills/commit/713e020fd42f47804179c60223934e20e5052ecb"
+    }
+  ]
 }
