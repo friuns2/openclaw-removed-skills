@@ -3,11 +3,16 @@
   "slug": "vmware-avi",
   "displayName": "Vmware Avi",
   "latest": {
-    "version": "1.5.12",
-    "publishedAt": 1776420320759,
-    "commit": "https://github.com/openclaw/skills/commit/c3998776ee731fe1653f3cd01773ea8fc84b22d6"
+    "version": "1.5.14",
+    "publishedAt": 1776774039901,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.12",
+      "publishedAt": 1776420320759,
+      "commit": "https://github.com/openclaw/skills/commit/c3998776ee731fe1653f3cd01773ea8fc84b22d6"
+    },
     {
       "version": "1.5.1",
       "publishedAt": 1776039086510,
