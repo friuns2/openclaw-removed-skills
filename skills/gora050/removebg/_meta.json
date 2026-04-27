@@ -3,11 +3,16 @@
   "slug": "removebg",
   "displayName": "Removebg",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168230058,
-    "commit": "https://github.com/openclaw/skills/commit/cbdf1e34363a0c8a00f3a8521f0d885e6ccaaec0"
+    "version": "1.0.3",
+    "publishedAt": 1776862314619,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168230058,
+      "commit": "https://github.com/openclaw/skills/commit/cbdf1e34363a0c8a00f3a8521f0d885e6ccaaec0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774587883205,
