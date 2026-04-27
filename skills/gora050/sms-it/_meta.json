@@ -3,11 +3,16 @@
   "slug": "sms-it",
   "displayName": "Sms It",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168452692,
-    "commit": "https://github.com/openclaw/skills/commit/c82c6575fcbf56e41dbf19036142a005335fcf3c"
+    "version": "1.0.3",
+    "publishedAt": 1776862652339,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168452692,
+      "commit": "https://github.com/openclaw/skills/commit/c82c6575fcbf56e41dbf19036142a005335fcf3c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774645501020,
