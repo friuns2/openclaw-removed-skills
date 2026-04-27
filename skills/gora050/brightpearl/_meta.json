@@ -3,11 +3,16 @@
   "slug": "brightpearl",
   "displayName": "Brightpearl",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170114204,
-    "commit": "https://github.com/openclaw/skills/commit/19aaa17fd5fb59240d69ea5128d5f597f8a60463"
+    "version": "1.0.3",
+    "publishedAt": 1776865080907,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170114204,
+      "commit": "https://github.com/openclaw/skills/commit/19aaa17fd5fb59240d69ea5128d5f597f8a60463"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774958635000,
