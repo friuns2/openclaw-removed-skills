@@ -3,9 +3,15 @@
   "slug": "bancontact-payconiq-company",
   "displayName": "Bancontact Payconiq Company",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775272000489,
-    "commit": "https://github.com/openclaw/skills/commit/701b66385c2da4d6f00a8c8e665d415f566c6ef8"
+    "version": "1.0.1",
+    "publishedAt": 1776885564200,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775272000489,
+      "commit": "https://github.com/openclaw/skills/commit/701b66385c2da4d6f00a8c8e665d415f566c6ef8"
+    }
+  ]
 }
