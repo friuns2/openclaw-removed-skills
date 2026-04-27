@@ -3,11 +3,16 @@
   "slug": "richrelevance",
   "displayName": "Richrelevance",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170510329,
-    "commit": "https://github.com/openclaw/skills/commit/64b7f9182aa1a96b5a07c2dde460730c3e0d2467"
+    "version": "1.0.3",
+    "publishedAt": 1776886048083,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170510329,
+      "commit": "https://github.com/openclaw/skills/commit/64b7f9182aa1a96b5a07c2dde460730c3e0d2467"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775037863509,
