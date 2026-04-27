@@ -3,11 +3,16 @@
   "slug": "branch",
   "displayName": "Branch",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167825664,
-    "commit": "https://github.com/openclaw/skills/commit/d24ddfbdcb3efc67d5cfef3eea2c74b179b5b516"
+    "version": "1.0.3",
+    "publishedAt": 1776864920257,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167825664,
+      "commit": "https://github.com/openclaw/skills/commit/d24ddfbdcb3efc67d5cfef3eea2c74b179b5b516"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774512226495,
