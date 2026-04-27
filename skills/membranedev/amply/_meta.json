@@ -3,11 +3,16 @@
   "slug": "amply",
   "displayName": "Amply",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169993833,
-    "commit": "https://github.com/openclaw/skills/commit/6fc80090eb0aa9988c7eb393a9704c6f6124bc79"
+    "version": "1.0.3",
+    "publishedAt": 1776856274994,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169993833,
+      "commit": "https://github.com/openclaw/skills/commit/6fc80090eb0aa9988c7eb393a9704c6f6124bc79"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774936959467,
