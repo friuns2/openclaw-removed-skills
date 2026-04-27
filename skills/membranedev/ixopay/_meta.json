@@ -3,11 +3,16 @@
   "slug": "ixopay",
   "displayName": "Ixopay",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168920450,
-    "commit": "https://github.com/openclaw/skills/commit/4331bc782ec25cd48c80057cd75de6dad4fb55c7"
+    "version": "1.0.3",
+    "publishedAt": 1776853976311,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168920450,
+      "commit": "https://github.com/openclaw/skills/commit/4331bc782ec25cd48c80057cd75de6dad4fb55c7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774738953612,
