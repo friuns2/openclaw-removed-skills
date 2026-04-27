@@ -3,11 +3,16 @@
   "slug": "web3forms-contact-forms-for-static-websites",
   "displayName": "Web3Forms Contact Forms For Static Websites",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170711470,
-    "commit": "https://github.com/openclaw/skills/commit/be29052384efe0f5e6723091515ce7570ae566ab"
+    "version": "1.0.3",
+    "publishedAt": 1776866064266,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170711470,
+      "commit": "https://github.com/openclaw/skills/commit/be29052384efe0f5e6723091515ce7570ae566ab"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775091880126,
