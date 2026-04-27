@@ -3,11 +3,16 @@
   "slug": "checkmarx",
   "displayName": "Checkmarx",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170275288,
-    "commit": "https://github.com/openclaw/skills/commit/5035802bef935b75991b5d2bfe67c3636ed0cfbd"
+    "version": "1.0.3",
+    "publishedAt": 1776856789597,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170275288,
+      "commit": "https://github.com/openclaw/skills/commit/5035802bef935b75991b5d2bfe67c3636ed0cfbd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775001766846,
