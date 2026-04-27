@@ -3,9 +3,15 @@
   "slug": "hive-builder",
   "displayName": "Hive Builder",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775127340220,
-    "commit": "https://github.com/openclaw/skills/commit/498aebc3cd77a1eeb692017d91740563c9048c6d"
+    "version": "1.1.1",
+    "publishedAt": 1775731226343,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775127340220,
+      "commit": "https://github.com/openclaw/skills/commit/498aebc3cd77a1eeb692017d91740563c9048c6d"
+    }
+  ]
 }
