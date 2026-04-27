@@ -1,0 +1,11 @@
+{
+  "owner": "sdk-team",
+  "slug": "alibabacloud-sas-alert-handler",
+  "displayName": "Alibabacloud Sas Alert Handler",
+  "latest": {
+    "version": "0.0.1",
+    "publishedAt": 1775045070617,
+    "commit": null
+  },
+  "history": []
+}
