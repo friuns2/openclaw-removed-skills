@@ -3,9 +3,15 @@
   "slug": "spaycial",
   "displayName": "Spaycial",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169574861,
-    "commit": "https://github.com/openclaw/skills/commit/a3698cf967a56d848e3bcc7384cc0483f338295d"
+    "version": "1.0.3",
+    "publishedAt": 1776855367740,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169574861,
+      "commit": "https://github.com/openclaw/skills/commit/a3698cf967a56d848e3bcc7384cc0483f338295d"
+    }
+  ]
 }
