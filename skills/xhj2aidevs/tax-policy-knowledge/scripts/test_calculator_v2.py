@@ -3,6 +3,11 @@
 """
 财税政策计算器测试脚本 V2
 """
+# Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+# Skill: tax-policy-knowledge | Version: 0.0.0
+# Author: QQ 1817694478 | Q-Group: 972156177
+# Unauthorized copying, modification, or distribution is prohibited.
+# This software is provided "as is" without warranty of any kind.
 import sys
 import os
 from pathlib import Path
@@ -11,7 +16,7 @@ from pathlib import Path
 SCRIPTS_DIR = Path(__file__).parent.resolve()
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-# 正规模块导入，替代危险的 exec() 动态执行
+# 使用标准模块导入方式
 from tax_policy_calculator import TaxCalculator
 
 def test_calculations():

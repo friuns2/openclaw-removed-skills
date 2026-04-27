@@ -1,0 +1,96 @@
+{
+  "skill_name": "tax-policy-knowledge",
+  "version": "1.4.1",
+  "generated_at": "2026-04-27 12:29:03",
+  "file_count": 21,
+  "files": {
+    "SKILL.md": {
+      "sha256": "56e865adceb7387dfea5b73d8cf5470f96423c6e012cf8ef4417b1b87be8a424",
+      "size": 3835
+    },
+    "assets/policy-overview.html": {
+      "sha256": "7750e7a2b73508978c87291a033ee3387fa1833ef21ef162e7b6de996b820f51",
+      "size": 10970
+    },
+    "references/cit-policy.md": {
+      "sha256": "9fe5b6af89fc0ed1ef5fe0f724c4888e60281b582ddf7e7fb79b890b98ade957",
+      "size": 4343
+    },
+    "references/learning_log.md": {
+      "sha256": "62e0be6c4d2780ad25af9910b7c5e972aa25178d878d6dcaeb11f95262393826",
+      "size": 1855
+    },
+    "references/pit-policy.md": {
+      "sha256": "95ef6e776d48f514fa8741edb472f5a977f6f580118bc52ec1f95d6013d0c694",
+      "size": 4937
+    },
+    "references/risk-indicators.md": {
+      "sha256": "e9157bd156c64143be86da94e8a779f9245fab54ebb3a14a0f8caf22c65e2eae",
+      "size": 10945
+    },
+    "references/self-learning.md": {
+      "sha256": "664cdee9e06c11207e2abde8e6c63a7f401e16675742ecd32ec5b6cbefe984c8",
+      "size": 4426
+    },
+    "references/tax-incentives-quick-ref.md": {
+      "sha256": "248f5e527c0674f086ad9ceae4f229d5a38f8eed4d9710adbb002e3089464203",
+      "size": 2219
+    },
+    "references/tax-policy-database.md": {
+      "sha256": "e60dab226682219822e686b3361439bae5cf70a4e65e1ab25bcf92342ab90392",
+      "size": 27367
+    },
+    "references/taxpayer-selection-guide.md": {
+      "sha256": "8a155eeb7666a8759aca3b4081a134c850174dae23c2020f0b0f6968de3eb1b6",
+      "size": 1822
+    },
+    "references/update_log.md": {
+      "sha256": "fe50185d7aaad80f21af89bf81fc660ba07b7f246de7d5fd35303541cf05c2e6",
+      "size": 2265
+    },
+    "references/vat-policy.md": {
+      "sha256": "136f6f7e4a702b1d43017c2056b927621d0be1a1ae640d030472317bbf145e77",
+      "size": 12148
+    },
+    "scripts/auto_update_knowledge.py": {
+      "sha256": "7e652278899639627b513ba8692a5fa06a8a619f37af446c171addf876d9277d",
+      "size": 16764
+    },
+    "scripts/integrity_guard.py": {
+      "sha256": "5d2f2085371aa35df9d544bd1c0571ac6579ea69d331ddcb93e9ef3fe1591d10",
+      "size": 30046
+    },
+    "scripts/learn_sync.py": {
+      "sha256": "51dac706ef4f5d594e32b27f0e45c9a1a32bf14968b7923cef36287e5d05d52f",
+      "size": 25494
+    },
+    "scripts/packaging.py": {
+      "sha256": "78378d2bac790a3097d2364467202cf623a00d5e066fa71d81688f1c8f50d3b4",
+      "size": 7423
+    },
+    "scripts/safe_io.py": {
+      "sha256": "b6b6dac87978c61ddcd25c1e95d31b951a56d139a2f5b0a8ad71e92fd534eac4",
+      "size": 17763
+    },
+    "scripts/self_learning.py": {
+      "sha256": "0a401d3d4af4b791c57804d58a59cffc4f5d25c3e48114582aeba085f80cd81a",
+      "size": 18321
+    },
+    "scripts/tax_policy_calculator.py": {
+      "sha256": "784f8c2ebef271f24c39f4b43b3aaf89f9eb9aa94a9b6c7a4610ce59ea1ddb4f",
+      "size": 15587
+    },
+    "scripts/test_calculator.py": {
+      "sha256": "8b4db0d99823ceb82cce373feec2248384c36a450de05c144322e3254a7403de",
+      "size": 3201
+    },
+    "scripts/test_calculator_v2.py": {
+      "sha256": "249b1607cac6b10f115a9fa61105483912bf2a137e86d30dca760063a4e54e58",
+      "size": 3368
+    }
+  },
+  "watermark": "6d9028097165ef16",
+  "excluded_patterns": [
+    "self-learning data files (learn_data*.json, etc.)"
+  ]
+}

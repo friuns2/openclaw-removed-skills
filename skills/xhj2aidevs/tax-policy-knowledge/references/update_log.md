@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+Skill: tax-policy-knowledge | Version: 0.0.0
+Author: QQ 1817694478 | Q-Group: 972156177
+Unauthorized copying, modification, or distribution is prohibited.
+-->
 # 知识库更新日志 (Update Log)
 
 > 版本：v1.3.0 | 创建日期：2026-04-20

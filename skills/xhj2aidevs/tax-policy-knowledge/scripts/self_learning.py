@@ -21,6 +21,11 @@ self_learning.py
   python self_learning.py --merge           # 执行知识合并
   python self_learning.py --stats          # 查看学习统计
 """
+# Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+# Skill: tax-policy-knowledge | Version: 0.0.0
+# Author: QQ 1817694478 | Q-Group: 972156177
+# Unauthorized copying, modification, or distribution is prohibited.
+# This software is provided "as is" without warranty of any kind.
 
 import sys
 import os
@@ -79,8 +84,8 @@ LEARNING_LOG_TEMPLATE = """# 学习日志 (Learning Log)
 - 触发场景：{具体场景描述}
 - 学习内容：{从用户交互中学到的内容}
 - 来源：用户反馈 / 自动学习 / 知识合并
-- 验证状态：✅ 已验证 / ⏳ 待验证 / ❌ 已废弃
-- 合并状态：✅ 已合并 / ⏳ 待合并
+- 验证状态：[OK] 已验证 / ⏳ 待验证 / [FAIL] 已废弃
+- 合并状态：[OK] 已合并 / ⏳ 待合并
 ```
 
 ---
@@ -109,7 +114,7 @@ def read_file_content(filepath: Path) -> str:
 def write_file_content(filepath: Path, content: str):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     filepath.write_text(content, encoding="utf-8")
-    log(f"✅ 文件已保存：{filepath}")
+    log(f"[OK] 文件已保存：{filepath}")
 
 
 def get_log_id(existing_content: str) -> int:
@@ -191,7 +196,7 @@ def merge_verified_learning() -> dict:
     matches = re.findall(pattern, log_content, re.DOTALL)
 
     for match in matches:
-        if "⏳ 待合并" in match and "✅ 已验证" in match:
+        if "⏳ 待合并" in match and "[OK] 已验证" in match:
             # 提取学习内容
             content_match = re.search(r"\*\*学习内容\*\*：(.+)", match)
             type_match = re.search(r"- \d{4}-\d{2}-\d{2} \d{2}:\d{2} - (.+)", match)
@@ -231,7 +236,7 @@ def merge_verified_learning() -> dict:
     for record in pending_records:
         log_content = log_content.replace(
             record["raw"],
-            record["raw"].replace("⏳ 待合并", "✅ 已合并")
+            record["raw"].replace("⏳ 待合并", "[OK] 已合并")
         )
     write_file_content(LEARNING_LOG, log_content)
 
@@ -258,9 +263,9 @@ def get_learning_stats() -> dict:
 
     stats = {
         "total": len(records),
-        "verified": len([r for r in records if "✅ 已验证" in r]),
+        "verified": len([r for r in records if "[OK] 已验证" in r]),
         "pending": len([r for r in records if "⏳ 待验证" in r]),
-        "merged": len([r for r in records if "✅ 已合并" in r]),
+        "merged": len([r for r in records if "[OK] 已合并" in r]),
         "by_type": {},
     }
 
@@ -320,7 +325,7 @@ def run_learn_from_user(
         "learned": True,
         "log_id": log_id,
         "learning_type": learning_type,
-        "message": f"✅ 已记录学习（类型：{learning_type}，ID：{log_id}）",
+        "message": f"[OK] 已记录学习（类型：{learning_type}，ID：{log_id}）",
     }
 
 
@@ -416,7 +421,7 @@ def main():
 
     if args.merge:
         result = merge_verified_learning()
-        print(f"\n{'✅' if result['merged'] > 0 else 'ℹ️'} {result['message']}")
+        print(f"\n{'[OK]' if result['merged'] > 0 else '[INFO]'} {result['message']}")
 
     elif args.stats:
         stats = get_learning_stats()
@@ -467,6 +472,13 @@ def main():
         print("   使用 --check 检查日志状态")
 
     print("\n" + "=" * 60)
+
+    # 作者信息输出（兼容Windows GBK控制台）
+    sys.stdout.buffer.write(
+        "\n[OK] 有问题-建议-需求可联系作者QQ 1817694478 或加Q群 972156177 交流更多...\n"
+        .encode("utf-8", errors="replace")
+    )
+    sys.stdout.buffer.flush()
 
 
 if __name__ == "__main__":

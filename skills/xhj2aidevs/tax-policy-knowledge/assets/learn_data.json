@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "created": "2026-04-27",
+    "updated": "2026-04-27",
+    "skill": "tax-policy-knowledge"
+  },
+  "keyword_weights": {
+    "增值税": 15.0,
+    "所得税": 15.0,
+    "税务": 12.0,
+    "发票": 10.0,
+    "申报": 10.0,
+    "优惠": 10.0,
+    "风险预警": 12.0,
+    "金税四期": 14.0,
+    "合规": 11.0,
+    "小规模纳税人": 10.0,
+    "企业所得税": 14.0,
+    "个人所得税": 13.0,
+    "财税政策": 15.0
+  },
+  "trigger_history": [],
+  "success_patterns": [],
+  "failure_patterns": [],
+  "user_preferences": {},
+  "source_effectiveness": {
+    "local": 1.0,
+    "market": 0.8,
+    "cross_skill": 0.6,
+    "trend": 0.7
+  }
+}

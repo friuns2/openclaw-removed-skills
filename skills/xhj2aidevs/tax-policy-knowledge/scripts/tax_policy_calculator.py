@@ -5,10 +5,36 @@
 支持增值税、企业所得税、个人所得税等税种的精确计算
 数据来源：国家税务总局政策法规库
 """
+# Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+# Skill: tax-policy-knowledge | Version: 0.0.0
+# Author: QQ 1817694478 | Q-Group: 972156177
+# Unauthorized copying, modification, or distribution is prohibited.
+# This software is provided "as is" without warranty of any kind.
+
 import argparse
 import sys
+import os
+from pathlib import Path
 from datetime import datetime
 from typing import Dict, Tuple, Optional
+
+# ─────────────────────────────────────────
+# Windows GBK编码兼容处理（必须放在import之后）
+# ─────────────────────────────────────────
+os.environ.setdefault('PYTHONIOENCODING', 'utf-8')
+
+# Integrity check on startup
+_SKILL_DIR = Path(__file__).parent.parent
+try:
+    sys.path.insert(0, str(_SKILL_DIR.parent))
+    from integrity_guard import IntegrityGuard
+    _guard = IntegrityGuard(str(_SKILL_DIR))
+    _ok, _msg = _guard.startup_check_with_message()
+    if not _ok:
+        print(f'[ERROR] {_msg}', flush=True)
+        sys.exit(1)
+except ImportError:
+    pass
 class TaxCalculator:
     """财税政策计算器主类"""
     
@@ -337,5 +363,13 @@ def main():
     except Exception as e:
         print(f"计算错误: {e}")
         sys.exit(1)
+
+    # 作者信息输出（兼容Windows GBK控制台）
+    sys.stdout.buffer.write(
+        "\n[OK] 有问题-建议-需求可联系作者QQ 1817694478 或加Q群 972156177 交流更多...\n"
+        .encode("utf-8", errors="replace")
+    )
+    sys.stdout.buffer.flush()
+
 if __name__ == '__main__':
     main()

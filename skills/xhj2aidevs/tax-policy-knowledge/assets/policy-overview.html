@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>财税政策知识库 - 政策概览</title>
-    <script src="https://dl.aipyaipy.com/downloads/js/echarts-5.5.0.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -108,6 +108,18 @@
         .tag-new { background: #e3f2fd; color: #1976d2; }
         .tag-extend { background: #e8f5e9; color: #388e3c; }
         .tag-important { background: #fff3e0; color: #f57c00; }
+        .rate-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .rate-table th { background: #667eea; color: white; padding: 10px 8px; text-align: left; }
+        .rate-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .rate-table tr:nth-child(even) td { background: #f8f9fa; }
+        .rate-table .std { color: #91cc75; font-weight: bold; }
+        .rate-table .pref { color: #5470c6; font-weight: bold; }
+        .timeline { list-style: none; padding: 0; }
+        .timeline li { padding: 8px 0; border-left: 3px solid #667eea; margin-bottom: 12px; padding-left: 16px; position: relative; }
+        .timeline li::before { content: ''; position: absolute; left: -6px; top: 12px; width: 9px; height: 9px; border-radius: 50%; background: #667eea; }
+        .timeline li .period { color: #888; font-size: 13px; margin-top: 2px; }
+        .timeline li .bar-wrap { background: #e0e0e0; border-radius: 4px; height: 8px; margin-top: 4px; overflow: hidden; }
+        .timeline li .bar { height: 100%; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -148,13 +160,93 @@
         </div>
         
         <div class="chart-container">
-            <div class="chart-title">📈 主要税种税率对比</div>
-            <div id="taxRateChart"></div>
+            <div class="chart-title">📊 主要税种税率对比</div>
+            <table class="rate-table">
+                <thead>
+                    <tr>
+                        <th>税种</th>
+                        <th>纳税人类型</th>
+                        <th>标准税率</th>
+                        <th>优惠税率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="2">增值税</td>
+                        <td>一般纳税人</td>
+                        <td class="std">13%</td>
+                        <td class="pref">13%</td>
+                    </tr>
+                    <tr>
+                        <td>小规模纳税人</td>
+                        <td class="std">3%</td>
+                        <td class="pref">1%</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3">企业所得税</td>
+                        <td>一般企业</td>
+                        <td class="std">25%</td>
+                        <td class="pref">25%</td>
+                    </tr>
+                    <tr>
+                        <td>小微企业</td>
+                        <td class="std">25%</td>
+                        <td class="pref">5%</td>
+                    </tr>
+                    <tr>
+                        <td>高新技术企业</td>
+                        <td class="std">25%</td>
+                        <td class="pref">15%</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2">个人所得税</td>
+                        <td>综合所得</td>
+                        <td class="std">最高45%</td>
+                        <td class="pref">10%起</td>
+                    </tr>
+                    <tr>
+                        <td>经营所得</td>
+                        <td class="std">最高35%</td>
+                        <td class="pref">17.5%</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        
+
         <div class="chart-container">
-            <div class="chart-title">📅 政策有效期时间线</div>
-            <div id="policyTimeline"></div>
+            <div class="chart-title">📅 政策有效期时间线（至2027年）</div>
+            <ul class="timeline">
+                <li>
+                    <strong>小规模增值税优惠</strong>（3%→1%）
+                    <div class="period">有效期：2023-01-01 至 2027-12-31</div>
+                    <div class="bar-wrap"><div class="bar" style="width:100%;background:#5470c6;"></div></div>
+                </li>
+                <li>
+                    <strong>小微企业所得税优惠</strong>（实际税负5%）
+                    <div class="period">有效期：2023-01-01 至 2027-12-31</div>
+                    <div class="bar-wrap"><div class="bar" style="width:100%;background:#91cc75;"></div></div>
+                </li>
+                <li>
+                    <strong>个体工商户减半征收</strong>（年应纳税所得额200万以下）
+                    <div class="period">有效期：2023-01-01 至 2027-12-31</div>
+                    <div class="bar-wrap"><div class="bar" style="width:100%;background:#fac858;"></div></div>
+                </li>
+                <li>
+                    <strong>六税两费减免</strong>
+                    <div class="period">有效期：2023-01-01 至 2027-12-31</div>
+                    <div class="bar-wrap"><div class="bar" style="width:100%;background:#ee6666;"></div></div>
+                </li>
+                <li>
+                    <strong>新能源汽车购置税免征</strong>
+                    <div class="period">有效期：2024-01-01 至 2027-12-31</div>
+                    <div class="bar-wrap"><div class="bar" style="width:80%;background:#73c0de;"></div></div>
+                </li>
+                <li>
+                    <strong>研发费用加计扣除</strong>（最高120%）
+                    <div class="period">有效期：2023-01-01 至 2027-12-31</div>
+                    <div class="bar-wrap"><div class="bar" style="width:100%;background:#3ba272;"></div></div>
+                </li>
+            </ul>
         </div>
         
         <div class="footer">
@@ -163,116 +255,6 @@
         </div>
     </div>
     
-    <script>
-        // 税率对比图表
-        var taxRateChart = echarts.init(document.getElementById('taxRateChart'));
-        var taxRateOption = {
-            tooltip: {
-                trigger: 'axis',
-                axisPointer: { type: 'shadow' }
-            },
-            legend: {
-                data: ['标准税率', '优惠税率'],
-                top: 10
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            xAxis: {
-                type: 'category',
-                data: ['增值税\n(一般纳税人)', '增值税\n(小规模)', '企业所得税\n(一般)', '企业所得税\n(小微)', '企业所得税\n(高新)', '个人所得税\n(综合所得)', '个人所得税\n(经营所得)'],
-                axisLabel: {
-                    interval: 0,
-                    rotate: 0
-                }
-            },
-            yAxis: {
-                type: 'value',
-                name: '税率 (%)',
-                max: 45
-            },
-            series: [
-                {
-                    name: '标准税率',
-                    type: 'bar',
-                    data: [13, 3, 25, 25, 25, 45, 35],
-                    itemStyle: { color: '#91cc75' }
-                },
-                {
-                    name: '优惠税率',
-                    type: 'bar',
-                    data: [13, 1, 25, 5, 15, 10, 17.5],
-                    itemStyle: { color: '#5470c6' }
-                }
-            ]
-        };
-        taxRateChart.setOption(taxRateOption);
-        
-        // 政策时间线图表
-        var timelineChart = echarts.init(document.getElementById('policyTimeline'));
-        var timelineOption = {
-            tooltip: {
-                trigger: 'item',
-                formatter: function(params) {
-                    return params.name + '<br/>有效期至：' + params.value[1];
-                }
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            xAxis: {
-                type: 'time',
-                name: '时间'
-            },
-            yAxis: {
-                type: 'category',
-                data: ['小规模增值税优惠', '小微企业所得税', '个体户减半', '六税两费减免', '新能源汽车购置税', '研发费用加计扣除']
-            },
-            series: [{
-                type: 'custom',
-                renderItem: function(params, api) {
-                    var categoryIndex = api.value(0);
-                    var start = api.coord([api.value(1), categoryIndex]);
-                    var end = api.coord([api.value(2), categoryIndex]);
-                    var height = api.size([0, 1])[1] * 0.6;
-                    return {
-                        type: 'rect',
-                        shape: {
-                            x: start[0],
-                            y: start[1] - height / 2,
-                            width: end[0] - start[0],
-                            height: height
-                        },
-                        style: api.style()
-                    };
-                },
-                encode: {
-                    x: [1, 2],
-                    y: 0
-                },
-                data: [
-                    {name: '小规模增值税优惠', value: [0, '2023-01-01', '2027-12-31'], itemStyle: {color: '#5470c6'}},
-                    {name: '小微企业所得税', value: [1, '2023-01-01', '2027-12-31'], itemStyle: {color: '#91cc75'}},
-                    {name: '个体户减半', value: [2, '2023-01-01', '2027-12-31'], itemStyle: {color: '#fac858'}},
-                    {name: '六税两费减免', value: [3, '2023-01-01', '2027-12-31'], itemStyle: {color: '#ee6666'}},
-                    {name: '新能源汽车购置税', value: [4, '2024-01-01', '2027-12-31'], itemStyle: {color: '#73c0de'}},
-                    {name: '研发费用加计扣除', value: [5, '2023-01-01', '2027-12-31'], itemStyle: {color: '#3ba272'}}
-                ]
-            }]
-        };
-        timelineChart.setOption(timelineOption);
-        
-        // 响应式
-        window.addEventListener('resize', function() {
-            taxRateChart.resize();
-            timelineChart.resize();
-        });
-    </script>
+
 </body>
 </html>

@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+Skill: tax-policy-knowledge | Version: 0.0.0
+Author: QQ 1817694478 | Q-Group: 972156177
+Unauthorized copying, modification, or distribution is prohibited.
+-->
 # 个人所得税政策详解（2024-2026年）
 
 > 更新时间：2026-04-19 | 政策来源：国家税务总局

@@ -20,6 +20,11 @@ auto_update_knowledge.py
 依赖：requests（联网搜索）
   pip install requests
 """
+# Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+# Skill: tax-policy-knowledge | Version: 0.0.0
+# Author: QQ 1817694478 | Q-Group: 972156177
+# Unauthorized copying, modification, or distribution is prohibited.
+# This software is provided "as is" without warranty of any kind.
 
 import sys
 import os
@@ -116,12 +121,15 @@ def search_web(query: str) -> dict:
     模拟联网搜索（实际使用时调用真实API或浏览器自动化）
     返回：{"title": "...", "url": "...", "snippet": "..."}
     """
-    # 注意：这里为演示结构，实际使用时需要接入真实搜索API
-    # 可以使用 MCP 工具或 requests 调用搜索API
+    # Note: This is a demo structure. For actual use, integrate with real search API.
+    # Recommended: Use MCP tools or requests to call search API.
+    # Default source URL should be configured via environment variable:
+    # TAX_POLICY_DEFAULT_SOURCE_URL (e.g., https://www.chinatax.gov.cn/)
+    default_source = os.environ.get("TAX_POLICY_DEFAULT_SOURCE_URL", "")
     return {
-        "title": f"[搜索结果] {query}",
-        "url": "https://www.chinatax.gov.cn/",
-        "snippet": f"搜索关键词：{query}，建议登录国家税务总局官网核实最新公告。",
+        "title": f"[Search Result] {query}",
+        "url": default_source if default_source else "NOT_CONFIGURED",
+        "snippet": f"Search keyword: {query}. Please configure TAX_POLICY_DEFAULT_SOURCE_URL for actual search.",
         "timestamp": datetime.now().isoformat(),
     }
 
@@ -166,7 +174,7 @@ def run_full_update() -> dict:
     执行全量更新流程
     返回：{"changed": bool, "records": list, "summary": str}
     """
-    log("🚀 开始执行全量知识库更新...")
+    log("[START] 开始执行全量知识库更新...")
 
     # 1. 读取现有知识库状态
     db_content = read_file_content(DATABASE_FILE)
@@ -175,11 +183,11 @@ def run_full_update() -> dict:
     old_version = extract_version_info(db_content)
     old_policies = extract_latest_policy_items(db_content)
 
-    log(f"📌 当前知识库版本：{old_version.get('version', 'unknown')}")
-    log(f"📌 当前政策文号数：{len(old_policies)}")
+    log(f"[INFO] 当前知识库版本：{old_version.get('version', 'unknown')}")
+    log(f"[INFO] 当前政策文号数：{len(old_policies)}")
 
     # 2. 联网搜索最新政策（模拟 - 实际接入真实搜索）
-    log("🔍 正在联网搜索最新政策...")
+    log("[SEARCH] 正在联网搜索最新政策...")
     search_results = []
     for term in SEARCH_TERMS_FULL:
         result = search_web(term)
@@ -194,7 +202,7 @@ def run_full_update() -> dict:
         if "2026年" in result["snippet"] or "2026年" in result["title"]:
             new_policies_found.append(result)
 
-    log(f"📊 发现可能的新政策条目：{len(new_policies_found)}")
+    log(f"[STAT] 发现可能的新政策条目：{len(new_policies_found)}")
 
     # 4. 判断是否需要更新
     need_update = check_version_changed(old_version, [p.get("title", "") for p in new_policies_found])
@@ -215,10 +223,10 @@ def run_full_update() -> dict:
         existing_log = read_file_content(UPDATE_LOG)
         new_log = existing_log + record
         UPDATE_LOG.write_text(new_log, encoding="utf-8")
-        log(f"✅ 更新记录已保存至：{UPDATE_LOG}")
+        log(f"[OK] 更新记录已保存至：{UPDATE_LOG}")
 
         # 6. 触发自学习脚本（分析搜索结果，学习新模式）
-        log("📚 触发自学习脚本...")
+        log("[LEARN] 触发自学习脚本...")
         try:
             import subprocess
             result = subprocess.run(
@@ -229,10 +237,10 @@ def run_full_update() -> dict:
             )
             log(f"   自学习脚本输出：{result.stdout.strip()}")
         except Exception as e:
-            log(f"   ⚠️ 自学习脚本执行失败：{e}")
+            log(f"   [WARN] 自学习脚本执行失败：{e}")
 
     else:
-        log("ℹ️ 未检测到实质变化，知识库版本不变。")
+        log("[INFO] 未检测到实质变化，知识库版本不变。")
         summary = "未检测到新政策，知识库保持最新状态。"
 
     return {
@@ -250,7 +258,7 @@ def run_monthly_update(month: str = None) -> dict:
     if not month:
         month = datetime.now().strftime("%Y年%m月")
 
-    log(f"🚀 开始执行月度更新（月份：{month}）...")
+    log(f"[START] 开始执行月度更新（月份：{month}）...")
 
     search_terms = [term.format(month=month.split("年")[1].replace("月", "")) for term in SEARCH_TERMS_MONTHLY]
     # 重新构建带完整月份的搜索词
@@ -281,7 +289,7 @@ def run_monthly_update(month: str = None) -> dict:
 
 def run_risk_update() -> dict:
     """仅更新税务风险预警指标"""
-    log("🚀 开始执行风险预警指标专项更新...")
+    log("[START] 开始执行风险预警指标专项更新...")
 
     results = []
     for term in SEARCH_TERMS_RISK:
@@ -303,7 +311,7 @@ def run_risk_update() -> dict:
 
 def run_version_check() -> dict:
     """仅检查版本，不写入"""
-    log("🔍 开始版本检查...")
+    log("[SEARCH] 开始版本检查...")
     db_content = read_file_content(DATABASE_FILE)
     info = extract_version_info(db_content)
     policies = extract_latest_policy_items(db_content)
@@ -383,6 +391,13 @@ def main():
     log_print("\n" + "=" * 60)
     log_print("  [WARNING] 注意：自动更新为辅助功能，最终内容请以国家税务总局官网为准。")
     log_print("=" * 60)
+
+    # 作者信息输出（兼容Windows GBK控制台）
+    sys.stdout.buffer.write(
+        "\n[OK] 有问题-建议-需求可联系作者QQ 1817694478 或加Q群 972156177 交流更多...\n"
+        .encode("utf-8", errors="replace")
+    )
+    sys.stdout.buffer.flush()
 
 
 if __name__ == "__main__":
