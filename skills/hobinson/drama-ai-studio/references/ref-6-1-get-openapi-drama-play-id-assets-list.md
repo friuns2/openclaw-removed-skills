@@ -34,7 +34,7 @@
       "source_episode_nos": [1, 2],
       "deleted": false,
       "operation_time": "2025-01-01T12:00:00",
-      "cover_url": "/openapi/drama/1/assets/2/1/general/candidates/10/image",
+      "cover_url": "https://示例域/openapi/drama/1/assets/2/1/general/candidates/10/image/original?su_scene=drama_candidate_image&su_exp=1730000000&su_sig=<HMAC_SHA256_HEX>",
       "has_final_image": true
     }
   ]
@@ -52,7 +52,7 @@
 | `source_episode_nos`| array\<int>  | 可选，资产首次出现的集号列表                                 |
 | `deleted`           | bool         | 是否已软删除                                                 |
 | `operation_time`    | string       | 最后操作时间（字符串时间戳）                                 |
-| `cover_url`         | string\|null | 封面图 URL（候选图 `/general/candidates/{cand_id}/image`）   |
+| `cover_url`         | string\|null | 封面图可 GET 的相对 URL：`/drama/{play_id}/assets/{type}/{id}/general/candidates/{cand_id}/image/original` + 短时 signed_url；无终稿封面时为 `null` |
 | `has_final_image`   | bool         | 是否已有终稿图                                               |
 
 **错误响应示例（HTTP 500）：**

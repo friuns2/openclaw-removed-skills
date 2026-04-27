@@ -27,7 +27,8 @@
         "candidate_id": "10",
         "image": "10_xxx.png",
         "path": "2/1_角色A/general/candidates/10_xxx.png",
-        "has_unresolved_comments": false
+        "has_unresolved_comments": false,
+        "url": "/drama/1/assets/2/1/general/candidates/10/image/original?su_scene=drama_candidate_image&su_exp=1730000000&su_sig=<HMAC_SHA256_HEX>"
       }
     ]
   }
@@ -47,6 +48,7 @@
 | `image`                     | string | 候选图文件名 |
 | `path`                      | string | 相对剧目根的资源路径 |
 | `has_unresolved_comments`   | bool   | 该候选是否存在未解决评论 |
+| `url`                       | string | 原图短时签名 URL（`/drama/.../image/original` + signed_url），可直接 GET |
 
 **错误响应示例：**
 

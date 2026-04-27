@@ -61,6 +61,6 @@
    - `completed`：成功完成
    - `failed`：执行失败（可读取 `errorMessage`）
 3. **获得最终执行结果（读取 result）**：当 `status=completed` 时，读取 `data.result`：
-   - `asset_candidate_image`：`result.id/name/image`
+   - `asset_candidate_image`：`result.id/name/image`，以及动态附加的 **`result.image_url`**（候选原图短时 signed URL，见 ref-6-6）
    - `shot_prompt_gen`：`result.prompt` / `result.saved`
-   - `shot_video_gen`：`result.result_video_path`
+   - `shot_video_gen`：`result.result_video_path`，以及动态附加的 **`result.result_video_url`**（`GET /drama/{play_id}/files/share-stream?path=...` 短时 signed，与 §8.3/§8.4 成片链一致；不落库，过期需重新轮询本接口）

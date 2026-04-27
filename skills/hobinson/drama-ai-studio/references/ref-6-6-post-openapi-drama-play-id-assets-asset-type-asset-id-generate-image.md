@@ -32,7 +32,7 @@
 
 | 字段               | 必填 | 类型        | 说明                                                             |
 |--------------------|------|-------------|------------------------------------------------------------------|
-| `user_prompt`      | 否   | string      | 用户输入的提示词                                                 |
+| `user_prompt`      | 是   | string      | 用户输入的提示词                                                 |
 | `prompt_template`  | 否   | string      | 提示词模板，将与 `user_prompt` 拼接成最终提示词                  |
 | `reference_images` | 否   | array       | 参考图相对路径数组（相对于剧目根目录），若提供则必须实际存在     |
 | `reference_materials` | 否 | array\<object> | 参考素材对象数组（`id/name/path/url/source`）；前端实际优先传该字段用于任务记录与重试 |
@@ -59,15 +59,25 @@
 
 **任务最终 `result`：**
 
-当任务 `status=completed` 后，`GET /openapi/api/ai-tasks/tasks/<task_id>` 返回的 `data.result` 通常包含：
+当任务 `status=completed` 后，`GET /openapi/api/ai-tasks/tasks/<task_id>`（及任务列表中对应条目）返回的 `data.result` 通常包含：
 
 ```json
 {
   "id": "候选图ID(字符串)",
   "name": "候选图文件名中的name",
-  "image": "候选图原图文件名(如 1_xxx.png)"
+  "image": "候选图原图文件名(如 1_xxx.png)",
+  "image_url": "https://示例域/openapi/drama/1/assets/2/1/general/candidates/10/image/original?su_scene=...&su_exp=...&su_sig=..."
 }
 ```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | string | 新候选图 ID |
+| `name` | string | 候选图名称片段（与落盘命名相关） |
+| `image` | string | 原图文件名 |
+| `image_url` | string | **仅完成态由接口动态附加**（不落库）。与 OpenAPI 资产候选原图一致：短时 signed URL；配置了 `DOMAIN_URL` 时常为 `{base}/openapi/drama/.../image/original?...`，否则为相对路径 `/drama/...?...`。过期后需重新 `GET` 任务详情换链。若服务端未配置 `SECRET_KEY` 等导致无法签发，则可能无此字段。 |
+
+任务查询接口详见 `{baseDir}/references/ref-8-2-get-openapi-api-ai-tasks-tasks-task-id.md`（路径、鉴权与 `data` 结构）。
 
 **错误响应结构：**
 

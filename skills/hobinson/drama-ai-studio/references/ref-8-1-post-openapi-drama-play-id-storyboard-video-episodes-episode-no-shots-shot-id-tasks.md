@@ -58,4 +58,4 @@
 }
 ```
 
-> 任务创建后，生成结果需要通过 §8.2 中的 `GET /openapi/api/ai-tasks/tasks/<task_id>` 查询任务详情，直到 `status=completed` 后从 `data.result.result_video_path` 读取最终视频路径。
+> 任务创建后，生成结果需要通过 §8.2 中的 `GET /openapi/api/ai-tasks/tasks/<task_id>` 查询任务详情，直到 `status=completed` 后从 `data.result.result_video_path` 读取最终视频相对路径，并可使用同对象上的 **`result_video_url`**（短时 signed 的可 GET 成片链，见 ref-8-2）直接拉取视频。

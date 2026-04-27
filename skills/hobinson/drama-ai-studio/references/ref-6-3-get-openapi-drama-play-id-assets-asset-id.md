@@ -27,7 +27,9 @@
     "source_episode_nos": [1, 2],
     "deleted": false,
     "prompt": "<该字段可能不存在>资产级主提示词，用于图像生成等综合场景",
-    "candidate_image_urls": [],
+    "candidate_image_urls": [
+      "https://示例域/openapi/drama/1/assets/2/1/general/candidates/10/image/original?su_scene=drama_candidate_image&su_exp=1730000000&su_sig=<HMAC_SHA256_HEX>"
+    ],
     "operation_time": "2025-01-01T12:00:00"
   }
 }
@@ -38,7 +40,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `prompt` | string | **可选。** 资产维度的**主提示词**，供生图等流程使用；未保存过则无此键 |
-| `candidate_image_urls` | array\<string> | 该资产下候选图的可访问 URL 列表；无候选图为 `[]` |
+| `candidate_image_urls` | array\<string> | 该资产下各候选**原图**的可 GET 相对 URL 列表（`/drama/.../image/original` + signed_url）；无候选图为 `[]` |
 
 **错误响应示例：**
 
