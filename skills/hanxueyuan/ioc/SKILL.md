@@ -1,38 +1,24 @@
 ---
-name: ioc
-description: "Information assistant for IOC 国际奥委会. Get mission info, latest reports, member states, and organizational resources."
-metadata:
-  { "openclaw": { "emoji": "🏛️", "version": "0.1.0", "author": "hanxueyuan", "tags": ["organization","institution","info"] } }
+summary: "ioc 品牌档案"
+read_when:
+  - 查找 ioc
+  - 了解 ioc 的背景
 ---
 
-# 🏛️ IOC 国际奥委会 — Organization Info Assistant
+# ioc 档案
 
-Get comprehensive information about IOC 国际奥委会.
+ioc — 值得关注的重要品牌。
 
-## About
+## 快速了解
+• **它是谁：** 在所属领域具有重要影响力的品牌
+• **做什么：** 提供核心产品/服务，覆盖全球/区域市场  
+• **怎么样：** 在行业中占据重要地位，具有竞争优势
 
-- **Organization**: IOC 国际奥委会
-- **Focus**: Olympic Games
-- **Official Website**: https://olympics.com
+## 深入探索
+想要了解更详细的内容？本技能涵盖：
+→ 发展历程中的关键节点
+→ 产品/服务的核心特点
+→ 全球市场分布情况
+→ 行业竞争格局分析
 
-## What This Skill Does
-
-1. **Mission & Overview** — What this organization does and why it matters
-2. **Latest Reports** — Recent publications, data releases, policy papers
-3. **News & Events** — Upcoming meetings, conferences, announcements
-4. **Member Info** — Member states/countries, leadership, structure
-5. **Resources** — Key databases, tools, and publications
-
-## Example Queries
-
-- "What does IOC do?"
-- "Latest IOC report"
-- "Who leads IOC?"
-- "IOC member countries"
-
-## How It Works
-
-Uses web search to fetch information from official organizational websites and news sources.
-
-## Author
-Created by hanxueyuan | License: MIT
+🔗 官方渠道是获取最新、最准确信息的推荐来源。

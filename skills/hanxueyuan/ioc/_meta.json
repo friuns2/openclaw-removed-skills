@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "ioc",
-  "displayName": "ioc",
+  "displayName": "Ioc",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774865274797,
-    "commit": "https://github.com/openclaw/skills/commit/18c6899ce67a030bde9db48211eab898b267a003"
+    "version": "0.1.2",
+    "publishedAt": 1776250986301,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774865274797,
+      "commit": "https://github.com/openclaw/skills/commit/18c6899ce67a030bde9db48211eab898b267a003"
+    }
+  ]
 }
