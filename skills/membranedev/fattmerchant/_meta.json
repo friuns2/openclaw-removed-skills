@@ -3,9 +3,15 @@
   "slug": "fattmerchant",
   "displayName": "Fattmerchant",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775203504125,
-    "commit": "https://github.com/openclaw/skills/commit/caed9c1801c5e06d7c46a4255a47cb007596101b"
+    "version": "1.0.1",
+    "publishedAt": 1776881378763,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775203504125,
+      "commit": "https://github.com/openclaw/skills/commit/caed9c1801c5e06d7c46a4255a47cb007596101b"
+    }
+  ]
 }
