@@ -3,11 +3,16 @@
   "slug": "outscraper",
   "displayName": "Outscraper",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167854272,
-    "commit": "https://github.com/openclaw/skills/commit/09367f5164dfc68b7df350a749e437961e1676c2"
+    "version": "1.0.3",
+    "publishedAt": 1776861812820,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167854272,
+      "commit": "https://github.com/openclaw/skills/commit/09367f5164dfc68b7df350a749e437961e1676c2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774515852799,
