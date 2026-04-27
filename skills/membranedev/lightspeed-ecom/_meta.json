@@ -3,9 +3,15 @@
   "slug": "lightspeed-ecom",
   "displayName": "Lightspeed Ecom",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286252759,
-    "commit": "https://github.com/openclaw/skills/commit/107cc40ed2e65ec8bc7b7be2672c35f2e50d43c8"
+    "version": "1.0.1",
+    "publishedAt": 1776882839076,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286252759,
+      "commit": "https://github.com/openclaw/skills/commit/107cc40ed2e65ec8bc7b7be2672c35f2e50d43c8"
+    }
+  ]
 }
