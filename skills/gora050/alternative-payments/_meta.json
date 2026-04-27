@@ -3,11 +3,16 @@
   "slug": "alternative-payments",
   "displayName": "Alternative Payments",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775169716160,
-    "commit": "https://github.com/openclaw/skills/commit/54ff9397fba7ac9cb8c16806c86cd2a90473c0db"
+    "version": "1.0.4",
+    "publishedAt": 1776864720046,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775169716160,
+      "commit": "https://github.com/openclaw/skills/commit/54ff9397fba7ac9cb8c16806c86cd2a90473c0db"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774875943599,
