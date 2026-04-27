@@ -3,11 +3,16 @@
   "slug": "easypost-integration",
   "displayName": "Easypost",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168111664,
-    "commit": "https://github.com/openclaw/skills/commit/565ad834b09be008c025ea8c3f3496800691971f"
+    "version": "1.0.3",
+    "publishedAt": 1776862044921,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168111664,
+      "commit": "https://github.com/openclaw/skills/commit/565ad834b09be008c025ea8c3f3496800691971f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774576991793,
