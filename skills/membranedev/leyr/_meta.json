@@ -3,11 +3,16 @@
   "slug": "leyr",
   "displayName": "Leyr",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170053482,
-    "commit": "https://github.com/openclaw/skills/commit/42c247fc7ad612ace164b3d7fcde9cacd0e1266e"
+    "version": "1.0.3",
+    "publishedAt": 1776856353870,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170053482,
+      "commit": "https://github.com/openclaw/skills/commit/42c247fc7ad612ace164b3d7fcde9cacd0e1266e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774947776646,
