@@ -1,11 +1,17 @@
 {
   "owner": "zxz333zxz",
   "slug": "jjy-agentguard",
-  "displayName": "AgentGuard",
+  "displayName": "Agentguard",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774579941069,
-    "commit": "https://github.com/openclaw/skills/commit/bda65191e4c8f3d02643a811039698f016611bee"
+    "version": "1.8.2",
+    "publishedAt": 1776744633850,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774579941069,
+      "commit": "https://github.com/openclaw/skills/commit/bda65191e4c8f3d02643a811039698f016611bee"
+    }
+  ]
 }
