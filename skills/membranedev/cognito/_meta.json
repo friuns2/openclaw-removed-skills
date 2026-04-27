@@ -3,11 +3,16 @@
   "slug": "cognito",
   "displayName": "Cognito",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170854649,
-    "commit": "https://github.com/openclaw/skills/commit/6800443991478fcae922a086e35250db1615d7fc"
+    "version": "1.0.3",
+    "publishedAt": 1776866608542,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170854649,
+      "commit": "https://github.com/openclaw/skills/commit/6800443991478fcae922a086e35250db1615d7fc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775109775957,
