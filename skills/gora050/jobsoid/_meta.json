@@ -3,11 +3,16 @@
   "slug": "jobsoid",
   "displayName": "Jobsoid",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169192284,
-    "commit": "https://github.com/openclaw/skills/commit/c589cc33db27e8e16ee07808d88b0b75b6510022"
+    "version": "1.0.3",
+    "publishedAt": 1776863869916,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169192284,
+      "commit": "https://github.com/openclaw/skills/commit/c589cc33db27e8e16ee07808d88b0b75b6510022"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774775018399,
