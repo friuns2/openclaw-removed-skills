@@ -3,11 +3,16 @@
   "slug": "kickbox",
   "displayName": "Kickbox",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167792502,
-    "commit": "https://github.com/openclaw/skills/commit/46dd955db1a209ecda9d54f1965e9330bfd8b79d"
+    "version": "1.0.3",
+    "publishedAt": 1776851504834,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167792502,
+      "commit": "https://github.com/openclaw/skills/commit/46dd955db1a209ecda9d54f1965e9330bfd8b79d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774504956787,
