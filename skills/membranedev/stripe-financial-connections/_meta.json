@@ -3,11 +3,16 @@
   "slug": "stripe-financial-connections",
   "displayName": "Stripe Financial Connections",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168928897,
-    "commit": "https://github.com/openclaw/skills/commit/6d974e0a8e79c74b02d11db2af33dab745610f29"
+    "version": "1.0.3",
+    "publishedAt": 1776853990626,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168928897,
+      "commit": "https://github.com/openclaw/skills/commit/6d974e0a8e79c74b02d11db2af33dab745610f29"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774738971920,
