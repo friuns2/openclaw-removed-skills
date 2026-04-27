@@ -3,11 +3,16 @@
   "slug": "vwork",
   "displayName": "Vwork",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170346262,
-    "commit": "https://github.com/openclaw/skills/commit/10cb76a2ab761c5d808f1dd9bc8aaa91678bd6e5"
+    "version": "1.0.3",
+    "publishedAt": 1776865502776,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170346262,
+      "commit": "https://github.com/openclaw/skills/commit/10cb76a2ab761c5d808f1dd9bc8aaa91678bd6e5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012675041,
