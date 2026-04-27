@@ -3,9 +3,15 @@
   "slug": "ovhcloud",
   "displayName": "Ovhcloud",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775217898216,
-    "commit": "https://github.com/openclaw/skills/commit/bc8d65c4cff44990d48f73b28813ada246558141"
+    "version": "1.0.1",
+    "publishedAt": 1776881838553,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775217898216,
+      "commit": "https://github.com/openclaw/skills/commit/bc8d65c4cff44990d48f73b28813ada246558141"
+    }
+  ]
 }
