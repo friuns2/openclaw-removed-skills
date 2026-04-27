@@ -3,9 +3,15 @@
   "slug": "twocaptcha",
   "displayName": "Twocaptcha",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171094781,
-    "commit": "https://github.com/openclaw/skills/commit/c16d7e8be77c908d45a2be91b8b477d0f35086bf"
+    "version": "1.0.3",
+    "publishedAt": 1776892568316,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171094781,
+      "commit": "https://github.com/openclaw/skills/commit/c16d7e8be77c908d45a2be91b8b477d0f35086bf"
+    }
+  ]
 }
