@@ -1,267 +1,131 @@
-# agent-memory-journal
+# Agent Memory Journal V2 (Zeus)
 
-Durable episodic memory for agents — file-based, inspectable, and easy to review.
+A robust, 3-tier memory system designed for autonomous agents. It moves beyond simple notes to a structured cognitive architecture featuring Hot, Warm, and Cold storage layers.
 
-`agent-memory-journal` helps keep daily notes, long-term memory, and compact review workflows in sync without requiring a database or external service. It is designed for agent setups that want durable memory with minimal moving parts.
+## Cognitive Architecture
 
-Think of it as an agent's working journal: not just a fact store, but a durable record of what happened, what mattered, and what should be remembered.
+The system organizes memory into three tiers to balance immediate context availability with long-term retrieval:
 
-## Why this exists
-
-Many agent workflows have the same failure mode:
-- useful facts are noticed but never written down
-- daily notes turn into noise
-- long-term memory becomes duplicated or bloated
-- recall is possible in theory but painful in practice
-
-`agent-memory-journal` is a pragmatic CLI for fixing that. It keeps memory in plain files, adds guardrails around duplication, and provides review commands that help turn recent logs into durable memory.
-
-## Current status
-
-This repository is the productization track.
-
-The internal production version still lives separately in the main OpenClaw workspace. This repo is where cleanup, parameterization, packaging, tests, and public-facing documentation happen before any internal migration.
-
-## Core capabilities
-
-- append daily notes with duplicate protection
-- optionally append long-term memory bullets
-- search recent notes and long-term memory
-- show recent activity and memory cadence
-- surface recurring topics
-- generate compact operational digests
-- suggest likely long-term memory candidates from recent daily notes
-- extract memory-worthy lines from raw text
-
-## File layout
-
-By default the tool expects a memory root with this structure:
-
-```text
-<root>/
-├── MEMORY.md
-└── memory/
-    ├── 2026-03-28.md
-    ├── 2026-03-29.md
-    └── 2026-03-30.md
-```
-
-### Daily note format
-
-Daily note entries are line-oriented and timestamped:
-
-```text
-- 08:15 Gmail watcher returned invalid_grant again.
-- 17:01 Added topics command to memory maintenance tooling.
-```
-
-### Long-term memory format
-
-`MEMORY.md` uses bullet points for durable facts, decisions, and policies:
-
-```text
-- Use use the app login path for live tee-time checks.
-- Keep Gmail monitoring out of heartbeat to avoid duplicate notifications.
-```
+1.  **Hot Set (`AGENT.md`)**:
+    *   **Always in context**: Intended to be loaded with every agent prompt.
+    *   **Size-constrained**: Default 2048 character budget (override via `.memory/config.json`).
+    *   **Curated**: Contains only "pinned" core memories that directly influence agent behavior.
+    *   **Claim-only rendering**: Metadata (id/state/timestamps) stays in `core/`; the hot file ships just the claim text.
+2.  **Warm Memory (`core/`)**:
+    *   **Structured facts**: Categorized into `decisions`, `constraints`, `gotchas`, `preferences`, and `capabilities`.
+    *   **BM25 Searchable**: Retrieved on-demand using probabilistic ranking.
+    *   **Metadata-rich**: Each item has a stable ID, state (active/superseded), creation timestamp, and `last_seen` tracking.
+3.  **Cold Archive (`episodic/`)**:
+    *   **Raw logs**: Daily chronological record of events and observations.
+    *   **Source evidence**: Used for autonomous promotion and auditing.
 
 ## Installation
 
-For local development:
-
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install pytest
+pip install .
 ```
 
-Install in a virtual environment or editable dev mode:
+For agent embedding and workspace bootstrap, see:
 
+- `docs/agent_install.md`
+
+## CLI Interface
+
+### Recording Observations
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -e .
-agent-memory-journal --help
+# Add a daily episodic note
+agent-memory-journal note "User prefers dark mode for all UI elements" --category preference
+
+# Add a core constraint (pinned to AGENT.md)
+agent-memory-journal remember "Never use public wifi for sensitive ops" --category constraint --pinned
 ```
 
-## Bootstrap a new memory root
-
-Initialize an empty memory root:
-
+### Retrieval and Maintenance
 ```bash
-agent-memory-journal --root /path/to/root init
+# Search across all tiers (warm hits are weighted 2x to prefer curated memory)
+# This also updates 'last_seen' metadata for retrieved core hits.
+agent-memory-journal search --query "network safety"
+
+# Supersede an outdated memory
+agent-memory-journal forget con-12345
+
+# Perform ingestion (Promote repeated facts & rebuild AGENT.md)
+agent-memory-journal ingest
+
+# Verify memory integrity
+agent-memory-journal doctor --strict
 ```
 
-This creates:
-- `MEMORY.md`
-- `memory/`
-- optional starter config if `--with-config` is used
+## Python API
 
-## CLI usage
+The `Journal` class is the primary entry point for agent integration.
+The CLI is a convenience wrapper, not the primary interface.
 
-### Add a note
+```python
+from agent_memory import Journal
 
-```bash
-python3 agent_memory_journal.py --root /path/to/workspace add --note "Remember to renew the PAT before Friday"
+# Initialize
+j = Journal(root="~/.memory")
+j.init()
+
+# Store episodic memory
+j.note("Detected high latency on primary gateway")
+
+# Store core memory with supersedes flow
+j.remember("Gateway 10.0.0.1 is unstable", category="gotcha", supersedes="got-prev-id")
+
+# Search (returns RecallResult objects)
+hits = j.recall("gateway status", tier="all")
+for hit in hits:
+    print(f"[{hit.tier}] {hit.text} (Score: {hit.score})")
 ```
 
-### Add a note to long-term memory too
+## Advanced Features
 
-```bash
-python3 agent_memory_journal.py --root /path/to/workspace add --note "Use playing golf app path for live tee time checks" --long
+### Autonomous Promotion
+The `ingest` cycle automatically detects facts repeated across different days in the episodic logs. If a fact appears on at least 2 distinct days, it is promoted to the **Warm** (Core) tier as a `decision` or based on keyword triggers.
+
+### Memory Decay & Archiving
+To prevent the Warm tier from becoming a "junk drawer," `ingest` runs `archive_unpinned_core` as part of its cycle: unpinned core memories whose `last_seen` (or `created`, as fallback) is older than 30 days are moved into `archive/core/`. Pinned memories are never decayed automatically — they leave the active set only via `forget`.
+
+### Session Management
+Short-term session memory is stored in `.memory/sessions/<session_id>.md`.
+*   **Lifecycle**: Currently, sessions are persistent files. Future versions will support TTL-based cleanup.
+*   **Context**: Agents can use `j.session_note(session_id, text)` to record ephemeral context that doesn't yet belong in the long-term episodic log.
+
+### Integrity & Safety
+*   **Doctor**: Uses SHA256 manifests to ensure core memory files haven't been tampered with or corrupted. Manifest entries are refreshed automatically on `remember`/`forget` so the integrity check only flags real out-of-band edits.
+*   **Sanitization**: Core memories are screened for prompt-injection patterns and control characters before promotion.
+
+## Directory Layout
+
+```text
+.memory/
+├── AGENT.md           # Hot Set (Auto-generated by default)
+├── config.json        # Hot target + size override config
+├── core/              # Warm Memory (decisions, constraints, etc.)
+├── episodic/          # Cold Memory (YYYY-MM-DD.md)
+├── sessions/          # Session-specific context
+├── index/             # Search indexes and manifests
+└── archive/           # Decayed core memories
 ```
 
-### Show recent notes
+## Hot promotion target override
 
-```bash
-python3 agent_memory_journal.py --root /path/to/workspace recent --days 2
-```
+Pinned memories are promoted into `.memory/AGENT.md` by default.
 
-### Search memory
-
-```bash
-python3 agent_memory_journal.py --root /path/to/workspace search --query "playing golf"
-```
-
-### Review recurring patterns
-
-```bash
-python3 agent_memory_journal.py --root /path/to/workspace topics --days 14
-python3 agent_memory_journal.py --root /path/to/workspace cadence --days 14
-python3 agent_memory_journal.py --root /path/to/workspace digest --days 7
-python3 agent_memory_journal.py --root /path/to/workspace candidates --days 7
-```
-
-### Extract likely memory-worthy lines from raw text
-
-```bash
-cat transcript.txt | python3 agent_memory_journal.py extract
-```
-
-## Configuration
-
-The tool resolves its root in this order:
-
-1. `--root /path/to/root`
-2. `AGENT_MEMORY_ROOT=/path/to/root`
-3. current working directory
-
-Optional path settings:
-
-- `--memory-dir memory`
-- `--long-file MEMORY.md`
-
-
-### Optional JSON config
-
-You can provide a config file with `--config-file` or place `agent-memory-journal.json` in the root.
-
-Example:
+You can override that in `.memory/config.json`:
 
 ```json
 {
-  "triggers": [
-    "\\bremember\\b",
-    "\\bdecision\\b",
-    "\\bfrom now on\\b"
-  ]
+  "hot_path": "../AGENTS.md",
+  "hot_header": "# AGENTS.md - Auto-generated hot memory",
+  "hot_max_chars": 4000
 }
 ```
 
-The repository includes a starter file at `examples/config.example.json`.
+`hot_max_chars` is currently a **character budget**, not a token budget.
+That choice is intentional for now to avoid adding a tokenizer dependency like `tiktoken`.
+A token-aware limit may be added later, but today the implementation enforces chars only.
 
-## Alpha contract (0.1.x)
-
-Stable for the alpha line:
-- file layout: `<root>/MEMORY.md` and `<root>/memory/YYYY-MM-DD.md`
-- commands: `add`, `extract`, `recent`, `search`, `stats`, `topics`, `cadence`, `digest`, `candidates`
-- `--root`, `--config-file`, `--json`, and `--version`
-- sentinel outputs such as `NO_MATCHES` and `NO_CANDIDATES`
-
-Intended for automation:
-- `recent --json`
-- `search --json`
-- `stats --json`
-- `topics --json`
-- `cadence --json`
-- `digest --json`
-- `candidates --json`
-
-Platform note:
-- current locking uses `fcntl`, so the alpha target is POSIX/Linux environments
-
-## Design goals
-
-- plain files, not a database
-- easy to inspect manually
-- safe against duplicate note spam
-- useful both for agents and humans
-- small enough to understand quickly
-
-
-## Agent-oriented setup
-
-If you want another agent to become productive from the repository URL alone, point it to:
-
-- `SKILL.md` for procedural usage
-- `examples/agent-install.md` for installation and first-run instructions
-
-The intended flow is: clone repo -> create venv -> run tests -> use CLI with `--root`.
-
-## Testing
-
-Run tests with:
-
-```bash
-.venv/bin/pytest -q
-```
-
-Current coverage includes:
-- repo smoke checks
-- add + recent flow
-- long-memory dedupe
-- search flow
-- digest flow
-- temp-root execution
-
-## Roadmap
-
-Short-term:
-- improve help text and examples
-- add more focused unit tests
-- clean up output contracts
-- package for easier installation
-
-Later:
-- decide whether the CLI name and internal engine naming should fully converge
-- publish a reusable skill/package around the standalone tool
-- consider importable Python API if it stays small and coherent
-
-## Repository layout
-
-```text
-agent-memory-journal/
-├── agent_memory_journal.py
-├── README.md
-├── LICENSE
-├── pyproject.toml
-├── .gitignore
-├── examples/
-│   └── quickstart.md
-└── tests/
-    ├── test_smoke.py
-    └── test_cli.py
-```
-
-## License
-
-MIT
-
-
-## Alpha release plan
-
-Target first public milestone: `0.1.0`.
-
-Release criteria:
-- standalone execution without workspace-specific paths
-- documented root/config model
-- green test suite
-- agent-facing setup instructions
-- stable CLI for add/recent/search/topics/cadence/digest/candidates
+This is useful when an agent framework expects a root-level memory file like `AGENTS.md`.
