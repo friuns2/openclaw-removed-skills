@@ -3,11 +3,16 @@
   "slug": "aleph-alpha",
   "displayName": "Aleph Alpha",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168604830,
-    "commit": "https://github.com/openclaw/skills/commit/14a277953dec4f1ead82e64b99b6412121b08c5b"
+    "version": "1.0.3",
+    "publishedAt": 1776853089325,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168604830,
+      "commit": "https://github.com/openclaw/skills/commit/14a277953dec4f1ead82e64b99b6412121b08c5b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774666974136,
