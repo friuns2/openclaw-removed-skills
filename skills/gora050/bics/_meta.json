@@ -3,11 +3,16 @@
   "slug": "bics",
   "displayName": "Bics",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169967403,
-    "commit": "https://github.com/openclaw/skills/commit/940a21ecf9ea26106afc0baf5706f27e39be7f66"
+    "version": "1.0.3",
+    "publishedAt": 1776865042780,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169967403,
+      "commit": "https://github.com/openclaw/skills/commit/940a21ecf9ea26106afc0baf5706f27e39be7f66"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774933496092,
