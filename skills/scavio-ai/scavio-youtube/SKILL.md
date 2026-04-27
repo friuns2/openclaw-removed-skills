@@ -1,8 +1,8 @@
 ---
 name: scavio-youtube
-description: Search YouTube, retrieve video metadata, extract full transcripts, and check AI trainability. Use for RAG pipelines or any task requiring video content.
-version: 2.0.0
-tags: youtube, video-search, transcript, metadata, captions, agents, langchain, crewai, autogen, structured-data, json, ai-agents, content-research, rag
+description: Search YouTube and retrieve video metadata. Use for finding videos, checking view counts, channel info, or AI training suitability.
+version: 2.1.0
+tags: youtube, video-search, metadata, agents, langchain, crewai, autogen, structured-data, json, ai-agents, content-research
 metadata:
   openclaw:
     requires:
@@ -13,15 +13,14 @@ metadata:
     homepage: https://scavio.dev/docs
 ---
 
-# YouTube Search and Transcripts via Scavio
+# YouTube Search and Metadata via Scavio
 
-Search YouTube, retrieve video metadata, extract transcripts, and check AI trainability. All endpoints return structured JSON.
+Search YouTube and retrieve video metadata. All endpoints return structured JSON.
 
 ## When to trigger
 
 Use this skill when the user asks to:
 - Find YouTube videos on a topic
-- Get the transcript of a YouTube video (for summarization, RAG, Q&A)
 - Check view counts, upload date, or video metadata
 - Verify if a video is suitable for AI training or has captions available
 
@@ -36,10 +35,8 @@ export SCAVIO_API_KEY=sk_live_your_key
 ## Workflow
 
 1. **Finding a video:** call `/search` with the topic. Use `sort_by: view_count` for the most-watched result.
-2. **Getting content:** if the user wants a summary, call `/transcript` with the `videoId` from search results.
-3. **Checking metadata:** call `/metadata` for view counts, likes, tags, or channel info.
-4. **RAG pipelines:** inject transcript segments directly into context. Each segment has `text`, `start`, and `duration`.
-5. **Trainability:** call `/trainability` to check license and caption availability before ingesting.
+2. **Checking metadata:** call `/metadata` for view counts, likes, tags, or channel info.
+3. **Trainability:** call `/trainability` to check license and caption availability before ingesting.
 
 ## Endpoints
 
@@ -47,7 +44,6 @@ export SCAVIO_API_KEY=sk_live_your_key
 |---|---|
 | `POST https://api.scavio.dev/api/v1/youtube/search` | Search YouTube videos |
 | `POST https://api.scavio.dev/api/v1/youtube/metadata` | Get structured video metadata |
-| `POST https://api.scavio.dev/api/v1/youtube/transcript` | Extract video transcript |
 | `POST https://api.scavio.dev/api/v1/youtube/trainability` | Check AI training suitability |
 
 ```
@@ -66,14 +62,6 @@ Authorization: Bearer $SCAVIO_API_KEY
 | `subtitles` | boolean | `false` | Videos with captions only |
 | `creative_commons` | boolean | `false` | Creative Commons videos only |
 
-## Transcript Parameters
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `video_id` | string | required | YouTube video ID (e.g. `sVcwVQRHIc8`) |
-| `language` | string | `en` | Language code for transcript |
-| `transcript_origin` | string | -- | `auto_generated` or `uploader_provided` |
-
 ## Examples
 
 ```python
@@ -88,11 +76,9 @@ results = requests.post(f"{BASE}/api/v1/youtube/search", headers=HEADERS,
 
 video_id = results["data"][0]["videoId"]
 
-# Transcript for RAG
-transcript = requests.post(f"{BASE}/api/v1/youtube/transcript", headers=HEADERS,
-    json={"video_id": video_id, "language": "en"}).json()
-
-text = " ".join(seg["text"] for seg in transcript["data"])
+# Metadata
+metadata = requests.post(f"{BASE}/api/v1/youtube/metadata", headers=HEADERS,
+    json={"video_id": video_id}).json()
 ```
 
 ## Search Response
@@ -114,8 +100,6 @@ text = " ".join(seg["text"] for seg in transcript["data"])
 }
 ```
 
-Transcript response: `[{"text": "...", "start": 0.0, "duration": 3.2}]`
-
 Metadata response: `title`, `view_count`, `like_count`, `comment_count`, `categories`, `tags`, `channel_id`, `upload_date`, `thumbnails`.
 
 Trainability response: `has_transcript`, `transcript_languages`, `license`, `is_trainable`.
@@ -123,14 +107,11 @@ Trainability response: `has_transcript`, `transcript_languages`, `license`, `is_
 ## Guardrails
 
 - The search parameter is `search`, not `query` — this is different from other Scavio endpoints.
-- Never fabricate video IDs, view counts, or transcript content.
-- Transcripts are raw captions — they may lack punctuation. Summarize them clearly.
-- If a transcript is not available, call `/trainability` to check why before reporting an error.
+- Never fabricate video IDs, view counts, or metadata.
 
 ## Failure handling
 
 - If search returns no results, suggest different keywords or relaxing filters.
-- If transcript fails, check if the video has captions using `/trainability`.
 - If `SCAVIO_API_KEY` is not set, prompt the user to export it before continuing.
 
 ## LangChain

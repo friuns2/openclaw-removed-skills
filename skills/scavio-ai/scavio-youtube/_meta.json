@@ -3,9 +3,15 @@
   "slug": "scavio-youtube",
   "displayName": "Scavio Youtube",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775039395569,
-    "commit": "https://github.com/openclaw/skills/commit/dfe352e8b0934de2d9070a28065e046ff42966d5"
+    "version": "2.1.0",
+    "publishedAt": 1777263446233,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775039395569,
+      "commit": "https://github.com/openclaw/skills/commit/dfe352e8b0934de2d9070a28065e046ff42966d5"
+    }
+  ]
 }
