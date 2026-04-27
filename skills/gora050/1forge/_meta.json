@@ -3,11 +3,16 @@
   "slug": "1forge",
   "displayName": "1Forge",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167829778,
-    "commit": "https://github.com/openclaw/skills/commit/586237042a9d60d1c7d6ab839c0a98691db7fa6c"
+    "version": "1.0.3",
+    "publishedAt": 1776864931639,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167829778,
+      "commit": "https://github.com/openclaw/skills/commit/586237042a9d60d1c7d6ab839c0a98691db7fa6c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774512237604,
