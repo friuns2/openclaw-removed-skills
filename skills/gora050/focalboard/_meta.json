@@ -3,11 +3,16 @@
   "slug": "focalboard",
   "displayName": "Focalboard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170159745,
-    "commit": "https://github.com/openclaw/skills/commit/b88e0dbaf911c78cbc72a777215ff16cfb42e830"
+    "version": "1.0.3",
+    "publishedAt": 1776865382161,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170159745,
+      "commit": "https://github.com/openclaw/skills/commit/b88e0dbaf911c78cbc72a777215ff16cfb42e830"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774962358444,
