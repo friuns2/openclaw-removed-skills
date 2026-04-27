@@ -3,11 +3,16 @@
   "slug": "ngrok",
   "displayName": "Ngrok",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169347242,
-    "commit": "https://github.com/openclaw/skills/commit/8d93170b8a54aff9fca7e556ca6f71f094d89cfe"
+    "version": "1.0.3",
+    "publishedAt": 1776864268166,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169347242,
+      "commit": "https://github.com/openclaw/skills/commit/8d93170b8a54aff9fca7e556ca6f71f094d89cfe"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774818329104,
