@@ -3,11 +3,16 @@
   "slug": "qualys",
   "displayName": "Qualys",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168898089,
-    "commit": "https://github.com/openclaw/skills/commit/2e18208c517faf8424bafd0e69f1485124aca588"
+    "version": "1.0.3",
+    "publishedAt": 1776863539535,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168898089,
+      "commit": "https://github.com/openclaw/skills/commit/2e18208c517faf8424bafd0e69f1485124aca588"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774731903162,
