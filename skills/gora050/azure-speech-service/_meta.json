@@ -3,11 +3,16 @@
   "slug": "azure-speech-service",
   "displayName": "Azure Speech Service",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168329199,
-    "commit": "https://github.com/openclaw/skills/commit/fedd8e5c479fb8ed4d0c23bb7da006d7aa96d326"
+    "version": "1.0.3",
+    "publishedAt": 1776862400573,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168329199,
+      "commit": "https://github.com/openclaw/skills/commit/fedd8e5c479fb8ed4d0c23bb7da006d7aa96d326"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774602293849,
