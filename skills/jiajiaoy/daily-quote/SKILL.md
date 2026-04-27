@@ -1,6 +1,6 @@
 ---
 name: daily-quote
-description: "每日精选名言金句，中英双语精美视觉卡片。Daily inspirational quote with bilingual EN/CN visual card. Trigger on：每日金句、今日金句、名言、鸡汤、励志、daily quote、quote of the day、motivational quote、morning motivation、早安语录。"
+description: "Daily curated quote from philosophers, leaders, and thinkers — with author context and why it resonates today. Bilingual EN/CN shareable visual card."
 keywords:
   - 每日金句
   - 今日金句

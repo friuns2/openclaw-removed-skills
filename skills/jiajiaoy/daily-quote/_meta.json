@@ -3,9 +3,15 @@
   "slug": "daily-quote",
   "displayName": "Daily Quote",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775109041097,
-    "commit": "https://github.com/openclaw/skills/commit/4615f328a6573dc19e3a2e58b2dc02f7c73f994b"
+    "version": "1.0.1",
+    "publishedAt": 1777286833192,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775109041097,
+      "commit": "https://github.com/openclaw/skills/commit/4615f328a6573dc19e3a2e58b2dc02f7c73f994b"
+    }
+  ]
 }
