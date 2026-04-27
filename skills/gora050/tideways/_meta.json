@@ -3,11 +3,16 @@
   "slug": "tideways",
   "displayName": "Tideways",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169263058,
-    "commit": "https://github.com/openclaw/skills/commit/3964269769617d7891cf13729d13addaad7cd9d4"
+    "version": "1.0.3",
+    "publishedAt": 1776863962794,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169263058,
+      "commit": "https://github.com/openclaw/skills/commit/3964269769617d7891cf13729d13addaad7cd9d4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774789450969,
