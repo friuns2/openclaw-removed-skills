@@ -3,9 +3,15 @@
   "slug": "buildbuddy",
   "displayName": "Buildbuddy",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286220037,
-    "commit": "https://github.com/openclaw/skills/commit/dfc282efa45807d87fe12f208574966e9b4ee57e"
+    "version": "1.0.1",
+    "publishedAt": 1776882702028,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286220037,
+      "commit": "https://github.com/openclaw/skills/commit/dfc282efa45807d87fe12f208574966e9b4ee57e"
+    }
+  ]
 }
