@@ -3,11 +3,16 @@
   "slug": "d7-sms",
   "displayName": "D7 Sms",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170322283,
-    "commit": "https://github.com/openclaw/skills/commit/d8a6f897938980da243d892c88b2200d5b161f29"
+    "version": "1.0.3",
+    "publishedAt": 1776857059266,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170322283,
+      "commit": "https://github.com/openclaw/skills/commit/d8a6f897938980da243d892c88b2200d5b161f29"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012566603,
