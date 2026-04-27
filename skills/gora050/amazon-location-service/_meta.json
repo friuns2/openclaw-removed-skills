@@ -3,11 +3,16 @@
   "slug": "amazon-location-service",
   "displayName": "Amazon Location Service",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170980917,
-    "commit": "https://github.com/openclaw/skills/commit/9cf4f5c3fa36a68d7b927c1d70233fe246ad48fb"
+    "version": "1.0.3",
+    "publishedAt": 1776892279877,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170980917,
+      "commit": "https://github.com/openclaw/skills/commit/9cf4f5c3fa36a68d7b927c1d70233fe246ad48fb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775131437800,
