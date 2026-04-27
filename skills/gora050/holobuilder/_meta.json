@@ -3,11 +3,16 @@
   "slug": "holobuilder",
   "displayName": "Holobuilder",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169669813,
-    "commit": "https://github.com/openclaw/skills/commit/8eb303a632850e2730923e835d2dbb34ac17f760"
+    "version": "1.0.3",
+    "publishedAt": 1776864638330,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169669813,
+      "commit": "https://github.com/openclaw/skills/commit/8eb303a632850e2730923e835d2dbb34ac17f760"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774868637230,
