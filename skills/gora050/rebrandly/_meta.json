@@ -3,11 +3,16 @@
   "slug": "rebrandly",
   "displayName": "Rebrandly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167846218,
-    "commit": "https://github.com/openclaw/skills/commit/29caf4e88563e81075161d71ce2385923434cad5"
+    "version": "1.0.3",
+    "publishedAt": 1776861805255,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167846218,
+      "commit": "https://github.com/openclaw/skills/commit/29caf4e88563e81075161d71ce2385923434cad5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774515823654,
