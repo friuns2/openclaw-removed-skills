@@ -3,9 +3,15 @@
   "slug": "kickfire",
   "displayName": "Kickfire",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168873344,
-    "commit": "https://github.com/openclaw/skills/commit/49c06b1d191cd4fb96d05cda1f40e2f1be0623df"
+    "version": "1.0.3",
+    "publishedAt": 1776864603803,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168873344,
+      "commit": "https://github.com/openclaw/skills/commit/49c06b1d191cd4fb96d05cda1f40e2f1be0623df"
+    }
+  ]
 }
