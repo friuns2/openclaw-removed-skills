@@ -3,11 +3,16 @@
   "slug": "propelauth",
   "displayName": "Propelauth",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168776987,
-    "commit": "https://github.com/openclaw/skills/commit/89b6247cd5cc7e3da4fb03807b44ba4062bf82ef"
+    "version": "1.0.3",
+    "publishedAt": 1776863198012,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168776987,
+      "commit": "https://github.com/openclaw/skills/commit/89b6247cd5cc7e3da4fb03807b44ba4062bf82ef"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774688674568,
