@@ -3,11 +3,16 @@
   "slug": "announcekit",
   "displayName": "Announcekit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167767377,
-    "commit": "https://github.com/openclaw/skills/commit/c0d999e7b5ceeca19fa077459a065aeb600fb489"
+    "version": "1.0.3",
+    "publishedAt": 1776861746033,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167767377,
+      "commit": "https://github.com/openclaw/skills/commit/c0d999e7b5ceeca19fa077459a065aeb600fb489"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774501472426,
