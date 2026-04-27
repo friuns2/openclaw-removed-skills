@@ -3,11 +3,16 @@
   "slug": "contentking",
   "displayName": "Contentking",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170917279,
-    "commit": "https://github.com/openclaw/skills/commit/fe0e078e3404a413b9d4b760ae94fc1b0031a06b"
+    "version": "1.0.3",
+    "publishedAt": 1776898950271,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170917279,
+      "commit": "https://github.com/openclaw/skills/commit/fe0e078e3404a413b9d4b760ae94fc1b0031a06b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775117103724,
