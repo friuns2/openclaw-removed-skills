@@ -3,11 +3,16 @@
   "slug": "veeva-vault",
   "displayName": "Veeva Vault",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169330258,
-    "commit": "https://github.com/openclaw/skills/commit/34b5cc10bdbac4acf19dcb29d5e96c6aba259e33"
+    "version": "1.0.3",
+    "publishedAt": 1776864198362,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169330258,
+      "commit": "https://github.com/openclaw/skills/commit/34b5cc10bdbac4acf19dcb29d5e96c6aba259e33"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774818271466,
