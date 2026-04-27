@@ -3,9 +3,15 @@
   "slug": "lean-technologies",
   "displayName": "Lean Technologies",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775225011438,
-    "commit": "https://github.com/openclaw/skills/commit/06a0552b26a0a2adb40c60a01b74620d373d8008"
+    "version": "1.0.1",
+    "publishedAt": 1776881966430,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775225011438,
+      "commit": "https://github.com/openclaw/skills/commit/06a0552b26a0a2adb40c60a01b74620d373d8008"
+    }
+  ]
 }
