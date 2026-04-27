@@ -3,11 +3,16 @@
   "slug": "tinypng",
   "displayName": "Tinypng",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169527737,
-    "commit": "https://github.com/openclaw/skills/commit/0e5354107b454f4e822aabc597ae90635434e869"
+    "version": "1.0.3",
+    "publishedAt": 1776855267011,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169527737,
+      "commit": "https://github.com/openclaw/skills/commit/0e5354107b454f4e822aabc597ae90635434e869"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774846984545,
