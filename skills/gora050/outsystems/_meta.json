@@ -3,11 +3,16 @@
   "slug": "outsystems",
   "displayName": "Outsystems",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169652658,
-    "commit": "https://github.com/openclaw/skills/commit/b81045b41189a5bb8eda806155c9ef7fccf247d3"
+    "version": "1.0.3",
+    "publishedAt": 1776864545638,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169652658,
+      "commit": "https://github.com/openclaw/skills/commit/b81045b41189a5bb8eda806155c9ef7fccf247d3"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775169650703,
