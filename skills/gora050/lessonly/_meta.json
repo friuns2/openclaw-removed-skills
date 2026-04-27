@@ -3,11 +3,16 @@
   "slug": "lessonly",
   "displayName": "Lessonly",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170407327,
-    "commit": "https://github.com/openclaw/skills/commit/ac8be0b81b6453e3fd0bb6962ce2f2edf1de9c80"
+    "version": "1.0.3",
+    "publishedAt": 1776865651337,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170407327,
+      "commit": "https://github.com/openclaw/skills/commit/ac8be0b81b6453e3fd0bb6962ce2f2edf1de9c80"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775019889210,
