@@ -3,9 +3,15 @@
   "slug": "matrix-detection",
   "displayName": "Matrix Detection",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774965697766,
-    "commit": "https://github.com/openclaw/skills/commit/cb5bbb05a3e7167e1d0e1f00ea564a2463cef517"
+    "version": "1.0.1",
+    "publishedAt": 1777051979672,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774965697766,
+      "commit": "https://github.com/openclaw/skills/commit/cb5bbb05a3e7167e1d0e1f00ea564a2463cef517"
+    }
+  ]
 }

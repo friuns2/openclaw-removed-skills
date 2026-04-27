@@ -1,13 +1,3 @@
----
-name: matrix-detection
-description: Identify illusions, hype, false narratives, and systemic manipulation; classify signal vs noise with evidence and risk tags.
-metadata:
-  author: Morpheus
-  version: 2.0.0
-  owner: Morpheus Agent
-  category: detection
----
-
 # SKILL: matrix-detection
 
 ## Purpose

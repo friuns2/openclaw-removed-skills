@@ -1,15 +1,16 @@
 ---
 name: matrix-detection
-description: Identify patterns where ignorance, noise, hype, and manipulation disguise themselves. Reveal dependency loops, governance theater, and predatory incentive structures.
-version: 1.0.0
+description: Identify illusions, hype, false narratives, and systemic manipulation; classify signal vs noise with evidence and risk tags.
+version: 2.0.0
 display_name: "Matrix Detection"
 triggers:
-  - detect matrix
-  - is this a scam
-  - analyze project
-  - identify trap
-  - find manipulation
   - matrix detection
-  - protocol analysis
-  - community analysis
+  - detect matrix
+  - is this hype
+  - is this manipulation
+  - false narrative
+  - narrative analysis
+  - analyze opportunity
+  - community movement
+  - market narrative
 ---
