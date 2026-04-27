@@ -3,11 +3,16 @@
   "slug": "appcues",
   "displayName": "Appcues",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168014634,
-    "commit": "https://github.com/openclaw/skills/commit/b9f62c18ed68f37aba29666f1b9be5ed91921a56"
+    "version": "1.0.3",
+    "publishedAt": 1776861932429,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168014634,
+      "commit": "https://github.com/openclaw/skills/commit/b9f62c18ed68f37aba29666f1b9be5ed91921a56"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774559086072,
