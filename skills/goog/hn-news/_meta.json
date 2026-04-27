@@ -1,0 +1,11 @@
+{
+  "owner": "goog",
+  "slug": "hn-news",
+  "displayName": "Hacker news on topic AI and agent only",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775046416548,
+    "commit": null
+  },
+  "history": []
+}
