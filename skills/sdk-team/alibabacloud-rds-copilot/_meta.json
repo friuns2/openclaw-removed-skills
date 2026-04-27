@@ -3,9 +3,15 @@
   "slug": "alibabacloud-rds-copilot",
   "displayName": "Alibabacloud Rds Copilot",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775220716144,
-    "commit": "https://github.com/openclaw/skills/commit/0c56c648b84da46a54df076ffaa3417de140b556"
+    "version": "0.0.2",
+    "publishedAt": 1776685817872,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775220716144,
+      "commit": "https://github.com/openclaw/skills/commit/0c56c648b84da46a54df076ffaa3417de140b556"
+    }
+  ]
 }
