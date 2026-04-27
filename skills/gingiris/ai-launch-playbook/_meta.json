@@ -1,11 +1,17 @@
 {
   "owner": "gingiris",
   "slug": "ai-launch-playbook",
-  "displayName": "Ai Launch Playbook",
+  "displayName": "AI Product Global Launch Playbook",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774767443014,
-    "commit": "https://github.com/openclaw/skills/commit/fcc837e2c511d27c75b737570f9e84f8c728f4ab"
+    "version": "1.1.2",
+    "publishedAt": 1776567422152,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774767443014,
+      "commit": "https://github.com/openclaw/skills/commit/fcc837e2c511d27c75b737570f9e84f8c728f4ab"
+    }
+  ]
 }

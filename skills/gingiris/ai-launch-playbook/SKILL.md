@@ -1,7 +1,7 @@
 ---
-name: ai-launch-playbook
+name: "AI Product Global Launch Playbook"
 version: 1.0.0
-description: AI Product Global Launch Guide - Complete strategy for launching AI products worldwide with real case studies from Manus, Devin, AFFiNE.
+description: Launch your AI product to global attention — the playbook behind Manus, Devin, and AFFiNE's breakout launches. Covers AI-specific GTM strategy, hype cycle management, waitlist tactics, and multi-market rollout for maximum day-one impact.
 author: Gingiris
 tags:
   - ai
