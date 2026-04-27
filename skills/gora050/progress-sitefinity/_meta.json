@@ -3,11 +3,16 @@
   "slug": "progress-sitefinity",
   "displayName": "Progress Sitefinity",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168905946,
-    "commit": "https://github.com/openclaw/skills/commit/396014d3d26b550bc5a96ef49133ea143e58fe15"
+    "version": "1.0.3",
+    "publishedAt": 1776863560215,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168905946,
+      "commit": "https://github.com/openclaw/skills/commit/396014d3d26b550bc5a96ef49133ea143e58fe15"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774731913340,
