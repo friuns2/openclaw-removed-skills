@@ -3,11 +3,16 @@
   "slug": "modulr",
   "displayName": "Modulr",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170896389,
-    "commit": "https://github.com/openclaw/skills/commit/7d205987f870b9c61d56f291f4e6f6d8ce3c0e2c"
+    "version": "1.0.3",
+    "publishedAt": 1776898912444,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170896389,
+      "commit": "https://github.com/openclaw/skills/commit/7d205987f870b9c61d56f291f4e6f6d8ce3c0e2c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775117029338,
