@@ -99,13 +99,24 @@ def download_data_file(file_name: str, output_path: str, max_retries: int = 3) -
     return False
 
 def init():
+    import platform
+    import stat
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    exe_file = os.path.join(current_dir, "BitSoulBeauty.exe")
+    
+    is_windows = platform.system().lower() == 'windows'
+    exe_name = "BitSoulBeauty.exe" if is_windows else "BitSoulBeauty"
+    
+    exe_file = os.path.join(current_dir, exe_name)
     if not os.path.exists(exe_file):
-        print(f"Local file BitSoulBeauty.exe not found, downloading from server...")
-        if not download_data_file("BitSoulBeauty.exe", exe_file, max_retries=3):
-            print("Error: BitSoulBeauty.exe download failed, initialization aborted.")
+        print(f"Local file {exe_name} not found, downloading from server...")
+        if not download_data_file(exe_name, exe_file, max_retries=3):
+            print(f"Error: {exe_name} download failed, initialization aborted.")
             return
+            
+        # Give execution permission on Mac/Linux
+        if not is_windows:
+            st = os.stat(exe_file)
+            os.chmod(exe_file, st.st_mode | stat.S_IEXEC)
         
 if __name__ == "__main__":
     init()

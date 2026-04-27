@@ -1,23 +1,6 @@
 ---
 name: ai-beauty
 description: Edit image to beautify faces or portaits in it. Use when (1) User requests to process an image, (2) User asks to beautify a photo.
-metadata:
-  openclaw:
-    emoji: "💄"
-    homepage: https://www.aicodingyard.com
-    requires:
-      env:
-        - BITSOUL_TOKEN
-      bins:
-        - python3
-    optional:
-      env:
-        - BITSOUL_TOKEN_ENV_FILE
-      pythonPackages:
-        - requests
-      network:
-        - info.aicodingyard.com
-    primaryEnv: BITSOUL_TOKEN
 ---
 
 # ai-beauty Skill
@@ -74,7 +57,7 @@ python ./BitSoulFaceBeautySkill/init.py
 Execute the following procedures step by step each time an image is processed:
 1. Run the initialization script init.py
 2. Get the image path to be beautified.
-3. Ask the user to obtain specific beautification requirements.
+3. Ask the user to make a choice among the recommended parameters files and obtain specific beautification requirements.
 4. Generate a temporary beauty parameters file (json format).
 5. Create a new directory in the image path to be beautified and save all results into this new directory.
 6. Run tool.
@@ -88,7 +71,10 @@ you must call init.py before you use any functions in this skill.
 
 # Beauty Parameters File
 
-A template file looks like:
+There are three recommended parameters files.
+
+1. 自然（默认）
+
 ```json
 {
     "磨皮":0.5,
@@ -123,19 +109,102 @@ A template file looks like:
     "瘦手臂":0.0,
     "瘦身":0.0,
     "发际线":0.0,
-    "双眼皮":0.0
+    "双眼皮":0.0,
+    "默认妆容":0.5,
+    "默认妆容_lut":0.5
+}
+```
+2.精致
+```json
+{
+    "磨皮":0.8,
+    "清晰":0.2,
+    "白牙":0.4,
+    "亮眼":0.5,
+    "美白-白皙":0.5,
+    "祛黑眼圈":0.7,
+    "祛法令纹":0.7,
+    "自然脸":0.0,
+    "女神":0.7,
+    "男神":0.0,
+    "小头":0.0,
+    "小脸":0.0,
+    "窄脸":0.15,
+    "瘦下巴":0.0,
+    "瘦颧骨":0.3,
+    "瘦下颌":0.2,
+    "眼睛位置":0.0,
+    "眼距":0.0,
+    "大眼":0.6,
+    "瘦鼻":0.6,
+    "长鼻":0.0,
+    "嘴巴位置":0.0,
+    "嘴巴大小":0.0,
+    "美胯":0.0,
+    "天鹅颈":0.0,
+    "丰胸":0.0,
+    "瘦腰":0.0,
+    "长腿":0.0,
+    "瘦腿":0.0,
+    "瘦手臂":0.0,
+    "瘦身":0.0,
+    "发际线":0.2,
+    "双眼皮":0.0,
+    "女神妆":0.7,
+    "女神妆_lut":0.7
+}
+```
+3.减龄
+```json
+{
+    "磨皮":0.9,
+    "清晰":0.2,
+    "白牙":0.4,
+    "亮眼":0.5,
+    "美白-红润":0.5,
+    "祛黑眼圈":0.9,
+    "祛法令纹":0.9,
+    "自然脸":0.75,
+    "女神":0.0,
+    "男神":0.0,
+    "小头":0.0,
+    "小脸":0.4,
+    "窄脸":0.3,
+    "瘦下巴":0.0,
+    "瘦颧骨":0.3,
+    "瘦下颌":0.2,
+    "眼睛位置":0.0,
+    "眼距":0.0,
+    "大眼":0.8,
+    "瘦鼻":0.6,
+    "长鼻":0.0,
+    "嘴巴位置":0.0,
+    "嘴巴大小":0.0,
+    "美胯":0.0,
+    "天鹅颈":0.0,
+    "丰胸":0.0,
+    "瘦腰":0.0,
+    "长腿":0.0,
+    "瘦腿":0.0,
+    "瘦手臂":0.0,
+    "瘦身":0.0,
+    "发际线":0.3,
+    "双眼皮":0.0,
+    "伪素颜":0.7,
+    "伪素颜_lut":0.6
 }
 ```
 
-
 # Beauty Items
 
-Beauty Parameters File中的**美颜小项**的介绍如下表所示：
+## Beauty Parameters File中的**美颜小项**的介绍如下表所示：
 
 |名称|功能描述|目的触发词汇(想要的效果)|问题触发词汇(想解决的痛点)|
 |--|--|--|--|
 |磨皮|柔化皮肤表层纹理，智能淡化毛孔、细纹、痘印等瑕疵；|磨皮、平滑、光滑、平整、细腻、柔肤、嫩肤、美肤、遮瑕、去瑕疵、护肤、皮肤优化、皮肤处理、去痘、缩毛孔、去黑头、去痘印、去斑、去纹、去油|皮肤粗糙、皮肤状态不好，有痘、皮肤油、毛孔大、皮肤差、闭口、粉刺、黑头|
-|美白|均匀提亮肤色至健康透亮状态，呈现“原生好皮”效果；|美白、提亮、变白、调亮、透亮、通透、白皙、亮白、去暗沉、去黑、暖白、自然美白|肤色不均匀、显黑、暗沉、肤色黑、肤色脏、肤色深|
+|美白-自然|均匀提亮肤色至健康透亮状态，呈现“原生好皮”效果；|美白、提亮、变白、调亮、透亮、通透、白皙、亮白、去暗沉、去黑、暖白、自然美白|肤色不均匀、显黑、暗沉、肤色黑、肤色脏、肤色深|
+|美白-粉白|提亮肤色并融入柔和粉调，增强脸颊红润气色；|粉白、红润、血色|苍白、气色差|
+|美白-白皙|深度提亮至冷调白皙肤质，弱化暗沉与黄气，呈现通透瓷肌感，突出清冷高级氛围；|冷白、雪白、去黄|肤色黄|
 |清晰|增强面部轮廓与五官边缘锐度，强化立体光影，避免画面模糊；|清晰，立体、层次、锐化、清楚、去糊|糊、朦胧、画面灰、不清楚|
 |自然脸|收窄下半脸，保留个人骨相特征；|瘦脸、脸瘦、推脸、收脸、瓜子脸、鹅蛋脸、小V脸|脸大、大脸、圆脸、方脸、国字脸、显胖、咬肌大、发腮、脸胖、肿脸，垮脸，脸盘大|
 |女神|强化V脸轮廓与下颌线流畅度，搭配柔和颧骨修饰，突出女性柔美气质；|女神脸、御姐、精致脸||
@@ -158,3 +227,6 @@ Beauty Parameters File中的**美颜小项**的介绍如下表所示：
 |嘴巴位置|调整嘴唇在面部的垂直位置，嘴巴整体上移，优化人中与唇颏关系；|嘴巴上移、嘴巴位置向上|嘴巴太靠下、嘴巴位置偏下|
 |祛法令纹|淡化法令纹，优化鼻基底，平滑肌肤，减少年龄感；|去法令纹、淡化法令纹、遮法令纹、抚平法令纹、消除法令纹、法令纹平整、面部平整、减龄、填充、去沟壑|法令纹深、显老、脸垮、有沟、笑纹重、鼻翼沟深、老态、皮肤下垂、沟壑明显、八字纹、|
 |白牙|提亮牙齿，去除黄渍暗沉；|白牙、牙齿美白、牙齿变白、亮白牙齿、去黄牙、洁牙、牙齿增白、牙齿亮白、牙白一点|牙齿黄、牙黄、黄牙|
+
+## 使用“美颜小项”需要遵守的规则
+1.“美白-自然”、“美白-粉白”、“美白-白皙”是互斥的，在同一个参数文件中只能出现一种。

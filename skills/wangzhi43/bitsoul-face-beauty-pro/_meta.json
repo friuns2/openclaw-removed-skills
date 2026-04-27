@@ -3,9 +3,15 @@
   "slug": "bitsoul-face-beauty-pro",
   "displayName": "BitSoul AI Face Beauty 人像AI美颜",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1774873815726,
-    "commit": "https://github.com/openclaw/skills/commit/b479a30a8e1f68b41e5362a7e6e0441308c509ba"
+    "version": "1.0.5",
+    "publishedAt": 1775443461472,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1774873815726,
+      "commit": "https://github.com/openclaw/skills/commit/b479a30a8e1f68b41e5362a7e6e0441308c509ba"
+    }
+  ]
 }
