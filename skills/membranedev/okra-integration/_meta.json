@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "okra-integration",
+  "displayName": "Okra",
+  "latest": {
+    "version": "1.0.3",
+    "publishedAt": 1776858086505,
+    "commit": null
+  },
+  "history": []
+}
