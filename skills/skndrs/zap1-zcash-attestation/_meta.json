@@ -1,0 +1,11 @@
+{
+  "owner": "skndrs",
+  "slug": "zap1-zcash-attestation",
+  "displayName": "ZAP1 - Zcash Attestation",
+  "latest": {
+    "version": "0.2.1",
+    "publishedAt": 1775179528142,
+    "commit": null
+  },
+  "history": []
+}
