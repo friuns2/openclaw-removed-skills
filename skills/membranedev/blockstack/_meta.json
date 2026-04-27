@@ -3,11 +3,16 @@
   "slug": "blockstack",
   "displayName": "Blockstack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170326687,
-    "commit": "https://github.com/openclaw/skills/commit/b2b15944cda472aed78e7ff48d16e4bf1af4d1fe"
+    "version": "1.0.3",
+    "publishedAt": 1776857069017,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170326687,
+      "commit": "https://github.com/openclaw/skills/commit/b2b15944cda472aed78e7ff48d16e4bf1af4d1fe"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012572586,
