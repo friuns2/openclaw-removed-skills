@@ -3,9 +3,15 @@
   "slug": "hivebrite",
   "displayName": "Hivebrite",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775293401939,
-    "commit": "https://github.com/openclaw/skills/commit/428056527825cd909528b1c049d84f39cdcb2008"
+    "version": "1.0.1",
+    "publishedAt": 1776882906451,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775293401939,
+      "commit": "https://github.com/openclaw/skills/commit/428056527825cd909528b1c049d84f39cdcb2008"
+    }
+  ]
 }
