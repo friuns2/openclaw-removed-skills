@@ -76,10 +76,10 @@ INDICATOR=<值>
 **失败输出示例：**
 
 ```
-订单创建失败: Order creation request failed: <urlopen error [Errno 111] Connection refused>
+订单创建失败: 网络请求异常，请确认网络连接并稍后重试: <urlopen error [Errno 111] Connection refused>
 ```
 
-告知用户：*"订单创建失败，错误信息：`Order creation request failed: <urlopen error [Errno 111] Connection refused>`。请稍后重试，或检查您的位置输入是否有效。"*
+告知用户：*"订单创建失败，错误信息：`网络请求异常，请确认网络连接并稍后重试: <urlopen error [Errno 111] Connection refused>`。请稍后重试，或检查您的位置输入是否有效。"*
 
 ---
 
@@ -101,13 +101,13 @@ INDICATOR=<值>
 
 ```json
 {
-  "order_no": "<第一阶段获取的 ORDER_NO>",
+  "orderNo": "<第一阶段获取的 ORDER_NO>",
   "indicator": "<第一阶段获取的 INDICATOR>"
 }
 ```
 
 > [!NOTE]
-> 订单的所有详细信息（skill-id、order_no、amount、question、description、slug、resource_url 等）已由第一阶段脚本写入固定目录下的 JSON 文件中，`pre-verify-skill` 会根据 `order_no` 和 `indicator` 自动定位并读取。
+> 订单的所有详细信息（skillId、orderNo、amount、question、description、slug、resourceUrl 等）已由第一阶段脚本写入固定目录下的 JSON 文件中，`clawtip` 会根据 `orderNo` 和 `indicator` 自动定位并读取。
 
 **目标：** 等待支付成功，并获取 `payCredential`（支付凭证）。
 

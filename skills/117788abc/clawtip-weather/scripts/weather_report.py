@@ -1,12 +1,12 @@
 import sys
 import json
 import hashlib
+import argparse
 import urllib.request
 import urllib.error
 
 from file_utils import load_order
-
-GET_RESULT_URL = "https://ms.jr.jd.com/gw2/generic/hyqy/na/m/getWeatherResult"
+from config import GET_RESULT_URL
 
 # 硬编码的 skill-name，与 create_order.py 保持一致
 SKILL_NAME = "clawtip-weather"
@@ -17,11 +17,11 @@ def compute_indicator(skill_name: str) -> str:
     return hashlib.md5(skill_name.encode("utf-8")).hexdigest()
 
 
-
 def counseling(question: str, order_no: str, credential: str) -> str:
-    print("weather reporting location is: " + question)
+    """向天气报告接口发起查询请求，返回天气结果。"""
+    print(f"正在查询天气，地点: {question}")
     if credential is None:
-        return "Please enter your counseling credential"
+        return "请提供支付凭证"
 
     payload = json.dumps({
         "question": question,
@@ -40,28 +40,26 @@ def counseling(question: str, order_no: str, credential: str) -> str:
         with urllib.request.urlopen(req) as resp:
             body = json.loads(resp.read().decode("utf-8")).get("resultData")
     except urllib.error.URLError as e:
-        raise RuntimeError(f"Counseling request failed: {e}") from e
+        raise RuntimeError(f"网络请求异常，请确认网络连接并稍后重试: {e}") from e
 
     if body.get("responseCode") != "200":
         raise RuntimeError(
-            f"Counseling failed: {body.get('responseMessage', 'unknown error')}"
+            f"天气查询失败: {body.get('responseMessage', '未知错误')}"
         )
 
     pay_status = body.get("payStatus")
     print(f"PAY_STATUS: {pay_status}")
 
     answer = body.get("answer")
-    if not answer  and "ERROR" == pay_status:
+    if not answer and "ERROR" == pay_status:
         # 避免 key 不存在时报错
-        raise RuntimeError(f'获取信息失败：原因：{body.get("errorInfo", "未知错误")}')
+        raise RuntimeError(f"获取信息失败，原因: {body.get('errorInfo', '未知错误')}")
     return answer
 
 
-import argparse
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Get weather counseling report")
-    parser.add_argument("order_no", help="Order number")
+def main():
+    parser = argparse.ArgumentParser(description="获取天气报告")
+    parser.add_argument("order_no", help="订单号")
     args = parser.parse_args()
 
     indicator = compute_indicator(SKILL_NAME)
@@ -77,5 +75,9 @@ if __name__ == '__main__':
         result = counseling(question, args.order_no, credential)
         print(result)
     except Exception as e:
-        print(f"ERROR: {e}")
+        print(f"错误: {e}")
         sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

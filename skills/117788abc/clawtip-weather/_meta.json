@@ -3,11 +3,16 @@
   "slug": "clawtip-weather",
   "displayName": "clawtip-weather",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1775747978357,
-    "commit": "https://github.com/openclaw/skills/commit/e53b6d3a6b7f8839ef6f46a388671c8f2ea2ffbf"
+    "version": "1.0.9",
+    "publishedAt": 1776929992131,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1775747978357,
+      "commit": "https://github.com/openclaw/skills/commit/e53b6d3a6b7f8839ef6f46a388671c8f2ea2ffbf"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1774903918101,
