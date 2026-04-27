@@ -3,9 +3,15 @@
   "slug": "addressfinder-australia",
   "displayName": "Addressfinder Australia",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169040970,
-    "commit": "https://github.com/openclaw/skills/commit/89eca7f8caad7e9689904989e7751dbf3f5cda3b"
+    "version": "1.0.3",
+    "publishedAt": 1776863757140,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169040970,
+      "commit": "https://github.com/openclaw/skills/commit/89eca7f8caad7e9689904989e7751dbf3f5cda3b"
+    }
+  ]
 }
