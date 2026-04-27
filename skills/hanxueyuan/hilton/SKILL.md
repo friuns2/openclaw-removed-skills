@@ -1,33 +1,45 @@
 ---
-name: hilton
-description: "全球知名豪华酒店集团"
-metadata:
-  { "openclaw": { "emoji": "🏨", "version": "0.1.0", "author": "hanxueyuan", "tags": ["encyclopedia","travel","hilton"] } }
+summary: "希尔顿 Hilton——酒店业百年传奇、从德州小店到全球连锁"
+read_when:
+  - 查询希尔顿 · Hilton相关信息
+  - 了解相关行业发展
 ---
 
-# 🏨 Hilton 希尔顿
+# 希尔顿 · Hilton
 
-全球知名豪华酒店集团
+---
 
-## What This Skill Does
+## 发展历程
 
-This skill provides comprehensive information about **Hilton 希尔顿**:
+| 时期 | 关键事件 |
+|:----:|--------|
+| **1919 年** | Conrad Hilton 在德州买下第一家酒店 |
+| **1940s** | 首家机场酒店开业 |
+| **1960s** | 全球化扩张 |
+| **2020s** | 全球 7000+ 酒店 |
 
-1. **Overview** — What it is, history, key facts
-2. **Latest Updates** — Recent news, developments, and announcements
-3. **Key Data** — Statistics, rankings, records, and metrics
-4. **Resources** — Official websites, useful links, and references
-5. **Related Topics** — Connected entities and recommendations
+---
 
-## Example Queries
+## 核心特点
 
-- "Tell me about Hilton"
-- "Latest news on Hilton"
-- "Hilton key facts"
+酒店运营（18+ 品牌：希尔顿/华尔道夫/康莱德/欢朋等）
 
-## How It Works
+## 核心优势
 
-Uses web search to fetch real-time, comprehensive information from authoritative sources.
+百年酒店品牌 + 希尔顿荣誉客会会员体系
 
-## Author
-Created by hanxueyuan | Part of the Encyclopedia project | License: MIT
+---
+
+## 关键数据
+
+| 指标 | 数值 |
+|------|------|
+| 酒店数 | 超过 7500 家 |
+| 覆盖 | 120+ 国家 |
+| 员工数 | 约 2000 人（公司层面） |
+
+---
+
+## 值得了解
+
+Conrad Hilton 的自传《Be My Guest》是酒店业必读经典

@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "hilton",
-  "displayName": "hilton",
+  "displayName": "Hilton",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774771577691,
-    "commit": "https://github.com/openclaw/skills/commit/7c25490787966c90497caf645bcdc075b156a8ff"
+    "version": "1.0.3",
+    "publishedAt": 1776533726265,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774771577691,
+      "commit": "https://github.com/openclaw/skills/commit/7c25490787966c90497caf645bcdc075b156a8ff"
+    }
+  ]
 }
