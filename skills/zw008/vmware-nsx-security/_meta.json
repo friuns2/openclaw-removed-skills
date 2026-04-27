@@ -3,11 +3,16 @@
   "slug": "vmware-nsx-security",
   "displayName": "Vmware Nsx Security",
   "latest": {
-    "version": "1.5.12",
-    "publishedAt": 1776420333302,
-    "commit": "https://github.com/openclaw/skills/commit/98b372e62f7057a15de27ad3d795722fa516bc3a"
+    "version": "1.5.14",
+    "publishedAt": 1776774050339,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.12",
+      "publishedAt": 1776420333302,
+      "commit": "https://github.com/openclaw/skills/commit/98b372e62f7057a15de27ad3d795722fa516bc3a"
+    },
     {
       "version": "1.5.0",
       "publishedAt": 1775969825298,
