@@ -7,7 +7,7 @@ metadata:
     capabilities: []
 ---
 
-# Locale Dates v3.0
+# Locale Dates v3.1
 
 **Install:** `clawhub install locale-dates`
 
@@ -92,6 +92,7 @@ Provide names in the user's language:
 3. **Check SOUL.md/USER.md** for user's preferred format
 4. **Match user language** — "mandag 3. mars" not "Monday, March 3"
 5. **Use ISO 8601** per SOUL.md convention unless user requests otherwise
+6. **UTC vs local time** — OpenClaw logs, session transcripts, and system messages use UTC timestamps internally. When presenting times to the user, ALWAYS convert to their local timezone (Europe/Oslo = UTC+1 winter / UTC+2 summer). Never show raw UTC times without noting the conversion. Rule of thumb: if you see a timestamp and the hour seems wrong, check if it's UTC and convert.
 
 ## What This Skill Does NOT Do
 
@@ -110,3 +111,8 @@ Install the full suite:
 ```bash
 clawhub install locale-dates setup-doctor context-brief smart-api-connector
 ```
+
+## Changelog
+
+### v3.1 — 2026-04-23
+- Added rule #6: UTC vs local time — always convert UTC timestamps to user's local timezone when presenting to user. OpenClaw logs and session transcripts use UTC internally.

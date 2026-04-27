@@ -3,11 +3,16 @@
   "slug": "locale-dates",
   "displayName": "Locale Dates",
   "latest": {
-    "version": "3.0.0",
-    "publishedAt": 1775173773434,
-    "commit": "https://github.com/openclaw/skills/commit/4b4e699934a1e442ae97a0556349efb187a6fd9c"
+    "version": "3.1.0",
+    "publishedAt": 1776955342313,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.0.0",
+      "publishedAt": 1775173773434,
+      "commit": "https://github.com/openclaw/skills/commit/4b4e699934a1e442ae97a0556349efb187a6fd9c"
+    },
     {
       "version": "1.6.2",
       "publishedAt": 1774933524900,
