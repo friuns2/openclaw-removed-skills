@@ -3,11 +3,16 @@
   "slug": "practitest",
   "displayName": "Practitest",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168172274,
-    "commit": "https://github.com/openclaw/skills/commit/0be08fd001b92caaa11b20217e08e549cf69ef01"
+    "version": "1.0.3",
+    "publishedAt": 1776862112011,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168172274,
+      "commit": "https://github.com/openclaw/skills/commit/0be08fd001b92caaa11b20217e08e549cf69ef01"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580653154,
