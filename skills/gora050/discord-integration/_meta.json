@@ -3,11 +3,16 @@
   "slug": "discord-integration",
   "displayName": "Discord",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169946934,
-    "commit": "https://github.com/openclaw/skills/commit/3531b90c4ebc232a57616b0c514d3d2850fb067c"
+    "version": "1.0.3",
+    "publishedAt": 1776865014207,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169946934,
+      "commit": "https://github.com/openclaw/skills/commit/3531b90c4ebc232a57616b0c514d3d2850fb067c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774926327552,
