@@ -1,5 +1,6 @@
 ---
 name: linkfox-aba-data-explorer
+version: 1.0.5
 description: 亚马逊ABA（品牌分析）搜索词数据的查询与分析，涵盖15个站点近3年的周维度数据。当用户提到ABA数据、亚马逊搜索词分析、关键词挖掘、搜索排名趋势、市场机会分析、季节性关键词、高点击低转化分析、蓝海词发现、竞品关键词分析、ABA data, search term report, keyword mining, search ranking trends, blue ocean keywords, click share, conversion share, seasonal keywords, market opportunity analysis, competitor keywords时触发此技能。即使用户未明确提及"ABA"，只要其需求涉及亚马逊搜索词数据和排名分析，也应触发此技能。
 ---
 
@@ -11,7 +12,7 @@ This skill guides you on how to query and analyze ABA search term data, helping 
 
 ABA (Amazon Brand Analytics) Search Term Report is official Amazon search behavior data that reflects real consumer search activity on Amazon. This tool holds nearly 3 years of **weekly-granularity** data across 15 Amazon marketplaces.
 
-**Ranking logic**: A smaller `searchFrequencyRank` value means higher search popularity. Rank 1 is the most popular search term. This is an easy point of confusion — when a user says "ranking improved," it means the numeric value decreased; "ranking dropped" means the value increased.
+**Ranking logic**: A smaller `searchFrequencyRank` value means higher search popularity. Rank 1 is the most popular search term. This is an easy point of confusion - when a user says "ranking improved," it means the numeric value decreased; "ranking dropped" means the value increased.
 
 ## Data Fields
 
@@ -29,7 +30,7 @@ ABA (Amazon Brand Analytics) Search Term Report is official Amazon search behavi
 
 ## Supported Marketplaces
 
-US (United States), DE (Germany), BR (Brazil), CA (Canada), AU (Australia), JP (Japan), AE (United Arab Emirates), ES (Spain), FR (France), IT (Italy), SA (Saudi Arabia), TR (Turkey), MX (Mexico), SE (Sweden), NL (Netherlands)
+US (United States), DE (Germany), BR (Brazil), CA (Canada), AU (Australia), JP (Japan), AE (United Arab Emirates), ES (Spain), FR (France), IT (Italy), SA (Saudi Arabia), TR (Turkey), MX (Mexico), SE (Sweden), NL (Netherlands) 
 
 Default marketplace is **US**. Use US when the user doesn't specify a marketplace.
 
@@ -39,7 +40,7 @@ This tool calls the LinkFox tool gateway API. See `references/api.md` for callin
 
 ## How to Build Queries
 
-The key parameter when calling this tool is `analysisDescription` — a natural language description of the data you want to query. This description is converted into a structured query on the backend, so it needs to be **precise and specific**.
+The key parameter when calling this tool is `analysisDescription` - a natural language description of the data you want to query. This description is converted into a structured query on the backend, so it needs to be **precise and specific**.
 
 ### Principles for Writing analysisDescription
 
@@ -48,7 +49,7 @@ The key parameter when calling this tool is `analysisDescription` — a natural 
 3. **Specify time ranges**: Use concrete time descriptions, e.g., "过去12周" (past 12 weeks), "2024年1-9月" (Jan-Sep 2024), "近3个月" (last 3 months)
 4. **Specify comparison baselines**: For trend analysis, clearly state the time points being compared, e.g., "4周前的排名比8周前提升30%" (rank 4 weeks ago improved 30% vs 8 weeks ago)
 5. **Handle deduplication logic**: When there are multiple records for the same search term + ASIN combination, specify which to keep, e.g., "相同搜索词相同ASIN值保留最新的一个" (keep only the latest for identical search term + ASIN)
-6. **Stay faithful to user intent**: Don't misinterpret or overextend the user's query — reflect exactly what they want
+6. **Stay faithful to user intent**: Don't misinterpret or overextend the user's query - reflect exactly what they want
 
 ### analysisDescription Examples for Common Scenarios
 
@@ -112,7 +113,7 @@ The key parameter when calling this tool is `analysisDescription` — a natural 
 
 ## User Expression & Scenario Quick Reference
 
-**Applicable** — Data queries around Amazon search terms:
+**Applicable** - Data queries around Amazon search terms:
 
 | User Says | Scenario |
 |-----------|----------|
@@ -124,7 +125,7 @@ The key parameter when calling this tool is `analysisDescription` — a natural 
 | "Who's capturing the traffic", "any monopoly" | Click share / monopoly analysis |
 | "ASINs with high clicks but low conversion" | High-click low-conversion diagnosis |
 
-**Not applicable** — Needs beyond ABA search term data:
+**Not applicable** - Needs beyond ABA search term data:
 - Advertising / PPC (bids, campaign strategy)
 - Product reviews, listing copywriting
 - ASIN sales estimation
