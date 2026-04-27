@@ -3,11 +3,16 @@
   "slug": "klaxoon",
   "displayName": "Klaxoon",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168132288,
-    "commit": "https://github.com/openclaw/skills/commit/d32c0867c425cdcb120c2b0bfc29fdf085bdd1a8"
+    "version": "1.0.3",
+    "publishedAt": 1776862083899,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168132288,
+      "commit": "https://github.com/openclaw/skills/commit/d32c0867c425cdcb120c2b0bfc29fdf085bdd1a8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774577024449,
