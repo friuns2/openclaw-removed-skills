@@ -1,13 +1,18 @@
 {
   "owner": "jessy-huang",
   "slug": "robot-paper-post",
-  "displayName": "Robot Paper Post",
+  "displayName": "robot-paper-post",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1775360604372,
-    "commit": "https://github.com/openclaw/skills/commit/c792fac20768a7c292939add1c2e2e65b720a1f4"
+    "version": "1.3.1",
+    "publishedAt": 1775535575057,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1775360604372,
+      "commit": "https://github.com/openclaw/skills/commit/c792fac20768a7c292939add1c2e2e65b720a1f4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774927852564,
