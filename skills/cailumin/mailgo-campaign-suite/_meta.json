@@ -3,11 +3,16 @@
   "slug": "mailgo-campaign-suite",
   "displayName": "mailgo-coldmail-marketing",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1775557885322,
-    "commit": "https://github.com/openclaw/skills/commit/6990fdc1b8c8b9da0e6aec97ba8d0025409a2950"
+    "version": "1.1.2",
+    "publishedAt": 1776849528330,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1775557885322,
+      "commit": "https://github.com/openclaw/skills/commit/6990fdc1b8c8b9da0e6aec97ba8d0025409a2950"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1775213601899,
