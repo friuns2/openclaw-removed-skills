@@ -1,6 +1,6 @@
 """Shared token-overlap relevance scoring for search result ranking.
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
 The score is intentionally query-centric:
 - exact phrase matches should score very high

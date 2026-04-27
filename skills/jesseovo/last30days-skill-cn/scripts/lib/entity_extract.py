@@ -1,6 +1,6 @@
 """Entity extraction from Phase 1 search results for supplemental searches.
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import re

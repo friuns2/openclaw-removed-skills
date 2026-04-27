@@ -1,6 +1,6 @@
 """Environment and API key management for last30days-cn (Chinese platforms).
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import logging
@@ -127,7 +127,13 @@ def get_xiaohongshu_api_base(config: Dict[str, Any]) -> str:
 
 
 def is_weibo_available(config: Dict[str, Any]) -> bool:
-    return bool(config.get("WEIBO_ACCESS_TOKEN"))
+    if config.get("WEIBO_ACCESS_TOKEN"):
+        return True
+    try:
+        from . import crawler_bridge
+        return crawler_bridge.is_playwright_available()
+    except Exception:
+        return False
 
 
 def is_xiaohongshu_available(config: Dict[str, Any]) -> bool:
@@ -157,7 +163,13 @@ def is_zhihu_available() -> bool:
 
 
 def is_douyin_available(config: Dict[str, Any]) -> bool:
-    return bool(config.get("TIKHUB_API_KEY") or config.get("DOUYIN_API_KEY"))
+    if config.get("TIKHUB_API_KEY") or config.get("DOUYIN_API_KEY"):
+        return True
+    try:
+        from . import crawler_bridge
+        return crawler_bridge.is_playwright_available()
+    except Exception:
+        return False
 
 
 def is_wechat_available(config: Dict[str, Any]) -> bool:
@@ -221,7 +233,6 @@ def get_missing_keys(config: Dict[str, Any]) -> str:
         or is_baidu_api_available(config)
         or bool(config.get("SCRAPECREATORS_API_KEY"))
         or bool(config.get("ZHIHU_COOKIE"))
-        or bool(config.get("TOUTIAO_API_KEY"))
     ):
         return "none"
     lines: List[str] = []
@@ -237,8 +248,6 @@ def get_missing_keys(config: Dict[str, Any]) -> str:
         lines.append("WECHAT_API_KEY")
     if not (config.get("BAIDU_API_KEY") and config.get("BAIDU_SECRET_KEY")):
         lines.append("BAIDU_API_KEY + BAIDU_SECRET_KEY")
-    if not config.get("TOUTIAO_API_KEY"):
-        lines.append("TOUTIAO_API_KEY")
     return "未配置：" + "；".join(lines)
 
 

@@ -1,6 +1,6 @@
 """Normalization of raw API data to canonical schema (Chinese platforms).
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 from typing import Any, Dict, List, TypeVar

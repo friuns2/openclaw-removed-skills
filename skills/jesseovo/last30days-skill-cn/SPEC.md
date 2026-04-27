@@ -1,6 +1,6 @@
 # last30days-cn 技术规格说明
 
-> Author: Jesse (https://github.com/ChiTing111)
+> Author: Jesse (https://github.com/Jesseovo)
 
 ## 概述
 

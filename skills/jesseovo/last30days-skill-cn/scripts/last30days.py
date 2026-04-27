@@ -2,7 +2,7 @@
 """
 last30days-cn - 研究过去30天内中国平台上的热门话题。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
 Usage:
     python3 last30days.py <topic> [options]
@@ -24,7 +24,7 @@ import os
 import signal
 import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -63,14 +63,6 @@ def parse_search_flag(search_str: str) -> set:
         sys.exit(1)
     return sources
 
-
-def register_child_pid(pid: int):
-    with _child_pids_lock:
-        _child_pids.add(pid)
-
-def unregister_child_pid(pid: int):
-    with _child_pids_lock:
-        _child_pids.discard(pid)
 
 def _cleanup_children():
     with _child_pids_lock:
@@ -123,6 +115,7 @@ from lib import (
     score,
     setup_wizard,
     query_type as qt,
+    crawler_bridge,
 )
 
 
@@ -303,6 +296,7 @@ def main():
     config = env.get_config()
 
     if args.diagnose:
+        crawler_status = crawler_bridge.get_crawler_status()
         diag = {
             "weibo": env.is_weibo_available(config),
             "xiaohongshu": env.is_xiaohongshu_available(config),
@@ -313,6 +307,11 @@ def main():
             "baidu_api": env.is_baidu_api_available(config),
             "toutiao": True,
             "xiaohongshu_api_base": env.get_xiaohongshu_api_base(config),
+            "crawler_engine": {
+                "playwright_available": crawler_status["playwright_available"],
+                "cached_logins": crawler_status["cached_logins"],
+                "note": "安装 Playwright 后，微博/小红书/抖音/B站/知乎可无需 API Key 使用爬虫模式",
+            },
         }
         print(json.dumps(diag, indent=2, ensure_ascii=False))
         sys.exit(0)

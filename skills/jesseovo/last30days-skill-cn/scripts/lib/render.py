@@ -1,6 +1,6 @@
 """Output rendering for Chinese-platform research (last30days CN skill).
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import json
@@ -335,7 +335,7 @@ def render_compact(report: schema.Report, limit: int = 15, missing_keys: str = "
         lines.extend(["### 微信公众号文章", ""])
         for item in wx[:limit]:
             date_str = f" ({item.date})" if item.date else ""
-            eng_str = _fmt_eng_wechat(item.engagement)
+            eng_str = _fmt_eng_wechat(getattr(item, "engagement", None))
             acct = getattr(item, "account_name", None) or getattr(item, "author_name", "") or getattr(item, "author", "")
             lines.append(f"**{item.id}** (得分:{item.score}) {acct}{date_str}{eng_str}{_xref_tag(item)}")
             lines.append(f"  {item.title}")

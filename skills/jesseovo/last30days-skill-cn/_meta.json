@@ -3,9 +3,15 @@
   "slug": "last30days-skill-cn",
   "displayName": "Last30Days CN",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775094489324,
-    "commit": "https://github.com/openclaw/skills/commit/b0ff8c80b18e33d5be9d753450e514c1a4387133"
+    "version": "2.0.0",
+    "publishedAt": 1776827368160,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775094489324,
+      "commit": "https://github.com/openclaw/skills/commit/b0ff8c80b18e33d5be9d753450e514c1a4387133"
+    }
+  ]
 }

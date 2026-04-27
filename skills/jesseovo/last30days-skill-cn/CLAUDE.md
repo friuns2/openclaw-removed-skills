@@ -1,6 +1,6 @@
 # last30days-cn 技能
 
-> Author: Jesse (https://github.com/ChiTing111)
+> Author: Jesse (https://github.com/Jesseovo)
 
 面向 Agent 的简短指引：**中国平台深度研究引擎**（微博、小红书、B 站、知乎、抖音、微信公众号、百度、今日头条），默认聚焦近 **30 天** 内容，经打分与去重后输出简报。
 

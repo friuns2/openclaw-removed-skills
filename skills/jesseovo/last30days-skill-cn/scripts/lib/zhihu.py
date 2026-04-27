@@ -1,8 +1,10 @@
 """知乎搜索模块 - 搜索知乎问答和文章。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
-使用知乎公开搜索接口和热榜 API。
+支持两种模式（自动切换）：
+1. 知乎公开搜索接口和热榜 API
+2. MediaCrawler 浏览器爬虫（备用方案）
 """
 
 import json
@@ -43,6 +45,17 @@ def search_zhihu(
 
     search_items = _search_general(topic, limit, cookie)
     items.extend(search_items)
+
+    if not items:
+        try:
+            from . import crawler_bridge
+            if crawler_bridge.is_playwright_available():
+                sys.stderr.write("[知乎] API 无结果，尝试 MediaCrawler 爬虫模式...\n")
+                items = crawler_bridge.crawl_zhihu(topic, limit)
+                if items:
+                    sys.stderr.write(f"[知乎] 爬虫模式获取 {len(items)} 条结果\n")
+        except Exception as e:
+            sys.stderr.write(f"[知乎] 爬虫模式失败: {e}\n")
 
     if depth != "quick":
         hot_items = _search_hot_related(topic)

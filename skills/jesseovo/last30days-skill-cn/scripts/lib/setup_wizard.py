@@ -1,6 +1,6 @@
 """首次运行配置向导 (last30days-cn)。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
 检测首次运行状态，检查中国平台 API 可用性，写入配置文件。
 实际向导界面由 SKILL.md 驱动（LLM 展示），本模块提供检测和配置动作。

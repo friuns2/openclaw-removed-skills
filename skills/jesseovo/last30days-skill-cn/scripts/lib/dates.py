@@ -1,6 +1,6 @@
 """Date utilities for last30days skill.
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 from datetime import datetime, timedelta, timezone

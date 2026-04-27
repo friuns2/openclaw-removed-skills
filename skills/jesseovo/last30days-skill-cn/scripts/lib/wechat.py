@@ -1,6 +1,6 @@
 """微信公众号搜索模块 - 搜索微信公众号文章。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
 使用搜狗微信搜索或第三方接口获取微信公众号文章。
 """

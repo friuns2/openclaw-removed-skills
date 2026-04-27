@@ -1,7 +1,7 @@
 ---
 name: last30days-cn
-version: "1.0.0"
-description: "中国平台深度研究引擎 - 覆盖微博、小红书、B站、知乎、抖音、微信公众号、百度搜索、今日头条等8大平台，AI综合分析生成有据可查的研究报告。"
+version: "2.1.0"
+description: "中国平台深度研究引擎 - 覆盖微博、小红书、B站、知乎、抖音、微信公众号、百度搜索、今日头条等8大平台。v2.1 修复百度/小红书反爬问题，XHR 拦截替代 DOM 解析，Bing 兜底搜索，AI综合分析生成有据可查的研究报告。"
 argument-hint: 'last30 AI视频工具, last30 最佳项目管理工具'
 allowed-tools: Bash, Read, Write, AskUserQuestion, WebSearch
 agent-compatibility: "本技能可在 Cursor、Claude Code、OpenClaw、Gemini CLI 及任何提供 Bash、Read、Write、AskUserQuestion、WebSearch 工具的 Agent 环境中使用；业务路径统一使用 {{SKILL_DIR}} 占位符，由各平台解析为实际技能目录。"
@@ -73,19 +73,28 @@ metadata:
 首次使用或用户询问「需要什么配置」时，可简要说明：
 
 ```
-🎉 欢迎使用 last30days-cn！
+🎉 欢迎使用 last30days-cn v2.0！
 
 📋 零配置即可使用 4 个免费数据源：
    ✅ B站（公开 API）
    ✅ 知乎（公开搜索）
-   ✅ 百度（基础公开搜索，无需 API Key）
+   ✅ 百度（公开搜索 + Bing 兜底，建议配 API Key 更稳定）
    ✅ 今日头条（公开接口）
 
-🔧 推荐配置以解锁更多数据源：
-   1. WEIBO_ACCESS_TOKEN - 微博搜索（强烈推荐）
-   2. TIKHUB_API_KEY - 抖音搜索
+🕷️ 安装 Playwright 可解锁爬虫模式（无需 API Key）：
+   pip install playwright && playwright install chromium
+   解锁平台：微博、小红书（XHR拦截）、抖音（XHR拦截）、B站（备用）、知乎（备用）
+
+🔧 可选配置 API Key 以获得更稳定的数据（非必需）：
+   1. WEIBO_ACCESS_TOKEN - 微博 API 模式
+   2. TIKHUB_API_KEY - 抖音 API 模式
    3. WECHAT_API_KEY - 微信公众号搜索
    4. BAIDU_API_KEY + BAIDU_SECRET_KEY - 百度高级搜索
+
+⚠️ v2.1 变更说明：
+   - 已移除 ScrapeCreators 集成（官方不支持小红书端点）
+   - 百度公开搜索可能被安全验证拦截，自动降级到 Bing 国内版
+   - 小红书爬虫改用 XHR 响应拦截，不再依赖 DOM 选择器
 
 配置文件位置: ~/.config/last30days-cn/.env
 ```
@@ -110,14 +119,14 @@ cd {{SKILL_DIR}}/scripts && python3 last30days.py "{{用户查询}}" --emit comp
 
 | 平台 | 模块 | 数据类型 | 需要配置 |
 |------|------|---------|---------|
-| 微博 | weibo.py | 动态/话题 | WEIBO_ACCESS_TOKEN（可选） |
-| 小红书 | xiaohongshu.py | 笔记/种草 | SCRAPECREATORS_API_KEY（可选） |
-| B站 | bilibili.py | 视频/弹幕 | 无需（公开API） |
-| 知乎 | zhihu.py | 问答/文章 | ZHIHU_COOKIE（可选） |
-| 抖音 | douyin.py | 短视频 | TIKHUB_API_KEY（可选） |
-| 微信 | wechat.py | 公众号文章 | WECHAT_API_KEY（可选） |
-| 百度 | baidu.py | 网页搜索 | 基础无需密钥；BAIDU_API_KEY（可选，高级） |
-| 头条 | toutiao.py | 资讯/热榜 | 无需（公开接口） |
+| 微博 | weibo.py | 动态/话题 | ✅ 爬虫模式无需配置；API 模式需 WEIBO_ACCESS_TOKEN |
+| 小红书 | xiaohongshu.py | 笔记/种草 | ✅ 爬虫模式无需配置（XHR拦截）；MCP API 可选 |
+| B站 | bilibili.py | 视频/弹幕 | ✅ 无需（公开 API + 爬虫备用） |
+| 知乎 | zhihu.py | 问答/文章 | ✅ 无需（公开搜索 + 爬虫备用） |
+| 抖音 | douyin.py | 短视频 | ✅ 爬虫模式无需配置；API 模式需 TIKHUB_API_KEY |
+| 微信 | wechat.py | 公众号文章 | WECHAT_API_KEY（可选，搜狗搜索为备用） |
+| 百度 | baidu.py | 网页搜索 | ⚠️ 公开搜索可能被反爬拦截，自动 Bing 兜底；BAIDU_API_KEY（推荐） |
+| 头条 | toutiao.py | 资讯/热榜 | ✅ 无需（公开接口） |
 
 ### 步骤 3: 综合分析
 

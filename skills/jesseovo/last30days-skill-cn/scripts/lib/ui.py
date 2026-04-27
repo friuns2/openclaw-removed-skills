@@ -1,6 +1,6 @@
 """last30days-cn 终端界面工具。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import sys
@@ -429,9 +429,9 @@ def _build_status_banner(diag: dict) -> list[str]:
     source_lines = _wrap_sources(active)
 
     if not setup_complete:
-        title = "/last30days-cn v1.0 — 首次运行"
+        title = "/last30days-cn v2.0 — 首次运行"
     else:
-        title = "/last30days-cn v1.0 — 信源状态"
+        title = "/last30days-cn v2.0 — 信源状态"
 
     suggestions: list[str] = []
     if not setup_complete:
@@ -479,7 +479,7 @@ def _colorize_banner(lines: list[str]) -> list[str]:
             inner_width = len(inner)
             inner = inner.replace("\u2705", f"{Colors.GREEN}\u2705{Colors.RESET}")
             inner = inner.replace("\u2b50", f"{Colors.YELLOW}\u2b50{Colors.RESET}")
-            if "/last30days-cn v1.0" in inner:
+            if "/last30days-cn v2.0" in inner:
                 stripped = inner.strip()
                 inner = f" {Colors.BOLD}{stripped}{Colors.RESET}"
                 visible_len = 1 + len(stripped)

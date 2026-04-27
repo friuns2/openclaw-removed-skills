@@ -1,7 +1,7 @@
 """Shared query preprocessing utilities: noise-word stripping, core subject
 extraction, and compound term detection. Used by all search modules.
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import re

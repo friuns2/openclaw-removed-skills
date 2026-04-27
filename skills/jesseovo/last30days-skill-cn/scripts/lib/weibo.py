@@ -1,10 +1,11 @@
 """微博搜索模块 - 搜索微博热门内容。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
-支持两种模式：
+支持三种模式（按优先级自动切换）：
 1. 微博开放平台 API（需要 WEIBO_ACCESS_TOKEN）
-2. 微博移动端公共接口（免费，无需认证）
+2. MediaCrawler 浏览器爬虫（需要 Playwright，无需 API Key）
+3. 微博移动端公共接口（免费，无需认证）
 """
 
 import json
@@ -47,7 +48,18 @@ def search_weibo(
 
     if token:
         items = _search_via_api(topic, from_date, to_date, limit, token)
-    
+
+    if not items:
+        try:
+            from . import crawler_bridge
+            if crawler_bridge.is_playwright_available():
+                sys.stderr.write("[微博] 尝试 MediaCrawler 爬虫模式...\n")
+                items = crawler_bridge.crawl_weibo(topic, limit)
+                if items:
+                    sys.stderr.write(f"[微博] 爬虫模式获取 {len(items)} 条结果\n")
+        except Exception as e:
+            sys.stderr.write(f"[微博] 爬虫模式失败: {e}\n")
+
     if not items:
         items = _search_via_public(topic, from_date, to_date, limit)
 

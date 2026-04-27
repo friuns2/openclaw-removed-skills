@@ -1,6 +1,6 @@
 """Popularity-aware scoring for last30days skill (Chinese platforms).
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import math

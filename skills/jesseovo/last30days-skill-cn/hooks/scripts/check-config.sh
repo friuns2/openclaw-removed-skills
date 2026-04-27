@@ -1,5 +1,5 @@
 #!/bin/bash
-# Author: Jesse (https://github.com/ChiTing111)
+# Author: Jesse (https://github.com/Jesseovo)
 set -euo pipefail
 
 # 检查 last30days-cn 配置状态并显示欢迎/就绪信息（中国平台）。

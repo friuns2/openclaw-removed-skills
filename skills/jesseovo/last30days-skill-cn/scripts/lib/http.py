@@ -1,6 +1,6 @@
 """HTTP utilities for last30days skill (stdlib only).
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import json
@@ -23,7 +23,8 @@ def log(msg: str):
         sys.stderr.flush()
 MAX_RETRIES = 5
 RETRY_DELAY = 2.0
-USER_AGENT = "last30days-cn/1.0 (Research Skill)"
+RETRY_BACKOFF = 2.0
+USER_AGENT = "last30days-cn/2.1.0 (Research Skill)"
 
 
 class HTTPError(Exception):
@@ -41,6 +42,7 @@ def request(
     json_data: Optional[Dict[str, Any]] = None,
     timeout: int = DEFAULT_TIMEOUT,
     retries: int = MAX_RETRIES,
+    backoff: float = RETRY_BACKOFF,
     raw: bool = False,
 ) -> Any:
     """Make an HTTP request and return JSON response.
@@ -51,7 +53,9 @@ def request(
         headers: Optional headers dict
         json_data: Optional JSON body (for POST)
         timeout: Request timeout in seconds
-        retries: Number of retries on failure
+        retries: Number of retries on failure (0 disables retry, v2.1+)
+        backoff: Exponential backoff base factor in seconds (v2.1+)
+        raw: If True, return raw text instead of parsed JSON
 
     Returns:
         Parsed JSON response (or raw text if raw=True)

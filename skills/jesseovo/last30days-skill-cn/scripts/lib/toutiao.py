@@ -1,6 +1,6 @@
 """今日头条搜索模块 - 提供热点趋势和资讯搜索。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
 使用今日头条搜索 API 和热榜接口。
 """

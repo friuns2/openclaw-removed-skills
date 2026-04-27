@@ -1,8 +1,11 @@
 """抖音搜索模块 - 搜索抖音短视频内容。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
-支持 TikHub API 或抖音公开搜索接口。
+支持三种模式（按优先级自动切换）：
+1. TikHub API（需要 TIKHUB_API_KEY）
+2. MediaCrawler 浏览器爬虫（需要 Playwright，无需 API Key）
+3. 抖音公开搜索接口
 """
 
 import json
@@ -42,6 +45,17 @@ def search_douyin(
 
     if token:
         items = _search_via_tikhub(topic, limit, token)
+
+    if not items:
+        try:
+            from . import crawler_bridge
+            if crawler_bridge.is_playwright_available():
+                sys.stderr.write("[抖音] 尝试 MediaCrawler 爬虫模式...\n")
+                items = crawler_bridge.crawl_douyin(topic, limit)
+                if items:
+                    sys.stderr.write(f"[抖音] 爬虫模式获取 {len(items)} 条结果\n")
+        except Exception as e:
+            sys.stderr.write(f"[抖音] 爬虫模式失败: {e}\n")
 
     if not items:
         items = _search_via_public(topic, limit)

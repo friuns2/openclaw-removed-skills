@@ -1,7 +1,7 @@
 {
   "name": "last30days-cn",
-  "version": "1.0.0",
-  "description": "中国平台深度研究引擎 - 搜索微博、小红书、B站、知乎、抖音、微信公众号、百度搜索、今日头条等8大平台最近30天的热门内容。",
+  "version": "2.0.0",
+  "description": "中国平台深度研究引擎（v2.0）— 集成 MediaCrawler / Playwright 爬虫思路，降低 API Key 依赖；搜索微博、小红书、B站、知乎、抖音、微信公众号、百度搜索、今日头条等 8 大平台最近 30 天的热门内容。",
   "settings": [
     {
       "name": "Extension Directory",

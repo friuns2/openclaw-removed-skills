@@ -1,6 +1,6 @@
 """Query type detection for source selection and scoring adjustments.
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 """
 
 import re

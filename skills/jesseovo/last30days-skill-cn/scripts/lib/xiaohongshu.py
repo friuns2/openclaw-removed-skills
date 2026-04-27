@@ -1,10 +1,15 @@
 """小红书搜索模块 - 搜索小红书笔记。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
-支持多种数据获取方式：
-1. ScrapeCreators API（推荐，同一个 key 也支持抖音）
-2. 公开搜索接口
+支持多种数据获取方式（按优先级自动切换）：
+1. xiaohongshu-mcp HTTP API（自托管，可选）
+2. MediaCrawler 浏览器爬虫（基于 Playwright，无需 API Key）
+3. 公开搜索接口（命中率较低，仅作兜底）
+
+注意：v2.1 起已移除 ScrapeCreators 集成 —— ScrapeCreators 官方
+（https://docs.scrapecreators.com）并未提供小红书端点，原代码调用的
+`/v2/xiaohongshu/search` 始终返回 404，属于错误实现。
 """
 
 import json
@@ -17,6 +22,8 @@ from typing import Any, Dict, List, Optional
 from . import http, relevance
 
 _UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15"
+
+_SCRAPECREATORS_DEPRECATION_WARNED = False
 
 
 def search_xiaohongshu(
@@ -34,8 +41,8 @@ def search_xiaohongshu(
         from_date: 起始日期 YYYY-MM-DD
         to_date: 结束日期 YYYY-MM-DD
         depth: 搜索深度 quick/default/deep
-        token: ScrapeCreators API key（可选）
-        api_base: 自定义 API 地址（可选）
+        token: 已弃用 —— 保留参数仅为向后兼容（v2.1 移除 ScrapeCreators 集成）
+        api_base: xiaohongshu-mcp 自托管 HTTP API 地址（可选）
 
     Returns:
         小红书笔记列表
@@ -43,13 +50,30 @@ def search_xiaohongshu(
     limit_map = {"quick": 10, "default": 20, "deep": 40}
     limit = limit_map.get(depth, 20)
 
+    if token:
+        global _SCRAPECREATORS_DEPRECATION_WARNED
+        if not _SCRAPECREATORS_DEPRECATION_WARNED:
+            sys.stderr.write(
+                "[小红书] 警告：ScrapeCreators 集成已在 v2.1 移除（官方未提供小红书端点），"
+                "传入的 token 已被忽略。请安装 Playwright 使用爬虫模式。\n"
+            )
+            _SCRAPECREATORS_DEPRECATION_WARNED = True
+
     items: List[Dict[str, Any]] = []
 
     if api_base:
         items = _search_via_mcp(topic, from_date, to_date, limit, api_base)
 
-    if not items and token:
-        items = _search_via_scrapecreators(topic, from_date, to_date, limit, token)
+    if not items:
+        try:
+            from . import crawler_bridge
+            if crawler_bridge.is_playwright_available():
+                sys.stderr.write("[小红书] 尝试 MediaCrawler 爬虫模式...\n")
+                items = crawler_bridge.crawl_xiaohongshu(topic, limit)
+                if items:
+                    sys.stderr.write(f"[小红书] 爬虫模式获取 {len(items)} 条结果\n")
+        except Exception as e:
+            sys.stderr.write(f"[小红书] 爬虫模式失败: {e}\n")
 
     if not items:
         items = _search_via_public(topic, limit)
@@ -87,25 +111,8 @@ def _search_via_mcp(
     return items
 
 
-def _search_via_scrapecreators(
-    topic: str, from_date: str, to_date: str, limit: int, token: str
-) -> List[Dict[str, Any]]:
-    """通过 ScrapeCreators API 搜索小红书。"""
-    items = []
-    try:
-        encoded = urllib.parse.quote(topic)
-        url = f"https://api.scrapecreators.com/v2/xiaohongshu/search?keyword={encoded}&limit={limit}"
-        resp = http.get(url, timeout=15, headers={"x-api-key": token})
-        if isinstance(resp, dict):
-            for note in resp.get("data", []):
-                items.append(_parse_note(note))
-    except Exception as e:
-        sys.stderr.write(f"[小红书] ScrapeCreators 搜索失败: {e}\n")
-    return items
-
-
 def _search_via_public(topic: str, limit: int) -> List[Dict[str, Any]]:
-    """通过公开接口搜索小红书（备用方案）。"""
+    """通过公开接口搜索小红书（备用方案，命中率较低）。"""
     items = []
     try:
         encoded = urllib.parse.quote(topic)
@@ -132,7 +139,6 @@ def _parse_note(note: dict) -> Dict[str, Any]:
     comment_count = note.get("comment_count") or note.get("comments", 0)
     share_count = note.get("share_count") or note.get("shares", 0)
 
-    # 提取话题标签
     hashtags = re.findall(r"#([^#\s]+)#?", f"{title} {desc}")
 
     date_str = note.get("time") or note.get("created_time") or note.get("date")

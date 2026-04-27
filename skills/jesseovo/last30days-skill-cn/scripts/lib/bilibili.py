@@ -1,8 +1,10 @@
 """B站搜索模块 - 搜索哔哩哔哩视频内容。
 
-Author: Jesse (https://github.com/ChiTing111)
+Author: Jesse (https://github.com/Jesseovo)
 
-使用 B站公开搜索 API（无需 API Key）。
+支持两种模式（自动切换）：
+1. B站公开搜索 API（无需 API Key）
+2. MediaCrawler 浏览器爬虫（备用方案）
 """
 
 import json
@@ -40,13 +42,24 @@ def search_bilibili(
 
     items: List[Dict[str, Any]] = []
 
-    for page in range(1, pages + 1):
+    for page_num in range(1, pages + 1):
         try:
-            page_items = _search_page(topic, page)
+            page_items = _search_page(topic, page_num)
             items.extend(page_items)
         except Exception as e:
-            sys.stderr.write(f"[B站] 搜索第 {page} 页失败: {e}\n")
+            sys.stderr.write(f"[B站] 搜索第 {page_num} 页失败: {e}\n")
             break
+
+    if not items:
+        try:
+            from . import crawler_bridge
+            if crawler_bridge.is_playwright_available():
+                sys.stderr.write("[B站] API 无结果，尝试 MediaCrawler 爬虫模式...\n")
+                items = crawler_bridge.crawl_bilibili(topic, limit)
+                if items:
+                    sys.stderr.write(f"[B站] 爬虫模式获取 {len(items)} 条结果\n")
+        except Exception as e:
+            sys.stderr.write(f"[B站] 爬虫模式失败: {e}\n")
 
     scored = []
     for i, item in enumerate(items):

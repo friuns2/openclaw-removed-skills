@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # sync.sh - 部署 last30days-cn 技能到各 Agent 平台
-# Author: Jesse (https://github.com/ChiTing111)
+# Author: Jesse (https://github.com/Jesseovo)
 # 用法: bash scripts/sync.sh  (从仓库根目录运行)
 set -euo pipefail
 
