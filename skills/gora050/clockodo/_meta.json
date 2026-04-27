@@ -3,11 +3,16 @@
   "slug": "clockodo",
   "displayName": "Clockodo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170106136,
-    "commit": "https://github.com/openclaw/skills/commit/d9913ab420c0ada0bdc6c9caa58f6c265d35f028"
+    "version": "1.0.3",
+    "publishedAt": 1776865064965,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170106136,
+      "commit": "https://github.com/openclaw/skills/commit/d9913ab420c0ada0bdc6c9caa58f6c265d35f028"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774958617620,
