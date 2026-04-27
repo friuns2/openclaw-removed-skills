@@ -3,11 +3,16 @@
   "slug": "polymarket-candle-volume-spike-trader",
   "displayName": "Polymarket Candle Volume Spike Trader",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775317075433,
-    "commit": "https://github.com/openclaw/skills/commit/c19b6498f6d7fa09be9021d96f96dbf03c8a7679"
+    "version": "0.0.2",
+    "publishedAt": 1776513258023,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775317075433,
+      "commit": "https://github.com/openclaw/skills/commit/c19b6498f6d7fa09be9021d96f96dbf03c8a7679"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774856108861,
