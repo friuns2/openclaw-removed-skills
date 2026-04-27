@@ -3,11 +3,16 @@
   "slug": "soci",
   "displayName": "Soci",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168885776,
-    "commit": "https://github.com/openclaw/skills/commit/d3f1ebd7f0909b4560947c8f74030e416fee8710"
+    "version": "1.0.3",
+    "publishedAt": 1776863488474,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168885776,
+      "commit": "https://github.com/openclaw/skills/commit/d3f1ebd7f0909b4560947c8f74030e416fee8710"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774731851683,
