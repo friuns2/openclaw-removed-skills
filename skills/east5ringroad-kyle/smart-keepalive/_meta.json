@@ -3,11 +3,16 @@
   "slug": "smart-keepalive",
   "displayName": "smart-keepalive",
   "latest": {
-    "version": "0.1.4",
-    "publishedAt": 1776664090968,
-    "commit": "https://github.com/openclaw/skills/commit/5c28cabe7ff4ea459c68895c77e99ded3f02eacb"
+    "version": "0.1.5",
+    "publishedAt": 1777011330318,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.4",
+      "publishedAt": 1776664090968,
+      "commit": "https://github.com/openclaw/skills/commit/5c28cabe7ff4ea459c68895c77e99ded3f02eacb"
+    },
     {
       "version": "0.0.31",
       "publishedAt": 1775533482378,

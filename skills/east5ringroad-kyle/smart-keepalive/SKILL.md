@@ -1,19 +1,19 @@
 # Smart Keepalive | 智能 Keepalive
 
-**Description:** 定时抓取 RSS 热点并自动发送「保活简报 keepalive」（双关 keepalive + 资讯简报），默认走 OpenClaw CLI；也支持 Hermes/其他环境通过自定义命令接入发送与润色（`KEEPALIVE_AGENT_COMMAND` / `KEEPALIVE_SEND_COMMAND`），含可选作息附录与 launchd/cron 定时部署辅助。
+**Description:** 定时抓取资讯素材并自动发送「保活简报 keepalive」（双关 keepalive + 资讯简报），默认走 OpenClaw CLI；也支持 Hermes/其他环境通过自定义命令接入发送与润色（`KEEPALIVE_AGENT_COMMAND` / `KEEPALIVE_SEND_COMMAND`），含可选作息附录与 launchd/cron 定时部署辅助。
 
-**何时读本文：** 用户要配置/调试 OpenClaw **定时 keepalive**、飞书或微信定时消息、`smart-keepalive.py` / `smart-keepalive.sh`、RSS 简报、`prompts/`、`--doctor` / `--install-launchd` / `--install-cron`。
+**何时读本文：** 用户要配置/调试 OpenClaw **定时 keepalive**、飞书或微信定时消息、`smart-keepalive.py` / `smart-keepalive.sh`、资讯简报、`prompts/`、`--doctor` / `--install-launchd` / `--install-cron`。
 
 ## 职责划分（SKILL.md / 脚本 / 提示词）
 
 | 内容 | 放哪里 | 说明 |
 |------|--------|------|
-| **定时无人值守时谁决定「拉哪路 RSS」** | **`smart-keepalive.py`** | 加权抽样、去重、状态落盘、HTTP 抓取只能由脚本执行；**SKILL.md 不能替代运行**，否则 cron 无法读 Markdown 来拉 RSS。 |
+| **定时无人值守时谁决定「拉哪路素材」** | **`smart-keepalive.py`** | 加权抽样、去重、状态落盘、HTTP 抓取只能由脚本执行；**SKILL.md 不能替代运行**，否则 cron 无法读 Markdown 来拉取素材。 |
 | **管线顺序、环境变量、`theme_tag` 含义、基准权重数字、状态 JSON 字段** | **`SKILL.md`（本文）** | 给人与 Agent 的**单一事实说明**；改脚本逻辑后**同步改本节**，避免脚本顶部长注释与文档漂移。 |
 | **成稿语气、版式、列表格式、标题弱化、占位句丢弃等** | **`prompts/rewrite-main.md`** 等 | 由 `openclaw agent` 执行；**不要用脚本再写一套润色规则**。其中 **凡来自各信息源的条目标题均须与素材一致、禁止 agent 改写**（见 `rewrite-main.md` 第 6 条）。作息见 **`prompts/wellness.md`**；文末彩蛋见 **`prompts/status-footer.md`**。 |
 
 - **原则**：能写在提示词里指导模型的，**不写进 Python**；必须在无模型时完成的（抓取、随机、写文件），**不写进 SKILL 当「假实现」**。
-- **脚本只做**：拉 RSS → 填模板变量 →（默认）`openclaw agent` 生成正文 /（可选）`KEEPALIVE_AGENT_COMMAND` 自定义润色 →（默认）`openclaw message send` /（可选）`KEEPALIVE_SEND_COMMAND` 自定义发送。换 RSS URL、权重常量或管线行为时改 Python，并**改本文对应表/段落**。
+- **脚本只做**：拉取素材 → 填模板变量 →（默认）`openclaw agent` 生成正文 /（可选）`KEEPALIVE_AGENT_COMMAND` 自定义润色 →（默认）`openclaw message send` /（可选）`KEEPALIVE_SEND_COMMAND` 自定义发送。换素材 URL、权重常量或管线行为时改 Python，并**改本文对应表/段落**。
 
 **仅部署 skill 目录不会创建系统定时任务**；周期发送需 launchd/cron（`--install-launchd` / `--install-cron` 可生成给 OpenClaw 的提示词）。
 
@@ -34,7 +34,7 @@
 
 ## 实现流程（供排查）
 
-1. **`build_keepalive_brief()`**：只组装 RSS 原始行（可含链接），不做面向用户的「业务级」润色。内部顺序概览：先算**综合乘数**（时段 × 轮换 × 节假日 × 跨日新鲜度）→ **盲盒**（`KEEPALIVE_BRIEF_CHAOS`，命中则**不参与**上述乘数，在今日仍可用源上均匀随机试拉，成功即返回）→ 否则 **基准权重 × 综合乘数** 后加权随机 → 主抽中源失败则**同轮乱序**试其余源 → **热点兜底**（多轮打乱顺序重试；轮数上限 `KEEPALIVE_BRIEF_HOT_FALLBACK_ROUNDS`，默认 `4`）。去重与 `tag_meta` 见下「简报素材随机」。
+1. **`build_keepalive_brief()`**：只组装素材原始行（可含链接），不做面向用户的「业务级」润色。内部顺序概览：先算**综合乘数**（时段 × 轮换 × 节假日 × 跨日新鲜度）→ **盲盒**（`KEEPALIVE_BRIEF_CHAOS`，命中则**不参与**上述乘数，在今日仍可用源上均匀随机试拉，成功即返回）→ 否则 **基准权重 × 综合乘数** 后加权随机 → 主抽中源失败则**同轮乱序**试其余源 → **热点兜底**（多轮打乱顺序重试；轮数上限 `KEEPALIVE_BRIEF_HOT_FALLBACK_ROUNDS`，默认 `4`）。去重与 `tag_meta` 见下「简报素材随机」。
 2. **主正文**：读 `rewrite-main.md`，填入 `{{BRIEF}}`、`{{LOCAL_TIME}}`、`{{HOUR}}`、`{{MINUTE}}`、`{{LOCALE}}`、`{{STYLE_GUIDE}}`，调用 `openclaw agent`；若提示词缺失则用脚本内 **`FALLBACK_REWRITE_PROMPT`**（与主提示词同版式摘要）。
 3. **Agent 失败时**：用 **`format_smart_report_fallback()`** 仅保证与「保活简报 keepalive」**结构一致**（标题 + 问候 + 正文），详细措辞仍以提示词为准。
 4. **作息附录**（可选）：`KEEPALIVE_REST_REMINDER=1` 时读 `wellness.md` + agent；失败用脚本内短句兜底。
@@ -80,30 +80,11 @@ export KEEPALIVE_SEND_COMMAND='hermes message send --message "$KEEPALIVE_MESSAGE
 
 ---
 
-## RSS 与 RSSHub（脚本仅负责抓取）
-
-感谢 [RSSHub](https://github.com/DIYgod/RSSHub) 社区提供的开放路由与生态支持；同时感谢以下实例服务提供可用访问：
-- `rsshub.liumingye.cn`
-- `rsshub.pseudoyu.com`
-
-本项目基于上述可用实例进行聚合抓取。
-
-默认依次尝试多个 **RSSHub** 根地址（首个返回有效条目的实例生效）：
-
-- `https://rsshub.liumingye.cn`
-- `https://rsshub.pseudoyu.com`
-
-可用 **`KEEPALIVE_RSSHUB_BASES`** 覆盖（逗号分隔、含 `https://` 的完整 base）。后续追加实例时改环境变量或改脚本内 `DEFAULT_RSSHUB_BASES` 即可。
-
-内置路由（相对路径拼在 base 后）：
-
-| 路由 | 说明 |
-|------|------|
-| `bilibili/weekly` | B 站每周必看 |
+## 资讯源（脚本仅负责抓取）
 
 **简报素材随机（`build_keepalive_brief()`）**：
 
-- **每源每日至多一次（默认）**：某一素材源**成功选用**后，同一日历日内后续轮次不再抽中该源（加权池与热点兜底均遵守；B 站与知乎等在两条链路里共用同一标签，故不会「随机一次、兜底又一次」重复出现）。
+- **每源每日至多一次（默认）**：某一素材源**成功选用**后，同一日历日内后续轮次不再抽中该源（加权池与热点兜底均遵守，避免「随机一次、兜底又一次」重复出现）。
   - **状态文件**：`~/.smart-keepalive/brief-sources.json`（JSON，**原子写入**；可用 `KEEPALIVE_BRIEF_STATE_FILE` 改路径）。字段与脚本一致：`date`（与 `used` 对齐的「今日」）、`used`（当日已成功选用过的源标签列表）、`tag_meta`（各源 `last`/`prior` 日期，用于跨日新鲜度 ×0.5）。
   - **审计日志**：与状态文件同目录，文件名为 `<状态主文件名>-audit.log`（默认状态文件为 `brief-sources.json` 时即 `brief-sources-audit.log`），**只追加、不自动轮转**；可用 `KEEPALIVE_BRIEF_AUDIT_LOG=0` 关闭。
   - **主日志**：默认再写一行到 `LOG_FILE` 或 `~/.openclaw/logs/smart-keepalive.log`（与定时任务主日志一致）；可用 `KEEPALIVE_BRIEF_LOG_TO_MAIN=0` 关闭。
@@ -112,8 +93,8 @@ export KEEPALIVE_SEND_COMMAND='hermes message send --message "$KEEPALIVE_MESSAGE
   - **0:00–6:00**：国外大报/国际向乘数高。
   - **6:00–10:00**：新闻向乘数高。
   - **10:00–17:00**：科技/热榜向乘数高。
-  - **17:00–24:00**：B 站/知乎等乘数高。
-- **4 小时轮换 + 早/晚强制**（默认）：`pick_rotating_theme()` 在非早/晚时段给不同栏目组加权；**早晨**再强化新闻类、**晚间**再强化 B 站/知乎类。关闭：`KEEPALIVE_BRIEF_ROTATION=0`。
+  - **17:00–24:00**：社区/科技类乘数高。
+- **4 小时轮换 + 早/晚强制**（默认）：`pick_rotating_theme()` 在非早/晚时段给不同栏目组加权；**早晨**再强化新闻类、**晚间**再强化社区/科技类。关闭：`KEEPALIVE_BRIEF_ROTATION=0`。
 - **跨日新鲜度**：状态文件 `tag_meta` 记录各源最近选用日；若**连续两个日历日**都选中同一源，**次日**该源额外 ×0.5（一次）。关闭：`KEEPALIVE_BRIEF_FRESHNESS=0`。
 - **节假日**：**周末**及 `KEEPALIVE_BRIEF_EXTRA_HOLIDAYS` 所列日期略提高知乎、少数派。关闭：`KEEPALIVE_BRIEF_HOLIDAY_BOOST=0`。
 - **盲盒随机**：默认 **10%** 概率走「均匀随机」试源（仍尊重今日去重），`theme_tag` 为 `brief-chaos`。关闭或调概率：`KEEPALIVE_BRIEF_CHAOS=0`（关闭）或 `0.05` 等。
@@ -122,11 +103,10 @@ export KEEPALIVE_SEND_COMMAND='hermes message send --message "$KEEPALIVE_MESSAGE
 
 | 基准权重 | 数据源 | 日志 `theme_tag` |
 |---------|--------|-------------------|
-| 0.09 | RSSHub `bilibili/weekly` | `bilibili-weekly` |
 | 0.09 | 知乎日报（AnyFeeder） | `zhihu-daily` |
 | 0.09 | 南方周末推荐（AnyFeeder `infzm/recommends`） | `infzm-recommends` |
 | 0.09 | 每日环球视野（AnyFeeder） | `idaily-today` |
-| 0.09 | 少数派 RSS（直连） | `sspai-feed` |
+| 0.09 | 少数派（直连） | `sspai-feed` |
 | 0.09 | 果壳科学人（AnyFeeder `guokr/scientific`） | `guokr-scientific` |
 | 0.09 | 法广中文网（AnyFeeder `rfi/cn`，法国国际广播电台中文） | `rfi-cn` |
 | 0.09 | 新华社新闻·新华网（AnyFeeder `newscn/whxw`） | `xinhua-whxw` |
@@ -143,18 +123,18 @@ export KEEPALIVE_SEND_COMMAND='hermes message send --message "$KEEPALIVE_MESSAGE
 
 - **兜底**：约 **10%** 概率落入热点池，或加权池**全部抓取失败**时 → 见上 `hots-*`。
 
-**热点兜底**（`run_theme(4)` / `run_theme_hot_fallback`）：多路源（B 站每周必看 / 南方周末推荐 / 新华社 / 法广中文网 / 果壳科学人 / 36氪 / 中央气象台每日天气提示 / 虎嗅）；外层轮数上限由 `KEEPALIVE_BRIEF_HOT_FALLBACK_ROUNDS` 控制（默认 `4`，允许 `1`–`32`），每轮随机顺序（与 `_brief_time_bucket` 偏好组合），先跳过当日已用源再全员重试；合并正文后洗牌，最多取 5 条。
+**热点兜底**（`run_theme(4)` / `run_theme_hot_fallback`）：多路源（南方周末推荐 / 新华社 / 法广中文网 / 果壳科学人 / 36氪 / 中央气象台每日天气提示 / 虎嗅）；外层轮数上限由 `KEEPALIVE_BRIEF_HOT_FALLBACK_ROUNDS` 控制（默认 `4`，允许 `1`–`32`），每轮随机顺序（与 `_brief_time_bucket` 偏好组合），先跳过当日已用源再全员重试；合并正文后洗牌，最多取 5 条。
 
 `pick_time_preferred_theme()` 仅供 `run_theme` 演示链；简报轮换见 `_brief_rotation_multipliers()` + `pick_rotating_theme()`。`run_theme(1|2|3)` 为按主题编号调用时的**源链**。
 
 | theme | 含义（`run_theme` 源链） |
 |-------|---------------------------|
 | 1 | 知乎日报 → 新华社新闻 → 南方周末推荐 → 每日环球视野 → 法广中文网 → 果壳科学人 → 少数派 → 36氪 → 虎嗅 |
-| 2 | 每日环球视野 → 法广中文网 → 知乎日报 → 南方周末推荐 → B 站每周必看 → 少数派 → 新华社新闻 → 果壳科学人 → 36氪 |
+| 2 | 每日环球视野 → 法广中文网 → 知乎日报 → 南方周末推荐 → 少数派 → 新华社新闻 → 果壳科学人 → 36氪 |
 | 3 | 少数派 → 虎嗅 |
 | 4 | 同上热点兜底 |
 
-**RSS URL（脚本内已配置；经抽检停更或不可用的源已移除）**  
+**素材 URL（脚本内已配置；经抽检停更或不可用的源已移除）**  
 
 | 名称 | URL |
 |------|-----|
@@ -166,10 +146,10 @@ export KEEPALIVE_SEND_COMMAND='hermes message send --message "$KEEPALIVE_MESSAGE
 | 新华社新闻（新华网） | `https://plink.anyfeeder.com/newscn/whxw` |
 | 36氪 | `https://36kr.com/feed` |
 | 少数派 | `https://sspai.com/feed` |
-| 虎嗅（兜底） | `https://rss.huxiu.com/` |
+| 虎嗅（兜底） | `https://www.huxiu.com/` |
 | 中央气象台国内天气预报（北京入口） | `https://www.nmc.cn/publish/forecast/ABJ/beijing.html` |
 
-RSSHub 仅用于 `bilibili/weekly`；其余新闻/科技源多为 AnyFeeder `plink` 直链。天气源可用 `KEEPALIVE_NMC_WEATHER_URL` 覆盖默认 URL（用于镜像或临时替换）；脚本会从该 URL 自动推导同域名的 `/rest/*` 实时接口，确保“展示页与实时数据”同源。天气城市优先取 `KEEPALIVE_WEATHER_CITY`，否则取 `config.json.weatherCity`（由 `--setup` 初始化）。
+新闻/科技源多为 AnyFeeder `plink` 直链。天气源可用 `KEEPALIVE_NMC_WEATHER_URL` 覆盖默认 URL（用于镜像或临时替换）；脚本会从该 URL 自动推导同域名的 `/rest/*` 实时接口，确保“展示页与实时数据”同源。天气城市优先取 `KEEPALIVE_WEATHER_CITY`，否则取 `config.json.weatherCity`（由 `--setup` 初始化）。
 
 ---
 
@@ -206,7 +186,6 @@ python3 smart-keepalive.py --doctor
 | `KEEPALIVE_REST_REMINDER` | `1` 开启作息附录 |
 | `KEEPALIVE_AGENT_ID` / `KEEPALIVE_SESSION_ACTIVE_MINUTES` | 凌晨活跃判定 |
 | `KEEPALIVE_STYLE_GUIDE` / `KEEPALIVE_WELLNESS_STYLE_GUIDE` | 注入主提示词 / 作息提示词 |
-| `KEEPALIVE_RSSHUB_BASES` | RSSHub 根地址列表（逗号分隔），覆盖默认两实例 |
 | `KEEPALIVE_NMC_WEATHER_URL` | 覆盖中央气象台天气页面 URL（默认 `https://www.nmc.cn/publish/forecast/ABJ/beijing.html`）；同时决定实时接口域名来源 |
 | `KEEPALIVE_WEATHER_CITY` | 覆盖天气城市（优先于 `config.json.weatherCity`；`--setup` 会提示填写，默认北京） |
 | `KEEPALIVE_APPEND_WEATHER` | `1`（默认）每次发送追加天气行；`0`/`off`/`false` 关闭天气追加 |
@@ -244,7 +223,7 @@ python3 smart-keepalive.py --doctor
 
 ## English (short)
 
-**Smart Keepalive** sends periodic messages via CLI. Default path is `openclaw agent` + `openclaw message send`; Hermes/other runtimes can override with `KEEPALIVE_AGENT_COMMAND` / `KEEPALIVE_SEND_COMMAND`. **Copy and layout live in `prompts/rewrite-main.md`** (fixed **保活简报 keepalive** header, time-based greeting, RSS body); **`prompts/wellness.md`** covers optional wellness lines. The script fetches RSS via a weighted pool (time slot, 4h rotation, holiday/freshness tweaks, optional chaos draw, daily dedup, multi-retry hot fallback), fills templates, rewrites, and sends. Edit those markdown files first when changing filters or tone.
+**Smart Keepalive** sends periodic messages via CLI. Default path is `openclaw agent` + `openclaw message send`; Hermes/other runtimes can override with `KEEPALIVE_AGENT_COMMAND` / `KEEPALIVE_SEND_COMMAND`. **Copy and layout live in `prompts/rewrite-main.md`** (fixed **保活简报 keepalive** header, time-based greeting, brief body); **`prompts/wellness.md`** covers optional wellness lines. The script fetches source items via a weighted pool (time slot, 4h rotation, holiday/freshness tweaks, optional chaos draw, daily dedup, multi-retry hot fallback), fills templates, rewrites, and sends. Edit those markdown files first when changing filters or tone.
 
 ---
 
@@ -257,10 +236,10 @@ python3 smart-keepalive.py --doctor
 1. `python3 smart-keepalive.py --doctor`（或项目内等价路径）：确认 `openclaw` 可执行、`openclaw.json` / channel、launchd 或 cron 环境等。
 2. 读 `~/.openclaw/logs/smart-keepalive.log`：是否有 `ERROR`、发送失败、`Unknown channel` 重试等。
 3. 手动试发：默认用 `openclaw message send --message "ping"`（按需加 `--channel` / `--target`）；若使用 Hermes/自定义发送命令，则执行你配置的 `KEEPALIVE_SEND_COMMAND` 对应试发。
-4. RSS：若简报里常出现「本轮暂无可用条目」，检查网络、RSS 源与 `KEEPALIVE_RSSHUB_BASES` 是否偶发失败（脚本已做重试与兜底，不必夸大成「服务宕机」）。
+4. 素材：若简报里常出现「本轮暂无可用条目」，检查网络与资讯源是否偶发失败（脚本已做重试与兜底，不必夸大成「服务宕机」）。
 
 **文末状态彩蛋（默认）**：未设置 `KEEPALIVE_STATUS_FOOTER` 时由 **`prompts/status-footer.md`** 经 `openclaw agent` 单独生成一句，与主正文 `rewrite-main.md` 分开；可用 **`KEEPALIVE_STATUS_STYLE_GUIDE`** 微调。若仍希望主正文里顺带提管线情况，可写进 `KEEPALIVE_STYLE_GUIDE`，**不要**要求模型伪造日志里不存在的告警。
 
 **English (for agent)**
 
-When the user asks about “keepalive” health: clarify it means the **scheduled pipeline** (RSS → rewrite → send), not full infra monitoring. Prefer `--doctor`, `smart-keepalive.log`, then a manual send test (OpenClaw or the command configured by `KEEPALIVE_SEND_COMMAND`). Do not invent incidents not present in logs.
+When the user asks about “keepalive” health: clarify it means the **scheduled pipeline** (fetch → rewrite → send), not full infra monitoring. Prefer `--doctor`, `smart-keepalive.log`, then a manual send test (OpenClaw or the command configured by `KEEPALIVE_SEND_COMMAND`). Do not invent incidents not present in logs.
