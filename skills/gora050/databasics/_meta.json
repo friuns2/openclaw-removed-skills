@@ -3,9 +3,15 @@
   "slug": "databasics",
   "displayName": "Databasics",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775203670726,
-    "commit": "https://github.com/openclaw/skills/commit/629156aa015e50c57ec1e62766032861d6d3be52"
+    "version": "1.0.1",
+    "publishedAt": 1776885094375,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775203670726,
+      "commit": "https://github.com/openclaw/skills/commit/629156aa015e50c57ec1e62766032861d6d3be52"
+    }
+  ]
 }
