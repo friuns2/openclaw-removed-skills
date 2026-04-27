@@ -271,6 +271,7 @@ pixcli video "The cat jumps over a fence" --from cat.mp4 --extend -o cat-extende
 | `--json` | `false` | Machine-readable JSON output |
 | `--no-wait` | `false` | Submit and return immediately (recommended for video — avoids 10min blocking) |
 | `--extend` | `false` | Extend the source video instead of I2V |
+| `--storyboard` | `false` | Generate a still frame with Nano Banana first, then animate it. Opt-in for tight visual control over the opening frame (brand shots, hero compositions). Adds ~5s + one extra credit. Default text-to-video is single-step T2V. |
 
 **Models — fal backend**: `veo31-lite-i2v` (default I2V, Veo 3.1 Lite), `veo31-lite-t2v` (default T2V, Veo 3.1 Fast), `veo31-lite-transition` (start→end frame), `kling-o3-pro-i2v` (cinematic, best quality), `kling-o3-pro-t2v`, `kling-o3-standard-i2v`, `kling-o3-standard-t2v`, `kling-v3-pro-i2v`, `veo3-i2v` (premium, native audio + lipsync), `veo3-t2v`, `pixverse-v6-i2v` / `-t2v` / `-transition` / `-extend` (stylized, audio, multi-clip), `ltx-t2v` (budget T2V), `ltx-extend-video` (budget extension, native audio), `wan-v2-i2v` (cheap motion), `minimax-i2v` (fast, avoid for faces), `grok-extend-video`
 

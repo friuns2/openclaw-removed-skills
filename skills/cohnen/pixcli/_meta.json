@@ -3,11 +3,16 @@
   "slug": "pixcli",
   "displayName": "Pixcli Skill",
   "latest": {
-    "version": "2.3.8",
-    "publishedAt": 1776161466246,
-    "commit": "https://github.com/openclaw/skills/commit/c1f991248db000a54e71c5bb7d4f2c22dbdaacc2"
+    "version": "2.3.10",
+    "publishedAt": 1776800304338,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.3.8",
+      "publishedAt": 1776161466246,
+      "commit": "https://github.com/openclaw/skills/commit/c1f991248db000a54e71c5bb7d4f2c22dbdaacc2"
+    },
     {
       "version": "2.3.4",
       "publishedAt": 1775815674808,
