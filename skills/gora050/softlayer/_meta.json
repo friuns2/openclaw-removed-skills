@@ -3,11 +3,16 @@
   "slug": "softlayer",
   "displayName": "Softlayer",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169291980,
-    "commit": "https://github.com/openclaw/skills/commit/0b7bbc0198775437dbd996ffcde85ba52d2aea2e"
+    "version": "1.0.3",
+    "publishedAt": 1776865196471,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169291980,
+      "commit": "https://github.com/openclaw/skills/commit/0b7bbc0198775437dbd996ffcde85ba52d2aea2e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812184760,
