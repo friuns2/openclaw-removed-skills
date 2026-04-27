@@ -3,9 +3,15 @@
   "slug": "ns1",
   "displayName": "Ns1",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170081419,
-    "commit": "https://github.com/openclaw/skills/commit/78da6388f346fd8054abad19d0f5d8786cbbc7b3"
+    "version": "1.0.3",
+    "publishedAt": 1776885747799,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170081419,
+      "commit": "https://github.com/openclaw/skills/commit/78da6388f346fd8054abad19d0f5d8786cbbc7b3"
+    }
+  ]
 }
