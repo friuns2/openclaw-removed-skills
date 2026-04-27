@@ -3,11 +3,16 @@
   "slug": "polymarket-candle-engulfing-reversal-trader",
   "displayName": "Polymarket Candle Engulfing Reversal Trader",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775317029449,
-    "commit": "https://github.com/openclaw/skills/commit/6b389cc92bdd79312e8869973ec0aff7c116cbf4"
+    "version": "0.0.2",
+    "publishedAt": 1776513211993,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775317029449,
+      "commit": "https://github.com/openclaw/skills/commit/6b389cc92bdd79312e8869973ec0aff7c116cbf4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774768744414,
