@@ -3,9 +3,15 @@
   "slug": "redox",
   "displayName": "Redox",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169732759,
-    "commit": "https://github.com/openclaw/skills/commit/0cb2e1248ba547429e8ed1f9c413e3d272fe609e"
+    "version": "1.0.3",
+    "publishedAt": 1776865708865,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169732759,
+      "commit": "https://github.com/openclaw/skills/commit/0cb2e1248ba547429e8ed1f9c413e3d272fe609e"
+    }
+  ]
 }
