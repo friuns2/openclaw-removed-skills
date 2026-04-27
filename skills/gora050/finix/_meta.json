@@ -3,11 +3,16 @@
   "slug": "finix",
   "displayName": "Finix",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170653900,
-    "commit": "https://github.com/openclaw/skills/commit/b52baffdeae0c6e3ecce068ff3060818e1ca655c"
+    "version": "1.0.3",
+    "publishedAt": 1776865981667,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170653900,
+      "commit": "https://github.com/openclaw/skills/commit/b52baffdeae0c6e3ecce068ff3060818e1ca655c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775088241442,
