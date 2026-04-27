@@ -3,9 +3,15 @@
   "slug": "talentlyft",
   "displayName": "Talentlyft",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775192768415,
-    "commit": "https://github.com/openclaw/skills/commit/72140663b8016e414e58aaeb3a441dfeb2128a3d"
+    "version": "1.0.1",
+    "publishedAt": 1776884872800,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775192768415,
+      "commit": "https://github.com/openclaw/skills/commit/72140663b8016e414e58aaeb3a441dfeb2128a3d"
+    }
+  ]
 }
