@@ -3,11 +3,16 @@
   "slug": "getemails",
   "displayName": "Getemails",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168496370,
-    "commit": "https://github.com/openclaw/skills/commit/c0c0c5eb4ec506bcdd665ccd0d5bab06955f90cb"
+    "version": "1.0.3",
+    "publishedAt": 1776862556690,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168496370,
+      "commit": "https://github.com/openclaw/skills/commit/c0c0c5eb4ec506bcdd665ccd0d5bab06955f90cb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652629117,
