@@ -22,14 +22,12 @@ core:
       search_pattern: "site:arxiv.org cs.AI OR cs.LG OR cs.RO"
       tags: [research, papers, cutting-edge]
       trust: 10
-      deep_dive: true
 
     - name: "Quanta Magazine"
       url: "https://www.quantamagazine.org"
       search_pattern: "site:quantamagazine.org"
       tags: [science, math, physics, biology]
       trust: 10
-      deep_dive: true
 
     - name: "MIT Technology Review"
       url: "https://www.technologyreview.com"
@@ -87,13 +85,6 @@ core:
       search_pattern: "site:nautil.us"
       tags: [science, philosophy, cross-disciplinary]
       trust: 9
-      deep_dive: true
-
-    - name: "ScienceDaily"
-      url: "https://www.sciencedaily.com"
-      search_pattern: "site:sciencedaily.com"
-      tags: [science, research, news, cross-disciplinary]
-      trust: 8
 
 # ============================================================
 # 第二层：常规水域
@@ -145,45 +136,12 @@ regular:
       tags: [products, startups, launches]
       trust: 6
 
-  multilingual:
-    - name: "机器之心"
-      url: "https://www.jiqizhixin.com"
-      search_pattern: "site:jiqizhixin.com"
-      tags: [ai, research, chinese, industry]
-      trust: 7
-
-    - name: "量子位"
-      url: "https://www.qbitai.com"
-      search_pattern: "site:qbitai.com"
-      tags: [ai, tech, chinese, news]
-      trust: 7
-
-    - name: "New Scientist"
-      url: "https://www.newscientist.com"
-      search_pattern: "site:newscientist.com"
-      tags: [science, technology, cross-disciplinary]
-      trust: 8
-
-    - name: "Aeon"
-      url: "https://aeon.co"
-      search_pattern: "site:aeon.co"
-      tags: [philosophy, science, long-form, essays]
-      trust: 9
-      deep_dive: true
-
-    - name: "IEEE Spectrum"
-      url: "https://spectrum.ieee.org"
-      search_pattern: "site:spectrum.ieee.org"
-      tags: [engineering, robotics, ai, deep-tech]
-      trust: 8
-
   blogs:
     - name: "Wait But Why"
       url: "https://waitbutwhy.com"
       search_pattern: "site:waitbutwhy.com"
       tags: [long-form, thinking, explanations]
       trust: 9
-      deep_dive: true
 
     - name: "Astral Codex Ten"
       url: "https://www.astralcodexten.com"
@@ -196,25 +154,6 @@ regular:
       search_pattern: "site:thebrowser.com"
       tags: [curated, long-form]
       trust: 8
-
-  ai_labs:
-    - name: "OpenAI Blog"
-      url: "https://openai.com/index"
-      search_pattern: "site:openai.com/index"
-      tags: [ai, research, frontier-models, safety]
-      trust: 9
-
-    - name: "Google DeepMind Blog"
-      url: "https://deepmind.google/discover/blog"
-      search_pattern: "site:deepmind.google"
-      tags: [ai, research, science, frontier-models]
-      trust: 9
-
-    - name: "Anthropic Research"
-      url: "https://www.anthropic.com/research"
-      search_pattern: "site:anthropic.com"
-      tags: [ai, safety, interpretability, research]
-      trust: 9
 
 # ============================================================
 # 第三层：远洋（Serendipity Zone）
@@ -268,27 +207,43 @@ exploration_strategy:
 # ============================================================
 # 动态质量维护规则
 # ============================================================
-# ============================================================
-# 深潜专用源（deep_dive: true 标记的源）
-# 用于每周六 22:00 的深潜模式
-# 只搜索这些高质量长文来源
-# 评分门槛 ≥ 8，明信片 450-600 字
-# ============================================================
-deep_dive:
-  description: "每周一次深度内容探索，只搜索长文/论文/深度报告"
-  sources:
-    - "arXiv CS/AI"       # core.tech_ai
-    - "Quanta Magazine"   # core.tech_ai
-    - "Nautilus"          # core.science_cross
-    - "Wait But Why"      # regular.blogs
-    - "Aeon"              # regular.multilingual
-  rules:
-    min_score: 8
-    word_count: "450-600"
-    search_modifiers: "in-depth OR analysis OR long-read OR review OR survey"
-    frequency: "weekly (Saturday 22:00)"
-
 quality_rules:
   promotion: "某源被核心水域引用3次以上 → 提升为常规水域候选"
   demotion: "某源连续3次产出低分内容 → 降级或移除"
   user_boost: "用户对来自某源的明信片有正面回复 → 该源权重+0.1"
+
+# ============================================================
+# 深潜模式专用源（每周六 22:00）
+# 只搜索长文/论文/深度报告
+# 评分门槛 ≥ 8 分才推送
+# ============================================================
+deep_dive:
+  - name: "arXiv CS/AI (长论文)"
+    url: "https://arxiv.org"
+    search_pattern: "site:arxiv.org cs.AI OR cs.LG OR cs.RO"
+    tags: [research, papers, cutting-edge]
+    trust: 10
+
+  - name: "Quanta Magazine"
+    url: "https://www.quantamagazine.org"
+    search_pattern: "site:quantamagazine.org"
+    tags: [science, math, physics, biology]
+    trust: 10
+
+  - name: "Nautilus"
+    url: "https://nautil.us"
+    search_pattern: "site:nautil.us"
+    tags: [science, philosophy, cross-disciplinary]
+    trust: 9
+
+  - name: "Wait But Why"
+    url: "https://waitbutwhy.com"
+    search_pattern: "site:waitbutwhy.com"
+    tags: [long-form, thinking, explanations]
+    trust: 9
+
+  - name: "Paul Graham Essays"
+    url: "http://paulgraham.com/articles.html"
+    search_pattern: "site:paulgraham.com"
+    tags: [startups, thinking, essays]
+    trust: 10
