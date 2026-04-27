@@ -3,11 +3,16 @@
   "slug": "forcemanager",
   "displayName": "Forcemanager",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169165152,
-    "commit": "https://github.com/openclaw/skills/commit/daace3b086b99c30d09a3f96cf7ff200a5693e1b"
+    "version": "1.0.3",
+    "publishedAt": 1776885153737,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169165152,
+      "commit": "https://github.com/openclaw/skills/commit/daace3b086b99c30d09a3f96cf7ff200a5693e1b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774771420884,
