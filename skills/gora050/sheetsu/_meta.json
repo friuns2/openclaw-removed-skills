@@ -3,11 +3,16 @@
   "slug": "sheetsu",
   "displayName": "Sheetsu",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170694612,
-    "commit": "https://github.com/openclaw/skills/commit/354cbe6a09af5f2ce7ed923559efc084f086e339"
+    "version": "1.0.3",
+    "publishedAt": 1776866038499,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170694612,
+      "commit": "https://github.com/openclaw/skills/commit/354cbe6a09af5f2ce7ed923559efc084f086e339"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775091831883,
