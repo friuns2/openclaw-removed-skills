@@ -8,6 +8,8 @@
  *   node train-query.js --train-number "G1234"
  *   node train-query.js --departure-station "北京南站" --arrival-station "上海虹桥站"
  *   node train-query.js --departure "北京" --destination "上海" --extra "明天 高铁"
+ *   node train-query.js --departure "北京" --destination "上海" --extra "最晚"
+ *   node train-query.js --departure "北京" --destination "上海" --extra "最早 高铁"
  * 
  * 参数说明：
  *   --departure <城市>        出发地城市
@@ -15,7 +17,7 @@
  *   --departure-station <站>  出发站
  *   --arrival-station <站>    到达站
  *   --train-number <车次>     车次号
- *   --extra <补充信息>        额外信息（日期、偏好等）
+ *   --extra <补充信息>        额外信息（日期、时间偏好、价格偏好、席别偏好等）
  *   --channel <渠道>          通信渠道（webchat/wechat 等）
  *   --surface <界面>          交互界面（mobile/desktop/table/card）
  * 
@@ -124,6 +126,7 @@ function handle_result(response_data, { print_success_once, format_options, prin
 
   if (Array.isArray(train_data_list) && train_data_list.length > 0) {
     let has_output = false;
+
     train_data_list.forEach((item, index) => {
       if (item.trainList && item.trainList.length > 0) {
         print_success_once();
@@ -138,8 +141,10 @@ function handle_result(response_data, { print_success_once, format_options, prin
     });
     if (!has_output) {
       print_no_match();
-    } else if (round_trip) {
-      console.log('🔄 用户查询了往返车次，请确认去程和返程的车次是否已齐全。如有缺少，需再次查询另一程（交换出发地和目的地）。\n');
+    } else {
+      if (round_trip) {
+        console.log(ROUND_TRIP_PROMPTS.TRAIN);
+      }
     }
   } else {
     print_no_match();
@@ -161,7 +166,7 @@ const runner = create_query_runner({
   },
   validate: validate_params,
   handle_result: handle_result,
-  no_match_detail: NO_MATCH_DETAIL.train,
+  no_match_detail: NO_MATCH_DETAIL.TRAIN,
   usage_example: `  node train-query.js --departure "北京" --destination "上海"
   node train-query.js --train-number "G1234"
   node train-query.js --departure-station "北京南站" --arrival-station "上海虹桥站"

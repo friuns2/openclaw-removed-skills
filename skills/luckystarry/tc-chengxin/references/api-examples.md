@@ -80,26 +80,50 @@ node scripts/flight-query.js \
   "data": {
     "flightDataList": [
       {
-        "desc": "北京 → 上海 2024-04-20",
-        "flightList": [
+        "desc": "北京 → 上海 2026-04-21",
+        "supplementTrafficType": "pre",
+        "supplementTrafficList": [
           {
-            "flightNo": "CA1234",
-            "airlineName": "中国国航",
-            "departureAirport": "首都国际机场T3",
-            "arrivalAirport": "虹桥国际机场T2",
-            "departureTime": "08:00",
-            "arrivalTime": "10:20",
-            "duration": "2小时20分",
-            "price": 850,
-            "discount": "5.2折",
-            "cabinClass": "经济舱",
-            "pcRedirectUrl": "https://...",
-            "clawRedirectUrl": "https://..."
+            "segmentType": "TRAIN",
+            "trafficNo": "G1234",
+            "depStationName": "苏州北",
+            "depStationCode": "OHH",
+            "arrStationName": "上海虹桥",
+            "arrStationCode": "AOH",
+            "depDateTime": "2026-04-21 07:00",
+            "arrDateTime": "2026-04-21 07:30",
+            "depDate": "2026-04-21",
+            "depTime": "07:00",
+            "arrDate": "2026-04-21",
+            "arrTime": "07:30",
+            "runTime": "30分",
+            "price": "39.5",
+            "ticketList": [
+              { "ticketType": "二等座", "ticketPrice": "39.5", "ticketLeft": "21" },
+              { "ticketType": "一等座", "ticketPrice": "64.5", "ticketLeft": "15" }
+            ],
+            "tripType": "DIRECT"
           }
         ],
-        "pageDataList": [
+        "flightList": [
           {
-            "pcRedirectUrl": "https://..."
+            "flightNo": "MF8561",
+            "airlineName": "厦门航空",
+            "depAirportName": "北京大兴国际机场",
+            "depAirportTerminal": "",
+            "arrAirportName": "上海浦东国际机场",
+            "arrAirportTerminal": "T2",
+            "depDate": "2026-04-21",
+            "depTime": "07:50",
+            "arrDate": "2026-04-21",
+            "arrTime": "09:45",
+            "daySpan": "0",
+            "runTime": "1时55分",
+            "price": "327",
+            "discount": null,
+            "originPrice": null,
+            "pcRedirectUrl": "https://...",
+            "clawRedirectUrl": "https://..."
           }
         ]
       }
@@ -107,6 +131,21 @@ node scripts/flight-query.js \
   }
 }
 ```
+
+**`supplementTrafficList` 补偿交通字段说明**：
+
+| 字段 | 说明 |
+|------|------|
+| `supplementTrafficType` | 补偿类型：`"pre"` = 出发地补偿（用户城市→机场城市），`"suffix"` = 目的地补偿（机场城市→用户目的地） |
+| `segmentType` | 交通类型：`"TRAIN"` = 火车，`"BUS"` = 汽车 |
+| `trafficNo` | 车次号 |
+| `depStationName` / `arrStationName` | 出发/到达站名 |
+| `depDateTime` / `arrDateTime` | 完整日期时间 |
+| `depTime` / `arrTime` | 出发/到达时间 |
+| `runTime` | 运行时长 |
+| `price` | 最低价格 |
+| `ticketList` | 席别票价列表（与火车票结构一致） |
+| `tripType` | 行程类型：`"DIRECT"` = 直达 |
 
 ---
 
@@ -157,22 +196,20 @@ node scripts/train-query.js \
         "trainList": [
           {
             "trainNo": "G1234",
-            "trainType": "高铁",
-            "departureStation": "北京南站",
-            "arrivalStation": "上海虹桥站",
-            "departureTime": "09:00",
-            "arrivalTime": "13:28",
-            "duration": "4小时28分",
-            "seatTypes": [
+            "trainType": "GD",
+            "depStationName": "北京南站",
+            "arrStationName": "上海虹桥站",
+            "depTime": "09:00",
+            "arrTime": "13:28",
+            "runTime": "4小时28分",
+            "ticketList": [
               {
-                "seatName": "二等座",
-                "price": 553,
-                "remainNum": 99
+                "ticketType": "二等座",
+                "ticketPrice": 553
               },
               {
-                "seatName": "一等座",
-                "price": 933,
-                "remainNum": 20
+                "ticketType": "一等座",
+                "ticketPrice": 933
               }
             ],
             "pcRedirectUrl": "https://...",
@@ -223,17 +260,20 @@ node scripts/bus-query.js \
   "data": {
     "busDataList": [
       {
-        "desc": "北京 → 上海 2024-04-20",
+        "desc": "苏州 → 常熟 2026-04-21",
         "busList": [
           {
-            "busNo": "K1234",
-            "departureStation": "北京六里桥客运站",
-            "arrivalStation": "上海长途汽车客运站",
-            "departureTime": "08:30",
-            "arrivalTime": "20:00",
-            "duration": "11小时30分",
-            "price": 350,
-            "seatType": "大型高三",
+            "coachNo": "SZ-CSB0001",
+            "coachType": "客车",
+            "depCityName": "苏州",
+            "arrCityName": "常熟",
+            "depStationName": "苏州北广场汽车客运站",
+            "arrStationName": "常熟南门汽车站",
+            "depTime": "06:15",
+            "arrTime": "07:45",
+            "runTimeMinutes": 90,
+            "runTimeDesc": "约1.5小时",
+            "price": "14.90",
             "pcRedirectUrl": "https://...",
             "clawRedirectUrl": "https://..."
           }
@@ -291,14 +331,13 @@ node scripts/hotel-query.js \
         "desc": "上海酒店推荐",
         "hotelList": [
           {
-            "hotelName": "上海外滩华尔道夫酒店",
-            "address": "上海市黄浦区中山东一路2号",
-            "star": "五星级",
-            "score": 4.8,
-            "price": 1280,
-            "originalPrice": 1580,
-            "discount": "8.1折",
-            "tags": ["外滩", "江景", "豪华"],
+            "name": "上海虹桥新华联索菲特大酒店",
+            "price": "1512",
+            "star": "豪华型",
+            "score": "4.8",
+            "commentNum": "7493",
+            "describe": "交通便利，设施齐全，服务优质。",
+            "address": "泰虹路666号",
             "pcRedirectUrl": "https://...",
             "clawRedirectUrl": "https://..."
           }
@@ -356,12 +395,15 @@ node scripts/scenery-query.js \
         "desc": "杭州景区推荐",
         "sceneryList": [
           {
-            "name": "西湖风景名胜区",
+            "name": "杭州宋城",
             "cityName": "杭州",
-            "star": "5A 景区",
-            "score": 4.9,
-            "price": 0,
-            "describe": "世界文化遗产，杭州标志性景点",
+            "star": "4A",
+            "score": "4.8",
+            "commentNum": "14186",
+            "price": "260",
+            "describe": "世界三大名秀之一",
+            "address": "杭州市西湖区之江路148号",
+            "theme": "演出赛事",
             "pcRedirectUrl": "https://...",
             "clawRedirectUrl": "https://..."
           }
@@ -427,7 +469,7 @@ node scripts/travel-query.js \
       {
         "desc": "苏州 → 杭州 推荐火车",
         "trainList": [
-          { "trainNo": "G7589", "departureTime": "09:00", "arrivalTime": "09:45" }
+          { "trainNo": "G7589", "depTime": "09:00", "arrTime": "09:45" }
         ]
       }
     ],
@@ -450,35 +492,42 @@ node scripts/travel-query.js \
         "desc": "杭州3日游产品",
         "tripList": [
           {
-            "tripName": "杭州西湖3日自由行",
-            "price": 1280,
-            "days": 3,
-            "type": "自由行",
-            "pcRedirectUrl": "https://..."
+            "name": "3天2晚·宿5钻·杭州+乌镇西栅+西塘古镇+灵隐飞来峰+西湖跟团游",
+            "price": "729",
+            "score": "0.9296",
+            "commentNum": "554",
+            "labelList": ["成团保障", "品质游", "古镇古村"],
+            "destList": ["杭州", "嘉兴", "桐乡"],
+            "pcRedirectUrl": "",
+            "clawRedirectUrl": "https://..."
           }
         ]
       }
     ],
     "tripPlanDataList": [
       {
-        "planTitle": "杭州3日游行程规划",
-        "days": [
+        "totalDays": "3",
+        "hotelNights": "2",
+        "foods": "杭州市美食有...",
+        "sceneryCount": "6",
+        "planList": [
           {
-            "day": 1,
-            "title": "西湖经典游",
-            "activityList": [
+            "index": "1",
+            "summary": "千岛湖景区",
+            "cityNameList": ["杭州"],
+            "activitiyList": [
               {
                 "name": "千岛湖景区",
                 "introduction": "徜徉在星罗密布的岛屿中",
                 "price": "45.5",
                 "star": "5A级景区",
                 "score": "4.6",
-                "commentNum": "13615",
+                "commentNum": "13614",
                 "openTime": "08:00-15:00",
                 "playTime": "半天-1天",
                 "theme": "海滨岛屿",
                 "pcRedirectUrl": "https://...",
-                "redirectUrl": "https://..."
+                "clawRedirectUrl": "https://..."
               }
             ]
           }
@@ -549,7 +598,7 @@ node scripts/traffic-query.js \
       {
         "desc": "北京 → 上海 火车推荐",
         "trainList": [
-          { "trainNo": "G123", "departureTime": "09:00", "price": 553 }
+          { "trainNo": "G123", "depTime": "09:00", "price": 553 }
         ]
       }
     ],
@@ -557,15 +606,15 @@ node scripts/traffic-query.js \
       {
         "desc": "北京 → 上海 航班推荐",
         "flightList": [
-          { "flightNo": "CA1234", "departureTime": "08:00", "price": 850 }
-        ],
+          { "flightNo": "CA1234", "depTime": "08:00", "price": 850 }
+        ]
       }
     ],
     "busDataList": [
       {
         "desc": "北京 → 上海 汽车推荐",
         "busList": [
-          { "busNo": "K1234", "departureTime": "08:30", "price": 350 }
+          { "coachNo": "K1234", "depTime": "08:30", "price": 350 }
         ]
       }
     ]
@@ -599,7 +648,7 @@ node scripts/traffic-query.js \
 
 **说明**:
 - `code`: `"0"` 表示成功
-- `data`: 业务数据对象（单层 data，不是双层）
+- `data`: 业务数据对象（部分接口可能返回双层嵌套 `{ code, data: { code, data: {...} } }`，代码已做兼容解包）
 - `xxxDataList`: 各类资源列表（如 `flightDataList`、`trainDataList` 等）
 - `xxxList`: 具体资源列表（如 `flightList`、`trainList` 等）
 - `desc`: 描述信息（可选）

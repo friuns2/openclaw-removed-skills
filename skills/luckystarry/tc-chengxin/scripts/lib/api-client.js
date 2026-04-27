@@ -13,7 +13,10 @@ const path = require('path');
 
 // 接口基础配置
 const API_BASE_URL = 'https://wx.17u.cn/skills/gateway/api/v1/gateway';
-const API_VERSION = '0.6.0';
+const API_VERSION = '0.7.0';
+
+// 超时配置（15 秒）
+const API_TIMEOUT = 15000;
 
 // 配置读取（优先级：环境变量 > config.json）
 let API_KEY = process.env.CHENGXIN_API_KEY;
@@ -24,7 +27,7 @@ if (!API_KEY) {
     const config = JSON.parse(fs.readFileSync(config_path, 'utf8'));
     API_KEY = config.apiKey;
   } catch (e) {
-    // 延迟报错，让调用方决定如何处理
+    // 静默处理：文件不存在走试用额度，其他异常由后续 API 调用的错误码 3 引导配置
   }
 }
 
@@ -71,7 +74,7 @@ function call_api(api_path, params) {
       port: parsed_url.port || 443,
       path: parsed_url.path,
       method: 'POST',
-      timeout: 15000, // 15 秒超时
+      timeout: API_TIMEOUT,
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(post_data),
@@ -109,7 +112,7 @@ function call_api(api_path, params) {
     // 超时处理
     req.on('timeout', () => {
       req.destroy();
-      reject(new Error('请求超时（15秒）'));
+      reject(new Error(`请求超时（${API_TIMEOUT / 1000}秒）`));
     });
 
     req.on('error', (e) => {
