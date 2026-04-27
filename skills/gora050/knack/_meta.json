@@ -3,11 +3,16 @@
   "slug": "knack",
   "displayName": "Knack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167966837,
-    "commit": "https://github.com/openclaw/skills/commit/fe5734edf6b83f7b4786e38c947f399bfb2e98cb"
+    "version": "1.0.3",
+    "publishedAt": 1776863063668,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167966837,
+      "commit": "https://github.com/openclaw/skills/commit/fe5734edf6b83f7b4786e38c947f399bfb2e98cb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774553052610,
