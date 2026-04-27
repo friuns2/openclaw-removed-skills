@@ -3,11 +3,16 @@
   "slug": "financialforce",
   "displayName": "Financialforce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169217230,
-    "commit": "https://github.com/openclaw/skills/commit/b21f1f332923dce7366b69df764db4be30ad3f0b"
+    "version": "1.0.3",
+    "publishedAt": 1776863945709,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169217230,
+      "commit": "https://github.com/openclaw/skills/commit/b21f1f332923dce7366b69df764db4be30ad3f0b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774775083090,
