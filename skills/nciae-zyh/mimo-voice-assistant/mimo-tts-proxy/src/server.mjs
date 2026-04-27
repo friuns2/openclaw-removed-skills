@@ -1,8 +1,16 @@
 /**
- * MiMo-TTS Proxy Server
+ * MiMo-V2.5-TTS Proxy Server
  *
  * 将 OpenAI TTS API 格式 (POST /v1/audio/speech) 转换为
- * 小米 MiMo-V2-TTS 的 chat completions 格式。
+ * 小米 MiMo-V2.5-TTS 的 chat completions 格式。
+ *
+ * 新增功能 (v2.0.0):
+ *   - MiMo-V2.5-TTS 模型支持
+ *   - System message 语音风格指令
+ *   - 音色克隆 (reference_audio)
+ *   - 细粒度控制 (speed, emotion, tone)
+ *   - 方言支持 (东北话/四川话/河南话/粤语/台湾腔)
+ *   - Token Plan 计费支持
  *
  * 启动: node src/server.mjs
  * 环境变量:
@@ -56,25 +64,73 @@ async function convertAudio(inputPath, outputFormat) {
   });
 }
 
-// ── 调用小米 MiMo-V2-TTS API ─────────────────────────────────
-async function callMiMoTTS(text, voice, apiKey, lang) {
+// ── 调用小米 MiMo-V2.5-TTS API ─────────────────────────────────
+async function callMiMoTTS(text, voice, apiKey, options = {}) {
+  const { lang, style, speed, emotion, reference_audio } = options;
   const url = `${MIMO_API_BASE}/v1/chat/completions`;
-  // 语言前缀提示，帮助 MiMo TTS 选择正确的语音
-  const langPrefix = lang ? `[lang:${lang}] ` : "";
+
+  // 构建 messages 数组
+  const messages = [];
+
+  // System message: 语音风格指令 (v2.5 新功能)
+  if (style) {
+    messages.push({
+      role: "system",
+      content: style,
+    });
+  }
+
+  // 构建 assistant message 内容
+  let content = text;
+
+  // 语言前缀提示
+  if (lang) {
+    content = `[lang:${lang}] ${content}`;
+  }
+
+  // 语速/情绪指令前缀 (v2.5 细粒度控制)
+  const instructions = [];
+  if (speed) instructions.push(`语速${speed}`);
+  if (emotion) instructions.push(`情绪${emotion}`);
+
+  if (instructions.length > 0) {
+    content = `[${instructions.join(",")}] ${content}`;
+  }
+
+  messages.push({
+    role: "assistant",
+    content: content,
+  });
+
+  // 构建请求体
   const body = {
-    model: "mimo-v2-tts",
-    messages: [{ role: "assistant", content: langPrefix + text }],
-    audio: { format: "wav", voice: voice || DEFAULT_VOICE },
+    model: "mimo-v2.5-tts",
+    messages: messages,
+    audio: {
+      format: "wav",
+      voice: voice || DEFAULT_VOICE,
+    },
   };
+
+  // 音色克隆: 添加 reference_audio (v2.5 新功能)
+  if (reference_audio) {
+    body.audio.reference_audio = reference_audio;
+  }
+
   const resp = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "api-key": apiKey },
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": apiKey,
+    },
     body: JSON.stringify(body),
   });
+
   if (!resp.ok) {
     const errText = await resp.text();
     throw new Error(`MiMo API error ${resp.status}: ${errText}`);
   }
+
   const data = await resp.json();
   const audioData = data.choices?.[0]?.message?.audio?.data;
   if (!audioData) throw new Error("No audio data in MiMo response");
@@ -119,13 +175,23 @@ async function handleRequest(req, res) {
 
   if (req.method === "GET" && req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", provider: "mimo-v2-tts" }));
+    res.end(JSON.stringify({
+      status: "ok",
+      provider: "mimo-v2.5-tts",
+      version: "2.0.0",
+      features: ["voice-clone", "emotion-control", "dialect", "style-instruction"],
+    }));
     return;
   }
 
   if (req.method === "GET" && req.url === "/v1/models") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ data: [{ id: "mimo-v2-tts", object: "model", owned_by: "xiaomi" }] }));
+    res.end(JSON.stringify({
+      data: [
+        { id: "mimo-v2.5-tts", object: "model", owned_by: "xiaomi" },
+        { id: "mimo-v2-tts", object: "model", owned_by: "xiaomi" },
+      ],
+    }));
     return;
   }
 
@@ -135,7 +201,13 @@ async function handleRequest(req, res) {
       const text = body.input || body.text;
       const voice = body.voice || DEFAULT_VOICE;
       const responseFormat = body.response_format || "mp3";
-      const lang = body.lang || undefined; // 语言提示：zh/en/ja/ko 等
+
+      // v2.5 新参数
+      const lang = body.lang || undefined;
+      const style = body.style || undefined;           // 语音风格指令 (system message)
+      const speed = body.speed || undefined;            // 语速控制
+      const emotion = body.emotion || undefined;        // 情绪控制
+      const reference_audio = body.reference_audio || undefined;  // 音色克隆参考音频
 
       if (!text) {
         res.writeHead(400, { "Content-Type": "application/json" });
@@ -153,7 +225,14 @@ async function handleRequest(req, res) {
         return;
       }
 
-      const wavBuffer = await callMiMoTTS(text, voice, apiKey, lang);
+      const wavBuffer = await callMiMoTTS(text, voice, apiKey, {
+        lang,
+        style,
+        speed,
+        emotion,
+        reference_audio,
+      });
+
       const tmpDir = mkdtempSync("/tmp/mimo-tts-");
       const wavPath = join(tmpDir, "audio.wav");
       writeFileSync(wavPath, wavBuffer);
@@ -189,10 +268,12 @@ async function handleRequest(req, res) {
 
 const server = http.createServer(handleRequest);
 server.listen(PORT, "127.0.0.1", () => {
-  console.log(`MiMo-TTS Proxy running at http://127.0.0.1:${PORT}`);
+  console.log(`MiMo-V2.5-TTS Proxy running at http://127.0.0.1:${PORT}`);
   console.log(`  API Key: ${MIMO_API_KEY ? "configured" : "not set (set MIMO_API_KEY)"}`);
   console.log(`  ffmpeg:  ${hasFfmpeg ? "available" : "not found (WAV only)"}`);
   console.log(`  Voice:   ${DEFAULT_VOICE}`);
+  console.log(`  Model:   mimo-v2.5-tts`);
+  console.log(`  Features: voice-clone, emotion-control, dialect, style-instruction`);
 });
 
 process.on("SIGINT", () => { server.close(); process.exit(0); });

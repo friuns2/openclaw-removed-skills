@@ -1,10 +1,12 @@
 ---
 name: mimo-voice-assistant
-version: 1.0.8
+version: 2.0.0
 description: >
   End-to-end voice solution for OpenClaw agents.
-  Xiaomi MiMo-V2-TTS with emotion-aware speech generation,
+  Xiaomi MiMo-V2.5-TTS with emotion-aware speech generation,
+  voice cloning, dialect support, and fine-grained instruction control.
   MiMo-V2-Omni for voice transcription. Multi-platform ready.
+  Supports Token Plan billing.
 metadata:
   openclaw:
     requires:
@@ -22,13 +24,22 @@ metadata:
 
 TTS (text-to-speech), STT (speech-to-text), and emotion-aware voice generation for OpenClaw agents across all platforms.
 
+## What's New in v2.0.0
+
+- **MiMo-V2.5-TTS** — upgraded model with better quality and instruction following
+- **Voice cloning** — use reference audio to clone any voice
+- **Fine-grained control** — speed, emotion, tone via natural language instructions
+- **Dialect support** — Northeastern, Sichuan, Henan, Cantonese, Taiwanese
+- **System message** — voice style instructions via system message
+- **Token Plan** — TTS free across all tiers (limited time)
+
 ## Architecture
 
 ```
 User voice → OpenClaw (Telegram/Discord/WhatsApp/...)
            → STT (MiMo-V2-Omni transcription)
            → Agent processes
-           → TTS (MiMo-V2-TTS with emotion + language)
+           → TTS (MiMo-V2.5-TTS with emotion + language + voice cloning)
            → Voice reply
 ```
 
@@ -63,6 +74,16 @@ OpenClaw config (`openclaw.json`):
 }
 ```
 
+## Token Plan
+
+MiMo-V2.5-TTS is now part of the Token Plan:
+- **TTS is free** across all tiers (limited time)
+- Token-based billing with transparent quotas
+- 20% off-peak discount
+- 30% monthly auto-renewal discount
+
+Get your API key at [platform.xiaomimimo.com](https://platform.xiaomimimo.com)
+
 ## Emotion Detection
 
 See `references/emotion-detection.md`
@@ -82,6 +103,16 @@ See `references/platforms.md`
 **Request format:**
 ```json
 {"model": "tts-1", "input": "Hello", "voice": "mimo_default", "response_format": "mp3"}
+```
+
+**With voice style instruction:**
+```json
+{"model": "tts-1", "input": "Hello", "voice": "mimo_default", "response_format": "mp3", "style": "用温柔的语气说"}
+```
+
+**With voice cloning:**
+```json
+{"model": "tts-1", "input": "Hello", "voice": "mimo_default", "response_format": "mp3", "reference_audio": "base64_audio_data"}
 ```
 
 **Formats:** `wav` (default), `mp3` (needs ffmpeg), `opus` (needs ffmpeg)
@@ -118,11 +149,12 @@ Only switch language if the user explicitly asks:
 
 ### TTS Language Compatibility
 
-MiMo-V2-TTS supports natural speech in:
+MiMo-V2.5-TTS supports natural speech in:
 - ✅ Chinese (Mandarin)
 - ✅ English (US/UK)
 - ✅ Japanese
 - ✅ Korean
+- ✅ Dialects: Northeastern, Sichuan, Henan, Cantonese, Taiwanese
 - ✅ Other languages (quality varies)
 
 ### Implementation

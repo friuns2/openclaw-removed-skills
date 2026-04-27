@@ -1,11 +1,17 @@
 {
   "owner": "nciae-zyh",
   "slug": "mimo-voice-assistant",
-  "displayName": "MiMo Voice Assistant",
+  "displayName": "Mimo Voice Assistant",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1775101099231,
-    "commit": "https://github.com/openclaw/skills/commit/a9e617172126c28c28447f3c3dbbf3c71d516c9f"
+    "version": "2.0.0",
+    "publishedAt": 1776913068951,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1775101099231,
+      "commit": "https://github.com/openclaw/skills/commit/a9e617172126c28c28447f3c3dbbf3c71d516c9f"
+    }
+  ]
 }
