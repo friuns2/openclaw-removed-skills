@@ -1,5 +1,22 @@
 # Stargate M.A.L.P. Reference
 
+## Table of contents
+
+- [Stargate M.A.L.P. Reference](#stargate-malp-reference)
+  - [Overview](#overview)
+  - [Variants](#variants)
+  - [Notable Uses](#notable-uses)
+  - [Related Devices](#related-devices)
+  - [Key Episodes](#key-episodes)
+- [Stargate Kino Reference](#stargate-kino-reference)
+  - [Overview](#overview-1)
+  - [Comparison to MALP](#comparison-to-malp)
+  - [Capabilities](#capabilities)
+  - [Kino Dispenser](#kino-dispenser)
+  - [Notable Uses](#notable-uses-1)
+  - [Behind the Scenes](#behind-the-scenes)
+  - [Key Episodes](#key-episodes-1)
+
 Source: https://stargate.fandom.com/wiki/Mobile_Analytic_Laboratory_Probe
 
 ## Overview

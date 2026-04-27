@@ -5,9 +5,15 @@ description: 'Project context tracker using `.malp/` directories. Use when the u
 
 # M*A*L*P
 
-Send a probe through before you send the team. Track local development progress for a path using `.malp/NOTES.txt` (working context) and `.malp/SUMMARY.txt` (concise overview).
+Send a probe through before you send the team. Track local development progress for a path using `.malp/NOTES.txt` (the main working file), `.malp/SUMMARY.txt` (a very short overview), and optional `.malp/FOB.txt` (the current forward operating base).
 
 Like its Stargate namesake, a `.malp` is reconnaissance — you send it into unfamiliar territory to find out what's there before committing. `SUMMARY.txt` is the telemetry; `NOTES.txt` is the Kino footage.
+
+Keep the distinction sharp:
+- `SUMMARY.txt` should stay short and answer "what is this path?" at a glance.
+- `NOTES.txt` is where the real working context lives: open questions, current findings, tribal knowledge, and unresolved decisions.
+- `FOB.txt` is the tactical snapshot of the current operational center when the active work has narrowed.
+- If material starts accumulating, it usually belongs in `NOTES.txt`, not `SUMMARY.txt`.
 
 A malp decides what to do next. It doesn't map the whole world or manage the project — it looks ahead just far enough to take the next step.
 
@@ -24,11 +30,17 @@ The malp skill is not itself a malp by default. Editing `skills/malp/` does not 
 
 ### `what malps do we have?`
 
-Read `~/.malp-home/MAP.txt`, summarize available `.malp` paths, help the user choose one to open. Once chosen, read that `.malp` and work from there.
+Read `~/.malp-home/MAP.txt`, summarize available active `.malp` paths, and help the user choose one to open.
+
+Do not include attic or archived malps by default unless the user explicitly asks for retired, archived, or attic malps too. If a requested malp is not found in the active index but is found in `~/.malp-home/attic/MAP.txt`, say so plainly before summarizing it.
+
+Follow `references/tasks.md` for discovery details.
 
 ### `lets send malp to <path>`
 
 Follow `references/tasks.md` exactly.
+
+Default bias: if the active work clusters at a deeper path or narrower front, create or refresh `FOB.txt` in the parent malp before proposing a child malp.
 
 ### Working on the malp skill itself
 
@@ -38,56 +50,46 @@ Only create or maintain `skills/malp/.malp/` when the user explicitly wants the 
 
 If the user says things like "work on the malp skill", "improve the malp skill", "review the malp skill", or "clean up the malp skill", do not assume they want `skills/malp/.malp/`. Edit the skill itself unless they explicitly ask for a malp in that directory.
 
+### Indexing states
+
+A project-local `.malp/` can be:
+- active — listed in `~/.malp-home/MAP.txt`
+- attic — listed in `~/.malp-home/attic/MAP.txt`
+- unindexed — exists on disk but is listed in neither map
+
+Do not treat an unindexed `.malp/` as automatically active or automatically attic. Presence on disk is not permission to pull it into normal context.
+
+Read `references/indexing.md` when the user is defining, classifying, or discovering malp states. Read `references/attic.md` when attic/archive behavior matters.
+
 ### Working in a malp
 
 - By default, read only the `.malp` the user asked for.
-- Do not bring another `.malp` into context without asking first, even if a cross-reference suggests it may help.
-- `.malp/NOTES.txt` is the scratchpad — open questions, tribal knowledge, working context.
-- `.malp/SUMMARY.txt` is the concise overview of the tracked path itself.
-- `~/.malp-home/MAP.txt` is append-mostly; keep older entries unless retired (see Staleness below).
-- `~/.malp-home/TAGS.txt` is optional user-maintained metadata for tagging malps.
-- Do not add tags automatically. Only add or change tags when the user explicitly asks.
-- Use one line per malp in `TAGS.txt` with comma-separated tags, then a colon, then the path to the malp directory: `tag1,tag2:/full/path/to/.malp`.
-- Keep comment lines in `TAGS.txt` prefixed with `#`.
-- `NOTES.txt` uses `- [ ]` / `- [x]` checkbox format; closed items append ` → <resolution>` inline.
-- Every `NOTES.txt` needs an **Exit criteria** section. The file should shrink toward empty as work matures.
-- See `references/tasks.md` for full conventions.
+- Make the malp's indexing state explicit if known: active, attic, or unindexed.
+- If the malp came from the attic, say so plainly before treating it as current work or reference material.
+- Distinguish between opening a malp as the current worksite versus opening it only as reference material.
+- Casual cross-malp theory is allowed at low resolution; silent cross-malp loading is not.
+- Do not read, summarize, or otherwise bring another `.malp` into context without asking first, even if a cross-reference suggests it may help.
+- Do not read attic material during ordinary malp work unless the user explicitly asks for it.
+- Prefer using `FOB.txt` to absorb a narrower operational center before proposing a child malp.
+- Keep `SUMMARY.txt` lean; put substance, uncertainty, and active reasoning in `NOTES.txt`.
 
-### Pruning
+Follow `references/tasks.md` for opening, refreshing, pruning, and maintaining a malp. Read `references/repo-strategies.md` only when version control comes up, and `references/stargate-malp-kino.md` only when the naming or lore matters.
 
-If NOTES.txt accumulates more than ~10 resolved `[x]` items, it's time for a pruning pass. Resolved items that are documented elsewhere should go. A NOTES.txt that only grows is a signal that items aren't being formalized.
+### Pruning and staleness
 
-### Cross-references
+If `NOTES.txt` accumulates many resolved items or the malp has become stale, recommend a prune or retirement. Do not apply that mechanically.
 
-When a malp discovery involves another malp's territory, note the cross-reference explicitly (e.g., "See also: `../related-project/.malp/NOTES.txt`"). Don't duplicate — point.
-
-A cross-reference is not permission to read that other `.malp`. For example, if `NOTES.txt` says `See also: ../related-project/.malp/NOTES.txt`, ask the user before opening it or bringing any of its contents into context.
-
-### Provenance
-
-When capturing tribal knowledge from a specific person, tag it (e.g., "Alice notes:", "Per Bob:"). Knowing who said something matters when verifying it later.
-
-### SUMMARY.txt depth
-
-Scale with the directory. A leaf project gets a paragraph. A monorepo root gets structure, tech stack, key paths.
-
-### Secrets
-
-Don't put credentials directly in NOTES.txt. Reference where they live instead (e.g., "Credentials in Makefile" or "See TOOLS.md").
-
-If secrets are already present in a `.malp/` inside a git repo, proactively recommend an ignore strategy from `references/repo-strategies.md` — this is the one exception to the "don't bring up version control" rule.
-
-### Staleness
-
-If a malp hasn't been touched in a while and its NOTES are mostly resolved, it may be time to retire it. Remove the entry from `MAP.txt` and optionally delete the `.malp/` directory. Not everything needs to live forever.
+Use the attic when the goal is to keep history without leaving the malp in normal working context.
 
 ### Version control
 
-Don't bring this up unless the user asks. When they do, see `references/repo-strategies.md`.
+Do not bring version control strategy up unless the user asks. When they do, read `references/repo-strategies.md`.
 
 ## References
 
-- `references/style.md` — voice notes
-- `references/tasks.md` — task-specific behavior
+- `references/tasks.md` — operational behavior and file conventions
+- `references/indexing.md` — active vs attic vs unindexed state
+- `references/attic.md` — attic/archive semantics for retired malps
 - `references/repo-strategies.md` — strategies for `.malp/` in git repos
+- `references/style.md` — voice notes
 - `references/stargate-malp-kino.md` — namesake lore (M.A.L.P., Kino, and the lineage between them)
