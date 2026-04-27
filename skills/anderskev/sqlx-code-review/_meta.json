@@ -3,11 +3,16 @@
   "slug": "sqlx-code-review",
   "displayName": "Sqlx Code Review",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966772389,
-    "commit": "https://github.com/openclaw/skills/commit/75307687eaa00b6f74610ee7c6506f40486da43f"
+    "version": "1.0.2",
+    "publishedAt": 1776831384141,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966772389,
+      "commit": "https://github.com/openclaw/skills/commit/75307687eaa00b6f74610ee7c6506f40486da43f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774641978150,
