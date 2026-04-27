@@ -3,9 +3,15 @@
   "slug": "workfront",
   "displayName": "Workfront",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286481166,
-    "commit": "https://github.com/openclaw/skills/commit/159221d195a6abb95975382ccb3a31a1a645c0b3"
+    "version": "1.0.1",
+    "publishedAt": 1776885670790,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286481166,
+      "commit": "https://github.com/openclaw/skills/commit/159221d195a6abb95975382ccb3a31a1a645c0b3"
+    }
+  ]
 }
