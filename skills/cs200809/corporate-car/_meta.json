@@ -1,0 +1,11 @@
+{
+  "owner": "cs200809",
+  "slug": "corporate-car",
+  "displayName": "企业用车",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1774925955827,
+    "commit": null
+  },
+  "history": []
+}
