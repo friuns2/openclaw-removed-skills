@@ -3,11 +3,16 @@
   "slug": "cognite",
   "displayName": "Cognite",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170458009,
-    "commit": "https://github.com/openclaw/skills/commit/bd9cd7093bed5227c3904038ef7a2285ac1bb0e8"
+    "version": "1.0.3",
+    "publishedAt": 1776893272433,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170458009,
+      "commit": "https://github.com/openclaw/skills/commit/bd9cd7093bed5227c3904038ef7a2285ac1bb0e8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775030610180,
