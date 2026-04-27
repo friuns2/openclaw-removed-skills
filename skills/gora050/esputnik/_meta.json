@@ -3,11 +3,16 @@
   "slug": "esputnik",
   "displayName": "Esputnik",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168345459,
-    "commit": "https://github.com/openclaw/skills/commit/68dd34e3b469c4a0e136058846afe55f7f931928"
+    "version": "1.0.3",
+    "publishedAt": 1776862416620,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168345459,
+      "commit": "https://github.com/openclaw/skills/commit/68dd34e3b469c4a0e136058846afe55f7f931928"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774609450951,
