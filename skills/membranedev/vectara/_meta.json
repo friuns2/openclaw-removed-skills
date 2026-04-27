@@ -3,9 +3,15 @@
   "slug": "vectara",
   "displayName": "Vectara",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775271814171,
-    "commit": "https://github.com/openclaw/skills/commit/274137b470ca449afa702f913d7ef2606ac0cdab"
+    "version": "1.0.1",
+    "publishedAt": 1776882452007,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775271814171,
+      "commit": "https://github.com/openclaw/skills/commit/274137b470ca449afa702f913d7ef2606ac0cdab"
+    }
+  ]
 }
