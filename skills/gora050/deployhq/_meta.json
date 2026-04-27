@@ -3,11 +3,16 @@
   "slug": "deployhq",
   "displayName": "Deployhq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168667594,
-    "commit": "https://github.com/openclaw/skills/commit/7a9512f1ee20b8937c6383996d93ea27be64caef"
+    "version": "1.0.3",
+    "publishedAt": 1776862994724,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168667594,
+      "commit": "https://github.com/openclaw/skills/commit/7a9512f1ee20b8937c6383996d93ea27be64caef"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774674255109,
