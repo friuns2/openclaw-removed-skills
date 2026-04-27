@@ -3,11 +3,16 @@
   "slug": "picky-assist",
   "displayName": "Picky Assist",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168838261,
-    "commit": "https://github.com/openclaw/skills/commit/ff202cf946d1debdbcfc1a87a4f43b745964b8cb"
+    "version": "1.0.3",
+    "publishedAt": 1776863443287,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168838261,
+      "commit": "https://github.com/openclaw/skills/commit/ff202cf946d1debdbcfc1a87a4f43b745964b8cb"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774703088567,
