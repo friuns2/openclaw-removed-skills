@@ -3,11 +3,16 @@
   "slug": "cufinder",
   "displayName": "Cufinder",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169028520,
-    "commit": "https://github.com/openclaw/skills/commit/d1a57361cf94df67cbee7f04b85a3e1bc76f7de2"
+    "version": "1.0.3",
+    "publishedAt": 1776885073304,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169028520,
+      "commit": "https://github.com/openclaw/skills/commit/d1a57361cf94df67cbee7f04b85a3e1bc76f7de2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774749855983,
