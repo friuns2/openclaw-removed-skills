@@ -3,11 +3,16 @@
   "slug": "snapshot-integration",
   "displayName": "Snapshot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169378818,
-    "commit": "https://github.com/openclaw/skills/commit/181becfea34187005d4df97b2c9b2f6bcc8e99ed"
+    "version": "1.0.3",
+    "publishedAt": 1776864232089,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169378818,
+      "commit": "https://github.com/openclaw/skills/commit/181becfea34187005d4df97b2c9b2f6bcc8e99ed"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774825466685,
