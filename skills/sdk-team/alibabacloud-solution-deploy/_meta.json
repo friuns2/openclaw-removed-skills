@@ -3,9 +3,15 @@
   "slug": "alibabacloud-solution-deploy",
   "displayName": "Alibabacloud Solution Deploy",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1774928551061,
-    "commit": "https://github.com/openclaw/skills/commit/fd826065fd3476fd8124e9ff34e7f4cded08c8d0"
+    "version": "0.0.2",
+    "publishedAt": 1775799753949,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1774928551061,
+      "commit": "https://github.com/openclaw/skills/commit/fd826065fd3476fd8124e9ff34e7f4cded08c8d0"
+    }
+  ]
 }
