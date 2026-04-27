@@ -3,9 +3,15 @@
   "slug": "proofpoint",
   "displayName": "Proofpoint",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775210847796,
-    "commit": "https://github.com/openclaw/skills/commit/40adc0b85c8cd4ad430ce78fee0339c5b23ea665"
+    "version": "1.0.1",
+    "publishedAt": 1776885235656,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775210847796,
+      "commit": "https://github.com/openclaw/skills/commit/40adc0b85c8cd4ad430ce78fee0339c5b23ea665"
+    }
+  ]
 }
