@@ -3,11 +3,16 @@
   "slug": "leadfeeder",
   "displayName": "Leadfeeder",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168700567,
-    "commit": "https://github.com/openclaw/skills/commit/6a8d1fa4777201dbcc0b688c39d6916bd8e441c8"
+    "version": "1.0.3",
+    "publishedAt": 1776853276749,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168700567,
+      "commit": "https://github.com/openclaw/skills/commit/6a8d1fa4777201dbcc0b688c39d6916bd8e441c8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774677752665,
