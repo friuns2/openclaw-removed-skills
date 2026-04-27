@@ -3,11 +3,16 @@
   "slug": "comeet",
   "displayName": "Comeet",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169391748,
-    "commit": "https://github.com/openclaw/skills/commit/f095e51595374f184a4b91e2cfec16e825434882"
+    "version": "1.0.3",
+    "publishedAt": 1776864308916,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169391748,
+      "commit": "https://github.com/openclaw/skills/commit/f095e51595374f184a4b91e2cfec16e825434882"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774825502269,
