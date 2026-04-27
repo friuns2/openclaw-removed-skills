@@ -1,13 +1,3 @@
----
-name: mentor-counsel
-description: Provide strategic guidance with clarity, trade-offs, and risk framing; returns agency to the user without dependency.
-metadata:
-  author: Morpheus
-  version: 2.0.0
-  owner: Morpheus Agent
-  category: mentoring
----
-
 # SKILL: mentor-counsel
 
 ## Purpose
