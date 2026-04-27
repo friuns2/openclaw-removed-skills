@@ -9,6 +9,10 @@ description: >
 
 # 唯品会扫码登录 Skill
 
+> ⚠️ **重要规范**：AI 必须先加载本 skill 规范（use_skill），再执行任何脚本或返回结果，不得绕过 skill 规范自行处理数据。
+>
+> **二维码展示规范**：执行登录脚本后，AI 智能体 **必须优先** 从 stdout 中提取机器可读标记：`[VIPSHOP_QR_PAYLOAD_BEGIN]` 与 `[VIPSHOP_QR_PAYLOAD_END]` 之间的 JSON，读取其中的 `qrImageUrl` 字段，并以 Markdown 图片语法 `![唯品会登录二维码](URL)` 直接展示给用户。仅当该标记不存在时，才允许回退到提取 `二维码链接` 后面的 URL。**不要仅输出链接或文字描述，必须展示图片**。
+
 此Skill提供唯品会扫码登录的完整解决方案，用于AI助手自动化完成唯品会账号登录流程。
 
 ## 使用场景
@@ -43,7 +47,7 @@ description: >
 └──────────────┘                       └──────────────┘
 ```
 
-1. **初始化二维码** - 调用API获取qrToken
+1. **初始化二维码** - 调用API获取qrToken（自动校验格式，格式错误自动重试）
 2. **获取二维码图片** - 使用qrToken获取二维码图片并展示
 3. **轮询状态** - 定时检查扫码状态（NOT_SCANNED/SCANNED/CONFIRMED/INVALID）
 4. **登录成功** - 状态为CONFIRMED时，Cookie中已包含登录凭证
@@ -61,9 +65,11 @@ result = manager.login()
 
 ### 2. 展示二维码
 
-支持两种展示方式：
+支持多种展示方式：
 - **终端显示** - 使用ASCII字符在终端显示（适合SSH环境）
 - **打开图片** - 生成图片文件并用系统默认程序打开
+- **AI智能体展示** - 脚本输出二维码链接 URL，AI 智能体应提取该 URL 并以 `![唯品会登录二维码](URL)` 展示图片
+- **OpenClaw展示** - 检测 `OPENCLAW_SESSION=1` 时输出 `[OPENCLAW_SEND_FILE]路径[/OPENCLAW_SEND_FILE]`
 
 ### 3. 轮询登录状态
 
@@ -79,6 +85,19 @@ result = manager.login()
 - 单用户模式，自动覆盖旧登录态
 - 基于Cookie的会话保持
 - 登录态有效期与 PASSPORT_ACCESS_TOKEN cookie 一致
+
+### 5. 版本检测与更新提示
+
+登录成功后，脚本会输出版本信息并检测版本变化：
+
+- 登录成功后会输出当前版本号（如 `当前版本: 1.0.0`）
+- `tokens.json` 中保存当前版本号 `version`
+- 如果检测到新版本，脚本只会提示用户按受控发布流程手动更新，不会自动执行更新命令，也不会远程下载并覆盖本地文件；提示信息中会给出可手动执行的命令 `npx clawhub update vipshop-skills --force`
+
+**AI 助手职责**：
+
+1. 登录成功后，**必须将脚本输出的当前版本号告知用户**（如"当前登录版本为 1.0.0"）
+2. 如果脚本提示有新版本，**AI 必须提示用户按受控发布流程手动更新**，并可转述脚本给出的手动命令 `npx clawhub update vipshop-skills --force`；如需查看最新版本，可访问 https://github.com/vipshop/vipshop-ai-skills
 
 ## 使用方法
 
@@ -152,8 +171,19 @@ if token_info:
 
 适用于AI助手或OpenClaw场景：**发送二维码给用户后立即结束脚本**，不阻塞主会话。用户扫码确认后，通过后续命令继续完成登录。
 
+**AI 智能体二维码展示：**
+脚本执行后会在 stdout 中输出以下机器可读片段：
+
+```text
+[VIPSHOP_QR_PAYLOAD_BEGIN]
+{"qrToken": "10000-xxx", "qrImageUrl": "https://passport.vip.com/qrLogin/getQrImage?qrToken=10000-xxx"}
+[VIPSHOP_QR_PAYLOAD_END]
+```
+
+AI 智能体应优先提取该 JSON 中的 `qrImageUrl`，并以 Markdown 图片语法 `![唯品会登录二维码](URL)` 直接展示二维码图片。仅当该标记不存在时，才回退到读取 `二维码链接:` 后面的 URL。该链接为公网可访问 URL，无需依赖本地文件。
+
 **OpenClaw 自动识别：**
-当检测到 `OPENCLAW_SESSION=1` 环境变量时，脚本会自动将二维码以 base64 格式输出，OpenClaw 可直接在会话中展示图片。
+当检测到 `OPENCLAW_SESSION=1` 环境变量时，脚本会自动输出 `[OPENCLAW_SEND_FILE]路径[/OPENCLAW_SEND_FILE]`，OpenClaw 可直接在会话中展示图片。
 
 ```python
 from scripts.vip_login import VIPLoginManager
@@ -176,6 +206,7 @@ result = manager.login(
 if result.success and result.qr_token:
     if result.message == "二维码已发送，请扫码确认后使用 --poll 参数继续":
         print(f"二维码已发送，qrToken: {result.qr_token}")
+        print(f"如果二维码展示失败，请点击 {result.qr_url} 查看二维码")
         print("用户扫码确认后，调用 manager.login(qr_token_to_poll=qr_token) 继续")
     else:
         print("登录成功!")
@@ -215,14 +246,14 @@ if success:
     # 2. 展示二维码
     success, image_bytes, fmt = qr_client.get_qr_image(qr_token)
     qr_client.open_qr_image(image_bytes, fmt)
-    
+
     # 3. 轮询状态
     poller = StatusPoller(
         base_url="https://passport.vip.com",
         check_endpoint="/qrLogin/checkStatus"
     )
     result = poller.poll_until_complete(qr_token)
-    
+
     if result.status == LoginStatus.CONFIRMED:
         print("登录成功!")
         # 4. 保存凭证（从响应中提取 cookies）
@@ -292,7 +323,8 @@ vipshop-user-login/
 │   ├── qr_code_client.py         # 二维码处理
 │   ├── status_poller.py          # 状态轮询
 │   ├── token_manager.py          # Token管理
-│   └── mars_cid_generator.py     # 设备ID生成器
+│   ├── mars_cid_generator.py     # 设备ID生成器
+│   └── logger.py                 # 日志上报（问题排查）
 └── references/
     └── api_reference.md          # API接口文档
 ```
@@ -327,3 +359,4 @@ else:
 3. **Cookie保持**: 登录成功后，Cookie会自动包含登录凭证，无需额外获取token
 4. **Token安全**: 凭证文件存储在用户目录`~/.vipshop-user-login/`下，权限设置为仅所有者可读写
 5. **依赖项**: 需要安装 requests、qrcode、Pillow
+6. **qrToken格式**: 系统会自动校验qrToken格式（如`10000-xxx`），格式错误会重试或报错，不会生成无效二维码

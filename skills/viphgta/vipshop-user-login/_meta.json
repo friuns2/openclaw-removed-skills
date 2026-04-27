@@ -3,11 +3,16 @@
   "slug": "vipshop-user-login",
   "displayName": "唯品会用户登录",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775197749579,
-    "commit": "https://github.com/openclaw/skills/commit/e9a59971697a8b56b8650c391c3a2575bbca62c1"
+    "version": "1.0.11",
+    "publishedAt": 1777000647390,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775197749579,
+      "commit": "https://github.com/openclaw/skills/commit/e9a59971697a8b56b8650c391c3a2575bbca62c1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774863254806,
