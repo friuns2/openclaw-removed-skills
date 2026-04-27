@@ -3,11 +3,16 @@
   "slug": "encore",
   "displayName": "Encore",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167813172,
-    "commit": "https://github.com/openclaw/skills/commit/8ef8812024f760e28b29e10cd3e0d946e0f893bf"
+    "version": "1.0.3",
+    "publishedAt": 1776864893284,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167813172,
+      "commit": "https://github.com/openclaw/skills/commit/8ef8812024f760e28b29e10cd3e0d946e0f893bf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774512198574,
