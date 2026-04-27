@@ -3,11 +3,16 @@
   "slug": "unbounce-integration",
   "displayName": "Unbounce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170707461,
-    "commit": "https://github.com/openclaw/skills/commit/9b7daebc88efde976e2c4db03e67bb4e23b0bc6a"
+    "version": "1.0.3",
+    "publishedAt": 1776866055045,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170707461,
+      "commit": "https://github.com/openclaw/skills/commit/9b7daebc88efde976e2c4db03e67bb4e23b0bc6a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775091869616,
