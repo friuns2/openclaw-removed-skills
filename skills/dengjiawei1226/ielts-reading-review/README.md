@@ -6,52 +6,45 @@
 
 ---
 
-## 🆕 What's New in v2.4
+## 🆕 What's New in v3.1 — Web Hand-off
 
-### 🔄 多用户云同步（v2.4 NEW）
+### 🌐 生成物一键上传到 Web 端
 
-每次复盘自动生成数据文件，通过 `scripts/sync-review.sh` 一键同步到云端。每个用户自动获得独立数据空间（基于机器指纹生成匿名 ID），在 Web Dashboard 查看自己的复盘历史和进步趋势。
+v3.1 在保持纯离线生成的同时，**明确了 JSON 产出物与 Web 端的对接路径**：
 
-### 📊 在线复盘系统（Web / 小程序）
+- 访问 https://tuyaya.online/ielts/submit.html 切到「**上传 JSON**」Tab
+- 把 skill 生成的 `.json` 文件拖进去 → 成绩、答案、用时自动入库
+- 首页成绩矩阵、词汇本、同义替换本实时更新
 
-除了 AI Skill，我们还上线了**在线复盘系统**，不用装任何东西，打开浏览器就能用：
+### 📊 Web 端新增 JSON 导入能力
 
-🌐 **Web 版在线体验：** https://tuyaya.online/ielts-api/web/
+Web 端 `submit.html` 新增第 4 种提交模式（粘贴文本 / PDF / 拍照 / **上传 JSON**），与 skill 的产出物严格对齐 v3.0 schema。
 
-> Skill 生成的复盘数据同步到云端后，在这里查看完整的复盘历史和进步趋势。
+## 🆕 What's New in v3.0 — Offline-First
 
-<p align="center">
-  <img src="assets/demo-web-reviews.png" width="700" alt="Web 版在线复盘系统 — 历史复盘记录列表">
-</p>
+### 🔌 去服务器依赖，纯本地生成
 
-📱 **微信小程序版**（开发中）：拍照识别答题卡 / 粘贴成绩 / 手动选题，三种方式快速录入。
+v3.0 重构为**纯离线模式**：
 
-### 📋 填空回填 4 步检查（v2.0+）
+- ✅ 复盘 HTML — 专业排版，浏览器直接查看
+- ✅ 复盘 PDF — 一键导出，存档分享
+- ✅ 结构化 JSON — 包含成绩、错题、词汇、同义替换等全量数据
+- 🔜 数据上传 — 后续通过 Web 端功能将 JSON 导入云系统，实现多设备同步
+
+**不再依赖任何远程 API**，AI Agent 在本地完成所有分析和生成工作。
+
+### 📋 填空回填 4 步检查
 
 每道填空题强制 4 步验证：语法 → 词性 → 语义 → 字数，杜绝低级失误。
 
-### ✅ 正确题确认 + 进步表扬（v2.0+）
+### ✅ 正确题确认 + 进步表扬
 
 - 做对的题也会简要确认，展示同义替换映射帮你强化记忆
 - 每篇开头先肯定你的进步点，保持刷题动力
 
-### 📈 题型进步趋势可视化（v2.0+）
+### 🔢 错误分类扩展到 12 类
 
-按题型统计正确率变化，3+ 篇数据后展示进步曲线。
-
-### 🔢 错误分类扩展到 12 类（v2.0+）
-
-新增 4 类错因：
-- 填空词性/词形错误（temperate → temperatures）
-- 跨代/范围混淆（life cycle = 单棵植物一生）
-- 类别归属当推理（A 类有 B 特征 → X 属于 A → X 有 B = 直接信息非推理）
-- 近距离干扰词（classification vs 附近的 habitat）
-
-### 📊 分数换算 + 跨篇进步追踪（v1.2+）
-
-- 自动把原始分换算成雅思 Band 分（基于官方换算表）
-- 每套题自动记分，P1/P2/P3 分段用时，对比 60 分钟考试限时
-- 多套考试成绩汇总表 + 正确率/速度趋势分析
+涵盖：同义替换识别失败、NG/FALSE 混淆、过度推理、填空重复题干、语法误解、选项不完全匹配、词汇缺口、粗心、词形错误、跨代/范围混淆、类别推理误判、邻近干扰词。
 
 ---
 
@@ -77,9 +70,10 @@ cp -r ielts-reading-review ~/.workbuddy/skills/
 
 ### 第三步：发给 AI，说"帮我复盘"
 
-就这么简单。AI 会自动生成一份完整的复盘笔记。
-
-**🌐 不想装 Skill？** 安装后复盘数据可同步到 Web Dashboard 查看历史进步趋势。
+就这么简单。AI 会自动生成：
+1. **复盘 HTML** — 专业排版的复盘笔记
+2. **复盘 JSON** — 结构化数据文件，供后续导入 Web 系统
+3. **复盘 PDF**（可选）— 从 HTML 生成，便于存档
 
 ---
 
@@ -112,131 +106,43 @@ Q13: 我选D → 正确A
 （然后把原文和翻译也贴上来）
 ```
 
-### AI 自动产出的复盘笔记
+### AI 自动产出
 
-AI 会生成一份结构化的 HTML 复盘笔记，包含以下模块：
+AI 会在本地生成三个文件：
 
-#### 📌 模块一：得分总览 + Band 分换算 + 核心问题一句话
+#### 📄 复盘 HTML — `剑4-Test3-Passage1-街头青年信贷复盘.html`
 
-```
-得分：7/13 ≈ Band 5.0 ｜ 用时：34:40
-填空题 4/6 ❌ ｜ 判断题 1/2 ❌ ｜ 选择题 2/5 ❌
+包含以下模块：
+- 得分总览 + Band 分换算 + 核心问题一句话
+- 进步点肯定
+- 逐题错因分析（定位原文、映射同义替换、分类错因、给出教训）
+- 正确题确认
+- 同义替换积累表
+- 考点词表
+- 核心问题总结
+- 行动清单
 
-⚠️ 核心问题：同义替换识别能力弱——"in association with" = "as part of"、
-"exemplify" = "用实例展示" 两组关键替换全部没识别出来，直接丢了 3 题。
-```
+#### 📊 结构化 JSON — `剑4-Test3-Passage1-街头青年信贷复盘.json`
 
-> 注意：核心问题会精确指出最大的失分模式，不会说"阅读理解有待提升"这种废话。
-
-#### 👍 模块二：进步点肯定
-
-每篇开头先看你做对了什么、哪里比上次进步了。
-
-#### ❌ 模块三：逐题错因分析
-
-每道错题会拆解成 4 个部分：
-
-**示例 — Q1（选择题）：**
-
-| 项目 | 内容 |
-|------|------|
-| **题目** | The quotations at the beginning of the article... |
-| **你选** | D. highlight the benefits **to society** of S.K.I. |
-| **正确** | A. **exemplify** the effects of S.K.I. |
-| **原文定位** | 引言中 Doreen 说"能给家人买早餐了"，Fan 说"学会了储蓄再投资" |
-| **关键词映射** | `exemplify`（举例说明）= 用 Doreen 和 Fan 的个人经历展示 S.K.I. 的效果 |
-| **错因分类** | 🏷️ 过度推理 — 引言只说了对个人和家庭的好处，你推断成了"对社会的好处" |
-| **教训** | 选项多一个词（"to society"）就可能是陷阱，严格看原文范围 |
-
-**示例 — Q11（判断题 T/F/NG）：**
-
-| 项目 | 内容 |
-|------|------|
-| **题目** | Only one fixed loan should be given to each child. |
-| **你选** | NOT GIVEN |
-| **正确** | NO |
-| **原文定位** | "Small loans are provided **initially**... the enterprises can be **gradually expanded** and consideration can be given to **increasing loan amounts**." |
-| **关键词映射** | `only one` ↔ `initially...increasing`（最初→逐步增加 = 不止一次） |
-| **错因分类** | 🏷️ NOT GIVEN/FALSE 混淆 — "initially" 暗示后续还有，"increasing" 直接矛盾 |
-| **教训** | 题目出现 only/all/never 等绝对词时，大概率答案是 NO，重点找反驳证据 |
-
-#### ✅ 模块四：正确题确认
-
-做对的题也会简要确认，展示同义替换映射帮你强化记忆。
-
-#### 🔄 模块五：同义替换积累表
-
-| 原文表达 | 题目表达 | 中文释义 | 题号 |
-|---------|---------|---------|------|
-| in association with other types of support | as part of a wider program of aid | 配合其他支持 → 更广泛援助的一部分 | Q13 |
-| support the economic lives | give business training and loans | 支持经济生活 → 提供商业培训和贷款 | Q2 |
-| choose entrepreneurship | set up their own business | 选择创业 → 自己开业 | Q2 |
-
-> **关键**：这张表会跨篇积累。做 10 篇之后你会发现同义替换的敏感度明显提升。
-
-#### 📚 模块六：考点词表
-
-| 词汇 | 频率 | 含义 | 来源 |
-|------|------|------|------|
-| exemplify | ⭐⭐⭐ 高频 | 举例说明 | 538 考点词 |
-| initiative | ⭐⭐⭐ 高频 | 倡议、方案 | 538 考点词 |
-| substantial | ⭐⭐ 中频 | 大量的、实质性的 | COCA 5000 |
-
-> 只标注值得背的词。低频词自动过滤，不浪费时间。
-
-#### 📈 模块七：跨篇进步追踪
-
-做 3+ 篇后会自动生成进步趋势表，识别你最常犯的错误类型，给出针对性提升建议。
-
----
-
-## 🔗 在线复盘系统
-
-Skill 生成的复盘数据同步到云端后，可以在 Web Dashboard 查看：
-
-| 平台 | 地址 | 状态 |
-|------|------|------|
-| 🌐 Web Dashboard | https://tuyaya.online/ielts-api/web/ | ✅ 已上线 |
-| 📱 微信小程序 | 搜索「雅思阅读复盘」 | 🚧 开发中 |
-
----
-
-## 📥 导入历史做题记录
-
-如果你之前已经做了很多题，可以把历史记录批量导入，让 AI 从第一天起就知道你的进步轨迹。
-
-### 方法一：跟 AI 说（最简单）
-
-```
-我之前做过这些题，帮我录入历史记录：
-剑4-T1-P1: 9/14, 25min
-剑4-T1-P2: 8/12, 30min
-剑4-T1-P3: 6/14, 35min
+```json
+{
+  "version": "3.0.0",
+  "source": { "book": 4, "test": 3, "passage": 1 },
+  "score": { "correct": 7, "total": 13, "band": "5.0" },
+  "wrongQuestions": [...],
+  "synonyms": [...],
+  "vocabulary": [...],
+  "problems": [...]
+}
 ```
 
-### 方法二：贴一个列表
+后续可通过 Web 端将此 JSON 上传到云系统，实现多设备同步和进度追踪。
 
-```
-Book | Test | Passage | Score | Total | Time | Date
-4    | 1    | 1       | 9     | 14    | 25   | 2026-03-15
-4    | 1    | 2       | 8     | 12    | 30   | 2026-03-15
-```
-
-### 方法三：用导入脚本
+#### 📑 复盘 PDF（可选）
 
 ```bash
-node scripts/batch-import.js --file my-records.csv
+node scripts/generate-pdf.js 剑4-Test3-Passage1-街头青年信贷复盘.html
 ```
-
-### 方法四：用云同步脚本
-
-Skill 每次复盘会自动生成 JSON 数据文件，运行同步脚本即可上传：
-
-```bash
-bash scripts/sync-review.sh 剑5-Test4-Passage1-data.json --html 复盘.html --bilingual 双语对照.html
-```
-
-脚本会自动生成匿名用户 ID，上传完成后输出你的个人 Dashboard 链接。
 
 ---
 
@@ -248,12 +154,10 @@ bash scripts/sync-review.sh 剑5-Test4-Passage1-data.json --html 复盘.html --b
 | **正确题确认** | 正确答案也简要展示同义替换映射，强化记忆 |
 | **同义替换积累** | 自动提取题目-原文同义替换对，跨篇持续积累 |
 | **考点词标注** | 基于刘洪波 538 考点词（⭐⭐⭐/⭐⭐/⭐）+ COCA 5000 词频 |
-| **易错模式追踪** | 跨篇检测反复犯的错（如总把 NG 选成 FALSE） |
-| **📋 填空回填检查** | 每道填空题 4 步强制验证（语法/词性/语义/字数），杜绝低级失误 |
-| **📈 题型进步趋势** | 按题型统计正确率变化，可视化展示进步曲线 |
-| **📊 打分 & Band 换算** | 每套题自动算分，原始分→雅思 Band 分数换算（学术类） |
-| **📈 进步趋势统计** | 多套考试成绩汇总表 + 正确率/速度趋势分析 |
-| **⏱️ 分段计时** | 记录 P1/P2/P3 各段用时，对比 60 分钟考试限时 |
+| **易错模式追踪** | 跨篇检测反复犯的错 |
+| **📋 填空回填检查** | 每道填空题 4 步强制验证（语法/词性/语义/字数） |
+| **📊 打分 & Band 换算** | 原始分→雅思 Band 分数换算（学术类） |
+| **📄 结构化 JSON 输出** | 成绩、错题、词汇、同义替换全量数据，供 Web 系统导入 |
 | **HTML + PDF 输出** | 排版专业的复盘笔记，支持打印和存档 |
 
 ## 📂 File Structure
@@ -264,16 +168,14 @@ ielts-reading-review/
 ├── README.md                         # 使用说明（你正在看的这个）
 ├── assets/
 │   ├── review-template.html          # HTML 模板 + CSS 样式
-│   └── bilingual-template.html       # 双语对照模板
+│   └── bilingual-template.html       # 双语对照页面模板
 ├── references/
 │   ├── error-taxonomy.md             # 12 类错误分类体系
 │   ├── 538-keywords-guide.md         # 考点词评级指南
 │   ├── score-band-table.md           # 分数→Band 换算表
 │   └── review-style-guide.md         # 写作风格规范
 └── scripts/
-    ├── generate-pdf.js               # PDF 生成脚本
-    ├── batch-import.js               # 历史数据批量导入脚本
-    └── sync-review.sh                # 复盘数据云同步脚本
+    └── generate-pdf.js               # PDF 生成脚本
 ```
 
 ## 🧠 内置做题方法论
@@ -289,6 +191,41 @@ ielts-reading-review/
 ### 选择题逐词验证法
 选项中的**每个关键词**都要在原文找到对应。"大致相关" ≠ "能选"。前半句对但后半句多了信息 → 干扰项。
 
+## 📤 数据导入 Web 系统
+
+v3.1 起，生成的 JSON 文件可**直接通过 Web 端导入**（已上线）：
+
+### 方式 1：Web 端拖拽上传（推荐）
+
+1. 访问 **https://tuyaya.online/ielts/submit.html**
+2. 登录账号（第一次使用会引导注册）
+3. 切换到顶部 Tab「**📊 上传 JSON**」
+4. 把 skill 生成的 `.json` 文件拖入上传区（或点击选择）
+5. 点「导入到我的记录」
+
+导入成功后，以下页面会自动刷新：
+- **首页成绩矩阵** — 新篇目变绿，显示得分
+- **词汇本** — JSON 中的考点词自动合并
+- **同义替换本** — JSON 中的同义替换对自动入库
+- **个人中心** — 统计总数、均分、Band 分更新
+
+### 方式 2：命令行批量上传（进阶）
+
+需要额外安装 `ielts-server-sync` skill（作者个人维护，不公开发布）：
+
+```bash
+# 单文件
+node ~/.workbuddy/skills/ielts-server-sync/scripts/upload.js 剑5-T1-P2.json
+# 批量
+node ~/.workbuddy/skills/ielts-server-sync/scripts/upload.js --batch ./reviews/
+# 查服务器记录
+node ~/.workbuddy/skills/ielts-server-sync/scripts/upload.js --status
+```
+
+### 方式 3：HTML 本地存档
+
+直接双击生成的 `.html` 文件，浏览器打开即可阅读 / 打印，不依赖任何服务器，隐私可控。
+
 ## 👤 Who It's For
 
 雅思备考者，尤其是：
@@ -301,7 +238,6 @@ ielts-reading-review/
 
 - 支持 SKILL.md 的 AI Agent（如 OpenClaw、Claude Code、WorkBuddy/CodeBuddy）
 - PDF 导出需要：Node.js + puppeteer-core + 本地 Chrome（可选，不装也能用 HTML）
-- 云同步功能需要网络连接（可选，不影响本地使用）
 
 ## 🤝 Contact & Feedback
 

@@ -1,342 +1,403 @@
 ---
 name: ielts-reading-review
-description: "IELTS Reading passage review, scoring, and progress tracking skill. This skill should be used when the user finishes an IELTS Academic Reading passage or full test and wants: (1) a structured review with per-question error analysis (12 error categories), synonym tracking, vocabulary building, and pattern-based mistake tracking; (2) score-to-band conversion and per-passage scoring; (3) cross-test progress statistics and trend analysis; (4) fill-in-the-blank readback verification; (5) per-question-type progress trend visualization. Generates professional HTML review notes with optional PDF export. Trigger phrases include: 雅思复盘, 帮我复盘阅读, IELTS reading review, 分析错题, 阅读错题分析, 成绩单, 打分, 统计, 进步趋势, score, band, progress."
+description: "IELTS Reading passage review, scoring, and progress tracking skill. Generates structured review data (JSON) and professional HTML/PDF review notes locally — no server required. Supports batch import of legacy reviews with auto-discovery of review folders. Trigger phrases: 雅思复盘, 帮我复盘阅读, IELTS reading review, 分析错题, 阅读错题分析, 成绩单, 打分, 统计, 进步趋势, 批量导入历史复盘, 历史笔记转 JSON, 把文件夹里的复盘都生成 JSON, 扫一下我电脑里的复盘, 帮我找出所有历史笔记, 自动发现复盘, score, band, progress, batch import, auto scan."
 ---
 
 # IELTS Reading Review Skill
 
 ## Purpose
 
-Transform raw IELTS Academic Reading practice results into structured, actionable review notes **and track scoring progress across multiple tests**. Each review produces a professional HTML document covering error analysis (12 error categories), synonym accumulation, vocabulary building, recurring-mistake tracking, **score-to-band conversion, per-passage timing breakdown, cumulative progress statistics, fill-in-the-blank readback verification, and per-question-type progress trend visualization** — helping users systematically improve their reading score.
+帮用户把雅思阅读做题结果变成结构化复盘笔记（HTML + PDF）和结构化数据（JSON），追踪分数进步趋势。
+
+## Architecture (v3.2 — Offline + Web Hand-off)
+
+**Skill 纯离线执行**——所有错题分析、文件生成都在本地完成，不发起任何网络请求。
+
+产出物：
+1. **复盘 HTML** — 专业排版的复盘笔记，双击浏览器打开
+2. **复盘 PDF** — 从 HTML 生成的 PDF 文件，便于存档和分享
+3. **结构化 JSON** — 成绩、错题、词汇、同义替换的全量数据（v3.0 schema）
+
+产出物与 Web 端（tuyaya.online）的对接方式详见下方 **Step 6: Apply to Web**。
 
 ## When to Activate
 
-- User sends IELTS reading passage content with answers / score / error information
-- User asks to review or analyze IELTS reading errors
-- User mentions "复盘", "错题分析", "阅读复盘", "reading review"
-- User asks for scoring, band estimation, or progress statistics
-- User mentions "成绩单", "打分", "统计", "进步趋势", "score", "band", "progress"
-- User completes a full test (3 passages) and wants a combined scorecard
-- User wants to export or review historical practice data
+- 用户发做题截图/答案，提到"复盘""错题分析""阅读复盘"
+- 用户问成绩、分数、进步趋势
+- 用户要生成复盘笔记或 PDF
 
 ## Workflow
 
 ### Step 1: Collect Input
 
-Ensure the following information is available (ask if missing):
+确保以下信息齐全（缺什么问什么）：
 
-- **Source**: Which Cambridge book, test, and passage (e.g., Cambridge 5 Test 1 Passage 2)
-- **Original text** or enough context to locate answers
-- **Answer key / correct answers**
-- **User's answers** and which ones are wrong
-- **Optional**: Translation, time spent per passage (e.g., `P1: 34:40, P2: 42:53, P3: 47:55`), user's self-reflection
+- **来源**：哪本书、哪套题、哪篇（如剑5 Test1 Passage2）
+- **原文**或答题上下文
+- **正确答案**
+- **用户答案**及错题
+- **🔴 用时（MUST ASK）**：做题用时（格式 `MM:SS`，如 `28:01`）。**必问项**，不能标"可选"——Web 端进步趋势图依赖此字段。用户若没计时，明确询问"这套大概做了多久"让其估算，别直接跳过
+- **可选**：翻译、自我反思
 
-If the user provides results for **all 3 passages of a full test**, collect scores and timing for each passage to generate a combined test scorecard.
+### Step 1b: Screenshot Wrong Answer Protocol (CRITICAL)
 
-### Step 2: Analyze Every Question
+**用户发答题截图时必须执行 3 步**：
 
-#### Wrong Answers (Detailed)
+1. **逐题读截图标记**：每题是红色（错）还是绿色（对），不能跳题，不能用自己的判断代替截图标记
+2. **先报错题清单等确认**：输出"根据截图，错题为 QX/QY/QZ（共N道），请确认"，**确认后才能写分析**
+3. **截图标记是唯一真相**：截图 vs 自己判断冲突时，信截图
 
-For each wrong question, produce a structured analysis block:
+**禁止**：跳过确认直接写分析、用 answer comparison 覆盖截图标记。
 
-1. **Locate the source sentence** — Quote the exact sentence(s) from the passage
-2. **Map key words** — Show `question keyword` → `passage synonym/paraphrase`
-3. **Classify the error cause** — Use the error taxonomy in `references/error-taxonomy.md` (12 categories: synonym failure, NG/FALSE confusion, over-inference, stem-word duplication, grammar mismatch, incomplete option matching, vocabulary gap, time pressure, word-form error, cross-generational confusion, category-membership reasoning, adjacent distractor words)
-4. **Extract the lesson** — One actionable takeaway
+### Step 2: Generate Review HTML
 
-#### Correct Answers (Brief)
+基于 `assets/review-template.html` 模板，使用 `references/` 下的规范生成完整复盘 HTML 文件。
 
-For correct answers, especially on T/F/NG questions, include a brief 2-3 line confirmation showing the synonym mapping:
+**🔴 文件命名强制规范（MUST FOLLOW）**：
 
-```
-✅ Q27: 题目原文... TRUE
-原文："引用..."
-`题目关键词` = `原文同义替换`。✅
-```
+文件名格式：`剑{book}-Test{test}-Passage{passage}-{titleCN}复盘.html`
 
-This reinforces the synonym recognition that led to the correct answer. Keep it concise — do not over-explain correct answers.
+- `{titleCN}` **必须与 JSON 里的 `source.titleCN` 字段完全一致**（同一个字符串，一字不差）
+- **必须以"复盘"两字结尾**（不是"积累"、不是直接 `.html`）
+- **禁止**：空格、下划线、英文连字符中混中文
+- 示例：
+  - ✅ `剑5-Test1-Passage2-鲸鱼感官复盘.html`
+  - ✅ `剑6-Test4-Passage2-识字女性与育儿复盘.html`
+  - ❌ `剑4-Test3-Passage2-火山专题积累.html`（缺"复盘"两字）
+  - ❌ `剑6-Test4-Passage2-识字女性育儿复盘.html`（和 title 里"与"字不一致）
 
-### Step 3: Build the Review Note (HTML)
+**命名一致性自检（生成前必做）**：
+1. 决定 `titleCN` 后，HTML 文件名、JSON 文件名、JSON 内 `source.titleCN` 三者必须用**完全相同**的中文串
+2. 生成完成后，自查输出"`{文件名}` 和 `source.titleCN='{titleCN}'` 一致 ✅"
+3. 如果篇目已在 `site/answer-key.json` 里存在，直接复用其 `title` 字段作为 `titleCN`，**不要自创新表述**（避免和已有文件/数据库漂移）
 
-Use the **V2 HTML template** at `assets/review-template.html` as the structural and styling foundation. The V2 design system features:
-- CSS Variables (`:root`) for theming
-- Purple gradient `.hero` header with `.book-tag`, `.stats-row`, `.hero-nav` (links to index + bilingual page)
-- `.card` layout with `.icon-box` + Lucide SVG icons (CDN: `unpkg.com/lucide@latest`)
-- `.status-chip.good` / `.status-chip.warn` for progress highlights and alerts
-- `.error-item` cards with `.q-header` / `.answer-compare` / `.quote-block` / `.analysis-block` / `.lesson-box`
-- `.data-table` / `.overview-table` / `.problem-table` for data
-- `.takeaway` purple gradient card for action items
-- `max-width: 960px` via `.container`
+遵循 `references/review-style-guide.md` 的设计规范（V2 紫色渐变主题、Lucide 图标、卡片布局）。
 
-See `references/review-style-guide.md` for the complete V2 CSS class reference.
+### Step 3: Generate Review Data JSON
 
-File naming convention: `剑X-TestX-PassageX-TopicKeyword复盘.html`
+在生成 HTML 的同时，输出一份结构化 JSON 文件，供后续导入 Web 系统：
 
-The note must include these sections in order:
+**输出文件命名规则**：`剑X-TestX-PassageX-中文主题复盘.json`
 
-1. **Hero header** — `.hero` with book tag, title, subtitle with time badge, `.stats-row` score breakdown
-2. **Progress & alert chips** — `.status-chip.good` highlighting specific things done RIGHT (always find at least 1 positive). Then `.status-chip.warn` with one-sentence core problem.
-3. **Per-question breakdown** — `.card` containing `.error-item` blocks for wrong answers + brief confirmation for correct answers (especially T/F/NG). Group by question type.
-4. **Fill-in-the-blank readback checklist** (when fill-in errors exist) — A `.status-chip.warn` with 4-step verification: grammar check, part-of-speech check, semantic check, word count check.
-5. **Synonym accumulation table** — `.data-table` with columns: 原文表达 | 题目表达 | 出处
-6. **Vocabulary table** — `.data-table` with columns: 词汇 | 释义 | 雅思高频 (`.freq-stars`) | 真题出现
-7. **Problem summary** — `.problem-table` with: 问题类型 | 具体表现 | 对应错题 | 改进方法
-8. **Recurring mistake tracker + per-question-type progress trend** — Cross-passage pattern tracking. When 3+ passages of the same question type exist, include a trend table.
-9. **Takeaway card** — `.takeaway` with numbered action items
-10. **Test scorecard** (when full test data available) — See Step 3b below
+> 命名必须与 Step 2 的 HTML 文件名**主干完全一致**（只差后缀），否则会触发 Web 端路径错乱。
 
-#### Vocabulary Frequency Rating
+示例：
+- HTML: `剑5-Test1-Passage2-鲸鱼感官复盘.html`
+- JSON: `剑5-Test1-Passage2-鲸鱼感官复盘.json`
+- `source.titleCN`: `"鲸鱼感官"`
 
-Reference `references/538-keywords-guide.md` to rate each word:
+> **命名说明**：文件名使用中文标题（`source.titleCN`），方便用户在文件管理器中一眼识别内容。Web 端导入时通过 JSON 内的 `source.book/test/passage` 识别篇目，不依赖文件名。
 
-| Rating | Criteria |
-|--------|----------|
-| ⭐⭐⭐ | Category 1: Top 54 keywords (90% question rate) |
-| ⭐⭐ | Category 2: 171 keywords (60% question rate) |
-| ⭐ | Category 3: 300+ keywords |
-| — | Not in 538 list; check COCA 5000 for general frequency |
+**🔴 timing 字段必须填充**：
+- `minutes`：数值型分钟（支持小数，如 `28.0` / `35.4`）
+- `formatted`：`"MM:SS"` 字符串（如 `"28:01"`）
+- MM:SS → minutes 换算：`分钟 + 秒/60`，保留 1 位小数
+- 用户实在给不出用时，才能置 `null`，但必须在回复里提醒"缺用时，进步图将缺一个点"
 
-The "Cambridge Appearance" column should track which real tests the word has appeared in — this accumulates over time.
-
-### Step 3b: Score-to-Band Conversion & Test Scorecard
-
-**This step runs whenever the user provides scores for a complete test (all 3 passages) or asks for scoring/band estimation.**
-
-#### Per-Test Scorecard
-
-When the user completes a full test (3 passages, total /40), generate a scorecard:
-
-```
-┌─────────────────────────────────────────────────────┐
-│  📊 成绩单 — 剑5 Test 4                              │
-├──────────┬────┬────┬────┬────────┬─────────┬────────┤
-│          │ P1 │ P2 │ P3 │ 总计/40 │ 总用时   │ 雅思分数│
-│ 剑5 T4   │ 11 │ 11 │  7 │ 29/40  │ 120:55  │ 6.5-7.0│
-└──────────┴────┴────┴────┴────────┴─────────┴────────┘
-```
-
-Required fields:
-- **P1 / P2 / P3**: Individual passage scores (number correct)
-- **总计/40**: Sum of all three passage scores
-- **总用时**: Total time in `MM:SS` format. If per-passage timing is provided, show breakdown: `34:10+35:32+51:13=120:55`
-- **雅思分数**: Band score estimated from the total score using the conversion table in `references/score-band-table.md`
-
-#### Band Score Conversion
-
-Use the official IELTS Academic Reading score-to-band conversion table at `references/score-band-table.md`. Key rules:
-- The table maps raw scores (0-40) to band scores (1.0-9.0)
-- When the raw score falls on a boundary between two bands, show as a range (e.g., `6.5-7.0`)
-- Always use the **Academic** reading conversion (not General Training)
-
-#### Cumulative Progress Table
-
-When the user has completed **2 or more full tests**, generate a cumulative progress table:
-
-```
-┌──────────┬────┬────┬────┬────────┬──────────────────────────┬────────┐
-│ 场景      │ P1 │ P2 │ P3 │ 总计/40│ 总用时                    │ 雅思分数│
-├──────────┼────┼────┼────┼────────┼──────────────────────────┼────────┤
-│ 剑4 T3   │  7 │  6 │  3 │ 16/40  │ 34:40+42:53+47:55=125:28│ 5.0    │
-│ 剑4 T4   │  7 │  7 │  5 │ 19/40  │ 33:43+30:59+33:50=98:32 │ 5.5    │
-│ 剑5 T2   │  8 │  9 │  2 │ 19/40  │ 35:52+36:23+53:32=125:47│ 5.5    │
-│ 剑5 T3   │ 11 │  9 │  6 │ 26/40  │ 32:40+39:34+34:32=106:46│ 6.0-6.5│
-│ 剑5 T4   │ 11 │ 11 │  7 │ 29/40  │ 34:10+35:32+51:13=120:55│ 6.5-7.0│
-└──────────┴────┴────┴────┴────────┴──────────────────────────┴────────┘
-```
-
-After the table, provide a brief **progress analysis** (3-5 sentences):
-
-1. **Accuracy trend**: Is the score improving? (e.g., "正确率在上升（5.0→6.5-7.0），好消息")
-2. **Speed analysis**: Compare total time to the 60-minute exam limit. Calculate the ratio (e.g., "平均用时 100-125 分钟，大约是考试时间的两倍")
-3. **Strategy advice**: Based on the trend, give ONE concrete suggestion (e.g., "先追正确率再追速度——等正确率稳在 7 分之后再专项练速度")
-4. **Per-passage pattern**: Note if P3 scores are consistently lower (common pattern — fatigue + harder passages)
-
-#### Score Memory
-
-After generating a scorecard, **always save the test result to working memory** so it persists across sessions. Store:
-- Test identifier (e.g., "剑5 T4")
-- P1, P2, P3 individual scores
-- Total score /40
-- Total time and per-passage time breakdown
-- Estimated band score
-- Date completed
-
-### Step 3c: Generate Bilingual Page
-
-**Every review note must have a corresponding bilingual (双语对照) HTML page.** This page provides paragraph-by-paragraph English-Chinese parallel text for the original passage.
-
-File naming: `剑X-TestX-PassageX-TopicKeyword双语对照.html`
-Location: `site/bilingual/` directory
-
-Use the **dark-theme bilingual template** at `assets/bilingual-template.html` (or reference any existing bilingual page in `site/bilingual/`). Key features:
-- Dark background (`--bg: #0c0c14`)
-- `.nav-bar` with links back to the review page and to the index
-- `h1` title + `.subtitle` source info
-- `.para-block` for each paragraph, containing:
-  - `.para-label` — Paragraph letter (A, B, C...)
-  - `.en-text` — Original English text
-  - `.cn-text` — Chinese translation (left-bordered)
-- `.vocab-highlight` spans for key vocabulary, with `title` attribute for Chinese meaning
-- Loads `../vocab-card-v2.js` at the end of `<body>` for interactive word cards
-
-**The review page's `.hero-nav` must link to the bilingual page:**
-```html
-<a href="../bilingual/剑X-TestX-PassageX-主题双语对照.html"><i data-lucide="book-open"></i> 双语</a>
+```json
+{
+  "version": "3.0.0",
+  "generatedAt": "2026-04-20T23:00:00.000Z",
+  "source": {
+    "book": 5,
+    "test": 1,
+    "passage": 2,
+    "title": "English Title",
+    "titleCN": "中文标题"
+  },
+  "score": {
+    "correct": 9,
+    "total": 13,
+    "band": "5.0",
+    "breakdown": {
+      "fillBlank": { "correct": 4, "total": 6 },
+      "tfng": { "correct": 3, "total": 4 },
+      "matching": { "correct": 2, "total": 3 }
+    }
+  },
+  "timing": {
+    "minutes": 25,
+    "formatted": "25:00"
+  },
+  "date": "2026-04-20",
+  "wrongQuestions": [
+    {
+      "q": 3,
+      "type": "tfng",
+      "myAnswer": "TRUE",
+      "correctAnswer": "NOT GIVEN",
+      "errorCategory": "ng-false-confusion",
+      "analysis": "错因分析文字",
+      "lesson": "教训一句话"
+    }
+  ],
+  "synonyms": [
+    {
+      "original": "原文表达",
+      "replacement": "题目表达",
+      "meaning": "中文释义",
+      "questionRef": "Q3"
+    }
+  ],
+  "vocabulary": [
+    {
+      "word": "exemplify",
+      "phonetic": "/ɪɡˈzemplɪfaɪ/",
+      "pos": "v.",
+      "definition": "举例说明",
+      "ieltsFreq": 3,
+      "source": "538 #42",
+      "appearance": "剑4T3P1"
+    }
+  ],
+  "problems": [
+    {
+      "type": "同义替换识别失败",
+      "detail": "具体表现",
+      "questions": "Q3, Q7",
+      "improvement": "改进方法"
+    }
+  ]
+}
 ```
 
 ### Step 4: Generate PDF (Optional)
 
-If the user wants a PDF:
+如果用户需要 PDF：
 
-1. Prefer using the script at `scripts/generate-pdf.js` with `puppeteer-core` + local Chrome
-2. Key parameters: A4 format, 2cm margins, `displayHeaderFooter: false`
-3. If dependencies are not installed, run `npm install puppeteer-core` first, or suggest the user print from browser as an alternative
+```bash
+node scripts/generate-pdf.js 剑X-TestX-PassageX-主题复盘.html
+```
 
-### Step 5: Update Long-term Memory
+需要 puppeteer-core + 本地 Chrome。PDF 输出到同目录。
 
-After each review, update the working memory:
+### Step 5: Update Memory
 
-- Add any **new recurring error patterns** discovered
-- Update the **vocabulary appearance tracking** across passages
-- Note the user's progress on previously identified weaknesses
-- **Save test scorecard data** (scores, timing, band) for cumulative progress tracking — this is essential for the progress table to work across sessions
+复盘完成后更新 working memory：新增的错误模式、词汇、成绩数据。
 
-### Step 5b: Site Integration & Cloud Sync
+### Step 6: Apply to Web (User-Initiated)
 
-After generating the review note and bilingual page:
+复盘生成完成后，**输出以下引导**：
 
-1. **Copy review HTML** to `site/reviews/`
-2. **Copy bilingual HTML** to `site/bilingual/`
-3. **Update `site/index.html`** — Add the new passage to the directory page data
-4. **Run `site/generate_vocab_synonym.py`** — Regenerates `site/vocab.html` (vocabulary overview) and `site/synonyms.html` (synonym overview) from all review HTML files
-5. **Update `site/changelog.html`** — Increment version, add changelog entry (only for feature/fix changes, not content additions)
-6. **Sync review to cloud** — Run the sync script to upload the review data and HTML to the web server:
-   ```
-   bash scripts/sync-review.sh <path-to-data.json> [--html review.html] [--bilingual bilingual.html]
-   ```
-   The script automatically generates a **unique user ID** (SHA256 of hostname + username) so each user's data is isolated. After upload, the script prints a personalized dashboard URL. Users can view their reviews at:
-   ```
-   https://tuyaya.online/ielts-api/web/?user=YOUR_USER_ID&key=API_KEY
-   ```
+---
 
-### Step 6: Feedback Nudge (Once per session)
+📤 **复盘文件已生成！**
 
-After delivering the review note, add a brief line at the end:
+| 文件 | 用途 |
+|------|------|
+| `剑X-TestX-PassageX-主题复盘.html` | 双击打开即可阅读，可打印 |
+| `剑X-TestX-PassageX-主题复盘.json` | 导入到 Web 端同步成绩 |
 
-> 💡 如果这次复盘对你有帮助，可以去 [GitHub 仓库](https://github.com/dengjiawei1226/ielts-reading-review) 点个 ⭐ Star，让更多雅思考生发现这个工具！
+**一键同步到 Web 端** 👉 [点此上传 JSON](https://tuyaya.online/ielts/submit.html?mode=json)
 
-Only show this once per session — do not repeat on subsequent reviews in the same conversation.
+上传页面会自动从 JSON 中识别出篇目信息（如「剑5 Test1 Passage2 · 鲸鱼感官」），确认后点击「导入」即可。
 
-## Error Analysis Rules (Critical)
+> 💡 JSON 文件在你当前的工作目录中，文件名如 `剑5-Test1-Passage2-鲸鱼感官复盘.json`
 
-These rules are battle-tested and must be strictly followed:
+---
 
-### TRUE / FALSE / NOT GIVEN
+#### 其他同步方式
 
-Use the **Three-Step Method**:
+**方式 B：Skill 伴侣脚本**（私有部署场景）
 
-1. **Find the topic** — Does the passage discuss the topic/object mentioned in the question? → If NO → **NOT GIVEN**
-2. **Find the stance** — If the topic exists, does the passage agree or contradict? → **TRUE** / **FALSE**
-3. **Verify** — "If I choose TRUE/FALSE, can I point to the exact sentence?" If not → likely **NOT GIVEN**
+如果有 `ielts-server-sync` skill（个人专用），可命令行批量上传：
 
-**Key distinctions:**
-- "Not mentioned" = NOT GIVEN (not FALSE)
-- FALSE requires **direct contradicting evidence** in the passage
-- A general statement (e.g., "most other parts of the world") that covers the question's subject counts as "discussed" — not NOT GIVEN
-- Every keyword in the question must match the passage; if even one doesn't align → lean toward NOT GIVEN
+```bash
+# 单文件上传
+node ~/.workbuddy/skills/ielts-server-sync/scripts/upload.js 剑5-T1-P2.json
 
-### Fill-in-the-blank
+# 批量上传目录
+node ~/.workbuddy/skills/ielts-server-sync/scripts/upload.js --batch ./reviews/
+```
 
-- **Never repeat words already in the question stem** — After filling in the answer, re-read the complete sentence to check for duplicates
-- Respect word limits strictly
-- **Readback Checklist (mandatory for every blank):**
-  1. Grammar check — does the sentence read naturally with the answer filled in?
-  2. Part-of-speech check — does the position require a noun/verb/adjective/adverb? Does your answer match?
-  3. Semantic check — does the answer match the topic? (e.g., if the question says "plants", the answer can't be "animals")
-  4. Word count check — within the word limit?
-- **"such as ___"** → always expects an example/name, never a condition or description
-- **"the ___ of X"** → expects a noun that collocates with "of X"
+**方式 C：纯离线**
 
-### Multiple Choice / Multi-select
+直接双击 `.html` 文件即可阅读 / 打印，不依赖任何服务器。
 
-- **Every keyword** in a chosen option must find correspondence in the passage
-- "Roughly related" ≠ "correct answer"
-- The most common trap: first half of an option matches, but the second half adds information not in the passage
+**重要**：Skill 本身 **不执行任何网络请求**。所有上传操作由用户主动发起，数据隐私可控。
 
-### Common Pitfall: Over-inference
+## Batch Import Mode (v3.2 — Legacy Review Folder → JSON)
 
-- Only consider what the author **explicitly wrote** — do not infer conclusions
-- Concessive clauses like "However far from reality..." acknowledge unreality, not confirm truth
-- `however + adj/adv` = `no matter how` (concessive), not causal
+**触发场景**：用户说"帮我把 XX 目录下的历史复盘都转成 JSON"、"批量导入我以前的复盘笔记"、"扫一下我电脑里的复盘"、"帮我找出所有历史笔记"等。
 
-### Common Pitfall: Category-Membership as Direct Information (NEW)
+此模式下 Buddy 自主循环，**无需用户自己找路径、无需一篇篇喂**。
 
-- When the passage says "A-type things have property B" and "X is A-type", then "X has property B" is **stated information**, not inference
-- This is TRUE/FALSE territory, NOT "NOT GIVEN"
-- Example: "Shade-tolerant plants have lower growth rates" + "Eastern hemlock is shade-tolerant" → Eastern hemlock has lower growth rates = directly stated
+### Step B0: Auto-Discovery（🔍 推荐默认起点）
 
-### Common Pitfall: Cross-generational Confusion (NEW)
+**不要开口就问用户"复盘文件夹在哪？"**——先自动扫常见位置：
 
-- "life cycle" = one individual's life span, not multi-generational species history
-- "flower, fruit and die" = flowers **once** then dies → NOT "flowers several times"
-- "The next generation flowered" ≠ "the same plant flowered again"
-- Always track **whose** life cycle or **which** generation is being discussed
+```bash
+node ~/.workbuddy/skills/ielts-reading-review/scripts/scan-legacy-reviews.js --auto
+```
 
-### Common Pitfall: Adjacent Distractor Words (NEW)
+脚本会扫描以下位置并按命中数推荐：
+- 当前工作目录 (cwd)
+- `~/Documents`、`~/Documents/个人`、`~/Documents/个人/WorkBuddy`
+- `~/Desktop`、`~/Downloads`
+- `~/Library/Mobile Documents/com~apple~CloudDocs`（iCloud）
+- `~/WorkBuddy`、`~/WorkBuddy/Claw`
 
-- After locating the relevant sentence, extract the answer ONLY from that sentence
-- Don't let nearby sentences contaminate your answer
-- If `habitat` appears in the next sentence but the question maps to `classification` in the current sentence, the answer is `classification`
+输出 `discoveries`（去重后的真实命中目录，命中数多的子目录优先）和 `recommended`（首选目录）。
 
-## Reference Files
+**把发现结果呈现给用户**：
 
-| File | Purpose |
-|------|---------|
-| `references/error-taxonomy.md` | Complete error type classification with examples |
-| `references/538-keywords-guide.md` | Guide for using the 538 IELTS keywords list |
-| `references/review-style-guide.md` | V2 design system CSS class reference and formatting conventions |
-| `references/score-band-table.md` | IELTS Academic Reading score-to-band conversion table |
-| `assets/review-template.html` | V2 HTML template with full CSS styling (purple gradient, Lucide icons, card layout) |
-| `assets/bilingual-template.html` | Dark-theme bilingual page template (English-Chinese parallel text) |
-| `scripts/generate-pdf.js` | PDF generation script (Node.js + puppeteer-core) |
-| `site/generate_vocab_synonym.py` | Extract vocabulary and synonym data from all review HTML files |
-| `site/vocab-card-v2.js` | Interactive vocabulary card component for bilingual pages (loads dict_full.json) |
+```
+我扫了你电脑常见位置，找到你的复盘应该在这里：
 
-## Style Guidelines
+🎯 推荐：/Users/xxx/Documents/个人/WorkBuddy/雅思学习（60 个候选文件）
+   样例：剑6-Test3-Passage3-抗衰老药物复盘.html / 剑4-Test1-听力Part2-河滨工业村复盘.html …
 
-- **Concise and direct** — No fluff, no decorative titles, focus on actionable content
-- **Function-oriented** — Every sentence should help the user improve
-- Vocabulary notes should include phonetic transcription
-- Error analysis should be blunt about the mistake cause — sugar-coating doesn't help learning
-- Chinese is the primary language for notes, with English terms preserved as-is
+其他候选：
+  - /Users/xxx/Downloads（4 个）
 
-## Data Export (Local-first)
+要用推荐目录还是选其他的？
+```
 
-After each review, the skill generates all data locally. Users who want to sync their progress to the cloud can do so manually via the companion website.
+用户点头后进入 Step B1 做精扫。**只有当自动发现完全找不到候选（discoveries 为空）时**，才问用户要具体路径。
 
-### Review Data JSON Export
+### Step B1: Scan the Folder
 
-After generating a review note (Step 3), also save a machine-readable JSON file alongside the HTML:
+调用扫描脚本生成候选清单：
 
-File naming: `剑X-TestX-PassageX-data.json`
+```bash
+# 默认只扫顶层
+node ~/.workbuddy/skills/ielts-reading-review/scripts/scan-legacy-reviews.js <目录> --out=/tmp/ielts-scan.json
+
+# 需要递归子目录
+node ~/.workbuddy/skills/ielts-reading-review/scripts/scan-legacy-reviews.js <目录> --deep --out=/tmp/ielts-scan.json
+```
+
+输出 JSON 结构（groups 按篇目聚合）：
 
 ```json
 {
-  "book": 5,
-  "test": 4,
-  "passage": 1,
-  "score": 11,
-  "total": 13,
-  "date": "2026-04-09",
-  "band": "6.5-7.0",
-  "timeSpent": "34:10",
-  "wrongQuestions": [3, 7, 12],
-  "errorCategories": ["synonym_failure", "over_inference"]
+  "totalFiles": 18,
+  "identifiedPassages": 6,
+  "groups": [
+    {
+      "passage": "C5-T1-P2",
+      "fileCount": 3,
+      "files": [
+        { "path": "...", "ext": ".html", "hints": { "book": 5, "test": 1, "passage": 2, "title": "鲸鱼感官" } },
+        { "path": "...", "ext": ".md" },
+        { "path": "...", "ext": ".png" }
+      ]
+    },
+    { "passage": "__unknown__", "files": [...] }
+  ]
 }
 ```
 
-This JSON file is used by the sync script (`scripts/sync-review.sh`) to upload review data to the cloud backend, making it available on the companion website. The sync happens automatically as part of Step 5b.
+### Step B2: Show Plan & Confirm
 
-### Cumulative Progress from Working Memory
+读取 scan 结果后，**必须先给用户一份执行计划**，不要直接开干：
 
-All cross-session progress tracking (cumulative progress table, score trends) should rely on **working memory** (the AI's built-in memory system) as the primary source. Save scorecard data to working memory after each review, and read it back when generating progress tables. The cloud backend serves as a secondary persistent store for web display.
+```
+扫描完成，找到 18 个候选文件，识别出 6 篇复盘：
+
+✅ 可识别：
+  1. 剑5-T1-P2 · 鲸鱼感官（HTML + MD + 截图，共 3 个文件）
+  2. 剑5-T1-P3 · 儿童认知（HTML）
+  3. 剑6-T2-P1 · ...
+  ...
+
+⚠️ 无法识别篇目（需你人工分配）：
+  - notes-2026-03-15.md
+  - 错题整理.docx
+
+我将逐篇处理可识别的 6 篇，每篇生成一个 JSON。预计 10-15 分钟。
+确认开始？
+```
+
+用户点头后才进入 Step B3。
+
+### Step B3: Loop — Generate JSON for Each Passage
+
+**逐篇循环**，每次处理一组：
+
+1. 读取该组所有文件内容（HTML 提纯文字、MD 直读、图片用视觉 OCR）
+2. 从内容中提取：原文/正确答案/用户答案/错题/时长/日期
+3. **关键兜底**：
+   - 内容里找不到"正确答案" → 查 `site/answer-key.json`（本地答案库，401 题全覆盖）
+   - 找不到用户答案 → 标注 `score.correct = null` 让用户后续补
+   - 错题列表不清晰 → 只生成基础成绩单 JSON，`wrongQuestions: []`
+4. 按 v3.0 schema 生成 JSON，文件名 `剑X-TestX-PassageX-中文主题复盘.json`
+5. 写入用户指定的输出目录（默认 `./batch-output/`）
+6. 输出一行进度：`✅ [3/6] 剑5-T1-P3 · 儿童认知 → 剑5-Test1-Passage3-儿童认知复盘.json`
+
+### Step B4: Summary Report
+
+全部完成后输出总结：
+
+```
+批量导入完成！
+
+✅ 成功：5 篇（已生成 5 个 JSON 到 ./batch-output/）
+⚠️ 部分数据缺失：1 篇（剑6-T2-P1 找不到用户答案，score.correct 置空）
+❌ 跳过：0 篇
+
+下一步：
+👉 打开 https://tuyaya.online/ielts/submit.html?mode=json
+👉 把 ./batch-output/ 里所有 JSON 拖进去，一键导入
+```
+
+### Batch Mode Rules (MUST FOLLOW)
+
+1. **永远先 scan + confirm，绝不跳过计划确认**
+2. **每篇独立处理，失败不阻塞下一篇**（捕获异常，记录到 skip 列表）
+3. **绝不编造数据**：用户答案缺失就置 null 或空数组，不要瞎填
+4. **同义替换/词汇/错因分析是可选项**：老笔记里没有就不生成，不要硬凑
+5. **答案库优先**：正确答案一律从 `site/answer-key.json` 核对，笔记里的可能是老婆写错的
+6. **产物隔离**：批量输出统一放 `./batch-output/`，不污染用户工作目录
+
+## Error Analysis Rules
+
+### TRUE / FALSE / NOT GIVEN 三步法
+
+1. **找话题** — 文章有没有讨论题目中的对象？→ 没讨论 = **NOT GIVEN**
+2. **找立场** — 讨论了的话，是同意还是矛盾？→ **TRUE** / **FALSE**
+3. **验证** — "如果选 TRUE/FALSE，能指出原文哪句话吗？" 指不出来 → 大概率 **NOT GIVEN**
+
+关键区分：
+- FALSE 需要**直接矛盾证据**，"没提到"= NG 不是 FALSE
+- 概括性表达覆盖题目对象 = 算讨论过，不是 NG
+- `however + adj` = `no matter how`（让步），不是因果
+
+### Fill-in-the-blank
+
+- 答案不能重复题干已有的词
+- 填完必须通读：语法/词性/语义/字数 四项检查
+- `such as ___` → 必须填具体例子
+- `the ___ of X` → 必须填能和 "of X" 搭配的名词
+
+### Common Pitfalls
+
+- **过度推理**：只看作者明确写了什么，不推导
+- **被绝对词吓到**：all/never 不一定错，看原文证据
+- **人名观点混淆**：先在文中标注每个人说了什么
+- **邻近干扰词**：从定位句提取答案，不要被旁边的句子污染
+
+## Error Categories
+
+参见 `references/error-taxonomy.md`，共 12 类错误分类。JSON 中 `errorCategory` 字段使用以下 ID：
+
+| ID | 错误类型 |
+|----|---------|
+| `synonym-failure` | 同义替换识别失败 |
+| `ng-false-confusion` | NOT GIVEN / FALSE 混淆 |
+| `over-inference` | 过度推理 |
+| `stem-repetition` | 填空重复题干词 |
+| `grammar-mismatch` | 语法/让步句理解错 |
+| `incomplete-option` | 选项不完全匹配 |
+| `vocab-gap` | 词汇缺口 |
+| `carelessness` | 粗心/时间压力 |
+| `word-form-error` | 填空词形/词性错 |
+| `scope-confusion` | 跨代/范围混淆 |
+| `category-reasoning` | 类别推理误判 |
+| `adjacent-distractor` | 邻近干扰词 |
+
+## Style Guidelines
+
+- 简洁直接，不废话
+- 错题分析直说问题，不糖衣炮弹
+- 中文为主，英语术语保留原文

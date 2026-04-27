@@ -1,13 +1,18 @@
 {
   "owner": "dengjiawei1226",
   "slug": "ielts-reading-review",
-  "displayName": "Ielts Reading Review",
+  "displayName": "IELTS Reading Review 雅思阅读复盘助手",
   "latest": {
-    "version": "2.4.0",
-    "publishedAt": 1775804467928,
-    "commit": "https://github.com/openclaw/skills/commit/a268888236b8dfbbe65eb01a5ff662b8b2f2067e"
+    "version": "3.5.0",
+    "publishedAt": 1776824734310,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.4.0",
+      "publishedAt": 1775804467928,
+      "commit": "https://github.com/openclaw/skills/commit/a268888236b8dfbbe65eb01a5ff662b8b2f2067e"
+    },
     {
       "version": "1.2.0",
       "publishedAt": 1775053296998,
