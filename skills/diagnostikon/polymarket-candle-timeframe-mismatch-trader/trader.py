@@ -67,6 +67,8 @@ def get_client(live: bool = False) -> SimmerClient:
             api_key=os.environ["SIMMER_API_KEY"],
             venue=venue,
         )
+        if live:
+            _client.live = True
         try:
             _client.apply_skill_config(SKILL_SLUG)
         except AttributeError:
