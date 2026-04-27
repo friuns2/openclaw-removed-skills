@@ -3,11 +3,16 @@
   "slug": "claid-ai",
   "displayName": "Claid Ai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168119937,
-    "commit": "https://github.com/openclaw/skills/commit/47efb99996a0a214388077a8e14c6d91d3a1e4d4"
+    "version": "1.0.3",
+    "publishedAt": 1776862060230,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168119937,
+      "commit": "https://github.com/openclaw/skills/commit/47efb99996a0a214388077a8e14c6d91d3a1e4d4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774577002615,
