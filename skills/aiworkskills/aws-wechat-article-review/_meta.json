@@ -1,0 +1,11 @@
+{
+  "owner": "aiworkskills",
+  "slug": "aws-wechat-article-review",
+  "displayName": "公众号审稿 / 合规 / 校对",
+  "latest": {
+    "version": "1.0.22",
+    "publishedAt": 1776900240121,
+    "commit": null
+  },
+  "history": []
+}
