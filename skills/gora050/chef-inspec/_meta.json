@@ -3,11 +3,16 @@
   "slug": "chef-inspec",
   "displayName": "Chef Inspec",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170497663,
-    "commit": "https://github.com/openclaw/skills/commit/e95a59be5e51d192b62074a5a0e1ffdf60ef9242"
+    "version": "1.0.3",
+    "publishedAt": 1776886023721,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170497663,
+      "commit": "https://github.com/openclaw/skills/commit/e95a59be5e51d192b62074a5a0e1ffdf60ef9242"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775037834420,
