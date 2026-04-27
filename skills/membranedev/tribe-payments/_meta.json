@@ -3,11 +3,16 @@
   "slug": "tribe-payments",
   "displayName": "Tribe Payments",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170447195,
-    "commit": "https://github.com/openclaw/skills/commit/f66a81a750e24fd96a4175dee6ccdd790f72e319"
+    "version": "1.0.3",
+    "publishedAt": 1776857415337,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170447195,
+      "commit": "https://github.com/openclaw/skills/commit/f66a81a750e24fd96a4175dee6ccdd790f72e319"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775023407993,
