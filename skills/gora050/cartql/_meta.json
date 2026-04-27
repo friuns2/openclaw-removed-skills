@@ -3,9 +3,15 @@
   "slug": "cartql",
   "displayName": "Cartql",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775185525014,
-    "commit": "https://github.com/openclaw/skills/commit/337e6fd07809a127c4d75946a11624edd1267ca5"
+    "version": "1.0.1",
+    "publishedAt": 1776873884830,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775185525014,
+      "commit": "https://github.com/openclaw/skills/commit/337e6fd07809a127c4d75946a11624edd1267ca5"
+    }
+  ]
 }
