@@ -3,11 +3,16 @@
   "slug": "finapi",
   "displayName": "Finapi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169309471,
-    "commit": "https://github.com/openclaw/skills/commit/4649678a6ba11be9521f603a7b0c10c7d66a4024"
+    "version": "1.0.3",
+    "publishedAt": 1776865253254,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169309471,
+      "commit": "https://github.com/openclaw/skills/commit/4649678a6ba11be9521f603a7b0c10c7d66a4024"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812247448,
