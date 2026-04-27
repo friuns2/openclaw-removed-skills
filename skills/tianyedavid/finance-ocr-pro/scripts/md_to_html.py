@@ -9,9 +9,9 @@ Generates ONE self-contained HTML file that shows:
 Mermaid ```mermaid``` fenced code blocks are rendered as interactive SVG
 diagrams via mermaid.js.
 
-The output HTML tries to be fully self-contained by embedding cached
-MathJax and Mermaid JS inline. If local caching/download fails, the
-report falls back to CDN script tags at runtime.
+The output HTML is fully self-contained by embedding bundled local
+MathJax and Mermaid assets inline. No network requests are performed
+during report generation or while viewing the generated report.
 
 File naming convention:
     Images:   <name>_<page>.png|jpeg|jpg|webp|gif   e.g. 陕国投年报_00001.png
@@ -22,7 +22,7 @@ File naming convention:
 Cross-platform: works on macOS, Windows, and Linux.
 
 Dependencies: markdown2
-Bundled (auto-downloaded): MathJax 3 (tex-svg-full), Mermaid 11
+Bundled locally: MathJax 3.2.2 (tex-svg-full), Mermaid 11.14.0
 """
 
 from __future__ import annotations
@@ -31,7 +31,6 @@ import argparse
 import base64
 import html
 import re
-import urllib.request
 from pathlib import Path
 
 import markdown2
@@ -522,7 +521,11 @@ def _classify_numeric_cells(html_content: str) -> str:
 # ==============================================================================
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_JS_CACHE_DIR = _SCRIPT_DIR / ".js_cache"
+_BUNDLED_JS_DIR = _SCRIPT_DIR / "vendor"
+_BUNDLED_JS_FILES = {
+    "mermaid.min.js": _BUNDLED_JS_DIR / "mermaid-11.14.0" / "mermaid.min.js",
+    "tex-svg-full.js": _BUNDLED_JS_DIR / "mathjax-3.2.2" / "tex-svg-full.js",
+}
 # Embedded company logo so generated HTML stays self-contained even if repo assets are removed.
 _COMPANY_LOGO_DATA_URL = (
     'data:image/webp;base64,UklGRio/AABXRUJQVlA4IB4/AADwyQCdASpEAtMAPjEWikOiISESScXkIAMEs7d6PRn4Kp07w1EZj'
@@ -743,41 +746,27 @@ _COMPANY_LOGO_DATA_URL = (
     '4LZJEdTol15+zhGJOt4lceIkaaRp+pkOxN45cABEn+tVDL0pw1Sq0chemVeiAPDyqunIxXZTworjM9wMhwwJy1G6gAAAAA='
 )
 
-_CDN_LIBS = {
-    "mermaid.min.js": "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js",
-    "tex-svg-full.js": "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg-full.js",
-}
-
-
-def _fetch_and_cache_js(filename: str) -> str | None:
-    """
-    Return JS library content for inline embedding.
-    Downloads from CDN on first use and caches in scripts/.js_cache/.
-    Returns None if download fails (caller falls back to CDN <script src>).
-    """
-    cache_path = _JS_CACHE_DIR / filename
-    if cache_path.exists():
-        return cache_path.read_text(encoding="utf-8")
-
-    url = _CDN_LIBS[filename]
-    try:
-        print(f"  Downloading {filename} from CDN ...")
-        req = urllib.request.Request(url, headers={"User-Agent": "md_to_html/1.0"})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            content = resp.read().decode("utf-8")
-        _JS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(content, encoding="utf-8")
-        print(f"  Cached → {cache_path} ({len(content):,} bytes)")
-        return content
-    except Exception as e:
-        print(f"  Warning: could not download {filename}: {e}")
-        print(f"  HTML will use CDN <script src> (requires internet to view)")
-        return None
+def _load_bundled_js(filename: str) -> str:
+    """Return bundled JS content for inline embedding."""
+    asset_path = _BUNDLED_JS_FILES[filename]
+    if not asset_path.is_file():
+        raise FileNotFoundError(
+            f"Bundled JavaScript asset not found: {asset_path}. "
+            "Reinstall or repackage the skill with scripts/vendor included."
+        )
+    return asset_path.read_text(encoding="utf-8")
 
 
 def _safe_inline_js(js_content: str) -> str:
     r"""Escape sequences that would break an inline <script> block."""
-    return js_content.replace("</script>", r"<\/script>").replace("</Script>", r"<\/Script>")
+    return (
+        js_content
+        .replace("</script>", r"<\/script>")
+        .replace("</Script>", r"<\/Script>")
+        # Vendored MathJax embeds legacy jsDelivr URL strings for optional SRE assets.
+        # Neutralize them so generated HTML contains no third-party CDN references.
+        .replace("https://cdn.jsdelivr.net/", "data:text/plain,")
+    )
 
 
 def _get_company_logo_data_url() -> str | None:
@@ -1900,22 +1889,10 @@ def _generate_html_document(page_sections: list[str], title: str) -> str:
         else '<div class="loading">No pages found</div>'
     )
 
-    mathjax_js = _fetch_and_cache_js("tex-svg-full.js")
-    mermaid_js = _fetch_and_cache_js("mermaid.min.js")
-
-    if mathjax_js:
-        mathjax_tag = f"<script>{_safe_inline_js(mathjax_js)}</script>"
-    else:
-        mathjax_tag = (
-            '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg-full.js" async></script>'
-        )
-
-    if mermaid_js:
-        mermaid_tag = f"<script>{_safe_inline_js(mermaid_js)}</script>"
-    else:
-        mermaid_tag = (
-            '<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>'
-        )
+    mathjax_js = _load_bundled_js("tex-svg-full.js")
+    mermaid_js = _load_bundled_js("mermaid.min.js")
+    mathjax_tag = f"<script>{_safe_inline_js(mathjax_js)}</script>"
+    mermaid_tag = f"<script>{_safe_inline_js(mermaid_js)}</script>"
 
     if logo_data_url:
         logo_html = (

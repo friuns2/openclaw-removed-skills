@@ -1,10 +1,11 @@
 name: finance-ocr-pro
-version: 1.0.4
+version: 1.0.6
 author: RizMoon
 description: >
   Extract structured Markdown, HTML, DOCX, and Excel from scanned documents,
   especially financial and complex chart-heavy files. Sends rendered page images
-  and OCR prompts to a configured OpenAI-compatible VLM endpoint.
+  and OCR prompts to a configured OpenAI-compatible VLM endpoint. HTML report
+  assets are bundled locally; no runtime CDN downloads are performed.
 license: MIT
 
 permissions:
@@ -35,9 +36,15 @@ entryPoint:
     documents and other complex files with dense tables, charts, graphs, 
     footnotes, and multi-part layouts. Before starting, announce the default
     mode, model, thread count, result path, and that page images will be
-    transmitted to BASE_URL. Then proceed unless the user changes defaults.
-    Prefer `python scripts/ocrctl.py --json start ...` for long jobs and
-    `python scripts/ocr_main.py ...` only for very small inline jobs.
+    transmitted to BASE_URL. Also tell the user that this skill supports
+    multi-thread OCR, but higher thread counts should only be used when the
+    API endpoint, rate limits, and subscription plan support parallel OCR
+    requests. First resolve the interpreter path: on macOS/Linux use
+    `.venv/bin/python` if present, otherwise `python3`; on Windows use
+    `.venv/Scripts/python.exe` if present, otherwise `python`. Then proceed
+    unless the user changes defaults. Prefer
+    `<python> scripts/ocrctl.py --json start ...` for long jobs and
+    `<python> scripts/ocr_main.py ...` only for very small inline jobs.
 
 triggers:
   keywords:

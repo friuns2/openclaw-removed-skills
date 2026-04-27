@@ -65,7 +65,7 @@ SUPPORTED_EXTENSIONS: dict[str, str] = {
 }
 
 ALLOWED_DPI = {72, 96, 150, 200, 300, 400, 600}
-DEFAULT_DPI = 300
+DEFAULT_DPI = 200
 MAX_FILENAME_LENGTH = 80
 JPEG_QUALITY = 95
 
@@ -557,15 +557,19 @@ def _apple_via_applescript(src: Path, tmp_dir: Path) -> Path:
 
     dst = tmp_dir / f"{src.stem}.pdf"
     script = (
-        f'tell application "{app}"\n'
-        f'  set theDoc to open POSIX file "{src.resolve()}"\n'
-        f'  delay 2\n'
-        f'  export theDoc to POSIX file "{dst}" as PDF\n'
-        f'  close theDoc saving no\n'
-        f'end tell'
+        "on run argv\n"
+        "  set srcPath to item 1 of argv\n"
+        "  set dstPath to item 2 of argv\n"
+        f'  tell application "{app}"\n'
+        "    set theDoc to open POSIX file srcPath\n"
+        "    delay 2\n"
+        "    export theDoc to POSIX file dstPath as PDF\n"
+        "    close theDoc saving no\n"
+        "  end tell\n"
+        "end run"
     )
     result = subprocess.run(
-        ["osascript", "-e", script],
+        ["osascript", "-e", script, str(src.resolve()), str(dst)],
         capture_output=True, text=True, timeout=90,
     )
     if result.returncode != 0 or not dst.exists():
@@ -593,7 +597,7 @@ def document_to_images(
                         When *None*, a new directory is created next to this script.
         output_format:  ``"png"`` (default, lossless) or ``"jpeg"``.
         dpi:            Render resolution.
-                        Allowed: 72, 96, 150, 200, 300 (default), 400, 600.
+                        Allowed: 72, 96, 150, 200 (default), 300, 400, 600.
 
     Returns:
         Path to the output folder containing the generated images.

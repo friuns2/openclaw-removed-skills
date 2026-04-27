@@ -1,12 +1,16 @@
 """
 First-run setup for the OCR Document Extraction skill.
 
-Checks Python dependencies and .env configuration, installs/creates
-what is missing, and validates that the configured model is likely
+Checks Python dependencies and .env configuration, creates local config
+templates when needed, and validates that the configured model is likely
 a vision-capable (multi-modal) model.
 
+This script never installs packages automatically. When dependencies are
+missing it prints the exact `pip install` command for the current Python
+interpreter so users can review and run it explicitly.
+
 Usage:
-    python scripts/ocr_setup.py           # interactive setup
+    python scripts/ocr_setup.py           # interactive setup/check
     python scripts/ocr_setup.py --check   # non-interactive check only (exit 0 = ready, 1 = not ready)
 """
 
@@ -15,7 +19,6 @@ from __future__ import annotations
 import importlib
 import os
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
@@ -37,6 +40,7 @@ REQUIRED_PACKAGES: list[tuple[str, str]] = [
     ("lxml", "lxml"),
     ("latex2mathml", "latex2mathml"),
     ("openpyxl", "openpyxl"),
+    ("unicodeit", "unicodeit"),
 ]
 
 REQUIRED_ENV_VARS = ["API_KEY", "BASE_URL", "VLM_MODEL"]
@@ -76,20 +80,9 @@ def check_packages() -> list[str]:
     return missing
 
 
-def install_packages() -> bool:
-    """Install all dependencies from requirements.txt. Returns True on success."""
-    print("[setup] Installing Python dependencies …")
-    result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "-r", str(_REQUIREMENTS), "-q"],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        print(f"[setup] pip install failed:\n{result.stderr}")
-        return False
-    importlib.invalidate_caches()
-    print("[setup] Dependencies installed successfully.")
-    return True
+def python_install_command() -> str:
+    """Return the explicit install command for the current interpreter."""
+    return f'"{sys.executable}" -m pip install -r "{_REQUIREMENTS}"'
 
 
 def check_env() -> list[str]:
@@ -188,9 +181,8 @@ def run_setup() -> None:
     missing_pkgs = check_packages()
     if missing_pkgs:
         print(f"\n[1/3] Missing Python packages: {', '.join(missing_pkgs)}")
-        if not install_packages():
-            print("      Please run manually: pip install -r requirements.txt")
-            sys.exit(1)
+        print("      Automatic installation is intentionally disabled.")
+        print(f"      Please review and run manually:\n      {python_install_command()}")
     else:
         print("\n[1/3] Python dependencies — OK")
 
@@ -223,7 +215,9 @@ def run_setup() -> None:
         print("\n[3/3] System dependencies — OK")
 
     print()
-    if not env_missing:
+    if missing_pkgs:
+        print("Setup incomplete. Install the missing Python packages, then re-run the check.")
+    elif not env_missing:
         print("Setup complete. Ready to use!")
     else:
         print(f"Edit {_ENV_FILE} with your credentials, then you're ready.")

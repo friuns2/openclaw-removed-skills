@@ -29,7 +29,7 @@ _IMAGE_EXTS = {".jpeg", ".jpg", ".png", ".webp", ".bmp", ".tiff", ".tif"}
 
 
 def _preflight() -> None:
-    """Auto-install dependencies and validate .env before the pipeline runs.
+    """Validate local dependencies and .env before the pipeline runs.
 
     Skips silently on subsequent calls within the same process.
     """
@@ -37,15 +37,15 @@ def _preflight() -> None:
     if _preflight_done:
         return
 
-    from ocr_setup import check_packages, install_packages, check_env, bootstrap_env
+    from ocr_setup import check_packages, check_env, bootstrap_env, python_install_command
 
     missing_pkgs = check_packages()
     if missing_pkgs:
-        print(f"[preflight] Missing packages: {', '.join(missing_pkgs)}")
-        print("[preflight] Installing dependencies …")
-        if not install_packages():
-            sys.exit("[preflight] Failed to install dependencies. "
-                     "Run manually: pip install -r requirements.txt")
+        sys.exit(
+            f"[preflight] Missing packages: {', '.join(missing_pkgs)}\n"
+            "[preflight] Automatic installation is disabled for security.\n"
+            f"  Run manually: {python_install_command()}"
+        )
 
     missing_env = check_env()
     env_path = _SKILL_ROOT / ".env"
@@ -210,7 +210,7 @@ if __name__ == "__main__":
         "-t", "--threads",
         type=int,
         default=1,
-        help="Number of concurrent OCR threads (default: 1).",
+        help="Number of concurrent OCR threads (default: 1; raise only if the API plan supports parallel OCR requests).",
     )
     args = parser.parse_args()
 

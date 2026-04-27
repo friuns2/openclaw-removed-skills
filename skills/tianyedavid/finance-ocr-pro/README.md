@@ -4,7 +4,9 @@ Finance OCR Pro is a cross-platform OCR skill and local runtime for agent
 environments such as Codex, Claude Code, and OpenClaw. The runtime executes on
 the user's machine, but the OCR step sends rendered page images and OCR prompts
 to a configured OpenAI-compatible Vision-Language Model (VLM) endpoint unless
-the user points `BASE_URL` to a trusted local service.
+the user points `BASE_URL` to a trusted local service. HTML report assets are
+bundled locally, and the setup flow prints manual dependency instructions
+instead of installing packages automatically.
 
 The project reconstructs each page into structured Markdown and then produces a
 reviewable HTML report, an editable DOCX file, and an Excel workbook of
@@ -37,14 +39,23 @@ Before using this project, understand the following:
   - `VLM_MODEL` -- vision-capable model identifier (e.g. `gpt-4o`). Must
     support image inputs; text-only models will not work.
 - These same environment variables are declared in the platform manifest
-  (`skill.yaml`), in `SKILL.md` front matter (`requires.env`), and in
-  `agents/openai.yaml` so that agent platforms and security scanners can
-  verify the requirements before installation.
+  (`skill.yaml`), in `SKILL.md` front matter (`metadata.openclaw.requires.env`),
+  and in `agents/openai.yaml` so that agent platforms and security scanners
+  can verify the requirements before installation.
 - Users should verify the exact endpoint they are sending data to and confirm
   that the provider is appropriate for the document sensitivity level.
 - If offline or local-only processing is required, configure `BASE_URL` to
   point to a trusted local VLM service. Do not use an external endpoint for
   sensitive documents unless the provider is trusted.
+- `scripts/ocr_setup.py` does not install dependencies automatically. It only
+  checks readiness and prints the manual install command for the current
+  Python interpreter.
+- HTML report generation uses vendored Mermaid and MathJax assets from
+  `scripts/vendor/` and performs no runtime CDN fetches.
+- Local subprocess usage is restricted to starting the background OCR worker
+  and calling known document-conversion helpers such as LibreOffice and
+  `osascript`. Commands are passed as explicit argument arrays; the project
+  does not use `shell=True`.
 - Do not commit a populated `.env` file. Keep secrets local and distribute
   `.env.example` only.
 
@@ -71,6 +82,9 @@ That notice should explicitly state:
 - which `VLM_MODEL` will be used
 - which execution mode will be used
 - where results will be written
+- that multi-thread OCR is supported and a higher thread count can be offered
+  when the user's API endpoint, rate limits, and plan support concurrent OCR
+  requests
 - that page images and OCR prompts will be sent to the configured endpoint
 - extraction by VLM models may be time-consuming
 
@@ -154,8 +168,17 @@ All scripts are intended to run on Windows, macOS, and Linux.
 - Use the skill-local virtualenv interpreter when present:
   - macOS/Linux: `.venv/bin/python`
   - Windows: `.venv/Scripts/python.exe`
-- If the virtualenv has not been created yet, `python` also works for setup
-  and local testing.
+- If the virtualenv has not been created yet, use `python3` on macOS/Linux or
+  `python` on Windows for setup and local testing.
+
+On macOS/Linux, a reliable pattern is:
+
+```bash
+PYTHON="${PYTHON:-$( [ -x .venv/bin/python ] && printf .venv/bin/python || printf python3 )}"
+```
+
+Then reuse `$PYTHON` for the remaining commands. On Windows, use
+`.venv\Scripts\python.exe` when present, otherwise `python`.
 
 ## How The Project Works Internally
 
@@ -169,8 +192,10 @@ The skill-facing metadata lives in:
   point. This is the file Clawhub reads for registry metadata and what the
   security scanner checks for declared credentials.
 - `SKILL.md` -- agent-facing instructions. The YAML front matter declares
-  `requires.env` listing the same three variables so the registry extractor
-  can surface them. The body tells agents when and how to run OCR.
+  `metadata.openclaw.requires.env` and `metadata.openclaw.requires.anyBins`
+  using standard multi-line YAML so the OpenClaw skill loader and ClawHub
+  security scanner can gate the skill correctly. The body tells agents when
+  and how to run OCR.
 - `agents/openai.yaml` -- OpenAI-agent-specific interface metadata.
 
 For distribution, ship `.env.example` as the editable template and keep the
@@ -228,7 +253,7 @@ Used when an agent or user is comfortable waiting for the full job inline.
 Example:
 
 ```bash
-python scripts/ocr_main.py /path/to/document.pdf
+$PYTHON scripts/ocr_main.py /path/to/document.pdf
 ```
 
 ### Durable Background Job Mode
@@ -238,11 +263,11 @@ Used when the OCR task may outlive an agent session.
 Examples:
 
 ```bash
-python scripts/ocrctl.py --json start /path/to/document.pdf
-python scripts/ocrctl.py --json status <job_id>
-python scripts/ocrctl.py --json artifacts <job_id>
-python scripts/ocrctl.py --json cancel <job_id>
-python scripts/ocrctl.py --json resume <job_id>
+$PYTHON scripts/ocrctl.py --json start /path/to/document.pdf
+$PYTHON scripts/ocrctl.py --json status <job_id>
+$PYTHON scripts/ocrctl.py --json artifacts <job_id>
+$PYTHON scripts/ocrctl.py --json cancel <job_id>
+$PYTHON scripts/ocrctl.py --json resume <job_id>
 ```
 
 In background mode, OCR state is persisted under:
@@ -279,6 +304,9 @@ should tell the user the defaults it plans to use:
   - background mode default: `~/.semantic-ocr/jobs/<job_id>/results/`
   - synchronous mode default: `ocr_output/OCR_<filename>/results/`
 - **Threads**: `1` by default
+  - The agent should also tell the user that this skill supports multi-thread
+    OCR and can use a higher thread count when the API endpoint, rate limits,
+    and subscription plan support parallel OCR requests.
 
 If the user does not change these defaults, the agent should proceed
 automatically. If the user explicitly requests inline execution, the agent
@@ -340,7 +368,8 @@ variables must be set before OCR can run:
 | `VLM_MODEL` | Yes      | No        | Vision-capable model identifier. Must support image inputs |
 
 These are the same variables declared in `skill.yaml` (platform manifest),
-`SKILL.md` front matter (`requires.env`), and `agents/openai.yaml`.
+`SKILL.md` front matter (`metadata.openclaw.requires.env`), and
+`agents/openai.yaml`.
 
 Important:
 
@@ -353,7 +382,14 @@ Important:
 First-run setup is handled by:
 
 ```bash
-python scripts/ocr_setup.py
+$PYTHON scripts/ocr_setup.py
+```
+
+If Python dependencies are missing, the setup script will print a manual
+install command similar to:
+
+```bash
+$PYTHON -m pip install -r requirements.txt
 ```
 
 For redistribution, do not ship a populated `.env` file. Ship
@@ -399,13 +435,13 @@ job-state persistence on disk.
 
 - OCR quality depends on the chosen VLM, endpoint behavior, and the source
   document quality.
-- Page rendering is fixed at 300 DPI to balance OCR quality and disk usage.
+- Page rendering now defaults to 200 DPI to balance OCR quality, speed, and
+  disk usage across hosts.
 - Very large documents can still take significant time, network transfer, and
   API cost.
 - Office document conversion may require local system dependencies.
-- HTML report generation tries to embed cached Mermaid/MathJax assets locally,
-  but may fall back to CDN loading when local JS download/caching is
-  unavailable.
+- HTML report generation depends on the vendored Mermaid and MathJax assets in
+  `scripts/vendor/`.
 - Cancellation is cooperative, which means it is most responsive between page
   operations rather than in the middle of a single OCR request.
 
@@ -421,8 +457,10 @@ job-state persistence on disk.
   and prompts to the configured VLM endpoint unless that endpoint is local.
 - Exclude developer-local files such as `.env`, `.venv/`, `__pycache__/`,
   `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`, `.DS_Store`,
-  `ocr_output/`, `scripts/.js_cache/`, `scripts/image_outputs_*/`, and ad-hoc
+  `ocr_output/`, `scripts/image_outputs_*/`, and ad-hoc
   test folders.
+- Include `scripts/vendor/`, `THIRD_PARTY_NOTICES.md`, and `SECURITY.md` in
+  distribution packages.
 - Expect PDF/image OCR to work with Python dependencies alone.
 - Expect Office-document OCR to require LibreOffice locally.
 

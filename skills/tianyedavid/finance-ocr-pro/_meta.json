@@ -3,9 +3,15 @@
   "slug": "finance-ocr-pro",
   "displayName": "Finance OCR Pro",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1774932193058,
-    "commit": "https://github.com/openclaw/skills/commit/8b493abb393692a19c9e0501562f3947986324c1"
+    "version": "1.0.6",
+    "publishedAt": 1776046597877,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1774932193058,
+      "commit": "https://github.com/openclaw/skills/commit/8b493abb393692a19c9e0501562f3947986324c1"
+    }
+  ]
 }

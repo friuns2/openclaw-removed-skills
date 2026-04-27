@@ -223,7 +223,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     start = subparsers.add_parser("start", help="Start a new OCR background job.")
     start.add_argument("input_path", help="Path to the document or image to OCR.")
-    start.add_argument("-t", "--threads", type=int, default=1, help="Number of OCR threads (default: 1).")
+    start.add_argument("-t", "--threads", type=int, default=1, help="Number of OCR threads (default: 1; raise only if the API plan supports parallel OCR requests).")
     start.add_argument("--json", dest="subcommand_json", action="store_true", help=argparse.SUPPRESS)
     start.set_defaults(handler=cmd_start)
 
