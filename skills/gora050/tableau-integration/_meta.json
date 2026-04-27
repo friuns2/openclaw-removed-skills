@@ -3,11 +3,16 @@
   "slug": "tableau-integration",
   "displayName": "Tableau",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169295911,
-    "commit": "https://github.com/openclaw/skills/commit/8e4f6bd85fa627dd7fe8ad9db40c7ecdeea07295"
+    "version": "1.0.3",
+    "publishedAt": 1776865217345,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169295911,
+      "commit": "https://github.com/openclaw/skills/commit/8e4f6bd85fa627dd7fe8ad9db40c7ecdeea07295"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812193960,
