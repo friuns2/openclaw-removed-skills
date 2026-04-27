@@ -3,11 +3,16 @@
   "slug": "contact-enhance",
   "displayName": "Contact Enhance",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169791392,
-    "commit": "https://github.com/openclaw/skills/commit/e7268fae0250487c120c27da811be0800afd3935"
+    "version": "1.0.3",
+    "publishedAt": 1776864847479,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169791392,
+      "commit": "https://github.com/openclaw/skills/commit/e7268fae0250487c120c27da811be0800afd3935"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774904755390,
