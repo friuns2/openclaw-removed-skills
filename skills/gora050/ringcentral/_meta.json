@@ -3,11 +3,16 @@
   "slug": "ringcentral",
   "displayName": "Ringcentral",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168632557,
-    "commit": "https://github.com/openclaw/skills/commit/affcdc9a1b8377a11a778730a81cceaa9526671a"
+    "version": "1.0.3",
+    "publishedAt": 1776862909742,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168632557,
+      "commit": "https://github.com/openclaw/skills/commit/affcdc9a1b8377a11a778730a81cceaa9526671a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774667089215,
