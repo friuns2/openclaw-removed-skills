@@ -1,6 +1,6 @@
 ---
 name: daily-reflect
-description: "每日日记引导 — 每天提供一个深度日记主题，早间引导写作，晚间回顾反思，帮助用户建立写日记习惯、提升自我觉察。Daily journal prompts — morning writing guide and evening reflection to build a daily journaling habit. Trigger on: 日记、写日记、今天写什么、每日日记、日记打卡、自我反思、journal、daily journal、journaling、writing prompt、reflection。"
+description: "Daily journaling prompts for meaningful reflection — morning intention-setting and evening review. Build a consistent self-reflection habit one prompt at a time."
 keywords:
   - 日记
   - 写日记

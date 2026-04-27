@@ -1,6 +1,9 @@
-# Daily Reflect / 每日日记引导
+# Daily Reflect — Daily Journal Prompts Skill
 
-> 每日日记引导 — 晨间写作 · 晚间反思 · 情绪觉察 · 习惯打卡
+> Morning writing prompts and evening reflections to build a daily journaling habit.
+
+[![clawhub](https://img.shields.io/badge/clawhub-daily--reflect-blue)](https://clawhub.ai/skills/daily-reflect)
+[![openclaw](https://img.shields.io/badge/openclaw-skill-orange)](https://openclaw.ai)
 
 An [OpenClaw](https://openclaw.ai) skill that guides you through daily journaling — a morning writing prompt to set intentions, and an evening reflection to review your day. Designed to build a sustainable journaling habit with the highest user retention of any daily skill type.
 
@@ -41,3 +44,11 @@ Supported channels: `telegram` / `feishu` / `slack` / `discord`
 ---
 
 *MIT License · OpenClaw Skill*
+
+## Keywords
+
+daily journal · journaling · journal prompts · writing prompts · daily reflection · self-awareness · gratitude · 日记 · 写日记 · 每日日记 · 自我反思 · 日记打卡
+
+---
+
+Built for [OpenClaw](https://openclaw.ai) · Published on [clawhub.ai](https://clawhub.ai/skills/daily-reflect)
