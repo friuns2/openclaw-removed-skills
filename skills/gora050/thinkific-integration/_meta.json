@@ -3,11 +3,16 @@
   "slug": "thinkific-integration",
   "displayName": "Thinkific",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167954273,
-    "commit": "https://github.com/openclaw/skills/commit/c4876da39f8df1be148fbab38de099e1d73f4274"
+    "version": "1.0.3",
+    "publishedAt": 1776863032920,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167954273,
+      "commit": "https://github.com/openclaw/skills/commit/c4876da39f8df1be148fbab38de099e1d73f4274"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774553023234,
