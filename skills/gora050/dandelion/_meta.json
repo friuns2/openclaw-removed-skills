@@ -3,11 +3,16 @@
   "slug": "dandelion",
   "displayName": "Dandelion",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167889626,
-    "commit": "https://github.com/openclaw/skills/commit/febf1f13113ffe7064ed248b61ea07a335481446"
+    "version": "1.0.3",
+    "publishedAt": 1776861873533,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167889626,
+      "commit": "https://github.com/openclaw/skills/commit/febf1f13113ffe7064ed248b61ea07a335481446"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774523002350,
