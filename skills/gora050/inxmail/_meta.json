@@ -3,11 +3,16 @@
   "slug": "inxmail",
   "displayName": "Inxmail",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168585633,
-    "commit": "https://github.com/openclaw/skills/commit/87b762804ccec081481507466e8f9f0edde2b211"
+    "version": "1.0.3",
+    "publishedAt": 1776870647530,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168585633,
+      "commit": "https://github.com/openclaw/skills/commit/87b762804ccec081481507466e8f9f0edde2b211"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774663448443,
