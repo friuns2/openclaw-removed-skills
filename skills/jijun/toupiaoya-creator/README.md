@@ -13,7 +13,7 @@
 | 路径 | 说明 |
 |------|------|
 | `SKILL.md` | 技能元数据与完整指令（name、description、read_when、流程说明） |
-| `scripts/toupiaoya_cli.py` | 命令行入口：`search`（模板搜索）与 `create`（创建作品） |
+| `scripts/toupiaoya_cli.py` | 命令行入口：`search`、`project create` / `project list`、`upload`、`material list` 等 |
 | `README.md` | 本说明文档 |
 
 ## 前置条件
@@ -56,7 +56,7 @@ python scripts/toupiaoya_cli.py search \
 | `--sortBy` | 排序，默认 `common_total|desc` |
 | `--color` | 颜色筛选（可选），如：紫色、蓝色、粉色、红色、绿色、青色、橙色、黄色、黑色、白色、灰色 |
 
-### 输出说明
+### 输出说明（stdout，JSON）
 
 - 若命中结果 `total == 0`，脚本输出 `{}`。
 - 否则大致形态为：
@@ -80,11 +80,13 @@ python scripts/toupiaoya_cli.py search \
 
 在对话或汇报中，建议展示前 **3～5** 个模板的标题、链接、描述与热度（`pv`）。
 
+> **说明**：`SKILL.md` 示例中使用字段名 `results`；当前 `toupiaoya_cli.py` 实际输出列表字段为 **`results`**，条目字段与用途一致。
+
 ---
 
 ## 二、创建投票作品
 
-使用子命令 `create`，底层请求：`POST` 至 `https://ai-api.toupiaoya.com/iaigc-toupiaoya/create`（可通过 `ToupiaoyaCreator` 修改 `base_url`）。
+使用子命令 `project create`，底层请求：`POST` 至 `https://ai-api.toupiaoya.com/iaigc-toupiaoya/create`（可通过 `ToupiaoyaCreator` 修改 `base_url`）。
 
 ### 请求体要点
 
@@ -110,7 +112,7 @@ python scripts/toupiaoya_cli.py search \
 **文字选项投票，多选：**
 
 ```bash
-python scripts/toupiaoya_cli.py create \
+python scripts/toupiaoya_cli.py project create \
   --briefTitle "年度最佳作品投票" \
   --briefDesc "封面简介：本次活动由某某主办。" \
   --detailTitle "年度最佳作品投票" \
@@ -124,7 +126,7 @@ python scripts/toupiaoya_cli.py create \
 **图片投票：**
 
 ```bash
-python scripts/toupiaoya_cli.py create \
+python scripts/toupiaoya_cli.py project create \
   --briefTitle "年度最佳作品投票" \
   --briefDesc "封面简介：本次活动由某某主办。" \
   --detailTitle "年度最佳作品投票" \

@@ -3,11 +3,16 @@
   "slug": "toupiaoya-creator",
   "displayName": "投票鸭制作助手",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775204133385,
-    "commit": "https://github.com/openclaw/skills/commit/d5d05bf20453ff879c64ce883022284f86af7bbf"
+    "version": "1.0.3",
+    "publishedAt": 1776898072171,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775204133385,
+      "commit": "https://github.com/openclaw/skills/commit/d5d05bf20453ff879c64ce883022284f86af7bbf"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775126159295,
