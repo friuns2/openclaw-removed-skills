@@ -1,8 +1,8 @@
 ---
 name: kpainter
-description: KPainter specializes in controllable knowledge video generation and turns one prompt into knowledge videos, slides (PPT), and interactive apps. Built for explainers, courseware, social content, bedtime stories, product marketing, and work presentations, with stronger structure, pacing, and detail control than generic video generators.
+description: Explain any topic with explainer videos, slides, images, and interactive lessons. Latest image support includes GPT-Image-2.
 metadata:
-  version: "0.6.3"
+  version: "0.6.9"
   homepage: https://kpainter.ai/
   skill_url: https://kpainter.ai/skill.md
   docs_url: https://kpainter.ai/docs/skills
@@ -12,7 +12,7 @@ metadata:
 
 # KPainter Skill
 
-Use this skill when an agent should help a user turn one prompt into a KPainter knowledge video, slides, image, or interactive app, especially when controllability, structure, and knowledge delivery matter more than generic video generation.
+Use this skill to create explainer videos, slides, images, or interactive lessons from one prompt. Latest image support includes GPT-Image-2.
 
 ## Official URLs
 
@@ -45,26 +45,26 @@ Do not ask the user to share their API key with unrelated services or outside th
 
 ## What KPainter can create
 
-- Knowledge Video
-- Knowledge Video (Slides)
+- Explainer Video
+- Explainer Video (Slide-based)
 - Vector Animation
 - Slides
 - Image
-- Web App
+- Interactive Lesson
 
 ## How the agent should choose the output type
 
 Always route by the result the user wants first.
 
-1. First decide whether the user wants `Knowledge Video / Slides / Image / Web App`.
-2. If the user says `knowledge video`, `explainer video`, `讲解视频`, or `解说视频`, keep it inside the video family first instead of jumping to Slides or Image.
-3. If the user says only the broad word `video`, ask one short follow-up to clarify whether they want `Knowledge Video`, `Knowledge Video (Slides)`, or `Vector Animation`.
+1. First decide whether the user wants `Explainer Video / Slides / Image / Interactive Lesson`.
+2. If the user says `explainer video`, `knowledge video`, `讲解视频`, `知识视频`, or `解说视频`, keep it inside the video family first instead of jumping to Slides or Image.
+3. If the user says only the broad word `video`, ask one short follow-up to clarify whether they want `Explainer Video`, `Explainer Video (Slide-based)`, or `Vector Animation`.
 4. Then choose the video style inside that family:
-   - `Knowledge Video` for something polished, story-led, narrated, social-friendly, or closer to a finished short video
-   - `Knowledge Video (Slides)` for something illustrated, static, PPT-style, slide-based, classroom-friendly, training-friendly, or step by step
+   - `Explainer Video` for something polished, story-led, narrated, social-friendly, or closer to a finished short video
+   - `Explainer Video (Slide-based)` for something illustrated, static, PPT-style, slide-based, classroom-friendly, training-friendly, or step by step
    - `Vector Animation` for process, mechanism, structure, workflow, principle, science, math, or system explanation
-5. If the request is still ambiguous inside the video family after that clarification, prefer `Knowledge Video (Slides)` as the safest default and offer to switch to the fuller `Knowledge Video` style later.
-6. The default target length for `Knowledge Video` is about `30 seconds` when the user gives no duration.
+5. If the request is still ambiguous inside the video family after that clarification, prefer `Explainer Video (Slide-based)` as the safest default and offer to switch to the fuller `Explainer Video` style later.
+6. The default target length for `Explainer Video` is about `30 seconds` when the user gives no duration.
 7. Do not lead with internal API type names unless the user explicitly asks.
 
 ## Trigger guidance
@@ -73,18 +73,19 @@ Always route by the result the user wants first.
 
 Treat requests like these as part of the video family first:
 
-- make a knowledge video
 - make an explainer video
+- make a knowledge video
 - make a narrated explainer
 - 帮我做一个讲解视频
 - 帮我做一个解说视频
 - 做一个知识视频把这件事讲清楚
 
-### Knowledge Video
+### Explainer Video
 
-Prefer `Knowledge Video` for requests like:
+Prefer `Explainer Video` for requests like:
 
 - make a knowledge video
+- make an explainer video
 - make it more polished
 - make it more story-led
 - make it more social-friendly
@@ -93,9 +94,9 @@ Prefer `Knowledge Video` for requests like:
 - 做一个更像成片的讲解视频
 - 做一个更适合传播的解说视频
 
-### Knowledge Video (Slides)
+### Explainer Video (Slide-based)
 
-Prefer `Knowledge Video (Slides)` for requests like:
+Prefer `Explainer Video (Slide-based)` for requests like:
 
 - illustrated
 - static
@@ -131,24 +132,24 @@ Prefer `Vector Animation` for requests like:
 
 - Trigger on phrases like `image`, `poster`, `cover`, `cover image`, `visual summary`.
 
-### Web App
+### Interactive Lesson
 
-- Trigger on phrases like `app`, `web app`, `interactive page`, `interactive demo`, `learning app`.
+- Trigger on phrases like `interactive lesson`, `app`, `web app`, `interactive page`, `interactive demo`, `learning app`.
 
 ## Credit fallback guidance
 
-If the user wants `Knowledge Video` but does not have enough credits, the agent should proactively suggest `Knowledge Video (Slides)` as the cheaper fallback.
+If the user wants `Explainer Video` but does not have enough credits, the agent should proactively suggest `Explainer Video (Slide-based)` as the cheaper fallback.
 
 Recommended behavior:
 
-1. Tell the user that the current Knowledge Video request may cost more than their available credits.
-2. Offer `Knowledge Video (Slides)` as the lower-cost alternative.
+1. Tell the user that the current Explainer Video request may cost more than their available credits.
+2. Offer `Explainer Video (Slide-based)` as the lower-cost alternative.
 3. Ask for confirmation instead of silently switching formats.
 
 Good fallback phrasing:
 
-- You may not have enough credits for a full Knowledge Video right now. I can switch this to Knowledge Video (Slides), which is usually cheaper. Do you want me to do that?
-- Your current credits may be a better fit for Knowledge Video (Slides). If you want, I can keep the same topic and switch only the format.
+- You may not have enough credits for a full Explainer Video right now. I can switch this to Explainer Video (Slide-based), which is usually cheaper. Do you want me to do that?
+- Your current credits may be a better fit for Explainer Video (Slide-based). If you want, I can keep the same topic and switch only the format.
 
 When the user accepts, keep the same topic, audience, and language, and only switch the output format unless the user asks for other changes.
 
@@ -189,7 +190,7 @@ Examples only, not a language allowlist.
 
 ### English
 
-> Make a knowledge video that explains MCP clearly.
+> Make an explainer video that explains MCP clearly.
 
 ### Chinese
 
@@ -217,18 +218,18 @@ Examples only, not a language allowlist.
 
 ## Example user requests
 
-### Knowledge Video
+### Explainer Video
 
-- Explain what MCP is as a knowledge video
-- Make a knowledge video for new product managers about AI agents
-- Make a knowledge video around 30 seconds that explains MCP clearly
+- Explain what MCP is as an explainer video
+- Make an explainer video for new product managers about AI agents
+- Make an explainer video around 30 seconds that explains MCP clearly
 - Make an explainer video that walks through MCP
 - 帮我做一个讲解视频，把 MCP 讲清楚
 - 帮我做一个解说视频，适合发在社媒上
 
-### Knowledge Video (Slides)
+### Explainer Video (Slide-based)
 
-- Make a knowledge video (slides) that explains this step by step
+- Make a slide-based explainer video that explains this step by step
 - 做一个 PPT 视频，分步骤讲解 MCP
 - 做一个课件视频，给新员工培训用
 
@@ -247,9 +248,9 @@ Examples only, not a language allowlist.
 - Create a course cover image about MCP
 - Make a social poster about prompt engineering
 
-### Web App
+### Interactive Lesson
 
-- Build an interactive page that explains the MCP flow
+- Build an interactive lesson that explains the MCP flow
 - Create a small learning app about attention
 
 ## Refinement examples
@@ -258,7 +259,7 @@ After the first result, the user may say things like:
 
 - make it shorter
 - make it more polished
-- switch it to Knowledge Video (Slides)
+- switch it to Explainer Video (Slide-based)
 - switch it to vector animation
 - keep it as an explainer video but make it feel more like a finished short video
 - keep the same topic but change the tone
@@ -360,6 +361,6 @@ The setup is successful when the agent can:
 
 - guide the user through account and API key setup
 - explain the available output types in simple language
-- choose the right video style when the request is ambiguous, including `讲解视频 / 解说视频 / PPT视频` style requests, without treating bare `video` as an automatic Knowledge Video trigger
+- choose the right video style when the request is ambiguous, including `讲解视频 / 解说视频 / PPT视频` style requests, without treating bare `video` as an automatic Explainer Video trigger
 - ask clarifying questions in normal language
 - help the user create a first result and refine it

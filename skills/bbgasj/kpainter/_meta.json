@@ -3,9 +3,15 @@
   "slug": "kpainter",
   "displayName": "KPainter",
   "latest": {
-    "version": "0.6.3",
-    "publishedAt": 1774511837326,
-    "commit": "https://github.com/openclaw/skills/commit/3b8b7e6d24af0547c45e81881f38675c14f3bbf1"
+    "version": "0.6.9",
+    "publishedAt": 1777091078524,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.6.3",
+      "publishedAt": 1774511837326,
+      "commit": "https://github.com/openclaw/skills/commit/3b8b7e6d24af0547c45e81881f38675c14f3bbf1"
+    }
+  ]
 }
