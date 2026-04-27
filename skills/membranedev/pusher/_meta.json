@@ -3,11 +3,16 @@
   "slug": "pusher",
   "displayName": "Pusher",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170793773,
-    "commit": "https://github.com/openclaw/skills/commit/94a6e8e80c2ca6c57a8dce6583dba45d6b9b9b41"
+    "version": "1.0.3",
+    "publishedAt": 1776858302788,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170793773,
+      "commit": "https://github.com/openclaw/skills/commit/94a6e8e80c2ca6c57a8dce6583dba45d6b9b9b41"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775102569775,
