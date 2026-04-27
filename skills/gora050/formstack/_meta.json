@@ -3,11 +3,16 @@
   "slug": "formstack",
   "displayName": "Formstack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168320806,
-    "commit": "https://github.com/openclaw/skills/commit/f8c0051f0fec7485b6acd46f29ccf1a8f994fc8e"
+    "version": "1.0.3",
+    "publishedAt": 1776862375178,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168320806,
+      "commit": "https://github.com/openclaw/skills/commit/f8c0051f0fec7485b6acd46f29ccf1a8f994fc8e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774602260470,
