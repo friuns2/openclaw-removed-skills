@@ -3,11 +3,16 @@
   "slug": "rutter",
   "displayName": "Rutter",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170399302,
-    "commit": "https://github.com/openclaw/skills/commit/95cdba2cf8ccc42f3dc5d0cfed2b3301391069ae"
+    "version": "1.0.3",
+    "publishedAt": 1776865633976,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170399302,
+      "commit": "https://github.com/openclaw/skills/commit/95cdba2cf8ccc42f3dc5d0cfed2b3301391069ae"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775019872203,
