@@ -3,11 +3,16 @@
   "slug": "eventzilla",
   "displayName": "Eventzilla",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167941285,
-    "commit": "https://github.com/openclaw/skills/commit/a6498f198f7f60c944a6394da5e89d487f7b80c1"
+    "version": "1.0.3",
+    "publishedAt": 1776862978514,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167941285,
+      "commit": "https://github.com/openclaw/skills/commit/a6498f198f7f60c944a6394da5e89d487f7b80c1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774552961662,
