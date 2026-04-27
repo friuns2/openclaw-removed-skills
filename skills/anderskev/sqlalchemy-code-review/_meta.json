@@ -3,9 +3,15 @@
   "slug": "sqlalchemy-code-review",
   "displayName": "Sqlalchemy Code Review",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1774604152050,
-    "commit": "https://github.com/openclaw/skills/commit/eb9a94c571c2546200d5861bf0d3f5fe70e42535"
+    "version": "1.1.1",
+    "publishedAt": 1776831279371,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1774604152050,
+      "commit": "https://github.com/openclaw/skills/commit/eb9a94c571c2546200d5861bf0d3f5fe70e42535"
+    }
+  ]
 }
