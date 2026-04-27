@@ -3,9 +3,15 @@
   "slug": "screensteps",
   "displayName": "Screensteps",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775185427583,
-    "commit": "https://github.com/openclaw/skills/commit/c6bedf8be3d0bd46694e1553fa59ba8f6087900d"
+    "version": "1.0.1",
+    "publishedAt": 1776873794954,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775185427583,
+      "commit": "https://github.com/openclaw/skills/commit/c6bedf8be3d0bd46694e1553fa59ba8f6087900d"
+    }
+  ]
 }
