@@ -3,11 +3,16 @@
   "slug": "polymarket-candle-gap-fill-trader",
   "displayName": "Polymarket Candle Gap Fill Trader",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775317036183,
-    "commit": "https://github.com/openclaw/skills/commit/aa694c27efe43dbfe3047707140cea90a4cfadb6"
+    "version": "0.0.2",
+    "publishedAt": 1776513218887,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775317036183,
+      "commit": "https://github.com/openclaw/skills/commit/aa694c27efe43dbfe3047707140cea90a4cfadb6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774768834188,
