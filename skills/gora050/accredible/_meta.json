@@ -3,11 +3,16 @@
   "slug": "accredible",
   "displayName": "Accredible",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168103425,
-    "commit": "https://github.com/openclaw/skills/commit/0daf0facf8c2804d3ea3152b484ad46fbd611c16"
+    "version": "1.0.3",
+    "publishedAt": 1776861976817,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168103425,
+      "commit": "https://github.com/openclaw/skills/commit/0daf0facf8c2804d3ea3152b484ad46fbd611c16"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774576978997,
