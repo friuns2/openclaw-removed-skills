@@ -3,11 +3,16 @@
   "slug": "mesibo",
   "displayName": "Mesibo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170368363,
-    "commit": "https://github.com/openclaw/skills/commit/ffc72e5be8d4d04a06901d0ffd2c79a8cdde795e"
+    "version": "1.0.3",
+    "publishedAt": 1776865545857,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170368363,
+      "commit": "https://github.com/openclaw/skills/commit/ffc72e5be8d4d04a06901d0ffd2c79a8cdde795e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012732109,
