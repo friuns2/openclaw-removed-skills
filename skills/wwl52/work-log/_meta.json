@@ -3,11 +3,16 @@
   "slug": "work-log",
   "displayName": "work-log",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1775556042333,
-    "commit": "https://github.com/openclaw/skills/commit/becc8bb52e87a57dee60a2338eda024619c93d4a"
+    "version": "1.0.7",
+    "publishedAt": 1776649045673,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1775556042333,
+      "commit": "https://github.com/openclaw/skills/commit/becc8bb52e87a57dee60a2338eda024619c93d4a"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1775024233494,
