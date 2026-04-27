@@ -3,11 +3,16 @@
   "slug": "alibabacloud-dms-skill",
   "displayName": "Alibabacloud Dms Skill",
   "latest": {
-    "version": "0.0.1-beta.2",
-    "publishedAt": 1775634317357,
-    "commit": "https://github.com/openclaw/skills/commit/981bae208cbdbca9d769b2438d4a690800f11320"
+    "version": "0.0.2",
+    "publishedAt": 1776750713095,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.1-beta.2",
+      "publishedAt": 1775634317357,
+      "commit": "https://github.com/openclaw/skills/commit/981bae208cbdbca9d769b2438d4a690800f11320"
+    },
     {
       "version": "0.0.1",
       "publishedAt": 1775111679579,
