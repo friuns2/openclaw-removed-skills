@@ -3,11 +3,16 @@
   "slug": "context-booster",
   "displayName": "Context Booster",
   "latest": {
-    "version": "0.1.2",
-    "publishedAt": 1775478984687,
-    "commit": "https://github.com/openclaw/skills/commit/154e98d226e496fb6050db3d3fe7330d497f6d30"
+    "version": "0.1.4",
+    "publishedAt": 1777184054010,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.2",
+      "publishedAt": 1775478984687,
+      "commit": "https://github.com/openclaw/skills/commit/154e98d226e496fb6050db3d3fe7330d497f6d30"
+    },
     {
       "version": "0.1.1",
       "publishedAt": 1775082030259,
