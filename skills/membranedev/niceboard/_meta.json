@@ -3,11 +3,16 @@
   "slug": "niceboard",
   "displayName": "Niceboard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168979295,
-    "commit": "https://github.com/openclaw/skills/commit/f4c9a441e104c470e8181b3aef3983ac7e3e948b"
+    "version": "1.0.3",
+    "publishedAt": 1776854030500,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168979295,
+      "commit": "https://github.com/openclaw/skills/commit/f4c9a441e104c470e8181b3aef3983ac7e3e948b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774746148539,
