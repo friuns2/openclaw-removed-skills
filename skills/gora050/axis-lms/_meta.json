@@ -3,11 +3,16 @@
   "slug": "axis-lms",
   "displayName": "Axis Lms",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169971491,
-    "commit": "https://github.com/openclaw/skills/commit/12dc2bf3db8c798f926a97fa9e3fdcbea2d7898f"
+    "version": "1.0.3",
+    "publishedAt": 1776865048590,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169971491,
+      "commit": "https://github.com/openclaw/skills/commit/12dc2bf3db8c798f926a97fa9e3fdcbea2d7898f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774933504341,
