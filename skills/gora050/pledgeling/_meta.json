@@ -3,11 +3,16 @@
   "slug": "pledgeling",
   "displayName": "Pledgeling",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170118039,
-    "commit": "https://github.com/openclaw/skills/commit/d05889e1086ec28ac8f35a2ad57a74dd4fe4fff2"
+    "version": "1.0.3",
+    "publishedAt": 1776865087042,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170118039,
+      "commit": "https://github.com/openclaw/skills/commit/d05889e1086ec28ac8f35a2ad57a74dd4fe4fff2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774958646343,
