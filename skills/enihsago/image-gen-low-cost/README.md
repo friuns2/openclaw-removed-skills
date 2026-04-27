@@ -11,10 +11,12 @@ npm install -g image-gen-low-cost
 ## 快速开始
 
 ```bash
-# 1. 配置 token
+# 1. 获取 token：访问 https://api.laozhang.ai/register/?aff_code=lfa0 注册
+
+# 2. 配置 token
 imgen config --token YOUR_API_TOKEN
 
-# 2. 生成图片
+# 3. 生成图片
 imgen "一只可爱的猫咪在花园里玩耍"
 ```
 

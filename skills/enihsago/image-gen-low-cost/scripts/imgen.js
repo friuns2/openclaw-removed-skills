@@ -20,13 +20,19 @@ const TOKEN_FILE = path.join(CONFIG_DIR, 'token');
 const OUTPUT_DIR = path.join(process.cwd(), 'generated-images');
 
 // Default API endpoint (OpenAI-compatible)
-const DEFAULT_API_URL = process.env.IMGEN_API_URL || 'https://api.openai.com/v1/chat/completions';
+// Default to laozhang API as documented in SKILL.md
+const DEFAULT_API_URL = process.env.IMGEN_API_URL || 'https://api.laozhang.ai/v1/chat/completions';
 
-// Available models with pricing
+// Available models with pricing (laozhang API)
+// Sorted by price, cheapest first (sora_image is default)
 const MODELS = {
-  'cheap': { id: 'dall-e-3', price: '$0.04/img', format: 'url' },
-  'fast': { id: 'dall-e-2', price: '$0.02/img', format: 'url' },
-  'quality': { id: 'dall-e-3-hd', price: '$0.08/img', format: 'url' },
+  // $0.01/image models (cheapest)
+  'sora': { id: 'sora_image', price: '$0.01/img', format: 'url', desc: 'Sora Image, URL output' },
+  'gpt4o': { id: 'gpt-4o-image', price: '$0.01/img', format: 'url', desc: 'GPT-4o Image, URL output' },
+  // Gemini-based models (base64 output)
+  'cheap': { id: 'gemini-2.5-flash-image', price: '$0.025/img', format: 'base64', desc: 'Nano Banana, 1K fixed' },
+  'fast': { id: 'gemini-3.1-flash-image-preview', price: '$0.045/img', format: 'base64', desc: 'Nano Banana2, 4K support' },
+  'quality': { id: 'gemini-3-pro-image-preview', price: '$0.05/img', format: 'base64', desc: 'Nano Banana Pro, 4K + advanced' },
 };
 
 // Preset styles for image editing
@@ -141,26 +147,54 @@ async function generateImage(prompt, options = {}) {
       'Authorization': `Bearer ${token}`
     }, body);
 
-    // Extract image URL from response
+    // Extract image from response (URL or base64)
     const content = result.choices?.[0]?.message?.content || '';
+    
+    // Check for markdown image with URL
+    let imageUrl = null;
+    let base64Data = null;
+    
     const urlMatch = content.match(/!\[.*?\]\((https?:\/\/[^)]+)\)/);
-    const imageUrl = urlMatch ? urlMatch[1] : result.data?.[0]?.url;
+    const base64Match = content.match(/!\[.*?\]\((data:image\/[^;]+;base64,([^)]+))\)/);
+    
+    if (urlMatch) {
+      imageUrl = urlMatch[1];
+    } else if (base64Match) {
+      base64Data = base64Match[2];
+    } else {
+      imageUrl = result.data?.[0]?.url;
+    }
 
-    if (!imageUrl) {
-      console.error('No image URL in response');
+    if (!imageUrl && !base64Data) {
+      console.error('No image in response');
       if (options.verbose) console.log(JSON.stringify(result, null, 2));
       process.exit(1);
     }
 
-    console.log(imageUrl);
-
-    // Download if not --no-save
+    // Save or print
     if (!options.noSave) {
       const outputPath = options.output || path.join(OUTPUT_DIR, generateFilename(prompt));
-      await downloadImage(imageUrl, outputPath);
+      
+      if (base64Data) {
+        // Save base64 directly
+        const dir = path.dirname(outputPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(outputPath, Buffer.from(base64Data, 'base64'));
+        console.error(`✓ Saved: ${outputPath}`);
+        console.log(outputPath);
+      } else {
+        console.log(imageUrl);
+        await downloadImage(imageUrl, outputPath);
+      }
+    } else if (imageUrl) {
+      console.log(imageUrl);
+    } else if (base64Match) {
+      console.log(base64Match[1]); // Full data URL
     }
 
-    return imageUrl;
+    return imageUrl || (base64Match ? base64Match[1] : null);
   } catch (err) {
     console.error('API error:', err.message);
     process.exit(1);
@@ -202,23 +236,50 @@ async function editImage(imageUrl, prompt, options = {}) {
     }, body);
 
     const content = result.choices?.[0]?.message?.content || '';
+    
+    // Check for markdown image with URL or base64
+    let resultUrl = null;
+    let base64Data = null;
+    
     const urlMatch = content.match(/!\[.*?\]\((https?:\/\/[^)]+)\)/);
-    const resultUrl = urlMatch ? urlMatch[1] : result.data?.[0]?.url;
-
-    if (!resultUrl) {
-      console.error('No image URL in response');
-      process.exit(1);
+    const base64Match = content.match(/!\[.*?\]\((data:image\/[^;]+;base64,([^)]+))\)/);
+    
+    if (urlMatch) {
+      resultUrl = urlMatch[1];
+    } else if (base64Match) {
+      base64Data = base64Match[2];
+    } else {
+      resultUrl = result.data?.[0]?.url;
     }
 
-    console.log(resultUrl);
+    if (!resultUrl && !base64Data) {
+      console.error('No image in response');
+      process.exit(1);
+    }
 
     if (!options.noSave) {
       const suffix = options.style ? `-${options.style}` : '-edited';
       const outputPath = options.output || path.join(OUTPUT_DIR, generateFilename(prompt, suffix));
-      await downloadImage(resultUrl, outputPath);
+      
+      if (base64Data) {
+        const dir = path.dirname(outputPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(outputPath, Buffer.from(base64Data, 'base64'));
+        console.error(`✓ Saved: ${outputPath}`);
+        console.log(outputPath);
+      } else {
+        console.log(resultUrl);
+        await downloadImage(resultUrl, outputPath);
+      }
+    } else if (resultUrl) {
+      console.log(resultUrl);
+    } else if (base64Match) {
+      console.log(base64Match[1]);
     }
 
-    return resultUrl;
+    return resultUrl || (base64Match ? base64Match[1] : null);
   } catch (err) {
     console.error('API error:', err.message);
     process.exit(1);
@@ -260,9 +321,11 @@ OPTIONS:
   -h, --help              Show this help
 
 MODELS:
-  cheap     dall-e-3      $0.04/img (default)
-  fast      dall-e-2      $0.02/img
-  quality   dall-e-3-hd   $0.08/img
+  sora      sora_image                       $0.01/img (default, URL)
+  gpt4o     gpt-4o-image                     $0.01/img (URL)
+  cheap     gemini-2.5-flash-image           $0.025/img (base64)
+  fast      gemini-3.1-flash-image-preview   $0.045/img (base64, 4K)
+  quality   gemini-3-pro-image-preview       $0.05/img (base64, 4K)
 
 STYLES (for editing):
   cartoon, oil, ink, cyberpunk, sketch, watercolor

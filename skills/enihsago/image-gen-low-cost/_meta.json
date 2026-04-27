@@ -3,9 +3,15 @@
   "slug": "image-gen-low-cost",
   "displayName": "Image Gen Low Cost",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775126818641,
-    "commit": "https://github.com/openclaw/skills/commit/f4007fe83f28e17f439609b969cb4b14b10e1c34"
+    "version": "1.0.5",
+    "publishedAt": 1775198217861,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775126818641,
+      "commit": "https://github.com/openclaw/skills/commit/f4007fe83f28e17f439609b969cb4b14b10e1c34"
+    }
+  ]
 }
