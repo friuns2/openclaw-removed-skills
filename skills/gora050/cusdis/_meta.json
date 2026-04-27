@@ -3,9 +3,15 @@
   "slug": "cusdis",
   "displayName": "Cusdis",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170501988,
-    "commit": "https://github.com/openclaw/skills/commit/e7205c7a3bb702d1020e95dd412546c2a6f41417"
+    "version": "1.0.3",
+    "publishedAt": 1776886032959,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170501988,
+      "commit": "https://github.com/openclaw/skills/commit/e7205c7a3bb702d1020e95dd412546c2a6f41417"
+    }
+  ]
 }
