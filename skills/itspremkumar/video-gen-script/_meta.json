@@ -3,9 +3,15 @@
   "slug": "video-gen-script",
   "displayName": "Video Script Generator",
   "latest": {
-    "version": "1.1.2",
-    "publishedAt": 1774865096041,
-    "commit": "https://github.com/openclaw/skills/commit/23f9ce3caaf461774edc1dba7c9bd1dc2b77963c"
+    "version": "5.0.0",
+    "publishedAt": 1775581030810,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.2",
+      "publishedAt": 1774865096041,
+      "commit": "https://github.com/openclaw/skills/commit/23f9ce3caaf461774edc1dba7c9bd1dc2b77963c"
+    }
+  ]
 }
