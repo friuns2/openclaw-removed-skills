@@ -3,11 +3,16 @@
   "slug": "peoplehr",
   "displayName": "Peoplehr",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170541550,
-    "commit": "https://github.com/openclaw/skills/commit/25af0cb4482e48356a28de65cf1dc8a3f76cc981"
+    "version": "1.0.3",
+    "publishedAt": 1776857581968,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170541550,
+      "commit": "https://github.com/openclaw/skills/commit/25af0cb4482e48356a28de65cf1dc8a3f76cc981"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775041399665,
