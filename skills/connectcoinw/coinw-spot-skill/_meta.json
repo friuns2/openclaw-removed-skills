@@ -3,11 +3,16 @@
   "slug": "coinw-spot-skill",
   "displayName": "Coinw Spot Skill",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775118540121,
-    "commit": "https://github.com/openclaw/skills/commit/878ef4c90c1cf1df7ea17d0fcd0dc9e28b5853c1"
+    "version": "1.5.0",
+    "publishedAt": 1776998578273,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775118540121,
+      "commit": "https://github.com/openclaw/skills/commit/878ef4c90c1cf1df7ea17d0fcd0dc9e28b5853c1"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775032759175,

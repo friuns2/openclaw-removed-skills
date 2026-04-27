@@ -2,7 +2,7 @@
 {
   "name": 'Coinw Spot Skill',
   "description": 'Coinw Spot REST API skill: covers market data, order placement/cancellation, order queries, account balances, and asset transfers.',
-  "metadata": {"version": "1.2.0","author": "Coinw","openclaw":{"always": true,"requires":{"env":["COINW_API_KEY","COINW_SECRET_KEY"]}}}
+  "metadata": {"version": "1.5.0","author": "Coinw","openclaw":{"always": true,"requires":{"env":["COINW_API_KEY","COINW_SECRET_KEY"]}}}
 }
 ---
 
@@ -12,6 +12,8 @@ Coinw Spot REST API skill: covers market data, order placement/cancellation, ord
 
 ### Setup Credentials
 CoinW private endpoints require `api_key` and a request signature (`sign`).
+
+> Signing note: Spot endpoints use Spot MD5 uppercase signing. Do not use Contract HMAC-SHA256 signing for Spot APIs.
 
 1. Environment variables:
 ```bash
@@ -122,6 +124,6 @@ When user provides new credentials:
 
 ## Reference
 - Authentication`./references/Authentication.md`
-- errorcode: `./references/errorcode.md`
+- errorcode: `./references/error-codes.md`
 - notes: `./references/notes.md`
 - api-key create steps: `./references/api-key-creation-steps.md`
