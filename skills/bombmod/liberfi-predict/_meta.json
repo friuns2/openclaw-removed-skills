@@ -3,11 +3,16 @@
   "slug": "liberfi-predict",
   "displayName": "Liberfi Predict",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776675484465,
-    "commit": "https://github.com/openclaw/skills/commit/092c49b116da7bf6a82217177e2b3c311a55de6d"
+    "version": "0.1.1",
+    "publishedAt": 1776709011166,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776675484465,
+      "commit": "https://github.com/openclaw/skills/commit/092c49b116da7bf6a82217177e2b3c311a55de6d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775166271168,

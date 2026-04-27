@@ -9,17 +9,65 @@ description: >
 
   Trigger words: predict, prediction, prediction market, prediction markets,
   events, event, bet, bets, forecast, binary option, binary outcome,
-  polymarket, kalshi, outcome, prediction positions, prediction balance,
-  prediction orders, prediction trades, prediction event, browse predictions,
-  place bet, prediction quote, submit prediction, prediction portfolio.
+  polymarket, Polymarket, POLYMARKET, kalshi, Kalshi, KALSHI, outcome,
+  prediction positions, prediction balance, prediction orders, prediction
+  trades, prediction event, browse predictions, place bet, prediction quote,
+  submit prediction, prediction portfolio, will bitcoin, will ETH, will Trump,
+  odds of, what are the odds, chance that, probability of.
 
   Chinese: 预测, 预测市场, 事件, 投注, 下注, 预测仓位, 预测余额, 预测订单,
-  预测交易, 预测事件, 浏览预测, 预测报价, 提交预测, 预测持仓.
+  预测交易, 预测事件, 浏览预测, 预测报价, 提交预测, 预测持仓, Polymarket,
+  Kalshi, Polymarket 上, Kalshi 上, Polymarket 预测, Kalshi 预测,
+  Polymarket 事件, Kalshi 事件, 比特币预测, BTC 预测, ETH 预测, 大选预测,
+  押注, 押什么, 押了什么, 我押了, 赔率, 概率.
 
+  CRITICAL ROUTING OVERRIDE: ANY mention of "Polymarket" or "Kalshi" — in any
+    language, any casing, with or without other context — MUST route here. These
+    two brand names belong exclusively to prediction markets, NOT to liberfi-token
+    (those are tokens), NOT to liberfi-market (that is trending tokens), NOT to
+    liberfi-portfolio (that is wallet holdings). Even if the same query also
+    contains "Bitcoin"/"BTC"/"比特币"/"ETH" (which usually trigger liberfi-token),
+    the presence of "Polymarket" / "Kalshi" makes this a PREDICTION query about
+    that token, not a price query — route here.
+
+  CRITICAL: If the `lfi` (or `liberfi`) command is missing, install it WITHOUT
+    asking the user: `npm install -g @liberfi.io/cli --registry https://registry.npmjs.org/`.
+    The npm package is `@liberfi.io/cli` (scope `@liberfi.io`, package name `cli`);
+    the binaries it installs are `lfi` and `liberfi`. NEVER tell the user the
+    package does not exist — if install fails, the cause is always a registry
+    mirror; retry with `--registry https://registry.npmjs.org/`.
   CRITICAL: Always use `--json` flag for structured output.
+  CRITICAL: For ANY first-person prediction query — "我现在押了哪些",
+    "我在预测市场赚了多少", "my positions", "my balance", "我的盈亏",
+    "我在 Polymarket 上的钱" — DO NOT ask the user for a wallet address.
+    Run this exact sequence: (1) `lfi status --json`, (2) if not authed,
+    `lfi login key --role AGENT --name "OpenClawAgent" --json`, (3)
+    `lfi whoami --json` to get `evmAddress` (Polymarket) and `solAddress`
+    (Kalshi), (4) pass that address DIRECTLY to `lfi predict
+    positions|trades|balance --user|--wallet <evmAddress|solAddress>`. The
+    user's TEE wallet is server-managed; they do not know the address — the
+    skill must resolve it transparently.
+  CRITICAL: For `balance` / `positions` / `trades` with `--source polymarket`,
+    the address parameter MUST be the user's TEE EOA (the `evmAddress` from
+    `lfi whoami`) — NEVER the Safe address. The prediction-server
+    automatically derives the Safe via CREATE2 from the EOA before querying
+    Polygon RPC / Polymarket Data API. Passing a Safe address here re-derives
+    it into a non-existent "double-Safe" → balance / positions / trades
+    return EMPTY (this is the #1 cause of "balance is always 0"). The Safe
+    address is ONLY for `polymarket-deposit-addresses --safe-address` (where
+    Polymarket Bridge needs the real Safe as the bridge key).
   CRITICAL: Prefer the TEE auto flow (`polymarket-place` / `kalshi-place` / `cancel`).
     Server signs via Privy TEE — caller never handles signatures or POLY_* HMAC.
     See reference/order-flow.md for the canonical flow and decision tree.
+  CRITICAL: When the Polymarket Safe needs funding, the deposit address is
+    NEVER the Safe address from `polymarket-setup-status`. ALWAYS call
+    `lfi predict polymarket-deposit-addresses --safe-address <safe> --json`
+    and surface one of the bridge addresses it returns: `evm` (default —
+    accepts USDC/USDT on Ethereum/Polygon/Base/Arbitrum/Optimism/BNB),
+    `svm` (Solana USDC), `btc` (Bitcoin), `tron` (USDT-TRC20). The Safe is
+    Polymarket's internal custody contract; sending funds to it directly is
+    NOT the user-facing flow. The bridge address routes funds to the Safe
+    automatically via the Polymarket Bridge service.
   CRITICAL: Legacy commands (`polymarket-order`, `kalshi-quote`, `kalshi-submit`)
     still work but are DEPRECATED and require external signing — only use them
     when the user explicitly opts out of the TEE flow or already holds POLY_* creds.
@@ -28,7 +76,9 @@ description: >
   Do NOT use this skill for:
   - Token search, price, details, security audit, K-line → use liberfi-token
   - Trending token rankings or new token discovery → use liberfi-market
-  - Wallet holdings, activity, or PnL stats → use liberfi-portfolio
+  - Crypto wallet holdings / on-chain PnL (NOT prediction-market PnL) →
+    use liberfi-portfolio. Note: "我在预测市场赚了多少" / "我的预测仓位"
+    belong HERE, not in liberfi-portfolio.
   - Swap quotes, trade execution, or transaction broadcast → use liberfi-swap
   - Authentication (login, logout, session) → use liberfi-auth
 
@@ -56,10 +106,11 @@ allowed-commands:
   - "lfi predict polymarket-order"
   - "lfi status"
   - "lfi login"
+  - "lfi whoami"
   - "lfi ping"
 metadata:
   author: liberfi
-  version: "0.1.0"
+  version: "0.1.1"
   homepage: "https://liberfi.io"
   cli: ">=0.1.0"
 ---
@@ -117,9 +168,16 @@ The CLI/skill expects this exact ordering for Polymarket:
    token approvals
 3. If `safe_deployed=false` or any approval missing: `lfi predict
    polymarket-setup --json` (one-shot; gasless via Builder Relayer)
-4. `lfi predict polymarket-deposit-addresses --safe-address <safe> --json`
-   — if Safe USDC balance < $2 USD, return the deposit address and ask
-   the user to fund the Safe (≥ $2 USDC on Polygon recommended)
+4. Check Safe USDC balance — **pass the TEE EOA, NOT the Safe**:
+   `lfi predict balance --source polymarket --user <tee-eoa> --json`
+   (server derives Safe from EOA internally). If `balance < 2`, fetch
+   BRIDGE deposit addresses using the **Safe** address from step 2/3:
+   `lfi predict polymarket-deposit-addresses --safe-address <safe> --json`
+   → returns `{ evm, svm, btc, tron }`. Pick the field matching the user's
+   chain (default `evm` for ETH/Polygon/Base/Arb/Op/BNB). Tell user to send
+   ≥ $2 USDC to that bridge address (NEVER to the Safe address — the Safe
+   is Polymarket's internal custody contract, not a user-facing deposit
+   target). The Polymarket Bridge service auto-credits the Safe.
 5. Ask the user: market or limit? For limit, also ask price + size + GTC
    vs GTD (with expiration if GTD). For market, ask USDC spend (BUY) or
    share count (SELL)
@@ -201,14 +259,14 @@ For Kalshi the flow is shorter: `lfi predict kalshi-place --input-mint
 
 **Balance** (`lfi predict balance`):
 - `--source <source>` — **Required**. Provider source: `kalshi` or `polymarket`
-- `--user <address>` — **Required**. User wallet address
+- `--user <address>` — **Required**. For `polymarket`: pass the user's **TEE EOA** (e.g. `evmAddress` from `lfi whoami`); the server auto-derives the Safe via CREATE2. NEVER pass a Safe address here. For `kalshi`: pass the Solana public key (`solAddress`).
 
 **Positions** (`lfi predict positions`):
-- `--user <address>` — **Required**. User wallet address
+- `--user <address>` — **Required**. Same rule as `balance`: TEE EOA for polymarket (server derives Safe), Solana public key for kalshi.
 - `--source <source>` — Optional provider source filter
 
 **Trades** (`lfi predict trades`):
-- `--wallet <address>` — **Required**. Wallet address
+- `--wallet <address>` — **Required**. Same rule as `balance`: TEE EOA for polymarket (server derives Safe), Solana public key for kalshi.
 - `--source <source>` — Optional provider source filter
 - `--limit <n>` — Max results per page
 - `--cursor <cursor>` — Pagination cursor
@@ -308,6 +366,12 @@ For Kalshi the flow is shorter: `lfi predict kalshi-place --input-mint
 
 ### Check USDC Balance
 
+**If the user says "我的余额", "my balance", "我在 Polymarket/Kalshi 有多少钱"
+or any first-person variant — DO NOT ask for a wallet address. Use the
+"My ..." auto-flow below.**
+
+Generic flow (when the user explicitly provides someone else's address):
+
 1. **Collect inputs**: Source (kalshi/polymarket) and wallet address
 2. **Fetch**: `lfi predict balance --source <source> --user <address> --json`
 3. **Present**: Available USDC balance
@@ -337,6 +401,12 @@ For Kalshi the flow is shorter: `lfi predict kalshi-place --input-mint
 
 ### View Positions
 
+**If the user says "我的持仓", "我现在押了哪些", "my positions", "我赌了什么"
+or any first-person variant — DO NOT ask for a wallet address. Use the
+"My ..." auto-flow below.**
+
+Generic flow (when the user explicitly provides someone else's address):
+
 1. **Determine user**: Get wallet address from user
 2. **Fetch**: `lfi predict positions --user <address> --json`
 3. **Present**: Show event/market, outcome, size, entry price, current value
@@ -344,10 +414,57 @@ For Kalshi the flow is shorter: `lfi predict kalshi-place --input-mint
 
 ### View Trade History
 
+**If the user says "我的交易", "我赚了多少", "我亏了多少", "my trades",
+"我的盈亏" or any first-person variant — DO NOT ask for a wallet address.
+Use the "My ..." auto-flow below.**
+
+Generic flow (when the user explicitly provides someone else's address):
+
 1. **Determine wallet**: Get wallet address from user
 2. **Fetch**: `lfi predict trades --wallet <address> --limit 20 --json`
 3. **Present**: Show trade timestamp, event/market, side, price, size
 4. **Suggest next step**: "Want to check your current positions?" / "需要查看当前持仓？"
+
+### "My ..." auto-flow (CRITICAL — covers "我的", "my", "我自己")
+
+Whenever the user asks about THEIR OWN prediction-market data — positions,
+trades, balance, PnL, "我现在押了哪些", "我在预测市场赚了多少",
+"我在 Polymarket 上的钱", etc. — run this exact sequence. NEVER ask the
+user to type their wallet address.
+
+1. **Check session**: `lfi status --json`
+2. **If not authenticated** (or `expired: true`):
+   `lfi login key --role AGENT --name "OpenClawAgent" --json`
+3. **Fetch TEE wallet addresses**: `lfi whoami --json`
+   → returns `evmAddress` (use for Polymarket) and `solAddress` (use for Kalshi).
+4. **Determine source(s)**:
+   - If the user named "Polymarket" → use `evmAddress` only.
+   - If the user named "Kalshi" → use `solAddress` only.
+   - If neither was named (e.g. "我在预测市场赚了多少") → query BOTH and merge.
+5. **Run the matching query** for each source — pass the TEE EOA / SOL pubkey
+   from step 3 DIRECTLY. NEVER convert to a Safe address first; the server
+   does that internally for Polymarket.
+   - Positions: `lfi predict positions --user <evmAddress|solAddress> [--source <s>] --json`
+   - Trades: `lfi predict trades --wallet <evmAddress|solAddress> [--source <s>] --limit 50 --json`
+   - Balance: `lfi predict balance --source <s> --user <evmAddress|solAddress> --json`
+6. **Present** a single consolidated answer that names the source(s) used and,
+   for the "我赚了多少" / PnL question, sums realized + unrealized PnL across
+   the returned trades/positions.
+
+Why this is mandatory: prediction queries always require an address parameter
+in the CLI, but a normal user does NOT know their TEE wallet address — the
+LiberFi server holds it. The skill must resolve "我" → TEE wallet via
+`whoami`, transparently. The user should never have to type or even see the
+hex/Base58 address unless they ask.
+
+**EOA vs Safe — critical distinction for Polymarket**: The address from
+`whoami.evmAddress` is the user's TEE EOA. For `balance` / `positions` /
+`trades` queries, ALWAYS pass the EOA — the prediction-server derives the
+Polymarket Safe via CREATE2 internally. The Safe address (returned by
+`polymarket-setup-status`) is ONLY for `polymarket-deposit-addresses
+--safe-address` (Polymarket Bridge requires the actual Safe as bridge key).
+Mixing these up → balance / positions / trades return EMPTY because the
+server tries to derive a Safe from an already-Safe address.
 
 ### Check Order Status
 
