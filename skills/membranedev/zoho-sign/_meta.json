@@ -3,11 +3,16 @@
   "slug": "zoho-sign",
   "displayName": "Zoho Sign",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169095172,
-    "commit": "https://github.com/openclaw/skills/commit/819660d7d6feaa8a173be6a9dcf4b40e21e4aa19"
+    "version": "1.0.3",
+    "publishedAt": 1776854406551,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169095172,
+      "commit": "https://github.com/openclaw/skills/commit/819660d7d6feaa8a173be6a9dcf4b40e21e4aa19"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774760563854,
