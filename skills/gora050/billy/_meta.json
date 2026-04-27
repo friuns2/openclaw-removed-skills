@@ -3,11 +3,16 @@
   "slug": "billy",
   "displayName": "Billy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169492024,
-    "commit": "https://github.com/openclaw/skills/commit/0a96200b7b3c31ef7d2091340824eb14bcdd8cf8"
+    "version": "1.0.3",
+    "publishedAt": 1776864363665,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169492024,
+      "commit": "https://github.com/openclaw/skills/commit/0a96200b7b3c31ef7d2091340824eb14bcdd8cf8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774839878553,
