@@ -3,9 +3,15 @@
   "slug": "threat-stack",
   "displayName": "Threat Stack",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170093599,
-    "commit": "https://github.com/openclaw/skills/commit/fe02831e81645a19a8069a9f6535e0595413eaaa"
+    "version": "1.0.3",
+    "publishedAt": 1776885779743,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170093599,
+      "commit": "https://github.com/openclaw/skills/commit/fe02831e81645a19a8069a9f6535e0595413eaaa"
+    }
+  ]
 }
