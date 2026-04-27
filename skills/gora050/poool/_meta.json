@@ -3,11 +3,16 @@
   "slug": "poool",
   "displayName": "Poool",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170485095,
-    "commit": "https://github.com/openclaw/skills/commit/71a6348101636c4e00ffad88aa2729f1a50563b2"
+    "version": "1.0.3",
+    "publishedAt": 1776893382309,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170485095,
+      "commit": "https://github.com/openclaw/skills/commit/71a6348101636c4e00ffad88aa2729f1a50563b2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775030693744,
