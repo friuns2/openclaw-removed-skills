@@ -3,11 +3,16 @@
   "slug": "funding-options",
   "displayName": "Funding Options",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167833750,
-    "commit": "https://github.com/openclaw/skills/commit/90d487b085e456bfe606195ef32e007233bd53c3"
+    "version": "1.0.3",
+    "publishedAt": 1776864940590,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167833750,
+      "commit": "https://github.com/openclaw/skills/commit/90d487b085e456bfe606195ef32e007233bd53c3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774512249552,
