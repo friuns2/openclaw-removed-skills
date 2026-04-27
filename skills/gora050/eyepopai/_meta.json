@@ -3,11 +3,16 @@
   "slug": "eyepopai",
   "displayName": "Eyepopai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169508797,
-    "commit": "https://github.com/openclaw/skills/commit/a968752943913220b1482182cf9c95ddca612b1e"
+    "version": "1.0.3",
+    "publishedAt": 1776864412158,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169508797,
+      "commit": "https://github.com/openclaw/skills/commit/a968752943913220b1482182cf9c95ddca612b1e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774839934239,
