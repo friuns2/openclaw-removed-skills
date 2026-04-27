@@ -1,56 +1,47 @@
 ---
-name: xpeng
-description: "Information assistant for 小鹏 XPeng. Search products, news, financials, and official resources for 小鹏 XPeng."
-metadata:
-  { "openclaw": { "emoji": "🏢", "version": "0.1.0", "author": "hanxueyuan", "tags": ["brand","xpeng","enterprise-info"] } }
+summary: "小鹏汽车 XPeng——中国智能电动车品牌、自动驾驶技术领先者、飞行汽车探索者"
+read_when:
+  - 查询小鹏汽车 · XPeng相关信息
+  - 了解相关行业发展
 ---
 
-# 小鹏 XPeng — Information Assistant
+# 小鹏汽车 · XPeng
 
-Query products, news, stock prices, financial reports, and official resources for **小鹏 XPeng**.
+---
 
-## About
+## 发展历程
 
-- **Company**: 小鹏 XPeng
-- **Industry**: Smart electric vehicles
-- **Official Website**: https://www.xpeng.com
+| 时期 | 关键事件 |
+|:----:|--------|
+| **2014 年** | 何小鹏在广州创立 |
+| **2018 年** | 首款车 G3 交付 |
+| **2020 年** | 纽交所上市 |
+| **2021 年** | 推出 XNGP 智能辅助驾驶 |
+| **2024 年** | MONA 子品牌发布——15 万级市场 |
+| **2024 年** | 飞行汽车开始试飞 |
 
-## What This Skill Does
+---
 
-When activated, this skill helps you:
+## 核心特点
 
-1. **Product Search** — Find and compare 小鹏 XPeng products, pricing, and availability
-2. **News & Updates** — Get the latest news, press releases, and announcements
-3. **Financial Info** — Stock price, market cap, earnings reports (for public companies)
-4. **Official Resources** — Direct links to official websites, support pages, and documentation
-5. **Competitor Comparison** — Compare with competitors in the same industry
+智能电动车（G6/G9/P7i/X9）+ 智能驾驶（XNGP）+ 飞行汽车
 
-## Usage Examples
+## 核心优势
 
-- "What are the latest 小鹏 XPeng products?"
-- "Show me 小鹏 XPeng stock price"
-- "Compare 小鹏 XPeng with competitors"
-- "Find 小鹏 XPeng official support page"
-- "What's new at 小鹏 XPeng?"
+全栈自研智能驾驶技术 + 800V 高压快充 + 飞行汽车前瞻布局
 
-## How It Works
+---
 
-This skill uses web search to fetch real-time information about 小鹏 XPeng from:
-- Official website: https://www.xpeng.com
-- Financial data providers
-- News aggregators
-- Product databases
+## 关键数据
 
-## Instructions for Agent
+| 指标 | 数值 |
+|------|------|
+| 年交付 | 约 14 万辆 |
+| 研发投入占比 | 约 25% |
+| 员工数 | 约 16000 人 |
 
-When this skill is triggered:
-1. Identify the user's specific query about 小鹏 XPeng
-2. Use web search tools to find current information
-3. Prioritize official sources (https://www.xpeng.com)
-4. Present results in a structured, easy-to-read format
-5. Include direct links to sources
+---
 
-## Author
+## 值得了解
 
-Created by hanxueyuan | Part of the Agent Commerce ecosystem
-License: MIT
+小鹏是全球首家获得飞行汽车适航认证的车企

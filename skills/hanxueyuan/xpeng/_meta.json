@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "xpeng",
-  "displayName": "xpeng",
+  "displayName": "Xpeng",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774865295004,
-    "commit": "https://github.com/openclaw/skills/commit/7fbbf4e0ecaaac448811d16e5b2fdfd68f016826"
+    "version": "0.1.3",
+    "publishedAt": 1776533986357,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774865295004,
+      "commit": "https://github.com/openclaw/skills/commit/7fbbf4e0ecaaac448811d16e5b2fdfd68f016826"
+    }
+  ]
 }
