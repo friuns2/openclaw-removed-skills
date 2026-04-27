@@ -3,11 +3,16 @@
   "slug": "mapbox-integration",
   "displayName": "Mapbox",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168038894,
-    "commit": "https://github.com/openclaw/skills/commit/2f19faa05de7dc933af8eb140a7ce53f5dc0f1f9"
+    "version": "1.0.3",
+    "publishedAt": 1776851763972,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168038894,
+      "commit": "https://github.com/openclaw/skills/commit/2f19faa05de7dc933af8eb140a7ce53f5dc0f1f9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774562556146,
