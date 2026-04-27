@@ -1,11 +1,11 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
 自动登录脚本 (支持图形验证码 OCR 识别 + 持久化会话 + 自动定位元素)
 【强制使用 Google Chrome 浏览器】
-用法: python3 openclaw_login.py <用户名> <密码> --url <登录页URL> [--debug] [--window-size WIDTH,HEIGHT]
+用法: python3 openclaw_login.py <用户名> <密码> [--url <登录页URL>] [--debug] [--window-size WIDTH,HEIGHT]
+若未提供 --url，则从环境变量 GJSW_LOGIN_URL 读取
 """
 
 import argparse
@@ -531,6 +531,23 @@ def auto_login(username, password, login_url, debug=False, window_size="1280,800
     print("国家税务总局 12366 纳税服务平台自动登录")
     print("=" * 50)
     
+    # ========== 新增：URL 清洗与有效性检查 ==========
+    # 去除首尾空白和可能的引号（单引号/双引号）
+    if login_url:
+        login_url = login_url.strip()
+        # 如果同时以双引号或单引号包裹，则去除外层匹配的引号
+        if (login_url.startswith('"') and login_url.endswith('"')) or (login_url.startswith("'") and login_url.endswith("'")):
+            login_url = login_url[1:-1]
+        # 再次 strip 以防内部有空白
+        login_url = login_url.strip()
+    
+    # 检查 URL 是否有效（必须以 http:// 或 https:// 开头）
+    if not login_url or not (login_url.startswith("http://") or login_url.startswith("https://")):
+        print(f"[错误] 无效的登录 URL: '{login_url}'")
+        print("请确保 URL 以 http:// 或 https:// 开头，且不包含多余引号。")
+        return False
+    # =============================================
+    
     ocr = ddddocr.DdddOcr(show_ad=False)
     
     if is_port_open(REMOTE_DEBUG_PORT):
@@ -607,10 +624,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="自动登录国家税务总局 12366 纳税服务平台")
     parser.add_argument("username", help="登录账号")
     parser.add_argument("password", help="登录密码")
-    parser.add_argument("--url", required=True, help="登录页面的URL")
+    parser.add_argument("--url", help="登录页面的URL（若未提供则从环境变量 GJSW_LOGIN_URL 读取）")
     parser.add_argument("--debug", action="store_true", help="调试模式（打印更多信息）")
     parser.add_argument("--window-size", default="1280,800", help="浏览器窗口大小，格式: 宽度,高度 (例如 1920,1080)，默认 1280,800")
     args = parser.parse_args()
-    
-    success = auto_login(args.username, args.password, args.url, args.debug, args.window_size)
+
+    # 获取登录 URL：优先使用命令行参数，其次使用环境变量 GJSW_LOGIN_URL
+    login_url = args.url
+    if not login_url:
+        login_url = os.environ.get("GJSW_LOGIN_URL")
+    if not login_url:
+        print("错误：未提供登录页面 URL。请通过 --url 参数指定，或设置环境变量 GJSW_LOGIN_URL。")
+        sys.exit(1)
+
+    # 清洗 URL（去除可能的多余引号和空白）
+    login_url = login_url.strip()
+    if (login_url.startswith('"') and login_url.endswith('"')) or (login_url.startswith("'") and login_url.endswith("'")):
+        login_url = login_url[1:-1]
+    login_url = login_url.strip()
+
+    # 简单检查 URL 有效性，提前给出明确错误
+    if not (login_url.startswith("http://") or login_url.startswith("https://")):
+        print(f"错误：登录 URL 无效，必须以 http:// 或 https:// 开头。当前值: '{login_url}'")
+        sys.exit(1)
+
+    success = auto_login(args.username, args.password, login_url, args.debug, args.window_size)
     sys.exit(0 if success else 1)

@@ -3,9 +3,15 @@
   "slug": "gjsw",
   "displayName": "gjsw",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775093310343,
-    "commit": "https://github.com/openclaw/skills/commit/96d0cbcf2c32a6fab089edd0db1ea5255e4ce970"
+    "version": "1.0.5",
+    "publishedAt": 1776735026294,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775093310343,
+      "commit": "https://github.com/openclaw/skills/commit/96d0cbcf2c32a6fab089edd0db1ea5255e4ce970"
+    }
+  ]
 }
