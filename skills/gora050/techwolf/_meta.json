@@ -3,11 +3,16 @@
   "slug": "techwolf",
   "displayName": "Techwolf",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167919960,
-    "commit": "https://github.com/openclaw/skills/commit/51879ae824fcec28232327cdcd3a02b30394c632"
+    "version": "1.0.3",
+    "publishedAt": 1776865296480,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167919960,
+      "commit": "https://github.com/openclaw/skills/commit/51879ae824fcec28232327cdcd3a02b30394c632"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774526627612,
