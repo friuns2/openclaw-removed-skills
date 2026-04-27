@@ -1,11 +1,10 @@
-# PRD Workflow v4.2.5 - 技术文档
+# PRD Workflow v5.1.0 - 技术文档
 
 **架构设计 · 代码结构 · 开发指南**
 
-> **v4.2.0 更新**: 验收标准 GWT 格式优化 - 需求拆解不再生成验收标准 + PRD 阶段按功能生成 GWT 格式 + COMPLETE-6 检查项。
-> **v4.1.0 更新**: 内容检查问答引导 - 13项内容检查 + 问答引导修补 + AI自动/用户指导/误报跳过三种处理方式。
-> **v4.0.0 更新**: 多页面原型系统 - 页面树推断 + 导航组件 + 路由注入 + 多端截图。
-> **v3.0.0 更新**: 图片渲染服务 - Mermaid → PNG 自动渲染 + Word 导出嵌入图片 + 系统 Chrome 支持。
+> **v5.1.0 更新**: Wiki 增强（可选）+ AI 驱动原型 v6.1.0（Chart.js CDN + JS 校验）+ 设计系统持久化
+> **v5.0.0 更新**: 分段确认模式 - 引入 Superpowers 分段确认 + 任务细化理念
+> **v4.2.5 更新**: 验收标准 GWT 格式优化 - 需求拆解不再生成验收标准 + PRD 阶段按功能生成 GWT 格式
 
 ---
 
@@ -172,7 +171,7 @@ prd-workflow/
 │   ├── smart_router.js         # 智能路由(技能编排)
 │   ├── prd_template.js         # PRD 模板引擎(v2.8.8 重构)
 │   ├── ai_diagram_extractor.js # AI 图表提取器(v2.8.8 新增)
-│   ├── image_renderer.js       # 图片渲染服务(v3.0.0 新增)
+│   ├── image_renderer.js       # 图片渲染服务(v4.0.0 新增)
 │   ├── quality_gates.js        # 质量门禁(检查点)
 │   ├── version_manager.js      # 版本管理(迭代支持)
 │   ├── requirement_diff.js     # 需求对比(变更分析)

@@ -36,6 +36,23 @@ class PRDModule {
     const featuresOrModules = decomposition.features || decomposition.modules || [];
     console.log(`   ✓ 已读取需求拆解：${featuresOrModules.length} 个功能`);
     
+    // Step 1.5: 读取 Wiki 搜索结果（v5.1.0 新增）
+    const wikiRecord = dataBus.read('wiki_search');
+    const wikiEnabled = wikiRecord && wikiRecord.data && wikiRecord.data.enabled;
+    let wikiContext = null;
+    let wikiBusinessRules = [];
+    let wikiGwtTemplates = [];
+    
+    if (wikiEnabled) {
+      wikiContext = wikiRecord.data;
+      wikiBusinessRules = wikiContext.businessRules || [];
+      wikiGwtTemplates = wikiContext.gwtTemplates || [];
+      const moduleNames = wikiContext.matchedModules?.map(m => m.module).join('、') || '未知';
+      console.log(`   📚 Wiki 增强已启用：${moduleNames}（${wikiBusinessRules.length} 条业务规则，${wikiGwtTemplates.length} 个 GWT 模板）`);
+    } else {
+      console.log('   ℹ️  Wiki 未启用，按标准方式生成 PRD');
+    }
+    
     // Step 2: 加载检查项指导
     console.log('   📋 加载 PRD 阶段质量检查项...');
     const checkItems = await checkItemsLoader.loadForStage('prd');
@@ -46,9 +63,9 @@ class PRDModule {
     const templateData = this.decompositionToTemplateData(decomposition);
     console.log(`   ✓ 已转换 ${templateData.functions.length} 个功能模块`);
     
-    // Step 4: 按章节调用 AI 填充内容（带 checker 约束）
-    console.log('   🤖 AI 填充：按章节生成内容（带 checker 约束）...');
-    await this.fillChaptersWithAI(templateData, decomposition, checkItems);
+    // Step 4: 按章节调用 AI 填充内容（带 checker 约束，启用 Wiki 时注入知识）
+    console.log('   🤖 AI 填充：按章节生成内容（带 checker 约束' + (wikiEnabled ? '，Wiki 增强' : '') + '）...');
+    await this.fillChaptersWithAI(templateData, decomposition, checkItems, wikiEnabled ? { wikiContext, wikiBusinessRules, wikiGwtTemplates } : null);
     console.log('   ✓ 章节内容填充完成');
     
     // Step 5: 使用模板生成 PRD
@@ -168,9 +185,9 @@ class PRDModule {
   }
   
   /**
-   * 按章节调用 AI 填充内容（带 checker 约束）
+   * 按章节调用 AI 填充内容（带 checker 约束，可选 Wiki 增强）
    */
-  async fillChaptersWithAI(templateData, decomposition, checkItems) {
+  async fillChaptersWithAI(templateData, decomposition, checkItems, wikiData = null) {
     // 支持 features 或 modules 字段
     const featuresOrModules = decomposition.features || decomposition.modules || [];
     
@@ -178,10 +195,10 @@ class PRDModule {
     const chapterCheckers = this.groupCheckersByChapter(checkItems);
     
     // 填充概述章节
-    templateData.overview = await this.fillOverviewChapter(templateData.overview, decomposition, chapterCheckers.overview);
+    templateData.overview = await this.fillOverviewChapter(templateData.overview, decomposition, chapterCheckers.overview, wikiData);
     
     // 填充全局业务流程章节
-    templateData.globalFlow = await this.fillGlobalFlowChapter(templateData.globalFlow, decomposition, chapterCheckers.globalFlow);
+    templateData.globalFlow = await this.fillGlobalFlowChapter(templateData.globalFlow, decomposition, chapterCheckers.globalFlow, wikiData);
     
     // 填充每个功能章节
     for (let i = 0; i < templateData.functions.length; i++) {
@@ -189,11 +206,11 @@ class PRDModule {
       const decompositionFeature = featuresOrModules[i];
       const funcCheckers = chapterCheckers.function || [];
       
-      templateData.functions[i] = await this.fillFunctionChapter(func, decompositionFeature, funcCheckers);
+      templateData.functions[i] = await this.fillFunctionChapter(func, decompositionFeature, funcCheckers, wikiData);
     }
     
     // 填充非功能需求章节
-    templateData.nonFunctional = await this.fillNonFunctionalChapter(templateData.nonFunctional, decomposition, chapterCheckers.nonFunctional);
+    templateData.nonFunctional = await this.fillNonFunctionalChapter(templateData.nonFunctional, decomposition, chapterCheckers.nonFunctional, wikiData);
   }
   
   /**
@@ -226,14 +243,14 @@ class PRDModule {
   /**
    * 填充概述章节
    */
-  async fillOverviewChapter(overview, decomposition, checkers) {
+  async fillOverviewChapter(overview, decomposition, checkers, wikiData = null) {
     const checkerPrompt = this.buildCheckerPrompt(checkers);
+    const wikiPrompt = this.buildWikiPrompt(wikiData, 'overview');
     
     const prompt = `
 你是产品经理，请完善产品概述章节。
 
-${checkerPrompt}
-
+${checkerPrompt}${wikiPrompt}
 ## 输入数据
 - 产品背景：${overview.productBackground}
 - 核心价值：${JSON.stringify(overview.productGoals)}
@@ -267,15 +284,15 @@ ${checkerPrompt}
   /**
    * 填充全局业务流程章节
    */
-  async fillGlobalFlowChapter(globalFlow, decomposition, checkers) {
+  async fillGlobalFlowChapter(globalFlow, decomposition, checkers, wikiData = null) {
     const checkerPrompt = this.buildCheckerPrompt(checkers);
+    const wikiPrompt = this.buildWikiPrompt(wikiData, 'globalFlow');
     const featuresOrModules = decomposition.features || decomposition.modules || [];
     
     const prompt = `
 你是系统架构师，请设计全局业务流程。
 
-${checkerPrompt}
-
+${checkerPrompt}${wikiPrompt}
 ## 输入数据
 - 功能列表：${JSON.stringify(featuresOrModules.map(f => f.name))}
 - 业务规则：${JSON.stringify(globalFlow.globalRules)}
@@ -307,14 +324,14 @@ ${checkerPrompt}
   /**
    * 填充功能章节（核心）
    */
-  async fillFunctionChapter(func, decompositionFeature, checkers) {
+  async fillFunctionChapter(func, decompositionFeature, checkers, wikiData = null) {
     const checkerPrompt = this.buildCheckerPrompt(checkers);
+    const wikiPrompt = this.buildWikiPrompt(wikiData, 'function', func.name);
     
     const prompt = `
 你是系统设计专家，请细化功能规格。
 
-${checkerPrompt}
-
+${checkerPrompt}${wikiPrompt}
 ## 输入数据
 - 功能名称：${func.name}
 - 功能描述：${func.description}
@@ -407,14 +424,14 @@ ${checkerPrompt}
   /**
    * 填充非功能需求章节
    */
-  async fillNonFunctionalChapter(nonFunctional, decomposition, checkers) {
+  async fillNonFunctionalChapter(nonFunctional, decomposition, checkers, wikiData = null) {
     const checkerPrompt = this.buildCheckerPrompt(checkers);
+    const wikiPrompt = this.buildWikiPrompt(wikiData, 'nonFunctional');
     
     const prompt = `
 你是技术架构师，请定义非功能需求。
 
-${checkerPrompt}
-
+${checkerPrompt}${wikiPrompt}
 ## 输出要求
 1. 性能指标（响应时间、吞吐量、并发量）
 2. 安全要求（权限、加密、审计）
@@ -457,6 +474,49 @@ ${checkerPrompt}
       }
     });
     prompt += '\n';
+    
+    return prompt;
+  }
+
+  /**
+   * 构建 Wiki 知识提示词（v5.1.0 新增）
+   */
+  buildWikiPrompt(wikiData, chapter, featureName = null) {
+    if (!wikiData) return '';
+    
+    let prompt = '';
+    
+    // 注入 Wiki 知识摘要
+    if (wikiData.wikiContext) {
+      prompt += '## 📚 Wiki 知识库上下文（已匹配到相关业务模块）\n\n';
+      for (const ctx of wikiData.wikiContext) {
+        prompt += `### ${ctx.module}（${ctx.code}）\n`;
+        prompt += `匹配关键词：${ctx.matchedKeywords.join('、')}\n`;
+        for (const doc of ctx.documents) {
+          prompt += `\n#### ${doc.file}\n`;
+          prompt += doc.content.substring(0, 3000) + '\n';
+        }
+      }
+      prompt += '\n';
+    }
+    
+    // 注入业务规则
+    if (wikiData.wikiBusinessRules && wikiData.wikiBusinessRules.length > 0) {
+      prompt += '## 📋 Wiki 业务规则（请在 PRD 中遵循）\n\n';
+      wikiData.wikiBusinessRules.slice(0, 15).forEach((rule, idx) => {
+        prompt += `${idx + 1}. 【${rule.module}】${rule.rule}\n`;
+      });
+      prompt += '\n';
+    }
+    
+    // 注入 GWT 模板
+    if (wikiData.wikiGwtTemplates && wikiData.wikiGwtTemplates.length > 0) {
+      prompt += '## ✅ Wiki GWT 模板（参考已有验收标准格式）\n\n';
+      wikiData.wikiGwtTemplates.slice(0, 8).forEach((tpl, idx) => {
+        prompt += `${idx + 1}. 【${tpl.module}】${tpl.feature} - ${tpl.scenario}\n`;
+        prompt += `${tpl.template}\n\n`;
+      });
+    }
     
     return prompt;
   }

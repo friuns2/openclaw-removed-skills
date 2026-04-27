@@ -19,11 +19,14 @@ const { VersionManager } = require('./version_manager');
 const { RequirementDiff } = require('./requirement_diff');
 
 // ⭐ v2.8.0 新增：流程步骤定义（用于进度显示）
+// v5.0.0 新增：prd-segmented（分段确认版）
 const STEPS = [
   { name: 'precheck', label: '环境检查', icon: '🔍' },
+  { name: 'wiki_search', label: 'Wiki 知识搜索', icon: '📚' },  // v5.1.0 新增
   { name: 'interview', label: '深度访谈', icon: '💬' },
   { name: 'decomposition', label: '需求拆解', icon: '📦' },
   { name: 'prd', label: 'PRD 生成', icon: '📝' },
+  { name: 'prd-segmented', label: 'PRD 分段确认', icon: '📝✨' },  // v5.0.0 新增
   { name: 'review', label: 'PRD 评审', icon: '🔍' },
   { name: 'flowchart', label: '流程图生成', icon: '📊' },
   { name: 'design', label: 'UI/UX 设计', icon: '🎨' },
@@ -247,16 +250,42 @@ async function prdWorkflow(userInput, options = {}) {
       throw new Error(`环境检查失败：${precheckResult.error || '关键依赖缺失'}`);
     }
 
+    // ⭐ v5.1.0 新增：执行 Wiki 知识搜索（在访谈之前，为访谈增强提供知识）
+    let wikiResult = null;
+    const wikiModule = router.getModule('wiki_search');
+    if (wikiModule && typeof wikiModule.searchWiki === 'function') {
+      console.log('\n📚 执行 Wiki 知识搜索...');
+      try {
+        wikiResult = await wikiModule.searchWiki(userInput);
+        if (wikiResult.enabled) {
+          const moduleNames = wikiResult.matchedModules.map(m => m.module).join('、');
+          console.log(`✅ Wiki 增强已启用，匹配模块：${moduleNames}`);
+          // 存入 dataBus 供后续模块读取
+          dataBus.write('wiki_search', wikiResult, { passed: true });
+        } else {
+          console.log(`ℹ️  Wiki 未启用：${wikiResult.reason}`);
+          // 仍然存储结果，标记为未启用
+          dataBus.write('wiki_search', wikiResult, { passed: true, enabled: false });
+        }
+      } catch (err) {
+        console.warn(`⚠️  Wiki 搜索失败：${err.message}，将按标准方式执行`);
+        wikiResult = { enabled: false, reason: err.message };
+        dataBus.write('wiki_search', wikiResult, { passed: true, enabled: false });
+      }
+    } else {
+      console.log('ℹ️  Wiki 搜索模块不可用，将按标准方式执行');
+    }
+
     // Step 2: 执行技能链
     const results = {};
 
-    // ⭐ v2.8.0：统计实际执行的步骤（排除 precheck）
-    const executionSteps = plan.skillsToExecute.filter(s => s !== 'precheck');
+    // ⭐ v2.8.0：统计实际执行的步骤（排除 precheck 和 wiki_search）
+    const executionSteps = plan.skillsToExecute.filter(s => s !== 'precheck' && s !== 'wiki_search');
     let currentStepIndex = 0;
 
     for (const skillId of plan.skillsToExecute) {
-      // ⭐ v2.8.0：进度显示
-      if (skillId !== 'precheck') {
+      // ⭐ v2.8.0 / v5.1.0：跳过 precheck 和 wiki_search（已在循环前执行）
+      if (skillId !== 'precheck' && skillId !== 'wiki_search') {
         currentStepIndex++;
         const stepInfo = getStepInfo(skillId);
         showProgress(currentStepIndex, executionSteps.length, stepInfo, executionSteps.map(getStepInfo));
@@ -265,6 +294,12 @@ async function prdWorkflow(userInput, options = {}) {
       console.log(`\n${'='.repeat(60)}`);
       console.log(`执行技能：${skillId}`);
       console.log('='.repeat(60));
+
+      // ⭐ v5.1.0：wiki_search 已在循环前执行，跳过
+      if (skillId === 'wiki_search') {
+        console.log('   ℹ️  Wiki 搜索已在访谈前完成，跳过');
+        continue;
+      }
 
       const module = router.getModule(skillId);
 

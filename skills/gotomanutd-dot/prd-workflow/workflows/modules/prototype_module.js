@@ -1,1272 +1,491 @@
 /**
- * HTML 原型模块 v4.0.0
+ * HTML 原型模块 v6.1.0（AI 驱动增强版）
  *
- * 多页面原型生成系统：
- * - Phase 1: 页面树推断（从 PRD 提取）
- * - Phase 2: 导航组件生成（侧边栏 + 底部 Tab）
- * - Phase 3: AI 内容填充（调用 OpenClaw AI）
- * - Phase 4: 路由注入（页面间跳转）
- * - Phase 5: 截图生成（桌面端 + 移动端）
+ * 重构核心：
+ * - 不再用模板引擎拼接字段
+ * - 不再只读 decomposition 的碎片数据
+ * - AI 读 PRD 全文 + 设计系统 + UX 指南，直接生成完整 HTML 原型系统
+ * - 页面结构、导航关系、跳转逻辑由 AI 根据业务逻辑自行判断
  *
- * v4.0.0: 完整重构，支持多页面原型
- * v2.8.9: 使用 AIDiagramExtractor.generatePrototypeConfig
+ * v6.1.0: 接入 Chart.js CDN + 业务规则 JS 校验
+ * v6.0.0: AI 驱动，一次生成完整原型系统
+ * v5.0.0: 数据驱动渲染（已废弃）
+ * v4.0.0: 多页面原型系统（已废弃）
  */
 
 const fs = require('fs');
 const path = require('path');
-const { AIDiagramExtractor } = require('../ai_diagram_extractor');
 
 class PrototypeModule {
   constructor() {
-    this.extractor = new AIDiagramExtractor();
-    this.version = '4.0.0';
-
-    // 页面类型映射
-    this.pageTypes = {
-      'list': '列表页',
-      'form': '表单页',
-      'dashboard': '仪表盘',
-      'detail': '详情页',
-      'login': '登录页',
-      'landing': '落地页',
-      'checkout': '支付页',
-      'custom': '自定义页'
-    };
-
-    // 截图尺寸配置
-    this.screenshotSizes = {
-      desktop: { width: 1440, height: 900 },
-      mobile: { width: 375, height: 667 }
-    };
+    this.version = '6.1.0';
   }
 
   /**
    * 执行原型生成
    */
   async execute(options) {
-    console.log('\n🎨 执行技能：HTML 原型生成 v4.0.0');
-    console.log('   多页面原型系统启动...');
+    console.log('\n🎨 执行技能：HTML 原型生成 v6.1.0（AI 驱动增强版）');
+    console.log('   读取产品上下文 → AI 生成完整原型系统（含图表+校验）...');
 
-    const { dataBus, qualityGate, outputDir } = options;
+    const { dataBus, qualityGate, outputDir, aiExecutor } = options;
 
-    // 读取 PRD
-    const prdRecord = dataBus.read('prd');
-    if (!prdRecord) {
-      throw new Error('PRD 不存在，请先执行 PRD 生成');
-    }
-    const prd = prdRecord.data;
+    // ========== Step 1: 读取产品上下文 ==========
+    const context = await this.readProductContext(outputDir, dataBus);
 
-    // 读取设计系统
-    const designRecord = dataBus.read('design');
-    const designTokens = designRecord?.data || this.getDefaultDesignTokens();
+    // ========== Step 2: 构建提示词 ==========
+    const prompt = this.buildPrompt(context);
 
-    // 读取需求拆解结果
-    const decompositionRecord = dataBus.read('decomposition');
-    const decomposition = decompositionRecord?.data || null;
+    // ========== Step 3: AI 生成原型 ==========
+    console.log('\n   🤖 AI 生成原型系统...');
+    const aiResult = await this.invokeAI(prompt, aiExecutor, outputDir);
 
-    // ========== Phase 1: 页面树推断 ==========
-    console.log('\n   📋 Phase 1: 页面树推断...');
-    const sitemap = this.extractPageTree(prd, decomposition);
-    console.log(`      ✅ 提取 ${sitemap.pages.length} 个页面`);
-    sitemap.pages.forEach(p => {
-      const parent = p.parent ? ` (父: ${p.parent})` : '';
-      console.log(`         - ${p.name} [${this.pageTypes[p.type] || p.type}]${parent}`);
+    // ========== Step 4: 解析并写入文件 ==========
+    console.log('   📝 写入 HTML 文件...');
+    const pages = await this.parseAndWriteFiles(aiResult, outputDir);
+
+    // ========== Step 5: 生成入口页 ==========
+    const indexContent = this.generateIndexPage(context.productName);
+    fs.writeFileSync(path.join(outputDir, 'index.html'), indexContent, 'utf8');
+    pages.push({
+      id: 'index',
+      name: '入口页',
+      type: 'index',
+      htmlPath: 'index.html',
+      absolutePath: path.join(outputDir, 'index.html')
     });
-
-    // ========== Phase 2: 导航组件生成 ==========
-    console.log('\n   🧭 Phase 2: 导航组件生成...');
-    const navigation = this.generateNavigation(sitemap, designTokens);
-    console.log(`      ✅ 侧边栏: ${navigation.sidebar.items.length} 个菜单项`);
-    console.log(`      ✅ 底部Tab: ${navigation.tabbar.items.length} 个Tab项`);
-
-    // ========== Phase 3: 页面内容生成 ==========
-    console.log('\n   📄 Phase 3: 页面内容生成...');
-    const pages = await this.generatePages(sitemap, prd, designTokens, outputDir);
-    console.log(`      ✅ 生成 ${pages.length} 个页面文件`);
-
-    // ========== Phase 4: 路由注入 ==========
-    console.log('\n   🔗 Phase 4: 路由注入...');
-    const routes = this.generateRoutes(sitemap);
-    await this.injectRoutes(pages, routes, navigation, outputDir);
-    console.log(`      ✅ 注入 ${routes.length} 条路由`);
-
-    // ========== Phase 5: 截图生成 ==========
-    console.log('\n   📸 Phase 5: 截图生成...');
-    const screenshots = await this.generateScreenshots(pages, outputDir);
-    const desktopCount = screenshots.desktop?.length || 0;
-    const mobileCount = screenshots.mobile?.length || 0;
-    console.log(`      ✅ 桌面端截图: ${desktopCount} 张`);
-    console.log(`      ✅ 移动端截图: ${mobileCount} 张`);
 
     // ========== 构建结果 ==========
     const result = {
-      sitemap,
       pages,
-      routes,
-      navigation,
-      screenshots,
-      prototypeConfig: {
-        designTokens,
-        pageTypesGenerated: sitemap.pages.map(p => p.type)
-      }
+      pageCount: pages.length,
+      designSystem: context.designTokens || {},
+      version: this.version
     };
 
-    // 质量验证
     const quality = {
       passed: pages.length > 0,
-      pagesGenerated: pages.length,
-      routesGenerated: routes.length,
-      screenshotsGenerated: desktopCount + mobileCount
+      pagesGenerated: pages.length
     };
 
-    // 写入数据总线
-    const filepath = dataBus.write('prototype', result, quality, {
+    dataBus.write('prototype', result, quality, {
       fromPRD: 'prd.json',
       fromDesign: 'design.json'
     });
 
-    // 门禁检查
     if (qualityGate) {
       await qualityGate.pass('gate7_prototype', result);
     }
 
-    console.log(`\n   ✅ 原型生成完成：${pages.length} 个页面，${routes.length} 条路由`);
+    console.log(`\n   ✅ 原型生成完成：${pages.length} 个页面`);
 
     return {
       ...result,
-      quality: quality,
-      outputPath: filepath
+      quality,
+      outputPath: path.join(outputDir, 'pages')
     };
   }
 
-  // ==================== Phase 1: 页面树推断 ====================
+  /**
+   * 读取产品上下文
+   */
+  async readProductContext(outputDir, dataBus) {
+    const context = {
+      productName: '',
+      prdContent: '',
+      designTokens: null,
+      masterMd: '',
+      uxGuidelines: '',
+      decomposition: null
+    };
+
+    // 1. 读 PRD 全文
+    const prdPath = path.join(outputDir, 'PRD.md');
+    if (fs.existsSync(prdPath)) {
+      context.prdContent = fs.readFileSync(prdPath, 'utf8');
+      const titleMatch = context.prdContent.match(/^# (.+)$/m);
+      context.productName = titleMatch ? titleMatch[1].replace(/\s*PRD.*/i, '').trim() : '产品';
+      console.log(`   ✅ 读取 PRD：${context.prdContent.length} 字`);
+    } else {
+      // fallback: 从 dataBus 读
+      const prdRecord = dataBus.read('prd');
+      if (prdRecord) {
+        context.prdContent = prdRecord.data.content || '';
+        context.productName = prdRecord.data.productName || '产品';
+        console.log(`   ✅ 从 dataBus 读取 PRD：${context.prdContent.length} 字`);
+      }
+    }
+
+    // 2. 读 design tokens
+    const designRecord = dataBus.read('design');
+    if (designRecord) {
+      context.designTokens = designRecord.data;
+      console.log('   ✅ 读取设计系统 tokens');
+    }
+
+    // 3. 读 design-system/MASTER.md
+    const masterPath = this.findFile(path.join(outputDir, 'design-system'), 'MASTER.md');
+    if (masterPath && fs.existsSync(masterPath)) {
+      context.masterMd = fs.readFileSync(masterPath, 'utf8');
+      console.log(`   ✅ 读取 MASTER.md：${context.masterMd.length} 字`);
+    }
+
+    // 4. 读 UX guidelines
+    const uxPath = path.join(__dirname, '../../skills/ui-ux-pro-max/data/ux-guidelines.csv');
+    if (fs.existsSync(uxPath)) {
+      const raw = fs.readFileSync(uxPath, 'utf8');
+      context.uxGuidelines = this.extractUXGuidelines(raw);
+      console.log(`   ✅ 读取 UX guidelines：${context.uxGuidelines.length} 条`);
+    }
+
+    // 5. 读 decomposition（结构化摘要）
+    const decompRecord = dataBus.read('decomposition');
+    if (decompRecord) {
+      context.decomposition = decompRecord.data;
+      console.log(`   ✅ 读取需求拆解：${(decompRecord.data.features || []).length} 个功能`);
+    }
+
+    return context;
+  }
 
   /**
-   * 从 PRD 提取页面树
+   * 提取 UX guidelines，按页面类型组织
    */
-  extractPageTree(prd, decomposition) {
-    const content = prd.content || '';
-    const features = decomposition?.features || prd.features || [];
+  extractUXGuidelines(csvContent) {
+    const lines = csvContent.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return '';
 
-    // 提取产品信息
-    const titleMatch = content.match(/^# (.+)$/m);
-    const productName = titleMatch ? titleMatch[1].replace(/\s*PRD.*/i, '').trim() : '产品';
-    const productType = this.extractor.inferProductType(content);
+    // 解析 CSV 表头
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    const categoryIdx = headers.findIndex(h => h.toLowerCase().includes('category'));
+    const doIdx = headers.findIndex(h => h.toLowerCase() === 'do' || h.toLowerCase().includes('best'));
+    const dontIdx = headers.findIndex(h => h.toLowerCase() === 'don\'t' || h.toLowerCase().includes('avoid'));
 
-    // 页面列表
+    if (categoryIdx === -1) return '';
+
+    // 按类别分组
+    const byCategory = {};
+    for (let i = 1; i < lines.length; i++) {
+      const fields = this.parseCSVLine(lines[i]);
+      if (fields.length <= categoryIdx) continue;
+      const cat = fields[categoryIdx] || 'General';
+      if (!byCategory[cat]) byCategory[cat] = { do: [], dont: [] };
+      if (doIdx >= 0 && fields[doIdx]) byCategory[cat].do.push(fields[doIdx]);
+      if (dontIdx >= 0 && fields[dontIdx]) byCategory[cat].dont.push(fields[dontIdx]);
+    }
+
+    return byCategory;
+  }
+
+  parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (const char of line) {
+      if (char === '"') { inQuotes = !inQuotes; continue; }
+      if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; continue; }
+      current += char;
+    }
+    result.push(current.trim());
+    return result;
+  }
+
+  /**
+   * 构建 AI 提示词
+   *
+   * 原则：
+   * - 只注入上下文，不指示页面结构
+   * - 不逐字段列出输入输出（会暗示 AI 每个功能=一个表单页）
+   * - 不说"每个页面一个 HTML"、"包含导航"等微观指令
+   * - 唯一要求：输出可运行的 HTML 文件到指定路径
+   */
+  buildPrompt(context) {
+    const parts = [];
+
+    // 唯一指令
+    parts.push('请基于以下产品上下文，生成可交互的 HTML 原型系统。');
+    parts.push('页面结构、导航关系、跳转逻辑由你根据业务逻辑自行判断。');
+    parts.push('将生成的 HTML 文件输出到指定路径。');
+    parts.push('');
+    parts.push('技术要求：');
+    parts.push('- 使用 Chart.js CDN（https://cdn.jsdelivr.net/npm/chart.js）渲染所有图表，不要用占位符。');
+    parts.push('- PRD 中的业务规则必须内化为 JS 校验逻辑（如权重之和必须等于 100%、情景数量 2-5 个、表单提交前验证等），不要只展示规则文本。');
+    parts.push('- 图表数据用 PRD 中的 example 值填充，确保数字合理可信。');
+    parts.push('');
+    parts.push('---');
+    parts.push('');
+
+    // PRD 全文 — 业务逻辑的唯一来源
+    if (context.prdContent) {
+      parts.push('## 产品需求文档\n');
+      parts.push(context.prdContent.substring(0, 30000));
+      parts.push('');
+      parts.push('---');
+      parts.push('');
+    }
+
+    // 设计系统
+    if (context.masterMd) {
+      parts.push('## 设计规范\n');
+      parts.push(context.masterMd.substring(0, 10000));
+      parts.push('');
+      parts.push('---');
+      parts.push('');
+    } else if (context.designTokens) {
+      parts.push('## 设计 Tokens\n');
+      parts.push('颜色：' + JSON.stringify(context.designTokens.colors || {}));
+      parts.push('字体：' + JSON.stringify(context.designTokens.typography || {}));
+      parts.push('间距：' + JSON.stringify(context.designTokens.spacing || {}));
+      parts.push('组件：' + JSON.stringify(context.designTokens.componentSpecs || {}));
+      parts.push('');
+      parts.push('---');
+      parts.push('');
+    }
+
+    // UX guidelines
+    if (context.uxGuidelines && Object.keys(context.uxGuidelines).length > 0) {
+      parts.push('## UX 最佳实践\n');
+      const cats = Object.keys(context.uxGuidelines).slice(0, 8);
+      for (const cat of cats) {
+        const g = context.uxGuidelines[cat];
+        if (g.do.length > 0 || g.dont.length > 0) {
+          parts.push(`### ${cat}`);
+          if (g.do.length > 0) parts.push('- Do: ' + g.do.slice(0, 3).join('; '));
+          if (g.dont.length > 0) parts.push("- Don't: " + g.dont.slice(0, 3).join('; '));
+          parts.push('');
+        }
+      }
+      parts.push('---');
+      parts.push('');
+    }
+
+    // decomposition：只给功能名和优先级，不给字段细节
+    if (context.decomposition && context.decomposition.features) {
+      parts.push('## 功能范围\n');
+      for (const f of context.decomposition.features) {
+        const priority = f.priority || 'P0';
+        const role = f.role ? `（${f.role}）` : '';
+        parts.push(`- ${f.name} ${role} [${priority}]`);
+      }
+      parts.push('');
+    }
+
+    return parts.join('\n');
+  }
+
+  /**
+   * 调用 AI 生成原型
+   */
+  async invokeAI(prompt, aiExecutor, outputDir) {
+    // 优先使用传入的 aiExecutor
+    if (aiExecutor && typeof aiExecutor === 'function') {
+      try {
+        console.log('   使用 aiExecutor 调用...');
+        return await aiExecutor(prompt);
+      } catch (e) {
+        console.warn(`   ⚠️ aiExecutor 调用失败：${e.message}，使用 fallback`);
+      }
+    }
+
+    // Fallback: sessions_spawn
+    try {
+      console.log('   使用 sessions_spawn 调用...');
+      const result = await this.sessionsSpawn(prompt);
+      return result;
+    } catch (e) {
+      console.warn(`   ⚠️ sessions_spawn 调用失败：${e.message}`);
+      return '';
+    }
+  }
+
+  /**
+   * 调用子代理
+   */
+  async sessionsSpawn(prompt) {
+    // 动态导入，避免循环依赖
+    const { sessions_spawn } = require('openclaw');
+    return await sessions_spawn({
+      runtime: 'subagent',
+      mode: 'run',
+      task: prompt,
+      timeoutSeconds: 300 // 5 分钟，原型生成需要时间
+    });
+  }
+
+  /**
+   * 解析 AI 返回内容并写入文件
+   */
+  async parseAndWriteFiles(aiResult, outputDir) {
     const pages = [];
-
-    // 1. 首页/落地页
-    pages.push({
-      id: 'home',
-      name: '首页',
-      type: 'landing',
-      description: `${productName} 首页`,
-      features: []
-    });
-
-    // 2. 从功能列表推断页面
-    const featurePages = this.inferPagesFromFeatures(features, content);
-    featurePages.forEach((page, index) => {
-      // 避免重复
-      if (!pages.find(p => p.id === page.id)) {
-        pages.push(page);
-      }
-    });
-
-    // 3. 补充必要的页面
-    // 如果有列表页，添加详情页
-    const hasList = pages.find(p => p.type === 'list');
-    if (hasList && !pages.find(p => p.type === 'detail')) {
-      pages.push({
-        id: `${hasList.id}-detail`,
-        name: `${hasList.name}详情`,
-        type: 'detail',
-        parent: hasList.id,
-        description: `${hasList.name}的详细信息`,
-        features: []
-      });
-    }
-
-    // 4. 推断路由关系
-    this.inferPageRelations(pages);
-
-    return {
-      productName,
-      productType,
-      pages
-    };
-  }
-
-  /**
-   * 从功能列表推断页面
-   */
-  inferPagesFromFeatures(features, content) {
-    const pages = [];
-
-    features.forEach((feature, index) => {
-      const name = feature.name || `功能${index + 1}`;
-      const pageType = this.inferPageType(feature, content);
-      const pageId = this.generatePageId(name, index);
-
-      pages.push({
-        id: pageId,
-        name: name,
-        type: pageType,
-        description: feature.description || `${name}页面`,
-        features: [feature],
-        priority: feature.priority || 'P0'
-      });
-
-      // 如果是表单类型，可能需要结果页
-      if (pageType === 'form' && feature.outputs && feature.outputs.length > 0) {
-        pages.push({
-          id: `${pageId}-result`,
-          name: `${name}结果`,
-          type: 'detail',
-          parent: pageId,
-          description: `${name}的结果展示`,
-          features: [feature]
-        });
-      }
-    });
-
-    return pages;
-  }
-
-  /**
-   * 推断单个功能的页面类型
-   */
-  inferPageType(feature, content) {
-    const name = (feature.name || '').toLowerCase();
-    const inputs = feature.inputs || [];
-    const outputs = feature.outputs || [];
-
-    // 规则匹配
-    if (name.includes('登录') || name.includes('注册') || name.includes('认证')) {
-      return 'login';
-    }
-    if (name.includes('统计') || name.includes('分析') || name.includes('看板') || name.includes('概览')) {
-      return 'dashboard';
-    }
-    if (name.includes('提交') || name.includes('申请') || name.includes('填写') || inputs.length > 3) {
-      return 'form';
-    }
-    if (name.includes('详情') || name.includes('查看')) {
-      return 'detail';
-    }
-    if (name.includes('支付') || name.includes('结算') || name.includes('收银')) {
-      return 'checkout';
-    }
-    if (name.includes('列表') || outputs.length > 3) {
-      return 'list';
-    }
-
-    // 默认列表页
-    return 'list';
-  }
-
-  /**
-   * 生成页面 ID
-   */
-  generatePageId(name, index) {
-    const slug = name
-      .toLowerCase()
-      .replace(/[^\u4e00-\u9fa5a-z0-9]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .substring(0, 20);
-    return `page-${slug || index}`;
-  }
-
-  /**
-   * 推断页面关系
-   */
-  inferPageRelations(pages) {
-    // 自动设置父页面关系
-    const listPages = pages.filter(p => p.type === 'list');
-    const detailPages = pages.filter(p => p.type === 'detail' && !p.parent);
-
-    // 为详情页关联列表页
-    detailPages.forEach(detail => {
-      const matchingList = listPages.find(list =>
-        detail.name.includes(list.name) || list.name.includes(detail.name.replace('详情', ''))
-      );
-      if (matchingList) {
-        detail.parent = matchingList.id;
-      }
-    });
-  }
-
-  // ==================== Phase 2: 导航组件生成 ====================
-
-  /**
-   * 生成导航组件配置
-   */
-  generateNavigation(sitemap, designTokens) {
-    const { pages, productName } = sitemap;
-    const colors = designTokens?.colors || {};
-
-    // 顶部页面（无 parent）作为菜单项
-    const topLevelPages = pages.filter(p => !p.parent);
-
-    // 侧边栏配置
-    const sidebar = {
-      brand: productName,
-      items: topLevelPages.map(page => ({
-        id: page.id,
-        name: page.name,
-        href: `${page.id}.html`,
-        icon: this.getIconForPageType(page.type),
-        children: pages.filter(p => p.parent === page.id).map(child => ({
-          id: child.id,
-          name: child.name,
-          href: `${child.id}.html`
-        }))
-      })),
-      style: {
-        backgroundColor: colors.background || '#FFFFFF',
-        textColor: colors.text || '#1E293B',
-        activeColor: colors.primary || '#1890FF'
-      }
-    };
-
-    // 底部 Tab 配置（最多 5 个）
-    const tabItems = topLevelPages.slice(0, 5);
-    const tabbar = {
-      items: tabItems.map(page => ({
-        id: page.id,
-        name: page.name,
-        href: `${page.id}.html`,
-        icon: this.getIconForPageType(page.type)
-      })),
-      style: {
-        backgroundColor: colors.background || '#FFFFFF',
-        textColor: colors.muted || '#6B7280',
-        activeColor: colors.primary || '#1890FF'
-      }
-    };
-
-    // 顶部导航栏
-    const header = {
-      brand: productName,
-      items: topLevelPages.slice(0, 6).map(page => ({
-        id: page.id,
-        name: page.name,
-        href: `${page.id}.html`
-      })),
-      style: {
-        backgroundColor: colors.primary || '#1890FF',
-        textColor: '#FFFFFF'
-      }
-    };
-
-    return { sidebar, tabbar, header };
-  }
-
-  /**
-   * 根据页面类型获取图标
-   */
-  getIconForPageType(type) {
-    const icons = {
-      'landing': 'home',
-      'list': 'list',
-      'form': 'edit',
-      'dashboard': 'dashboard',
-      'detail': 'file-text',
-      'login': 'user',
-      'checkout': 'shopping-cart',
-      'custom': 'file'
-    };
-    return icons[type] || 'file';
-  }
-
-  // ==================== Phase 3: 页面内容生成 ====================
-
-  /**
-   * 生成所有页面
-   */
-  async generatePages(sitemap, prd, designTokens, outputDir) {
-    const pages = [];
-    const htmlPrototypePath = path.join(__dirname, '../../skills/htmlPrototype/main.py');
-
-    // 确保输出目录存在
     const pagesDir = path.join(outputDir, 'pages');
     if (!fs.existsSync(pagesDir)) {
       fs.mkdirSync(pagesDir, { recursive: true });
     }
 
-    // 保存设计系统文件
-    const tokensPath = path.join(outputDir, 'design-tokens.json');
-    fs.writeFileSync(tokensPath, JSON.stringify(designTokens, null, 2), 'utf8');
+    // AI 可能返回多种格式：
+    // 1. Markdown 代码块：```html ... ```
+    // 2. 多个代码块带文件名注释
+    // 3. 纯 HTML
+    // 4. JSON 格式的文件映射
 
-    // 为每个页面生成 HTML
-    for (const page of sitemap.pages) {
-      console.log(`      生成: ${page.name}...`);
+    const files = this.extractFilesFromAIResult(aiResult);
 
-      const pageData = await this.generatePageContent(page, prd, designTokens);
-      const htmlContent = this.renderPageTemplate(page, pageData, designTokens, sitemap);
+    for (const [filename, content] of Object.entries(files)) {
+      const htmlPath = path.join(pagesDir, filename);
+      fs.writeFileSync(htmlPath, content, 'utf8');
 
-      const htmlPath = path.join(pagesDir, `${page.id}.html`);
-      fs.writeFileSync(htmlPath, htmlContent, 'utf8');
-
+      const pageId = filename.replace('.html', '').replace(/\s+/g, '-');
       pages.push({
-        id: page.id,
-        name: page.name,
-        type: page.type,
-        htmlPath: `pages/${page.id}.html`,
+        id: pageId,
+        name: filename.replace('.html', ''),
+        type: this.inferPageType(filename),
+        htmlPath: `pages/${filename}`,
         absolutePath: htmlPath
       });
+
+      console.log(`   ✅ 写入：${filename}`);
     }
 
-    // 生成入口文件 index.html
-    this.generateIndexPage(sitemap, designTokens, outputDir);
+    // 如果 AI 没返回任何文件，用 fallback
+    if (pages.length === 0) {
+      console.warn('   ⚠️ AI 未返回有效文件，使用 fallback');
+      pages.push(...this.generateFallbackPages(outputDir, pagesDir));
+    }
 
     return pages;
   }
 
   /**
-   * 生成单个页面内容
+   * 从 AI 返回内容中提取文件
    */
-  async generatePageContent(page, prd, designTokens) {
-    // 从 PRD 提取页面相关内容
-    const content = prd.content || '';
-    const feature = page.features?.[0] || {};
+  extractFilesFromAIResult(result) {
+    const files = {};
 
-    // 表单字段
-    const formFields = (feature.inputs || []).map(input => ({
-      label: input.field,
-      type: this.mapInputType(input.type),
-      required: input.required,
-      placeholder: `请输入${input.field}`,
-      validation: input.validation
-    }));
+    if (!result || typeof result !== 'string') return files;
 
-    // 表格列
-    const tableColumns = (feature.outputs || []).map(output => ({
-      field: output.field,
-      label: output.description || output.field,
-      type: output.type
-    }));
-
-    // 示例数据
-    const sampleData = this.generateSampleData(feature.outputs, page.name);
-
-    return {
-      title: page.name,
-      description: page.description,
-      formFields,
-      tableColumns,
-      sampleData
-    };
-  }
-
-  /**
-   * 渲染页面模板
-   */
-  renderPageTemplate(page, pageData, designTokens, sitemap) {
-    const colors = designTokens?.colors || {};
-    const typography = designTokens?.typography || {};
-
-    // 根据页面类型选择模板
-    switch (page.type) {
-      case 'list':
-        return this.renderListPage(page, pageData, designTokens, sitemap);
-      case 'form':
-        return this.renderFormPage(page, pageData, designTokens, sitemap);
-      case 'dashboard':
-        return this.renderDashboardPage(page, pageData, designTokens, sitemap);
-      case 'detail':
-        return this.renderDetailPage(page, pageData, designTokens, sitemap);
-      case 'login':
-        return this.renderLoginPage(page, pageData, designTokens, sitemap);
-      case 'landing':
-        return this.renderLandingPage(page, pageData, designTokens, sitemap);
-      default:
-        return this.renderListPage(page, pageData, designTokens, sitemap);
+    // 模式 1: Markdown 代码块带文件名注释
+    // <!-- file: home.html -->
+    // ```html
+    // ...
+    // ```
+    const fileBlockRegex = /<!--\s*file:\s*(.+?)\s*-->\s*```(?:html)?\s*([\s\S]*?)```/gi;
+    let match;
+    while ((match = fileBlockRegex.exec(result)) !== null) {
+      files[match[1].trim()] = match[2].trim();
     }
-  }
 
-  /**
-   * 渲染列表页
-   */
-  renderListPage(page, pageData, designTokens, sitemap) {
-    const colors = designTokens?.colors || {};
-    const navigation = this.generateNavigation(sitemap, designTokens);
-    const columns = pageData.tableColumns.length > 0 ? pageData.tableColumns : [
-      { field: 'name', label: '名称' },
-      { field: 'status', label: '状态' },
-      { field: 'createTime', label: '创建时间' },
-      { field: 'actions', label: '操作' }
-    ];
-    const sampleData = pageData.sampleData.length > 0 ? pageData.sampleData : [
-      ['示例数据1', '正常', '2026-04-01', '查看'],
-      ['示例数据2', '正常', '2026-04-02', '查看'],
-      ['示例数据3', '正常', '2026-04-03', '查看']
-    ];
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${page.name} - ${sitemap.productName}</title>
-    <style>
-        ${this.getBaseStyles(designTokens)}
-        ${this.getNavigationStyles(designTokens)}
-    </style>
-</head>
-<body>
-    ${this.renderSidebar(navigation.sidebar, page.id)}
-    <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">${page.name}</h1>
-            <div class="page-actions">
-                <button class="btn btn-primary">+ 新建</button>
-                <button class="btn btn-secondary">导出</button>
-            </div>
-        </div>
-
-        <div class="filter-section">
-            <div class="filter-row">
-                <input type="text" class="filter-input" placeholder="搜索关键词...">
-                <select class="filter-select"><option>全部状态</option></select>
-                <button class="btn btn-secondary">筛选</button>
-            </div>
-        </div>
-
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        ${columns.map(col => `<th>${col.label}</th>`).join('\n                        ')}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${sampleData.map(row => `
-                    <tr>
-                        ${row.map((cell, i) => i === row.length - 1
-                          ? `<td><a href="${page.id}-detail.html" class="action-link">${cell}</a></td>`
-                          : `<td>${cell}</td>`
-                        ).join('\n                        ')}
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="pagination">
-            <button class="page-btn">上一页</button>
-            <button class="page-btn active">1</button>
-            <button class="page-btn">2</button>
-            <button class="page-btn">下一页</button>
-        </div>
-    </div>
-
-    ${this.renderTabbar(navigation.tabbar, page.id)}
-</body>
-</html>`;
-  }
-
-  /**
-   * 渲染表单页
-   */
-  renderFormPage(page, pageData, designTokens, sitemap) {
-    const colors = designTokens?.colors || {};
-    const navigation = this.generateNavigation(sitemap, designTokens);
-    const fields = pageData.formFields.length > 0 ? pageData.formFields : [
-      { label: '名称', type: 'text', required: true },
-      { label: '描述', type: 'textarea', required: false }
-    ];
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${page.name} - ${sitemap.productName}</title>
-    <style>
-        ${this.getBaseStyles(designTokens)}
-        ${this.getNavigationStyles(designTokens)}
-    </style>
-</head>
-<body>
-    ${this.renderSidebar(navigation.sidebar, page.id)}
-    <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">${page.name}</h1>
-        </div>
-
-        <div class="form-container">
-            <form class="form-section">
-                ${fields.map(field => `
-                <div class="form-group">
-                    <label class="form-label">
-                        ${field.label}${field.required ? ' <span class="required">*</span>' : ''}
-                    </label>
-                    ${field.type === 'textarea'
-                      ? `<textarea class="form-input form-textarea" placeholder="${field.placeholder || '请输入' + field.label}"></textarea>`
-                      : `<input type="${field.type}" class="form-input" placeholder="${field.placeholder || '请输入' + field.label}">`
-                    }
-                </div>`).join('')}
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">提交</button>
-                    <button type="button" class="btn btn-secondary">取消</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    ${this.renderTabbar(navigation.tabbar, page.id)}
-</body>
-</html>`;
-  }
-
-  /**
-   * 渲染仪表盘页
-   */
-  renderDashboardPage(page, pageData, designTokens, sitemap) {
-    const navigation = this.generateNavigation(sitemap, designTokens);
-    const colors = designTokens?.colors || {};
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${page.name} - ${sitemap.productName}</title>
-    <style>
-        ${this.getBaseStyles(designTokens)}
-        ${this.getNavigationStyles(designTokens)}
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px; }
-        .stat-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .stat-value { font-size: 28px; font-weight: 700; color: ${colors.primary || '#1890FF'}; }
-        .stat-label { color: #666; margin-top: 8px; }
-        .chart-placeholder { background: #f5f5f5; height: 300px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #999; }
-    </style>
-</head>
-<body>
-    ${this.renderSidebar(navigation.sidebar, page.id)}
-    <div class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">${page.name}</h1>
-        </div>
-
-        <div class="stat-grid">
-            <div class="stat-card">
-                <div class="stat-value">1,234</div>
-                <div class="stat-label">总数据量</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">567</div>
-                <div class="stat-label">本月新增</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">89%</div>
-                <div class="stat-label">完成率</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">¥12.3万</div>
-                <div class="stat-label">总金额</div>
-            </div>
-        </div>
-
-        <div class="chart-placeholder">
-            图表区域（需要图表库支持）
-        </div>
-    </div>
-
-    ${this.renderTabbar(navigation.tabbar, page.id)}
-</body>
-</html>`;
-  }
-
-  /**
-   * 渲染详情页
-   */
-  renderDetailPage(page, pageData, designTokens, sitemap) {
-    const navigation = this.generateNavigation(sitemap, designTokens);
-    const colors = designTokens?.colors || {};
-    const parentPage = sitemap.pages.find(p => p.id === page.parent);
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${page.name} - ${sitemap.productName}</title>
-    <style>
-        ${this.getBaseStyles(designTokens)}
-        ${this.getNavigationStyles(designTokens)}
-        .detail-card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
-        .detail-row { display: flex; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .detail-label { width: 120px; color: #666; }
-        .detail-value { flex: 1; color: #333; }
-    </style>
-</head>
-<body>
-    ${this.renderSidebar(navigation.sidebar, page.id)}
-    <div class="main-content">
-        <div class="page-header">
-            <a href="${parentPage ? parentPage.id : 'home'}.html" class="back-link">← 返回列表</a>
-            <h1 class="page-title">${page.name}</h1>
-        </div>
-
-        <div class="detail-card">
-            <h3>基本信息</h3>
-            <div class="detail-row">
-                <div class="detail-label">名称</div>
-                <div class="detail-value">示例数据</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">状态</div>
-                <div class="detail-value">正常</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">创建时间</div>
-                <div class="detail-value">2026-04-05</div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button class="btn btn-primary">编辑</button>
-            <button class="btn btn-secondary">删除</button>
-        </div>
-    </div>
-
-    ${this.renderTabbar(navigation.tabbar, page.id)}
-</body>
-</html>`;
-  }
-
-  /**
-   * 渲染登录页
-   */
-  renderLoginPage(page, pageData, designTokens, sitemap) {
-    const colors = designTokens?.colors || {};
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 - ${sitemap.productName}</title>
-    <style>
-        ${this.getBaseStyles(designTokens)}
-        body { background: linear-gradient(135deg, ${colors.primary || '#1890FF'} 0%, ${colors.secondary || '#1890FF'} 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: white; border-radius: 12px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .login-logo { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 32px; }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <div class="login-logo">${sitemap.productName}</div>
-        <form>
-            <div class="form-group">
-                <label class="form-label">用户名</label>
-                <input type="text" class="form-input" placeholder="请输入用户名">
-            </div>
-            <div class="form-group">
-                <label class="form-label">密码</label>
-                <input type="password" class="form-input" placeholder="请输入密码">
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">登录</button>
-        </form>
-    </div>
-</body>
-</html>`;
-  }
-
-  /**
-   * 渲染落地页/首页
-   */
-  renderLandingPage(page, pageData, designTokens, sitemap) {
-    const colors = designTokens?.colors || {};
-    const navigation = this.generateNavigation(sitemap, designTokens);
-
-    return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${sitemap.productName} - 首页</title>
-    <style>
-        ${this.getBaseStyles(designTokens)}
-        .hero { padding: 80px 32px; text-align: center; background: linear-gradient(180deg, #f8f9ff 0%, #fff 100%); }
-        .hero h1 { font-size: 42px; font-weight: 700; margin-bottom: 16px; }
-        .hero p { font-size: 18px; color: #666; margin-bottom: 32px; }
-        .hero-buttons { display: flex; gap: 16px; justify-content: center; }
-        .features { padding: 60px 32px; background: #f8f9fa; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
-        .feature-card { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .feature-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
-        .feature-desc { color: #666; font-size: 14px; }
-    </style>
-</head>
-<body>
-    ${this.renderHeader(navigation.header, 'home')}
-
-    <section class="hero">
-        <h1>${sitemap.productName}</h1>
-        <p>一站式解决方案，助力您的业务增长</p>
-        <div class="hero-buttons">
-            <a href="${sitemap.pages[1]?.id || 'home'}.html" class="btn btn-primary">立即体验</a>
-            <button class="btn btn-secondary">了解更多</button>
-        </div>
-    </section>
-
-    <section class="features">
-        <div class="features-grid">
-            ${sitemap.pages.filter(p => p.type !== 'landing' && p.type !== 'login').slice(0, 6).map(p => `
-            <a href="${p.id}.html" class="feature-card">
-                <div class="feature-title">${p.name}</div>
-                <div class="feature-desc">${p.description || '功能模块'}</div>
-            </a>
-            `).join('')}
-        </div>
-    </section>
-
-    ${this.renderTabbar(navigation.tabbar, 'home')}
-</body>
-</html>`;
-  }
-
-  /**
-   * 生成入口页面
-   */
-  generateIndexPage(sitemap, designTokens, outputDir) {
-    // 默认跳转到首页
-    const indexContent = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0;url=pages/home.html">
-    <title>${sitemap.productName}</title>
-</head>
-<body>
-    <p>正在跳转... <a href="pages/home.html">点击这里</a></p>
-</body>
-</html>`;
-
-    fs.writeFileSync(path.join(outputDir, 'index.html'), indexContent, 'utf8');
-  }
-
-  // ==================== Phase 4: 路由注入 ====================
-
-  /**
-   * 生成路由表
-   */
-  generateRoutes(sitemap) {
-    const routes = [];
-
-    sitemap.pages.forEach(page => {
-      // 列表页 → 详情页
-      if (page.type === 'list') {
-        const detailPage = sitemap.pages.find(p => p.parent === page.id && p.type === 'detail');
-        if (detailPage) {
-          routes.push({
-            from: page.id,
-            to: detailPage.id,
-            trigger: '点击详情',
-            type: 'link'
-          });
+    // 模式 2: JSON 格式
+    if (Object.keys(files).length === 0) {
+      try {
+        // 尝试提取 JSON
+        const jsonMatch = result.match(/\{[\s\S]*"files"[\s\S]*\}/);
+        if (jsonMatch) {
+          const json = JSON.parse(jsonMatch[0]);
+          if (json.files && typeof json.files === 'object') {
+            for (const [filename, content] of Object.entries(json.files)) {
+              files[filename] = content;
+            }
+          }
         }
+      } catch (e) {
+        // 不是 JSON，忽略
       }
+    }
 
-      // 表单页 → 结果页
-      if (page.type === 'form') {
-        const resultPage = sitemap.pages.find(p => p.parent === page.id && p.name.includes('结果'));
-        if (resultPage) {
-          routes.push({
-            from: page.id,
-            to: resultPage.id,
-            trigger: '提交成功',
-            type: 'auto'
-          });
-        }
+    // 模式 3: 单个 HTML 文件
+    if (Object.keys(files).length === 0) {
+      const htmlMatch = result.match(/```(?:html)?\s*([\s\S]*?)```/);
+      if (htmlMatch) {
+        files['home.html'] = htmlMatch[1].trim();
+      } else if (result.includes('<!DOCTYPE html') || result.includes('<html')) {
+        files['home.html'] = result;
       }
+    }
 
-      // 首页 → 功能页
-      if (page.type === 'landing') {
-        sitemap.pages.filter(p => p.type !== 'landing' && p.type !== 'login' && !p.parent).forEach(targetPage => {
-          routes.push({
-            from: page.id,
-            to: targetPage.id,
-            trigger: `点击${targetPage.name}`,
-            type: 'link'
-          });
-        });
-      }
+    return files;
+  }
+
+  /**
+   * 推断页面类型
+   */
+  inferPageType(filename) {
+    const name = filename.toLowerCase();
+    if (name.includes('home') || name.includes('index')) return 'landing';
+    if (name.includes('login') || name.includes('auth')) return 'login';
+    if (name.includes('list') || name.includes('列表')) return 'list';
+    if (name.includes('form') || name.includes('表单')) return 'form';
+    if (name.includes('detail') || name.includes('详情')) return 'detail';
+    if (name.includes('dashboard') || name.includes('看板')) return 'dashboard';
+    return 'custom';
+  }
+
+  /**
+   * Fallback 页面生成
+   */
+  generateFallbackPages(outputDir, pagesDir) {
+    const pages = [];
+
+    // 如果连 AI 调用都失败，至少生成一个入口页
+    const content = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>原型占位</title>
+  <style>body{font-family:system-ui;padding:40px;text-align:center;color:#666}</style>
+</head>
+<body>
+  <h1>原型生成失败</h1>
+  <p>AI 调用未返回有效结果，请检查 AI 执行器配置。</p>
+</body>
+</html>`;
+
+    const path = require('path');
+    const fallbackPath = path.join(pagesDir, 'fallback.html');
+    fs.writeFileSync(fallbackPath, content, 'utf8');
+
+    pages.push({
+      id: 'fallback',
+      name: '占位页',
+      type: 'custom',
+      htmlPath: 'pages/fallback.html',
+      absolutePath: fallbackPath
     });
 
-    return routes;
+    return pages;
   }
 
   /**
-   * 注入路由到页面
+   * 查找文件（递归）
    */
-  async injectRoutes(pages, routes, navigation, outputDir) {
-    // 路由已通过模板中的 href 注入
-    // 这里可以保存路由配置文件供后续使用
-    const routesPath = path.join(outputDir, 'routes.json');
-    fs.writeFileSync(routesPath, JSON.stringify({
-      routes,
-      navigation: {
-        sidebar: navigation.sidebar.items.map(i => ({ id: i.id, name: i.name, href: i.href })),
-        tabbar: navigation.tabbar.items.map(i => ({ id: i.id, name: i.name, href: i.href }))
-      }
-    }, null, 2), 'utf8');
-  }
-
-  // ==================== Phase 5: 截图生成 ====================
-
-  /**
-   * 生成多端截图
-   */
-  async generateScreenshots(pages, outputDir) {
-    const screenshots = {
-      desktop: [],
-      mobile: []
-    };
-
-    const screenshotsDir = path.join(outputDir, 'screensshots');
-    const desktopDir = path.join(screenshotsDir, 'desktop');
-    const mobileDir = path.join(screenshotsDir, 'mobile');
-
-    if (!fs.existsSync(desktopDir)) {
-      fs.mkdirSync(desktopDir, { recursive: true });
-    }
-    if (!fs.existsSync(mobileDir)) {
-      fs.mkdirSync(mobileDir, { recursive: true });
-    }
-
-    // 检测截图工具
-    const hasPlaywright = this.checkPlaywright();
-    const hasSafari = this.checkSafari();
-
-    if (!hasPlaywright && !hasSafari) {
-      console.log('      ⚠️  未检测到截图工具，跳过截图生成');
-      console.log('      💡 安装 Playwright: npm install -g playwright');
-      return screenshots;
-    }
-
-    // 为每个页面生成截图
-    for (const page of pages) {
-      const htmlPath = page.absolutePath;
-      if (!fs.existsSync(htmlPath)) continue;
-
-      // 桌面端截图
-      const desktopPath = path.join(desktopDir, `${page.id}.png`);
-      try {
-        await this.captureScreenshot(htmlPath, desktopPath, this.screenshotSizes.desktop);
-        screenshots.desktop.push({
-          pageId: page.id,
-          path: `screensshots/desktop/${page.id}.png`,
-          ...this.screenshotSizes.desktop
-        });
-      } catch (e) {
-        console.log(`      ⚠️  桌面端截图失败: ${page.id}`);
-      }
-
-      // 移动端截图
-      const mobilePath = path.join(mobileDir, `${page.id}.png`);
-      try {
-        await this.captureScreenshot(htmlPath, mobilePath, this.screenshotSizes.mobile);
-        screenshots.mobile.push({
-          pageId: page.id,
-          path: `screensshots/mobile/${page.id}.png`,
-          ...this.screenshotSizes.mobile
-        });
-      } catch (e) {
-        console.log(`      ⚠️  移动端截图失败: ${page.id}`);
+  findFile(dir, filename) {
+    if (!fs.existsSync(dir)) return null;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === filename) return path.join(dir, filename);
+      if (entry.isDirectory()) {
+        const found = this.findFile(path.join(dir, entry.name), filename);
+        if (found) return found;
       }
     }
-
-    return screenshots;
+    return null;
   }
 
   /**
-   * 截图
+   * 生成入口页
    */
-  async captureScreenshot(htmlPath, outputPath, size) {
-    const { execSync } = require('child_process');
-
-    // 尝试 Playwright
-    try {
-      const script = `
-        const { chromium } = require('playwright');
-        (async () => {
-          const browser = await chromium.launch();
-          const page = await browser.newPage({ viewport: { width: ${size.width}, height: ${size.height} } });
-          await page.goto('file://${htmlPath}');
-          await page.screenshot({ path: '${outputPath}', fullPage: false });
-          await browser.close();
-        })();
-      `;
-      const tempScript = outputPath.replace('.png', '.js');
-      fs.writeFileSync(tempScript, script, 'utf8');
-      execSync(`node "${tempScript}"`, { stdio: 'pipe', timeout: 30000 });
-      fs.unlinkSync(tempScript);
-      return true;
-    } catch (e) {
-      // Playwright 失败，创建占位符
-      this.createPlaceholderScreenshot(outputPath);
-      return false;
-    }
-  }
-
-  /**
-   * 检测 Playwright
-   */
-  checkPlaywright() {
-    try {
-      const { execSync } = require('child_process');
-      execSync('playwright --version', { stdio: 'pipe' });
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /**
-   * 检测 Safari
-   */
-  checkSafari() {
-    return fs.existsSync('/Applications/Safari.app');
-  }
-
-  /**
-   * 创建占位符截图
-   */
-  createPlaceholderScreenshot(outputPath) {
-    const pngHeader = Buffer.from([
-      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-      0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-      0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-      0x89, 0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41,
-      0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-      0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-      0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-      0x42, 0x60, 0x82
-    ]);
-    fs.writeFileSync(outputPath, pngHeader);
-  }
-
-  // ==================== 辅助方法 ====================
-
-  /**
-   * 获取基础样式
-   */
-  getBaseStyles(designTokens) {
-    const colors = designTokens?.colors || {};
-    const typography = designTokens?.typography || {};
-
-    return `
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: ${typography.fontFamily || 'system-ui, -apple-system, sans-serif'}; background: #f5f5f5; color: ${colors.text || '#333'}; }
-        a { color: ${colors.primary || '#1890FF'}; text-decoration: none; }
-
-        .btn { display: inline-block; padding: 10px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; transition: all 200ms; font-weight: 500; }
-        .btn-primary { background: ${colors.primary || '#1890FF'}; color: white; }
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-secondary { background: white; color: #666; border: 1px solid #ddd; }
-        .btn-secondary:hover { background: #f5f5f5; }
-
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500; }
-        .form-label .required { color: #F5222D; }
-        .form-input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; transition: border-color 200ms; }
-        .form-input:focus { outline: none; border-color: ${colors.primary || '#1890FF'}; }
-        .form-textarea { min-height: 100px; resize: vertical; }
-        .form-actions { display: flex; gap: 12px; margin-top: 24px; }
-
-        .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th { background: #f8f9fa; padding: 14px 16px; text-align: left; font-weight: 600; font-size: 13px; color: #666; border-bottom: 1px solid #eee; }
-        .data-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
-        .data-table tr:hover { background: #fafafa; }
-        .action-link { color: ${colors.primary || '#1890FF'}; cursor: pointer; }
-
-        .pagination { display: flex; gap: 8px; margin-top: 20px; justify-content: center; }
-        .page-btn { padding: 8px 12px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; }
-        .page-btn.active { background: ${colors.primary || '#1890FF'}; color: white; border-color: ${colors.primary || '#1890FF'}; }
-
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .page-title { font-size: 24px; font-weight: 600; }
-        .back-link { color: #666; margin-right: 16px; }
-
-        .filter-section { background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
-        .filter-row { display: flex; gap: 12px; flex-wrap: wrap; }
-        .filter-input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; }
-        .filter-select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; background: white; }
-
-        .form-container { max-width: 800px; }
-        .form-section { background: white; padding: 32px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
-
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .tabbar { display: flex; }
-            .filter-row { flex-direction: column; }
-            .filter-input { width: 100%; }
-            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-        }
-    `;
-  }
-
-  /**
-   * 获取导航样式
-   */
-  getNavigationStyles(designTokens) {
-    return `
-        .app-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 220px; background: white; box-shadow: 1px 0 8px rgba(0,0,0,0.05); position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; }
-        .sidebar-brand { padding: 20px; font-size: 18px; font-weight: 600; border-bottom: 1px solid #f0f0f0; }
-        .sidebar-menu { list-style: none; padding: 12px 0; }
-        .sidebar-item { display: block; padding: 12px 20px; color: #333; transition: all 200ms; }
-        .sidebar-item:hover { background: #f5f5f5; }
-        .sidebar-item.active { background: #e6f4ff; color: ${designTokens?.colors?.primary || '#1890FF'}; border-left: 3px solid ${designTokens?.colors?.primary || '#1890FF'}; }
-        .sidebar-submenu { padding-left: 20px; }
-
-        .main-content { flex: 1; margin-left: 220px; padding: 24px; min-height: 100vh; }
-
-        .tabbar { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); z-index: 100; }
-        .tabbar-item { flex: 1; text-align: center; padding: 12px 0; color: #666; font-size: 12px; }
-        .tabbar-item.active { color: ${designTokens?.colors?.primary || '#1890FF'}; }
-
-        .header-nav { background: ${designTokens?.colors?.primary || '#1890FF'}; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
-        .header-brand { color: white; font-size: 18px; font-weight: 600; }
-        .header-links { display: flex; gap: 24px; }
-        .header-link { color: rgba(255,255,255,0.8); }
-        .header-link:hover { color: white; }
-    `;
-  }
-
-  /**
-   * 渲染侧边栏
-   */
-  renderSidebar(sidebar, activeId) {
-    return `
-    <nav class="sidebar">
-        <div class="sidebar-brand">${sidebar.brand}</div>
-        <ul class="sidebar-menu">
-            ${sidebar.items.map(item => `
-            <li>
-                <a href="../pages/${item.href}" class="sidebar-item ${item.id === activeId ? 'active' : ''}">
-                    ${item.name}
-                </a>
-                ${item.children && item.children.length > 0 ? `
-                <ul class="sidebar-submenu">
-                    ${item.children.map(child => `
-                    <li>
-                        <a href="../pages/${child.href}" class="sidebar-item ${child.id === activeId ? 'active' : ''}">
-                            ${child.name}
-                        </a>
-                    </li>
-                    `).join('')}
-                </ul>
-                ` : ''}
-            </li>
-            `).join('')}
-        </ul>
-    </nav>`;
-  }
-
-  /**
-   * 渲染底部 Tab
-   */
-  renderTabbar(tabbar, activeId) {
-    return `
-    <nav class="tabbar">
-        ${tabbar.items.map(item => `
-        <a href="../pages/${item.href}" class="tabbar-item ${item.id === activeId ? 'active' : ''}">
-            ${item.name}
-        </a>
-        `).join('')}
-    </nav>`;
-  }
-
-  /**
-   * 渲染顶部导航
-   */
-  renderHeader(header, activeId) {
-    return `
-    <header class="header-nav">
-        <div class="header-brand">${header.brand}</div>
-        <nav class="header-links">
-            ${header.items.map(item => `
-            <a href="pages/${item.href}" class="header-link ${item.id === activeId ? 'active' : ''}">
-                ${item.name}
-            </a>
-            `).join('')}
-        </nav>
-    </header>`;
-  }
-
-  /**
-   * 映射输入类型
-   */
-  mapInputType(inputType) {
-    const typeMap = {
-      '整数': 'number',
-      '数字': 'number',
-      '数字 (2位小数)': 'number',
-      '字符串': 'text',
-      '文本': 'textarea',
-      '日期': 'date',
-      '日期时间': 'datetime-local',
-      '百分比': 'number',
-      '下拉选择': 'select',
-      '布尔': 'checkbox'
-    };
-    return typeMap[inputType] || 'text';
-  }
-
-  /**
-   * 生成示例数据
-   */
-  generateSampleData(outputs, featureName) {
-    if (!outputs || outputs.length === 0) {
-      return [
-        ['示例数据1', '正常', '2026-04-01', '查看'],
-        ['示例数据2', '正常', '2026-04-02', '查看'],
-        ['示例数据3', '正常', '2026-04-03', '查看']
-      ];
-    }
-
-    const columns = outputs.slice(0, 4).map(o => o.example || '-');
-    return [
-      [...columns.slice(0, 3), '查看'],
-      [...columns.slice(0, 3).map(c => c + '2'), '查看'],
-      [...columns.slice(0, 3).map(c => c + '3'), '查看']
-    ];
-  }
-
-  /**
-   * 默认设计系统
-   */
-  getDefaultDesignTokens() {
-    return {
-      colors: {
-        primary: '#1890FF',
-        secondary: '#1890FF',
-        cta: '#F97316',
-        background: '#FFFFFF',
-        text: '#1E293B',
-        success: '#52C41A',
-        warning: '#FAAD14',
-        error: '#F5222D',
-        muted: '#6B7280'
-      },
-      typography: {
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: 14
-      },
-      spacing: {
-        unit: 8,
-        scale: [0, 4, 8, 12, 16, 24, 32, 48, 64]
-      }
-    };
+  generateIndexPage(productName) {
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0;url=pages/home.html">
+  <title>${productName}</title>
+</head>
+<body>
+  <p>正在跳转... <a href="pages/home.html">点击这里</a></p>
+</body>
+</html>`;
   }
 }
 

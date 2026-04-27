@@ -17,9 +17,10 @@ const path = require('path');
 
 class SmartRouter {
   constructor() {
-    // 技能定义（v2.7.0 新增 precheck）
+    // 技能定义（v2.7.0 新增 precheck，v5.1.0 新增 wiki_search）
     this.skills = {
       'precheck': { name: '环境检查', keywords: ['检查', '环境', 'precheck'], priority: 0 },
+      'wiki_search': { name: 'Wiki 知识搜索', keywords: ['wiki', '知识库', 'knowledge'], priority: 0.5, autoDetect: true },
       'interview': { name: '深度访谈', keywords: ['访谈', 'grill', 'interview'], priority: 1 },
       'decomposition': { name: '需求拆解', keywords: ['拆解', '分解', 'decomposition'], priority: 2 },
       'prd': { name: 'PRD 生成', keywords: ['PRD', '文档', 'prd'], priority: 3 },
@@ -31,24 +32,27 @@ class SmartRouter {
       'quality': { name: 'Word 质量审核', keywords: ['质量', 'quality', '审核'], priority: 9 }
     };
 
-    // 技能依赖关系（v2.7.0 新增 precheck）
+    // 技能依赖关系（v2.7.0 新增 precheck，v5.1.0 wiki_search 依赖 precheck）
     this.dependencies = {
       'precheck': [],
-      'interview': ['precheck'],
+      'wiki_search': ['precheck'],
+      'interview': ['precheck', 'wiki_search'],
       'decomposition': ['interview'],
       'prd': ['decomposition'],
-      'review': ['prd'],
+      'prd-segmented': ['decomposition'],  // v5.0.0：分段版同样依赖需求拆解
+      'review': ['prd'],  // review 也兼容 prd-segmented（main.js 自动处理）
       'flowchart': ['prd'],
       'design': ['prd'],
       'prototype': ['design'],
-      'export': ['prd'],
+      'export': ['prd'],  // export 也兼容 prd-segmented
       'quality': ['export']  // 质量审核依赖导出结果
     };
 
-    // 预定义流程模板（v2.7.0 新增 precheck）
+    // 预定义流程模板（v2.7.0 新增 precheck，v5.0.0 新增 segmented，v5.1.0 新增 wiki_search）
     this.templates = {
-      'full': ['precheck', 'interview', 'decomposition', 'prd', 'review', 'flowchart', 'design', 'prototype', 'export', 'quality'],
-      'lite': ['precheck', 'interview', 'decomposition', 'prd'],
+      'full': ['precheck', 'wiki_search', 'interview', 'decomposition', 'prd', 'review', 'flowchart', 'design', 'prototype', 'export', 'quality'],
+      'lite': ['precheck', 'wiki_search', 'interview', 'decomposition', 'prd'],
+      'segmented': ['precheck', 'wiki_search', 'interview', 'decomposition', 'prd-segmented', 'review', 'export'],  // v5.0.0 新增：分段确认版
       'review-only': ['review'],
       'export-only': ['export'],
       'design-only': ['design', 'prototype'],
@@ -93,10 +97,10 @@ class SmartRouter {
       }
     }
     
-    // 如果没有识别到任何技能，默认执行完整流程
+    // 如果没有识别到任何技能，默认执行分段流程（v5.0.0 默认）
     if (requestedSkills.length === 0) {
-      console.log('⚠️  未识别到具体技能，默认执行完整流程');
-      return [...this.templates.full];
+      console.log('⚠️  未识别到具体技能，默认执行分段确认流程（v5.0.0）');
+      return [...this.templates.segmented];
     }
     
     return requestedSkills;
@@ -109,6 +113,7 @@ class SmartRouter {
     const names = {
       'full': '完整',
       'lite': '轻量',
+      'segmented': '分段',  // v5.0.0 新增
       'review-only': '评审',
       'export-only': '导出',
       'design-only': '设计',
@@ -153,7 +158,13 @@ class SmartRouter {
    * @returns {Array<string>} 完整的技能列表
    */
   autoFillPrerequisites(requestedSkills, missingPrereqs) {
-    const additionalSkills = missingPrereqs.map(({missing}) => missing);
+    const additionalSkills = missingPrereqs.map(({missing}) => {
+      // v5.1.0：如果请求了 prd-segmented，export/review 依赖的 prd 视为已满足
+      if (missing === 'prd' && requestedSkills.includes('prd-segmented')) {
+        return null;
+      }
+      return missing;
+    }).filter(Boolean);
     const allSkills = [...new Set([...additionalSkills, ...requestedSkills])];
     
     // 保持正确的执行顺序
@@ -164,7 +175,11 @@ class SmartRouter {
       if (visited.has(skill)) return;
       visited.add(skill);
       
-      const deps = this.dependencies[skill] || [];
+      // v5.1.0：跳过 prd 依赖（当 prd-segmented 已在列表中时）
+      const deps = (this.dependencies[skill] || []).filter(dep => {
+        if (dep === 'prd' && allSkills.includes('prd-segmented')) return false;
+        return true;
+      });
       deps.forEach(visit);
       orderedSkills.push(skill);
     };
@@ -246,9 +261,11 @@ class SmartRouter {
   getModule(skillId) {
     const moduleMap = {
       'precheck': './modules/precheck_module.js',
+      'wiki_search': './modules/wiki_search_module.js',  // v5.1.0 新增
       'interview': './modules/interview_module.js',
       'decomposition': './modules/decomposition_module.js',
       'prd': './modules/prd_module.js',
+      'prd-segmented': './modules/prd_segmented_module.js',  // v5.0.0 新增：分段确认版
       'review': './modules/review_module.js',
       'optimize': './modules/optimize_module.js',
       'flowchart': './modules/flowchart_module.js',
@@ -274,8 +291,17 @@ class SmartRouter {
     }
     
     try {
-      const ModuleClass = require(modulePath);
-      return new ModuleClass();
+      const ModuleExport = require(modulePath);
+      // v5.1.0：wiki_search 导出函数对象，不是类，直接返回
+      if (typeof ModuleExport !== 'function' && ModuleExport.searchWiki) {
+        return ModuleExport;
+      }
+      // v5.1.0：prd_segmented 导出 { PRDSegmentedModule } 对象
+      if (typeof ModuleExport !== 'function' && ModuleExport.PRDSegmentedModule) {
+        return new ModuleExport.PRDSegmentedModule();
+      }
+      // 其他模块：类构造函数
+      return new ModuleExport();
     } catch (error) {
       console.error(`❌ 加载技能模块失败：${skillId}`);
       console.error(`   错误：${error.message}`);

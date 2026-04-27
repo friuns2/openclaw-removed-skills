@@ -16,10 +16,10 @@
 
 module.exports = {
   // 当前版本号
-  version: '4.2.5',
+  version: '5.1.0',
 
   // 发布日期
-  releaseDate: '2026-04-08',
+  releaseDate: '2026-04-20',
 
   // 技能名称
   name: 'PRD Workflow',
@@ -36,6 +36,20 @@ module.exports = {
 
   // 版本历史（用于生成文档）
   changelog: [
+    {
+      version: '5.1.0',
+      date: '2026-04-20',
+      type: 'feature',
+      desc: 'Wiki增强 + AI驱动原型v6.1.0 + 设计系统持久化',
+      detail: 'Wiki知识库智能集成（可选）+ 原型从模板渲染改为AI驱动（Chart.js CDN + JS校验）+ ui-ux-pro-max设计系统持久化'
+    },
+    {
+      version: '5.0.0',
+      date: '2026-04-15',
+      type: 'feature',
+      desc: '分段确认模式',
+      detail: '引入 Superpowers 分段确认 + 任务细化理念'
+    },
     {
       version: '4.2.5',
       date: '2026-04-07',

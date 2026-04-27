@@ -3,11 +3,16 @@
   "slug": "prd-workflow",
   "displayName": "Prd Workflow",
   "latest": {
-    "version": "4.2.5",
-    "publishedAt": 1775626741404,
-    "commit": "https://github.com/openclaw/skills/commit/3636e225d3b28f834b36f60177f0a3d2290ee893"
+    "version": "5.1.0",
+    "publishedAt": 1776697266416,
+    "commit": null
   },
   "history": [
+    {
+      "version": "4.2.5",
+      "publishedAt": 1775626741404,
+      "commit": "https://github.com/openclaw/skills/commit/3636e225d3b28f834b36f60177f0a3d2290ee893"
+    },
     {
       "version": "4.2.0",
       "publishedAt": 1775401228798,

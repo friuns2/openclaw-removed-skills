@@ -1,7 +1,7 @@
 {
   "name": "prd-workflow",
-  "version": "4.2.5",
-  "description": "一站式 PRD 生成工作流 v4.2.0 - 验收标准 GWT 格式优化",
+  "version": "5.1.0",
+  "description": "一站式 PRD 生成工作流 v5.1.0（Wiki 增强 + AI 驱动原型 + 分段确认）",
   "author": "gotomanutd",
   "license": "MIT",
   "scripts": {
