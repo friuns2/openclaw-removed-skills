@@ -3,11 +3,16 @@
   "slug": "ascora",
   "displayName": "Ascora",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168509176,
-    "commit": "https://github.com/openclaw/skills/commit/2e89a96f75ffc7d8206cb575fe8eb9f3b1e35eac"
+    "version": "1.0.3",
+    "publishedAt": 1776862693539,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168509176,
+      "commit": "https://github.com/openclaw/skills/commit/2e89a96f75ffc7d8206cb575fe8eb9f3b1e35eac"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652671583,
