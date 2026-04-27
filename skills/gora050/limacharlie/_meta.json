@@ -3,11 +3,16 @@
   "slug": "limacharlie",
   "displayName": "Limacharlie",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171006477,
-    "commit": "https://github.com/openclaw/skills/commit/a1ee82784cc1746531e9dcfa3732960f0f5b0065"
+    "version": "1.0.3",
+    "publishedAt": 1776892332967,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171006477,
+      "commit": "https://github.com/openclaw/skills/commit/a1ee82784cc1746531e9dcfa3732960f0f5b0065"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775131504714,
