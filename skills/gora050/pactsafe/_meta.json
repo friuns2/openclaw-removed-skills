@@ -3,11 +3,16 @@
   "slug": "pactsafe",
   "displayName": "Pactsafe",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170251607,
-    "commit": "https://github.com/openclaw/skills/commit/c8b849e8879b1f148a2e86ee9075acb40fa72b35"
+    "version": "1.0.3",
+    "publishedAt": 1776865438198,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170251607,
+      "commit": "https://github.com/openclaw/skills/commit/c8b849e8879b1f148a2e86ee9075acb40fa72b35"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998287880,
