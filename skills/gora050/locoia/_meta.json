@@ -3,11 +3,16 @@
   "slug": "locoia",
   "displayName": "Locoia",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169736712,
-    "commit": "https://github.com/openclaw/skills/commit/8a71d3ab9e5af7d3f5bf3ca699ce0f22134552bd"
+    "version": "1.0.3",
+    "publishedAt": 1776865715966,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169736712,
+      "commit": "https://github.com/openclaw/skills/commit/8a71d3ab9e5af7d3f5bf3ca699ce0f22134552bd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774898597213,
