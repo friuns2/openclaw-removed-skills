@@ -3,11 +3,16 @@
   "slug": "concord",
   "displayName": "Concord",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168176909,
-    "commit": "https://github.com/openclaw/skills/commit/25d3667e1799e825996d80bc4bb8af3c6b835dc8"
+    "version": "1.0.3",
+    "publishedAt": 1776862124968,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168176909,
+      "commit": "https://github.com/openclaw/skills/commit/25d3667e1799e825996d80bc4bb8af3c6b835dc8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580669506,
