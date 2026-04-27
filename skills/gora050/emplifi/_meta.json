@@ -3,11 +3,16 @@
   "slug": "emplifi",
   "displayName": "Emplifi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170218621,
-    "commit": "https://github.com/openclaw/skills/commit/79b6a4e3b99dbef34f7e26afc4c94ca8e6ed4d9a"
+    "version": "1.0.3",
+    "publishedAt": 1776865191321,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170218621,
+      "commit": "https://github.com/openclaw/skills/commit/79b6a4e3b99dbef34f7e26afc4c94ca8e6ed4d9a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774991119796,
