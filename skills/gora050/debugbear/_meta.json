@@ -3,11 +3,16 @@
   "slug": "debugbear",
   "displayName": "Debugbear",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170042406,
-    "commit": "https://github.com/openclaw/skills/commit/f0f79fb2572728c0b74e6b8d23656a528b3f28fe"
+    "version": "1.0.3",
+    "publishedAt": 1776885633530,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170042406,
+      "commit": "https://github.com/openclaw/skills/commit/f0f79fb2572728c0b74e6b8d23656a528b3f28fe"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774944299901,
