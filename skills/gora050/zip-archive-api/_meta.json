@@ -3,11 +3,16 @@
   "slug": "zip-archive-api",
   "displayName": "Zip Archive Api",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169770204,
-    "commit": "https://github.com/openclaw/skills/commit/9404fbebbcc3cc55162daf39c0023a12b6c13164"
+    "version": "1.0.3",
+    "publishedAt": 1776864787347,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169770204,
+      "commit": "https://github.com/openclaw/skills/commit/9404fbebbcc3cc55162daf39c0023a12b6c13164"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774904677938,
