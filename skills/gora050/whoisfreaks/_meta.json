@@ -3,9 +3,15 @@
   "slug": "whoisfreaks",
   "displayName": "Whoisfreaks",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775264786169,
-    "commit": "https://github.com/openclaw/skills/commit/5f1856b84105ab0dd7b7c09d90347ad83ffabbd4"
+    "version": "1.0.1",
+    "publishedAt": 1776885495298,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775264786169,
+      "commit": "https://github.com/openclaw/skills/commit/5f1856b84105ab0dd7b7c09d90347ad83ffabbd4"
+    }
+  ]
 }
