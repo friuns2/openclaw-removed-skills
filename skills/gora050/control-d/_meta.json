@@ -3,9 +3,15 @@
   "slug": "control-d",
   "displayName": "Control D",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171070564,
-    "commit": "https://github.com/openclaw/skills/commit/7558fdae8f4ce1dcf6a2918da076f6231e2ecb13"
+    "version": "1.0.3",
+    "publishedAt": 1776892511395,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171070564,
+      "commit": "https://github.com/openclaw/skills/commit/7558fdae8f4ce1dcf6a2918da076f6231e2ecb13"
+    }
+  ]
 }
