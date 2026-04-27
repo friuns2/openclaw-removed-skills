@@ -3,11 +3,16 @@
   "slug": "oxford-dictionaries",
   "displayName": "Oxford Dictionaries",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167995568,
-    "commit": "https://github.com/openclaw/skills/commit/77223e9e9e29995cee1b00e596ebfbc084812163"
+    "version": "1.0.3",
+    "publishedAt": 1776851758471,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167995568,
+      "commit": "https://github.com/openclaw/skills/commit/77223e9e9e29995cee1b00e596ebfbc084812163"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774558972997,
