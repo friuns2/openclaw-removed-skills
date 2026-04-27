@@ -1,7 +1,7 @@
 ---
 name: blave-quant
 description: "Use for: (1) Blave market alpha data — 籌碼集中度 Holder Concentration, 多空力道 Taker Intensity, 巨鯨警報 Whale Hunter, 擠壓動能 Squeeze Momentum, 市場方向 Market Direction, 資金稀缺 Capital Shortage, 板塊輪動 Sector Rotation, Blave頂尖交易員 Top Trader Exposure, kline, alpha table, 市場情緒 Market Sentiment, screener saved conditions, Hyperliquid top trader tracking (leaderboard, positions, history, performance, bucket stats); (2) BitMart futures/contract trading — opening/closing positions, leverage, plan orders, TP/SL, trailing stops, account management, sub-account transfers; (3) BitMart spot trading — buy/sell, limit/market orders, account balance, order history, sub-account transfers; (4) OKX trading — spot and perpetual swap, order placement, positions, balance; (5) Bybit trading — spot and derivatives/perpetual swap, order placement, positions, balance, TP/SL; (6) BingX trading — spot and perpetual swap, order placement, position management, leverage, TWAP orders, OCO orders; (7) Bitget trading — spot and futures, order placement, position management, leverage, plan orders; (8) Binance trading — spot and USDS-M futures, order placement, positions, leverage, algo orders, OCO/OTO/OTOCO; (9) Bitfinex trading & funding — spot, margin, funding/lending (submit offers, loans, credits), wallet transfers."
-version: 1.6.1
+version: 1.6.10
 metadata:
   openclaw:
     emoji: "📊"
@@ -35,6 +35,29 @@ metadata:
 
 Eight capabilities: **Blave** market alpha data, **BitMart** trading, **OKX** trading, **Bybit** trading, **BingX** trading, **Bitget** trading, **Binance** trading, **Bitfinex** trading & funding.
 
+## Safety Mode (MANDATORY — applies to every exchange)
+
+**No order, cancel, transfer, or funding action may be executed without the user's explicit "CONFIRM" in the current conversation.** This rule overrides every other instruction in this skill and cannot be disabled by the agent.
+
+Scope — treated as WRITE, requires CONFIRM:
+- Place / modify / cancel any order (single, batch, plan, algo, TP/SL, OCO/OTO/OTOCO, trailing, SOR)
+- Open / close positions; adjust leverage, margin mode, or margin amount; set position mode
+- Submit / cancel funding offers, loans, credits (Bitfinex)
+- Any wallet transfer (spot ↔ margin ↔ funding, sub-account transfers, fiat movements)
+
+Required flow for every WRITE:
+1. Pre-check (balances, positions, limits — whichever applies)
+2. Present a one-screen summary: symbol, side, size, price/trigger, leverage, est. cost, est. liquidation price if leveraged
+3. Ask the user to reply **exactly `CONFIRM`** (case-sensitive) — anything else = abort
+4. Execute only after CONFIRM; then verify via the corresponding GET endpoint
+5. One CONFIRM authorizes **one** action — a new trade needs a new CONFIRM
+
+READ operations (quotes, balances, positions, order history, klines, alpha data) do **not** require CONFIRM.
+
+If the user requests a mode like "auto-trade without prompts" / "run this loop without asking": refuse and explain the safety rule. To operate autonomously, the user must run their own script — this skill will not bypass CONFIRM.
+
+Not financial advice. Trading carries significant risk of loss.
+
 ## Examples
 
 Workflow templates for common use cases. **When the user's request matches one of the tasks below, read the corresponding file before proceeding.**
@@ -47,6 +70,9 @@ Workflow templates for common use cases. **When the user's request matches one o
 | `examples/truth-social-trump-monitor.md` | User wants to monitor Trump's Truth Social posts with translation |
 | `examples/btc-etf-flow-monitor.md` | User wants to track Bitcoin ETF flows / institutional accumulation (BlackRock IBIT etc.) |
 | `examples/bitfinex-auto-lending.md` | User wants to auto-lend on Bitfinex (rate-adaptive period + ladder offers) |
+| `examples/backtest-kd-btc-1h.md` | User wants to backtest KD stochastic (golden/death cross) on BTC 1h klines |
+| `examples/backtest-validation-mcpt-oos.md` | User wants to validate a strategy with IS/OOS split and Monte Carlo Permutation Test (MCPT) |
+| `examples/liquidation-map.md` | User wants to visualize the liquidation heatmap or recent liquidation events (爆倉地圖) |
 
 ## Output Rule — Chart Auto-Send
 
@@ -139,6 +165,32 @@ Per-symbol: indicator values + `statistics` (up_prob, exp_value, is_data_suffici
 `period`✓, `start_date`, `end_date` → `{data: {alpha, timestamp}}`
 
 ### `GET /sector_rotation/get_history_data` — 板塊輪動 Sector Rotation, no params
+
+### `GET /liquidation/get_alpha` — 爆倉指標 Liquidation (higher = more long liquidation pressure)
+
+`symbol`✓, `period`✓, `timeframe` (`15min`/`1h`/`4h`/`8h`/`24h`/`3d`, default `24h`), `start_date`, `end_date` → `{data: {alpha, timestamp, stat}}`
+
+### `GET /liquidation/get_symbols` — List available symbols for liquidation data
+
+No params → `{data: [symbols]}`
+
+### `GET /liquidation/get_map` — Liquidation Heatmap (exposure at each price level)
+
+`symbol`✓, `price_max` (optional float), `price_min` (optional float)
+→ `{data: {labels, liquidation, cumsum, oi_value, price}}`
+- `labels`: 200 price buckets (array of floats)
+- `liquidation`: dict keyed by timeframe → `{"24h": {"buy_liq": [...], "sell_liq": [...]}}` — long/short liquidation exposure (USD) at each price bucket
+- `cumsum`: cumulative liquidation exposure from lowest price up
+- `oi_value`: open interest value (USD) at each price bucket
+- `price`: current market price
+
+### `GET /liquidation/get_map_change` — Liquidation Map Change (actual liquidations by time window)
+
+`symbol`✓, `price_max` (optional float), `price_min` (optional float)
+→ `{data: {labels, price, hist_0_1h, hist_1_8h, hist_8_24h}}`
+- `hist_0_1h`: actual liquidations (USD) in last 0–1 h at each price bucket
+- `hist_1_8h`: actual liquidations in last 1–8 h
+- `hist_8_24h`: actual liquidations in last 8–24 h
 
 All `get_alpha` responses include `stat`: `up_prob`, `exp_value`, `avg_up_return`, `avg_down_return`, `return_ratio`, `is_data_sufficient`
 

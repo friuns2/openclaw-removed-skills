@@ -67,6 +67,10 @@ Base URL: `https://api.blave.org`
 - `whale_hunter/get_symbols` / `get_alpha` — 巨鯨警報 Whale Hunter; supports `score_type`
 - `squeeze_momentum/get_symbols` / `get_alpha` — 擠壓動能 Squeeze Momentum + scolor; period fixed to `1d`
 - `blave_top_trader/get_exposure` — Blave頂尖交易員 Top Trader Exposure (BTCUSDT)
+- `liquidation/get_symbols` — list of symbols with liquidation data
+- `liquidation/get_alpha` — 爆倉指標 Liquidation alpha time series + stat; `timeframe` default `24h`
+- `liquidation/get_map` — liquidation heatmap: price levels vs USD exposure (`labels`, `liquidation`, `cumsum`, `oi_value`, `price`)
+- `liquidation/get_map_change` — recent liquidation events by time window (`hist_0_1h`, `hist_1_8h`, `hist_8_24h`)
 - `screener/get_saved_conditions` — user's saved screener conditions
 - `screener/get_saved_condition_result` — symbols matching a saved condition (`condition_id` required)
 - `hyperliquid/leaderboard` — top 100 Hyperliquid traders (`sort_by` param)
@@ -130,6 +134,14 @@ Spot Base URL: `https://api.binance.com` | Futures Base URL: `https://fapi.binan
 
 Signature: `HMAC-SHA256(secret, queryString + requestBody)` → hex, `signature` as last param
 Headers: `X-MBX-APIKEY`
+
+## Binance Broker ID (Blave)
+
+Broker attribution is per-order via `newClientOrderId` (NOT a header). Every order placement MUST include `newClientOrderId` starting with:
+- Spot: `x-GBN6HWR2` (broker ID `GBN6HWR2`)
+- USDS-M Futures: `x-52DDFAFN` (broker ID `52DDFAFN`)
+
+Total length ≤ 36 chars. Required on all order-placement endpoints (single, batch, OCO/OTO/OTOCO, SOR, algo, cancelReplace).
 
 ## Bitfinex
 
