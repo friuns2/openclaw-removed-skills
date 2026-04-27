@@ -53,26 +53,59 @@ echo "[integration] Watching ${#SESSIONS[@]} subteams: ${SESSIONS[*]}"
 # ============================================================
 # PHASE 1: Wait for all subteams (builder + review chains)
 # ============================================================
-all_done() {
-  # Check that NO tmux sessions exist for any subteam (builder, review, or fix)
+session_known() {
+  local sess="$1"
+
+  # A session is known if spawn-agent registered it, its worklog exists,
+  # the tmux session/review chain exists, or its watcher exists. This prevents
+  # a misspelled/predicted session name from being treated as already done.
+  if [[ -f "$SWARM_DIR/active-tasks.json" ]] && python3 - <<'PY_INNER' "$SWARM_DIR/active-tasks.json" "$sess" >/dev/null 2>&1; then
+import json, sys
+path, sess = sys.argv[1:3]
+with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+raise SystemExit(0 if any(t.get('tmuxSession') == sess for t in data.get('tasks', [])) else 1)
+PY_INNER
+    return 0
+  fi
+
+  [[ -f "/tmp/worklog-${sess}.md" ]] && return 0
+
   local active_sessions
   active_sessions=$(tmux ls 2>/dev/null | cut -d: -f1 || echo "")
-  
+  if printf '%s\n' "$active_sessions" | grep -Fxq "$sess"; then return 0; fi
+  if printf '%s\n' "$active_sessions" | grep -Fq "${sess}-review-"; then return 0; fi
+  if printf '%s\n' "$active_sessions" | grep -Fq "${sess}-fix-"; then return 0; fi
+
+  if pgrep -af "notify-on-complete.sh.*${sess}" >/dev/null 2>&1; then return 0; fi
+
+  return 1
+}
+
+all_done() {
+  # Check that every expected session is known, then that no builder, review,
+  # fix, or notify watcher remains active for that session.
+  local active_sessions
+  active_sessions=$(tmux ls 2>/dev/null | cut -d: -f1 || echo "")
+
   for sess in "${SESSIONS[@]}"; do
-    # Check if builder session still exists
-    if echo "$active_sessions" | grep -qE "^${sess}$"; then return 1; fi
-    # Check if any review/fix chain sessions exist
-    if echo "$active_sessions" | grep -qE "^${sess}-review-"; then return 1; fi
-    if echo "$active_sessions" | grep -qE "^${sess}-fix-"; then return 1; fi
+    if ! session_known "$sess"; then
+      echo "[integration] Waiting: expected session not observed yet: $sess"
+      return 1
+    fi
+
+    if printf '%s\n' "$active_sessions" | grep -Fxq "$sess"; then return 1; fi
+    if printf '%s\n' "$active_sessions" | grep -Fq "${sess}-review-"; then return 1; fi
+    if printf '%s\n' "$active_sessions" | grep -Fq "${sess}-fix-"; then return 1; fi
   done
-  
+
   # Extra safety: wait for notify-on-complete.sh processes to finish
   for sess in "${SESSIONS[@]}"; do
-    if ps aux 2>/dev/null | grep "notify-on-complete.sh.*${sess}" | grep -v grep > /dev/null; then
+    if pgrep -af "notify-on-complete.sh.*${sess}" >/dev/null 2>&1; then
       return 1
     fi
   done
-  
+
   return 0
 }
 

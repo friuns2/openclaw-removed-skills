@@ -125,6 +125,43 @@ QUEUED_COUNT=${#QUEUED[@]}
 
 SESSIONS=()
 
+capture_spawn_session() {
+  local task_id="$1"
+  local fallback_role_or_agent="$2"
+  local spawn_output="$3"
+
+  # Prefer the authoritative line printed by spawn-agent.sh after it has
+  # resolved role/agent/model fallbacks. This avoids predicting session names
+  # from requested agents (e.g. requested claude, resolved deepseek).
+  local session
+  session=$(printf '%s\n' "$spawn_output" | awk -F': ' '/Agent running in tmux session:/ {print $2}' | tail -1 | tr -d '[:space:]')
+
+  if [[ -n "$session" ]]; then
+    printf '%s\n' "$session"
+    return 0
+  fi
+
+  # Secondary source of truth: active-tasks.json as registered by spawn-agent.sh.
+  session=$(python3 - <<'PY_INNER' "$SWARM_DIR/active-tasks.json" "$task_id" 2>/dev/null || true
+import json, sys
+path, task_id = sys.argv[1:3]
+with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+matches = [t for t in data.get('tasks', []) if t.get('id') == task_id and t.get('tmuxSession')]
+print(matches[-1]['tmuxSession'] if matches else '')
+PY_INNER
+)
+
+  if [[ -n "$session" ]]; then
+    printf '%s\n' "$session"
+    return 0
+  fi
+
+  # Last-resort fallback preserves old behavior but marks the problem loudly.
+  echo "[spawn-batch] ⚠️ Could not capture actual session for $task_id; falling back to ${fallback_role_or_agent}-${task_id}" >&2
+  printf '%s-%s\n' "$fallback_role_or_agent" "$task_id"
+}
+
 if [[ $QUEUED_COUNT -gt 0 ]]; then
   echo "🐝 Batch $BATCH_ID: spawning $SPAWNED_COUNT agents, queuing $QUEUED_COUNT tasks (max concurrent: $MAX_PARALLEL)"
 else
@@ -142,21 +179,15 @@ for line in "${INITIAL_BATCH[@]}"; do
     "$ENDORSE_SCRIPT" --batch "$TASK_ID" >/dev/null
   fi
 
-  # spawn-agent.sh resolves role→agent from duty table
-  "$SPAWN_AGENT" "$PROJECT_DIR" "$TASK_ID" "$DESCRIPTION" "$ROLE_OR_AGENT" "$MODEL" "$REASONING"
+  # spawn-agent.sh resolves role→agent from duty table and fallback-swap.
+  # Capture its output so batch metadata uses the *actual* tmux session name.
+  SPAWN_OUTPUT_FILE=$(mktemp)
+  "$SPAWN_AGENT" "$PROJECT_DIR" "$TASK_ID" "$DESCRIPTION" "$ROLE_OR_AGENT" "$MODEL" "$REASONING" 2>&1 | tee "$SPAWN_OUTPUT_FILE"
+  SPAWN_OUTPUT=$(cat "$SPAWN_OUTPUT_FILE")
+  rm -f "$SPAWN_OUTPUT_FILE"
 
-  # Determine the actual tmux session name (spawn-agent uses $AGENT-$TASK_ID)
-  # If role was passed, resolve what agent it mapped to
-  RESOLVED_AGENT="$ROLE_OR_AGENT"
-  if [[ "$ROLE_OR_AGENT" == "architect" || "$ROLE_OR_AGENT" == "builder" || "$ROLE_OR_AGENT" == "reviewer" || "$ROLE_OR_AGENT" == "integrator" ]]; then
-    RESOLVED_AGENT=$(python3 -c "
-import json
-with open('$SWARM_DIR/duty-table.json') as f: d=json.load(f)
-print(d.get('dutyTable',{}).get('$ROLE_OR_AGENT',{}).get('agent','claude'))
-" 2>/dev/null || echo "claude")
-  fi
-
-  SESSIONS+=("${RESOLVED_AGENT}-${TASK_ID}")
+  ACTUAL_SESSION=$(capture_spawn_session "$TASK_ID" "$ROLE_OR_AGENT" "$SPAWN_OUTPUT")
+  SESSIONS+=("$ACTUAL_SESSION")
 done
 
 if [[ $QUEUED_COUNT -gt 0 ]]; then
@@ -178,7 +209,8 @@ for line in task_lines:
     parts = line.split('\t')
     tid, desc, agent, model, reasoning = parts[0], parts[1], parts[2], parts[3], parts[4]
     pending.append({'id': tid, 'description': desc, 'agent': agent, 'model': model, 'reasoning': reasoning})
-    all_sessions.append(f'{agent}-{tid}')
+    # Do not precompute queued session names. spawn-agent may resolve/fallback
+    # role/agent choices at spawn time. queue-watcher appends actual names.
 
 with open(queue_file, 'w', encoding='utf-8') as f:
     json.dump({'batchId': batch_id, 'projectDir': project_dir, 'description': batch_desc,

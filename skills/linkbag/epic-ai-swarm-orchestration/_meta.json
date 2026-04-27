@@ -1,11 +1,17 @@
 {
   "owner": "linkbag",
   "slug": "epic-ai-swarm-orchestration",
-  "displayName": "Epic Ai Swarm Orchestration",
+  "displayName": "Epic AI Swarm Orchestration",
   "latest": {
-    "version": "3.2.0",
-    "publishedAt": 1775316134273,
-    "commit": "https://github.com/openclaw/skills/commit/9c3718984ec68e8293f432585447f76ba235c6c4"
+    "version": "3.2.1",
+    "publishedAt": 1777257963845,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "3.2.0",
+      "publishedAt": 1775316134273,
+      "commit": "https://github.com/openclaw/skills/commit/9c3718984ec68e8293f432585447f76ba235c6c4"
+    }
+  ]
 }

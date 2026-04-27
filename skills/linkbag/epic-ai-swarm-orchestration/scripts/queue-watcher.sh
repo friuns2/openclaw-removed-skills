@@ -44,6 +44,52 @@ POLL_INTERVAL=60
 
 echo "[queue-watcher] Batch: $BATCH_ID | Max concurrent: $MAX_CONCURRENT | Queue: $QUEUE_FILE"
 
+capture_spawn_session() {
+  local task_id="$1"
+  local fallback_role_or_agent="$2"
+  local spawn_output="$3"
+
+  local session
+  session=$(printf '%s\n' "$spawn_output" | awk -F': ' '/Agent running in tmux session:/ {print $2}' | tail -1 | tr -d '[:space:]')
+  if [[ -n "$session" ]]; then
+    printf '%s\n' "$session"
+    return 0
+  fi
+
+  session=$(python3 - <<'PY_INNER' "$SWARM_DIR/active-tasks.json" "$task_id" 2>/dev/null || true
+import json, sys
+path, task_id = sys.argv[1:3]
+with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+matches = [t for t in data.get('tasks', []) if t.get('id') == task_id and t.get('tmuxSession')]
+print(matches[-1]['tmuxSession'] if matches else '')
+PY_INNER
+)
+  if [[ -n "$session" ]]; then
+    printf '%s\n' "$session"
+    return 0
+  fi
+
+  echo "[queue-watcher] ⚠️ Could not capture actual session for $task_id; falling back to ${fallback_role_or_agent}-${task_id}" >&2
+  printf '%s-%s\n' "$fallback_role_or_agent" "$task_id"
+}
+
+append_actual_session() {
+  local session="$1"
+  python3 - <<'PY_INNER' "$QUEUE_FILE" "$session"
+import json, sys
+path, session = sys.argv[1:3]
+with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+sessions = data.setdefault('allSessions', [])
+if session and session not in sessions:
+    sessions.append(session)
+with open(path, 'w', encoding='utf-8') as f:
+    json.dump(data, f, indent=2)
+    f.write('\n')
+PY_INNER
+}
+
 while true; do
   ELAPSED=$(( $(date +%s) - START_TIME ))
   if [[ $ELAPSED -gt $TIMEOUT_SECS ]]; then
@@ -58,7 +104,7 @@ while true; do
     break
   fi
 
-  ACTIVE=$(tmux ls 2>/dev/null | grep -cE "^(claude|codex|gemini)-" || echo 0)
+  ACTIVE=$(tmux ls 2>/dev/null | grep -cE "^(claude|codex|gemini|deepseek)-" || echo 0)
 
   if [[ $ACTIVE -lt $MAX_CONCURRENT ]]; then
     # Pop next task from queue file
@@ -89,10 +135,17 @@ PY
         "$ENDORSE_SCRIPT" --batch "$TASK_ID" >/dev/null
       fi
 
-      # Pass role-or-agent to spawn-agent.sh which resolves from duty table
-      "$SPAWN_AGENT" "$PROJECT_DIR" "$TASK_ID" "$DESCRIPTION" "$ROLE_OR_AGENT" "$MODEL" "$REASONING"
+      # Pass role-or-agent to spawn-agent.sh which resolves from duty table.
+      # Capture actual tmux session after fallback-swap resolution.
+      SPAWN_OUTPUT_FILE=$(mktemp)
+      "$SPAWN_AGENT" "$PROJECT_DIR" "$TASK_ID" "$DESCRIPTION" "$ROLE_OR_AGENT" "$MODEL" "$REASONING" 2>&1 | tee "$SPAWN_OUTPUT_FILE"
+      SPAWN_OUTPUT=$(cat "$SPAWN_OUTPUT_FILE")
+      rm -f "$SPAWN_OUTPUT_FILE"
 
-      echo "[queue-watcher] ✅ Spawned: ${ROLE_OR_AGENT}-${TASK_ID} ($((ACTIVE + 1))/$MAX_CONCURRENT active, $((PENDING_COUNT - 1)) remaining)"
+      ACTUAL_SESSION=$(capture_spawn_session "$TASK_ID" "$ROLE_OR_AGENT" "$SPAWN_OUTPUT")
+      append_actual_session "$ACTUAL_SESSION"
+
+      echo "[queue-watcher] ✅ Spawned: ${ACTUAL_SESSION} ($((ACTIVE + 1))/$MAX_CONCURRENT active, $((PENDING_COUNT - 1)) remaining)"
     fi
   else
     echo "[queue-watcher] ⏳ Waiting for slot ($ACTIVE/$MAX_CONCURRENT active, $PENDING_COUNT queued)..."

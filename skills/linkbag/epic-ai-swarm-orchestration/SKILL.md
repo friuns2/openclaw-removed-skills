@@ -1,136 +1,153 @@
 ---
 name: epic-ai-swarm-orchestration
-description: Multi-agent AI swarm orchestration system for parallel coding tasks. Use when spawning multiple AI coding agents (Claude, Codex, Gemini) to work in parallel on a project with automatic tmux tracking, endorsement gates, integration merging, Telegram notifications, review chains, and completion watchers. Triggers on multi-agent work, parallel coding tasks, swarm orchestration, batch spawning, agent monitoring, or when 2+ coding tasks should run simultaneously with coordinated integration.
+description: Production playbook for running parallel AI coding agents (Claude, Codex, Gemini) with automatic model selection via duty table, token-limit auto-fallback, human oversight, quality gates, and automated integration. Use when orchestrating multi-agent coding swarms, spawning parallel builders with review loops, managing model availability/rotation across vendors, or integrating branches from multiple AI agents. Triggers on phrases like "run the swarm", "spawn agents", "AI swarm", "multi-agent build", "duty table", "model rotation", "parallel coding agents".
 ---
 
-# Epic AI Swarm Orchestration v3.1
+# Epic AI Swarm Orchestration v3.2.1
 
-Multi-agent coding orchestration: plan → endorse → spawn → monitor → review → integrate → ship.
+Production system for running parallel AI coding agents with dynamic model selection, automatic token-limit failover, and quality gates.
 
-## Core Workflow
+## Prerequisites
 
-1. **Plan** — Break work into parallel tasks, present plan to user for endorsement
-2. **Endorse** — `endorse-task.sh <task-id>` (or auto-endorsed via `spawn-batch.sh`)
-3. **Spawn** — `spawn-batch.sh` (multi) or `spawn-agent.sh` (single)
-4. **Monitor** — Auto: tmux sessions, `notify-on-complete.sh` watchers, `pulse-check.sh`
-5. **Review** — Auto: reviewer agent spawns on completion, max 3 fix rounds
-6. **Integrate** — Auto: `integration-watcher.sh` merges all branches, resolves conflicts
-7. **Ship** — Auto-merge to main, cleanup worktrees, notify user
+### Required CLIs (on PATH)
+- `tmux` — agent sandboxing (each agent in its own session)
+- `git` — worktree creation, branching, commits, push
+- `gh` — GitHub CLI (authenticated via `gh auth login`)
+- `python3` — JSON manipulation (no pip packages)
+- `openclaw` — notification delivery (Telegram/other)
 
-## Script Reference
+### Model CLIs (at least one, authenticated)
+- `claude` — Anthropic CLI (OAuth or API key)
+- `codex` — OpenAI Codex CLI (optional)
+- `gemini` — Google Gemini CLI (optional)
 
-### Primary (use these)
+Scripts use host-authenticated CLIs — they do not store credentials.
 
-| Script | Purpose | When |
-|--------|---------|------|
-| `spawn-batch.sh` | Spawn N agents + auto-integration | **Multi-agent work** |
-| `spawn-agent.sh` | Spawn single agent | Single tasks |
-| `endorse-task.sh` | Endorse a task | Before spawning |
-| `check-agents.sh` | Check tmux status | Quick status |
-| `cleanup.sh` | Remove worktrees + branches | Post-merge |
+## Quick Start
 
-### Usage
+1. Copy `scripts/` to `~/workspace/swarm/`
+2. Edit `scripts/swarm.conf` with notification target
+3. Run `scripts/assess-models.sh` to initialize the duty table
+4. Read [references/workflow.md](references/workflow.md) for the 3-phase workflow
+5. Read [references/duty-table.md](references/duty-table.md) for model rotation system
+6. Read [references/tools.md](references/tools.md) for spawn commands
 
-```bash
-# 1. Write prompts
-cat > /tmp/prompt-task1.md << 'EOF'
-... task description ...
-EOF
+## v3.2.1 Bookkeeping Fix
 
-# 2. Create tasks JSON
-cat > /tmp/tasks.json << 'EOF'
-[
-  {"id": "task-1", "description": "/tmp/prompt-task1.md", "agent": "claude", "model": "claude-sonnet-4-6"},
-  {"id": "task-2", "description": "/tmp/prompt-task2.md", "agent": "claude", "model": "claude-sonnet-4-6"}
-]
-EOF
+This release fixes a critical integration-watcher bookkeeping bug: `spawn-batch.sh` and `queue-watcher.sh` now record the actual tmux session emitted by `spawn-agent.sh` after duty-table/fallback resolution, instead of predicting names from the requested agent. `integration-watcher.sh` also refuses to treat unknown/misspelled expected sessions as complete.
 
-# 3. Endorse + spawn
-cd path/to/swarm/scripts
-bash endorse-task.sh task-1
-bash endorse-task.sh task-2
-bash spawn-batch.sh "/path/to/project" "batch-id" "Description" /tmp/tasks.json
-```
-
-#### spawn-agent.sh
+## Architecture Overview
 
 ```
-spawn-agent.sh <project-dir> <task-id> <description-or-prompt-file> [agent] [model] [reasoning]
+┌─────────────────────────────────────────────────────────┐
+│                    DUTY TABLE                           │
+│  assess-models.sh → duty-table.json (daily cron)       │
+│  architect=claude/opus, builder=codex, reviewer=gemini  │
+└───────────┬─────────────────────────────┬───────────────┘
+            │                             │
+    ┌───────▼───────┐           ┌─────────▼────────┐
+    │ spawn-agent.sh│           │ spawn-batch.sh   │
+    │ (single task) │           │ (parallel tasks)  │
+    └───────┬───────┘           └────────┬─────────┘
+            │  Reads role → agent/model  │
+            │  from duty-table.json      │
+    ┌───────▼────────────────────────────▼───────────┐
+    │              RUNNER (in tmux)                    │
+    │  On token limit → model-fallback.sh             │
+    │  Auto-retry up to 2x with next available model  │
+    │  Updates duty table for future spawns            │
+    └───────┬─────────────────────────────────────────┘
+            │
+    ┌───────▼───────────────────────┐
+    │  notify-on-complete.sh        │
+    │  → auto-spawns reviewer       │
+    │  → integration-watcher.sh     │
+    │  → ESR + work log persistence │
+    └───────────────────────────────┘
 ```
 
-- `project-dir`: Absolute path to project root
-- `task-id`: Unique ID (used for branch name + tmux session)
-- `description`: Task prompt text or path to `.md` prompt file
-- `agent`: `claude` | `codex` | `gemini` (default: `claude`)
-- `model`: Model override (default: per duty table)
-- `reasoning`: `low` | `medium` | `high` (default: `high`)
+## Duty Table System
 
-### Supporting Scripts
+The duty table (`duty-table.json`) maps **roles** to **agents/models**:
+
+| Role | Purpose | Default Assignment |
+|------|---------|-------------------|
+| architect | Planning, design | Claude Opus (best reasoning) |
+| builder | Implementation | Codex or Claude Sonnet (fast) |
+| reviewer | Code review + fixes | Gemini Flash or Sonnet |
+| integrator | Branch merging | Claude Opus (deep thinking) |
+
+### Auto-Assessment
+`assess-models.sh` runs daily (or on-demand) to:
+1. Test all models across all 3 vendors (45s timeout each)
+2. Assign optimal 3-vendor spread to roles
+3. If both Codex + Gemini down → fallback to all-Claude table
+
+### Mid-Run Token Failover
+When an agent hits a token/rate limit during execution:
+1. Runner detects the error pattern in output
+2. Calls `model-fallback.sh` with the role + failed model
+3. Gets the next available model from the per-role fallback chain
+4. Retries the task (up to 2 attempts)
+5. Updates duty table so future spawns use the working model
+6. Logs the switch to `pending-notifications.txt`
+
+See [references/duty-table.md](references/duty-table.md) for full details.
+
+## Core Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `integration-watcher.sh` | Poll + auto-merge (called by spawn-batch) |
-| `notify-on-complete.sh` | Per-agent watcher (called by spawn-agent) |
-| `start-integration.sh` | Manual integration start |
-| `pulse-check.sh` | Detect stuck agents |
-| `queue-watcher.sh` | Process inbox queue |
-| `inbox-add.sh` | Add task to inbox |
-| `inbox-list.sh` | List queued tasks |
-| `assess-models.sh` | Weekly model rotation |
-| `deploy-notify.sh` | CI/CD build notifications |
-| `esr-log.sh` | Log to ESR/work history |
-| `daily-standup.sh` | Generate standup summary |
-| `cleanup.sh` | Post-merge cleanup |
+| `spawn-agent.sh` | Spawn single agent (resolves role from duty table) |
+| `spawn-batch.sh` | Spawn parallel agents with auto-queuing |
+| `assess-models.sh` | Test models, update duty table |
+| `model-fallback.sh` | Find next available model for a role |
+| `fallback-swap.sh` | Pre-spawn primary/fallback test |
+| `try-model.sh` | Quick model health check |
+| `notify-on-complete.sh` | Watcher: auto-review + integration |
+| `integration-watcher.sh` | Merge all branches after batch |
+| `queue-watcher.sh` | Auto-spawn queued overflow tasks |
+| `pulse-check.sh` | Detect stuck agents, auto-kill |
+| `check-agents.sh` | Monitor all active agents |
+| `endorse-task.sh` | Human endorsement gate |
+| `esr-log.sh` | Engineering Status Report logging |
+| `daily-standup.sh` | Daily status summary |
+| `cleanup.sh` | Remove old worktrees + logs |
 
-## Setup
+## Workflow
 
-1. Copy `scripts/` to your workspace (e.g., `~/workspace/swarm/`)
-2. Copy `duty-table.template.json` → `duty-table.json` and customize
-3. Ensure `tmux`, `git`, `gh` CLI, and at least one coding agent CLI are installed
-4. For notifications: configure OpenClaw with Telegram/Discord
+### Phase 1: PLAN (Architect)
+- Read project context, ESR, codebase
+- Break work into parallel tasks with prompts
+- Present plan to human → **HOLD** until endorsed
 
-### Dependencies
+### Phase 2: BUILD + REVIEW (Builder + Reviewer)
+- `spawn-batch.sh` deploys agents in tmux + worktrees
+- Each agent codes autonomously with structured work log
+- `notify-on-complete.sh` auto-spawns reviewer (max 3 fix loops)
+- Token limits trigger automatic model switch mid-run
 
-- `bash` 4+ (macOS: install via Homebrew, ships with Linux)
-- `tmux` (all platforms: `brew install tmux` / `apt install tmux`)
-- `git` + `gh` CLI (for PR creation and merging)
-- `jq` (JSON processing: `brew install jq` / `apt install jq`)
-- At least one coding agent: `claude` (Claude Code), `codex`, or `gemini`
-- Optional: `openclaw` (for Telegram/Discord notifications)
-
-### macOS Notes
-
-- macOS ships with bash 3.x; install bash 5+ via `brew install bash`
-- Use `brew install gnu-sed` and alias `sed=gsed` if scripts use GNU sed features
-- `tmux` works identically on macOS and Linux
+### Phase 3: SHIP (Integrator)
+- `integration-watcher.sh` merges all branches sequentially
+- Conflict resolution, build verification
+- ESR + work log persisted to project history
+- Telegram notification with shipped summary
 
 ## Configuration
 
-### duty-table.json
-
-Maps roles to agents/models:
-
-```json
-{
-  "dutyTable": {
-    "architect": {"agent": "claude", "model": "claude-opus-4-6"},
-    "builder":   {"agent": "claude", "model": "claude-sonnet-4-6"},
-    "reviewer":  {"agent": "claude", "model": "claude-sonnet-4-6"},
-    "integrator":{"agent": "claude", "model": "claude-opus-4-6"}
-  }
-}
+`swarm.conf`:
+```bash
+SWARM_NOTIFY_TARGET="<telegram-user-id>"
+SWARM_NOTIFY_CHANNEL="telegram"
+SWARM_MAX_CONCURRENT=8
 ```
 
-### Endorsement System
+## Endorsement System
 
-Every task requires endorsement before spawning (safety gate):
-- `spawn-batch.sh` auto-endorses all tasks in the batch
-- Manual: `bash endorse-task.sh <task-id>`
-- 30-second cooldown between endorsement and spawn
+Every task requires human approval before agents spawn:
+```bash
+endorse-task.sh <task-id>           # Single task
+spawn-batch.sh ... <tasks.json>     # Batch endorsement (auto per-task)
+```
 
-## Hard Rules
-
-1. **Always endorse before spawning** — no endorsement = no spawn
-2. **Use spawn-batch.sh for 2+ tasks** — it starts the integration watcher
-3. **Never use bare `claude --print` in background** — bypasses tmux, notifications, everything
-4. **Let notify-on-complete.sh handle notifications** — don't add `openclaw system event` to prompts
+30-second cooldown between endorsement and spawn prevents accidental double-runs.
