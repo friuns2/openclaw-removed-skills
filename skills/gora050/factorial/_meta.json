@@ -3,9 +3,15 @@
   "slug": "factorial",
   "displayName": "Factorial",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775225210649,
-    "commit": "https://github.com/openclaw/skills/commit/fe8268aacdd744a628b868afbbb378c2c89dc330"
+    "version": "1.0.1",
+    "publishedAt": 1776885301950,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775225210649,
+      "commit": "https://github.com/openclaw/skills/commit/fe8268aacdd744a628b868afbbb378c2c89dc330"
+    }
+  ]
 }
