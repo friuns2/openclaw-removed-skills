@@ -3,11 +3,16 @@
   "slug": "sumo-logic",
   "displayName": "Sumo Logic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168397164,
-    "commit": "https://github.com/openclaw/skills/commit/ae4c400e5677e52b6225d68a52f061da54672347"
+    "version": "1.0.3",
+    "publishedAt": 1776862532989,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168397164,
+      "commit": "https://github.com/openclaw/skills/commit/ae4c400e5677e52b6225d68a52f061da54672347"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774616682566,
