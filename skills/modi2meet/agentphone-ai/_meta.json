@@ -3,11 +3,16 @@
   "slug": "agentphone-ai",
   "displayName": "Agentphone Skills",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1775198124169,
-    "commit": "https://github.com/openclaw/skills/commit/dbbc53127c6b7750d9c915858185826b398f40b8"
+    "version": "1.3.0",
+    "publishedAt": 1776742947426,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1775198124169,
+      "commit": "https://github.com/openclaw/skills/commit/dbbc53127c6b7750d9c915858185826b398f40b8"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1774947857936,
