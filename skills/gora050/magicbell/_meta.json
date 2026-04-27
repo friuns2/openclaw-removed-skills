@@ -3,11 +3,16 @@
   "slug": "magicbell",
   "displayName": "Magicbell",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168960140,
-    "commit": "https://github.com/openclaw/skills/commit/f8ec7d56ef204dc64bb31449c9faa4f18f342595"
+    "version": "1.0.3",
+    "publishedAt": 1776863577363,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168960140,
+      "commit": "https://github.com/openclaw/skills/commit/f8ec7d56ef204dc64bb31449c9faa4f18f342595"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774739089018,
