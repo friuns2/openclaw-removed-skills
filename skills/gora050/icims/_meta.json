@@ -3,11 +3,16 @@
   "slug": "icims",
   "displayName": "Icims",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167932787,
-    "commit": "https://github.com/openclaw/skills/commit/71673e5fe9314e63f3c99d32bebf3aa23956ec15"
+    "version": "1.0.3",
+    "publishedAt": 1776865332499,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167932787,
+      "commit": "https://github.com/openclaw/skills/commit/71673e5fe9314e63f3c99d32bebf3aa23956ec15"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774526662418,
