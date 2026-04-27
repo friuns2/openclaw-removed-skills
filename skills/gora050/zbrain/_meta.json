@@ -3,9 +3,15 @@
   "slug": "zbrain",
   "displayName": "Zbrain",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171074967,
-    "commit": "https://github.com/openclaw/skills/commit/5d51ec43aed99a601dc7fbb0b1b298e7d1b3bc95"
+    "version": "1.0.3",
+    "publishedAt": 1776892520891,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171074967,
+      "commit": "https://github.com/openclaw/skills/commit/5d51ec43aed99a601dc7fbb0b1b298e7d1b3bc95"
+    }
+  ]
 }
