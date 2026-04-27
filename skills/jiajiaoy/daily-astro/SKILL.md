@@ -1,6 +1,6 @@
 ---
 name: daily-astro
-description: "西方星座每日运势 — 12星座今日运程、幸运元素、爱情事业财运指数，中英双语精美卡片。Daily Western horoscope for all 12 zodiac signs — love career finance scores, lucky elements, bilingual EN/CN. Trigger on: 星座运势、今日星座、白羊座、金牛座、双子座、巨蟹座、狮子座、处女座、天秤座、天蝎座、射手座、摩羯座、水瓶座、双鱼座、horoscope、zodiac、daily horoscope。"
+description: "Daily horoscope for all 12 zodiac signs — love, career & finance scores (1–5★), lucky color/number/direction, daily affirmation. Morning & evening push. Bilingual EN/CN."
 keywords:
   - 星座运势
   - 今日星座

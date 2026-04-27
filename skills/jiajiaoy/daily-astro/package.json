@@ -1,7 +1,7 @@
 {
   "name": "daily-horoscope-west",
-  "version": "1.0.0",
-  "description": "\u897f\u65b9\u661f\u5ea7\u8fd0\u52bf",
+  "version": "1.0.2",
+  "description": "Daily horoscope for all 12 zodiac signs — love, career & finance scores (1–5★), lucky color/number/direction, daily affirmation. Morning & evening push. Bilingual EN/CN.",
   "engines": {
     "node": ">=18"
   },

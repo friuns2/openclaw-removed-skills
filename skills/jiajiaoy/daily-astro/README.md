@@ -1,6 +1,9 @@
-# Daily Astro / 西方星座运势
+# Daily Astro — Western Horoscope Skill
 
-> 西方星座运势 — 12星座每日运程 · 爱情事业财运 · 幸运元素 · 中英双语
+> Daily horoscope for all 12 zodiac signs — love, career, finance scores, lucky elements. Bilingual EN/CN.
+
+[![clawhub](https://img.shields.io/badge/clawhub-daily--astro-blue)](https://clawhub.ai/skills/daily-astro)
+[![openclaw](https://img.shields.io/badge/openclaw-skill-orange)](https://openclaw.ai)
 
 An [OpenClaw](https://openclaw.ai) skill that delivers daily Western horoscope readings for all 12 zodiac signs — love, career, and finance scores, lucky color/number/direction, and a daily affirmation. Pairs naturally with [yunshi](https://github.com/jiajiaoy/yunshi) for a complete Chinese + Western astrology experience.
 
@@ -42,3 +45,11 @@ Supported channels: `telegram` / `feishu` / `slack` / `discord`
 ---
 
 *MIT License · OpenClaw Skill*
+
+## Keywords
+
+horoscope · daily horoscope · zodiac · astrology · western astrology · Aries · Taurus · Gemini · Cancer · Leo · Virgo · Libra · Scorpio · Sagittarius · Capricorn · Aquarius · Pisces · 星座运势 · 今日星座 · 每日运势 · 星座
+
+---
+
+Built for [OpenClaw](https://openclaw.ai) · Published on [clawhub.ai](https://clawhub.ai/skills/daily-astro)
