@@ -3,11 +3,16 @@
   "slug": "omniconvert",
   "displayName": "Omniconvert",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168316691,
-    "commit": "https://github.com/openclaw/skills/commit/0f8e6e3bbe4c44eef6ebbafcfd4cdecdfa1c658f"
+    "version": "1.0.3",
+    "publishedAt": 1776862362802,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168316691,
+      "commit": "https://github.com/openclaw/skills/commit/0f8e6e3bbe4c44eef6ebbafcfd4cdecdfa1c658f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774602252907,
