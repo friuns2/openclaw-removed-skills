@@ -3,9 +3,15 @@
   "slug": "arangodb",
   "displayName": "Arangodb",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775203679174,
-    "commit": "https://github.com/openclaw/skills/commit/675589cae919f6e43efd7ea12e4f5215d744a845"
+    "version": "1.0.1",
+    "publishedAt": 1776885099320,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775203679174,
+      "commit": "https://github.com/openclaw/skills/commit/675589cae919f6e43efd7ea12e4f5215d744a845"
+    }
+  ]
 }
