@@ -3,11 +3,16 @@
   "slug": "boost",
   "displayName": "Boost",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171049755,
-    "commit": "https://github.com/openclaw/skills/commit/b9b3d21c5cbc7ece07354ddf855a73010a568f9c"
+    "version": "1.0.3",
+    "publishedAt": 1776870567320,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171049755,
+      "commit": "https://github.com/openclaw/skills/commit/b9b3d21c5cbc7ece07354ddf855a73010a568f9c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775135137348,
