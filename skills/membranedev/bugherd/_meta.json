@@ -3,11 +3,16 @@
   "slug": "bugherd",
   "displayName": "Bugherd",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168472278,
-    "commit": "https://github.com/openclaw/skills/commit/a6ff17c804ee77438c2fd6f2bc18a0debfe1f433"
+    "version": "1.0.3",
+    "publishedAt": 1776852631944,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168472278,
+      "commit": "https://github.com/openclaw/skills/commit/a6ff17c804ee77438c2fd6f2bc18a0debfe1f433"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774648951006,
