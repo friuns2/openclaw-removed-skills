@@ -278,6 +278,37 @@ This skill should prefer a ranked cluster of opportunities over a single determi
 
 ---
 
+## Combined Agent Use Cases (Spot + Perps)
+
+This futures skill composes cleanly with the FarmDash Signal Architect tool surface when an agent needs both spot routing and perps exposure.
+
+### 1) Hedge a farming portfolio
+
+Use when the user is farming points but wants to reduce directional risk.
+
+- Research farms with `get_trail_heat` / `optimize_portfolio`.
+- Move spot exposure with `get_swap_quote` + `execute_swap` (user-approved).
+- Hedge with `analyze_futures_strategy` + `calculate_position_size`.
+- Execute hedge legs with `execute_perp_order` (user-approved).
+
+### 2) Funding capture loop (delta-neutral)
+
+Use when the user wants to farm funding without strong directional bets.
+
+- `scan_funding_rates` daily to shortlist candidates.
+- `analyze_futures_strategy` to confirm liquidity + basis assumptions.
+- `execute_perp_order` for entry, and `cancel_perp_order` for stale orders.
+- Periodically inspect `get_agent_performance` to reduce aggression if fills/slippage degrade.
+
+### 3) "No-trade" is the product
+
+Use when the user wants safety first.
+
+- If `analyze_futures_strategy` returns `no_trade`, do not force a setup.
+- Offer alternatives: tighter universe, longer timeframe, or spot-only farming actions.
+
+---
+
 ## Guardrails
 
 These rules remain non-negotiable:
