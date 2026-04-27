@@ -1,0 +1,11 @@
+{
+  "owner": "cinience",
+  "slug": "aliyun-qwen-generation",
+  "displayName": "Aliyun Qwen Generation",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775069970759,
+    "commit": null
+  },
+  "history": []
+}
