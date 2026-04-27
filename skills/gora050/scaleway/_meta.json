@@ -3,11 +3,16 @@
   "slug": "scaleway",
   "displayName": "Scaleway",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170479133,
-    "commit": "https://github.com/openclaw/skills/commit/8af7e26bae42d43b1c9a9745ce48e4d0308fed2a"
+    "version": "1.0.3",
+    "publishedAt": 1776893374563,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170479133,
+      "commit": "https://github.com/openclaw/skills/commit/8af7e26bae42d43b1c9a9745ce48e4d0308fed2a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775030685135,
