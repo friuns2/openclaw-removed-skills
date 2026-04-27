@@ -3,11 +3,16 @@
   "slug": "burst-sms",
   "displayName": "Burst Sms",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168809594,
-    "commit": "https://github.com/openclaw/skills/commit/6a66863c0b78002cbaccd582652996e77080e8d5"
+    "version": "1.0.3",
+    "publishedAt": 1776863341065,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168809594,
+      "commit": "https://github.com/openclaw/skills/commit/6a66863c0b78002cbaccd582652996e77080e8d5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774695879130,
