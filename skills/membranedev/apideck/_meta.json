@@ -3,9 +3,15 @@
   "slug": "apideck",
   "displayName": "Apideck",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775275415188,
-    "commit": "https://github.com/openclaw/skills/commit/88f4bdcf80db11a7a45f1b2281d7314d71c0f194"
+    "version": "1.0.1",
+    "publishedAt": 1776882602504,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775275415188,
+      "commit": "https://github.com/openclaw/skills/commit/88f4bdcf80db11a7a45f1b2281d7314d71c0f194"
+    }
+  ]
 }
