@@ -3,11 +3,16 @@
   "slug": "flywire",
   "displayName": "Flywire",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168569491,
-    "commit": "https://github.com/openclaw/skills/commit/25049bc8d66f4e877abfa60a91f6a96b5878ecc0"
+    "version": "1.0.3",
+    "publishedAt": 1776870614166,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168569491,
+      "commit": "https://github.com/openclaw/skills/commit/25049bc8d66f4e877abfa60a91f6a96b5878ecc0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774663410434,
