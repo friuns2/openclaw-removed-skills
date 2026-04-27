@@ -3,11 +3,16 @@
   "slug": "callpage",
   "displayName": "Callpage",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168750483,
-    "commit": "https://github.com/openclaw/skills/commit/8d84dfd50e8586dc1776d29447cf25f76ba37411"
+    "version": "1.0.3",
+    "publishedAt": 1776863104656,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168750483,
+      "commit": "https://github.com/openclaw/skills/commit/8d84dfd50e8586dc1776d29447cf25f76ba37411"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774688617558,
