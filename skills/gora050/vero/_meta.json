@@ -3,9 +3,15 @@
   "slug": "vero",
   "displayName": "Vero",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168877418,
-    "commit": "https://github.com/openclaw/skills/commit/3359490137b75fb386f2b956af03264d2610c49b"
+    "version": "1.0.3",
+    "publishedAt": 1776864611843,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168877418,
+      "commit": "https://github.com/openclaw/skills/commit/3359490137b75fb386f2b956af03264d2610c49b"
+    }
+  ]
 }
