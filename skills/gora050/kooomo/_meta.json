@@ -3,9 +3,15 @@
   "slug": "kooomo",
   "displayName": "Kooomo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775261068751,
-    "commit": "https://github.com/openclaw/skills/commit/2d540c9f00ec08c7187e7662d045abf545f8d9d0"
+    "version": "1.0.1",
+    "publishedAt": 1776893099747,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775261068751,
+      "commit": "https://github.com/openclaw/skills/commit/2d540c9f00ec08c7187e7662d045abf545f8d9d0"
+    }
+  ]
 }
