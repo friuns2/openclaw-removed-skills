@@ -3,11 +3,16 @@
   "slug": "actblue",
   "displayName": "Actblue",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170331189,
-    "commit": "https://github.com/openclaw/skills/commit/91051c4a3fde2f6a13648dab51175f6b4a2ae587"
+    "version": "1.0.3",
+    "publishedAt": 1776857097448,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170331189,
+      "commit": "https://github.com/openclaw/skills/commit/91051c4a3fde2f6a13648dab51175f6b4a2ae587"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012577488,
