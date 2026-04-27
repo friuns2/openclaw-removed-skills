@@ -1,0 +1,11 @@
+{
+  "owner": "arhadnane",
+  "slug": "attack-surface-mapper",
+  "displayName": "Attack Surface Mapper",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775253087651,
+    "commit": null
+  },
+  "history": []
+}
