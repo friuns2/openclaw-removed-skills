@@ -1,0 +1,11 @@
+{
+  "owner": "twinsgeeks",
+  "slug": "ubuntu-ai",
+  "displayName": "Ubuntu Ai",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775256950408,
+    "commit": null
+  },
+  "history": []
+}
