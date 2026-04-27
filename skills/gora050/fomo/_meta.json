@@ -3,11 +3,16 @@
   "slug": "fomo",
   "displayName": "Fomo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168333183,
-    "commit": "https://github.com/openclaw/skills/commit/07a5d10f7aea3474dc6a5a28643f3b500a0bdb54"
+    "version": "1.0.3",
+    "publishedAt": 1776862171786,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168333183,
+      "commit": "https://github.com/openclaw/skills/commit/07a5d10f7aea3474dc6a5a28643f3b500a0bdb54"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774609416468,
