@@ -3,9 +3,15 @@
   "slug": "daily-mindful",
   "displayName": "Daily Mindful",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775109002590,
-    "commit": "https://github.com/openclaw/skills/commit/062b258c0fda8fb9bd8cce7005158f6c292ef079"
+    "version": "1.0.1",
+    "publishedAt": 1777286827985,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775109002590,
+      "commit": "https://github.com/openclaw/skills/commit/062b258c0fda8fb9bd8cce7005158f6c292ef079"
+    }
+  ]
 }

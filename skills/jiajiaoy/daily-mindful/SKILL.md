@@ -1,6 +1,6 @@
 ---
 name: daily-mindful
-description: "每日正念冥想引导、呼吸练习与心灵小文，帮助放松减压。Daily mindfulness meditation guide, breathing exercise, and reflection — calm and stress relief. Trigger on：每日正念、冥想、正念、减压、呼吸练习、放松、daily mindfulness、meditation、stress relief、breathing exercise、anxiety、睡前放松。"
+description: "Daily mindfulness in 3–5 minutes — morning breathing exercise, guided meditation, and evening reflection prompt. Practical calm and stress relief for busy people."
 keywords:
   - 每日正念
   - 冥想
