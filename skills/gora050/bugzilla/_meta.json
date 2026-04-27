@@ -3,11 +3,16 @@
   "slug": "bugzilla",
   "displayName": "Bugzilla",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170306366,
-    "commit": "https://github.com/openclaw/skills/commit/551b6c3a86a8588f1721c8198f9c7a2681c3b10a"
+    "version": "1.0.3",
+    "publishedAt": 1776893351193,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170306366,
+      "commit": "https://github.com/openclaw/skills/commit/551b6c3a86a8588f1721c8198f9c7a2681c3b10a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775009089482,
