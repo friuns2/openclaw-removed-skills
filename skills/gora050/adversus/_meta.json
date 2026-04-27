@@ -3,11 +3,16 @@
   "slug": "adversus",
   "displayName": "Adversus",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167842211,
-    "commit": "https://github.com/openclaw/skills/commit/2901ee67f252831ee80faadc14448e85d927796b"
+    "version": "1.0.3",
+    "publishedAt": 1776861796857,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167842211,
+      "commit": "https://github.com/openclaw/skills/commit/2901ee67f252831ee80faadc14448e85d927796b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774515816166,
