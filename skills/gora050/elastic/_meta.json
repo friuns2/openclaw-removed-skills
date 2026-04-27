@@ -1,0 +1,11 @@
+{
+  "owner": "gora050",
+  "slug": "elastic",
+  "displayName": "Elastic",
+  "latest": {
+    "version": "1.0.3",
+    "publishedAt": 1776866157422,
+    "commit": null
+  },
+  "history": []
+}
