@@ -3,11 +3,16 @@
   "slug": "paigo",
   "displayName": "Paigo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169283883,
-    "commit": "https://github.com/openclaw/skills/commit/fb60ef0ba65f9cde1f620008f54bded90224fd14"
+    "version": "1.0.3",
+    "publishedAt": 1776864163374,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169283883,
+      "commit": "https://github.com/openclaw/skills/commit/fb60ef0ba65f9cde1f620008f54bded90224fd14"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774789520100,
