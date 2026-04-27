@@ -4,12 +4,32 @@ description: Create conversational Pulses that replace forms, surveys, intake em
 license: MIT
 metadata:
   author: Spark Collective
-  version: "1.3.0"
+  version: "1.4.0"
   website: https://unformal.ai
 allowed-tools: Bash
 ---
 
 # Unformal API
+
+## STAY CURRENT — check before creating a Pulse
+
+Before you create or modify a Pulse, make sure your local CLI and this skill file are up to date. The Pulse API gains new config fields regularly (persona, welcome copy, research toggle, topics, etc.) and an outdated CLI / skill silently drops them — the Pulse gets created with defaults the user didn't intend.
+
+One `curl` tells you everything:
+
+```bash
+curl -fsS https://unformal.ai/api/v1/version
+```
+
+Returns the current CLI version, current skill version, and the minimum versions that know about the full API surface. Then:
+
+1. Compare the `cli.latest` to `unformal --version`. If yours is older, run `npm i -g @unformal/cli@latest`.
+2. Compare the `skill.latest` to the `version:` in the frontmatter of **this file** (currently `1.4.0`). If yours is older, re-install: `mkdir -p ~/.claude/skills/unformal && curl -fsS https://unformal.ai/SKILL.md > ~/.claude/skills/unformal/SKILL.md`, then read the new version before continuing.
+3. If you hit `409` / `400` / missing-field errors from the API, the first thing to check is always: are you on the latest CLI + skill?
+
+Skipping this step is the #1 cause of "the Pulse I created is missing fields I wanted." Don't skip it.
+
+
 
 Create AI-powered conversational flows (Pulses) that replace forms, surveys, and intake emails. Send someone a link — an AI agent has a real conversation with them and extracts structured data.
 
@@ -106,9 +126,13 @@ Send the URL to anyone. The AI conducts the conversation. You get structured dat
 |--------|------|-------------|
 | POST | /signup | Create account (no auth required) |
 | POST | /verify | Verify email (no auth required) |
+| POST | /login | Email a 6-digit login code for an existing account (no auth required) |
+| POST | /login/verify | Exchange login code for a fresh API key (no auth required) |
 | POST | /pulses | Create a Pulse |
 | GET | /pulses | List all Pulses |
 | GET | /pulses/:id | Get Pulse details |
+| GET | /pulses/by-slug/:slug | Get full Pulse details by slug (workspace-scoped) |
+| GET | /pulses/public/:slug | Public-facing preview (welcome copy, tone, mode) — no auth |
 | PATCH | /pulses/:id | Update Pulse config (all creation fields supported) |
 | DELETE | /pulses/:id | Archive a Pulse |
 | POST | /pulses/:id/publish | Publish a Pulse |

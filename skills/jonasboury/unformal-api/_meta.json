@@ -3,11 +3,16 @@
   "slug": "unformal-api",
   "displayName": "Unformal Api",
   "latest": {
-    "version": "1.3.0",
-    "publishedAt": 1776622820029,
-    "commit": "https://github.com/openclaw/skills/commit/df5765358f8c607feb81785df4dfe1ad1dc10494"
+    "version": "1.4.0",
+    "publishedAt": 1777021078364,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.0",
+      "publishedAt": 1776622820029,
+      "commit": "https://github.com/openclaw/skills/commit/df5765358f8c607feb81785df4dfe1ad1dc10494"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812544824,
