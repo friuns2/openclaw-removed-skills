@@ -3,11 +3,16 @@
   "slug": "degreed",
   "displayName": "Degreed",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169757698,
-    "commit": "https://github.com/openclaw/skills/commit/45f0a1766e7d39b04c46375fa70ba69a1c9a8b7c"
+    "version": "1.0.3",
+    "publishedAt": 1776865829131,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169757698,
+      "commit": "https://github.com/openclaw/skills/commit/45f0a1766e7d39b04c46375fa70ba69a1c9a8b7c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774898689374,
