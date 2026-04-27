@@ -3,9 +3,15 @@
   "slug": "pre-verify-skill",
   "displayName": "pre-verify-skill",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775034885537,
-    "commit": "https://github.com/openclaw/skills/commit/6357d393ed7fe966b8e72c0a903e89319cc533db"
+    "version": "1.0.2",
+    "publishedAt": 1776773648175,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775034885537,
+      "commit": "https://github.com/openclaw/skills/commit/6357d393ed7fe966b8e72c0a903e89319cc533db"
+    }
+  ]
 }
