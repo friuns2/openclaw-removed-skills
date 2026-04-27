@@ -1,0 +1,11 @@
+{
+  "owner": "bigrobinson",
+  "slug": "ros2-introspection",
+  "displayName": "ROS2 Introspection",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775585380883,
+    "commit": null
+  },
+  "history": []
+}
