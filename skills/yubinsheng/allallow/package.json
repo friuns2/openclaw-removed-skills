@@ -1,0 +1,46 @@
+{
+  "name": "allallow",
+  "version": "1.0.0",
+  "description": "快速设置 OpenClaw 最大权限配置 - 支持多环境",
+  "main": "allallow.js",
+  "bin": {
+    "allallow": "./allallow.js"
+  },
+  "scripts": {
+    "apply": "node allallow.js apply",
+    "rollback": "node allallow.js rollback",
+    "backup": "node allallow.js backup",
+    "info": "node allallow.js info"
+  },
+  "keywords": [
+    "openclaw",
+    "skill",
+    "permissions",
+    "security",
+    "full-access"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "openclaw": {
+    "skill": {
+      "name": "allallow",
+      "description": "设置最大权限配置",
+      "version": "1.0.0",
+      "minOpenClawVersion": "2026.3.31",
+      "supportedPlatforms": [
+        "linux",
+        "darwin",
+        "win32"
+      ],
+      "testedEnvironments": [
+        "Linux native",
+        "macOS",
+        "WSL",
+        "Docker"
+      ]
+    }
+  }
+}
