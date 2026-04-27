@@ -3,11 +3,16 @@
   "slug": "waitlist",
   "displayName": "Waitlist",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168901888,
-    "commit": "https://github.com/openclaw/skills/commit/8ef9c603e5f4cfcddc0ba039b103a6e9a0e584f4"
+    "version": "1.0.3",
+    "publishedAt": 1776863549641,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168901888,
+      "commit": "https://github.com/openclaw/skills/commit/8ef9c603e5f4cfcddc0ba039b103a6e9a0e584f4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774731908261,
