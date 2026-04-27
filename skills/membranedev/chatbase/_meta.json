@@ -3,9 +3,15 @@
   "slug": "chatbase",
   "displayName": "Chatbase",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775192620558,
-    "commit": "https://github.com/openclaw/skills/commit/1dbc5d7547b677fa5a3ae5f91ebb3f3f937ea8c4"
+    "version": "1.0.1",
+    "publishedAt": 1776880994379,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775192620558,
+      "commit": "https://github.com/openclaw/skills/commit/1dbc5d7547b677fa5a3ae5f91ebb3f3f937ea8c4"
+    }
+  ]
 }
