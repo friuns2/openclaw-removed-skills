@@ -3,11 +3,16 @@
   "slug": "ritekit",
   "displayName": "Ritekit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167898354,
-    "commit": "https://github.com/openclaw/skills/commit/c12a1d85d5e988bc088f0ecc1f7f2e7de6efa6c9"
+    "version": "1.0.3",
+    "publishedAt": 1776861890241,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167898354,
+      "commit": "https://github.com/openclaw/skills/commit/c12a1d85d5e988bc088f0ecc1f7f2e7de6efa6c9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774523025825,
