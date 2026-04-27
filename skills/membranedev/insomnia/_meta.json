@@ -3,11 +3,16 @@
   "slug": "insomnia",
   "displayName": "Insomnia",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171021489,
-    "commit": "https://github.com/openclaw/skills/commit/996787341f1eb9ff6364672a74ade4ea568a57d9"
+    "version": "1.0.3",
+    "publishedAt": 1776870205204,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171021489,
+      "commit": "https://github.com/openclaw/skills/commit/996787341f1eb9ff6364672a74ade4ea568a57d9"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775134987267,
