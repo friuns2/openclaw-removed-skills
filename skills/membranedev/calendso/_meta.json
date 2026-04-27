@@ -3,11 +3,16 @@
   "slug": "calendso",
   "displayName": "Calendso",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168937161,
-    "commit": "https://github.com/openclaw/skills/commit/406ec628d011ed314ceab44cbc2d85fb30f8d181"
+    "version": "1.0.3",
+    "publishedAt": 1776854004733,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168937161,
+      "commit": "https://github.com/openclaw/skills/commit/406ec628d011ed314ceab44cbc2d85fb30f8d181"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774738988365,
