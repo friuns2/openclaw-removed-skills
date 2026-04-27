@@ -3,11 +3,16 @@
   "slug": "ip2locationio",
   "displayName": "Ip2Locationio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169555620,
-    "commit": "https://github.com/openclaw/skills/commit/5f2ce6118c7115f936a4de211ff9f5160953ac89"
+    "version": "1.0.3",
+    "publishedAt": 1776864445232,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169555620,
+      "commit": "https://github.com/openclaw/skills/commit/5f2ce6118c7115f936a4de211ff9f5160953ac89"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774847100379,
