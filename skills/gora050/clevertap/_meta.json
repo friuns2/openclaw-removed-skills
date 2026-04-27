@@ -3,11 +3,16 @@
   "slug": "clevertap",
   "displayName": "Clevertap",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168834473,
-    "commit": "https://github.com/openclaw/skills/commit/96a8c7a05e5ba963fa5d42445595718a0a27de09"
+    "version": "1.0.3",
+    "publishedAt": 1776863403993,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168834473,
+      "commit": "https://github.com/openclaw/skills/commit/96a8c7a05e5ba963fa5d42445595718a0a27de09"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774703080635,
