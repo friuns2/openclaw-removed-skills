@@ -3,11 +3,16 @@
   "slug": "pricefy",
   "displayName": "Pricefy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169362154,
-    "commit": "https://github.com/openclaw/skills/commit/e9a74b6d2deac77364b7a00f5d9944791919619f"
+    "version": "1.0.3",
+    "publishedAt": 1776854630881,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169362154,
+      "commit": "https://github.com/openclaw/skills/commit/e9a74b6d2deac77364b7a00f5d9944791919619f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774825357279,
