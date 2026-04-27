@@ -3,11 +3,16 @@
   "slug": "chatbotkit",
   "displayName": "Chatbotkit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168115690,
-    "commit": "https://github.com/openclaw/skills/commit/01f6a1fb05cd1167a0e29e9f5c5b32420d4b8d6c"
+    "version": "1.0.3",
+    "publishedAt": 1776862052163,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168115690,
+      "commit": "https://github.com/openclaw/skills/commit/01f6a1fb05cd1167a0e29e9f5c5b32420d4b8d6c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774576997305,
