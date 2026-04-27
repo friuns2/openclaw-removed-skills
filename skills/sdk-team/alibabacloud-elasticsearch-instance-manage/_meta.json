@@ -3,11 +3,16 @@
   "slug": "alibabacloud-elasticsearch-instance-manage",
   "displayName": "Alibabacloud Elasticsearch Instance Manage",
   "latest": {
-    "version": "0.0.2",
-    "publishedAt": 1775806363708,
-    "commit": "https://github.com/openclaw/skills/commit/1eca04b0bd28764e300e249721c3987c4abbd49b"
+    "version": "0.0.3",
+    "publishedAt": 1776866854180,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.2",
+      "publishedAt": 1775806363708,
+      "commit": "https://github.com/openclaw/skills/commit/1eca04b0bd28764e300e249721c3987c4abbd49b"
+    },
     {
       "version": "0.0.1",
       "publishedAt": 1774953134422,
