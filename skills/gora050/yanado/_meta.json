@@ -3,11 +3,16 @@
   "slug": "yanado",
   "displayName": "Yanado",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169287769,
-    "commit": "https://github.com/openclaw/skills/commit/b7747c38649cffd639089bf4755b5e7bf37dfa5f"
+    "version": "1.0.3",
+    "publishedAt": 1776864170927,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169287769,
+      "commit": "https://github.com/openclaw/skills/commit/b7747c38649cffd639089bf4755b5e7bf37dfa5f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774789527527,
