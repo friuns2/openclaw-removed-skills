@@ -3,11 +3,16 @@
   "slug": "cafe-24",
   "displayName": "Cafe 24",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169712303,
-    "commit": "https://github.com/openclaw/skills/commit/3aa3517b9a0346fb8025da31ceef0bcbdf2e96b1"
+    "version": "1.0.3",
+    "publishedAt": 1776864710461,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169712303,
+      "commit": "https://github.com/openclaw/skills/commit/3aa3517b9a0346fb8025da31ceef0bcbdf2e96b1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774875915207,
