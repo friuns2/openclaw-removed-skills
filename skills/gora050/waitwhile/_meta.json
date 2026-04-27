@@ -3,11 +3,16 @@
   "slug": "waitwhile",
   "displayName": "Waitwhile",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169703414,
-    "commit": "https://github.com/openclaw/skills/commit/110fbfdbc070a642df720c42ae06bea24293b464"
+    "version": "1.0.3",
+    "publishedAt": 1776864595257,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169703414,
+      "commit": "https://github.com/openclaw/skills/commit/110fbfdbc070a642df720c42ae06bea24293b464"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774875890476,
