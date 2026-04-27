@@ -1,0 +1,11 @@
+{
+  "owner": "aisadocs",
+  "slug": "polymarket-arb",
+  "displayName": "Polymarket Spread Arbitrage",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775108834749,
+    "commit": null
+  },
+  "history": []
+}
