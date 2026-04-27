@@ -3,11 +3,16 @@
   "slug": "alibabacloud-emr-cluster-manage",
   "displayName": "Alibabacloud Emr Cluster Manage",
   "latest": {
-    "version": "0.0.2",
-    "publishedAt": 1775113261032,
-    "commit": "https://github.com/openclaw/skills/commit/91058dd5ff2dc02f1d98a09a1df36b4895ba568d"
+    "version": "0.0.3",
+    "publishedAt": 1777007644742,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.0.2",
+      "publishedAt": 1775113261032,
+      "commit": "https://github.com/openclaw/skills/commit/91058dd5ff2dc02f1d98a09a1df36b4895ba568d"
+    },
     {
       "version": "0.0.1",
       "publishedAt": 1774953720106,
