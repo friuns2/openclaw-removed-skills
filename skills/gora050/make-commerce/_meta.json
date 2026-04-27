@@ -3,11 +3,16 @@
   "slug": "make-commerce",
   "displayName": "Make Commerce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167936923,
-    "commit": "https://github.com/openclaw/skills/commit/677da2a07db209d0c963c555838a233957b3d240"
+    "version": "1.0.3",
+    "publishedAt": 1776865340070,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167936923,
+      "commit": "https://github.com/openclaw/skills/commit/677da2a07db209d0c963c555838a233957b3d240"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774526670802,
