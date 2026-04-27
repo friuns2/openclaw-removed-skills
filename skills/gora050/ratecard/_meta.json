@@ -3,11 +3,16 @@
   "slug": "ratecard",
   "displayName": "Ratecard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168221697,
-    "commit": "https://github.com/openclaw/skills/commit/82130e690a66458364714e0c8c51f436116ca8dc"
+    "version": "1.0.3",
+    "publishedAt": 1776862247888,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168221697,
+      "commit": "https://github.com/openclaw/skills/commit/82130e690a66458364714e0c8c51f436116ca8dc"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774587863658,
