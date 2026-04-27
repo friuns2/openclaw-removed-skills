@@ -3,11 +3,16 @@
   "slug": "zoho-inventory-integration",
   "displayName": "Zoho Inventory",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170612953,
-    "commit": "https://github.com/openclaw/skills/commit/706b1c1614bb5c78d4b2994fd8d7a83d5d1c7067"
+    "version": "1.0.3",
+    "publishedAt": 1776865914352,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170612953,
+      "commit": "https://github.com/openclaw/skills/commit/706b1c1614bb5c78d4b2994fd8d7a83d5d1c7067"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775048803218,
