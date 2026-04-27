@@ -3,11 +3,16 @@
   "slug": "rootfi",
   "displayName": "Rootfi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170703329,
-    "commit": "https://github.com/openclaw/skills/commit/2698eedb5a5158587912d296041d1cb065bc1fc8"
+    "version": "1.0.3",
+    "publishedAt": 1776866046533,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170703329,
+      "commit": "https://github.com/openclaw/skills/commit/2698eedb5a5158587912d296041d1cb065bc1fc8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775091858527,
