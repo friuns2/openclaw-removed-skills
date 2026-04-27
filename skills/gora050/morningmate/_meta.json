@@ -3,11 +3,16 @@
   "slug": "morningmate",
   "displayName": "Morningmate",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168789473,
-    "commit": "https://github.com/openclaw/skills/commit/bf68ae862dd1f347f9ca9d836d0db3e1f8125b2e"
+    "version": "1.0.3",
+    "publishedAt": 1776863112275,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168789473,
+      "commit": "https://github.com/openclaw/skills/commit/bf68ae862dd1f347f9ca9d836d0db3e1f8125b2e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774695829345,
