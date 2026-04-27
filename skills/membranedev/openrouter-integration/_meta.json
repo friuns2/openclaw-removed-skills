@@ -3,11 +3,16 @@
   "slug": "openrouter-integration",
   "displayName": "Openrouter",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170451202,
-    "commit": "https://github.com/openclaw/skills/commit/4e9059ea90948606e48089eca53365f078bbd5b5"
+    "version": "1.0.3",
+    "publishedAt": 1776857422665,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170451202,
+      "commit": "https://github.com/openclaw/skills/commit/4e9059ea90948606e48089eca53365f078bbd5b5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775023417097,
