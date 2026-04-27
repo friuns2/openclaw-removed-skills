@@ -3,11 +3,16 @@
   "slug": "contis",
   "displayName": "Contis",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168414665,
-    "commit": "https://github.com/openclaw/skills/commit/0c442044d1ad9feafa782b8409a8071fdbecdb85"
+    "version": "1.0.3",
+    "publishedAt": 1776863997016,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168414665,
+      "commit": "https://github.com/openclaw/skills/commit/0c442044d1ad9feafa782b8409a8071fdbecdb85"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774639424172,
