@@ -3,11 +3,16 @@
   "slug": "formcan",
   "displayName": "Formcan",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168480543,
-    "commit": "https://github.com/openclaw/skills/commit/c14bc28a6d575971ecf8b9e58df3ac5a0d6b2a19"
+    "version": "1.0.3",
+    "publishedAt": 1776852646101,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168480543,
+      "commit": "https://github.com/openclaw/skills/commit/c14bc28a6d575971ecf8b9e58df3ac5a0d6b2a19"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774648967340,
