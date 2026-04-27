@@ -3,11 +3,16 @@
   "slug": "zencom",
   "displayName": "Zencom",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170428126,
-    "commit": "https://github.com/openclaw/skills/commit/7c3105dbe10fd5f422dffcba9f2e178f9dd5d4ff"
+    "version": "1.0.3",
+    "publishedAt": 1776865691814,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170428126,
+      "commit": "https://github.com/openclaw/skills/commit/7c3105dbe10fd5f422dffcba9f2e178f9dd5d4ff"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775019971358,
