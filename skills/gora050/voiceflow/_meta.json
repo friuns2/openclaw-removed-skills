@@ -3,11 +3,16 @@
   "slug": "voiceflow",
   "displayName": "Voiceflow",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170514653,
-    "commit": "https://github.com/openclaw/skills/commit/25376775392b7937584916560dad5ff5f22ee7d2"
+    "version": "1.0.3",
+    "publishedAt": 1776886057800,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170514653,
+      "commit": "https://github.com/openclaw/skills/commit/25376775392b7937584916560dad5ff5f22ee7d2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775037875999,
