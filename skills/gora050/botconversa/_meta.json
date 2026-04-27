@@ -3,11 +3,16 @@
   "slug": "botconversa",
   "displayName": "Botconversa",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168066884,
-    "commit": "https://github.com/openclaw/skills/commit/370401a98a2267dbe73db9bdd63b94ec862c2d3f"
+    "version": "1.0.3",
+    "publishedAt": 1776862007048,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168066884,
+      "commit": "https://github.com/openclaw/skills/commit/370401a98a2267dbe73db9bdd63b94ec862c2d3f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774566255967,
