@@ -1,6 +1,6 @@
 ---
 name: tsarr
-description: Manage home media services through TsArr from OpenClaw. Use for Radarr, Sonarr, Lidarr, Readarr, Prowlarr, and Bazarr tasks such as checking health, inspecting queues and history, browsing libraries, searching, adding, editing, deleting items, viewing profiles, tags, and root folders, and checking TsArr configuration.
+description: Manage home media services through TsArr from OpenClaw. Use for Radarr, Sonarr, Lidarr, Readarr, Prowlarr, Bazarr, qBittorrent, and Seerr tasks such as checking health, inspecting queues and history, browsing libraries, searching, adding, editing, deleting items, viewing profiles, tags, and root folders, managing torrents, managing media requests, and checking TsArr configuration.
 metadata:
   openclaw:
     requires:
@@ -34,6 +34,7 @@ Manage Servarr apps through the `tsarr` CLI.
 - Fetch the current item before `edit` or `delete` when possible.
 - Avoid `--yes` on destructive commands unless the user explicitly wants non-interactive execution.
 - If the user says "Arr", "library", or "queue" without naming a service, clarify which service to use.
+- If a service has multiple named instances and the user doesn't specify which, clarify or default to the first instance.
 
 ## Routing
 

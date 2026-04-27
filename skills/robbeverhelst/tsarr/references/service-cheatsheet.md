@@ -125,6 +125,47 @@ tsarr bazarr system health --json
 tsarr bazarr system badges --json
 ```
 
+## qBittorrent
+
+Use for torrent management and download status.
+
+```bash
+tsarr qbit torrents list --json
+tsarr qbit torrents list --filter downloading --json
+tsarr qbit torrents pause --hashes <hash>
+tsarr qbit torrents resume --hashes <hash>
+tsarr qbit torrents delete --hashes <hash> --delete-files
+tsarr qbit status show --json
+```
+
+qBittorrent uses username/password authentication instead of API keys. Configure via `tsarr config init` or environment variables `TSARR_QBITTORRENT_URL`, `TSARR_QBITTORRENT_USERNAME`, `TSARR_QBITTORRENT_PASSWORD`.
+
+## Seerr
+
+Use for media request management. Works with Seerr, Jellyseerr, and Overseerr.
+
+```bash
+tsarr seerr requests list --json
+tsarr seerr requests list --filter pending --json
+tsarr seerr requests count --json
+tsarr seerr requests approve --id 123
+tsarr seerr requests decline --id 123
+tsarr seerr search query --query "The Matrix" --json
+tsarr seerr users list --json
+tsarr seerr status show --json
+```
+
+Seerr uses API key authentication. Configure via `tsarr config init` or environment variables `TSARR_SEERR_URL` and `TSARR_SEERR_API_KEY`.
+
+## Multi-instance services
+
+When a service has multiple named instances, append `--instance <name>` or `-i <name>` to target a specific one. Without `--instance`, the first (default) instance is used.
+
+```bash
+tsarr radarr movie list --instance 4K --json
+tsarr sonarr series list -i main --json
+```
+
 ## Mutation rules
 
 - Run `get` or `list` first when a delete or edit is requested.

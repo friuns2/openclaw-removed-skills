@@ -9,12 +9,14 @@ Prefer:
 - `--plain` for TSV-style piping
 - `--quiet` when only IDs are needed
 - `--select=field1,field2` to reduce noisy JSON
+- `--instance <name>` / `-i <name>` to target a specific named instance (for multi-instance services)
 
 Examples:
 
 ```bash
 tsarr radarr movie list --json --select=title,year,monitored
 tsarr sonarr series list --quiet
+tsarr radarr movie list --instance 4K --json
 ```
 
 ## Health and status
@@ -28,6 +30,8 @@ tsarr radarr system health --json
 tsarr sonarr system status --json
 tsarr prowlarr system health --json
 tsarr bazarr system status --json
+tsarr qbit status show --json
+tsarr seerr status show --json
 ```
 
 ## Browse libraries
@@ -51,6 +55,12 @@ tsarr readarr book list --json
 tsarr bazarr series list --json
 tsarr bazarr movie list --json
 tsarr bazarr episode wanted --json
+
+tsarr qbit torrents list --json
+tsarr qbit torrents list --filter downloading --json
+
+tsarr seerr requests list --json
+tsarr seerr users list --json
 ```
 
 ## Search and add
@@ -152,6 +162,7 @@ Use extra destructive flags only when the user clearly asks for them:
 ```bash
 tsarr radarr movie delete --id 123 --delete-files
 tsarr sonarr series delete --id 456 --delete-files
+tsarr qbit torrents delete --hashes <hash> --delete-files
 ```
 
 ## Configuration checks
