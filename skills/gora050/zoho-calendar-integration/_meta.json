@@ -3,11 +3,16 @@
   "slug": "zoho-calendar-integration",
   "displayName": "Zoho Calendar",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170989700,
-    "commit": "https://github.com/openclaw/skills/commit/1c5e6dcc8d2483f8177a79ce60d6b4e016a2341e"
+    "version": "1.0.3",
+    "publishedAt": 1776892301252,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170989700,
+      "commit": "https://github.com/openclaw/skills/commit/1c5e6dcc8d2483f8177a79ce60d6b4e016a2341e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775131467891,
