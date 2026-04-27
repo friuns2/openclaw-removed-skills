@@ -3,9 +3,15 @@
   "slug": "firstknow",
   "displayName": "FirstKnow — Portfolio Intelligence",
   "latest": {
-    "version": "0.0.0-git.2b0b7976d59ed0e1372ad0c5070986b9bca94dcf",
-    "publishedAt": 1774757494158,
-    "commit": "https://github.com/openclaw/skills/commit/ed88be8e42debd58dfa2dab2d80f9daec8f7d5a9"
+    "version": "0.0.0-git.bdcfd7594c0071040762a54fbbc98ae176330845",
+    "publishedAt": 1775793399074,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.0-git.2b0b7976d59ed0e1372ad0c5070986b9bca94dcf",
+      "publishedAt": 1774757494158,
+      "commit": "https://github.com/openclaw/skills/commit/ed88be8e42debd58dfa2dab2d80f9daec8f7d5a9"
+    }
+  ]
 }
