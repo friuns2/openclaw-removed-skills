@@ -3,11 +3,16 @@
   "slug": "3scribe",
   "displayName": "3Scribe",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168152073,
-    "commit": "https://github.com/openclaw/skills/commit/97a80f8c882f5c285652af6c849a2d40193ab1df"
+    "version": "1.0.3",
+    "publishedAt": 1776852052814,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168152073,
+      "commit": "https://github.com/openclaw/skills/commit/97a80f8c882f5c285652af6c849a2d40193ab1df"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774580569656,
