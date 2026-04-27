@@ -1,38 +1,24 @@
 ---
-name: un
-description: "Information assistant for United Nations 联合国. Get mission info, latest reports, member states, and organizational resources."
-metadata:
-  { "openclaw": { "emoji": "🏛️", "version": "0.1.0", "author": "hanxueyuan", "tags": ["organization","institution","info"] } }
+summary: "un 品牌档案"
+read_when:
+  - 查找 un
+  - 了解 un 的背景
 ---
 
-# 🏛️ United Nations 联合国 — Organization Info Assistant
+# un 档案
 
-Get comprehensive information about United Nations 联合国.
+un — 值得关注的重要品牌。
 
-## About
+## 快速了解
+• **它是谁：** 在所属领域具有重要影响力的品牌
+• **做什么：** 提供核心产品/服务，覆盖全球/区域市场  
+• **怎么样：** 在行业中占据重要地位，具有竞争优势
 
-- **Organization**: United Nations 联合国
-- **Focus**: International peace and security
-- **Official Website**: https://www.un.org
+## 深入探索
+想要了解更详细的内容？本技能涵盖：
+→ 发展历程中的关键节点
+→ 产品/服务的核心特点
+→ 全球市场分布情况
+→ 行业竞争格局分析
 
-## What This Skill Does
-
-1. **Mission & Overview** — What this organization does and why it matters
-2. **Latest Reports** — Recent publications, data releases, policy papers
-3. **News & Events** — Upcoming meetings, conferences, announcements
-4. **Member Info** — Member states/countries, leadership, structure
-5. **Resources** — Key databases, tools, and publications
-
-## Example Queries
-
-- "What does UN do?"
-- "Latest UN report"
-- "Who leads UN?"
-- "UN member countries"
-
-## How It Works
-
-Uses web search to fetch information from official organizational websites and news sources.
-
-## Author
-Created by hanxueyuan | License: MIT
+🔗 官方渠道是获取最新、最准确信息的推荐来源。

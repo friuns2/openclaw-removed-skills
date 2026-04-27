@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "un",
-  "displayName": "un",
+  "displayName": "Un",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774853929751,
-    "commit": "https://github.com/openclaw/skills/commit/1a9cd0d0a5b5414da922b0b6e04e34eaf9cd8e98"
+    "version": "0.1.1",
+    "publishedAt": 1776295671767,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774853929751,
+      "commit": "https://github.com/openclaw/skills/commit/1a9cd0d0a5b5414da922b0b6e04e34eaf9cd8e98"
+    }
+  ]
 }
