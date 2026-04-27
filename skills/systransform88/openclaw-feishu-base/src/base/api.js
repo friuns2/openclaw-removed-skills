@@ -1,7 +1,7 @@
 import { baseError } from '../errors.js';
 
-export async function resolveLinkApi(_client, input) {
-  const resolved = parseFeishuBaseUrl(input.url);
+export async function resolveLinkApi(client, input) {
+  const resolved = await parseFeishuBaseUrl(client, input.url);
   if (!resolved.app_token) {
     throw baseError('LINK_PARSE_FAILED', 'Could not extract app_token from Feishu Base link', { url: input.url });
   }
@@ -475,7 +475,7 @@ function normalizeRecord(record = {}) {
   };
 }
 
-function parseFeishuBaseUrl(url) {
+async function parseFeishuBaseUrl(client, url) {
   let parsed;
   try {
     parsed = new URL(url);
@@ -483,21 +483,132 @@ function parseFeishuBaseUrl(url) {
     throw baseError('LINK_PARSE_FAILED', 'Invalid URL', { url });
   }
 
-  const text = `${parsed.pathname}${parsed.hash}${parsed.search}`;
+  const direct = parseBaseTokensFromText(`${parsed.pathname}${parsed.hash}${parsed.search}`);
+  if (direct.app_token) {
+    return {
+      url,
+      ...direct,
+    };
+  }
+
+  const wikiMatch = parsed.pathname.match(/^\/wiki\/([A-Za-z0-9_]+)/);
+  if (!wikiMatch) {
+    return {
+      url,
+      ...direct,
+    };
+  }
+
+  const wiki_token = wikiMatch[1];
+  const resolved = await resolveWikiBaseLink(client, wiki_token, url);
+  const merged = {
+    ...resolved,
+    table_id: direct.table_id || resolved.table_id,
+    view_id: direct.view_id || resolved.view_id,
+  };
+
+  return {
+    url,
+    wiki_token,
+    ...merged,
+  };
+}
+
+function parseBaseTokensFromText(text) {
   const appTokenMatch = text.match(/\b(?:app|base|bitable)\/([A-Za-z0-9_]+)|\b(bascn[A-Za-z0-9_]+)\b/);
   const tableMatch = text.match(/\b(tbl[A-Za-z0-9_]+)\b/);
   const viewMatch = text.match(/\b(vew[A-Za-z0-9_]+)\b/);
 
-  const app_token = appTokenMatch?.[1] || appTokenMatch?.[2];
-  const table_id = tableMatch?.[1];
-  const view_id = viewMatch?.[1];
-
   return {
-    url,
-    app_token,
-    table_id,
-    view_id,
+    app_token: appTokenMatch?.[1] || appTokenMatch?.[2],
+    table_id: tableMatch?.[1],
+    view_id: viewMatch?.[1],
   };
+}
+
+async function resolveWikiBaseLink(client, wikiToken, originalUrl) {
+  const attempts = [];
+  const candidates = [];
+
+  const addCandidate = (value) => {
+    if (!value || typeof value !== 'object') return;
+    candidates.push(value);
+  };
+
+  try {
+    const response = await client.wiki.space.getNode({ params: { token: wikiToken } });
+    ensureSuccess(response, 'WIKI_RESOLVE_FAILED');
+    addCandidate(response?.data);
+    addCandidate(response?.data?.node);
+  } catch (error) {
+    attempts.push({
+      method: 'wiki.space.getNode',
+      message: error?.message,
+      response: error?.response?.data || error?.data || null,
+    });
+  }
+
+  try {
+    const response = await client.wiki.spaceNode.list({ params: { parent_node_token: wikiToken, page_size: 50 } });
+    ensureSuccess(response, 'WIKI_RESOLVE_FAILED');
+    for (const item of response?.data?.items || []) addCandidate(item);
+  } catch (error) {
+    attempts.push({
+      method: 'wiki.spaceNode.list',
+      message: error?.message,
+      response: error?.response?.data || error?.data || null,
+    });
+  }
+
+  for (const candidate of candidates) {
+    const token = extractBaseAppTokenFromWikiCandidate(candidate);
+    const ids = parseBaseTokensFromText(JSON.stringify(candidate));
+    if (token || ids.app_token) {
+      return {
+        app_token: token || ids.app_token,
+        table_id: ids.table_id,
+        view_id: ids.view_id,
+        wiki_resolved: true,
+      };
+    }
+  }
+
+  throw baseError('WIKI_RESOLVE_FAILED', 'Could not resolve wiki link to underlying Feishu Base app_token', {
+    url: originalUrl,
+    wiki_token: wikiToken,
+    attempts,
+    candidate_count: candidates.length,
+  });
+}
+
+function extractBaseAppTokenFromWikiCandidate(candidate) {
+  const possibleValues = [
+    candidate?.obj_token,
+    candidate?.token,
+    candidate?.app_token,
+    candidate?.origin_node_token,
+    candidate?.origin_space_id,
+    candidate?.url,
+    candidate?.obj_url,
+    candidate?.node_url,
+    candidate?.origin_url,
+    candidate?.shortcut?.url,
+    candidate?.shortcut?.obj_url,
+    candidate?.shortcut?.token,
+  ];
+
+  for (const value of possibleValues) {
+    const ids = parseBaseTokensFromText(String(value || ''));
+    if (ids.app_token) return ids.app_token;
+    if (typeof value === 'string' && /^bascn[A-Za-z0-9_]+$/.test(value)) return value;
+  }
+
+  const objType = String(candidate?.obj_type || candidate?.type || '').toLowerCase();
+  if ((objType.includes('bitable') || objType.includes('base')) && typeof candidate?.obj_token === 'string') {
+    return candidate.obj_token;
+  }
+
+  return undefined;
 }
 
 function escapeDriveQuery(value) {

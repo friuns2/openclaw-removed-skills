@@ -1,6 +1,6 @@
 {
   "name": "openclaw-feishu-base",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "description": "Unified Feishu Base/Bitable management plugin for OpenClaw with table, field, and record operations.",
   "keywords": [

@@ -1,7 +1,7 @@
 {
   "id": "openclaw-feishu-base",
   "name": "Feishu Base",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Unified Feishu Base/Bitable management plugin for OpenClaw: resolve links, inspect schema, manage tables/fields, and query/create/update/delete records using existing Feishu credentials.",
   "entry": "./index.js",
   "skills": [

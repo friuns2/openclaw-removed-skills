@@ -1,11 +1,17 @@
 {
   "owner": "systransform88",
   "slug": "openclaw-feishu-base",
-  "displayName": "OpenClaw Feishu Base",
+  "displayName": "Feishu Base",
   "latest": {
-    "version": "0.2.5",
-    "publishedAt": 1775148456210,
-    "commit": "https://github.com/openclaw/skills/commit/9f1882a014d9b58f928645b7d1c73270e538f94b"
+    "version": "0.2.6",
+    "publishedAt": 1775689150886,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.2.5",
+      "publishedAt": 1775148456210,
+      "commit": "https://github.com/openclaw/skills/commit/9f1882a014d9b58f928645b7d1c73270e538f94b"
+    }
+  ]
 }
