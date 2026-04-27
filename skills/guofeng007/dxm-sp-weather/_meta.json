@@ -3,11 +3,16 @@
   "slug": "dxm-sp-weather",
   "displayName": "度小满天气商户",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1775708043895,
-    "commit": "https://github.com/openclaw/skills/commit/3aacd229a646ee40df824b0314d39057acc65ec7"
+    "version": "1.0.10",
+    "publishedAt": 1776169447185,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1775708043895,
+      "commit": "https://github.com/openclaw/skills/commit/3aacd229a646ee40df824b0314d39057acc65ec7"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774854876842,

@@ -1,19 +1,112 @@
 #!/usr/bin/env node
 'use strict';
 
-console.error('DEBUG: Loading sp-weather-cli.js');
 const crypto = require('crypto');
-console.error('DEBUG: crypto loaded, SSL_OP_LEGACY_SERVER_CONNECT =', crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT);
-const fs = require('fs');
-const os = require('os');
+const fs   = require('fs');
+const os   = require('os');
 const path = require('path');
-const http = require('http');
+const http  = require('http');
 const https = require('https');
-const { spawnSync } = require('child_process');
 
 const CONFIG_PATH = path.join(process.env.CLAUDE_SKILL_DIR || __dirname, 'sp-weather-config.json');
 const BASE_URL = process.env.SP_WEATHER_BASE || 'https://www.dxmpay.com';
 const SKILL_ID = '6143ff36-82e6-4d96-468a-e299dd478554';
+
+// ─── 密码读取（终端不回显 / 环境变量两路） ────────────────────────────────
+
+/**
+ * 从终端读取密码（字符不回显）。
+ * 若 SP_WEATHER_PASSWORD 环境变量已设置则直接返回，不弹提示。
+ * @param {string} prompt
+ * @returns {Promise<string>}
+ */
+function readPassword(prompt) {
+  if (process.env.SP_WEATHER_PASSWORD) {
+    return Promise.resolve(process.env.SP_WEATHER_PASSWORD);
+  }
+  return new Promise((resolve) => {
+    process.stderr.write(prompt);
+    let password = '';
+    const onData = (buf) => {
+      for (const ch of buf.toString()) {
+        if (ch === '\n' || ch === '\r' || ch === '\u0004') {   // Enter / EOF
+          process.stdin.setRawMode(false);
+          process.stdin.removeListener('data', onData);
+          process.stdin.pause();
+          process.stderr.write('\n');
+          resolve(password);
+          return;
+        } else if (ch === '\u0003') {                           // Ctrl-C
+          process.stderr.write('\n');
+          process.exit(0);
+        } else if (ch === '\u007f' || ch === '\b') {            // Backspace
+          password = password.slice(0, -1);
+        } else {
+          password += ch;
+        }
+      }
+    };
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on('data', onData);
+  });
+}
+
+// 同一进程内只读一次密码
+let _cachedPassword = null;
+async function getPassword() {
+  if (_cachedPassword !== null) return _cachedPassword;
+  _cachedPassword = await readPassword('请输入私钥保护密码: ');
+  return _cachedPassword;
+}
+
+// ─── PBKDF2 + AES-256-GCM 私钥加解密 ────────────────────────────────────────
+
+const PBKDF2_ITERATIONS = 210000;
+
+/**
+ * 用密码加密私钥 PEM，返回可 JSON 序列化的对象。
+ * @param {string} pem
+ * @param {string} password
+ */
+function encryptPrivateKey(pem, password) {
+  const salt       = crypto.randomBytes(32);
+  const key        = crypto.pbkdf2Sync(password, salt, PBKDF2_ITERATIONS, 32, 'sha512');
+  const iv         = crypto.randomBytes(12);
+  const cipher     = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const ciphertext = Buffer.concat([cipher.update(pem, 'utf8'), cipher.final()]);
+  const authTag    = cipher.getAuthTag();
+  return {
+    kdf:        'pbkdf2-sha512',
+    iterations: PBKDF2_ITERATIONS,
+    salt:       salt.toString('base64'),
+    iv:         iv.toString('base64'),
+    authTag:    authTag.toString('base64'),
+    ciphertext: ciphertext.toString('base64'),
+  };
+}
+
+/**
+ * 用密码解密私钥，密码错误时抛出异常。
+ * @param {{ salt, iv, authTag, ciphertext, iterations }} encrypted
+ * @param {string} password
+ * @returns {string} PEM
+ */
+function decryptPrivateKey(encrypted, password) {
+  const salt       = Buffer.from(encrypted.salt,       'base64');
+  const iv         = Buffer.from(encrypted.iv,         'base64');
+  const authTag    = Buffer.from(encrypted.authTag,    'base64');
+  const ciphertext = Buffer.from(encrypted.ciphertext, 'base64');
+  const iterations = encrypted.iterations || PBKDF2_ITERATIONS;
+  const key        = crypto.pbkdf2Sync(password, salt, iterations, 32, 'sha512');
+  const decipher   = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(authTag);
+  try {
+    return decipher.update(ciphertext) + decipher.final('utf8');
+  } catch {
+    throw new Error('密码错误，私钥解密失败');
+  }
+}
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -41,40 +134,31 @@ function generateKeys() {
   };
 }
 
-// AES-256-GCM: uid → SHA-256(uid) 作为 32 字节密钥
-function _uidKey(uid) {
-  return crypto.createHash('sha256').update(uid).digest();
-}
-
-function encryptField(plaintext, uid) {
-  const key = _uidKey(uid);
-  const iv = crypto.randomBytes(12);
-  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-  return `${iv.toString('base64')}:${authTag.toString('base64')}:${encrypted.toString('base64')}`;
-}
-
-function decryptField(encryptedStr, uid) {
-  const key = _uidKey(uid);
-  const [ivB64, authTagB64, ciphertextB64] = encryptedStr.split(':');
-  const iv = Buffer.from(ivB64, 'base64');
-  const authTag = Buffer.from(authTagB64, 'base64');
-  const ciphertext = Buffer.from(ciphertextB64, 'base64');
-  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-  decipher.setAuthTag(authTag);
-  return decipher.update(ciphertext) + decipher.final('utf8');
-}
-
-function ensureConfig() {
+/**
+ * 读取并校验配置，用密码解密私钥后返回完整 config 对象。
+ * 自动检测旧格式（uid 推导密钥），提示用户重新注册。
+ */
+async function ensureConfig() {
   const config = readConfig();
   if (!config || !config.uid || !config.registered) {
     output({ success: false, message: '用户未注册，请先运行: userConfig' });
     process.exit(1);
   }
-  config.publicKeyB64 = decryptField(config.publicKeyB64, config.uid);
-  config.publicKeyPem = decryptField(config.publicKeyPem, config.uid);
-  config.privateKeyPem = decryptField(config.privateKeyPem, config.uid);
+  // 旧格式检测：privateKey 字段不存在或不是 object，说明是旧的 uid 推导加密方案
+  if (!config.privateKey || typeof config.privateKey !== 'object') {
+    output({
+      success: false,
+      message: '配置格式已更新，请重新运行 userConfig 完成迁移（原配置将被覆盖）',
+    });
+    process.exit(1);
+  }
+  const password = await getPassword();
+  try {
+    config.privateKeyPem = decryptPrivateKey(config.privateKey, password);
+  } catch (e) {
+    output({ success: false, message: e.message });
+    process.exit(1);
+  }
   return config;
 }
 
@@ -101,19 +185,10 @@ async function httpRequest(url, options = {}) {
       }
     }
 
-    // 打印请求信息
-    console.error('[REQUEST]', reqOptions.method, url);
-    console.error('[REQUEST HEADERS]', JSON.stringify(reqOptions.headers));
-    if (options.body) console.error('[REQUEST BODY]', options.body);
-
     const req = lib.request(reqOptions, (res) => {
       let data = '';
       res.on('data', (chunk) => (data += chunk));
       res.on('end', () => {
-        // 打印响应信息
-        console.error('[RESPONSE STATUS]', res.statusCode);
-        console.error('[RESPONSE HEADERS]', JSON.stringify(res.headers));
-        console.error('[RESPONSE BODY]', data);
         resolve({ status: res.statusCode, body: data });
       });
     });
@@ -150,7 +225,6 @@ function signApiBody(timestamp, bodyObj, privateKeyPem) {
   delete bodyWithoutSign.sign;
   const sortedJson = JSON.stringify(sortKeysRecursive(bodyWithoutSign));
   const message = `${timestamp}\n${sortedJson}`;
-  console.error('[SIGN MESSAGE]', message);
   const signer = crypto.createSign('SHA256');
   signer.update(message, 'utf8');
   return signer.sign(privateKeyPem, 'base64');
@@ -170,7 +244,6 @@ function buildSignedGetUrl(baseUrl, params, privateKeyPem) {
   const allParams = Object.assign({}, params, { timestamp });
   const sortedJson = JSON.stringify(sortKeysRecursive(allParams));
   const message = `${timestamp}\n${sortedJson}`;
-  console.error('[SIGN MESSAGE]', message);
   const signer = crypto.createSign('SHA256');
   signer.update(message, 'utf8');
   const sign = signer.sign(privateKeyPem, 'base64');
@@ -212,6 +285,22 @@ async function cmdUserConfig() {
 
   // 生成 EC 密钥对
   const keys = generateKeys();
+
+  // 提示用户设置密码（两次确认），不从环境变量读（这是首次设置）
+  let password, confirm;
+  do {
+    password = await readPassword('设置私钥保护密码（不可为空）: ');
+    if (!password) {
+      process.stderr.write('密码不能为空，请重新输入\n');
+      continue;
+    }
+    confirm = await readPassword('再次输入密码确认: ');
+    if (password !== confirm) {
+      process.stderr.write('两次密码不一致，请重新输入\n');
+      password = '';
+    }
+  } while (!password);
+
   const timestamp = String(Date.now());
   const sign = signRegistration(timestamp, keys.publicKeyB64, keys.privateKeyPem);
 
@@ -246,21 +335,27 @@ async function cmdUserConfig() {
     return;
   }
 
-  // 保存到本地（敏感字段用 uid 派生的 AES-256-GCM 密钥加密）
+  // 公钥明文保存，私钥用密码 + PBKDF2 加密
   const configToSave = {
-    uid: keys.uid,
-    publicKeyB64: encryptField(keys.publicKeyB64, keys.uid),
-    publicKeyPem: encryptField(keys.publicKeyPem, keys.uid),
-    privateKeyPem: encryptField(keys.privateKeyPem, keys.uid),
-    registered: true,
+    uid:          keys.uid,
+    publicKeyB64: keys.publicKeyB64,
+    publicKeyPem: keys.publicKeyPem,
+    privateKey:   encryptPrivateKey(keys.privateKeyPem, password),
+    registered:   true,
     registeredAt: new Date().toISOString(),
   };
   fs.writeFileSync(CONFIG_PATH, JSON.stringify(configToSave, null, 2));
-  output({ success: true, action: 'registered', uid: keys.uid, configPath: CONFIG_PATH, serverResponse: data });
+  output({
+    success:        true,
+    action:         'registered',
+    uid:            keys.uid,
+    configPath:     CONFIG_PATH,
+    serverResponse: data,
+  });
 }
 
 async function cmdQueryWeather(args) {
-  const config = ensureConfig();
+  const config = await ensureConfig();
   const { date, city } = parseArgs(args);
 
   if (!city) {
@@ -316,7 +411,7 @@ async function cmdQueryWeather(args) {
 }
 
 async function cmdQueryOrders(args) {
-  const config = ensureConfig();
+  const config = await ensureConfig();
   const { page = '1', pageSize = '20' } = parseArgs(args);
   const url = buildSignedGetUrl(
     `${BASE_URL}/api/skill/orders`,
@@ -334,7 +429,7 @@ async function cmdQueryOrders(args) {
 }
 
 async function cmdQueryOrder(args) {
-  const config = ensureConfig();
+  const config = await ensureConfig();
   const { orderId } = parseArgs(args);
   if (!orderId) {
     output({ success: false, message: '请提供订单ID（--orderId SP202603192029449B6A4893）' });
@@ -356,7 +451,7 @@ async function cmdQueryOrder(args) {
 }
 
 async function cmdQueryQuota() {
-  const config = ensureConfig();
+  const config = await ensureConfig();
   const url = buildSignedGetUrl(
     `${BASE_URL}/api/skill/quota`,
     { uid: config.uid, skill_id: SKILL_ID },
@@ -373,7 +468,7 @@ async function cmdQueryQuota() {
 }
 
 async function cmdQueryPurchaseDetail() {
-  const config = ensureConfig();
+  const config = await ensureConfig();
   const url = buildSignedGetUrl(
     `${BASE_URL}/api/skill/purchase/detail`,
     { uid: config.uid, skill_id: SKILL_ID },
@@ -390,7 +485,7 @@ async function cmdQueryPurchaseDetail() {
 }
 
 async function cmdQueryCallLogs(args) {
-  const config = ensureConfig();
+  const config = await ensureConfig();
   const { page = '1', pageSize = '20' } = parseArgs(args);
   const url = buildSignedGetUrl(
     `${BASE_URL}/api/skill/call-logs`,
