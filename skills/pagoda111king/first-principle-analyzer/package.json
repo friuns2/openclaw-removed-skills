@@ -7,12 +7,27 @@
     "test": "jest",
     "start": "node src/index.js"
   },
-  "keywords": ["analysis", "first-principles", "problem-solving", "decision-making", "meta-skill"],
+  "keywords": [
+    "analysis",
+    "first-principles",
+    "problem-solving",
+    "decision-making",
+    "meta-skill"
+  ],
   "author": "pagoda111king",
   "license": "MIT",
   "clawhub": {
     "slug": "first-principle-analyzer",
     "name": "First Principle Analyzer",
-    "tags": ["analysis", "first-principles", "problem-solving", "decision-making", "meta-skill"]
+    "tags": [
+      "analysis",
+      "first-principles",
+      "problem-solving",
+      "decision-making",
+      "meta-skill"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^30.3.0"
   }
 }

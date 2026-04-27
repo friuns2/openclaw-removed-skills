@@ -3,11 +3,16 @@
   "slug": "first-principle-analyzer",
   "displayName": "First Principle Analyzer",
   "latest": {
-    "version": "2.4.1",
-    "publishedAt": 1775478945010,
-    "commit": "https://github.com/openclaw/skills/commit/e17f8a1bef024ffc87320e86e2c6bb22b2a1c031"
+    "version": "2.4.2",
+    "publishedAt": 1777184077555,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.4.1",
+      "publishedAt": 1775478945010,
+      "commit": "https://github.com/openclaw/skills/commit/e17f8a1bef024ffc87320e86e2c6bb22b2a1c031"
+    },
     {
       "version": "0.1.1",
       "publishedAt": 1775432888607,
