@@ -3,11 +3,16 @@
   "slug": "zenscrape",
   "displayName": "Zenscrape",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170462538,
-    "commit": "https://github.com/openclaw/skills/commit/03399c7d6567eb5040d06080abe31f0f0eb31df5"
+    "version": "1.0.3",
+    "publishedAt": 1776893280209,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170462538,
+      "commit": "https://github.com/openclaw/skills/commit/03399c7d6567eb5040d06080abe31f0f0eb31df5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775030621888,
