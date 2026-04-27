@@ -3,9 +3,15 @@
   "slug": "clawvoice",
   "displayName": "ClawVoice",
   "latest": {
-    "version": "1.1.2",
-    "publishedAt": 1774914389492,
-    "commit": "https://github.com/openclaw/skills/commit/e90de9970a4ab670d7bf90982b1694347bc93934"
+    "version": "1.1.3",
+    "publishedAt": 1775242678708,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.2",
+      "publishedAt": 1774914389492,
+      "commit": "https://github.com/openclaw/skills/commit/e90de9970a4ab670d7bf90982b1694347bc93934"
+    }
+  ]
 }
