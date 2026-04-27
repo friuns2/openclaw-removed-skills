@@ -3,11 +3,16 @@
   "slug": "cincopa",
   "displayName": "Cincopa",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168801712,
-    "commit": "https://github.com/openclaw/skills/commit/46c424750fd0d376b291ce3390f9fec9b4b6f2ad"
+    "version": "1.0.3",
+    "publishedAt": 1776863269596,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168801712,
+      "commit": "https://github.com/openclaw/skills/commit/46c424750fd0d376b291ce3390f9fec9b4b6f2ad"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774695863973,
