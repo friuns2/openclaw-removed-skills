@@ -1,0 +1,11 @@
+{
+  "owner": "lmercy",
+  "slug": "restaurant-reservation-radar",
+  "displayName": "用空位“雷达”替你抢旅游目的地的米其林/热门餐厅",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775050875140,
+    "commit": null
+  },
+  "history": []
+}
