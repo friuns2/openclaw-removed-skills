@@ -3,9 +3,15 @@
   "slug": "react-flow-implementation",
   "displayName": "React Flow Implementation",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1774618264085,
-    "commit": "https://github.com/openclaw/skills/commit/454e4edb014d9f4144183680188c68c72edea925"
+    "version": "1.1.1",
+    "publishedAt": 1776831307059,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1774618264085,
+      "commit": "https://github.com/openclaw/skills/commit/454e4edb014d9f4144183680188c68c72edea925"
+    }
+  ]
 }
