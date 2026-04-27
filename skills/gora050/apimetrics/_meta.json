@@ -3,11 +3,16 @@
   "slug": "apimetrics",
   "displayName": "Apimetrics",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775169135091,
-    "commit": "https://github.com/openclaw/skills/commit/2b3e9eee709c5cf4d3180f8e7ad2ce10059119e7"
+    "version": "1.0.4",
+    "publishedAt": 1776863885876,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775169135091,
+      "commit": "https://github.com/openclaw/skills/commit/2b3e9eee709c5cf4d3180f8e7ad2ce10059119e7"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1774760752879,
