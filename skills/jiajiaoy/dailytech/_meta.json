@@ -1,11 +1,17 @@
 {
   "owner": "jiajiaoy",
   "slug": "dailytech",
-  "displayName": "Daily Tech",
+  "displayName": "Dailytech",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775115654520,
-    "commit": "https://github.com/openclaw/skills/commit/7cee117e75c65f2d2f762cc459dcf0f2fe6111f2"
+    "version": "1.0.1",
+    "publishedAt": 1777287013679,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775115654520,
+      "commit": "https://github.com/openclaw/skills/commit/7cee117e75c65f2d2f762cc459dcf0f2fe6111f2"
+    }
+  ]
 }

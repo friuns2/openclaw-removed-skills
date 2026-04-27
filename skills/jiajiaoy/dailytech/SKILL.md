@@ -1,6 +1,6 @@
 ---
-name: daily-tech
-description: "每日AI与科技领域要闻速览，中英双语精美新闻卡片。Daily AI and tech news briefing — bilingual EN/CN visual cards. Trigger on：科技日报、科技新闻、AI新闻、技术日报、今日科技、最新科技、创业新闻、daily tech、tech news、AI news、startup news、product launch。"
+name: dailytech
+description: "Daily AI & tech news in 60 seconds — LLM updates, product launches, startup funding, developer tools. Bilingual EN/CN visual card. Morning & evening push."
 keywords:
   - 科技日报
   - 科技新闻
