@@ -3,11 +3,16 @@
   "slug": "gameanalytics",
   "displayName": "Gameanalytics",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170012611,
-    "commit": "https://github.com/openclaw/skills/commit/126a7e058644eb61220108a16b3d644e7932335f"
+    "version": "1.0.3",
+    "publishedAt": 1776885572298,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170012611,
+      "commit": "https://github.com/openclaw/skills/commit/126a7e058644eb61220108a16b3d644e7932335f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774944205598,
