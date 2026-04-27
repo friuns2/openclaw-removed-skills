@@ -3,11 +3,16 @@
   "slug": "railway-integration",
   "displayName": "Railway",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169462736,
-    "commit": "https://github.com/openclaw/skills/commit/6769c4d7c9c98918db2067f319272aebee75a244"
+    "version": "1.0.3",
+    "publishedAt": 1776885378855,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169462736,
+      "commit": "https://github.com/openclaw/skills/commit/6769c4d7c9c98918db2067f319272aebee75a244"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774836245883,
