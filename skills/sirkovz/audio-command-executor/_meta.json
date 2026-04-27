@@ -3,9 +3,15 @@
   "slug": "audio-command-executor",
   "displayName": "Audio Command Executor",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774896382334,
-    "commit": "https://github.com/openclaw/skills/commit/5ce0b9122475f7f797a755648d74e467f8069f45"
+    "version": "1.0.1",
+    "publishedAt": 1776884054631,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774896382334,
+      "commit": "https://github.com/openclaw/skills/commit/5ce0b9122475f7f797a755648d74e467f8069f45"
+    }
+  ]
 }

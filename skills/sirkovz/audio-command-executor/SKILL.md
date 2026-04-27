@@ -1,7 +1,7 @@
 ---
 name: audio-command-executor
 description: Processes inbound audio files, transcribes them, and answers to resulting texts. Converts non-WAV inputs to WAV before transcription.
-version: 1.0.2
+version: 1.0.3
 author: Marvin (via skill-creator)
 ---
 
@@ -16,7 +16,7 @@ Input
 Workflow
 1) Normalize Format
 - Wenn Input nicht .wav ist, konvertiere zu WAV:
-  ffmpeg -i {input_file} -ar 16000 -ac 1 -c:a pcm_s16le {input_file}.wav
+  /usr/bin/ffmpeg -i {input_file} -ar 16000 -ac 1 -c:a pcm_s16le {input_file}.wav
   Hinweis: Die Zieldatei heißt input_file.wav (Beispiel: /.../aufnahme.ogg → /.../aufnahme.wav)
 
 2) Transkription
