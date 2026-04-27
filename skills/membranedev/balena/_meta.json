@@ -3,11 +3,16 @@
   "slug": "balena",
   "displayName": "Balena",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169087034,
-    "commit": "https://github.com/openclaw/skills/commit/bc40bb3de7531774f40eba126df687768a57da5b"
+    "version": "1.0.3",
+    "publishedAt": 1776854349509,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169087034,
+      "commit": "https://github.com/openclaw/skills/commit/bc40bb3de7531774f40eba126df687768a57da5b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774756976810,
