@@ -3,11 +3,16 @@
   "slug": "yotpo-loyalty-referrals",
   "displayName": "Yotpo Loyalty Referrals",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170364048,
-    "commit": "https://github.com/openclaw/skills/commit/614c0be2b5b7e7c60070e91fe99ced66d2bb92b8"
+    "version": "1.0.3",
+    "publishedAt": 1776865537723,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170364048,
+      "commit": "https://github.com/openclaw/skills/commit/614c0be2b5b7e7c60070e91fe99ced66d2bb92b8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012716499,
