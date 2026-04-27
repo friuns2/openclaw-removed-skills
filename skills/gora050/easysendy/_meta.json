@@ -3,11 +3,16 @@
   "slug": "easysendy",
   "displayName": "Easysendy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167775951,
-    "commit": "https://github.com/openclaw/skills/commit/8d8651158304d0e138a222a24d7b5c795a522578"
+    "version": "1.0.3",
+    "publishedAt": 1776861763395,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167775951,
+      "commit": "https://github.com/openclaw/skills/commit/8d8651158304d0e138a222a24d7b5c795a522578"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774501497577,
