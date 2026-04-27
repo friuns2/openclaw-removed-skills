@@ -3,11 +3,16 @@
   "slug": "ravelin",
   "displayName": "Ravelin",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169406702,
-    "commit": "https://github.com/openclaw/skills/commit/f80179d6a379a1cf813b7bd65663376778eba462"
+    "version": "1.0.3",
+    "publishedAt": 1776854997269,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169406702,
+      "commit": "https://github.com/openclaw/skills/commit/f80179d6a379a1cf813b7bd65663376778eba462"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774828962676,
