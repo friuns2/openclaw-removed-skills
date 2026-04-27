@@ -3,11 +3,16 @@
   "slug": "axum-code-review",
   "displayName": "Axum Code Review",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966729655,
-    "commit": "https://github.com/openclaw/skills/commit/234f95413a4754f6b3c99743242f625c6c529d7f"
+    "version": "1.0.2",
+    "publishedAt": 1776831339115,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966729655,
+      "commit": "https://github.com/openclaw/skills/commit/234f95413a4754f6b3c99743242f625c6c529d7f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774632775032,
