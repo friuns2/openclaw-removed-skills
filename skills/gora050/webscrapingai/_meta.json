@@ -3,11 +3,16 @@
   "slug": "webscrapingai",
   "displayName": "Webscrapingai",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168943949,
-    "commit": "https://github.com/openclaw/skills/commit/3e43ce876ef0c2895d090c783a011c3cd7ce075b"
+    "version": "1.0.3",
+    "publishedAt": 1776863470839,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168943949,
+      "commit": "https://github.com/openclaw/skills/commit/3e43ce876ef0c2895d090c783a011c3cd7ce075b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774739033965,
