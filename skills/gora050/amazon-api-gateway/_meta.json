@@ -3,11 +3,16 @@
   "slug": "amazon-api-gateway",
   "displayName": "Amazon Api Gateway",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170913246,
-    "commit": "https://github.com/openclaw/skills/commit/a9ff6369b26efb67fb34a672d9e00998e5ce9af3"
+    "version": "1.0.3",
+    "publishedAt": 1776898942790,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170913246,
+      "commit": "https://github.com/openclaw/skills/commit/a9ff6369b26efb67fb34a672d9e00998e5ce9af3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775117095846,
