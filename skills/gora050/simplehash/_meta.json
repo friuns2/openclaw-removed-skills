@@ -3,11 +3,16 @@
   "slug": "simplehash",
   "displayName": "Simplehash",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168765072,
-    "commit": "https://github.com/openclaw/skills/commit/edbf50db5b34ad3ccd5e67b200e6e54be8b9868c"
+    "version": "1.0.3",
+    "publishedAt": 1776863166879,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168765072,
+      "commit": "https://github.com/openclaw/skills/commit/edbf50db5b34ad3ccd5e67b200e6e54be8b9868c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774688650456,
