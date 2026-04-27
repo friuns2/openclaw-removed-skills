@@ -3,9 +3,15 @@
   "slug": "azure-devops-integration",
   "displayName": "Azure Devops",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775286435734,
-    "commit": "https://github.com/openclaw/skills/commit/7a3906476c44f26021899b8993b08261ab0860a0"
+    "version": "1.0.1",
+    "publishedAt": 1776885650912,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775286435734,
+      "commit": "https://github.com/openclaw/skills/commit/7a3906476c44f26021899b8993b08261ab0860a0"
+    }
+  ]
 }
