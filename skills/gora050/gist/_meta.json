@@ -3,11 +3,16 @@
   "slug": "gist",
   "displayName": "Gist",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168354127,
-    "commit": "https://github.com/openclaw/skills/commit/5389a45ccb6e17c2ce520cb62d00d35ff9bf985f"
+    "version": "1.0.3",
+    "publishedAt": 1776862435650,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168354127,
+      "commit": "https://github.com/openclaw/skills/commit/5389a45ccb6e17c2ce520cb62d00d35ff9bf985f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774609466591,
