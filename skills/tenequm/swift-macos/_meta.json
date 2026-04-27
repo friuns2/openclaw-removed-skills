@@ -1,11 +1,17 @@
 {
   "owner": "tenequm",
   "slug": "swift-macos",
-  "displayName": "swift-macos",
+  "displayName": "macOS App Development - Swift 6.2",
   "latest": {
-    "version": "0.3.0",
-    "publishedAt": 1775238264056,
-    "commit": "https://github.com/openclaw/skills/commit/30cb8d91c1e9b1b9d77bbd88f6968532c607c4a1"
+    "version": "0.4.0",
+    "publishedAt": 1777061933306,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.3.0",
+      "publishedAt": 1775238264056,
+      "commit": "https://github.com/openclaw/skills/commit/30cb8d91c1e9b1b9d77bbd88f6968532c607c4a1"
+    }
+  ]
 }
