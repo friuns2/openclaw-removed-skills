@@ -3,11 +3,16 @@
   "slug": "gleap",
   "displayName": "Gleap",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169954795,
-    "commit": "https://github.com/openclaw/skills/commit/9d204288aa3ed0e5b7ae25632a9b9af2f89f8b71"
+    "version": "1.0.3",
+    "publishedAt": 1776865025269,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169954795,
+      "commit": "https://github.com/openclaw/skills/commit/9d204288aa3ed0e5b7ae25632a9b9af2f89f8b71"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774933463451,
