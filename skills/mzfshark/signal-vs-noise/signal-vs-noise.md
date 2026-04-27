@@ -1,13 +1,3 @@
----
-name: signal-vs-noise
-description: Filter relevant information from noise; extract claims, dedupe, rank impact, and preserve evidence.
-metadata:
-  author: Morpheus
-  version: 2.0.0
-  owner: Morpheus Agent
-  category: filtering
----
-
 # SKILL: signal-vs-noise
 
 ## Purpose

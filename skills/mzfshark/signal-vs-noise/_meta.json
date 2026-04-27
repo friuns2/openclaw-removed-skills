@@ -3,9 +3,15 @@
   "slug": "signal-vs-noise",
   "displayName": "Signal vs Noise",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774973592624,
-    "commit": "https://github.com/openclaw/skills/commit/557feef8c6f7e122c949cde04298ef2c0556ed45"
+    "version": "2.0.0",
+    "publishedAt": 1777052357062,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774973592624,
+      "commit": "https://github.com/openclaw/skills/commit/557feef8c6f7e122c949cde04298ef2c0556ed45"
+    }
+  ]
 }

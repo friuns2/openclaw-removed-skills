@@ -1,15 +1,15 @@
 ---
 name: signal-vs-noise
-description: Distinguish real progress from performative activity. Protect humans from drowning in information while starving for truth through disciplined signal detection.
-version: 1.0.0
+description: Filter relevant information from noise; extract claims, dedupe, rank impact, and preserve evidence.
+version: 2.0.0
 display_name: "Signal vs Noise"
 triggers:
+  - signal vs noise
   - filter noise
-  - identify signal
-  - real progress
-  - what matters
-  - ignore hype
-  - focus attention
-  - detect signal
-  - assess importance
+  - summarize messages
+  - extract key claims
+  - rank information
+  - what matters most
+  - reduce noise
+  - high signal
 ---
