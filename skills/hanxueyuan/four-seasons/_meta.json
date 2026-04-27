@@ -1,11 +1,17 @@
 {
   "owner": "hanxueyuan",
   "slug": "four-seasons",
-  "displayName": "four-seasons",
+  "displayName": "Four Seasons",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774771584224,
-    "commit": "https://github.com/openclaw/skills/commit/f1160d6982660e457567a4df3c12cfc0ec242234"
+    "version": "0.1.4",
+    "publishedAt": 1776533714972,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774771584224,
+      "commit": "https://github.com/openclaw/skills/commit/f1160d6982660e457567a4df3c12cfc0ec242234"
+    }
+  ]
 }

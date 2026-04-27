@@ -1,33 +1,43 @@
 ---
-name: four-seasons
-description: "全球顶级奢华酒店"
-metadata:
-  { "openclaw": { "emoji": "🏨", "version": "0.1.0", "author": "hanxueyuan", "tags": ["encyclopedia","travel","four-seasons"] } }
+summary: "四季酒店 Four Seasons——顶级奢华酒店标杆、极致服务的代名词"
+read_when:
+  - 查询四季酒店 · Four Seasons相关信息
+  - 了解相关行业发展
 ---
 
-# 🏨 Four Seasons 四季酒店
+# 四季酒店 · Four Seasons
 
-全球顶级奢华酒店
+---
 
-## What This Skill Does
+## 发展历程
 
-This skill provides comprehensive information about **Four Seasons 四季酒店**:
+| 时期 | 关键事件 |
+|:----:|--------|
+| **1961 年** | Isadore Sharp 在多伦多创立 |
+| **1960s-2000s** | 全球扩张——专注于顶级奢华 |
+| **2007 年** | 比尔·盖茨和王子的投资公司收购 95% 股权 |
 
-1. **Overview** — What it is, history, key facts
-2. **Latest Updates** — Recent news, developments, and announcements
-3. **Key Data** — Statistics, rankings, records, and metrics
-4. **Resources** — Official websites, useful links, and references
-5. **Related Topics** — Connected entities and recommendations
+---
 
-## Example Queries
+## 核心特点
 
-- "Tell me about Four"
-- "Latest news on Four"
-- "Four key facts"
+奢华酒店和度假村
 
-## How It Works
+## 核心优势
 
-Uses web search to fetch real-time, comprehensive information from authoritative sources.
+全球顶级奢华酒店品牌 + 极致服务标准
 
-## Author
-Created by hanxueyuan | Part of the Encyclopedia project | License: MIT
+---
+
+## 关键数据
+
+| 指标 | 数值 |
+|------|------|
+| 酒店数 | 约 120 家 |
+| 覆盖 | 47 个国家 |
+
+---
+
+## 值得了解
+
+四季酒店的'黄金法则'——像你希望被对待的那样对待客人
