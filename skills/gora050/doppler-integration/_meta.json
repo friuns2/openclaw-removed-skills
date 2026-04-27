@@ -3,9 +3,15 @@
   "slug": "doppler-integration",
   "displayName": "Doppler",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170089748,
-    "commit": "https://github.com/openclaw/skills/commit/09e41183426e1983a747af2a813b6904abdd8e9e"
+    "version": "1.0.3",
+    "publishedAt": 1776885768858,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170089748,
+      "commit": "https://github.com/openclaw/skills/commit/09e41183426e1983a747af2a813b6904abdd8e9e"
+    }
+  ]
 }
