@@ -3,9 +3,15 @@
   "slug": "pulsetic",
   "displayName": "Pulsetic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168623794,
-    "commit": "https://github.com/openclaw/skills/commit/5b6ef8f49a4a10d02c67dd0ff800e6111b247870"
+    "version": "1.0.3",
+    "publishedAt": 1776862824775,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168623794,
+      "commit": "https://github.com/openclaw/skills/commit/5b6ef8f49a4a10d02c67dd0ff800e6111b247870"
+    }
+  ]
 }
