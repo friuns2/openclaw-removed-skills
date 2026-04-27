@@ -3,11 +3,16 @@
   "slug": "zixflow",
   "displayName": "Zixflow",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169015298,
-    "commit": "https://github.com/openclaw/skills/commit/632af3a3d3ed25ff0c2d20554c7664283bc2351a"
+    "version": "1.0.3",
+    "publishedAt": 1776885047842,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169015298,
+      "commit": "https://github.com/openclaw/skills/commit/632af3a3d3ed25ff0c2d20554c7664283bc2351a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774749833104,
