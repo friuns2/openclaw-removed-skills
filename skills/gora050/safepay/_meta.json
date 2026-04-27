@@ -3,11 +3,16 @@
   "slug": "safepay",
   "displayName": "Safepay",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170126327,
-    "commit": "https://github.com/openclaw/skills/commit/38960e495ff5eca50686cf2acd67d90d0b2eea30"
+    "version": "1.0.3",
+    "publishedAt": 1776865097639,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170126327,
+      "commit": "https://github.com/openclaw/skills/commit/38960e495ff5eca50686cf2acd67d90d0b2eea30"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774958665576,
