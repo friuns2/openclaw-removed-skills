@@ -3,11 +3,16 @@
   "slug": "hubstaff",
   "displayName": "Hubstaff",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168805898,
-    "commit": "https://github.com/openclaw/skills/commit/677e78c8c39858406817c39537a978dd116cb386"
+    "version": "1.0.3",
+    "publishedAt": 1776863330374,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168805898,
+      "commit": "https://github.com/openclaw/skills/commit/677e78c8c39858406817c39537a978dd116cb386"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774695871652,
