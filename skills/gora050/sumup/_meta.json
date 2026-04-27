@@ -3,11 +3,16 @@
   "slug": "sumup",
   "displayName": "Sumup",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170247538,
-    "commit": "https://github.com/openclaw/skills/commit/335f7494af7133ca974f58ac3f268a51167bf903"
+    "version": "1.0.3",
+    "publishedAt": 1776865430726,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170247538,
+      "commit": "https://github.com/openclaw/skills/commit/335f7494af7133ca974f58ac3f268a51167bf903"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998279955,
