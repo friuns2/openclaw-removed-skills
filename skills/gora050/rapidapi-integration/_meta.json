@@ -3,11 +3,16 @@
   "slug": "rapidapi-integration",
   "displayName": "Rapidapi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169300706,
-    "commit": "https://github.com/openclaw/skills/commit/412615355dd389d13cb5dd01d856f62c7bd3445a"
+    "version": "1.0.3",
+    "publishedAt": 1776865222559,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169300706,
+      "commit": "https://github.com/openclaw/skills/commit/412615355dd389d13cb5dd01d856f62c7bd3445a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812202582,
