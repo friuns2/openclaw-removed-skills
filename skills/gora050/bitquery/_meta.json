@@ -3,11 +3,16 @@
   "slug": "bitquery",
   "displayName": "Bitquery",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169753339,
-    "commit": "https://github.com/openclaw/skills/commit/15c3048e8429c9ca9d99db2873eb8b32d7fe5f2d"
+    "version": "1.0.3",
+    "publishedAt": 1776865820934,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169753339,
+      "commit": "https://github.com/openclaw/skills/commit/15c3048e8429c9ca9d99db2873eb8b32d7fe5f2d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774898670692,
