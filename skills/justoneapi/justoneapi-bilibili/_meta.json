@@ -3,11 +3,16 @@
   "slug": "justoneapi-bilibili",
   "displayName": "Bilibili API",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776239948365,
-    "commit": "https://github.com/openclaw/skills/commit/25fab64baa345d5473036db33bb88cee27cae29b"
+    "version": "1.0.10",
+    "publishedAt": 1776924420722,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776239948365,
+      "commit": "https://github.com/openclaw/skills/commit/25fab64baa345d5473036db33bb88cee27cae29b"
+    },
     {
       "version": "1.0.7",
       "publishedAt": 1775375303537,

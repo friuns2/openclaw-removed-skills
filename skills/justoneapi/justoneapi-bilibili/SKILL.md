@@ -19,8 +19,8 @@ This skill wraps 9 Bilibili operations exposed by JustOneAPI. It is strongest fo
 
 ## Representative Operations
 
-- `getVideoDetailV2`: Video Details — Get Bilibili video Details data, including metadata (title, tags, and publishing time), for tracking video performance and engagement metrics and analyzing content metadata and uploader information
-- `getUserVideoListV2`: User Published Videos — Get Bilibili user Published Videos data, including titles, covers, and publish times, for creator monitoring and content performance analysis
+- `getBilibiliVideoDetailV2`: Video Details — Get Bilibili video Details data, including metadata (title, tags, and publishing time), for tracking video performance and engagement metrics and analyzing content metadata and uploader information
+- `getBilibiliUserVideoListV2`: User Published Videos — Get Bilibili user Published Videos data, including titles, covers, and publish times, for creator monitoring and content performance analysis
 - `getUserDetailV2`: User Profile — Get Bilibili user Profile data, including account metadata, audience metrics, and verification-related fields, for analyzing creator's profile, level, and verification status and verifying user identity and social presence on bilibili
 - `getVideoDanmuV2`: Video Danmaku — Get Bilibili video Danmaku data, including timeline positions and comment text, for audience reaction analysis and subtitle-style comment review
 
@@ -34,7 +34,7 @@ This skill wraps 9 Bilibili operations exposed by JustOneAPI. It is strongest fo
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getVideoDetailV2`, `getUserVideoListV2`, `getUserDetailV2`, `getVideoDanmuV2`.
+2. Start with one of these operations when it matches the user's request: `getBilibiliVideoDetailV2`, `getBilibiliUserVideoListV2`, `getUserDetailV2`, `getVideoDanmuV2`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -55,6 +55,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the Bilibili task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `getVideoDetailV2`, explain why the returned fields answer the user's question.
+- When using `getBilibiliVideoDetailV2`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `aid`, `bvid`, `cid`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

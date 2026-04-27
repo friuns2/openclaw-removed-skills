@@ -38,8 +38,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -75,8 +75,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Relation Stats",
@@ -87,7 +87,7 @@ const manifest = {
     {
       "description": "Get Bilibili user Published Videos data, including titles, covers, and publish times, for creator monitoring and content performance analysis.",
       "method": "GET",
-      "operationId": "getUserVideoListV2",
+      "operationId": "getBilibiliUserVideoListV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -121,8 +121,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Videos",
@@ -176,8 +176,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Captions",
@@ -222,8 +222,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Comments",
@@ -277,8 +277,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Danmaku",
@@ -289,7 +289,7 @@ const manifest = {
     {
       "description": "Get Bilibili video Details data, including metadata (title, tags, and publishing time), for tracking video performance and engagement metrics and analyzing content metadata and uploader information.",
       "method": "GET",
-      "operationId": "getVideoDetailV2",
+      "operationId": "getBilibiliVideoDetailV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -314,8 +314,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Details",
@@ -326,7 +326,7 @@ const manifest = {
     {
       "description": "Get Bilibili video Search data, including matched videos, creators, and engagement metrics, for topic research and content discovery.",
       "method": "GET",
-      "operationId": "searchVideoV2",
+      "operationId": "searchBilibiliVideoV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -375,8 +375,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Search",
@@ -387,7 +387,7 @@ const manifest = {
     {
       "description": "Get Bilibili share Link Resolution data, including resolved video and page identifier, for converting shortened mobile share links to standard bvid/metadata and automating content extraction from shared social media links.",
       "method": "GET",
-      "operationId": "shareUrlTransferV1",
+      "operationId": "shareBilibiliUrlTransferV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -412,8 +412,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Share Link Resolution",

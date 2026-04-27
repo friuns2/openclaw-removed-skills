@@ -23,7 +23,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserRelationStat`
 
@@ -46,9 +46,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserVideoListV2`
+## `getBilibiliUserVideoListV2`
 
 - Method: `GET`
 - Path: `/api/bilibili/get-user-video-list/v2`
@@ -70,7 +70,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getVideoCaptionV1`
 
@@ -95,7 +95,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getVideoCommentV2`
 
@@ -119,7 +119,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getVideoDanmuV2`
 
@@ -144,9 +144,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getVideoDetailV2`
+## `getBilibiliVideoDetailV2`
 
 - Method: `GET`
 - Path: `/api/bilibili/get-video-detail/v2`
@@ -167,9 +167,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchVideoV2`
+## `searchBilibiliVideoV2`
 
 - Method: `GET`
 - Path: `/api/bilibili/search-video/v2`
@@ -200,9 +200,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `shareUrlTransferV1`
+## `shareBilibiliUrlTransferV1`
 
 - Method: `GET`
 - Path: `/api/bilibili/share-url-transfer/v1`
@@ -223,4 +223,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

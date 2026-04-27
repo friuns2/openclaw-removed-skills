@@ -32,8 +32,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -69,8 +69,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Relation Stats",
@@ -81,7 +81,7 @@
     {
       "description": "Get Bilibili user Published Videos data, including titles, covers, and publish times, for creator monitoring and content performance analysis.",
       "method": "GET",
-      "operationId": "getUserVideoListV2",
+      "operationId": "getBilibiliUserVideoListV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -115,8 +115,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Videos",
@@ -170,8 +170,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Captions",
@@ -216,8 +216,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Comments",
@@ -271,8 +271,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Danmaku",
@@ -283,7 +283,7 @@
     {
       "description": "Get Bilibili video Details data, including metadata (title, tags, and publishing time), for tracking video performance and engagement metrics and analyzing content metadata and uploader information.",
       "method": "GET",
-      "operationId": "getVideoDetailV2",
+      "operationId": "getBilibiliVideoDetailV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -308,8 +308,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Details",
@@ -320,7 +320,7 @@
     {
       "description": "Get Bilibili video Search data, including matched videos, creators, and engagement metrics, for topic research and content discovery.",
       "method": "GET",
-      "operationId": "searchVideoV2",
+      "operationId": "searchBilibiliVideoV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -369,8 +369,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Search",
@@ -381,7 +381,7 @@
     {
       "description": "Get Bilibili share Link Resolution data, including resolved video and page identifier, for converting shortened mobile share links to standard bvid/metadata and automating content extraction from shared social media links.",
       "method": "GET",
-      "operationId": "shareUrlTransferV1",
+      "operationId": "shareBilibiliUrlTransferV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -406,8 +406,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Share Link Resolution",
