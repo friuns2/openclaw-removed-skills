@@ -3,11 +3,16 @@
   "slug": "employment-hero",
   "displayName": "Employment Hero",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169395855,
-    "commit": "https://github.com/openclaw/skills/commit/3dd7ffc75ecc3ab761278d05a239738d3f2ffdc4"
+    "version": "1.0.3",
+    "publishedAt": 1776864317260,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169395855,
+      "commit": "https://github.com/openclaw/skills/commit/3dd7ffc75ecc3ab761278d05a239738d3f2ffdc4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774825518260,
