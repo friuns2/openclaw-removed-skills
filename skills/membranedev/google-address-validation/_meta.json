@@ -3,11 +3,16 @@
   "slug": "google-address-validation",
   "displayName": "Google Address Validation",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170801981,
-    "commit": "https://github.com/openclaw/skills/commit/8f302dae69b90a1ea1984fa47967b75ef178af07"
+    "version": "1.0.3",
+    "publishedAt": 1776858318683,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170801981,
+      "commit": "https://github.com/openclaw/skills/commit/8f302dae69b90a1ea1984fa47967b75ef178af07"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775102580817,
