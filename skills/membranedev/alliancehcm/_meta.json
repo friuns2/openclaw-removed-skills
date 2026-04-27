@@ -3,11 +3,16 @@
   "slug": "alliancehcm",
   "displayName": "Alliancehcm",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170318257,
-    "commit": "https://github.com/openclaw/skills/commit/bda78333dec7c7e92f7c60295e3b30c372e2527f"
+    "version": "1.0.3",
+    "publishedAt": 1776856981502,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170318257,
+      "commit": "https://github.com/openclaw/skills/commit/bda78333dec7c7e92f7c60295e3b30c372e2527f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012560684,
