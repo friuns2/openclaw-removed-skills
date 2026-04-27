@@ -43,7 +43,8 @@
       "code": "000300.SH",
       "name": "沪深300指数",
       "sub_category": "大盘",
-      "url": "https://www.txfund.com/h5/v6/pages/finance-tools/stock-index/detail?indexCode=000300"
+      "url": "https://www.txfund.com/h5/v6/pages/finance-tools/stock-index/detail?indexCode=000300",
+      "miniapp_link": "#小程序://腾讯理财通/cyfvJbHcajFfG8B"
     },
     {
       "code": "000510.SH",

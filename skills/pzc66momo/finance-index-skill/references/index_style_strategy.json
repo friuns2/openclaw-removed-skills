@@ -85,7 +85,8 @@
       "code": "000922.CSI",
       "name": "中证红利指数",
       "sub_category": "红利",
-      "url": "https://www.txfund.com/h5/v6/pages/finance-tools/stock-index/detail?indexCode=000922"
+      "url": "https://www.txfund.com/h5/v6/pages/finance-tools/stock-index/detail?indexCode=000922",
+      "miniapp_link": "#小程序://腾讯理财通/BCuhbiSEKKYrmfd"
     },
     {
       "code": "000925.CSI",

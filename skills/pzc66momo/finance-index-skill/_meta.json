@@ -3,9 +3,15 @@
   "slug": "finance-index-skill",
   "displayName": "财经指数通",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1775203126543,
-    "commit": "https://github.com/openclaw/skills/commit/7a0eacad1c5b82e7917a95e4e3c75528eed08562"
+    "version": "2.0.0",
+    "publishedAt": 1777282533487,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1775203126543,
+      "commit": "https://github.com/openclaw/skills/commit/7a0eacad1c5b82e7917a95e4e3c75528eed08562"
+    }
+  ]
 }
