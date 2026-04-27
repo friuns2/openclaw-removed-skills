@@ -3,11 +3,16 @@
   "slug": "zeit",
   "displayName": "Zeit",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170289704,
-    "commit": "https://github.com/openclaw/skills/commit/588f284ddd6fe2f119c704d2bfc6360fad5f8ec2"
+    "version": "1.0.3",
+    "publishedAt": 1776893311876,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170289704,
+      "commit": "https://github.com/openclaw/skills/commit/588f284ddd6fe2f119c704d2bfc6360fad5f8ec2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775009029749,
