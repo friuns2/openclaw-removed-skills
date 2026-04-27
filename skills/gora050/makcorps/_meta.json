@@ -3,11 +3,16 @@
   "slug": "makcorps",
   "displayName": "Makcorps",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169475072,
-    "commit": "https://github.com/openclaw/skills/commit/d9dd9cde326e53c455a5fdea6df5d601fc92bf40"
+    "version": "1.0.3",
+    "publishedAt": 1776885405265,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169475072,
+      "commit": "https://github.com/openclaw/skills/commit/d9dd9cde326e53c455a5fdea6df5d601fc92bf40"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774836273666,
