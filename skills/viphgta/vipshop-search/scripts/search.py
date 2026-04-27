@@ -7,10 +7,22 @@
 
 import sys
 import json
+import time
 import urllib.request
 import urllib.parse
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+
+# 设置 stdout 编码为 utf-8，解决 Windows 上的编码问题
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+# 导入 exchange_link_builder 中的函数
+from exchange_link_builder import build_product_link
+
+import logger
 
 
 def load_login_tokens() -> Optional[Dict[str, Any]]:
@@ -18,7 +30,7 @@ def load_login_tokens() -> Optional[Dict[str, Any]]:
     加载登录态
     
     Returns:
-        登录态字典，包含cookies等信息；如果未登录返回None
+        登录态字典，包含cookies等信息；如果未登录或已过期返回None
     """
     token_file = Path.home() / ".vipshop-user-login" / "tokens.json"
     
@@ -31,10 +43,15 @@ def load_login_tokens() -> Optional[Dict[str, Any]]:
         
         # 检查是否是新格式（包含cookies字段）
         if data and isinstance(data, dict) and 'cookies' in data:
+            # 检查token是否过期
+            expires_at = data.get('expires_at')
+            if expires_at and time.time() > expires_at:
+                return None
             return data
         return None
     except Exception as e:
         sys.stderr.write(f"加载登录态失败: {e}\n")
+        logger.error("load_login_tokens_failed", error_msg=str(e))
         return None
 
 
@@ -92,6 +109,7 @@ def search_products(keyword: str, cookies: Dict[str, str], mars_cid: str, page_o
     Returns:
         搜索结果，包含商品ID列表和总数
     """
+    BATCH_SIZE = 10
     base_url = "https://mapi-pc.vip.com/vips-mobile/rest/shopping/skill/search/product/rank"
 
     params = {
@@ -110,7 +128,7 @@ def search_products(keyword: str, cookies: Dict[str, str], mars_cid: str, page_o
         'standby_id': 'nature',
         'pageOffset': str(page_offset),
         'channelId': '1',
-        'batchSize': '20'
+        'batchSize': str(BATCH_SIZE)
     }
 
     # 添加价格区间参数
@@ -135,8 +153,11 @@ def search_products(keyword: str, cookies: Dict[str, str], mars_cid: str, page_o
     total = data.get("total", 0)
     products = data.get("products", [])
 
-    # 提取所有商品ID
+    # 提取所有商品ID并截断为 batchSize 数量
     product_ids = [p.get("pid") for p in products if p.get("pid")]
+    if len(product_ids) > BATCH_SIZE:
+        product_ids = product_ids[:BATCH_SIZE]
+        products = products[:BATCH_SIZE]
 
     return {
         "total": total,
@@ -194,6 +215,96 @@ def get_product_details(product_ids: List[str], cookies: Dict[str, str], mars_ci
     return response.get("data", {})
 
 
+def process_image_url(image_url: str) -> str:
+    """
+    处理图片URL，添加裁剪参数和webp格式
+    
+    Args:
+        image_url: 原始图片URL
+        
+    Returns:
+        处理后的图片URL
+    """
+    import re
+    
+    if not image_url:
+        return image_url
+    
+    # 支持的域名列表
+    supported_domains = [
+        "a.appsimg.com", "b.appsimg.com", "h2.appsimg.com",
+        "a.vpimg1.com", "c.vpimg1.com", "d.vpimg1.com",
+        "a.vpimg2.com", "a.vpimg3.com", "a.vpimg4.com",
+        "img1.vipshop.com"
+    ]
+    
+    # 需要替换为 a.appsimg.com 的域名
+    domains_to_replace = [
+        "a.vpimg1.com", "c.vpimg1.com", "d.vpimg1.com",
+        "a.vpimg2.com", "a.vpimg3.com", "a.vpimg4.com",
+        "img1.vipshop.com"
+    ]
+    
+    # 第一步：判断图片是否支持增加webp后缀
+    url_lower = image_url.lower()
+    support_webp = True
+    
+    # (1) 如果后缀是webp结尾；不支持
+    if url_lower.endswith(".webp"):
+        support_webp = False
+    
+    # (2) 是否是PNG结尾，不支持
+    if url_lower.endswith(".png"):
+        support_webp = False
+    
+    # (3) 是否是APNG，不支持（判断URL参数有ext=apng）
+    if "ext=apng" in url_lower:
+        support_webp = False
+    
+    # (4) 域名必须是指定域名
+    domain_matched = False
+    for domain in supported_domains:
+        if domain in image_url:
+            domain_matched = True
+            break
+    
+    if not domain_matched:
+        support_webp = False
+    
+    # 第二步：判断是否支持裁剪参数拼接
+    support_crop = True
+    
+    # (1) 不是gif、不是apng
+    if url_lower.endswith(".gif") or "ext=apng" in url_lower:
+        support_crop = False
+    
+    # (2) 没有匹配到格式：(_\d+x\d+)_(\d+)\.{1}  例如：_1920x1080_30.
+    pattern = r'_\d+x\d+_\d+\.'
+    if re.search(pattern, image_url):
+        support_crop = False
+    
+    # 第三步：处理裁剪参数拼接
+    if support_crop:
+        # (1) 替换域名
+        for old_domain in domains_to_replace:
+            if old_domain in image_url:
+                image_url = image_url.replace(old_domain, "a.appsimg.com")
+                break
+        
+        # (2) 添加裁剪参数：把.jpg 替换成 _200x200.jpg
+        if image_url.lower().endswith(".jpg"):
+            image_url = image_url[:-4] + "_200x200_90.jpg"
+        elif image_url.lower().endswith(".jpeg"):
+            image_url = image_url[:-5] + "_200x200_90.jpeg"
+    
+    # 第四步：处理webp参数
+    if support_webp:
+        # 添加 !85.webp 后缀
+        image_url = image_url + "!85.webp"
+    
+    return image_url
+
+
 def format_product_detail(product: Dict[str, Any], index: int) -> Dict[str, Any]:
     """
     格式化单个商品详情为字典结构
@@ -210,8 +321,8 @@ def format_product_detail(product: Dict[str, Any], index: int) -> Dict[str, Any]
     title = product.get("title", "")
     price = product.get("price", {})
 
-    # 构建商品链接
-    product_link = f"https://detail.vip.com/detail-{brand_id}-{product_id}.html?f=AIClaw"
+    # 使用 build_product_link 生成带 exchange token 的链接
+    product_link = build_product_link(brand_id, product_id)
 
     # 提取价格信息
     sale_price = price.get("salePrice", "")
@@ -224,6 +335,9 @@ def format_product_detail(product: Dict[str, Any], index: int) -> Dict[str, Any]
     # 提取图片信息
     small_image = product.get("smallImage", "")
     square_image = product.get("squareImage", "")
+    
+    # 处理图片URL：添加裁剪参数和webp格式
+    image_url = process_image_url(square_image or small_image)
 
     # 返回结构化数据
     return {
@@ -231,9 +345,9 @@ def format_product_detail(product: Dict[str, Any], index: int) -> Dict[str, Any]
         "商品ID": product_id,
         "商品链接": product_link,
         "商品名": title,
-        "商品图片": small_image or square_image,
-        "价格": sale_price,
-        "原价": market_price,
+        "商品图片": image_url,
+        "特卖价": sale_price,
+        "划线价": market_price,
         "折扣": sale_discount,
         "卖点": sell_tips,
         "品牌": brand
@@ -254,11 +368,13 @@ def search_vipshop(keyword: str, page_offset: int = 0, price_min: Optional[int] 
         JSON格式的搜索结果
     """
     if not keyword:
+        logger.warning("search_empty_keyword")
         return {"error": "请提供搜索关键词"}
 
     # 检查登录态
     login_data = load_login_tokens()
     if login_data is None:
+        logger.warning("search_no_login")
         return {
             "error": "login_required",
             "message": "需要登录唯品会账户",
@@ -275,28 +391,37 @@ def search_vipshop(keyword: str, page_offset: int = 0, price_min: Optional[int] 
         mars_cid = login_cookies['mars_cid']
 
     # 步骤1: 搜索商品
+    logger.info("search_start", keyword=keyword, page_offset=str(page_offset))
     search_result = search_products(keyword, cookies, mars_cid, page_offset, price_min, price_max)
 
     if "error" in search_result:
         # 检查是否是token过期
         if search_result.get("error") == "token_expired":
+            logger.error("search_token_expired", keyword=keyword)
             return {"error": "token_expired", "message": "登录已过期，请重新登录"}
+        logger.error("search_api_failed", keyword=keyword, error_msg=search_result['error'])
         return {"error": f"接口调用失败：{search_result['error']}"}
 
     total = search_result.get("total", 0)
     product_ids = search_result.get("product_ids", [])
 
     if total == 0:
+        logger.info("search_no_result", keyword=keyword)
         return {"error": "未找到相关商品"}
 
+    logger.info("search_success", keyword=keyword, total=str(total), product_ids=product_ids)
+
     # 步骤2: 获取商品详情
+    logger.info("search_detail_start", keyword=keyword, product_ids=product_ids)
     detail_result = get_product_details(product_ids, cookies, mars_cid)
 
     if "error" in detail_result:
         # 检查是否是token过期
         if detail_result.get("error") == "token_expired":
+            logger.error("search_detail_token_expired", keyword=keyword)
             return {"error": "token_expired", "message": "登录已过期，请重新登录"}
         # 详情接口失败，降级为返回商品ID
+        logger.error("search_detail_failed", keyword=keyword, error_msg=detail_result['error'])
         return {
             "error": f"商品详情接口失败：{detail_result['error']}",
             "总数": total,
@@ -306,6 +431,7 @@ def search_vipshop(keyword: str, page_offset: int = 0, price_min: Optional[int] 
     products = detail_result.get("products", [])
 
     if not products:
+        logger.warning("search_detail_empty", keyword=keyword)
         return {
             "error": "未获取到商品详情",
             "总数": total,
@@ -313,16 +439,25 @@ def search_vipshop(keyword: str, page_offset: int = 0, price_min: Optional[int] 
         }
 
     # 步骤3: 格式化为结构化数据
-    batch_size = 20
+    batch_size = 10
+    max_pages = 10
+    max_total = 100
+    
+    # 限制总数最大为100
+    display_total = min(total, max_total)
+    
     current_page = page_offset // batch_size + 1
-    total_pages = (total + batch_size - 1) // batch_size
+    total_pages = min((display_total + batch_size - 1) // batch_size, max_pages)
+    
     formatted_products = []
     for i, product in enumerate(products, page_offset + 1):
         formatted_products.append(format_product_detail(product, i))
 
+    logger.info("search_complete", keyword=keyword, total=str(display_total), current_page=str(current_page), result_count=str(len(products)))
+
     result = {
         "搜索关键词": keyword,
-        "总数": total,
+        "总数": display_total,
         "当前页": current_page,
         "总页数": total_pages,
         "当前展示": len(products),
@@ -400,6 +535,9 @@ def main():
 
     # 输出JSON格式数据，确保中文正常显示
     print(json.dumps(result, ensure_ascii=False, indent=2))
+
+    # 等待所有日志上报完成
+    logger.flush()
 
 
 if __name__ == "__main__":

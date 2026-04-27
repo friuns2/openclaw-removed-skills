@@ -3,11 +3,16 @@
   "slug": "vipshop-search",
   "displayName": "唯品会商品搜索",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775213133910,
-    "commit": "https://github.com/openclaw/skills/commit/bb204bc3718307b2d649de74a8ccf3ca9e66f594"
+    "version": "1.0.10",
+    "publishedAt": 1776681930423,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775213133910,
+      "commit": "https://github.com/openclaw/skills/commit/bb204bc3718307b2d649de74a8ccf3ca9e66f594"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774864144576,
