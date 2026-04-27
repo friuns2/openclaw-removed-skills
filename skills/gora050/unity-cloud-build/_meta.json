@@ -3,11 +3,16 @@
   "slug": "unity-cloud-build",
   "displayName": "Unity Cloud Build",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170359725,
-    "commit": "https://github.com/openclaw/skills/commit/fb26c9a5c45cd78ef9cb7ebcdca8c448ea221179"
+    "version": "1.0.3",
+    "publishedAt": 1776865529758,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170359725,
+      "commit": "https://github.com/openclaw/skills/commit/fb26c9a5c45cd78ef9cb7ebcdca8c448ea221179"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775012700664,
