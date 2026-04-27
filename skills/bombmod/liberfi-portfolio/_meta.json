@@ -3,9 +3,15 @@
   "slug": "liberfi-portfolio",
   "displayName": "Liberfi Portfolio",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775166266651,
-    "commit": "https://github.com/openclaw/skills/commit/230cac10751fce0bc73e3c4964541d4b5798f619"
+    "version": "1.0.2",
+    "publishedAt": 1776700485810,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775166266651,
+      "commit": "https://github.com/openclaw/skills/commit/230cac10751fce0bc73e3c4964541d4b5798f619"
+    }
+  ]
 }
