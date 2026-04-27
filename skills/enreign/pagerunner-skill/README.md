@@ -9,10 +9,8 @@ Use Pagerunner to drive real Chrome with your existing profiles — authenticate
 ### Installation
 
 ```bash
-# Via skills.sh (recommended)
-npx skills add Enreign/pagerunner-skill
-
-# Or manual setup in your Claude Code config:
+# Coming soon: skills.sh registry
+# For now, manual setup in your Claude Code config:
 curl -sL https://raw.githubusercontent.com/Enreign/pagerunner-skill/main/SKILL.md -o SKILL.md
 ```
 
@@ -59,12 +57,13 @@ pagerunner daemon &  // background service
 |---|---|
 | **[SKILL.md](SKILL.md)** | Main entry point — ICP quick starts, gotchas, core workflow |
 | **[PATTERNS.md](PATTERNS.md)** | 11 workflow patterns (form filling, auth, scrolling, etc.) |
-| **[REFERENCE.md](REFERENCE.md)** | All 27 Pagerunner tools with examples |
+| **[REFERENCE.md](REFERENCE.md)** | All ~44 Pagerunner MCP tools with examples |
 | **[SECURITY.md](SECURITY.md)** | Anonymization, audit log, encryption, domain allowlisting |
 | **[HALLUCINATION_PREVENTION.md](HALLUCINATION_PREVENTION.md)** | Why arrays cause hallucinations + how metadata fixes it |
 | **[DEBUGGING.md](DEBUGGING.md)** | Troubleshooting common issues |
 | **[EXAMPLES.md](EXAMPLES.md)** | 4 full ICP workflows + multi-agent patterns |
-| **[ADVANCED.md](ADVANCED.md)** | Multi-agent coordination, daemon lifecycle, performance |
+| **[ADVANCED.md](ADVANCED.md)** | Multi-agent coordination, daemon lifecycle, session persistence (v0.6), auto-recovery (v0.7), retention |
+| **[RECORDING.md](RECORDING.md)** | Director's guide to making great videos (v0.8) — bug repros, feature demos, onboarding tutorials |
 
 ## What is Pagerunner?
 
@@ -73,10 +72,15 @@ Real Chrome browser automation for AI agents. Not mocked, not cloud.
 **Key features:**
 - Real authenticated browser (uses your existing Chrome profiles)
 - MCP-native (Claude Code, Cursor, Windsurf, Cline, any MCP client)
-- PII anonymization (email, phone, credit card tokens instead of raw values)
+- PII anonymization (email, phone, credit card tokens instead of raw values) — plus credential scrubbing + entropy-based gap detection
+- Sealed-secret trust boundary — tokens extracted from pages are injected into subprocesses via stdin; the raw value never reaches the LLM or audit log
+- Site intelligence — learned JS adapters + auth token vault for direct API calls against logged-in sites
+- Session checkpoints + auto-reattach — full tab state survives daemon restart, Chrome crash, and sleep/wake
+- Network + console capture (`get_network_log`, `get_console_log`)
+- Video recording (v0.8) — MP4 with auto-zoom, cursor tracking, markers, Screen Studio-quality rendering (ffmpeg)
 - Encrypted local state (AES-256-GCM)
 - Persistent daemon (multi-agent coordination via KV store)
-- Audit logging (compliance trail for every action)
+- Audit logging (compliance trail for every action, `AnonymizationGap` events on residual PII)
 - Domain allowlisting (per-session containment)
 - Stealth mode (hides automation signals)
 

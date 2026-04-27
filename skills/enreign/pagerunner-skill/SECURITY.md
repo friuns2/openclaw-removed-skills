@@ -160,6 +160,151 @@ await fill(sessionId, tabId, "input[name='email']", "[EMAIL:abc123]");
 
 ---
 
+## Sealed-Secret Trust Boundary (v0.7.0+)
+
+Tokenization protects PII that the agent needs to *handle*. Sealed secrets go further: they protect credentials the agent should **never see** — not even as tokens.
+
+### Threat Model
+
+An agent scraping an admin dashboard stumbles onto a freshly-generated API token. You want the token in your CI secret manager, not in the agent's context window, not in the audit log.
+
+Anonymization can't help here — the agent would need the *real* token to ship it anywhere useful. A traditional "pass it through a variable" approach puts the token in the LLM prompt, risking prompt leaks, training contamination, or logged context.
+
+### How It Works
+
+```
+         Page DOM                                Subprocess
+  "secret_token=sk_abc..."       extract           stdin
+         │                    ─────────────▶    ┌──────────┐
+         ▼                                      │  gh CLI  │
+  ┌──────────────┐    seal      ┌──────────┐    └──────────┘
+  │ Pagerunner   │──────────────▶ Sealed KV │          ▲
+  │   runtime    │               │ (AES-256)│──────────┘
+  └──────────────┘               └──────────┘   use_secret
+         │
+         ▼
+     LLM (Claude)
+   NEVER SEES RAW
+     VALUE
+```
+
+1. **`extract_secret`** evaluates JS in a tab; the result is written directly into the encrypted sealed table. The tool response is `{ name, stored: true }` — no value.
+2. **`use_secret`** runs a subprocess with the sealed value piped to stdin. The child reads it, the buffer is zeroed, and the value never enters Pagerunner's stdout or the audit log.
+3. **`list_secrets`** returns names only; **`delete_secret`** removes a sealed entry.
+
+### Example — Rotate an npm Token
+
+```javascript
+// 1. Agent navigates to npmjs.com token dashboard and generates a token.
+await click(sessionId, tabId, ".generate-token-btn");
+await wait_for(sessionId, tabId, { selector: ".token-value", ms: 5000 });
+
+// 2. Seal it. Value never echoed.
+await extract_secret(
+  sessionId, tabId,
+  `document.querySelector('.token-value').textContent.trim()`,
+  "npm_token"
+);
+
+// 3. Push to GitHub secrets via gh CLI — value flows via stdin only.
+//    (CLI equivalent; same flow if called via MCP.)
+// $ pagerunner use-secret npm_token -- gh secret set NPM_TOKEN --repos owner/repo
+
+// 4. Discard the sealed entry.
+await delete_secret("npm_token");
+```
+
+At no point does the token appear in:
+- The agent's tool-call context.
+- `get_content` or `evaluate` responses.
+- The audit log.
+- Pagerunner logs.
+
+### When to Use Sealed Secrets vs Tokenization
+
+| Data | Use |
+|---|---|
+| Email / phone / name the agent must *send* | Tokenization (`anonymize: tokenize`) |
+| API token the agent must *hand to another system* | Sealed secret |
+| Password the user typed that Pagerunner saw | Sealed secret |
+| Social security number the agent is *reading for a report* | Redact (`anonymize: redact`) |
+
+### Caveats
+
+- Sealed secrets are one-way for the LLM by design. There is no `get_secret`. Build a helper script and pipe via `use_secret`.
+- The sealed table is encrypted with the same per-user key as the main DB (macOS Keychain or equivalent). Lose the key, lose the secrets.
+- `extract_secret` stores whatever the JS expression returns. If you point it at the wrong element, you seal the wrong thing — you won't know until `use_secret` pipes garbage to your subprocess.
+
+---
+
+## Credential Scrubbing & Gap Detection (v0.7.0+)
+
+Pagerunner actively scans anonymized output for residual credentials — a *second* anonymization pass that specifically targets developer secrets.
+
+### Scrubbed Patterns
+
+Built-in, always on when `anonymize: true`:
+
+| Provider | Pattern family |
+|---|---|
+| OpenAI | Classic keys (`sk-...T3BlbkFJ...`), project keys, service-account keys |
+| GitLab | Personal access tokens (`glpat-...`) |
+| Stripe | Live + test keys (`sk_live_`, `pk_test_`) |
+| AWS | Access key IDs (`AKIA...`), secret keys |
+| Slack | xapp-1 tokens, bot/user tokens |
+| HashiCorp Vault | `hvs.*`, `hvb.*` |
+| Linear | Personal tokens |
+| HuggingFace | Org tokens |
+| PEM | `-----BEGIN ... PRIVATE KEY-----` blocks (RSA, EC, Ed25519) |
+
+These come from a gitleaks gap analysis — they're the patterns most likely to escape generic regex anonymization.
+
+### Gap Detection — Residual Scan
+
+After the main anonymization pass, Pagerunner re-runs every credential pattern against the *output* (what the agent is about to see). If anything matches, the response is **blocked** and an `AnonymizationGap` event is written to the audit log:
+
+```json
+{
+  "timestamp": "2026-04-05T...",
+  "event": "AnonymizationGap",
+  "pattern": "aws_access_key",
+  "position": 420,
+  "sample": "AKIA████████████████",
+  "action": "blocked"
+}
+```
+
+The sample is masked — the real value is never in the log.
+
+### Entropy Heuristic — Catching Unknown Formats
+
+Credential patterns miss novel formats (your internal service-account keys, for example). Pagerunner runs a **Shannon entropy** fallback:
+
+- Any span ≥ 20 characters with entropy ≥ 3.5 bits/char near a context keyword (`token`, `key`, `secret`, `password`, `apikey`) is flagged.
+- Flagged spans are replaced with `[ENTROPY_BLOCK]` and emit an `AnonymizationGap` audit event with `pattern: "entropy"`.
+
+This catches most bespoke credential formats without a hand-written regex. False positives (high-entropy non-secrets like base64-encoded images) are rare in text content; if they happen, pin a `custom_patterns` entry in config to whitelist.
+
+### How to Verify Scrubbing Works
+
+```bash
+# After a run, look for AnonymizationGap events in the audit log
+cat ~/.pagerunner/audit.log | jq 'select(.event == "AnonymizationGap")'
+
+# Count gaps by pattern
+cat ~/.pagerunner/audit.log \
+  | jq -r 'select(.event == "AnonymizationGap") | .pattern' \
+  | sort | uniq -c
+```
+
+A healthy production run has **zero** `AnonymizationGap` events. A non-zero count means *something* pushed a credential through the first pass — investigate which tool call produced it and tighten upstream (maybe the tab was rendering credentials the agent shouldn't have opened at all).
+
+### Compliance Angle
+
+Gap detection gives you a concrete answer to "how do you know no secret leaked to the LLM?" — the audit trail of `AnonymizationGap` events is the evidence. Pair with `AnonymizationGap` alerting in your log pipeline for a hard signal.
+
+---
+
 ## Audit Log (Compliance Trail)
 
 Append-only JSON-lines log at `~/.pagerunner/audit.log`. Every browser action recorded.
@@ -190,6 +335,9 @@ Every event:
 - `screenshot` — (recording that it happened)
 - `save_snapshot`, `restore_snapshot` — origin
 - `kv_set`, `kv_get` — namespace, key (not values)
+- `extract_secret`, `use_secret`, `delete_secret` — secret name only (v0.7.0+)
+- `AnonymizationGap` — residual credential detected in anonymized output; pattern name + masked sample + action (`blocked` / `masked`) (v0.7.0+)
+- `SessionHealthChange` — session transitioned between `Alive`/`Reconnecting`/`Recovering`/`Dead` (v0.7.0+)
 
 ### What's NOT Logged
 

@@ -136,6 +136,117 @@ site_knowledge_ttl_days = 0  # Days before snapshots expire (default: 0 = indefi
 
 ---
 
+## Daemon Hardening and Auto-Recovery (v0.7.0+)
+
+Sessions now survive macOS sleep/wake cycles, Chrome crashes, and Chrome OOM kills transparently. Agents never need to call `open_session` again after these failure modes — the daemon auto-recovers and reuses the same session ID.
+
+### The SessionHealth State Machine
+
+Every session has a `status` field (returned by `list_sessions`):
+
+```
+┌────────┐   CDP drops    ┌──────────────┐   reconnect ok   ┌────────┐
+│ Alive  │──────────────▶│ Reconnecting │───────────────▶│ Alive  │
+│        │                │              │                  │        │
+│        │                │              │   give up        │        │
+│        │                └──────┬───────┘───────────────▶  │  Dead  │
+│        │   Chrome dies         │                          │        │
+│        │──────────────────────▶│  Recovering              │        │
+│        │                       │  (spawn Chrome +         │        │
+│        │                       │   restore checkpoint)    │        │
+│        │◀──────────────────────┴─────────── on success ───│        │
+└────────┘                                                   └────────┘
+```
+
+- **Alive** — tool calls succeed normally.
+- **Reconnecting** — CDP WebSocket dropped (common on sleep/wake). Exponential backoff (100 ms → 2 s, 30 s total budget). Tool calls return structured errors with retry hints — your code should retry after a short delay.
+- **Recovering** — Chrome process died. Daemon spawns a fresh Chrome on the same profile and restores the latest checkpoint. Same session ID survives.
+- **Dead** — all recovery attempts failed. Call `close_session` and `open_session` to start fresh.
+
+### Failure Modes After v0.7.0
+
+| Failure | Before | After |
+|---|---|---|
+| Sleep/wake (WS drops) | Session dead; manual reopen | Yellow `Reconnecting` badge for 1–2 s; auto-reconnect |
+| Chrome crash | Session dead; manual reopen | Orange `Recovering` badge for 3–5 s; auto-recover + checkpoint restore |
+| Chrome OOM kill | Session dead; manual reopen | Same as crash — auto-recover |
+| Daemon SIGTERM | Sessions lost | Checkpoints saved pre-exit; Chrome survives; sessions reattach on restart |
+
+### Writing Resilient Agent Code
+
+```javascript
+// Retry helper that respects SessionHealth transitions
+async function withRetry(fn, { attempts = 3, delay = 500 } = {}) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const sessions = await list_sessions();
+      const self = sessions.find(s => s.id === sessionId);
+      if (self?.status === "Reconnecting" || self?.status === "Recovering") {
+        await new Promise(r => setTimeout(r, delay * (i + 1)));
+        continue;
+      }
+      throw err; // not a transient recovery error
+    }
+  }
+  throw new Error("exhausted retries");
+}
+
+const content = await withRetry(() => get_content(sessionId, tabId));
+```
+
+Most agents don't need this explicit retry — a single reconnection completes in 1–2 s and the next tool call just works. Use it for long-running jobs that *cannot* tolerate a 5 s blip.
+
+### Sleep/Wake Awareness (macOS)
+
+When the OS signals `WillSleep`, the daemon synchronously checkpoints every session before allowing sleep (via `IOAllowPowerChange`). On `DidWake`, it triggers CDP reconnection. Net effect: you close the laptop at 5 PM, open it at 9 AM, and your overnight agent's session is right where it was.
+
+On Linux/Windows this hook is a no-op; sessions still recover via the CDP reconnection path but without pre-sleep checkpoint guarantees.
+
+### Request Timeouts
+
+All CDP calls now go through `send_with_timeout` (default 30 s). A frozen Chrome can no longer hang your agent indefinitely — a timeout returns a structured error that retryable callers can handle.
+
+---
+
+## Video Recording — When and Why
+
+**Tool signatures:** [REFERENCE.md § Video Recording](REFERENCE.md#video-recording-7-tools)
+**Director's guide:** [RECORDING.md](RECORDING.md)
+
+At the advanced-topics level, the key decision is **when to record**. Rules of thumb:
+
+- **Always** record CI-run agents if you'll be debugging failures after the fact. Disk is cheaper than a lost repro.
+- **Turn on `auto_record = true`** for customer-facing automations where "show the video" is the compliance answer.
+- **Do NOT** record sessions on `profile: "personal"` — any private tabs get captured.
+- **Set `retention_days`** to keep disk from growing unbounded.
+
+### Retention and Cleanup
+
+```toml
+[recording]
+auto_record = true
+retention_days = 7     # delete recordings older than 7 days
+
+[checkpoints]
+interval_seconds = 300
+
+[retention]
+max_snapshot_versions = 10
+site_knowledge_ttl_days = 90
+```
+
+The cleanup pass runs once per daemon startup and every 6 h thereafter. Manually force it with:
+
+```bash
+pagerunner status --gc     # reports and runs retention pruning
+```
+
+Recordings each consume ~2–10 MB per minute depending on render settings; unrendered raw captures are smaller. A week of hourly agent runs at auto-record is ~1 GB — plan accordingly.
+
+---
+
 ## Daemon Mode & Multi-Client Coordination
 
 ### Setup

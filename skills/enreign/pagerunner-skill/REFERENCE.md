@@ -1,10 +1,26 @@
 # Pagerunner Tools Reference
 
-Complete documentation for all 27 Pagerunner MCP tools.
+Complete documentation for Pagerunner MCP tools (~44 total as of upstream v0.8.0).
+
+Tool families:
+
+| Section | Tools |
+|---|---|
+| [Sessions & Tabs](#sessions--tabs-8-tools) | `open_session`, `attach_session`, `close_session`, `list_sessions`, `list_tabs`, `new_tab`, `close_tab`, `navigate` |
+| [Navigation & Content](#navigation--content-5-tools) | `wait_for`, `get_content`, `screenshot`, `evaluate`, `scroll` |
+| [Interactions](#interactions-5-tools) | `click`, `type_text`, `fill`, `select`, `scroll` |
+| [Snapshots & Tab State](#snapshots--state-6-tools) | `save_snapshot`, `restore_snapshot`, `list_snapshots`, `delete_snapshot`, `save_tab_state`, `restore_tab_state` |
+| [Session Checkpoints](#session-checkpoints-4-tools) *(v0.6.0+)* | `save_session_checkpoint`, `restore_session_checkpoint`, `list_session_checkpoints`, `delete_session_checkpoint` |
+| [Key-Value Store](#key-value-store-5-tools) | `kv_set`, `kv_get`, `kv_list`, `kv_delete`, `kv_clear` |
+| [Sealed Secrets](#sealed-secrets-4-tools) *(v0.7.0+)* | `extract_secret`, `use_secret`, `list_secrets`, `delete_secret` |
+| [Network & Console](#network--console-2-tools) *(v0.3.0+)* | `get_network_log`, `get_console_log` |
+| [Site Intelligence](#site-intelligence-4-tools) *(v0.5.0+)* | `get_site_knowledge`, `register_adapter`, `call_site_api`, `generate_adapter` |
+| [Video Recording](#video-recording-7-tools) *(v0.8.0+)* | `start_recording`, `stop_recording`, `add_marker`, `list_recordings`, `get_recording`, `delete_recording`, `render_recording` |
+| [Notifications](#notifications-1-tool) *(macOS)* | `notify` |
 
 ---
 
-## Sessions & Tabs (6 tools)
+## Sessions & Tabs (8 tools)
 
 ### `open_session(profile, anonymize?, stealth?, allowed_domains?)`
 
@@ -73,6 +89,38 @@ await close_session(sessionId);
 
 ---
 
+### `attach_session(profile, debug_port, ...)` *(v0.6.0+)*
+
+**Attach to a Chrome instance that's already running with `--remote-debugging-port`.**
+
+Use this when you launched Chrome yourself (or a previous process did) and want Pagerunner to take over without killing and re-launching the browser. The Chrome must have been started with `--remote-debugging-port=<port>` on `127.0.0.1`.
+
+**Arguments:**
+- `profile` (string, required) — Chrome profile name (used for config lookup and the session registry)
+- `debug_port` (number, required) — Port Chrome is listening on (e.g. `9222`)
+- `anonymize` / `stealth` / `allowed_domains` — same meaning as `open_session`
+
+**Returns:** `session_id` (string), just like `open_session`.
+
+**Example:**
+
+```javascript
+// Chrome already running on port 9222
+const sessionId = await attach_session({
+  profile: "personal",
+  debug_port: 9222
+});
+```
+
+**When to use:**
+- You want to preserve a hand-launched Chrome (e.g. during interactive debugging).
+- A previous daemon crashed; you want to reattach without the startup reconciliation path.
+- Integration tests that spin up Chrome separately.
+
+**See Also:** `list_sessions` — reattached sessions are listed with `status` = `Alive`.
+
+---
+
 ### `list_sessions()`
 
 **List all active Chrome sessions.**
@@ -81,10 +129,20 @@ await close_session(sessionId);
 
 ```json
 [
-  { "id": "sess_abc123", "profile": "personal", "stealth": false, "anonymize": false },
-  { "id": "sess_def456", "profile": "agent-work", "stealth": true, "anonymize": true }
+  { "id": "sess_abc123", "profile": "personal", "stealth": false, "anonymize": false, "alive": true, "status": "Alive" },
+  { "id": "sess_def456", "profile": "agent-work", "stealth": true, "anonymize": true, "alive": true, "status": "Reconnecting" }
 ]
 ```
+
+**`status` field (v0.7.0+):**
+- `Alive` — healthy, tools should succeed
+- `Reconnecting` — CDP WebSocket dropped (e.g. sleep/wake); auto-reconnecting with exponential backoff. Tool calls during this state return structured errors with retry hints — retry after a short delay.
+- `Recovering` — Chrome process died; daemon is spawning a new Chrome and restoring the latest checkpoint. Same session ID — no need to call `open_session`.
+- `Dead` — recovery failed. Call `close_session` and open a new one.
+
+`alive` (boolean) is kept for backward compatibility and is `true` for everything except `Dead`.
+
+See [ADVANCED.md § Daemon Hardening](ADVANCED.md#daemon-hardening-and-auto-recovery-v070) for the full state machine.
 
 **Example:**
 
@@ -167,6 +225,29 @@ const [tab1, tab2, tab3] = await Promise.all([
 **ICP Context:**
 - **ICP 1:** Multiple tabs for research (docs, tests, design specs)
 - **ICP 5:** Parallel scraping across multiple sources
+
+---
+
+### `close_tab(session_id, target_id)`
+
+**Close a single tab in a session.** Fails if it's the last tab — use `close_session` instead.
+
+**Arguments:**
+- `session_id` (string, required)
+- `target_id` (string, required) — Tab to close
+
+**Returns:** Success message; the remaining tabs in the session are unaffected.
+
+**Example:**
+
+```javascript
+// Close only the scratch tab, keep the session running
+await close_tab(sessionId, scratchTabId);
+```
+
+**When to use:**
+- Long-running sessions that accumulate tabs (e.g. research agents).
+- Cleanup after a sub-task without tearing down the whole session.
 
 ---
 
@@ -770,6 +851,42 @@ await restore_tab_state(sessionId2);
 
 ---
 
+## Session Checkpoints (4 tools) *(v0.6.0+)*
+
+Session checkpoints capture **full tab state** — URLs, scroll positions, and auth state for every tab in the session — and store it in the encrypted DB. Distinct from `save_snapshot` (which is per-origin cookies/localStorage) and `save_tab_state` (which is just URLs without auth).
+
+Use them when you need to pause a multi-tab investigation and pick up exactly where you left off.
+
+**Auto-checkpoints:** The daemon writes `"Autosave · close"` on every `close_session` and `"Autosave · periodic"` every 5 minutes (configurable via `[checkpoints] interval_seconds`). Retention: `[retention] max_snapshot_versions` (default 10).
+
+See [ADVANCED.md § Session Persistence](ADVANCED.md#session-persistence--auto-reattach-v060) for retention tuning and recovery flows.
+
+### `save_session_checkpoint(session_id, name?)`
+
+Snapshot every open tab's URL + scroll + auth into one checkpoint. Returns `checkpoint_id`.
+
+```javascript
+const { checkpoint_id } = await save_session_checkpoint(sessionId, "before-deploy-review");
+```
+
+### `restore_session_checkpoint(session_id, checkpoint_id)`
+
+Reopen all saved tabs at their stored URLs in the given session.
+
+```javascript
+await restore_session_checkpoint(sessionId, "cp_abc123");
+```
+
+### `list_session_checkpoints(profile?)`
+
+List checkpoints for a profile. Profile scoping keeps agent and personal checkpoints separate.
+
+### `delete_session_checkpoint(checkpoint_id)`
+
+Remove a specific checkpoint. Auto-checkpoints honor retention but manual ones stick around until you delete them.
+
+---
+
 ## Key-Value Store (5 tools)
 
 ### `kv_set(namespace, key, value)`
@@ -897,6 +1014,171 @@ await kv_clear("old_pipeline");
 
 ---
 
+## Sealed Secrets (4 tools) *(v0.7.0+)*
+
+A **trust boundary** for credentials. Secrets extracted from pages live in an encrypted sealed table and are injected into subprocesses via stdin — the raw value never passes through the LLM prompt or the audit log. Use this for tokens you don't want a model to see (GitHub PATs, npm tokens, API keys scraped from a dashboard).
+
+See [SECURITY.md § Sealed-Secret Trust Boundary](SECURITY.md#sealed-secret-trust-boundary-v070) for the threat model and scrubbing details.
+
+### `extract_secret(session_id, target_id, expression, name)`
+
+Evaluate JS in a tab and store the result as a named sealed secret. The value never appears in stdout, the tool response, or the audit log.
+
+```javascript
+// Read a freshly-generated npm token from the dashboard, seal it
+await extract_secret(
+  sessionId, tabId,
+  `document.querySelector('.token-value').textContent.trim()`,
+  "npm_token"
+);
+// Tool response: { "name": "npm_token", "stored": true } — the value itself is NEVER echoed.
+```
+
+### `use_secret(name, command, args)`
+
+Run a subprocess with the sealed value piped to stdin. The value is read from the sealed store, written to the child's stdin, then zeroed in memory.
+
+```bash
+# CLI equivalent
+pagerunner use-secret npm_token -- gh secret set NPM_TOKEN --repos owner/repo
+```
+
+### `list_secrets()`
+
+Names only — values are never returned.
+
+### `delete_secret(name)`
+
+Remove a sealed entry.
+
+**Important:** Sealed secrets are intentionally one-way for the LLM. There is no `get_secret` that returns a raw value. If you need the value in JS, use `use_secret` to pipe it to a helper script.
+
+---
+
+## Network & Console (2 tools) *(v0.3.0+)*
+
+Inspect HTTP requests and JS console output captured during a session. Replaces the fragile `evaluate`-based fetch-monkey-patching pattern — use these instead.
+
+### `get_network_log(session_id, target_id?, filters?)`
+
+Query the session's CDP network ring buffer. Filter by URL glob, method, status, or time window.
+
+```javascript
+// Find the XHR that loaded invoices
+const hits = await get_network_log(sessionId, tabId, {
+  url_glob: "**/api/invoices**",
+  method: "GET",
+  status_range: [200, 299]
+});
+// Each hit has { url, method, status, request_headers, response_headers, body_preview, timing }
+```
+
+**When to use:** figure out which API endpoint the site UI actually calls, inspect auth headers before registering a site adapter, debug failed requests.
+
+### `get_console_log(session_id, target_id, since?)`
+
+Recent `console.*` messages and uncaught exceptions. Useful for catching JS errors without opening DevTools.
+
+```javascript
+const log = await get_console_log(sessionId, tabId, { since: "2s" });
+// [{ level: "error", text: "TypeError: ...", source: "https://...", line: 42 }]
+```
+
+**Pattern:** Call this after any interaction that should not emit a JS error; treat any `level: "error"` as a hard fail.
+
+---
+
+## Site Intelligence (4 tools) *(v0.5.0+)*
+
+Pagerunner **learns about sites as you use them**. Adapters are short JS functions executed in the browser tab — same origin as the logged-in user, so they inherit all cookies and tokens. The site knowledge store also remembers auth tokens seen in network traffic (in an encrypted vault) and tracks selector health over time.
+
+Seed adapters for **GitHub, Linear, Jira, Notion, and Gmail** are built in — call them without registering anything.
+
+### `get_site_knowledge(origin)`
+
+Return what Pagerunner knows about a site: registered adapters, detected auth tokens (names + detection metadata, never raw values), selector health stats.
+
+```javascript
+const k = await get_site_knowledge("https://github.com");
+// { adapters: [...], auth_tokens: [{name: "github_pat", detected_in: "Authorization header"}], selectors: [...] }
+```
+
+### `register_adapter(origin, name, description, js_code)`
+
+Store a JS adapter. The function is executed inside the tab when called — it has access to the site's session, cookies, and any detected auth tokens via a `credentials` argument.
+
+```javascript
+await register_adapter(
+  "https://api.github.com",
+  "list-issues",
+  "List open issues for a repo",
+  `async ({ owner, repo }, { credentials }) => {
+     const r = await fetch(\`/repos/\${owner}/\${repo}/issues\`, {
+       headers: { Authorization: 'Bearer ' + credentials.github_pat }
+     });
+     return r.json();
+   }`
+);
+```
+
+### `call_site_api(session_id, target_id, origin, name, params)`
+
+Execute a registered adapter.
+
+```javascript
+const issues = await call_site_api(sessionId, tabId, "https://github.com", "list-issues", {
+  owner: "Enreign", repo: "pagerunner"
+});
+```
+
+### `generate_adapter(origin, goal)` *(requires `ANTHROPIC_API_KEY`)*
+
+Auto-generate a JS adapter from captured network traffic using the Claude API. Pagerunner passes recent network log entries + a natural-language goal to the model and stores the resulting adapter.
+
+```javascript
+await generate_adapter("https://linear.app", "create an issue given title + description");
+```
+
+**Why adapters beat DOM automation:** they're faster, less brittle (no selectors), and reuse browser credentials. Use them for bulk / repeatable operations; use `click`/`fill` for one-off UI tasks.
+
+**Selector fragility warnings:** `click`, `fill`, and `select` track success/failure per selector. Responses include a warning block when a selector fails > 30% over ≥ 5 uses. Treat that as a cue to switch to an adapter.
+
+---
+
+## Video Recording (7 tools) *(v0.8.0+)*
+
+Record tabs as polished MP4 with auto-zoom, cursor tracking, markers, and Screen Studio-quality rendering. Requires `ffmpeg` on PATH (ImageMagick for text overlays).
+
+**Tools at a glance:**
+
+| Tool | Purpose |
+|---|---|
+| `start_recording(session_id, target_id, name?)` | Begin capture on a tab |
+| `stop_recording(session_id)` | End the active recording, returns `recording_id` |
+| `add_marker(session_id, label, note?)` | Timestamped annotation (burned into overlays + SRT) |
+| `list_recordings(profile?)` | List saved recordings |
+| `get_recording(recording_id)` | Metadata: duration, markers, events, file paths |
+| `delete_recording(recording_id)` | Remove a recording and its files |
+| `render_recording(recording_id, options?)` | Post-process: overlays, zoom, motion interpolation, window chrome |
+
+**This is a doc-lite summary.** The real value of recording lies in *how* you structure the session and *how* you render it. For a full walkthrough — cursor choreography, marker scripts, zoom targeting, auto-record mode, SRT subtitles, and examples for the three common use cases (bug repros, feature demos, onboarding tutorials) — see **[RECORDING.md](RECORDING.md)**.
+
+---
+
+## Notifications (1 tool)
+
+### `notify(title, message, session_id?)` *(macOS menu bar)*
+
+Send a macOS notification through the Pagerunner menu bar app. Requires the menu bar companion running (`apps/menubar`). No-op on Linux/Windows.
+
+```javascript
+await notify("Deployment green", "All Jira tickets for sprint-42 closed.");
+```
+
+**When to use:** long-running agent jobs where you want a passive signal ("done", "needs attention") without dumping to the Claude transcript.
+
+---
+
 ## Quick Reference Table
 
 | Tool | Use Case | ICP |
@@ -927,6 +1209,25 @@ await kv_clear("old_pipeline");
 | `kv_delete` | Delete key | 2, 4 |
 | `kv_list` | List keys | 4 |
 | `kv_clear` | Clear namespace | 4 |
+| `attach_session` | Attach to existing Chrome | 4 |
+| `close_tab` | Close one tab | All |
+| `save_session_checkpoint` | Full tab-state snapshot | 2, 4 |
+| `restore_session_checkpoint` | Reopen all tabs at URLs | 2, 4 |
+| `extract_secret` | Seal a credential | 3 |
+| `use_secret` | Pipe sealed value to subprocess | 3, 4 |
+| `get_network_log` | Inspect HTTP traffic | All |
+| `get_console_log` | Inspect JS console | All |
+| `get_site_knowledge` | What do we know about this site? | 2, 4 |
+| `register_adapter` | Store a direct-API function | 2, 4 |
+| `call_site_api` | Call a stored adapter | 2, 4 |
+| `generate_adapter` | Auto-generate adapter via Claude | 2, 4 |
+| `start_recording` | Begin video capture | All |
+| `stop_recording` | End video capture | All |
+| `add_marker` | Timestamped note in video | All |
+| `render_recording` | Post-process to polished MP4 | All |
+| `notify` | macOS notification | 2 |
+
+See [RECORDING.md](RECORDING.md) for recording how-to and [ADVANCED.md](ADVANCED.md) for checkpoint/daemon internals.
 
 ---
 
