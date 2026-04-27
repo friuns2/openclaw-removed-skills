@@ -1,11 +1,17 @@
 {
   "owner": "gingiris",
   "slug": "b2b-marketing-playbook",
-  "displayName": "B2B Marketing Playbook",
+  "displayName": "B2B Marketing & SaaS Growth Playbook",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774763620454,
-    "commit": "https://github.com/openclaw/skills/commit/141cb433af908031c4e18c369c933608bcb8f182"
+    "version": "1.1.3",
+    "publishedAt": 1776567379490,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774763620454,
+      "commit": "https://github.com/openclaw/skills/commit/141cb433af908031c4e18c369c933608bcb8f182"
+    }
+  ]
 }
