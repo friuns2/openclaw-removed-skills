@@ -3,11 +3,16 @@
   "slug": "contrast-security",
   "displayName": "Contrast Security",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169648300,
-    "commit": "https://github.com/openclaw/skills/commit/f20d6b6288809fb506a1e92e398be565a6e87222"
+    "version": "1.0.3",
+    "publishedAt": 1776864521722,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169648300,
+      "commit": "https://github.com/openclaw/skills/commit/f20d6b6288809fb506a1e92e398be565a6e87222"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774865045963,
