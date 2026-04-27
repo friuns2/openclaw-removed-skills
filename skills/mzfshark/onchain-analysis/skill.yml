@@ -1,15 +1,14 @@
 ---
 name: onchain-analysis
-description: Interpret on-chain behavior to reveal structural truth. Analyze token distribution, treasury structure, governance architecture, and risk vectors through verifiable evidence.
-version: 1.0.0
-display_name: "On-Chain Analysis"
+description: Interpret blockchain data strategically; identify patterns, anomalies, and flows with data-backed evidence and explicit uncertainty.
+version: 2.0.0
+display_name: "Onchain Analysis"
 triggers:
-  - analyze blockchain
-  - token distribution
-  - treasury analysis
-  - contract analysis
-  - wallet concentration
-  - governance architecture
-  - on-chain evidence
-  - verify contract
+  - onchain analysis
+  - analyze wallet
+  - analyze contract
+  - trace transactions
+  - fund flows
+  - detect anomaly
+  - token movements
 ---

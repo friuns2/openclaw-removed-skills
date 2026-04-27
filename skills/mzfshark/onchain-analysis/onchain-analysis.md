@@ -1,13 +1,3 @@
----
-name: onchain-analysis
-description: Interpret blockchain data strategically; identify patterns, anomalies, and flows with data-backed evidence and explicit uncertainty.
-metadata:
-  author: Morpheus
-  version: 2.0.0
-  owner: Morpheus Agent
-  category: onchain
----
-
 # SKILL: onchain-analysis
 
 ## Purpose
