@@ -3,11 +3,16 @@
   "slug": "google-postmaster-tools",
   "displayName": "Google Postmaster Tools",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168238289,
-    "commit": "https://github.com/openclaw/skills/commit/525ccb99dab326f951ddb20d89f194a49c4e57d6"
+    "version": "1.0.3",
+    "publishedAt": 1776862330045,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168238289,
+      "commit": "https://github.com/openclaw/skills/commit/525ccb99dab326f951ddb20d89f194a49c4e57d6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774587908794,
