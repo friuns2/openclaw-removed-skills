@@ -3,11 +3,16 @@
   "slug": "finicity",
   "displayName": "Finicity",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169126981,
-    "commit": "https://github.com/openclaw/skills/commit/5842936613eca95e9336ef65da04be6b45159751"
+    "version": "1.0.3",
+    "publishedAt": 1776863861893,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169126981,
+      "commit": "https://github.com/openclaw/skills/commit/5842936613eca95e9336ef65da04be6b45159751"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774760699602,
