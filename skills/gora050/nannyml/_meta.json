@@ -3,11 +3,16 @@
   "slug": "nannyml",
   "displayName": "Nannyml",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169619356,
-    "commit": "https://github.com/openclaw/skills/commit/ecbcaf2e42f196d34d70d8c01bb9a7bf9187c3a1"
+    "version": "1.0.3",
+    "publishedAt": 1776885463050,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169619356,
+      "commit": "https://github.com/openclaw/skills/commit/ecbcaf2e42f196d34d70d8c01bb9a7bf9187c3a1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774857859926,
