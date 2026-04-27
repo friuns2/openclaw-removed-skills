@@ -3,11 +3,16 @@
   "slug": "advantage-csp",
   "displayName": "Advantage Csp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170172710,
-    "commit": "https://github.com/openclaw/skills/commit/e61b3bd88f9d5940219f70412491249609cf06be"
+    "version": "1.0.3",
+    "publishedAt": 1776866123379,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170172710,
+      "commit": "https://github.com/openclaw/skills/commit/e61b3bd88f9d5940219f70412491249609cf06be"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774984992712,
