@@ -1,0 +1,11 @@
+{
+  "owner": "neroagent",
+  "slug": "session-sync-cloud",
+  "displayName": "Session Sync Cloud",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775069938789,
+    "commit": null
+  },
+  "history": []
+}
