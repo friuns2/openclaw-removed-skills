@@ -3,11 +3,16 @@
   "slug": "mctime",
   "displayName": "Mctime",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168830302,
-    "commit": "https://github.com/openclaw/skills/commit/9cdfcde65e06213ec0d62bcfd29e74b3893c3465"
+    "version": "1.0.3",
+    "publishedAt": 1776863208323,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168830302,
+      "commit": "https://github.com/openclaw/skills/commit/9cdfcde65e06213ec0d62bcfd29e74b3893c3465"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774703072458,
