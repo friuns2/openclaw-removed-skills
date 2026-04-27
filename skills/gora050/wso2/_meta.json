@@ -3,11 +3,16 @@
   "slug": "wso2",
   "displayName": "Wso2",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167715751,
-    "commit": "https://github.com/openclaw/skills/commit/65069df9715d7c7f9578fc8e11693172c129e25b"
+    "version": "1.0.3",
+    "publishedAt": 1776865180750,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167715751,
+      "commit": "https://github.com/openclaw/skills/commit/65069df9715d7c7f9578fc8e11693172c129e25b"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774494257349,
