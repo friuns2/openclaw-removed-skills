@@ -3,11 +3,16 @@
   "slug": "centrifuge",
   "displayName": "Centrifuge",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170834089,
-    "commit": "https://github.com/openclaw/skills/commit/14cdc61c5ac2a962fa5d762fb5527b46c6005858"
+    "version": "1.0.3",
+    "publishedAt": 1776866221603,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170834089,
+      "commit": "https://github.com/openclaw/skills/commit/14cdc61c5ac2a962fa5d762fb5527b46c6005858"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775106281409,
