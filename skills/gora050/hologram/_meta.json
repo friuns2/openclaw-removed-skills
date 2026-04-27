@@ -3,11 +3,16 @@
   "slug": "hologram",
   "displayName": "Hologram",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170900288,
-    "commit": "https://github.com/openclaw/skills/commit/039719862739da564f60f63ffa06a25c490eb48c"
+    "version": "1.0.3",
+    "publishedAt": 1776898919905,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170900288,
+      "commit": "https://github.com/openclaw/skills/commit/039719862739da564f60f63ffa06a25c490eb48c"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775117038406,
