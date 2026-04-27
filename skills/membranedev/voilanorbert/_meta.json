@@ -3,9 +3,15 @@
   "slug": "voilanorbert",
   "displayName": "Voilanorbert",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169900141,
-    "commit": "https://github.com/openclaw/skills/commit/63ab7dc8e47e552d2a2655c5a5f0656166dbefe5"
+    "version": "1.0.3",
+    "publishedAt": 1776855872209,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169900141,
+      "commit": "https://github.com/openclaw/skills/commit/63ab7dc8e47e552d2a2655c5a5f0656166dbefe5"
+    }
+  ]
 }
