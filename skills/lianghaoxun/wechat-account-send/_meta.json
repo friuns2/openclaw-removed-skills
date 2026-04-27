@@ -1,0 +1,11 @@
+{
+  "owner": "lianghaoxun",
+  "slug": "wechat-account-send",
+  "displayName": "微信消息文件发送skill",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775259179810,
+    "commit": null
+  },
+  "history": []
+}
