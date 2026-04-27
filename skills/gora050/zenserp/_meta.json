@@ -3,11 +3,16 @@
   "slug": "zenserp",
   "displayName": "Zenserp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169196232,
-    "commit": "https://github.com/openclaw/skills/commit/473117cc34297e0386e8a9c35bbb652df6f69b3e"
+    "version": "1.0.3",
+    "publishedAt": 1776863903739,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169196232,
+      "commit": "https://github.com/openclaw/skills/commit/473117cc34297e0386e8a9c35bbb652df6f69b3e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774775039708,
