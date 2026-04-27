@@ -3,9 +3,15 @@
   "slug": "equensworldline",
   "displayName": "Equensworldline",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168855999,
-    "commit": "https://github.com/openclaw/skills/commit/28d35c76e48d2f480edbcd8f670da45f0a3f92af"
+    "version": "1.0.3",
+    "publishedAt": 1776864530124,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168855999,
+      "commit": "https://github.com/openclaw/skills/commit/28d35c76e48d2f480edbcd8f670da45f0a3f92af"
+    }
+  ]
 }
