@@ -3,11 +3,16 @@
   "slug": "alphasense",
   "displayName": "Alphasense",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170658028,
-    "commit": "https://github.com/openclaw/skills/commit/ed2091340c093cadcd1fb15a38d51d545f93d689"
+    "version": "1.0.3",
+    "publishedAt": 1776865990325,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170658028,
+      "commit": "https://github.com/openclaw/skills/commit/ed2091340c093cadcd1fb15a38d51d545f93d689"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775088252877,
