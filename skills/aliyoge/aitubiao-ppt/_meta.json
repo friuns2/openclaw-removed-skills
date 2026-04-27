@@ -3,9 +3,15 @@
   "slug": "aitubiao-ppt",
   "displayName": "爱图表PPT",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775139954875,
-    "commit": "https://github.com/openclaw/skills/commit/a2a80970f42ef25a1148abf06eaf416fcce90bed"
+    "version": "1.1.5",
+    "publishedAt": 1776934139752,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775139954875,
+      "commit": "https://github.com/openclaw/skills/commit/a2a80970f42ef25a1148abf06eaf416fcce90bed"
+    }
+  ]
 }

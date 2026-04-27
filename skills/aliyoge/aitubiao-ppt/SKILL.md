@@ -1,7 +1,12 @@
 ---
 name: aitubiao-ppt
-version: 1.0.1
 description: AI PPT/演示文稿生成。根据用户主题或内容自动生成PPT演示文稿项目。当用户想要创建PPT、演示文稿、幻灯片时使用，触发词包括"创建PPT"、"做PPT"、"做个演示文稿"、"生成幻灯片"、"create PPT"、"make slides"、"generate presentation"、"make a PPT"等。
+license: MIT
+compatibility: Requires network access to api.aitubiao.com, Bash shell, curl, and jq
+metadata:
+  author: aitubiao
+  version: "1.1.5"
+allowed-tools: Bash Read
 ---
 
 # AI PPT/演示文稿生成
@@ -14,10 +19,10 @@ description: AI PPT/演示文稿生成。根据用户主题或内容自动生成
 
 1. **认证优先**：在执行任何操作之前，必须先检查凭证状态。认证未通过时，禁止执行任何后续步骤。
 2. **按顺序执行**：工作流程的 5 个步骤必须按顺序执行，禁止跳步。
-3. **费用确认前禁止调用生成接口**：必须成功查询配额、计算费用、并获得用户明确确认后，才能调用 `create-project` 接口。
+3. **费用确认前禁止调用生成接口**：必须成功查询配额、计算费用、并获得用户明确确认后，才能调用创建接口。
 4. **仅通过 API 创建PPT**：禁止使用本地工具（reveal.js、impress.js、Google Slides API、python-pptx、LibreOffice 等）生成PPT。无论 API 因何种原因失败，都**绝对禁止使用本地工具**，没有任何例外。API 失败时正确做法是停止并告知用户，不是寻找替代方案。
-5. **401/403 立即停止**：任何步骤中收到 HTTP 401/403，立即停止并引导用户前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys) 检查或重新创建 API Key。401/403 不是超时，禁止重试。
-6. **超时/500 重试规则**：最多重试 3 次（间隔 5 秒），仍失败则停止并告知用户。
+5. **401/403 立即停止**：任何步骤中收到 HTTP 401/403（CLI exit 1），立即停止并引导用户前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys) 检查或重新创建 API Key。401/403 不是超时，禁止重试。
+6. **超时/500 不自动重试创建接口**：创建接口不可重试（可能重复扣费）。告知用户失败原因，由用户决定是否重新发起。
 
 **⚠️ 以下想法是错误的，如果你发现自己在这样想，请立即停止：**
 - ❌ "API 不可用，我可以用本地工具生成PPT作为替代" → 违反规则 4
@@ -30,54 +35,42 @@ description: AI PPT/演示文稿生成。根据用户主题或内容自动生成
 
 ### 检查凭证
 
-读取凭证文件，判断认证状态：
-
 ```bash
-cat ~/.aitubiao/credentials 2>/dev/null
+bash scripts/aitubiao-cli.sh check-auth
 ```
 
-根据结果判断：
-- **文件不存在或为空** → 执行下方"配置凭证"流程
-- **`API_KEY` 为空** → 执行下方"配置凭证"流程
-- **`API_KEY` 不以 `sk_v1_` 开头** → 告知用户"当前 API Key 已失效，请前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys) 重新创建一个 API Key"
-- **`BASE_URL` 为空或不等于 `https://api.aitubiao.com`** → 执行下方"配置凭证"流程（保留现有 API_KEY，仅修正 BASE_URL）
-- **`API_KEY` 格式正确且 `BASE_URL` 正确** → 认证通过
-
-认证通过后，加载环境变量：
-```bash
-source ~/.aitubiao/credentials
-export BASE_URL="${BASE_URL:-https://api.aitubiao.com}"
-```
+- **Exit 0** → 认证通过
+- **Exit 1** → 凭证问题，按 stderr 提示处理：
+  - 文件不存在/API_KEY 为空 → 执行下方"配置凭证"流程
+  - API_KEY 格式无效 → 告知用户"当前 API Key 已失效，请前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys) 重新创建一个 API Key"
+  - BASE_URL 与当前技能包环境不一致 → 说明凭证中残留了旧环境地址；向用户索要当前仍有效的 API Key，并执行下方"配置凭证"流程重写凭证（通常不需要重新创建 API Key）
 
 ### 配置凭证
 
 1. 向用户索要 API Key（格式：`sk_v1_...`）。如果没有，引导用户前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys) 创建一个新的 API Key，然后将创建好的 Key 粘贴回来。
 2. 保存凭证：
 ```bash
-mkdir -p ~/.aitubiao
-cat > ~/.aitubiao/credentials << EOF
-API_KEY=<用户提供的key>
-BASE_URL=https://api.aitubiao.com
-EOF
-chmod 600 ~/.aitubiao/credentials
+bash scripts/aitubiao-cli.sh auth <用户提供的key>
 ```
-3. 重新读取文件验证配置是否成功。
+3. 验证：再次运行 `bash scripts/aitubiao-cli.sh check-auth` 确认配置成功。
 
 凭证保存在 `~/.aitubiao/credentials`，跨会话持久生效。
 
-## 服务架构
+## Windows / Git Bash 注意事项（仅 Windows 用户需要关注）
 
-所有 API 使用统一的服务地址：
+在 Windows 上通过 Git Bash 运行本 CLI 时，**禁止把含中文等非 ASCII 字符的 JSON 直接写在 heredoc 里**——MSYS 会按 Windows 系统代码页（常为 GBK/CP936）转换 argv 字节，传到后端就是乱码。
 
-| 默认地址 | API前缀 | 认证方式 |
-|---------|---------|---------|
-| `https://api.aitubiao.com/` | `/api/v1/agent` | `Authorization: Bearer <API_KEY>` |
+正确做法：先用 Write 工具把完整 UTF-8 JSON 写到一个临时文件，然后用 `--body-file` 让 CLI 从文件读取（绕过任何 argv/控制台编码转换）：
 
-**重要**：所有非流式响应都包裹在统一格式中：
-```json
-{ "code": 0, "msg": "ok", "data": { ... } }
+```bash
+# 第一步：用 Write 工具把请求体写到 /tmp/aitubiao-payload.json（内容必须是 UTF-8）
+# 第二步：用 --body-file 调用 CLI
+bash scripts/aitubiao-cli.sh --body-file /tmp/aitubiao-payload.json create-chart
 ```
-实际业务数据在 `data` 字段内。**即使 HTTP 状态码为 200，也必须检查 `code` 字段是否为 0，非 0 表示业务错误。**
+
+`--body-file` 可用于所有读取 stdin JSON 的命令：`create-chart` / `create-ppt` / `create-sankey` / `create-3d` / `download-project`。CLI 会自动剥离 UTF-8 BOM 和 CRLF。
+
+macOS / Linux 上无需改动，仍然可以使用 heredoc。
 
 ## 支持的输入方式
 
@@ -112,18 +105,19 @@ chmod 600 ~/.aitubiao/credentials
 
 在创建PPT前，**必须**检查用户的 AI贝余额和项目配额，并向用户确认费用后才能继续。
 
-收到 401/403 按强制规则 5 处理。超时/500 按强制规则 6 处理。
-
 #### 3.1 查询配额
 
 ```bash
-curl -s --max-time 10 -X GET "${BASE_URL}/api/v1/agent/quota" \
-  -H "Authorization: Bearer ${API_KEY}"
+bash scripts/aitubiao-cli.sh quota --skill ppt
 ```
 
 #### 3.2 计算总费用
 
-使用 `features.pptProjectCreate` 的 cost 和 billingModel 计算费用：
+**PPT 项目按"页"计费**：每生成一页扣 `.feature.cost` 个 AI贝。
+
+总费用 = `.feature.cost` × `pageCount`
+
+（`pageCount` 上限由顶层字段 `pptGeneratePageLimit` 决定，超过会被拒绝。）
 
 | billingModel | 计算方式 | 示例 |
 |-------------|---------|------|
@@ -153,54 +147,39 @@ curl -s --max-time 10 -X GET "${BASE_URL}/api/v1/agent/quota" \
 API 会在项目创建后立即返回项目地址（不等待所有页面生成完成）。用户可以通过项目地址实时查看生成进度。
 
 ```bash
-curl -s --max-time 120 -X POST "${BASE_URL}/api/v1/agent/infographic/create-project" \
-  -H "Authorization: Bearer ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "<用户的主题或内容>",
-    "pageCount": 6,
-    "theme": "light",
-    "projectName": "我的PPT"
-  }'
-```
-
-响应格式（需解析 `data` 字段）：
-```json
+bash scripts/aitubiao-cli.sh create-ppt <<'EOF'
 {
-  "code": 0,
-  "msg": "ok",
-  "data": {
-    "success": true,
-    "outlineId": "uuid...",
-    "project": {
-      "id": "cuid...",
-      "title": "我的PPT",
-      "status": "generating",
-      "width": 960,
-      "height": 540,
-      "projectUrl": "https://app.aitubiao.com/workspace/cuid..."
-    },
-    "quota": {
-      "shellCoinCost": 60,
-      "shellBalance": 40,
-      "projectsUsed": 6,
-      "projectsLimit": 50,
-      "projectsRemaining": 44,
-      "canCreateProject": true
-    },
-    "totalPages": 6,
-    "completedPages": 0,
-    "failedPages": 0,
-    "processingTime": "5000ms"
-  }
+  "prompt": "<用户的主题或内容>",
+  "pageCount": 6,
+  "theme": "light",
+  "projectName": "<项目名称>"
 }
+EOF
 ```
 
-完整请求/响应格式详见 [ppt-api.md](references/ppt-api.md)。
+**请求体字段说明**：
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|-------|------|
+| prompt | string | 是 | - | 用户输入的主题或内容文本 |
+| pageCount | number | 否 | 6 | 页数（最小 1，上限由 `pptGeneratePageLimit` 决定） |
+| theme | string | 否 | "light" | "light"（浅色）或 "dark"（深色） |
+| color | string | 否 | - | 主题色：`#004eff`/`#f16f0b`/`#ee4646`/`#2197fc`/`#8a61ec`/`#35b13f`/`dynamic` |
+| projectName | string | 否 | - | 项目名称 |
+| requirements | string | 否 | - | 附加要求（风格偏好、内容侧重等） |
+| title | string | 否 | - | 大纲标题 |
+
+**检查 CLI 退出码**：
+- **Exit 0**：成功。解析 stdout JSON 获取项目信息。
+- **Exit 1**：认证失败。引导用户前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys)。
+- **Exit 2**：业务错误。向用户展示错误详情。
+- **Exit 3**：网络/超时错误。告知用户稍后重试。
+
+响应字段说明详见下方"响应字段参考"。
 
 ### 第五步：返回结果（前置条件：第四步创建成功）
 
-**立即向用户展示项目 URL**（从 `data.project.projectUrl` 获取）。PPT 页面仍在后台生成中，用户可以在浏览器中打开此链接实时查看生成进度和最终效果。格式示例：
+**立即向用户展示项目 URL**（从 `project.projectUrl` 获取）。PPT 页面仍在后台生成中，用户可以在浏览器中打开此链接实时查看生成进度和最终效果。格式示例：
 ```
 您的 PPT 项目已创建成功！页面正在后台生成中（通常需要 5-10 分钟）。
 请点击下方链接实时查看生成进度和编辑 PPT：
@@ -208,26 +187,63 @@ https://app.aitubiao.com/workspace/xxxxxxxxx
 ```
 
 同时提供以下补充信息：
-- 项目 ID（从 `data.project.id` 获取）
+- 项目 ID（从 `project.id` 获取）
 - 总页数
 - 资源消耗：本次消耗 AI贝数、剩余 AI贝、已用项目数/上限
 
+## 下载已创建项目（可选后续操作）
+
+如果用户在 PPT 项目创建后要求“帮我下载或者导出这个项目”，先提醒用户 PPT 页面仍可能在后台生成。**优先让用户通过 `projectUrl` 确认内容已生成完成，再执行下载。**
+
+下载命令：
+
+```bash
+bash scripts/aitubiao-cli.sh download-project <本地保存路径> <<'EOF'
+{
+  "projectId": "<project.id>",
+  "format": "png"
+}
+EOF
+```
+
+规则：
+- `projectId` 使用上一步返回的 `project.id`
+- `format` 按用户需求填写：PPT 项目可用 `ppt`/`pdf`/`png`，图表/桑基图项目可用 `png`/`jpg`/`pdf`/`ppt`
+- **格式费用**：`png`/`jpg`/`pdf` 任何用户均可免费导出；`ppt` 需要 PPT 导出权限（付费会员）；其它特殊格式（`svg`/`gif`/`mp4`/`mov`/透明 PNG/2x 及以上倍率）也需对应会员权益。如果用户尝试受限格式但权益不足，CLI 会返回 exit 2 并附服务端错误，应告知用户升级会员或改用免费格式
+- **本地保存路径处理**：
+  - 优先使用用户明确指定的路径；如果用户没指定，传**绝对路径**（如 `$HOME/Downloads/<filename>` 或当前工作目录下的具体文件名），不要省略命令参数
+  - 不要把文件写入项目源码目录或不可写目录
+  - CLI 会在启动导出任务**之前**检查目标目录是否可写：如果失败会立即报错（exit 4，stderr 含 `not writable` 或 `cannot be created`），此时**禁止自动改路径重试**——必须先告诉用户当前路径不可写，请用户给一个可写的位置
+- 下载清晰度由服务端按会员权益自动决定：免费用户较低，付费用户更高
+- 仅通过此 API 下载，禁止使用本地工具导出替代文件
+- **禁止对同一 `projectId` 并发执行 `download-project`**：服务端默认每个项目只允许 1 个 API Key 并发导出任务。需要重试时，等待上一次下载彻底完成（成功或失败）再重新发起
+- **下载完整性**：CLI 会先写入 `*.partial` 临时文件，校验文件大小与已知格式（png/jpg/pdf/ppt/zip）的魔数后再原子重命名为最终路径。如果 CLI 返回 exit 3 且 stderr 含 `integrity check failed`，说明服务端返回的文件已损坏；不要伪装成功，告知用户重试或联系支持
+- **多页导出会自动打成 zip**：当 PPT 项目（或多页项目）以 `png`/`jpg`/`pdf` 格式导出多页时，服务端会把所有页面压缩成一个 ZIP 包返回。CLI 检测到这种情况会自动把保存路径改为 `.zip`（例如 `report.png` → `report.zip`），并在 stderr 输出 `Note: server returned a multi-page ZIP bundle ...`。**返回 JSON 中的 `savedPath` 和 `fileName` 是真实落盘路径**——告诉用户文件位置时必须使用这两个字段，不要使用最初传入的路径
+- **告知用户文件位置**：成功后必须使用 CLI 返回 JSON 中的 `savedPath`（绝对路径）告诉用户文件保存在哪里
+
 ## 错误处理
 
-| HTTP 状态码 | 含义 | 处理方式 |
-|------------|------|---------|
-| 401/403 | API Key 无效、过期或权限不足 | 按强制规则 5：立即停止，引导用户前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys) 检查或重新创建 |
-| 429 | 频率限制 | 等待 30 秒后重试一次，仍失败则告知用户稍后再试 |
-| 500 | 服务器错误 | 按强制规则 6：重试最多 3 次 |
+| CLI Exit Code | 含义 | 处理方式 |
+|--------------|------|---------|
+| 1 | 认证失败（HTTP 401/403 或凭证无效） | 立即停止，引导用户前往 [API Key 管理页面](https://app.aitubiao.com/setting/api-keys) |
+| 2 | 业务错误（code 90001=AI贝不足，40007=项目数已满，40015=创建失败，15009=同一项目已有 API Key 导出任务进行中） | 向用户展示详情；遇到 15009 时，提示用户等待上一个导出完成后再重试 |
+| 3 | 网络/超时错误 | 告知用户稍后重试 |
 
-当 `code` 不为 0 时，表示业务错误：
+## 响应字段参考
 
-| code | 含义 | 处理方式 |
-|------|------|---------|
-| 90001 | AI贝不足 | 向用户展示 `quota` 中的余额和消耗信息，并引导其前往 aitubiao 网站购买会员或充值后再继续 |
-| 40007 | 项目数已满 | 向用户展示 `quota` 中的已用/上限，并引导其前往 aitubiao 网站升级会员，或在网站中删除旧项目后再继续 |
-| 40015 | 项目创建失败 | 系统内部错误，建议重试 |
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| success | boolean | 项目是否创建成功 |
+| outlineId | string | 大纲会话 ID |
+| project.id | string | 项目 ID |
+| project.title | string | 项目标题 |
+| project.status | string | 通常为 `generating`（页面在后台异步生成） |
+| project.projectUrl | string? | 项目 URL，用户打开可查看生成进度和编辑 PPT |
+| quota | object? | 配额快照（**可能为 null**） |
+| quota.shellCoinCost | number | 本次消耗 AI贝 |
+| quota.shellBalance | number | 剩余 AI贝 |
+| totalPages | number | 总页数 |
+| completedPages | number | 已完成页数（API 返回时为 0，页面后台异步生成） |
+| processingTime | string | API 响应时间（不含页面生成时间） |
 
-## API 参考
-
-详细的接口规格说明见 [ppt-api.md](references/ppt-api.md)。
+**异步生成行为**：API 立即返回，页面在后台生成（5-10 分钟）。`projectUrl` 必须醒目展示给用户。
