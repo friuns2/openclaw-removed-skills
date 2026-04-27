@@ -118,7 +118,7 @@ Skip symbolic link creation with `--no-symlink` option. Delete original director
 
 ## Absolute Migration Principles
 
-### Correct migration = use mv only
+### Migration Philosophy: Use `mv` only
 
 Migration should be completed with **2 mv commands**. No rm, cp, git reset, or mkdir needed.
 
@@ -190,5 +190,5 @@ The `repo-to-ghq.sh` script:
 ## Output
 
 ```
-Repository moved to '/Users/david/ghq/github.com/org/repo'.
+Repository moved to '/Users/es6kr/ghq/github.com/org/repo'.
 ```

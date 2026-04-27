@@ -1,14 +1,14 @@
-# SourceGit Management
+# SourceGit Integration
 
-Manage SourceGit GUI client repositories and workspaces by editing preference.json directly.
+Manage SourceGit GUI client's `preference.json` and custom actions.
 
-## Configuration File Location
+## Configuration Path
 
 | OS | Path |
 |----|------|
 | macOS | `~/Library/Application Support/SourceGit/preference.json` |
 | Linux | `~/.config/SourceGit/preference.json` |
-| Windows | `%APPDATA%/SourceGit/preference.json` |
+| Windows | `%APPDATA%\SourceGit\preference.json` |
 
 Detect OS and use the appropriate path.
 
@@ -72,7 +72,7 @@ cat ~/Library/Application\ Support/SourceGit/preference.json
 
 #### Creating Group Hierarchy (for ghq repositories)
 
-For path like `/Users/david/ghq/github.com/es6kr/blog.git`:
+For path like `/Users/es6kr/ghq/github.com/es6kr/blog.git`:
 
 1. Find or create host group: `github.com`
 2. Find or create org group: `es6kr` (under github.com)
@@ -188,7 +188,7 @@ ghq get <url>
 ### Repository Added
 ```
 Added repository to SourceGit:
-- Path: /Users/david/works/my-project
+- Path: /Users/es6kr/works/my-project
 - Group: (root level)
 
 Will be reflected next time SourceGit is opened.
@@ -197,7 +197,7 @@ Will be reflected next time SourceGit is opened.
 ### ghq Repository Added
 ```
 Cloned and added to SourceGit:
-- Path: /Users/david/ghq/github.com/es6kr/blog.git
+- Path: /Users/es6kr/ghq/github.com/es6kr/blog.git
 - Group: github.com > es6kr
 
 Will be reflected next time SourceGit is opened.
@@ -206,7 +206,7 @@ Will be reflected next time SourceGit is opened.
 ### Workspace Created
 ```
 Created workspace 'my-workspace':
-- DefaultCloneDir: /Users/david/projects/
+- DefaultCloneDir: /Users/es6kr/projects/
 - Color: Default blue
 
 Switch to this workspace in SourceGit's workspace selector.
@@ -215,8 +215,8 @@ Switch to this workspace in SourceGit's workspace selector.
 ### Folder Renamed
 ```
 Folder rename complete:
-- Before: /Users/david/works/project/oldname
-- After: /Users/david/works/project/newname
+- Before: /Users/es6kr/works/project/oldname
+- After: /Users/es6kr/works/project/newname
 
 SourceGit updated:
 - RepositoryNodes: oldname -> newname

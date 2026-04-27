@@ -1,11 +1,17 @@
 {
   "owner": "drumrobot",
   "slug": "git-repo",
-  "displayName": "Git Repo Manager",
+  "displayName": "Git Repo",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1774932196769,
-    "commit": "https://github.com/openclaw/skills/commit/bc8177991b6937a735819a9d04ef2ec43d657c22"
+    "version": "0.1.2",
+    "publishedAt": 1776220952266,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1774932196769,
+      "commit": "https://github.com/openclaw/skills/commit/bc8177991b6937a735819a9d04ef2ec43d657c22"
+    }
+  ]
 }
