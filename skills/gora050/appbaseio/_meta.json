@@ -3,11 +3,16 @@
   "slug": "appbaseio",
   "displayName": "Appbaseio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167711419,
-    "commit": "https://github.com/openclaw/skills/commit/3ce233b122cd5c1ee3c6a8f5ec2a4f8f56f57092"
+    "version": "1.0.3",
+    "publishedAt": 1776865175474,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167711419,
+      "commit": "https://github.com/openclaw/skills/commit/3ce233b122cd5c1ee3c6a8f5ec2a4f8f56f57092"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774494247221,
