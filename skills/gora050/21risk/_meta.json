@@ -3,11 +3,16 @@
   "slug": "21risk",
   "displayName": "21Risk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170838316,
-    "commit": "https://github.com/openclaw/skills/commit/4ca7f763be91e9438f02845f7e6bfbf3f3f095f3"
+    "version": "1.0.3",
+    "publishedAt": 1776866230339,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170838316,
+      "commit": "https://github.com/openclaw/skills/commit/4ca7f763be91e9438f02845f7e6bfbf3f3f095f3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775106289564,
