@@ -3,11 +3,16 @@
   "slug": "aitubiao-ai-chart",
   "displayName": "爱图表ai图表",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775136424418,
-    "commit": "https://github.com/openclaw/skills/commit/350e694694b55d6d88a566a7c384fa048e8dd70a"
+    "version": "1.1.5",
+    "publishedAt": 1776934435677,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775136424418,
+      "commit": "https://github.com/openclaw/skills/commit/350e694694b55d6d88a566a7c384fa048e8dd70a"
+    },
     {
       "version": "0.0.2",
       "publishedAt": 1774937681644,
