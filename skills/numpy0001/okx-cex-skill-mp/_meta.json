@@ -3,11 +3,16 @@
   "slug": "okx-cex-skill-mp",
   "displayName": "okx-cex-skill-mp",
   "latest": {
-    "version": "1.3.1",
-    "publishedAt": 1776395998524,
-    "commit": "https://github.com/openclaw/skills/commit/694dbc0fd9e731e084e56d712c50974d0420ffc2"
+    "version": "1.3.2",
+    "publishedAt": 1777263415331,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.1",
+      "publishedAt": 1776395998524,
+      "commit": "https://github.com/openclaw/skills/commit/694dbc0fd9e731e084e56d712c50974d0420ffc2"
+    },
     {
       "version": "1.3.0",
       "publishedAt": 1775654674183,
