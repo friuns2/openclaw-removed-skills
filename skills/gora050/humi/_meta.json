@@ -3,11 +3,16 @@
   "slug": "humi",
   "displayName": "Humi",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170662293,
-    "commit": "https://github.com/openclaw/skills/commit/0667b987e56d6e0d8f6e8767e164ca5c1cf7d93e"
+    "version": "1.0.3",
+    "publishedAt": 1776865997814,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170662293,
+      "commit": "https://github.com/openclaw/skills/commit/0667b987e56d6e0d8f6e8767e164ca5c1cf7d93e"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775088262691,
