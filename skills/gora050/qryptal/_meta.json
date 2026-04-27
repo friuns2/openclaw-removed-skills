@@ -3,11 +3,16 @@
   "slug": "qryptal",
   "displayName": "Qryptal",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168967887,
-    "commit": "https://github.com/openclaw/skills/commit/3f7b73795f575345fae78ee5f555488268f0dcf4"
+    "version": "1.0.3",
+    "publishedAt": 1776863601600,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168967887,
+      "commit": "https://github.com/openclaw/skills/commit/3f7b73795f575345fae78ee5f555488268f0dcf4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774739103472,
