@@ -1,6 +1,6 @@
 ---
 name: daily-movie
-description: "每日影视推荐 — 每天推荐一部精选电影或剧集，含剧情简介、豆瓣IMDb评分、观影指南，泛娱乐高打开率。Daily movie and TV recommendation — curated film or series pick with synopsis ratings watch guide bilingual EN/CN. Trigger on: 今天看什么、电影推荐、看什么电影、剧推荐、今晚看什么、movie recommendation、what to watch、Netflix推荐、豆瓣高分。"
+description: "Daily movie & TV recommendation — curated by genre, mood, or theme. One great watch per day with synopsis, streaming platform, and audience ratings."
 keywords:
   - 今天看什么
   - 电影推荐

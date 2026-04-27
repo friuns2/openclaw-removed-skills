@@ -1,7 +1,7 @@
 {
   "name": "daily-movie",
-  "version": "1.0.0",
-  "description": "\u6bcf\u65e5\u5f71\u89c6\u63a8\u8350",
+  "version": "1.0.2",
+  "description": "Daily movie & TV recommendation — curated by genre, mood, or theme. One great watch per day with synopsis, streaming platform, and audience ratings.",
   "engines": {
     "node": ">=18"
   },

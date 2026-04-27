@@ -3,9 +3,15 @@
   "slug": "daily-movie",
   "displayName": "Daily Movie",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775210033480,
-    "commit": "https://github.com/openclaw/skills/commit/a5aa31312d3f75a2d492f996b08514a5282bdfc7"
+    "version": "1.0.3",
+    "publishedAt": 1777287260341,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775210033480,
+      "commit": "https://github.com/openclaw/skills/commit/a5aa31312d3f75a2d492f996b08514a5282bdfc7"
+    }
+  ]
 }

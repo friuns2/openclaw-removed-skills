@@ -1,6 +1,9 @@
-# Daily Movie / 每日影视推荐
+# Daily Movie — Movie & TV Recommendation Skill
 
-> 每日影视推荐 — 今日精选 · 评分推荐 · 观影指南 · 中英双语
+> One curated film or series pick every day — synopsis, Douban + IMDb ratings, where to stream. Bilingual EN/CN.
+
+[![clawhub](https://img.shields.io/badge/clawhub-daily--movie-blue)](https://clawhub.ai/skills/daily-movie)
+[![openclaw](https://img.shields.io/badge/openclaw-skill-orange)](https://openclaw.ai)
 
 An [OpenClaw](https://openclaw.ai) skill that recommends one movie and one TV series every day — with synopsis, Douban/IMDb ratings, platform availability, and a spoiler-free reason to watch. High open rate by design: everyone wants to know what to watch tonight.
 
@@ -50,3 +53,11 @@ Supported channels: `telegram` / `feishu` / `slack` / `discord`
 ---
 
 *MIT License · OpenClaw Skill*
+
+## Keywords
+
+movie recommendation · what to watch · film recommendation · daily movie · Netflix · Korean drama · 电影推荐 · 今天看什么 · 今晚看什么 · 豆瓣高分 · 剧推荐 · 看什么电影
+
+---
+
+Built for [OpenClaw](https://openclaw.ai) · Published on [clawhub.ai](https://clawhub.ai/skills/daily-movie)
