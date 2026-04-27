@@ -3,11 +3,16 @@
   "slug": "uptime-robot",
   "displayName": "Uptime Robot",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170423945,
-    "commit": "https://github.com/openclaw/skills/commit/4522e5afaf5418147058da873533ab1f8f4f8304"
+    "version": "1.0.3",
+    "publishedAt": 1776865683068,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170423945,
+      "commit": "https://github.com/openclaw/skills/commit/4522e5afaf5418147058da873533ab1f8f4f8304"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775019943966,
