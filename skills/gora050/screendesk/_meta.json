@@ -3,11 +3,16 @@
   "slug": "screendesk",
   "displayName": "Screendesk",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168504614,
-    "commit": "https://github.com/openclaw/skills/commit/df3499775985af5ef87951f8235971800c5852c0"
+    "version": "1.0.3",
+    "publishedAt": 1776862685381,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168504614,
+      "commit": "https://github.com/openclaw/skills/commit/df3499775985af5ef87951f8235971800c5852c0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652663315,
