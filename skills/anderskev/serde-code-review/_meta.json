@@ -3,11 +3,16 @@
   "slug": "serde-code-review",
   "displayName": "Serde Code Review",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966768675,
-    "commit": "https://github.com/openclaw/skills/commit/2bc15b6383aa44b78e2bd1744d2ce6aa8274a4e5"
+    "version": "1.0.2",
+    "publishedAt": 1776831380172,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966768675,
+      "commit": "https://github.com/openclaw/skills/commit/2bc15b6383aa44b78e2bd1744d2ce6aa8274a4e5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774641972833,
