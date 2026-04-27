@@ -3,11 +3,16 @@
   "slug": "youdaonote",
   "displayName": "YoudaoNote",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776175503452,
-    "commit": "https://github.com/openclaw/skills/commit/63d4345d3d0acdb11266e2bb3e0c187d00322ce5"
+    "version": "1.0.7",
+    "publishedAt": 1777199448880,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776175503452,
+      "commit": "https://github.com/openclaw/skills/commit/63d4345d3d0acdb11266e2bb3e0c187d00322ce5"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1775824459017,
