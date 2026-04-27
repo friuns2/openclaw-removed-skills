@@ -3,11 +3,16 @@
   "slug": "sellsy",
   "displayName": "Sellsy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168249286,
-    "commit": "https://github.com/openclaw/skills/commit/bdf9e543604e990168e80c27602dec83eb0feba6"
+    "version": "1.0.3",
+    "publishedAt": 1776852169825,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168249286,
+      "commit": "https://github.com/openclaw/skills/commit/bdf9e543604e990168e80c27602dec83eb0feba6"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774591350217,
