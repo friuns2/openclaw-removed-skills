@@ -3,11 +3,16 @@
   "slug": "checkmarket",
   "displayName": "Checkmarket",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170439041,
-    "commit": "https://github.com/openclaw/skills/commit/492714b50795d59b86a3d820b60567b9f51f49f5"
+    "version": "1.0.3",
+    "publishedAt": 1776857305598,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170439041,
+      "commit": "https://github.com/openclaw/skills/commit/492714b50795d59b86a3d820b60567b9f51f49f5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775023373770,
