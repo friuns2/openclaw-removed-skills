@@ -3,11 +3,16 @@
   "slug": "apitemplateio",
   "displayName": "Apitemplateio",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168500669,
-    "commit": "https://github.com/openclaw/skills/commit/9f7cc562114b9c203b34ace43cd5c6f89fc561f4"
+    "version": "1.0.3",
+    "publishedAt": 1776862628498,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168500669,
+      "commit": "https://github.com/openclaw/skills/commit/9f7cc562114b9c203b34ace43cd5c6f89fc561f4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774652637446,
