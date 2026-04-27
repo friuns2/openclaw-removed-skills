@@ -3,11 +3,16 @@
   "slug": "privyid",
   "displayName": "Privyid",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169523779,
-    "commit": "https://github.com/openclaw/skills/commit/c49d9e2af73fcdd2cd132c4bb47273cb744fd2ea"
+    "version": "1.0.3",
+    "publishedAt": 1776855259879,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169523779,
+      "commit": "https://github.com/openclaw/skills/commit/c49d9e2af73fcdd2cd132c4bb47273cb744fd2ea"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774846979238,
