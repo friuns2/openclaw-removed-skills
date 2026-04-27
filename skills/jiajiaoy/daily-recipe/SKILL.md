@@ -1,6 +1,6 @@
 ---
 name: daily-recipe
-description: "每天推荐一道精选菜谱，中西菜式交替，含食材、步骤和精美视觉呈现。Daily recipe recommendation — alternating Chinese and Western cuisines, with ingredients, steps, and visual card. Trigger on：今日食谱、今天吃什么、做什么菜、食谱推荐、晚餐吃什么、daily recipe、what to cook、dinner ideas、家常菜。"
+description: "Daily recipe recommendation — Chinese, Western, and fusion cuisines on rotation. Full ingredients, step-by-step instructions, 30–60 min home-cook meals."
 keywords:
   - 今日食谱
   - 今天吃什么

@@ -3,9 +3,15 @@
   "slug": "daily-recipe",
   "displayName": "Daily Recipe",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775115528608,
-    "commit": "https://github.com/openclaw/skills/commit/9a726b7349d9de162e728bbfcaf0d357ff9d35f1"
+    "version": "1.0.1",
+    "publishedAt": 1777286839382,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775115528608,
+      "commit": "https://github.com/openclaw/skills/commit/9a726b7349d9de162e728bbfcaf0d357ff9d35f1"
+    }
+  ]
 }
