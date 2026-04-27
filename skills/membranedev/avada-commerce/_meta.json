@@ -3,9 +3,15 @@
   "slug": "avada-commerce",
   "displayName": "Avada Commerce",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169582972,
-    "commit": "https://github.com/openclaw/skills/commit/853742b55f5c38e715759877c093347f909e189b"
+    "version": "1.0.3",
+    "publishedAt": 1776855490664,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169582972,
+      "commit": "https://github.com/openclaw/skills/commit/853742b55f5c38e715759877c093347f909e189b"
+    }
+  ]
 }
