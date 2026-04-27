@@ -3,11 +3,16 @@
   "slug": "thinq",
   "displayName": "Thinq",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168932828,
-    "commit": "https://github.com/openclaw/skills/commit/5c832489e60f55fc3a8ef699b693e53ee6bffc18"
+    "version": "1.0.3",
+    "publishedAt": 1776853997642,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168932828,
+      "commit": "https://github.com/openclaw/skills/commit/5c832489e60f55fc3a8ef699b693e53ee6bffc18"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774738982923,
