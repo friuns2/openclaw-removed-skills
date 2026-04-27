@@ -3,9 +3,15 @@
   "slug": "clickmeter",
   "displayName": "Clickmeter",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775264771112,
-    "commit": "https://github.com/openclaw/skills/commit/049a9b2ef7aa29e43f57998ce8a48e3749d11be4"
+    "version": "1.0.1",
+    "publishedAt": 1776885437436,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775264771112,
+      "commit": "https://github.com/openclaw/skills/commit/049a9b2ef7aa29e43f57998ce8a48e3749d11be4"
+    }
+  ]
 }
