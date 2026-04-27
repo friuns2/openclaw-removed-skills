@@ -3,11 +3,16 @@
   "slug": "swiftype",
   "displayName": "Swiftype",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168096382,
-    "commit": "https://github.com/openclaw/skills/commit/d33fe573f87c6fef7b1c6a25497cd5e46e62b391"
+    "version": "1.0.3",
+    "publishedAt": 1776851863364,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168096382,
+      "commit": "https://github.com/openclaw/skills/commit/d33fe573f87c6fef7b1c6a25497cd5e46e62b391"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774569748956,
