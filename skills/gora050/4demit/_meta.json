@@ -3,9 +3,15 @@
   "slug": "4demit",
   "displayName": "4Demit",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775225220184,
-    "commit": "https://github.com/openclaw/skills/commit/15316403527405515e441515f6da7e472022d0a1"
+    "version": "1.0.1",
+    "publishedAt": 1776885307938,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775225220184,
+      "commit": "https://github.com/openclaw/skills/commit/15316403527405515e441515f6da7e472022d0a1"
+    }
+  ]
 }
