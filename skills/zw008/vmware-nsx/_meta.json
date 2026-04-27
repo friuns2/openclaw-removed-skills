@@ -3,11 +3,16 @@
   "slug": "vmware-nsx",
   "displayName": "Vmware Nsx",
   "latest": {
-    "version": "1.5.12",
-    "publishedAt": 1776420322535,
-    "commit": "https://github.com/openclaw/skills/commit/6d0c3d8f4241efcd47fac1814a199e6bc18b7467"
+    "version": "1.5.14",
+    "publishedAt": 1776774047108,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.12",
+      "publishedAt": 1776420322535,
+      "commit": "https://github.com/openclaw/skills/commit/6d0c3d8f4241efcd47fac1814a199e6bc18b7467"
+    },
     {
       "version": "1.5.0",
       "publishedAt": 1775969821168,
