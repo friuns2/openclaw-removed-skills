@@ -3,11 +3,16 @@
   "slug": "exabeam",
   "displayName": "Exabeam",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167728410,
-    "commit": "https://github.com/openclaw/skills/commit/b04202e0d38f968db84a03a3a4e8f437f96f20af"
+    "version": "1.0.3",
+    "publishedAt": 1776865206737,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167728410,
+      "commit": "https://github.com/openclaw/skills/commit/b04202e0d38f968db84a03a3a4e8f437f96f20af"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774494299161,
