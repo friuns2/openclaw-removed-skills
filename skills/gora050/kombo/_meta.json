@@ -3,11 +3,16 @@
   "slug": "kombo",
   "displayName": "Kombo",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170235342,
-    "commit": "https://github.com/openclaw/skills/commit/dfc2988eedca2e162fa516bb9cb6d40aa217e8bd"
+    "version": "1.0.3",
+    "publishedAt": 1776865403848,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170235342,
+      "commit": "https://github.com/openclaw/skills/commit/dfc2988eedca2e162fa516bb9cb6d40aa217e8bd"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774991176991,
