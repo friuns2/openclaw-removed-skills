@@ -3,11 +3,16 @@
   "slug": "mx-toolbox",
   "displayName": "Mx Toolbox",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168234058,
-    "commit": "https://github.com/openclaw/skills/commit/ce6e5f03cf3dc73dd7c643e5716b302f65d140f7"
+    "version": "1.0.3",
+    "publishedAt": 1776862322245,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168234058,
+      "commit": "https://github.com/openclaw/skills/commit/ce6e5f03cf3dc73dd7c643e5716b302f65d140f7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774587890417,
