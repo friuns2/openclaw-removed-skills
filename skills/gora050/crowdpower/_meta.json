@@ -3,11 +3,16 @@
   "slug": "crowdpower",
   "displayName": "Crowdpower",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167838017,
-    "commit": "https://github.com/openclaw/skills/commit/f82998e1701936f27efc486ece29441ca0e84d41"
+    "version": "1.0.3",
+    "publishedAt": 1776861789599,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167838017,
+      "commit": "https://github.com/openclaw/skills/commit/f82998e1701936f27efc486ece29441ca0e84d41"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774515807658,
