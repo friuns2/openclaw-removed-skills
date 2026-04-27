@@ -3,9 +3,15 @@
   "slug": "updownio",
   "displayName": "Updownio",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775203544309,
-    "commit": "https://github.com/openclaw/skills/commit/8dd8239819f76cd05b014884cb0bf9d068c71217"
+    "version": "1.0.1",
+    "publishedAt": 1776881402169,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775203544309,
+      "commit": "https://github.com/openclaw/skills/commit/8dd8239819f76cd05b014884cb0bf9d068c71217"
+    }
+  ]
 }
