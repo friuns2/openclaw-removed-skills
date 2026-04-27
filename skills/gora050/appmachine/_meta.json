@@ -3,11 +3,16 @@
   "slug": "appmachine",
   "displayName": "Appmachine",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170601168,
-    "commit": "https://github.com/openclaw/skills/commit/e6ce8023c912ead8754b18eb82f2bfecf06cb178"
+    "version": "1.0.3",
+    "publishedAt": 1776865880657,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170601168,
+      "commit": "https://github.com/openclaw/skills/commit/e6ce8023c912ead8754b18eb82f2bfecf06cb178"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775048743670,
