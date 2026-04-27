@@ -3,11 +3,16 @@
   "slug": "junip",
   "displayName": "Junip",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167983304,
-    "commit": "https://github.com/openclaw/skills/commit/ad0a7a67dc415427de2cb1456a2f90bd80d65617"
+    "version": "1.0.3",
+    "publishedAt": 1776851741965,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167983304,
+      "commit": "https://github.com/openclaw/skills/commit/ad0a7a67dc415427de2cb1456a2f90bd80d65617"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774558956053,
