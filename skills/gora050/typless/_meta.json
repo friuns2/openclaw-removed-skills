@@ -3,11 +3,16 @@
   "slug": "typless",
   "displayName": "Typless",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169400134,
-    "commit": "https://github.com/openclaw/skills/commit/5b2203f2b566a7661e93c90fc68a320f842a10ef"
+    "version": "1.0.3",
+    "publishedAt": 1776864325923,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169400134,
+      "commit": "https://github.com/openclaw/skills/commit/5b2203f2b566a7661e93c90fc68a320f842a10ef"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775169398253,
