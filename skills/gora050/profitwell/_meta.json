@@ -3,11 +3,16 @@
   "slug": "profitwell",
   "displayName": "Profitwell",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168640743,
-    "commit": "https://github.com/openclaw/skills/commit/0e200a98806151ce94dce469c5d652d3b42cce5d"
+    "version": "1.0.3",
+    "publishedAt": 1776862937715,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168640743,
+      "commit": "https://github.com/openclaw/skills/commit/0e200a98806151ce94dce469c5d652d3b42cce5d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774667104482,
