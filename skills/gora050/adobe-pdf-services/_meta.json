@@ -3,11 +3,16 @@
   "slug": "adobe-pdf-services",
   "displayName": "Adobe Pdf Services",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170130298,
-    "commit": "https://github.com/openclaw/skills/commit/64ba067bcbbf5eb3e5ea48a3735288f21c8d0da3"
+    "version": "1.0.3",
+    "publishedAt": 1776865102948,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170130298,
+      "commit": "https://github.com/openclaw/skills/commit/64ba067bcbbf5eb3e5ea48a3735288f21c8d0da3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774958673637,
