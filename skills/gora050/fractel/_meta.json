@@ -3,11 +3,16 @@
   "slug": "fractel",
   "displayName": "Fractel",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169334696,
-    "commit": "https://github.com/openclaw/skills/commit/201083e2552c95bdb43e7ad8bdd3e0b8bf90f714"
+    "version": "1.0.3",
+    "publishedAt": 1776864218820,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169334696,
+      "commit": "https://github.com/openclaw/skills/commit/201083e2552c95bdb43e7ad8bdd3e0b8bf90f714"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774818294194,
