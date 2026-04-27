@@ -3,11 +3,16 @@
   "slug": "mosaicml",
   "displayName": "Mosaicml",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168273602,
-    "commit": "https://github.com/openclaw/skills/commit/c6145235d7ea2aa71ad81e13a3b7ae40374e8903"
+    "version": "1.0.3",
+    "publishedAt": 1776865579091,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168273602,
+      "commit": "https://github.com/openclaw/skills/commit/c6145235d7ea2aa71ad81e13a3b7ae40374e8903"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774598610419,
