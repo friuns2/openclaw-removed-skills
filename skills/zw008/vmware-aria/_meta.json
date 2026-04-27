@@ -3,11 +3,16 @@
   "slug": "vmware-aria",
   "displayName": "Vmware Aria",
   "latest": {
-    "version": "1.5.12",
-    "publishedAt": 1776420321183,
-    "commit": "https://github.com/openclaw/skills/commit/e100136f28f924c2f0feddbd931a9dcf9cab2a8c"
+    "version": "1.5.14",
+    "publishedAt": 1776774054091,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.12",
+      "publishedAt": 1776420321183,
+      "commit": "https://github.com/openclaw/skills/commit/e100136f28f924c2f0feddbd931a9dcf9cab2a8c"
+    },
     {
       "version": "1.5.0",
       "publishedAt": 1775969828613,
