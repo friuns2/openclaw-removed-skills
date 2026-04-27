@@ -13,9 +13,29 @@
   python social_security_calculator.py --city 广州 --type resident --age 40
   python social_security_calculator.py --retirement --years 30 --avg-index 0.8 --city 北京
 """
+# Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+# Skill: social-security-advisor | Version: 2.0.0
+# Author: QQ 1817694478 | Q-Group: 972156177
+# Unauthorized copying, modification, or distribution is prohibited.
+# This software is provided "as is" without warranty of any kind.
 
 import argparse
 import sys
+import os
+from pathlib import Path
+
+# Integrity check on startup
+_SKILL_DIR = Path(__file__).parent.parent
+try:
+    sys.path.insert(0, str(_SKILL_DIR.parent))
+    from integrity_guard import IntegrityGuard
+    _guard = IntegrityGuard(str(_SKILL_DIR))
+    _ok, _msg = _guard.startup_check_with_message()
+    if not _ok:
+        print(f'[ERROR] {_msg}', flush=True)
+        sys.exit(1)
+except ImportError:
+    pass
 
 # ─────────────────────────────────────────
 # 各城市社保参数数据库（2024年度）

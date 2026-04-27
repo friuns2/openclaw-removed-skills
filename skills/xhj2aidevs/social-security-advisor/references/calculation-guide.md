@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+Skill: social-security-advisor | Version: 2.0.0
+Author: QQ 1817694478 | Q-Group: 972156177
+Unauthorized copying, modification, or distribution is prohibited.
+-->
 # 缴费计算公式与待遇测算参考
 
 ## 一、月缴费金额计算

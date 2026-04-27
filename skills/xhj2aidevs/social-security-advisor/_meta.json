@@ -1,13 +1,18 @@
 {
   "owner": "xhj2aidevs",
   "slug": "social-security-advisor",
-  "displayName": "social-security-advisor 社保政策查询与缴费规划助手 v2.0（2026年版）",
+  "displayName": "Social Security Advisor",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776311733719,
-    "commit": "https://github.com/openclaw/skills/commit/e8232e578a3973e6f26e6437e8b33fc9a14c97b5"
+    "version": "2.0.3",
+    "publishedAt": 1777032722397,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776311733719,
+      "commit": "https://github.com/openclaw/skills/commit/e8232e578a3973e6f26e6437e8b33fc9a14c97b5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775009045646,

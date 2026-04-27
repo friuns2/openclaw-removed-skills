@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+Skill: social-security-advisor | Version: 2.0.0
+Author: QQ 1817694478 | Q-Group: 972156177
+Unauthorized copying, modification, or distribution is prohibited.
+-->
 # 各省市社保政策详细参考
 
 > 数据以2024-2025年度为准，实际缴费基数上下限以当地人社局最新公告为准。

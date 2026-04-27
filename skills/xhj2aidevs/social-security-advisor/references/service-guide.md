@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+Skill: social-security-advisor | Version: 2.0.0
+Author: QQ 1817694478 | Q-Group: 972156177
+Unauthorized copying, modification, or distribution is prohibited.
+-->
 # 社保业务办理与查询指南
 
 ## 一、全国统一查询渠道

@@ -1,3 +1,9 @@
+<!--
+Copyright (c) 2026 WorkBuddy Skills. All rights reserved.
+Skill: social-security-advisor | Version: 2.0.0
+Author: QQ 1817694478 | Q-Group: 972156177
+Unauthorized copying, modification, or distribution is prohibited.
+-->
 # 2026年全国社保优惠补贴政策专项文档
 
 > 数据更新时间：2026年3月  

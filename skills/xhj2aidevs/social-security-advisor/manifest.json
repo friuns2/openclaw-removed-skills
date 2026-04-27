@@ -1,0 +1,44 @@
+{
+  "skill_name": "social-security-advisor",
+  "version": "2.0.0",
+  "generated_at": "2026-04-24 18:28:20",
+  "file_count": 8,
+  "files": {
+    "SKILL.md": {
+      "sha256": "0993ce3eed7f3d0f66638c01d198b63692eab056e6474ea7fd063f3f17bf6892",
+      "size": 14370
+    },
+    "references/calculation-guide.md": {
+      "sha256": "fc737fcd572727b36d4778821342a789f137aa975e23c063865fc7a26a6b7de7",
+      "size": 4802
+    },
+    "references/national-policy.md": {
+      "sha256": "91e8addf0d21bb918e0b797aeb7694c621658cbf31fde12ad6263e2d317147ef",
+      "size": 4932
+    },
+    "references/province-policy.md": {
+      "sha256": "815d2be87192133b3a5a8be74c44fb0890cda805c8a325dfe5ea4e0e93d8569c",
+      "size": 11010
+    },
+    "references/service-guide.md": {
+      "sha256": "dd25e10e298496aee196f6f7c34d04d6d7b7386f0012d49d61189a74fb10bba8",
+      "size": 5989
+    },
+    "references/subsidy-policy-2026.md": {
+      "sha256": "982971165c6e67a56fccca44cb4fc735e21e82246e3aaff67dd0912d527c4f64",
+      "size": 13609
+    },
+    "scripts/self_learning.py": {
+      "sha256": "c7c6222108775c582ef5752a94f96403e0a60a43e0230008fb102b1a1c530f99",
+      "size": 10118
+    },
+    "scripts/social_security_calculator.py": {
+      "sha256": "4e04475e38ce9bbcea513b38334c488e5a815ce6a8c455761823ce345acfde32",
+      "size": 19567
+    }
+  },
+  "watermark": "620bd2c9ec28f10d",
+  "excluded_patterns": [
+    "self-learning data files (learn_data*.json, etc.)"
+  ]
+}
