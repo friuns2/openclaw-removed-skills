@@ -3,11 +3,16 @@
   "slug": "codemagic",
   "displayName": "Codemagic",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168684922,
-    "commit": "https://github.com/openclaw/skills/commit/0e7737fbac276857adfcdead29bd7b4bb6e9c712"
+    "version": "1.0.3",
+    "publishedAt": 1776863097388,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168684922,
+      "commit": "https://github.com/openclaw/skills/commit/0e7737fbac276857adfcdead29bd7b4bb6e9c712"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774674292119,
