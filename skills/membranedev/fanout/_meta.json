@@ -3,9 +3,15 @@
   "slug": "fanout",
   "displayName": "Fanout",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775275469960,
-    "commit": "https://github.com/openclaw/skills/commit/90f6d22bf6baa0d5fac365fa5b45af2d98e16614"
+    "version": "1.0.1",
+    "publishedAt": 1776882621318,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775275469960,
+      "commit": "https://github.com/openclaw/skills/commit/90f6d22bf6baa0d5fac365fa5b45af2d98e16614"
+    }
+  ]
 }
