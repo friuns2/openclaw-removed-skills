@@ -3,11 +3,16 @@
   "slug": "zoho-meeting",
   "displayName": "Zoho Meeting",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775169317983,
-    "commit": "https://github.com/openclaw/skills/commit/211df6323dbfee3ab8701d935a6e9cce2fd41297"
+    "version": "1.0.3",
+    "publishedAt": 1776865303203,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775169317983,
+      "commit": "https://github.com/openclaw/skills/commit/211df6323dbfee3ab8701d935a6e9cce2fd41297"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774812276954,
