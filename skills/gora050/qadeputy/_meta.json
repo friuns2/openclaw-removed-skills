@@ -3,9 +3,15 @@
   "slug": "qadeputy",
   "displayName": "Qadeputy",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775171098527,
-    "commit": "https://github.com/openclaw/skills/commit/e66281ffd2e78388ac5975cf08b1b968ee88909b"
+    "version": "1.0.3",
+    "publishedAt": 1776892577866,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775171098527,
+      "commit": "https://github.com/openclaw/skills/commit/e66281ffd2e78388ac5975cf08b1b968ee88909b"
+    }
+  ]
 }
