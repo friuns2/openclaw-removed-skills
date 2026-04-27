@@ -1,0 +1,11 @@
+{
+  "owner": "twinsgeeks",
+  "slug": "cuda-ollama",
+  "displayName": "Cuda Ollama",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775256818688,
+    "commit": null
+  },
+  "history": []
+}
