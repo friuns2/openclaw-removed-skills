@@ -3,11 +3,16 @@
   "slug": "fortify",
   "displayName": "Fortify",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170268289,
-    "commit": "https://github.com/openclaw/skills/commit/6646b2ee27254bee8e72530e67b16506e4a968b3"
+    "version": "1.0.3",
+    "publishedAt": 1776865484074,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170268289,
+      "commit": "https://github.com/openclaw/skills/commit/6646b2ee27254bee8e72530e67b16506e4a968b3"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774998338905,
