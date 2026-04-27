@@ -3,9 +3,15 @@
   "slug": "wallet-guard",
   "displayName": "Wallet Guard",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1774842443930,
-    "commit": "https://github.com/openclaw/skills/commit/c8dc171d0d31885fd049f161fb826b2e2686586c"
+    "version": "2.0.0",
+    "publishedAt": 1776677157199,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1774842443930,
+      "commit": "https://github.com/openclaw/skills/commit/c8dc171d0d31885fd049f161fb826b2e2686586c"
+    }
+  ]
 }

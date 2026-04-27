@@ -1,7 +1,7 @@
 {
   "name": "antalpha-wallet-guard",
-  "version": "1.0.0",
-  "description": "Wallet anti-theft guard. One-click scan for high-risk wallet approvals to protect user assets.",
+  "version": "1.1.0",
+  "description": "Wallet anti-theft guard. One-click scan for high-risk wallet approvals across EVM chains (Ethereum, BSC, Polygon, Base) to protect user assets.",
   "main": "SKILL.md",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,12 +11,17 @@
     "security",
     "web3",
     "ethereum",
+    "bsc",
+    "polygon",
+    "base",
+    "evm",
     "approval",
     "risk",
     "scan",
     "antalpha",
     "defi",
-    "revoke"
+    "revoke",
+    "multi-chain"
   ],
   "author": "Antalpha",
   "license": "MIT",
