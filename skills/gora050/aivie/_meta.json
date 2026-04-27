@@ -3,11 +3,16 @@
   "slug": "aivie",
   "displayName": "Aivie",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775167724381,
-    "commit": "https://github.com/openclaw/skills/commit/6f7e82bc7b0bbc22418326b80bf3e38493b4bba7"
+    "version": "1.0.3",
+    "publishedAt": 1776865201562,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775167724381,
+      "commit": "https://github.com/openclaw/skills/commit/6f7e82bc7b0bbc22418326b80bf3e38493b4bba7"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774494284182,
