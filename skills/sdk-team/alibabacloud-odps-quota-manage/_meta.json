@@ -1,0 +1,11 @@
+{
+  "owner": "sdk-team",
+  "slug": "alibabacloud-odps-quota-manage",
+  "displayName": "Alibabacloud Odps Quota Manage",
+  "latest": {
+    "version": "0.0.3",
+    "publishedAt": 1776912196323,
+    "commit": null
+  },
+  "history": []
+}
