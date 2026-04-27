@@ -3,11 +3,16 @@
   "slug": "tubular",
   "displayName": "Tubular",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775170016866,
-    "commit": "https://github.com/openclaw/skills/commit/7baef4213c1e1a0a9a418721f8418617c8264970"
+    "version": "1.0.3",
+    "publishedAt": 1776885580477,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775170016866,
+      "commit": "https://github.com/openclaw/skills/commit/7baef4213c1e1a0a9a418721f8418617c8264970"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774944215925,
