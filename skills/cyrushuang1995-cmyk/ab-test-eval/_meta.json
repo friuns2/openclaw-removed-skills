@@ -1,11 +1,17 @@
 {
   "owner": "cyrushuang1995-cmyk",
   "slug": "ab-test-eval",
-  "displayName": "Ab Test Eval",
+  "displayName": "AB Test Eval",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1774928229177,
-    "commit": "https://github.com/openclaw/skills/commit/9ef9967ff1817ca1628efd3e8a93503b5e8f5100"
+    "version": "2.1.2",
+    "publishedAt": 1775909492769,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1774928229177,
+      "commit": "https://github.com/openclaw/skills/commit/9ef9967ff1817ca1628efd3e8a93503b5e8f5100"
+    }
+  ]
 }

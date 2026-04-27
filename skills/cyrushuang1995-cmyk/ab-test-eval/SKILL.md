@@ -1,62 +1,84 @@
 ---
 name: ab-test-eval
-description: "Run A/B evaluation tests for any skill using subagents. Use when the user wants to test, benchmark, or compare a skill's effectiveness — e.g. 'test this skill', 'run evals', 'AB test the skill', 'benchmark this skill'. Automatically spawns with-skill and without-skill subagents, grades assertions, and generates a benchmark report."
+description: "Run A/B evaluation tests for any OpenClaw skill, script, hook, or cron job. Make sure to use this skill whenever the user mentions testing, benchmarking, comparing, or evaluating a skill, script, hook, or cron job — even if they don't explicitly ask for 'AB testing'. Supports 10 eval modes: baseline comparison, regression testing, model-swap, prompt variants, trigger accuracy, adversarial robustness, script validation, hook dry-run, cron dry-run, and integration testing."
 metadata:
   {
     "openclaw":
       {
         "requires":
           {
-            "bins": ["jq"]
+            "bins": ["mkdir", "cp"]
           }
       }
   }
 ---
 
-# AB Test Eval — Skill Benchmarking via Subagents
+# AB Test Eval — Automated Component Benchmarking via Subagents
 
-Evaluate any skill by spawning parallel subagents: one with the skill loaded, one without. Compare results against predefined assertions to measure the skill's actual impact.
+Evaluate any OpenClaw component (skill, script, hook, cron job) by spawning parallel subagents and comparing arms. Supports multiple eval modes, auto-grading, and regression tracking.
 
-## Workflow Overview
+## Step 1: Choose the Eval Mode
 
-1. **Define evals** — write test prompts and assertions
-2. **Spawn subagents** — with-skill vs without-skill, in parallel
-3. **Wait for results** — `sessions_yield` until all complete
-4. **Grade** — check each assertion against outputs
-5. **Benchmark** — aggregate pass rates and summarize
+Pick the mode that matches the user's intent:
 
----
+| Mode | Question | Arms |
+|------|----------|------|
+| **baseline** | Does the skill help at all? | with-skill vs without-skill |
+| **regression** | Did changes break anything? | skill-v2 vs skill-v1 |
+| **model-swap** | Works on another model? | model-A vs model-B |
+| **prompt-variant** | Which description works better? | variant-A vs variant-B |
+| **trigger-accuracy** | Dispatches correctly? | should-trigger vs should-not |
+| **adversarial** | Robust against bad inputs? | clean vs perturbed |
+| **script-test** | Script produces correct output? | script-A vs script-B |
+| **hook-dryrun** | Hook responds correctly? | with-hook vs without |
+| **cron-dryrun** | Cron payload does the right thing? | cron-run vs baseline |
+| **integration** | Full stack works together? | full vs missing-component |
 
-## Step 1: Prepare Directory Structure
+Default to **baseline** if unclear.
+
+## Step 2: Prepare Directory Structure
+
+Create the eval workspace as a sibling to the skill directory:
 
 ```
-<skill-dir>/evals/evals.json          # Test prompts
-<skill-dir>/<skill>-workspace/
+<skill-dir>/evals/evals.json
+<skill-dir>/<skill-name>-workspace/
   iteration-1/
-    eval-1/
-      with_skill/outputs/              # Skill-guided output
-      without_skill/outputs/           # Baseline output
-      eval_metadata.json               # Prompt + assertions
-      grading.json                     # Grading results
-    eval-2/ ...
-    benchmark.json                     # Aggregated results
-    benchmark.md                       # Human-readable summary
+    <eval-name>/
+      <arm-a>/
+        outputs/commands.md
+        timing.json
+        grading.json
+      <arm-b>/
+        outputs/commands.md
+        timing.json
+        grading.json
+      eval_metadata.json
+    benchmark.json
+    benchmark.md
+  iteration-2/
+    ...
+  history.jsonl
 ```
 
-Create directories upfront:
+Create directories with `mkdir -p`. Use descriptive arm names (e.g. `with_skill`, `without_skill`, `new_version`, `old_version`).
 
-```bash
-SKILL_DIR="path/to/skill"
-SKILL_NAME="my-skill"
-WORKSPACE="${SKILL_DIR}/${SKILL_NAME}-workspace/iteration-1"
-mkdir -p "${WORKSPACE}"/eval-{1,2,3}/{with_skill,without_skill}/outputs
-```
+## Step 3: Define or Generate Evals
 
----
+### If evals already exist
+Read `<skill-dir>/evals/evals.json` and present the cases to the user for confirmation before running. Do not auto-run without sign-off.
 
-## Step 2: Define Eval Cases
+### If evals are missing
+Generate them by reading the skill's `SKILL.md` and creating 4-6 realistic eval cases:
 
-Save to `<skill-dir>/evals/evals.json`:
+1. **Happy path** — clear request the skill should nail
+2. **Ambiguous request** — could go multiple ways
+3. **Edge case** — unusual params or corner case
+4. **Negative case** — similar but should NOT trigger this skill
+5. **Multi-step case** — complex multi-tool request
+6. **Adversarial case** (if mode=adversarial) — misleading / typo / injected junk
+
+Write to `<skill-dir>/evals/evals.json`:
 
 ```json
 {
@@ -64,230 +86,274 @@ Save to `<skill-dir>/evals/evals.json`:
   "evals": [
     {
       "id": 1,
-      "prompt": "A realistic user request that should trigger the skill",
-      "expected_output": "What the correct approach looks like",
-      "files": []
-    },
-    {
-      "id": 2,
-      "prompt": "Another test case covering a different aspect",
-      "expected_output": "Expected behavior description",
+      "prompt": "Realistic user request",
+      "expected_output": "What correct behavior looks like",
       "files": []
     }
   ]
 }
 ```
 
-Guidelines for good eval prompts:
-- Write as a real user would — casual, specific, with context
-- Cover different aspects of the skill (not just happy path)
-- Include edge cases where the skill's traps/gotchas matter
-- 3-5 evals is usually enough for a first iteration
+Then show them to the user: *"Here are the test cases I plan to run. Do these look right, or do you want to add more?"*
 
----
+Wait for approval before spawning subagents.
 
-## Step 3: Spawn Subagents
+## Step 4: Efficiency Controls — Dry-Run Preview & Smoke Test
 
-For each eval, spawn **two** subagents in the same turn — with-skill and without-skill. The maximum concurrent subagents is 5, so batch accordingly.
+Before spawning expensive subagents, offer the user two efficiency controls (especially useful when eval count > 3 or arms > 2).
 
-### With-skill subagent
+### `--dry` Preview
+Generate a **preview report** that lists exactly what will run, without spawning any subagents:
 
-```
-sessions_spawn:
-  label: eval-N-with-skill
-  mode: run
-  runTimeoutSeconds: 120
-  task: |
-    Execute this task:
-    - Skill path: <absolute-path-to-skill>/SKILL.md
-    - Read the skill file first, then follow its guidance.
-    - Task: <eval prompt>
-    - Input files: <eval files or "none">
-    - Save outputs to: <workspace>/eval-N/with_skill/outputs/commands.md
-    - DO NOT actually run commands (no auth/runtime available).
-      Instead, document exactly what commands/steps you would run,
-      in what order, based on the skill instructions.
+```markdown
+# Eval Preview Report
+- Mode: baseline
+- Evals: 4
+- Arms per eval: 2 (with-skill, without-skill)
+- Model: current
+- Estimated subagent calls: 8
+
+Evals:
+1. happy-path-basic — 2 arms, 3 assertions
+2. ambiguous-request — 2 arms, 3 assertions
 ```
 
-### Without-skill subagent (baseline)
+Present this to the user and ask: *"This looks like X evals across Y arms. Should I proceed, or do you want to trim the list?"*
 
-```
-sessions_spawn:
-  label: eval-N-without-skill
-  mode: run
-  runTimeoutSeconds: 120
-  task: |
-    Execute this task WITHOUT reading any skill files:
-    - Task: <eval prompt>
-    - Use the relevant CLI/API tool.
-    - Input files: <eval files or "none">
-    - Save outputs to: <workspace>/eval-N/without_skill/outputs/commands.md
-    - DO NOT actually run commands (no auth/runtime available).
-      Instead, document exactly what commands/steps you would run,
-      in what order, and explain your approach.
-```
+### `--smoke` Smoke Test
+If the user wants a quick confidence check, run **only the first eval** end-to-end (all arms + grading). This verifies the pipeline works before committing to the full run.
 
-### Batch spawning pattern
+After a successful smoke test, ask: *"Smoke test passed. Should I run the remaining N evals now?"*
 
-```
-# Round 1: spawn eval-1 + eval-2 (4 subagents, within limit)
-sessions_spawn eval-1-with-skill
-sessions_spawn eval-1-without-skill
-sessions_spawn eval-2-with-skill
-sessions_spawn eval-2-without-skill
+## Step 5: Write Assertions
 
-# Wait for completions via sessions_yield
-# Round 2: spawn eval-3 (2 subagents)
-sessions_spawn eval-3-with-skill
-sessions_spawn eval-3-without-skill
-```
+While waiting for user approval (or while subagents run), draft assertions in `eval_metadata.json` for each eval.
 
-After spawning, call `sessions_yield` to wait for results. Subagents auto-announce on completion.
-
----
-
-## Step 4: Handle Results
-
-Each completed subagent sends a notification. Key things to check:
-
-1. **Status** — `completed successfully` vs `timed out`. Timed-out subagents may still have partial output saved to files.
-2. **Output files** — always verify the output file was actually written, regardless of status.
-3. **Timing data** — the notification includes `total_tokens` and `duration_ms`. Save to `timing.json` in the run directory if tracking performance.
-
-```json
-{
-  "total_tokens": 22900,
-  "duration_ms": 51000,
-  "total_duration_seconds": 51.0
-}
-```
-
----
-
-## Step 5: Grade Assertions
-
-For each eval, write `eval_metadata.json`:
+Save to `<workspace>/iteration-N/<eval-name>/eval_metadata.json`:
 
 ```json
 {
   "eval_id": 1,
-  "eval_name": "descriptive-kebab-case-name",
-  "prompt": "The eval prompt",
+  "eval_name": "happy-path-basic",
+  "prompt": "The user's task prompt",
   "assertions": [
     {
-      "text": "Description of what the correct approach should do",
+      "text": "Uses the --force flag",
+      "expected": true
+    },
+    {
+      "text": "Warns about OAuth timeout gotcha",
       "expected": true
     }
   ]
 }
 ```
 
-Then read both outputs and grade each assertion, saving to `grading.json`:
+Assertions use `text` and `expected` fields. These are the basis for grading.
+
+## Step 6: Spawn Subagents in Parallel
+
+For **each eval**, spawn all arms in the same turn. Launch as many as the environment allows concurrently.
+
+### Baseline mode
+- **with_skill**: load `SKILL.md`, execute prompt, save outputs
+- **without_skill**: same prompt, no skill, save outputs
+
+### Regression mode
+- **new_skill**: load updated `SKILL.md`
+- **old_skill**: load a snapshot of the previous version (make a `cp -r` snapshot before editing)
+
+### Model-swap mode
+- **model-a**: run with skill + model A override
+- **model-b**: run with skill + model B override
+
+### Prompt-variant mode
+- **variant-a**: load skill variant A's `SKILL.md`
+- **variant-b**: load skill variant B's `SKILL.md`
+
+### Trigger-accuracy mode
+Each prompt gets ONE subagent tasked as the dispatcher:
+> "You are the dispatcher. Given this user prompt, would you load `<skill-path>/SKILL.md` before responding? Answer yes/no and explain why."
+Save yes/no explanations, then grade TP/FP/TN/FN.
+
+### Adversarial mode
+- **clean**: normal prompt + skill
+- **perturbed**: prompt with typos / injected irrelevance / misleading framing + skill
+
+### Script-test mode
+- Run the bundled script with controlled inputs and assert on stdout, exit code, and generated files.
+- Arms can be: **current-script** vs **previous-script**, or **script-with-skill-guidance** vs **naive-approach**.
+- Assertions focus on correctness, idempotency, and edge-case handling.
+
+### Hook-dryrun mode
+- **Simulate** a hook event by spawning a subagent and telling it: "Pretend you are an OpenClaw agent receiving a `<hook-type>` event with this payload. Given this hook's `SKILL.md` or config, what would you do?"
+- Do NOT modify actual system hook registrations. This is a read-only simulation.
+
+### Cron-dryrun mode
+- Extract the cron job's payload (task command or script path from `jobs.json` or cron config).
+- Run the payload in an isolated subagent or `exec` dry-run context.
+- Assert on expected side effects, file outputs, or command sequence.
+- Also verify the cron expression is valid and produces expected schedule times.
+
+### Integration mode
+- Test the **full stack**: user prompt → skill dispatch → script execution → hook response.
+- Arms: **full-stack** vs **missing-script** vs **missing-hook** vs **skill-only**.
+
+**Task template for standard arms:**
+
+```
+Execute this task:
+- Arm: <arm-name>
+- Skill path: <absolute-path> or "none"
+- Model override: <model> or "default"
+- Task: <eval prompt>
+- Input files: <files or "none">
+- Save outputs to: <workspace>/iteration-N/<eval-name>/<arm>/outputs/commands.md
+- Execute the task using available tools — if the subagent has tool access, run commands for real; if not, document what would be done.
+```
+
+## Step 7: Capture Timing from Notifications
+
+When each subagent completes, its notification includes `total_tokens` and `duration_ms`. **This is the only chance to capture it.**
+
+Save to `<arm>/timing.json`:
 
 ```json
 {
-  "eval_id": 1,
-  "eval_name": "descriptive-kebab-case-name",
-  "grading": {
-    "with_skill": {
-      "assertions": [
-        {
-          "text": "Description of what was checked",
-          "passed": true,
-          "evidence": "Quote or reference from the output proving it"
-        }
-      ]
-    },
-    "without_skill": {
-      "assertions": [
-        {
-          "text": "Description of what was checked",
-          "passed": false,
-          "evidence": "What went wrong or was missing"
-        }
-      ]
+  "total_tokens": 84852,
+  "duration_ms": 23332,
+  "total_duration_seconds": 23.3
+}
+```
+
+Process each notification as it arrives rather than batching.
+
+## Step 8: Auto-Grade with LLM-as-Judge
+
+Spawn a **grading subagent** per eval to compare all arms against the assertions:
+
+```
+Read the following files:
+- <workspace>/iteration-N/<eval-name>/<arm-a>/outputs/commands.md
+- <workspace>/iteration-N/<eval-name>/<arm-b>/outputs/commands.md
+
+Eval prompt: <prompt>
+Expected output: <expected_output>
+
+Grade each arm against these assertions:
+<assertions from eval_metadata.json>
+
+For each arm, save a separate grading.json with:
+- A top-level "expectations" array with text/passed/evidence
+- A "summary" with passed/failed/total/pass_rate
+
+Save arm A results to: <workspace>/iteration-N/<eval-name>/<arm-a>/grading.json
+Save arm B results to: <workspace>/iteration-N/<eval-name>/<arm-b>/grading.json
+```
+
+Each `grading.json` schema:
+
+```json
+{
+  "expectations": [
+    {
+      "text": "Uses the --force flag",
+      "passed": true,
+      "evidence": "Output contains 'clawhub update --force'"
     }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
   }
 }
 ```
 
-**Tips for good assertions:**
-- Focus on the skill's unique knowledge (CLI flags, gotchas, parameter formats) — things the baseline wouldn't know
-- Each assertion should be independently verifiable from the output
-- 3-5 assertions per eval is sufficient
-- The `evidence` field is important for human review — quote the exact command or explain the gap
+For trigger-accuracy runs, save a separate `trigger_grading.json` with `tp`, `fp`, `tn`, `fn` tallies at the eval level.
 
----
+## Step 9: Aggregate and Generate Report
 
-## Step 6: Generate Benchmark
-
-Write `benchmark.json` manually (the aggregate script may not always work):
+Write `benchmark.json`:
 
 ```json
 {
-  "skill_name": "my-skill",
-  "model": "model-id-from-session",
-  "date": "ISO-date",
+  "metadata": {
+    "skill_name": "my-skill",
+    "mode": "baseline",
+    "model": "current-model-id",
+    "timestamp": "2026-04-11T05:30:00+08:00",
+    "evals_run": [1, 2, 3],
+    "arms": ["with_skill", "without_skill"]
+  },
   "evals": [
     {
       "eval_id": 1,
-      "eval_name": "name",
-      "configurations": {
+      "eval_name": "happy-path-basic",
+      "arms": {
         "with_skill": {
           "pass_rate": 1.0,
-          "assertions_passed": 4,
-          "assertions_total": 4,
-          "details": "Brief summary"
+          "passed": 3,
+          "total": 3,
+          "tokens": 12345,
+          "duration_seconds": 17.6
         },
         "without_skill": {
-          "pass_rate": 0.25,
-          "assertions_passed": 1,
-          "assertions_total": 4,
-          "details": "Brief summary"
+          "pass_rate": 0.67,
+          "passed": 2,
+          "total": 3,
+          "tokens": 18590,
+          "duration_seconds": 29.0
         }
       }
     }
   ],
-  "summary": {
-    "with_skill": { "pass_rate": 0.85, "total_assertions": 20, "passed": 17 },
-    "without_skill": { "pass_rate": 0.15, "total_assertions": 20, "passed": 3 },
-    "delta": 0.70
-  }
+  "totals": {
+    "with_skill": { "pass_rate": 0.85, "passed": 17, "total": 20 },
+    "without_skill": { "pass_rate": 0.45, "passed": 9, "total": 20 }
+  },
+  "delta": {
+    "pass_rate": "+0.40"
+  },
+  "notes": [
+    "Arm with_skill consistently better on safety assertions",
+    "eval-3 edge-case shows no difference — consider strengthening skill"
+  ]
 }
 ```
 
-Then present the summary table to the user:
+Append a compact line to `history.jsonl` for regression tracking.
 
-| Eval | With Skill | Without Skill |
-|------|-----------|---------------|
-| eval-1 | X/Y (Z%) | X/Y (Z%) |
-| ... | ... | ... |
-| **Total** | **X/Y** | **X/Y** |
+Then write `benchmark.md` with:
+- Executive summary (delta, winner, biggest weaknesses)
+- Per-eval breakdown table
+- Notable failures with quotes
+- Recommendations for improving the skill
 
----
+Present the summary to the user directly in chat.
 
-## Iteration Loop
+## Step 10: Iterate Based on Feedback
 
-If results aren't satisfactory:
+1. Discuss results with the user
+2. Improve the skill based on failed assertions
+3. Rerun into `iteration-(N+1)/`
+4. Compare `history.jsonl` entries for trend
+5. Repeat until satisfied
 
-1. Improve the skill based on failed assertions
-2. Rerun into `iteration-2/` directory
-3. Compare against `iteration-1/`
-4. Repeat until pass rate is acceptable
+## Mode-Specific Notes
 
-Focus improvements on the assertions that failed — those represent the skill's weak points.
+- **Regression**: Snapshot old skill before editing (`cp -r`). Use previous version as baseline.
+- **Model-swap**: Use `sessions_spawn` with `model` override.
+- **Prompt-variant**: Create two temp skill copies with different descriptions.
+- **Trigger-accuracy**: Generate 10 queries (5 should-trigger, 5 near-miss should-not). Grade precision/recall/F1.
+- **Adversarial**: Perturbations include typos, irrelevant context injection, misleading framing. Report degradation score = clean_avg - perturbed_avg.
+- **Script-test**: Run via `exec` for deterministic results unless script invokes LLM. Check happy-path AND error handling.
+- **Hook-dryrun**: Simulate event via subagent with exact payload JSON. Do NOT modify actual hook registrations.
+- **Cron-dryrun**: Validate cron expression and list next N execution times. If payload sends messages, use dry-run constraint.
+- **Integration**: For missing-component arms, tell subagent: "You do NOT have access to <component X>."
 
----
+## Hard Constraints
 
-## Quick Reference
-
-| Step | Action |
-|------|--------|
-| Prepare | `mkdir -p` workspace + eval dirs |
-| Define | Write `evals.json` with prompts |
-| Spawn | `sessions_spawn` x2 per eval (with/without skill) |
-| Wait | `sessions_yield`, handle notifications |
-| Grade | Write `grading.json` per eval |
-| Benchmark | Aggregate into `benchmark.json` |
-| Report | Present summary table |
-| Iterate | Fix skill → `iteration-N+1/` |
+- **Do not auto-run evals without user sign-off** — present evals and wait for approval before spawning
+- **Respect `--dry` and `--smoke`** — offer preview / smoke-test paths to improve UX and reduce wasted tokens
