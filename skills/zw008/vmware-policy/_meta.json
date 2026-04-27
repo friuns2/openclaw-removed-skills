@@ -3,11 +3,16 @@
   "slug": "vmware-policy",
   "displayName": "Vmware Policy",
   "latest": {
-    "version": "1.5.0",
-    "publishedAt": 1775969838982,
-    "commit": "https://github.com/openclaw/skills/commit/5940840c687544b485639a2e39ebd973bc92eddc"
+    "version": "1.5.14",
+    "publishedAt": 1776774062686,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.0",
+      "publishedAt": 1775969838982,
+      "commit": "https://github.com/openclaw/skills/commit/5940840c687544b485639a2e39ebd973bc92eddc"
+    },
     {
       "version": "1.4.4",
       "publishedAt": 1775058559494,

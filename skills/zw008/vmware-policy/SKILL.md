@@ -17,6 +17,8 @@ metadata: {"openclaw":{"requires":{"bins":["vmware-audit"],"config":["~/.vmware/
 
 # VMware Policy
 
+> **Disclaimer**: This is a community-maintained open-source project and is **not affiliated with, endorsed by, or sponsored by VMware, Inc. or Broadcom Inc.** "VMware" and "vSphere" are trademarks of Broadcom. Source code is publicly auditable at [github.com/zw008/VMware-Policy](https://github.com/zw008/VMware-Policy) under the MIT license.
+
 Unified audit logging, policy enforcement, and input sanitization -- the infrastructure layer for the entire VMware MCP skill family.
 
 > **Infrastructure dependency**: All 8 VMware skills depend on vmware-policy. It is auto-installed and provides the `@vmware_tool` decorator, `sanitize()`, and the shared audit database.
