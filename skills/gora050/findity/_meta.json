@@ -3,11 +3,16 @@
   "slug": "findity",
   "displayName": "Findity",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775168948187,
-    "commit": "https://github.com/openclaw/skills/commit/619632f3eedd7711e609973db36e994ff755c849"
+    "version": "1.0.3",
+    "publishedAt": 1776863480999,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775168948187,
+      "commit": "https://github.com/openclaw/skills/commit/619632f3eedd7711e609973db36e994ff755c849"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1774739040886,
