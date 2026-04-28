@@ -3,11 +3,16 @@
   "slug": "okx-defi-invest",
   "displayName": "Okx Defi Invest",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776333210324,
-    "commit": "https://github.com/openclaw/skills/commit/ac76c45e3a647bbdff94f1d9afcb891c5908d680"
+    "version": "2.4.0",
+    "publishedAt": 1776778667296,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776333210324,
+      "commit": "https://github.com/openclaw/skills/commit/ac76c45e3a647bbdff94f1d9afcb891c5908d680"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775722685452,
