@@ -3,9 +3,15 @@
   "slug": "open-accounting",
   "displayName": "Open Accounting",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495052491,
-    "commit": "https://github.com/openclaw/skills/commit/2d3ef6308c922c33e281d70a60ee2f8217bd6d78"
+    "version": "1.0.1",
+    "publishedAt": 1776890620556,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495052491,
+      "commit": "https://github.com/openclaw/skills/commit/2d3ef6308c922c33e281d70a60ee2f8217bd6d78"
+    }
+  ]
 }
