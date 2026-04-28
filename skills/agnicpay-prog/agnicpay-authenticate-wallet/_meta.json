@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "agnicpay-authenticate-wallet",
-  "displayName": "Authenticate Wallet",
+  "displayName": "Agnic Authenticate Wallet",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775599179203,
-    "commit": "https://github.com/openclaw/skills/commit/809deb11b9877a98bfa89abff56ab625279d3eb4"
+    "version": "2.0.2",
+    "publishedAt": 1776953498030,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775599179203,
+      "commit": "https://github.com/openclaw/skills/commit/809deb11b9877a98bfa89abff56ab625279d3eb4"
+    }
+  ]
 }
