@@ -151,8 +151,8 @@ vipshop-skills/
 ## 技术架构
 
 ### 登录态管理
-- 登录态存储：`~/.vipshop-user-login/tokens.json`
-- 所有子技能自动读取登录态
+- 通过 `vipshop status` 命令检查登录状态
+- 所有子技能自动调用 `vipshop status` 判断登录态
 - 登录态过期时自动触发重新登录
 
 ### 数据格式

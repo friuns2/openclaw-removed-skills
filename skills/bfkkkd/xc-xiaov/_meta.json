@@ -3,11 +3,16 @@
   "slug": "xc-xiaov",
   "displayName": "xc-xiaov",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776170111654,
-    "commit": "https://github.com/openclaw/skills/commit/aefaea5f20231e83d785ba8eda0c9e40ce17169b"
+    "version": "1.0.4",
+    "publishedAt": 1777009142228,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776170111654,
+      "commit": "https://github.com/openclaw/skills/commit/aefaea5f20231e83d785ba8eda0c9e40ce17169b"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775722100783,
