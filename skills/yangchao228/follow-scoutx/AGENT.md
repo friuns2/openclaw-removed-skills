@@ -10,8 +10,9 @@ Follow ScoutX 是一个可安装的 agent skill，用于从中心化 ScoutX publ
 
 - 终端用户通过自然语言配置频率、时间、主题、语言、摘要风格和投递目标。
 - 终端用户可以选择 `ScoutX` 定制优质媒体源、一手信息源（X 平台与播客），或两者都看。
-- 如果两类信息源都启用，OpenClaw recurring delivery 应拆成两次推送：一手信息源一条、ScoutX 优质自媒体一条。
+- 如果两类信息源都启用，OpenClaw recurring delivery 默认仍只创建一个 cron job；digest 内部按一手信息源 / ScoutX 优质自媒体分区排版。
 - 默认条数按消息组平分；用户可以用 `--max-first-party-items` 和 `--max-scoutx-items` 分别设置上限。
+- 如果飞书消息超长，脚本应在投递前拆成多条连续消息，而不是回退成多个 cron job。
 - 终端用户不应该被要求配置 `BASE_URL`、API token、feed endpoint 或 raw JSON filter。
 - 终端用户不应该被要求配置 X bearer token、播客 RSS 或转写服务 API key。
 - ScoutX 后端负责集中采集和清洗内容；本仓库的 skill 只负责本地偏好、拉取、筛选、摘要输出和 OpenClaw cron 辅助。
@@ -41,10 +42,12 @@ Follow ScoutX 是一个可安装的 agent skill，用于从中心化 ScoutX publ
 
 - `profile.json`
 - `state.json`
+- `prompt_sync_state.json`
 - `service.json`
 - `prompts/*.md`
 
 测试或验证时如需隔离本地状态，使用 `FOLLOW_SCOUTX_HOME` 指向临时目录，避免污染真实用户配置。
+- `ensure_local_files()` 会自动同步 skill 内置 prompts 到 `~/.follow_scoutx/prompts/`；旧版或未托管 prompt 会先备份到 `prompts/backups/`，已经被用户手改过的 prompt 默认保留不覆盖。
 
 示例：
 
@@ -158,11 +161,17 @@ python3 scripts/follow_scoutx.py install-openclaw-cron --replace-existing --appl
 - 如果 `service.json` 指向 placeholder 域名，应把它视为 operator packaging 问题，不要向终端用户索要 feed URL。
 - 修改 OpenClaw cron 逻辑时，保持 Feishu 外部投递必须使用明确的 `--channel feishu --to <target>`。
 - 当前聊天投递使用 `--session main --system-event`，不要默认使用 `--channel last`。
-- 混合源 recurring delivery 必须生成两个 cron job，分别调用 `deliver --message-group first_party` 和 `deliver --message-group scoutx`。
+- `--main-session-system-event` 只允许用于当前聊天；如果 `delivery.channel=feishu`，应直接拒绝安装并要求显式 `--channel feishu --to <target>`。
+- 混合源 recurring delivery 默认只生成一个 cron job；旧版遗留的 `-first-party` / `-scoutx` 任务在 `--replace-existing` 时应一并清理。
 - 替换旧定时任务时使用 `--replace-existing`，不要依赖 name 更新；OpenClaw 资源管理以 id 为准。
 - 不要把 Feishu 定时任务配置成 `delivery.mode=session` + `sessionTarget=isolated`；isolated session 没有可继承的当前聊天通道。
 - 不要默认安装 `channel=last` 的 recurring job；`install-openclaw-cron --apply` 应要求显式 Feishu target 或 `--main-session-system-event`，除非用户主动传 `--allow-channel-last`。
-- 默认 recurring delivery 使用 `deliver`，只有确实需要 LLM remix 时才使用 `prepare-digest`。
+- 默认 recurring delivery 使用 `deliver`；但如果 `language` 是 `zh-CN` 或 `bilingual` 且启用了一手信息源（`x` / `podcast`），应优先切到 `prepare-digest`，否则一手信息源会保持原文语言。
+- 如果 `language=zh-CN` 且走 `prepare-digest`，一手信息源的标题和摘要都必须中文化，而不是只把分区标题翻成中文。
+- 如果走 `prepare-digest`，必须保持“每个选中 item 对应一个编号条目”；禁止把第 4 条以后折叠成“更多动态/更多精选内容”。
+- 做验收或排查时，优先读取 `preview --json` / `deliver --json` 原始字段；不要额外生成 `AI相关: ✅/⚠️/❌`、`边界内容` 之类的二次判断标签。
+- 做“真实执行”验收时，优先读取 `deliver --json` 的 `group_counts` 与 `errors`，不要自己推断 first_party / scoutx 条数。
+- 选中的 feed 只要有一个拉取失败，默认可以降级成 partial result，但必须显式暴露 `status=partial`、`failed_source_types` 和 `errors`；不要把抓取故障误报成过滤后 0 条。
 - prompt 文案应保持直接、紧凑、面向 builder，不要加入营销口吻。
 - 修改脚本行为时，同步检查 `SKILL.md` 和 `README.md` 是否需要更新。
 

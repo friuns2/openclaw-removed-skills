@@ -1,13 +1,18 @@
 {
   "owner": "yangchao228",
   "slug": "follow-scoutx",
-  "displayName": "Follow Scoutx",
+  "displayName": "谛听.skill",
   "latest": {
-    "version": "0.2.1",
-    "publishedAt": 1776652784867,
-    "commit": "https://github.com/openclaw/skills/commit/8e4fc6862721c59c7ea47d70f128ab612d5645fd"
+    "version": "0.2.2",
+    "publishedAt": 1776876866797,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.2.1",
+      "publishedAt": 1776652784867,
+      "commit": "https://github.com/openclaw/skills/commit/8e4fc6862721c59c7ea47d70f128ab612d5645fd"
+    },
     {
       "version": "0.1.3",
       "publishedAt": 1776149569983,
