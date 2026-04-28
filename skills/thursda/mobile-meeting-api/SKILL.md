@@ -1,8 +1,10 @@
 ---
 name: mobile-meeting-api
-description: 提及移动会议/云视讯、视频会议、会议API集成时,自动激活本技能。使用移动会议skill前，可使用use_skill 手动加载本技能（mobile-meeting）。涵盖登录鉴权、会议管理（创建/编辑/取消/查询）、会议控制（会中操作）、网络研讨会、用户管理、企业通讯录等模块。
+description: 提及移动会议/云视讯、视频会议、会议API集成时,自动激活本技能, 也可使用手动加载本技能（ use_skill mobile-meeting-api）。涵盖登录鉴权、会议管理（创建/编辑/取消/查询）、会议控制（会中操作）、网络研讨会管理等模块。
 homepage: https://www.125339.com.cn/developerCenter/ReBar/63/222
-version: 1.0tags: [API, 会议, 集成开发]---
+version: 1.0.0 
+tags: [API, 会议, 集成开发]
+---
 
 # 移动会议服务端API集成指导
 
@@ -15,9 +17,9 @@ version: 1.0tags: [API, 会议, 集成开发]---
 - 生产环境：`apigw.125339.com.cn`
 - 鉴权方式：App ID鉴权（SDK用户及鉴权）+ 标准账号鉴权（高清、App账号及鉴权）
 
-## 参考文档
+## 参考文档及执行脚本
 
-完整API文档位于`./references`文件夹中。如需全量接口文档，可以从[云视讯/移动会议-开发者中心下载](https://www.125339.com.cn/developerCenter/ReBar/63/197)，或联系云视讯/移动会议集成开发支撑团队获取
+- 完整API文档位于`./references`文件夹中。如需全量接口文档，可以从[云视讯/移动会议-开发者中心下载](https://www.125339.com.cn/developerCenter/ReBar/63/197)，或联系云视讯/移动会议集成开发支撑团队获取
 
 ## 触发原则
 
@@ -30,11 +32,10 @@ version: 1.0tags: [API, 会议, 集成开发]---
 ## 不触发边界
 不要在以下场景使用此技能：
 
-- 用户进行聊天、打电话、PSTN童话、视频剪辑等
+- 用户进行聊天、打电话、PSTN通话、视频剪辑等
 - 用户要查询日历日程但不涉及云视讯/移动会议
 - 用户要预约线下会议室（非线上会议）
 - 用户询问的是其他视频会议平台（如 Zoom、Teams、腾讯会议、飞书会议、钉钉）
-
 
 
 ## 使用原则
@@ -60,9 +61,9 @@ version: 1.0tags: [API, 会议, 集成开发]---
 | 编辑会议 | UpdateMeeting.md | `修改会议` |
 | 开始会议 | StartMeeting.md | `开始会议` |
 | 查询会议列表/详情 | SearchMeetings.md, ShowMeetingDetail.md, SearchHisMeetings.md, ShowHisMeetingDetail.md | `查询会议` |
-| 录制相关 | SearchRecordings.md, ShowRecordingDetail.md, ShowRecordingFileDownloadUrls.md, DeleteRecordings.md | `录制`、`download` |
 | 会中操作（静音/邀请/挂断等） | InviteParticipant.md, ListOnlineConfAttendee.md, SearchCtlRecordsOfHisMeeting.md | `会控`、`invite` |
 | 参会记录 | SearchAttendanceRecordsOfHisMeeting.md | `参会记录` |
+| 录制相关 | SearchRecordings.md, ShowRecordingDetail.md, ShowRecordingFileDownloadUrls.md, DeleteRecordings.md | `录制`、`download` |
 
 
 ## 工作流程
@@ -98,14 +99,14 @@ version: 1.0tags: [API, 会议, 集成开发]---
 
 ## 关键接口速查
 
-### 登录鉴权（第3章）
+### 登录鉴权
 
 #### App ID鉴权 - 获取Token
 ```
 POST /v2/usg/acs/auth/appauth
 ```
 **关键参数：**
-- `Authorization`: HMAC-SHA256签名 `appId:userId:expireTime:nonce`。签名可以使用`./references/app_auth.html`验证是否正确。
+- `Authorization`: HMAC-SHA256签名 `appId:userId:expireTime:nonce`。签名可以使用`./scripts/app_auth.html`验证是否正确。
 - `X-Token-Type`: 固定值 `LongTicket`
 - `clientType`: 72（API调用类型）
 
@@ -113,53 +114,25 @@ POST /v2/usg/acs/auth/appauth
 - `accessToken`: 访问令牌（12-24小时有效）
 - `refreshToken`: 刷新令牌（30天有效）
 
-### 会议管理（第4章）
+### 会议管理
 
-#### 创建会议
-```
-POST /v2/mmc/management/conferences
-```
+- 创建会议: ` POST /v1/mmc/management/conferences `
+- 查询会议列表: `GET /v1/mmc/management/conferences`
+- 取消预约会议: `DELETE /v1/mmc/management/conferences`
+- 查询会议详情: `GET /v1/mmc/management/conferences/confDetail`  
+- 查询录制文件下载链接: ` GET /v1/mmc/management/record/downloadurls`
 
-#### 查询会议列表
-```
-GET /v2/mmc/management/conferences
-```
+### 会议控制
 
-#### 取消预约会议
-```
-DELETE /v2/mmc/management/conferences/{conferenceId}
-```
-
-#### 查询录制文件下载链接
-```
-GET /v2/mmc/management/record/downloadUrl
-```
-
-### 会议控制（第5章）
-
-#### 获取会控Token
-```
-POST /v2/mmc/control/conferences/{conferenceId}/token
-```
-
-#### 邀请与会者
-```
-POST /v2/mmc/control/conferences/{conferenceId}/invite
-```
-
-#### 静音与会者
-```
-PUT /v2/mmc/control/conferences/{conferenceId}/mute
-```
-
-#### 全场静音
-```
-PUT /v2/mmc/control/conferences/{conferenceId}/muteAll
-```
+- 获取会控Token ` GET /v1/mmc/control/conferences/token `
+- 邀请与会者 ` POST /v1/mmc/control/conferences/participants`
+- 静音与会者 ` PUT /v1/mmc/control/conferences/participants/mute `
+- 全场静音 ` PUT /v1/mmc/control/conferences/mute `
 
 ### 打开移动会议app
+
 ```
-ysx://com.zhongtai.ysx/app/callup?num=375xxx389&amp;random=mnaibtK0wChtuoV8gPZDcpV99n2nARqge 
+ysx://com.zhongtai.ysx/app/callup?num=375xxx389&random=mnaibtK0wChtuoV8gPZDcpV99n2nARqge 
 ```
 
 ## 脚本工具
@@ -177,14 +150,17 @@ ysx://com.zhongtai.ysx/app/callup?num=375xxx389&amp;random=mnaibtK0wChtuoV8gPZDc
 - [查询会议](./scripts/search_meetings.py)：查询会议列表
 - [取消会议](./scripts/cancel_meeting.py)：取消预约会议
 
+**签名调试工具：**
+- [app_auth.html](./scripts/app_auth.html)：浏览器端交互式 HMAC-SHA256 签名生成器，**无需任何服务器或依赖**，直接用浏览器打开即可使用。输入 App ID、App Key、User ID，自动生成 Authorization 签名，适合在对接初期排查鉴权问题。
+
 **注意：** 脚本仅用于测试，请勿在生产环境直接使用。确保网络安全，避免泄露密钥。
 
 ## 注意事项
 
 1. **Token有效期**：accessToken 12-24小时，refreshToken 30天
 2. **clientType固定值**：API调用时固定为72
-3. **Authorization签名**：必须使用HMAC-SHA256，格式严格按文档。可以通过返回错误码或使用使用`./references/app_auth.html`，确定签名是否正确。
-4. **错误处理**：参考第10章错误码处理异常情况
+3. **Authorization签名**：必须使用HMAC-SHA256，格式严格按文档。可以通过返回错误码或使用`./scripts/app_auth.html`，确定签名是否正确。
+4. **错误处理**：参考错误码处理异常情况
 
 
 ## 常见问题
@@ -192,6 +168,6 @@ ysx://com.zhongtai.ysx/app/callup?num=375xxx389&amp;random=mnaibtK0wChtuoV8gPZDc
 - **如何处理鉴权失败？**：检查App ID和Token是否正确，参考app_auth.html和CreateAppIdToken.md。
 - **会议创建失败的原因？**：确认必填参数，如会议主题、开始时间等，参考CreateMeeting.md。
 - **如何获取录制文件？**：使用ShowRecordingFileDownloadUrls.md中的接口获取下载链接。
-- **事件推送如何配置？**：参考文档中的推送章节，设置Webhook或WebSocket。
+- **事件推送如何配置？**：参考接口文档中的推送章节，设置Webhook或WebSocket。
 
-最后更新日期：2026年4月9日
+最后更新日期：2026年4月27日

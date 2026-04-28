@@ -3,9 +3,15 @@
   "slug": "mobile-meeting-api",
   "displayName": "移动会议API",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775716108022,
-    "commit": "https://github.com/openclaw/skills/commit/aac475835aea065c520fa003e7b6159d4f7bffb8"
+    "version": "1.0.1",
+    "publishedAt": 1777281479260,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775716108022,
+      "commit": "https://github.com/openclaw/skills/commit/aac475835aea065c520fa003e7b6159d4f7bffb8"
+    }
+  ]
 }
