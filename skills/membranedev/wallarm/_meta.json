@@ -3,9 +3,15 @@
   "slug": "wallarm",
   "displayName": "Wallarm",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775646241882,
-    "commit": "https://github.com/openclaw/skills/commit/3b59bb4adcf1e4762eb7cc9a01b1fdbd99bd60a8"
+    "version": "1.0.1",
+    "publishedAt": 1776896825750,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775646241882,
+      "commit": "https://github.com/openclaw/skills/commit/3b59bb4adcf1e4762eb7cc9a01b1fdbd99bd60a8"
+    }
+  ]
 }
