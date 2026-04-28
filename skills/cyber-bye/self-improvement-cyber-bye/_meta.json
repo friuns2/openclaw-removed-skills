@@ -3,9 +3,15 @@
   "slug": "self-improvement-cyber-bye",
   "displayName": "Self Improvement Cyber Bye",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776131650762,
-    "commit": "https://github.com/openclaw/skills/commit/f972cbe3b2c65781c743c56ad2c4fc50f10c0377"
+    "version": "4.0.1",
+    "publishedAt": 1777162522383,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776131650762,
+      "commit": "https://github.com/openclaw/skills/commit/f972cbe3b2c65781c743c56ad2c4fc50f10c0377"
+    }
+  ]
 }
