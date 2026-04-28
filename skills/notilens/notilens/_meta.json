@@ -3,9 +3,15 @@
   "slug": "notilens",
   "displayName": "NotiLens",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1776174227474,
-    "commit": "https://github.com/openclaw/skills/commit/56fde21e500fcd4e6014e2947dd046a27e7b299e"
+    "version": "0.2.0",
+    "publishedAt": 1777290292171,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1776174227474,
+      "commit": "https://github.com/openclaw/skills/commit/56fde21e500fcd4e6014e2947dd046a27e7b299e"
+    }
+  ]
 }
