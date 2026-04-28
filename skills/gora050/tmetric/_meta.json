@@ -3,9 +3,15 @@
   "slug": "tmetric",
   "displayName": "Tmetric",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379940050,
-    "commit": "https://github.com/openclaw/skills/commit/4c5cb51797219325438dc144e4c0c4fe2206b310"
+    "version": "1.0.1",
+    "publishedAt": 1776892106098,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379940050,
+      "commit": "https://github.com/openclaw/skills/commit/4c5cb51797219325438dc144e4c0c4fe2206b310"
+    }
+  ]
 }
