@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-php-laravel",
-  "displayName": "php-laravel",
+  "displayName": "ia-php-laravel",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518996643,
-    "commit": "https://github.com/openclaw/skills/commit/19337efd952ba557787a744a1ebae76864a3a59a"
+    "version": "3.0.4",
+    "publishedAt": 1777300738948,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518996643,
+      "commit": "https://github.com/openclaw/skills/commit/19337efd952ba557787a744a1ebae76864a3a59a"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004218945,
