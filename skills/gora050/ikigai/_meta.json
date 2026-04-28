@@ -3,9 +3,15 @@
   "slug": "ikigai",
   "displayName": "Ikigai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775459197439,
-    "commit": "https://github.com/openclaw/skills/commit/2a2249fa3c6d39818e56b65d8242a0676272fc53"
+    "version": "1.0.1",
+    "publishedAt": 1776892800375,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775459197439,
+      "commit": "https://github.com/openclaw/skills/commit/2a2249fa3c6d39818e56b65d8242a0676272fc53"
+    }
+  ]
 }
