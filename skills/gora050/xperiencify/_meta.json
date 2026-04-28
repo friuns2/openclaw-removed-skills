@@ -3,9 +3,15 @@
   "slug": "xperiencify",
   "displayName": "Xperiencify",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775427499055,
-    "commit": "https://github.com/openclaw/skills/commit/42d7cb8e1758100d475c988ce4de19aea52daeef"
+    "version": "1.0.1",
+    "publishedAt": 1776892633470,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775427499055,
+      "commit": "https://github.com/openclaw/skills/commit/42d7cb8e1758100d475c988ce4de19aea52daeef"
+    }
+  ]
 }
