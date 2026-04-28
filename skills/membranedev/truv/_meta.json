@@ -3,9 +3,15 @@
   "slug": "truv",
   "displayName": "Truv",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581469140,
-    "commit": "https://github.com/openclaw/skills/commit/64025b4da3678dd1e0d81853f313417cbb3f3400"
+    "version": "1.0.1",
+    "publishedAt": 1776896052847,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581469140,
+      "commit": "https://github.com/openclaw/skills/commit/64025b4da3678dd1e0d81853f313417cbb3f3400"
+    }
+  ]
 }
