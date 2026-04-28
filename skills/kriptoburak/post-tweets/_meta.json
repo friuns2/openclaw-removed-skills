@@ -3,9 +3,15 @@
   "slug": "post-tweets",
   "displayName": "Post Tweets",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776105983163,
-    "commit": "https://github.com/openclaw/skills/commit/50f16b4161402d776b78a7ae51ad77518d952990"
+    "version": "1.0.1",
+    "publishedAt": 1776903283551,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776105983163,
+      "commit": "https://github.com/openclaw/skills/commit/50f16b4161402d776b78a7ae51ad77518d952990"
+    }
+  ]
 }
