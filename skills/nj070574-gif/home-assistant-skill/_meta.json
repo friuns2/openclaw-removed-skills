@@ -3,9 +3,15 @@
   "slug": "home-assistant-skill",
   "displayName": "Home Assistant Integration",
   "latest": {
-    "version": "2.0.0",
-    "publishedAt": 1776019271802,
-    "commit": "https://github.com/openclaw/skills/commit/bdf49d62ec2c52ed9b2e383776e0b732a4af0133"
+    "version": "2.1.0",
+    "publishedAt": 1777045137968,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.0.0",
+      "publishedAt": 1776019271802,
+      "commit": "https://github.com/openclaw/skills/commit/bdf49d62ec2c52ed9b2e383776e0b732a4af0133"
+    }
+  ]
 }

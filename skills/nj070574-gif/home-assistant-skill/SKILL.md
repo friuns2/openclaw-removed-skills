@@ -1,121 +1,149 @@
 ---
-name: home-assistant
-description: Control and query Home Assistant via natural language. Covers lights, switches, climate, temperature sensors, cameras, automations, energy monitoring, EV chargers, presence detection, and home summaries. Works with Telegram and any OpenClaw channel.
-version: 2.0.0
-tags: [home-assistant, smart-home, iot, telegram, lights, heating, climate, cameras, energy, automation, switches, sensors]
-author: nj070574-gif
+name: home-assistant-skill
+version: "2.1.0"
+description: >
+  Control and query Home Assistant via natural language. Covers lights,
+  switches, climate, temperature sensors, cameras, automations, energy
+  monitoring, EV chargers, presence detection, door sensors, and home
+  summaries. Credentials loaded from OpenClaw environment only.
+author: openclaw-community
 license: MIT
-repository: https://github.com/nj070574-gif/openclaw-homeassistant-skill
+tags:
+  - home-assistant
+  - smart-home
+  - lights
+  - climate
+  - cameras
+  - automation
+  - energy
+  - iot
+  - heating
+  - telegram
+  - latest
+
+requires:
+  env:
+    - name: HOME_ASSISTANT_URL
+      description: Your Home Assistant URL (e.g. http://homeassistant.local:8123)
+    - name: HOME_ASSISTANT_TOKEN
+      description: Long-lived access token (HA Profile > Security > Long-Lived Access Tokens)
+  optional_env:
+    - name: HOME_ASSISTANT_SSL_VERIFY
+      description: Set to 'false' if using a self-signed certificate
+    - name: HOME_ASSISTANT_CA_CERT
+      description: Path to CA certificate file
+  python_packages:
+    - requests
+    - urllib3
+
+security:
+  scope: owner-operated
+  note: >
+    Connects only to the Home Assistant instance you configure via
+    HOME_ASSISTANT_URL. All credentials are user-supplied via openclaw.json
+    env block. No data is sent to third parties.
+  credential_handling: user-supplied-only
+  network_access: user-own-home-assistant-only
 ---
 
-# Home Assistant Skill for OpenClaw
+# Home Assistant Integration v2.1 — OpenClaw Skill
 
-Control and query your Home Assistant smart home in plain English through Telegram or any OpenClaw channel.
+Control and query your Home Assistant smart home in plain English through
+Telegram or any OpenClaw channel.
 
-## What You Can Say
+## Setup
 
-| Phrase | What happens |
-|--------|-------------|
-| `Home summary` | Temperatures, lights on, heating status, active switches |
-| `What is the temperature?` | All temperature sensors with current readings |
-| `Turn off the living room lights` | Calls `light.turn_off` |
-| `Set the heating to 21 degrees` | Calls `climate.set_temperature` |
-| `Is the EV charger on?` | Reads the switch state |
-| `Show me the front door camera` | Returns snapshot URL |
-| `List all my automations` | Shows enabled/disabled automations |
-| `Is anyone home?` | Reads presence/person entity states |
-| `What is my energy consumption?` | All power/energy sensors |
-| `Turn on lights at 80% brightness` | Service call with brightness attribute |
-
-## Requirements
-
-- Home Assistant 2023.1 or newer (REST API enabled by default)
-- Python 3.9+ on your OpenClaw server
-- `requests` + `urllib3` Python packages
-
-## Setup (5 minutes)
-
-### 1. Generate a Home Assistant Token
+### 1. Create a Home Assistant Long-Lived Token
 
 In Home Assistant: **Profile** (bottom-left) → **Security** → **Long-Lived Access Tokens** → **Create Token**
 
-> Copy the token immediately — it is only shown once.
+Copy the token immediately — it is only shown once.
 
 ### 2. Add credentials to openclaw.json
 
-```json
+`json
 {
   "env": {
     "HOME_ASSISTANT_URL":   "http://homeassistant.local:8123",
     "HOME_ASSISTANT_TOKEN": "your-long-lived-token-here"
   }
 }
-```
+`
 
 Using HTTPS with a self-signed certificate? Also add:
-```json
+
+`json
 "HOME_ASSISTANT_SSL_VERIFY": "false"
-```
+`
 
 ### 3. Restart OpenClaw
 
-```bash
+`ash
 sudo systemctl restart openclaw
-```
+`
 
 ### 4. Test
 
-Send your bot: `home summary`
+Send your bot: home summary
 
-## Credential Priority
+## Security Notes
 
-The skill checks in this order — no credentials go in the skill file itself:
+- Connects **only** to your configured HOME_ASSISTANT_URL — no third-party calls
+- Create a dedicated HA user with only the permissions your agent needs
+- Store credentials in openclaw.json with restricted permissions (chmod 600)
+- Prefer HOME_ASSISTANT_CA_CERT over HOME_ASSISTANT_SSL_VERIFY=false for HTTPS
 
-1. `HOME_ASSISTANT_TOKEN` system environment variable
-2. `openclaw.json` env block (recommended)
-3. `~/.openclaw/workspace/.secrets/home_assistant.token` (line 1: token, line 2: URL)
+## What You Can Ask
 
-## SSL / HTTPS Support
+| Phrase | What happens |
+|---|---|
+| home summary | Temperatures, lights on, heating status, active switches |
+| what is the temperature? | All temperature sensors |
+| 	urn off the living room lights | Calls light.turn_off |
+| set the heating to 21 degrees | Calls climate.set_temperature |
+| is the EV charger on? | Reads switch state |
+| show me the front door camera | Returns snapshot URL |
+| list all automations | Shows enabled/disabled automations |
+| is anyone home? | Reads presence/person entity states |
+| what is my energy consumption? | All power/energy sensors |
+| 	urn on lights at 80% brightness | Service call with brightness attribute |
 
-| Variable | Purpose |
-|----------|---------|
-| `HOME_ASSISTANT_SSL_VERIFY` | Set `false` for self-signed certs |
-| `HOME_ASSISTANT_CA_CERT` | Path to your CA cert file |
+## Available Operations
 
-## Available Snippets (15)
+The skill provides 15 Python snippets executed via the OpenClaw exec tool:
 
-| Snippet | What it does |
-|---------|-------------|
-| `_load_config` | Loads credentials — always runs first |
-| `check_api` | Tests HA connectivity |
-| `ha_summary_for_telegram` | Full home summary |
-| `get_temperature_sensors` | All temperature sensors |
-| `get_lights` | Lights with brightness |
-| `get_switches` | All switches |
-| `get_climate` | Thermostat status |
-| `call_service` | Control any device |
-| `search_entities` | Find entities by keyword |
-| `get_cameras` | Camera list + snapshot URLs |
-| `camera_snapshot` | Download camera image |
-| `get_automations` | All automations |
-| `trigger_automation` | Fire a specific automation |
-| `get_energy` | Energy/power sensors |
-| `send_notification` | Send via HA notify service |
+- _load_config — loads credentials from environment (always runs first)
+- check_api — tests HA connectivity
+- ha_summary_for_telegram — full home summary
+- get_temperature_sensors — all temperature sensors
+- get_lights — lights with brightness levels
+- get_switches — all switches with state
+- get_climate — thermostat/climate status
+- call_service — control any HA device/service
+- search_entities — find entities by keyword
+- get_cameras — camera list with snapshot URLs
+- camera_snapshot — download camera image
+- get_automations — all automations with last-triggered
+- 	rigger_automation — fire a specific automation
+- get_energy — energy and power sensors
+- send_notification — send via HA notify service
+
+## Skill File
+
+The full skill implementation is in home_assistant.json in this directory.
+It contains all 15 snippets as Python code that the agent executes via
+the Home Assistant REST API (/api/states, /api/services/*).
 
 ## Troubleshooting
 
-**`HOME_ASSISTANT_TOKEN not configured`**
-Token not found. Check the `env` block in `openclaw.json` and restart OpenClaw.
-Quick fix: `bash fix-token-config.sh` from the repo directory.
+**HOME_ASSISTANT_TOKEN not configured**
+Check the HOME_ASSISTANT_TOKEN in your openclaw.json env block and restart OpenClaw.
 
-**`401 Unauthorized`**
+**401 Unauthorized**
 Token expired. Regenerate: HA → Profile → Security → Long-Lived Access Tokens.
 
-**`SSL certificate verify failed`**
-Add `"HOME_ASSISTANT_SSL_VERIFY": "false"` to your `openclaw.json` env block.
+**SSL certificate verify failed**
+Add "HOME_ASSISTANT_SSL_VERIFY": "false" to your openclaw.json env block.
 
-## Full Source
-
-GitHub: https://github.com/nj070574-gif/openclaw-homeassistant-skill
-
-Includes `install.sh` (interactive installer with connectivity test) and `fix-token-config.sh` for common token errors.
+**Connection refused**
+Check HOME_ASSISTANT_URL is correct and HA is running.
