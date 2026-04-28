@@ -3,9 +3,15 @@
   "slug": "sapling",
   "displayName": "Sapling",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775351023736,
-    "commit": "https://github.com/openclaw/skills/commit/a2ae5135436825bb2de2d216a88599621698f5a8"
+    "version": "1.0.1",
+    "publishedAt": 1776884195551,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775351023736,
+      "commit": "https://github.com/openclaw/skills/commit/a2ae5135436825bb2de2d216a88599621698f5a8"
+    }
+  ]
 }
