@@ -85,8 +85,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Search",
@@ -147,8 +147,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "News by Category",
@@ -195,8 +195,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Streaming Picks",
@@ -252,8 +252,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Awards Summary",
@@ -309,8 +309,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Base Info",
@@ -366,8 +366,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Box Office Summary",
@@ -426,8 +426,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Chart Rankings",
@@ -483,8 +483,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Contribution Questions",
@@ -540,8 +540,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Countries of Origin",
@@ -597,8 +597,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Critics Review Summary",
@@ -654,8 +654,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Details",
@@ -711,8 +711,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "'Did You Know' Insights",
@@ -768,8 +768,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Extended Details",
@@ -825,8 +825,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Recommendations",
@@ -882,8 +882,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Plot Summary",
@@ -939,8 +939,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Redux Overview",
@@ -1005,8 +1005,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Release Expectation",
@@ -1062,8 +1062,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Top Cast and Crew",
@@ -1119,8 +1119,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Reviews Summary",

@@ -79,8 +79,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Search",
@@ -141,8 +141,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "News by Category",
@@ -189,8 +189,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Streaming Picks",
@@ -246,8 +246,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Awards Summary",
@@ -303,8 +303,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Base Info",
@@ -360,8 +360,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Box Office Summary",
@@ -420,8 +420,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Chart Rankings",
@@ -477,8 +477,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Contribution Questions",
@@ -534,8 +534,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Countries of Origin",
@@ -591,8 +591,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Critics Review Summary",
@@ -648,8 +648,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Details",
@@ -705,8 +705,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "'Did You Know' Insights",
@@ -762,8 +762,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Extended Details",
@@ -819,8 +819,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Recommendations",
@@ -876,8 +876,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Plot Summary",
@@ -933,8 +933,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Redux Overview",
@@ -999,8 +999,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Release Expectation",
@@ -1056,8 +1056,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Top Cast and Crew",
@@ -1113,8 +1113,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Reviews Summary",

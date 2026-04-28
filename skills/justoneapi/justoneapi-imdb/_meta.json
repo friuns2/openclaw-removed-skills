@@ -3,11 +3,16 @@
   "slug": "justoneapi-imdb",
   "displayName": "IMDb API",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1776239970590,
-    "commit": "https://github.com/openclaw/skills/commit/eaa12cfde65dc2248c1abd0dcf6637b424bbcbb5"
+    "version": "1.0.8",
+    "publishedAt": 1776924449131,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1776239970590,
+      "commit": "https://github.com/openclaw/skills/commit/eaa12cfde65dc2248c1abd0dcf6637b424bbcbb5"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1775375322328,

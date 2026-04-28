@@ -50,7 +50,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `newsByCategoryQuery`
 
@@ -94,7 +94,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `streamingPicksQuery`
 
@@ -130,7 +130,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleAwardsSummaryQuery`
 
@@ -167,7 +167,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleBaseQuery`
 
@@ -204,7 +204,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleBoxOfficeSummary`
 
@@ -241,7 +241,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleChartRankings`
 
@@ -283,7 +283,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleContributionQuestions`
 
@@ -320,7 +320,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleCountriesOfOrigin`
 
@@ -357,7 +357,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleCriticsReviewSummaryQuery`
 
@@ -394,7 +394,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleDetailsQuery`
 
@@ -431,7 +431,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleDidYouKnowQuery`
 
@@ -468,7 +468,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleExtendedDetailsQuery`
 
@@ -505,7 +505,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleMoreLikeThisQuery`
 
@@ -542,7 +542,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titlePlotQuery`
 
@@ -579,7 +579,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleReduxOverviewQuery`
 
@@ -616,7 +616,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleReleaseExpectationQuery`
 
@@ -654,7 +654,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleTopCastAndCrew`
 
@@ -691,7 +691,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `titleUserReviewsSummaryQuery`
 
@@ -728,4 +728,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
