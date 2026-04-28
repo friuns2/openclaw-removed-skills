@@ -15,13 +15,13 @@ Guides you through updating project documentation based on code changes on the a
 2. **Discover project structure**: Find documentation directories, formats, and conventions
 3. **Determine run mode**:
    - **First run** (no `.docs-sync` record): Perform a **full-project audit** — read the entire codebase, compare with existing docs, fill every gap. Do **not** rely on git diff.
-   - **Incremental run** (sync record exists): Diff from the recorded commit hash and only review changes since then.
+   - **Incremental run** (sync record exists): Read the recorded commit hash, then resolve the effective diff base. If the commit immediately after the recorded hash updates the sync record, use that commit as the diff base; otherwise use the recorded hash itself.
 4. **Map code to docs**: Identify which documentation is missing, outdated, or affected
 5. **Scaffold missing doc infrastructure** (first run only, if needed): Create the doc site skeleton
 6. **Review and update each doc**: Walk through updates with user confirmation
 7. **Validate**: Run the project's lint/build checks
-8. **Record sync point**: Save the current commit hash so the next run can do an incremental update
-9. **Commit**: Stage documentation changes
+8. **Record sync point**: Save the current code-sync commit hash
+9. **Commit**: Stage the documentation changes and sync record together
 
 ## Workflow: Pre-flight Check
 
@@ -42,7 +42,7 @@ Use the AskUserQuestion tool to present this choice. Do not silently include or 
 
 ### Step 2: Find the last sync point
 
-The skill records the commit hash of the last documentation sync in a tracking file so subsequent runs can do **incremental updates** instead of re-scanning the entire codebase.
+The skill records the commit hash of the code state that the documentation is synced to in a tracking file so subsequent runs can do **incremental updates** instead of re-scanning the entire codebase.
 
 Look for the sync record in this order:
 
@@ -65,15 +65,18 @@ abc1234567890def...
 #### Incremental run (sync record exists)
 
 - Verify the recorded commit still exists in history (`git cat-file -e <hash>`)
-- Use it as the diff base: `git diff <recorded-hash>...HEAD`
-- Only changes since that commit are reviewed — this is the fast path
+- Find the commit immediately after the recorded hash on the current branch:
+  `git rev-list --ancestry-path --first-parent --reverse <recorded-hash>..HEAD | head -n 1`
+- If that immediate next commit updates the sync record, treat that commit as the effective diff base. This skips the previous documentation-sync commit instead of reprocessing it on every run.
+- If that immediate next commit does **not** update the sync record, use the recorded hash itself as the diff base and include that commit in the review.
+- Use the effective base for review: `git diff <effective-base>...HEAD`
 - If the commit no longer exists (force-pushed, rebased away), warn the user and fall back to first-run mode
 
 #### First run (no sync record)
 
 **Do not use git diff as the entry point.** A first run means the documentation has never been audited against the current codebase — there may be missing, outdated, or stale documentation regardless of recent git history. Even if `git diff origin/main...HEAD` is empty, the docs may still need substantial work.
 
-Instead, perform a **full-project audit** (see the "First-Run Full Audit" workflow below). After the audit is complete and documentation is updated, record the current `HEAD` as the sync point so subsequent runs can switch to incremental mode.
+Instead, perform a **full-project audit** (see the "First-Run Full Audit" workflow below). After the audit is complete and documentation is updated, record the current `HEAD` as the code-sync point so subsequent runs can switch to incremental mode.
 
 ## Workflow: Discover Project Structure
 
@@ -288,10 +291,20 @@ Use this workflow when **a sync record exists**. It reviews only the changes sin
 
 ### Step 1: Get the diff
 
-Use the recorded commit hash as the diff base:
+Resolve the effective diff base from the recorded commit hash:
 
 ```bash
-BASE=<recorded-hash-from-sync-file>
+RECORDED=<recorded-hash-from-sync-record>
+SYNC_RECORD_PATH=<path-to-sync-record-file-or-doc-page>
+NEXT=$(git rev-list --ancestry-path --first-parent --reverse "$RECORDED"..HEAD | head -n 1)
+BASE="$RECORDED"
+
+# If the immediate next commit updated the sync record, it is the previous
+# documentation-sync commit and should be skipped on the next run.
+if [ -n "$NEXT" ] && git diff-tree --no-commit-id --name-only -r "$NEXT" -- "$SYNC_RECORD_PATH" | grep -q .
+then
+  BASE="$NEXT"
+fi
 
 # See all changed files since the last sync
 git diff $BASE...HEAD --stat
@@ -303,7 +316,7 @@ git diff $BASE...HEAD -- src/ lib/ packages/
 git log --oneline $BASE..HEAD
 ```
 
-Only changes since the last documentation update are reviewed, instead of re-scanning the full codebase every time.
+Only changes since the effective diff base are reviewed, instead of re-scanning the full codebase every time. In the normal case, this skips the immediately preceding documentation-sync commit without skipping unrelated code commits.
 
 ### Step 2: Identify documentation-relevant changes
 
@@ -390,15 +403,17 @@ Replace `Project Name` and the description based on the project's metadata (`pyp
 ```markdown
 - [Home](/)
 - Getting Started
-  - [Installation](getting-started/installation.md)
-  - [Quick Start](getting-started/quick-start.md)
+  - [Installation](/getting-started/installation.md)
+  - [Quick Start](/getting-started/quick-start.md)
 - Guides
-  - [Basic Usage](guides/basic-usage.md)
+  - [Basic Usage](/guides/basic-usage.md)
 - API Reference
-  - [Overview](api/index.md)
+  - [Overview](/api/index.md)
 ```
 
 Populate the sidebar based on the actual topics the project needs documented. The file-system structure under `docs/` should mirror the sidebar hierarchy.
+
+> **Critical**: Every link in `_sidebar.md` **must** use an absolute path starting with `/` (resolved from the docs root), e.g. `/guides/basic-usage.md` — never the relative form `guides/basic-usage.md`. Docsify resolves relative sidebar links against the **current page's URL**, not the docs root, so when a user is already on `/task-configuration/foo.md` and clicks a relative link `task-configuration/bar.md`, the browser requests `/task-configuration/task-configuration/bar.md` and 404s. Absolute paths always resolve from the docs root regardless of which page the user is currently viewing. This rule applies to every sidebar entry, including nested groups and the home link.
 
 **`docs/_coverpage.md`** — landing page:
 
@@ -587,9 +602,9 @@ If no sidebar config exists, skip this step.
 
 ## Workflow: Record Sync Point
 
-After all documentation updates are applied and validated, record the current commit hash so the next run can do an incremental update.
+After all documentation updates are applied and validated, record the current code-sync commit hash so the next run can resolve its incremental diff base correctly.
 
-### Step 1: Get the current commit hash
+### Step 1: Get the current code-sync commit hash
 
 ```bash
 git rev-parse HEAD
@@ -614,6 +629,7 @@ abc1234567890abcdef1234567890abcdef123456
 Notes:
 - Commit the sync file alongside the documentation changes — the next run reads it from the committed history
 - If the user chose to ignore uncommitted changes in the pre-flight step, still record `HEAD` (the recorded hash represents what the docs are synced *to*, not what was reviewed)
+- The next run may use the commit immediately after the recorded hash as the effective diff base, but only if that immediate next commit updated the sync record
 - Add `.docs-sync` to `.gitignore`? **No** — the file must be committed so other contributors and future runs can read it
 - If the project already has a sync record in a different location (e.g., frontmatter on a docs index page), update that instead of creating a new file
 
@@ -626,16 +642,17 @@ When committing documentation updates, include the sync file in the same commit 
 Before committing documentation changes:
 
 - [ ] Working tree was clean (or user explicitly chose to ignore uncommitted changes)
-- [ ] Diff base was the recorded sync point (or full audit on first run)
+- [ ] Effective diff base was resolved from the recorded sync point (or a full audit was used on the first run)
 - [ ] Content accurately reflects the code changes
 - [ ] Frontmatter matches the project's schema
 - [ ] Code examples are correct and runnable
 - [ ] Internal links point to valid paths
 - [ ] Formatting matches existing documentation conventions
 - [ ] Navigation/sidebar updated if a new page was added
+- [ ] **Sidebar links use absolute paths** — every link in `_sidebar.md` (or equivalent) starts with `/` and resolves from the docs root; no relative paths that would cause duplicate-prefix 404s when navigating from a nested page
 - [ ] **Directory structure matches sidebar hierarchy** — every sidebar section maps to a directory, every sidebar entry points to a file that exists at the expected path, no file is in a directory that contradicts its sidebar position
 - [ ] Project's doc lint/build commands pass (if available)
-- [ ] Sync record updated with the current `HEAD` hash
+- [ ] Sync record updated with the current code-sync `HEAD` hash
 - [ ] Changes reviewed with the user before committing
 
 ## References
