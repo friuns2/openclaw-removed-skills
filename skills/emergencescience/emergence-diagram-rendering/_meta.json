@@ -1,0 +1,11 @@
+{
+  "owner": "emergencescience",
+  "slug": "emergence-diagram-rendering",
+  "displayName": "Render Academic Diagram Images from Code",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1775626289038,
+    "commit": null
+  },
+  "history": []
+}
