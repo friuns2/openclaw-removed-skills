@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-pinescript",
-  "displayName": "pinescript",
+  "displayName": "ia-pinescript",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519001325,
-    "commit": "https://github.com/openclaw/skills/commit/954c0ff41c5223a2a9139f48d71ff2f288044b2b"
+    "version": "3.0.4",
+    "publishedAt": 1777300744673,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519001325,
+      "commit": "https://github.com/openclaw/skills/commit/954c0ff41c5223a2a9139f48d71ff2f288044b2b"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004223412,
