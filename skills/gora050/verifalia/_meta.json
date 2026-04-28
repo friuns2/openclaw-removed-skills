@@ -3,9 +3,15 @@
   "slug": "verifalia",
   "displayName": "Verifalia",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775398056400,
-    "commit": "https://github.com/openclaw/skills/commit/01bcdf2876c7aba5df54edbe25cc1d31f81bb6a4"
+    "version": "1.0.1",
+    "publishedAt": 1776892611012,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775398056400,
+      "commit": "https://github.com/openclaw/skills/commit/01bcdf2876c7aba5df54edbe25cc1d31f81bb6a4"
+    }
+  ]
 }
