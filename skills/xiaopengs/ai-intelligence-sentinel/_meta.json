@@ -1,11 +1,17 @@
 {
   "owner": "xiaopengs",
   "slug": "ai-intelligence-sentinel",
-  "displayName": "Ai Sentinel",
+  "displayName": "AI前沿哨兵",
   "latest": {
-    "version": "1.4.1",
-    "publishedAt": 1776132336912,
-    "commit": "https://github.com/openclaw/skills/commit/0af6ac69df77ad5d1afa67d411bae4c1157877c3"
+    "version": "1.4.2",
+    "publishedAt": 1776735913664,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.4.1",
+      "publishedAt": 1776132336912,
+      "commit": "https://github.com/openclaw/skills/commit/0af6ac69df77ad5d1afa67d411bae4c1157877c3"
+    }
+  ]
 }
