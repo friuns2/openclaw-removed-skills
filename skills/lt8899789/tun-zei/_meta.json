@@ -3,11 +3,16 @@
   "slug": "tun-zei",
   "displayName": "Tun Zei",
   "latest": {
-    "version": "1.0.10",
-    "publishedAt": 1776731955773,
-    "commit": "https://github.com/openclaw/skills/commit/765286694addd927089d26922da4df42a90b366a"
+    "version": "1.0.16",
+    "publishedAt": 1777364489348,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.10",
+      "publishedAt": 1776731955773,
+      "commit": "https://github.com/openclaw/skills/commit/765286694addd927089d26922da4df42a90b366a"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1776196880768,
