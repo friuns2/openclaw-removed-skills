@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "get-agent-identity",
-  "displayName": "Get Agent Identity",
+  "displayName": "Agnic Get Agent Identity",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775592152375,
-    "commit": "https://github.com/openclaw/skills/commit/42eaaed711137740a8d6e9fdbb9f8dbd8f5d19c7"
+    "version": "2.0.2",
+    "publishedAt": 1776953763478,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775592152375,
+      "commit": "https://github.com/openclaw/skills/commit/42eaaed711137740a8d6e9fdbb9f8dbd8f5d19c7"
+    }
+  ]
 }
