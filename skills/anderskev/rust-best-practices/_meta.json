@@ -3,9 +3,15 @@
   "slug": "rust-best-practices",
   "displayName": "Rust Best Practices",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966751523,
-    "commit": "https://github.com/openclaw/skills/commit/c77397d5e260e400c7d3a23bb01a56af00374fe7"
+    "version": "1.0.2",
+    "publishedAt": 1776831360569,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966751523,
+      "commit": "https://github.com/openclaw/skills/commit/c77397d5e260e400c7d3a23bb01a56af00374fe7"
+    }
+  ]
 }
