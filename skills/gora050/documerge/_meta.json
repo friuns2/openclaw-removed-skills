@@ -3,9 +3,15 @@
   "slug": "documerge",
   "displayName": "Documerge",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534819298,
-    "commit": "https://github.com/openclaw/skills/commit/c3cebef006e0bd121e43e2d9cd9ba2529de97f8f"
+    "version": "1.0.1",
+    "publishedAt": 1776893431540,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534819298,
+      "commit": "https://github.com/openclaw/skills/commit/c3cebef006e0bd121e43e2d9cd9ba2529de97f8f"
+    }
+  ]
 }
