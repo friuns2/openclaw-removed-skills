@@ -3,9 +3,15 @@
   "slug": "metabase",
   "displayName": "Metabase",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775574303275,
-    "commit": "https://github.com/openclaw/skills/commit/3a327fc0f83fc02d9e53a16ce5ce1a6efb4b8964"
+    "version": "1.0.2",
+    "publishedAt": 1776895984347,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775574303275,
+      "commit": "https://github.com/openclaw/skills/commit/3a327fc0f83fc02d9e53a16ce5ce1a6efb4b8964"
+    }
+  ]
 }
