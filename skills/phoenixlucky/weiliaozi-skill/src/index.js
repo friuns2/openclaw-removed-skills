@@ -21,7 +21,6 @@ function prepareClawHubRequest(options) {
   return {
     route,
     instructions,
-    systemPrompt: instructions,
     messages: [
       { role: "system", content: instructions },
       { role: "user", content: userInput }

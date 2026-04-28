@@ -1,10 +1,20 @@
 {
   "name": "weiliaozi-skill",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js"
   },
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "CHANGELOG.md",
+    "agents/",
+    "examples/",
+    "references/",
+    "src/",
+    "test/"
+  ],
   "description": "尉缭子分析法 - 按本质、条件、得失、先后、对手进行结构化决策分析。战略分析、商业博弈、政策判断、竞争推演专用。",
   "author": "phoenixlucky",
   "license": "MIT",
@@ -38,6 +48,7 @@
     "skill"
   ],
   "scripts": {
-    "example:clawhub-router": "node examples/clawhub-router.js"
+    "example:clawhub-router": "node examples/clawhub-router.js",
+    "test": "node test/router.test.js"
   }
 }

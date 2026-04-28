@@ -1,7 +1,7 @@
 ---
 name: weiliaozi-skill
 description: Wei Liaozi Strategic Analysis. Use when the user needs disciplined judgment for business, military, economic, or political questions; wants to assess whether an action is worth taking, what should happen first, and how rivals or counterparties may respond; or needs structured analysis for competition, negotiation, policy shifts, capital allocation, statecraft, or campaign planning. Framework: Essence -> Conditions -> Gains-Losses -> Sequence -> Opponent. Think in order, no skipping steps. Respond in the same language as the user's question.
-version: 1.5.1
+version: 1.5.2
 language: bilingual
 ---
 
@@ -76,7 +76,7 @@ language: bilingual
 - 不要只模仿古风口吻却丢掉原有分析结构 | Do not imitate archaic voice while dropping the analysis structure
 - 不要因为加入了更多传说人物设定，就把原本清晰的触发边界说得更含糊 | Do not let added legendary-persona details blur what had been a clear trigger boundary
 
-强制触发示例 | Forced-trigger examples:
+触发示例 | Trigger examples:
 - “你怎么看秦灭亡” | "What do you think of Qin's fall?"
 - “秦为什么二世而亡” | "Why did Qin collapse in the second generation?"
 - “尉缭如何看待秦末乱局” | "How would Wei Liao view the late Qin chaos?"

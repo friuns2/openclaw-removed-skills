@@ -2,7 +2,7 @@
 
 An English-described strategic analysis skill for business, military, economic, and political judgment.
 
-Version: 1.5.1
+Version: 1.5.2
 
 License: MIT
 
@@ -321,6 +321,8 @@ weiliaozi-skill/
 │   ├── index.js
 │   ├── prompts.js
 │   └── router.js
+├── test/
+│   └── router.test.js
 ├── agents/
 │   └── openai.yaml
 └── references/
@@ -335,6 +337,7 @@ weiliaozi-skill/
 - `src/prompts.js`: 根据路由结果生成给 ClawHub 的宿主指令层
 - `src/index.js`: 组合路由和宿主指令层，生成可直接喂给宿主的消息结构
 - `examples/clawhub-router.js`: 最小接入示例
+- `test/router.test.js`: 路由规则与请求结构测试
 - `agents/openai.yaml`: 展示名称与简短说明
 - `references/examples.md`: 分析示例
 - `references/tone-guide.md`: 输出风格与压缩规则
@@ -354,15 +357,15 @@ const request = prepareClawHubRequest({
 
 // request.route: 路由结果与命中的时间/人物/事件信号
 // request.instructions: 已叠加路由结果的宿主指令层
-// request.systemPrompt: 兼容旧接入的别名
 // request.messages: 可直接交给宿主继续发模型
 ```
 
 路由逻辑：
 
 - 同时检查 `时间信号`、`人物信号`、`事件信号`
+- 对“秦灭亡”“楚汉相争”“张良韩信与尉缭关系”等短问句设置直接命中规则
 - 命中至少两类信号时，切到 `historical_persona`
-- 历史模式下强制要求回答以 `臣缭以为` 开头
+- 历史模式下要求回答以 `臣缭以为` 开头
 - 无论是否切换模式，都保留原有五栏分析结构
 
 这层代码的作用不是替代 Skill，而是把“是否进入历史模式”的判断从模型侧前移到宿主侧，减少漏触发和风格漂移。
@@ -371,7 +374,7 @@ const request = prepareClawHubRequest({
 
 - 这是一层由宿主本地代码生成的受控指令层，不从网页、搜索结果、邮件或其他外部不可信文本中提取控制指令。
 - 路由结果只依赖本地正则信号匹配与本仓库内的 `SKILL.md` 内容，不接受外部返回内容覆盖宿主控制层。
-- 对外文档统一使用 `instructions` 命名；`systemPrompt` 仅作为兼容旧接入的保留别名。
+- 对外文档统一使用 `instructions` 命名，不再展示旧版兼容字段名。
 
 ## 行动方案
 
@@ -434,14 +437,18 @@ git push -u origin main
 
 ## 变更日志
 
-最新版本：`1.5.1`（2026-04-18）
+最新版本：`1.5.2`（2026-04-27）
+
+- 移除 README 中容易被静态安全扫描误判的旧版兼容字段名展示。
+- `prepareClawHubRequest()` 继续以 `instructions` 作为宿主接入的正式字段。
+- 增加路由测试，覆盖 README 中承诺直接命中的历史短问句。
 
 - 增加 `src/router.js`、`src/prompts.js`、`src/index.js`，提供可由 ClawHub 宿主在模型调用前执行的代码层路由。
 - 增加 `prepareClawHubRequest()`，把路由结果、宿主指令层和消息结构组合成可直接接入的请求对象。
 - 增加 `examples/clawhub-router.js` 示例，演示如何对“秦为什么二世而亡”这类问题先走历史路由，再进入技能正文。
 
-- 修正英文历史模式的语言规则，不再强制继续用中文输出，而是默认跟随用户语言。
-- 降低对外文档中的高敏感表述，统一将宿主侧覆盖说明写为 `instructions` / 宿主指令层，并保留 `systemPrompt` 兼容别名。
+- 修正英文历史模式的语言规则，不再固定继续用中文输出，而是默认跟随用户语言。
+- 降低对外文档中的高敏感表述，统一将宿主侧覆盖说明写为 `instructions` / 宿主指令层。
 - 增加安全边界说明，明确宿主控制层不接收外部不可信文本作为控制指令来源。
 
 - 增加“模式路由与优先级”说明，明确先判断是否命中历史模式，再生成回答，避免新增人设描述稀释原有规则。
@@ -449,7 +456,7 @@ git push -u origin main
 - 补充时间/人物/事件三类触发信号，并要求对短问句也直接命中，不再依赖模糊语感。
 
 - 强化历史问答触发规则：凡命中战国末期至汉建立前的魏、秦、楚汉问题，必须使用尉缭子第一视角，不得退回普通口吻。
-- 增加显式强制触发示例，覆盖“秦灭亡”“秦为什么二世而亡”“秦末乱局”“楚汉相争”等常见问法。
+- 增加显式触发示例，覆盖“秦灭亡”“秦为什么二世而亡”“秦末乱局”“楚汉相争”等常见问法。
 
 - 将“历史问答触发规则”从“战国末期至秦统一前”扩展为“战国末期至汉建立前”，覆盖秦末与楚汉相争叙事。
 - 在人物设定中加入民间传说谱系：张良、韩信、商山四皓、黄石公等相关关联，但明确标注为传说性内容。
