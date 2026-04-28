@@ -3,9 +3,15 @@
   "slug": "fonoa",
   "displayName": "Fonoa",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775714817048,
-    "commit": "https://github.com/openclaw/skills/commit/cc6d23b75d650bb5ef23720c018a78c7c2583d1b"
+    "version": "1.0.1",
+    "publishedAt": 1776899706399,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775714817048,
+      "commit": "https://github.com/openclaw/skills/commit/cc6d23b75d650bb5ef23720c018a78c7c2583d1b"
+    }
+  ]
 }
