@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-planning",
-  "displayName": "planning",
+  "displayName": "ia-planning",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519006850,
-    "commit": "https://github.com/openclaw/skills/commit/3000fb2de5213b44cf9a62e1b60db471ee8d240c"
+    "version": "3.0.4",
+    "publishedAt": 1777300751024,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519006850,
+      "commit": "https://github.com/openclaw/skills/commit/3000fb2de5213b44cf9a62e1b60db471ee8d240c"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004228400,
