@@ -3,9 +3,15 @@
   "slug": "bambora",
   "displayName": "Bambora",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775437473564,
-    "commit": "https://github.com/openclaw/skills/commit/028c9a170cdd12a91320dd5c344c65185d4095ee"
+    "version": "1.0.1",
+    "publishedAt": 1776897150321,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775437473564,
+      "commit": "https://github.com/openclaw/skills/commit/028c9a170cdd12a91320dd5c344c65185d4095ee"
+    }
+  ]
 }
