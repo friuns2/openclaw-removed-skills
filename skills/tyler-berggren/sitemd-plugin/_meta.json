@@ -3,9 +3,15 @@
   "slug": "sitemd-plugin",
   "displayName": "sitemd plugin",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1775681324503,
-    "commit": "https://github.com/openclaw/skills/commit/98cab7c81b288c77c0011912486c3f03b19f8f97"
+    "version": "0.1.3",
+    "publishedAt": 1776776283333,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1775681324503,
+      "commit": "https://github.com/openclaw/skills/commit/98cab7c81b288c77c0011912486c3f03b19f8f97"
+    }
+  ]
 }
