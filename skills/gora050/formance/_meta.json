@@ -3,9 +3,15 @@
   "slug": "formance",
   "displayName": "Formance",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775452048133,
-    "commit": "https://github.com/openclaw/skills/commit/ad74b8830a59d6bf95ff92ea5e5907cb5b1165cd"
+    "version": "1.0.1",
+    "publishedAt": 1776892779674,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775452048133,
+      "commit": "https://github.com/openclaw/skills/commit/ad74b8830a59d6bf95ff92ea5e5907cb5b1165cd"
+    }
+  ]
 }
