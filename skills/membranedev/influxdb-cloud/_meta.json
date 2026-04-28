@@ -3,9 +3,15 @@
   "slug": "influxdb-cloud",
   "displayName": "Influxdb Cloud",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297133239,
-    "commit": "https://github.com/openclaw/skills/commit/4867b6d3682961ca6d3b932d670e8f93d23e338b"
+    "version": "1.0.1",
+    "publishedAt": 1776883439086,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297133239,
+      "commit": "https://github.com/openclaw/skills/commit/4867b6d3682961ca6d3b932d670e8f93d23e338b"
+    }
+  ]
 }
