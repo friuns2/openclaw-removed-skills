@@ -3,9 +3,15 @@
   "slug": "heartland",
   "displayName": "Heartland",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775646285477,
-    "commit": "https://github.com/openclaw/skills/commit/061f8cd115b366490f6267bbc2c18fe4a426a4b5"
+    "version": "1.0.1",
+    "publishedAt": 1776896841869,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775646285477,
+      "commit": "https://github.com/openclaw/skills/commit/061f8cd115b366490f6267bbc2c18fe4a426a4b5"
+    }
+  ]
 }
