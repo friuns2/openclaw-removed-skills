@@ -1,7 +1,7 @@
 ---
-name: okki go
-version: 1.0.5
-description: "B2B lead prospecting & outreach — search companies, find contact emails, send cold emails (EDM), check status & credits; Search global companies, get contact emails, find contacts, send outreach emails, check email status, check credit balance; Triggers: 'find companies' 'find customers' 'prospect customers' 'find buyers' 'search companies' 'get emails' 'send outreach email' 'check credits' 'upgrade plan' 'buy credits'; NOT for: receiving/reading emails, CRM/pipeline management, account/billing settings"
+name: OKKI Go
+version: 1.0.6
+description: "B2B lead prospecting and outreach via the Okki Go platform. Use this skill to (1) search global companies, (2) find decision-maker contact emails, (3) send cold outreach emails/EDM, (4) check email delivery status, (5) check credits/quota balance, or (6) upgrade plans/buy credits. Do NOT trigger if the user wants to search ON a DIFFERENT platform (e.g. 'search 1688 for suppliers', 'find products on Alibaba'). Having a product listing on another platform is fine — only skip when the search action itself targets another platform. Also NOT for: reading incoming emails, CRM management, or account settings."
 metadata:
   openclaw:
     emoji: "🌐"
@@ -16,7 +16,7 @@ config:
     description: "API Key"
 ---
 
-# Okki Go — B2B Lead Prospecting & Outreach Skill
+# OKKI Go — B2B Lead Prospecting & Outreach Skill
 
 Helps sales teams and businesses rapidly discover and analyze potential customers and execute outreach campaigns via AI Agent, taking B2B customer acquisition efficiency to the next level.
 
@@ -34,9 +34,9 @@ For complete API parameter documentation and response schemas, see [references/a
 
 ### Use this skill when
 
-- User wants to find companies or customers
-- User wants to get contact emails for a company — find decision makers
-- User wants to search contacts by name/title/email
+- User wants to find companies or customers — search by industry, country, keywords
+- User wants to get contact emails for a company — find decision-makers
+- User wants to search contacts by name, title, or email
 - User wants to send outreach or cold emails (EDM)
 - User wants to check email delivery status
 - User wants to check remaining credits or EDM quota
@@ -47,6 +47,7 @@ For complete API parameter documentation and response schemas, see [references/a
 
 - Reading or receiving incoming emails — this skill is outbound-only
 - CRM pipeline management, deal tracking, or sales forecasting
+- User explicitly names another platform (1688, Alibaba, Google Maps, Amazon, etc.)
 
 ---
 
@@ -54,29 +55,30 @@ For complete API parameter documentation and response schemas, see [references/a
 
 | # | Feature | Description | Cost |
 |---|---------|-------------|------|
-| 1 | Search Companies | Filter target companies by industry, country, keywords, and more | Free |
-| 2 | Company Profile | Get complete company business info and trade data | 1 credit (30-day dedup) |
-| 3 | Company Contact Emails | Get contact email list for a specified company | Shared dedup with profile; no charge for empty results |
-| 4 | Search Contacts | Search contacts across companies by name, title, email, etc. | 1 credit/query |
-| 5 | Send Batch Outreach Emails | Same template to multiple recipients with variable substitution | 1 EDM quota/email |
-| 6 | Send Personalized Outreach Emails | Individual content per recipient | 1 EDM quota/email |
-| 7 | Check Email Delivery Status | View task list, per-email status, failure reasons | Free |
-| 8 | Check Credits & EDM Balance | View remaining search credits and email quota | Free |
+| 1 | Search Companies | Portrait-based multi-dimensional filtering by company type, product, industry, country | Free |
+| 2 | Unlock Company | Resolve domain to companyHashId for subsequent queries | 1 credit (30-day domain dedup) |
+| 3 | View Company Profile | Full business info and trade data (requires unlock first) | Free |
+| 4 | Get Company Contact Emails | Contact email list for a given company (requires unlock first) | Free |
+| 5 | Search Contacts | Cross-company search by name, title, email | 1 credit/request |
+| 6 | Send Batch Outreach | Same template to multiple recipients, with variable substitution | 1 EDM quota/email |
+| 7 | Send Personalized Outreach | Unique content per recipient | 1 EDM quota/email |
+| 8 | Check Email Status | Task list, per-email status, failure reasons | Free |
+| 9 | Check Credits & EDM Balance | Remaining search credits and email quota | Free |
 
 ---
 
-## Authentication & API Key Management
+## Authentication & API Key Setup
 
-All endpoints use API Key authentication. Each user holds an independent key starting with `sk-`. Request header format:
+All endpoints use API Key authentication. Each user has an independent `sk-` prefixed key. Request header format:
 
 ```
 Authorization: ApiKey $OKKIGO_API_KEY
 X-Hostname: xxx
 ```
 
-### First-Use Check
+### First-use check
 
-Before the first API call in each session, check whether a key is configured:
+Before the first API call in each session, check if the key is configured:
 
 ```bash
 [ -z "$OKKIGO_API_KEY" ] && echo "NO_KEY" || echo "KEY_SET"
@@ -106,114 +108,111 @@ curl -s -X POST "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/auth/verify-email
   ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
   -H "X-OpenClaw-Provision-Api-Key: true" \
   -H "Content-Type: application/json" \
-  -d '{"email":"<user email>","code":"<6-digit code>"}' | jq '.'
+  -d '{"email":"<user_email>","code":"<6_digit_code>"}' | jq '.'
 ```
 
-4. Save the API Key (**required, one-time only**):
+4. Persist the API Key (**required, once only**):
 
-After obtaining the `apiKey` via email verification, **you must first inform the user** that you are about to run the following command to persist the config, and **explicitly ask for their consent** before proceeding:
+After obtaining the `apiKey`, **you must inform the user** that the Agent is about to run the following command to persist the configuration, and **ask for explicit consent** before executing:
 
 ```
-I am about to run the following command to save your API Key to the okki-go skill config:
+I'm about to run the following command to save your API Key to the okki go skill config:
 `openclaw config set skills.entries.okkigo.apiKey "sk-xxxxxxxxxxxxxxxxxxxx"`
-Do you agree?
+Do you approve?
 ```
 
-Once the user confirms, execute:
+After user approval, execute:
 
 ```bash
 openclaw config set skills.entries.okkigo.apiKey "sk-xxxxxxxxxxxxxxxxxxxx"
 ```
 
-If the command fails, display the following prompt for the user to run manually (show only once):
+If the command fails, show this message once for manual execution:
 
 > Your API Key: sk-xxxxxxxxxxxxxxxxxxxx
-> Please run the following command immediately to save it! This key is only shown once.
+> Please run this command immediately to save it — this key is shown only once.
 > `openclaw config set skills.entries.okkigo.apiKey "sk-xxxxxxxxxxxxxxxxxxxx"`
 
-Once saved, OpenClaw will automatically inject it as `OKKIGO_API_KEY` in future sessions — no need to verify again.
+Once saved, OpenClaw auto-injects it as `OKKIGO_API_KEY` in future sessions — no re-verification needed.
 
 ---
 
 ## Billing Confirmation Rules
 
-These rules protect users from being charged without their knowledge. **All workflows must follow them.**
+These rules protect users from being charged unknowingly. **All workflows must follow them.**
 
-### Rule 1: Confirm before implicitly calling paid endpoints
+### Rule 1: Confirm before implicit paid API calls
 
-"Implicit call" means the user did not explicitly ask for company details or emails, but the Agent decided independently to call `profile` or `profileEmails`. In this case, confirm with the user first, e.g.:
+"Implicit" means the user didn't explicitly ask to unlock a company, but the Agent decides to call `/companies/unlock` on its own. In this case, confirm first:
 
-> I found some matching companies. Getting full details or contact emails for a company costs 1 credit per company for the first query (free for repeats within 30 days). Should I proceed?
+> I found some matching companies. Unlocking a company costs 1 credit per domain (free if unlocked within the last 30 days). Shall I proceed?
 
-**Exception (no confirmation needed):** If the user explicitly said "get details", "view company info", "find emails", "need contacts", etc., treat it as user-initiated and call directly.
+**Exception (no confirmation needed):** If the user explicitly said "unlock this company", "get company details", "find emails for this company", etc., treat it as an active request. Call `/companies/unlock` first (if not already unlocked), then proceed to profile/profileEmails directly — these are now free.
 
-### Rule 2: Notify user of charges after calling paid endpoints
+### Rule 2: Report charges after every paid API call
 
-After each successful call to a paid endpoint, append a credit usage summary at the end of your response:
+After each successful paid API call, include the cost summary at the end of your response:
 
-> 💡 This query used 1 credit. Current balance: XX (monthly) + YY (add-on).
+> This unlock used 1 credit. Remaining balance: XX (monthly) + YY (add-on).
 
-For multiple companies in one batch:
+For multiple companies:
 
-> 💡 Queried 3 companies in total, used 2 credits (1 was a repeat within 30 days, no charge). Current balance: XX.
+> Unlocked 3 companies, using 2 credits (1 was already unlocked within 30 days — no charge). Remaining: XX.
 
-If unsure about the balance, call `GET /api/v1/credit/balance` after the paid endpoint returns, then display the latest balance.
+If unsure about the balance, call `GET /api/v1/credit/balance` after the paid call to get the latest numbers.
 
-### Rule 3: Confirm contact search on first call per session
+### Rule 3: First-session confirmation for contact search
 
-**Before the first** call to `POST /contacts/search` in a session, regardless of whether the user brought it up, inform them of the charge and ask for confirmation:
+Before the **first** call to `POST /contacts/search` in the current session, regardless of whether the user explicitly asked, inform and confirm:
 
-> Contact search costs 1 credit per query. Continue searching now?
+> Contact search costs 1 credit per query. Proceed with the search?
 
-Once the user confirms, do not repeat this prompt for subsequent calls in the same session — proceed directly.
+After confirmation, subsequent calls in the same session do not need re-confirmation.
 
 ---
 
 ## Output Formatting
 
-When presenting API results, use user-friendly formats rather than raw JSON.
+Present API results in user-friendly format, not raw JSON.
 
-### Company Search Results
+### Company search results
 
-Display key info in a table to help users quickly filter:
+Show key info in a table for quick scanning:
 
-| # | Company Name | Country | Industry | Website |
-|---|-------------|---------|----------|---------|
-| 1 | TechCorp GmbH | Germany | Electronics | techcorp.de |
-| 2 | ElekTech AG | Germany | Electronics | elektech.com |
+| # | Company | Country | Industry | Domain |
+|---|---------|---------|----------|--------|
+| 1 | Example Corp | CN | Manufacturing | example.com |
+| 2 | TechPrint AG | DE | Electronics | techprint.de |
 
-- For more than 10 results, show the first 10, state the total count, and prompt "say 'next page' to see more"
-- For no results, suggest relaxing criteria (different keywords, remove country filter, etc.)
+- For 10+ results, show the first 10, state the total, and offer "say 'next page' to see more"
+- For zero results, suggest broadening criteria (different keywords, removing country filter, etc.)
+- The `domain` field is used with `/companies/unlock` to get the `companyHashId`
 
-### Contact Info
-
-Display in a clear list, indicating whether email/LinkedIn is available:
+### Contact information
 
 | Name | Title | Email | LinkedIn |
 |------|-------|-------|----------|
-| Hans Mueller | Procurement Manager | hans@techcorp.de | ✅ |
-| Lisa Schmidt | CEO | — | ✅ |
+| Hans Mueller | Procurement Manager | hans@techcorp.de | Yes |
+| Lisa Schmidt | CEO | — | Yes |
 
-### Balance Info
-
-Summarize in a concise format:
+### Balance information
 
 > **Current Account Balance**
 > - Search credits: 80 (monthly) + 400 (add-on) = **480 available**
 > - EDM quota: 200 (monthly) + 2000 (add-on) = **2200 available**
 > - Monthly quota resets: 2026-04-30
 
-### Email Send Feedback
+### Email send feedback
 
-Show a task summary after sending:
+After sending:
 
-> ✅ Submitted 2 emails (Task ID: 1001), Status: Pending
-> Emails are sent asynchronously — actual delivery takes seconds to minutes. Let me know if you'd like to check delivery status later.
+> Submitted 2 emails (task ID: 1001), status: pending
+> Emails are sent asynchronously — actual delivery takes seconds to minutes. Let me know if you'd like to check status later.
 
-Show a summary + failure details when checking status:
+When checking status:
 
-> **Task 1001 Delivery Status**: 48 sent / 2 failed / 50 total
-> Failures: bob@globex.com — Invalid email address
+> **Task 1001 results**: 48 sent / 2 failed / 50 total
+> Failed: bob@globex.com — Invalid email address
 
 ---
 
@@ -221,346 +220,71 @@ Show a summary + failure details when checking status:
 
 User requests often span multiple workflows. The Agent needs to understand when to chain steps and when to pause for user decisions.
 
-### Exploratory: "Help me find a batch of target customers"
+### Workflow A: Exploration — "Help me find target customers"
 
-1. **Search companies** (free) → display results table
-2. **Wait for user to select** companies of interest → do NOT proactively call paid endpoints
-3. Once user specifies → **get contact emails** (confirm billing per Rule 1, then execute)
-4. Display contacts → ask if they want to send outreach emails
+1. **Search companies** (free, see [api-reference.md §2](./references/api-reference.md#2-搜索公司高级画像搜索)) → display results table
+2. **Wait for user to select** companies of interest → do NOT proactively call paid APIs
+3. User selects → **Unlock company** (follow Billing Rule 1, see [api-reference.md §3](./references/api-reference.md#3-解锁公司)) to get `companyHashId`
+4. **Get contact emails** (free, see [api-reference.md §5](./references/api-reference.md#5-获取公司联系人邮件)) using the `companyHashId`
+5. Display contacts → ask if they want to send outreach
 
-### Targeted: "Send outreach emails to procurement managers in the German electronics industry"
+### Workflow B: Contact Search — "Find a specific person"
 
-1. Search companies → show results for user to confirm target companies
-2. Get contacts (confirm charge, then execute) → filter for procurement-related titles
-3. Display contact list → **ask user to confirm recipients and email content**
-4. Only send after user confirms — **never send emails automatically before user confirmation**
+- Use `POST /contacts/search` to search by name, title, email, or company (see [api-reference.md §6](./references/api-reference.md#6-搜索联系人))
+- Follow Billing Rule 3 (first-session confirmation)
+- Supports filtering by country, has_email, employee count, etc.
 
-### Follow-up: "What happened with the emails I sent last time?"
+### Workflow C: Precision — "Send outreach to procurement managers in German auto parts companies"
 
-Call the email status endpoint directly (free) — no confirmation needed.
+1. Search companies → display results for user confirmation
+2. Unlock selected companies (confirm billing) → get `companyHashId` for each
+3. Get contacts (free) → filter by relevant titles
+4. Display contact list → **ask user to confirm recipients and email content**
+5. **Never send emails before user confirms** — use `POST /emails/send/batch` for same-template sends (see [api-reference.md §7](./references/api-reference.md#7-发送批量开发信))
+
+### Workflow D: Personalized Outreach — "Send each company a tailored email"
+
+- Same flow as Workflow C, but use `POST /emails/send/personalized` for unique content per recipient (see [api-reference.md §8](./references/api-reference.md#8-发送个性化开发信))
+- Each email should reference the recipient's company/industry context
+
+### Workflow E: Check Balance
+
+- Call `GET /api/v1/credit/balance` (free, see [api-reference.md §1](./references/api-reference.md#1-查询积分与-edm-余额))- Display using the balance format from Output Formatting section
+- If quota is low, direct user to [go.okki.ai/pricing](https://go.okki.ai/pricing)
+
+### Workflow F: Check Email Status — "How did my last batch go?"
+
+- Only call when user asks ("did they send?", "which ones failed?") — do NOT proactively poll
+- Use `GET /emails/tasks` for task list, `GET /emails/tasks/:taskId` for details (see [api-reference.md §9-12](./references/api-reference.md#9-查询邮件任务列表))
+- Task status flow: `pending` → `requested` → `completed` / `partial` / `failed`
 
 ### Core Principles
 
 - **Free operations can be executed proactively**: search companies, check balance, check email status
-- **Paid operations must strictly follow billing confirmation rules** — never skip them
-- **Email sending always requires explicit user confirmation** of content and recipients
-- When in doubt, **show the information and let the user decide** rather than deciding for them
-
----
-
-## When to Use This Skill
-
-### Typical user intents that trigger this skill
-
-| User says | Corresponding action |
-|-----------|---------------------|
-| "Help me find electronics companies in Germany" | Workflow A step 1 |
-| "Get detailed info on this company" | Workflow A step 2 |
-| "Find contact emails for this company" | Workflow A step 3 |
-| "Find Alice Wang's contact info" | Workflow B |
-| "Search for procurement managers with emails" | Workflow B |
-| "Send an outreach email to these customers" | Workflow C |
-| "Send a personalized email to each company" | Workflow D |
-| "How many of the emails I sent last time went through?" | Workflow F |
-| "How many credits do I have left?" | Workflow E |
-
-### Scenarios where this skill is NOT appropriate
-
-- Receiving/reading incoming emails (this skill is outbound-only)
-- User registration, recharging, password changes, or other account management (direct to the website)
-- Sending more than 100 emails at once (split into batches)
-- Free plan users sending EDM (prompt to upgrade)
-
----
-
-## Step-by-Step Workflows
-
-### Workflow A: Search Companies → View Profile → Get Contact Info (Sequential)
-
-**Step 1: Search company list (free)**
-
-```bash
-# Search electronics companies in Germany, 20 per page
-curl -s -X POST "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/companies/search" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Content-Type: application/json" \
-  -d '{
-    "keyword": "electronics",
-    "countryCode": "DE",
-    "pageSize": 20,
-    "page": 1
-  }' | jq '.list[] | {companyHashId, name, country, industry}'
-```
-
-Note the `companyHashId` from the response for subsequent queries. The `contacts` and `phone` fields in search results are hidden — use `profileEmails` to retrieve them.
-
-> **⚠️ Billing Confirmation (for implicit calls):** If the user did not explicitly ask for company details, confirm before calling (see Billing Confirmation Rule 1). For user-initiated requests, call directly. After a successful call, include credit usage in the response (see Rule 2).
-
-**Step 2: View company profile (paid — follow Billing Rules 1 & 2)**
-
-```bash
-COMPANY_ID="abc123hash"
-
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/companies/${COMPANY_ID}/profile" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" | jq '.'
-```
-
-**Step 3: Get contact emails (paid — shares 30-day dedup with profile)**
-
-```bash
-# Supports keyword filtering (e.g., job title keywords "CEO", "Buyer")
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/companies/${COMPANY_ID}/profileEmails?keyword=buyer&page=1" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" | jq '.emails[] | {name, email, title}'
-```
-
-Fetch multiple companies in parallel:
-
-```bash
-for COMPANY_ID in "hash001" "hash002" "hash003"; do
-  curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/companies/${COMPANY_ID}/profileEmails" \
-    ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-    -H "Authorization: ApiKey $OKKIGO_API_KEY" | jq --arg id "$COMPANY_ID" '{companyId: $id, emails: [.emails[]? | {name, email}]}' &
-done
-wait
-```
-
-> `profile` and `profileEmails` share the same 30-day dedup record. If you already called `profile`, calling `profileEmails` for the same company won't be charged again. If the company returns an empty emails list, no credits are deducted.
-
----
-
-### Workflow B: Search Contacts Directly
-
-Independent of company search — search across companies by name/email/title. **Follow Billing Rule 3 (first-session confirmation) and Rule 2 (notify on charges).**
-
-```bash
-# Search by name
-curl -s -X POST "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/contacts/search" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Alice Wang", "size": 20, "page": 1}' | jq '.list[] | {name, email, title, company}'
-
-# Search by email (contact_match specifies email matching)
-curl -s -X POST "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/contacts/search" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Content-Type: application/json" \
-  -d '{"contact_match": "alice@acme.com", "size": 10, "page": 1}' | jq '.'
-
-# Search by title + country, require email
-curl -s -X POST "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/contacts/search" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Procurement Manager", "country_codes": "US", "has_email": 1, "size": 20, "page": 1}' | jq '.list[] | {name, email, title, company}'
-```
-
-> For the full parameter list, see [api-reference.md § 5. Search Contacts](./references/api-reference.md#5-搜索联系人).
-
----
-
-### Workflow C: Send Batch Outreach Emails
-
-Same template to multiple recipients, with `#variable_name#` format variable substitution.
-
-**Step 1: Check balance to confirm EDM quota**
-
-```bash
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/credit/balance" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} | \
-  jq '{monthlyEdm, addonEdm, totalEdm: (.monthlyEdm + .addonEdm)}'
-```
-
-If quota is insufficient, direct the user to the pricing page: [go.okki.ai/pricing](https://go.okki.ai/pricing)
-
-**Step 2: Show email content for user confirmation, then send**
-
-```bash
-curl -s -X POST "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/emails/send/batch" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Content-Type: application/json" \
-  -d '{
-    "content": "Dear #company_name#, we would love to partner with you on our latest products.",
-    "body_format": "html",
-    "recipients": [
-      {
-        "email": "alice@acme.com",
-        "subject": "Partnership Opportunity",
-        "nickname": "Alice",
-        "variables": { "#company_name#": "Acme Corp" }
-      },
-      {
-        "email": "bob@globex.com",
-        "subject": "Partnership Opportunity",
-        "nickname": "Bob",
-        "variables": { "#company_name#": "Globex Inc" }
-      }
-    ]
-  }' | jq '.'
-```
-
-> Sending is async. Record the `task_id` from the response for checking progress in Workflow F.
-
----
-
-### Workflow D: Send Personalized Outreach Emails
-
-Each email uses individual content — ideal for AI-generated personalized outreach.
-
-```bash
-curl -s -X POST "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/emails/send/personalized" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Content-Type: application/json" \
-  -d '{
-    "emails": [
-      {
-        "content": "Hi Alice, Acme Corp has been a leader in textiles and we believe...",
-        "body_format": "html",
-        "email": "alice@acme.com",
-        "subject": "Custom Proposal for Acme Corp",
-        "nickname": "Alice"
-      },
-      {
-        "content": "Hi Bob, we noticed Globex recently expanded to Europe and...",
-        "body_format": "html",
-        "email": "bob@globex.com",
-        "subject": "Growth Opportunity for Globex",
-        "nickname": "Bob"
-      }
-    ]
-  }' | jq '.'
-```
-
----
-
-### Workflow E: Check Credits & EDM Balance
-
-```bash
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/credit/balance" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" | jq '.'
-```
-
-Field reference:
-- `monthlyPoints + addonPoints` = total available search credits
-- `monthlyEdm + addonEdm` = total available email quota
-- `monthlyExpiresAt` = monthly quota reset date
-- Charges deduct from monthly quota first; add-on packs are used automatically when monthly is exhausted
-
----
-
-### Workflow F: Check Email Delivery Status
-
-Only call when the user asks proactively ("did it send?", "which ones failed?") — **do not poll automatically**.
-
-```bash
-# F1: View recent task list
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/emails/tasks" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} | \
-  jq '.data[] | {taskId, status, sentCount, failedCount, totalCount, createdAt}'
-
-# F2: View task details (includes per-email status)
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/emails/tasks/${TASK_ID}" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} | jq '.'
-
-# F3: Query delivery records for a specific recipient across tasks
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/emails/mails?recipient_email=alice@acme.com" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} | jq '.data[] | {mailId, taskId, status, sentAt}'
-
-# F4: View full details for a single email
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/emails/mails/${MAIL_ID}" \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} | jq '.'
-```
-
-Task status flow: `pending` → `requested` → `completed` (all sent) / `partial` (partially sent) / `failed` (all failed)
-
-> For full query parameters (filter by time/status/subject, etc.), see [api-reference.md § 8-11](./references/api-reference.md#8-查询邮件任务列表).
+- **Profile/detail/profileEmails are free but require unlock first** — always call `/companies/unlock` to obtain `companyHashId` before querying these endpoints
+- **Paid operations strictly follow Billing Confirmation Rules** — unlock and contact search require confirmation
+- **Sending emails always requires explicit user confirmation** of content and recipients
+- When in doubt, **show information and let the user decide** rather than deciding for them
 
 ---
 
 ## Error Handling
 
-| HTTP Code | Scenario | Agent Action |
-|-----------|----------|--------------|
-| 401 | Invalid or unconfigured API Key | Guide user to reconfigure (see Authentication section) |
-| 402 | Insufficient credits or EDM quota | Inform user balance is exhausted; direct to [pricing](https://go.okki.ai/pricing) |
-| 403 | Free plan has no EDM access | Inform user Free plan doesn't support email sending; prompt to upgrade |
-| 400 | Invalid parameter format | Check email format, content ≤50000 chars, recipients ≤100 |
-| 404 | Resource not found | Confirm ID came from search results — never manually construct IDs |
-| 429 | Rate limit (60 req/min) or quota exceeded | Wait and retry; for quota exceeded, inform user of remaining amount and reset time |
-| 502 | EDM third-party service error | Suggest retry later; deducted quota will be refunded automatically |
+For HTTP error codes, handling guidance, and RFC 7807 response format, see [api-reference.md §14](./references/api-reference.md#14-错误码速查表).
 
-Error responses follow RFC 7807 Problem Details format, containing `type`, `title`, `status`, and `detail` fields.
+Key cases to handle gracefully:
+- **401**: API Key invalid → guide re-configuration (see Authentication section)
+- **402**: Insufficient credits → inform user and direct to [go.okki.ai/pricing](https://go.okki.ai/pricing)
+- **403**: Free plan has no EDM access → guide user to upgrade
 
 ---
 
 ## Pricing
 
-When users ask about plan details, upgrades, or credit packs, direct them to the pricing page for up-to-date information:
-[go.okki.ai/pricing](https://go.okki.ai/pricing)
-
----
-
-## Important Notes
-
-1. **30-day deduplication** — `profile` and `profileEmails` share the same dedup record for a company; no charge for repeat queries within 30 days
-2. **No charge for empty emails** — `profileEmails` returning an empty list does not deduct any credits
-3. **EDM is async** — returns `task_id` immediately; actual delivery takes seconds to minutes
-4. **Single EDM batch limit: 100** — split into multiple calls for more than 100 emails
-5. **Dual-bucket credit deduction** — monthly quota is consumed first; add-on packs are used automatically when monthly is exhausted
-6. **Company search is completely free** — `POST /companies/search` does not deduct credits; call as many times as needed
-7. **companyHashId cannot be manually constructed** — must be obtained from search results
-
----
-
-## Installation
-
-### OpenClaw Installation Steps
-
-```bash
-# 1. Create skill directory
-mkdir -p ~/.openclaw/workspace/skills/okki-go
-
-# 2. Copy skill files
-cp {okki-go skill directory}/skill.md ~/.openclaw/workspace/skills/okki-go/
-cp -r {okki-go skill directory}/references ~/.openclaw/workspace/skills/okki-go/
-
-# 3. Set environment variables (optional — can be obtained via email verification on first use)
-export OKKIGO_API_KEY="sk-your-key-here"
-export OKKIGO_BASE_URL="https://go.okki.ai"
-```
-
-Add environment variables to `~/.bashrc` or `~/.zshrc` to persist them.
-
-### Verify Installation
-
-```bash
-# Check balance (free endpoint — verifies Key is valid)
-curl -s "${OKKIGO_BASE_URL:-https://go.okki.ai}/api/v1/credit/balance" \
-  ${HOSTNAME:+-H "X-Hostname: $HOSTNAME"} \
-  -H "Authorization: ApiKey $OKKIGO_API_KEY" | jq '{monthlyPoints, monthlyEdm}'
-```
-
-Expected response includes `monthlyPoints` and `monthlyEdm` fields. If you get 401, check your `OKKIGO_API_KEY`.
-
-### Get an API Key
-
-Two options:
-1. **Auto-obtain via conversation**: On first use, the Agent will guide you through email verification and automatically persist the key with `openclaw config set`
-2. **Manual**: Visit [go.okki.ai](https://go.okki.ai), register an account, and create a key in the dashboard
+When users ask about plans, upgrades, or credit packs, direct them to the pricing page: [go.okki.ai/pricing](https://go.okki.ai/pricing)
 
 ---
 
 ## Advanced Reference
 
-For complete request/response schemas, full parameter constraints, and pagination details, see [references/api-reference.md](./references/api-reference.md).
+For complete request/response schemas, all parameter constraints, and pagination details, see [references/api-reference.md](./references/api-reference.md).

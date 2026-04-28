@@ -3,9 +3,15 @@
   "slug": "okki-go",
   "displayName": "Okki Go",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1775646238106,
-    "commit": "https://github.com/openclaw/skills/commit/925b523289177be9fca05b6b679b9c82bbde2e5c"
+    "version": "1.0.6",
+    "publishedAt": 1776913268914,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1775646238106,
+      "commit": "https://github.com/openclaw/skills/commit/925b523289177be9fca05b6b679b9c82bbde2e5c"
+    }
+  ]
 }

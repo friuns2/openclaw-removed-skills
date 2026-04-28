@@ -1,6 +1,6 @@
 # Okki go API 完整参考文档
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Base URL:** `https://go.okki.ai`
 **认证方式:** `Authorization: ApiKey sk-your-key-here`
 **错误格式:** RFC 7807 Problem Details
@@ -11,18 +11,19 @@
 ## 目录
 
 1. [查询积分与 EDM 余额](#1-查询积分与-edm-余额)
-2. [搜索公司](#2-搜索公司)
-3. [查看公司 Profile](#3-查看公司-profile)
-4. [获取公司联系人邮件](#4-获取公司联系人邮件)
-5. [搜索联系人](#5-搜索联系人)
-6. [发送批量开发信](#6-发送批量开发信)
-7. [发送个性化开发信](#7-发送个性化开发信)
-8. [查询邮件任务列表](#8-查询邮件任务列表)
-9. [查询邮件任务详情](#9-查询邮件任务详情)
-10. [查询邮件发送记录列表](#10-查询邮件发送记录列表)
-11. [查看单封邮件详情](#11-查看单封邮件详情)
-12. [计费规则汇总](#12-计费规则汇总)
-13. [错误码速查表](#13-错误码速查表)
+2. [搜索公司（高级画像搜索）](#2-搜索公司高级画像搜索)
+3. [解锁公司](#3-解锁公司)
+4. [查看公司 Profile](#4-查看公司-profile)
+5. [获取公司联系人邮件](#5-获取公司联系人邮件)
+6. [搜索联系人](#6-搜索联系人)
+7. [发送批量开发信](#7-发送批量开发信)
+8. [发送个性化开发信](#8-发送个性化开发信)
+9. [查询邮件任务列表](#9-查询邮件任务列表)
+10. [查询邮件任务详情](#10-查询邮件任务详情)
+11. [查询邮件发送记录列表](#11-查询邮件发送记录列表)
+12. [查看单封邮件详情](#12-查看单封邮件详情)
+13. [计费规则汇总](#13-计费规则汇总)
+14. [错误码速查表](#14-错误码速查表)
 
 ---
 
@@ -60,28 +61,27 @@
 
 ---
 
-## 2. 搜索公司
+## 2. 搜索公司（高级画像搜索）
 
-**POST** `/api/v1/companies/search`
+**POST** `/api/v1/companies/search-advanced`
 
 - 认证：必须
 - 计费：**免费**（不扣积分）
-- 返回结果中 `contacts` 和 `phone` 字段已隐藏，需通过 profileEmails 接口获取
+- 基于企业画像的多维搜索，返回公司列表含 domain
 
 ### 请求体
 
 ```json
 {
-  "keyword": "electronics",
-  "keywordOperator": "and",
-  "countryCode": "DE",
-  "industryCode": "3600",
-  "businessType": "manufacturer",
-  "tradeType": "exporter",
-  "existUrl": "1",
-  "existEmail": "1",
-  "page": 1,
-  "pageSize": 20
+  "companyTypeKeywords": ["数字印刷设备"],
+  "productKeywords": ["DTF printer"],
+  "industryKeywords": ["manufacturing"],
+  "includeCountry": ["US", "CN"],
+  "excludeCountry": ["RU"],
+  "withEmails": true,
+  "crossFieldOperator": "and",
+  "from": 0,
+  "size": 10
 }
 ```
 
@@ -89,59 +89,110 @@
 
 | 参数 | 类型 | 必填 | 约束 | 说明 |
 |------|------|------|------|------|
-| `keyword` | string | 否 | — | 关键词搜索 |
-| `keywordOperator` | string | 否 | `"and"` / `"or"` | 关键词匹配逻辑 |
-| `countryCode` | string | 否 | ISO 3166-1 alpha-2 | 国家代码，如 `"US"`, `"DE"`, `"JP"` |
-| `industryCode` | string | 否 | — | 行业代码 |
-| `businessType` | string | 否 | — | 企业类型（如 manufacturer, trader） |
-| `tradeType` | string | 否 | — | 贸易类型（如 exporter, importer） |
-| `existUrl` | string | 否 | `"0"` / `"1"` | 是否有官网 |
-| `existEmail` | string | 否 | `"0"` / `"1"` | 是否有邮箱 |
-| `viewed` | string | 否 | `"0"` / `"1"` | 是否已查看过 |
-| `page` | integer | 否 | 默认 1 | 页码 |
-| `pageSize` | integer | 否 | 最大 100，默认 20 | 每页数量 |
-| `matchingScope` | string[] | 否 | — | 匹配范围 |
-| `deduplicated` | string | 否 | — | 去重标记 |
-| `tagFilter` | string | 否 | — | 标签过滤 |
-| `showUnViewed` | string | 否 | — | 只显示未查看 |
-| `showUnFollowed` | string | 否 | — | 只显示未关注 |
+| `companyTypeKeywords` | string[] | 否 | — | 公司类型关键词 |
+| `productKeywords` | string[] | 否 | — | 产品关键词 |
+| `industryKeywords` | string[] | 否 | — | 行业关键词 |
+| `includeCountry` | string[] | 否 | ISO 3166-1 alpha-2 | 包含的国家代码 |
+| `excludeCountry` | string[] | 否 | ISO 3166-1 alpha-2 | 排除的国家代码 |
+| `withEmails` | boolean | 否 | — | 是否只返回有邮箱的公司 |
+| `crossFieldOperator` | string | 否 | `"and"` / `"or"` | 跨字段匹配逻辑 |
+| `from` | integer | 否 | 默认 0 | 分页偏移量 |
+| `size` | integer | 否 | 默认 10，最大 50 | 每页数量 |
 
 ### 响应示例
 
 ```json
 {
+  "total": 215,
   "list": [
     {
-      "companyHashId": "abc123hash",
-      "name": "TechCorp GmbH",
-      "country": "DE",
-      "industry": "Electronics",
-      "employeeCount": 350,
-      "website": "https://techcorp.de"
+      "company_type": ["数字印刷设备制造商"],
+      "email_count": 4,
+      "founding_time": "1996",
+      "industry": ["制造业-印刷专用设备制造"],
+      "main_products": ["UV平板打印机", "热升华打印机"],
+      "country_code": "CN",
+      "whatsapp_count": 0,
+      "company_profile": "Company description...",
+      "domain": "example.com",
+      "company_name": "Example Corp",
+      "id": "uuid-here",
+      "employees_count": "201-500"
     }
-  ],
-  "total": 128,
-  "page": 1,
-  "pageSize": 20
+  ]
 }
 ```
 
-> `companyHashId` 是后续查询 profile 和 profileEmails 的必须参数，务必从此接口响应中获取，不可手动构造。
+> `domain` is the key field — use it with `/companies/unlock` to resolve the `companyHashId` needed for profile/detail/email queries.
 
 ---
 
-## 3. 查看公司 Profile
+## 3. 解锁公司
+
+**POST** `/api/v1/companies/unlock`
+
+- 认证：必须
+- 计费：**首次解锁扣 1 积分**，同一 domain 30 天内重复解锁免费
+- 用途：将 domain 解析为 `companyHashId`，后续用于查询 profile/detail/profileEmails
+
+### 请求体
+
+```json
+{
+  "domain": "epson.com",
+  "countryCode": "US"
+}
+```
+
+### 请求参数说明
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `domain` | string | 是 | 公司域名，来自 search-advanced 结果 |
+| `countryCode` | string | 是 | ISO 3166-1 alpha-2 国家代码 |
+
+### 响应示例（200 OK）
+
+```json
+{
+  "companyHashId": "00a718fdc83311638eca442bb591bef2",
+  "companyName": "epson.com",
+  "charged": true,
+  "alreadyViewed": false
+}
+```
+
+### 响应字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `companyHashId` | string | 公司唯一标识，用于后续 profile/detail/profileEmails 查询 |
+| `companyName` | string | 公司名称（可能为 domain） |
+| `charged` | boolean | 本次是否扣费 |
+| `alreadyViewed` | boolean | 是否 30 天内已解锁过 |
+
+### 错误响应
+
+- **404**: domain + countryCode 无匹配公司（不扣费）
+- **402**: 余额不足
+
+> `companyHashId` is required for all subsequent company queries. Always obtain it via this endpoint first.
+
+---
+
+## 4. 查看公司 Profile
 
 **GET** `/api/v1/companies/:companyHashId/profile`
 
 - 认证：必须
-- 计费：**首次查看扣 1 积分**，同一公司 30 天内重复查看免费
+- 计费：**免费**（纯查询，不扣积分）
+- 前置条件：必须先通过 `/companies/unlock` 获取 `companyHashId`
 
 ### 路径参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `companyHashId` | string | 是 | 来自搜索结果的公司唯一标识 |
+| `companyHashId` | string | 是 | 来自 `/companies/unlock` 响应的公司唯一标识 |
 
 ### 响应示例
 
@@ -167,12 +218,13 @@
 
 ---
 
-## 4. 获取公司联系人邮件
+## 5. 获取公司联系人邮件
 
 **GET** `/api/v1/companies/:companyHashId/profileEmails`
 
 - 认证：必须
-- 计费：**与 profile 接口共享 30 天去重**，首次查看扣 1 积分；若返回 emails 为空列表则不扣积分
+- 计费：**免费**（纯查询，不扣积分）
+- 前置条件：必须先通过 `/companies/unlock` 获取 `companyHashId`
 - 可与多家公司的 profileEmails 请求并行调用
 
 ### 路径参数
@@ -206,11 +258,11 @@
 }
 ```
 
-> 若 `emails` 为空数组（`[]`），表示该公司暂无可用联系人邮件，**不扣积分**。
+> 若 `emails` 为空数组（`[]`），表示该公司暂无可用联系人邮件。
 
 ---
 
-## 5. 搜索联系人
+## 6. 搜索联系人
 
 **POST** `/api/v1/contacts/search`
 
@@ -283,7 +335,7 @@
 
 ---
 
-## 6. 发送批量开发信
+## 7. 发送批量开发信
 
 **POST** `/api/v1/emails/send/batch`
 
@@ -330,7 +382,7 @@
 
 ---
 
-## 7. 发送个性化开发信
+## 8. 发送个性化开发信
 
 **POST** `/api/v1/emails/send/personalized`
 
@@ -381,7 +433,7 @@
 
 ---
 
-## 8. 查询邮件任务列表
+## 9. 查询邮件任务列表
 
 **GET** `/api/v1/emails/tasks`
 
@@ -438,7 +490,7 @@
 
 ---
 
-## 9. 查询邮件任务详情
+## 10. 查询邮件任务详情
 
 **GET** `/api/v1/emails/tasks/:taskId`
 
@@ -496,7 +548,7 @@
 
 ---
 
-## 10. 查询邮件发送记录列表
+## 11. 查询邮件发送记录列表
 
 **GET** `/api/v1/emails/mails`
 
@@ -548,7 +600,7 @@
 
 ---
 
-## 11. 查看单封邮件详情
+## 12. 查看单封邮件详情
 
 **GET** `/api/v1/emails/mails/:mailId`
 
@@ -584,13 +636,14 @@
 
 ---
 
-## 12. 计费规则汇总
+## 13. 计费规则汇总
 
 | 接口 | 扣费类型 | 扣费规则 |
 |------|---------|---------|
-| `POST /companies/search` | 无 | 完全免费 |
-| `GET /companies/:id/profile` | Points | 首次查看扣 1 积分，同一公司 30 天内重复免费 |
-| `GET /companies/:id/profileEmails` | Points | 与 profile 共享 30 天去重；emails 为空不扣费 |
+| `POST /companies/search-advanced` | 无 | 完全免费 |
+| `POST /companies/unlock` | Points | 首次解锁扣 1 积分，同一 domain 30 天内重复免费 |
+| `GET /companies/:id/profile` | 无 | 完全免费（纯查询） |
+| `GET /companies/:id/profileEmails` | 无 | 完全免费（纯查询） |
 | `POST /contacts/search` | Points | 每次请求扣 1 积分（与结果数量无关） |
 | `POST /emails/send/batch` | EDM 配额 | 每个收件人扣 1 配额；余额不足则全部退还并返回 402 |
 | `POST /emails/send/personalized` | EDM 配额 | 每封邮件扣 1 配额；中途不足则退还已扣并返回 402 |
@@ -611,7 +664,7 @@
 
 ---
 
-## 13. 错误码速查表
+## 14. 错误码速查表
 
 | HTTP 状态码 | type 字段（RFC 7807） | 常见原因 | 处理建议 |
 |-------------|----------------------|---------|---------|
