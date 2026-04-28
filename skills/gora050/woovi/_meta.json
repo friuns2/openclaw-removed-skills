@@ -3,9 +3,15 @@
   "slug": "woovi",
   "displayName": "Woovi",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574482582,
-    "commit": "https://github.com/openclaw/skills/commit/46318652149a750309c9b3c2c53c5a47a2f64ef0"
+    "version": "1.0.1",
+    "publishedAt": 1776899058845,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574482582,
+      "commit": "https://github.com/openclaw/skills/commit/46318652149a750309c9b3c2c53c5a47a2f64ef0"
+    }
+  ]
 }
