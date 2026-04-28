@@ -3,9 +3,15 @@
   "slug": "pitch-screener",
   "displayName": "Pitch Screener",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1775365137916,
-    "commit": "https://github.com/openclaw/skills/commit/1b4c60e9988833182074fab241b22faf3b12273a"
+    "version": "1.0.2",
+    "publishedAt": 1776777416818,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1775365137916,
+      "commit": "https://github.com/openclaw/skills/commit/1b4c60e9988833182074fab241b22faf3b12273a"
+    }
+  ]
 }
