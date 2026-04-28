@@ -3,9 +3,15 @@
   "slug": "newsman",
   "displayName": "Newsman",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775365626528,
-    "commit": "https://github.com/openclaw/skills/commit/cddf5445476bba9661de8dc3ece76edfbd8a2402"
+    "version": "1.0.1",
+    "publishedAt": 1776892090895,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775365626528,
+      "commit": "https://github.com/openclaw/skills/commit/cddf5445476bba9661de8dc3ece76edfbd8a2402"
+    }
+  ]
 }
