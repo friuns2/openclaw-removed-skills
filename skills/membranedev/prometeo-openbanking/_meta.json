@@ -3,9 +3,15 @@
   "slug": "prometeo-openbanking",
   "displayName": "Prometeo Openbanking",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775559814939,
-    "commit": "https://github.com/openclaw/skills/commit/5a744d1ba2af51000115e24ee77cfafff2fe1751"
+    "version": "1.0.1",
+    "publishedAt": 1776895546516,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775559814939,
+      "commit": "https://github.com/openclaw/skills/commit/5a744d1ba2af51000115e24ee77cfafff2fe1751"
+    }
+  ]
 }
