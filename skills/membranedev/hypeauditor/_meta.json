@@ -3,9 +3,15 @@
   "slug": "hypeauditor",
   "displayName": "Hypeauditor",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775703861845,
-    "commit": "https://github.com/openclaw/skills/commit/6b1ef2b0fddbd839b40a513d8ab4b54e4419d0f9"
+    "version": "1.0.2",
+    "publishedAt": 1776898044804,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775703861845,
+      "commit": "https://github.com/openclaw/skills/commit/6b1ef2b0fddbd839b40a513d8ab4b54e4419d0f9"
+    }
+  ]
 }
