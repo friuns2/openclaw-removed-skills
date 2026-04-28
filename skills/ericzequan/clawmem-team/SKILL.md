@@ -59,8 +59,38 @@ For `main-worker-summary-queue.md`:
 - For any Team blueprint, read [references/blueprint.md](references/blueprint.md).
 - For Team bootstrap and mutation sequencing, read [references/bootstrap.md](references/bootstrap.md).
 - For readiness checks and end-to-end proof, read [references/verification.md](references/verification.md).
+- For user-facing tone, progressive disclosure, and plain-language substitutions, read [references/communication.md](references/communication.md).
 - For the main/worker/summary queue template, read [references/templates/main-worker-summary-queue.md](references/templates/main-worker-summary-queue.md).
 - For the reviewing template, read [references/templates/reviewing.md](references/templates/reviewing.md).
+
+## Workflow label schema
+
+Every Team produces an explicit Workflow Label Schema, even when starting from a template. It lives inside the canonical Team artifact so workers can read it at runtime. ClawMem deliberately stays label-agnostic, so the Team is the only place this schema can live.
+
+A schema is valid when it names:
+- task-kind labels: which kinds of work exist in this Team (e.g., `queue:task`, `review:request`)
+- status labels: the finite set of status values a task can move through
+- exactly one terminal status label: the label that means the task is finished
+- assignment label format: how a task records its current owner (e.g., `assignee:<agent-id>`)
+- terminal closure rule: when a task reaches the terminal status, the issue MUST also be set to `state: closed` via `issue_update` in the same mutation
+- canonical polling filter: the `issue_list` filter participants use to pick up work (`state: open` plus the task-kind label), so closed tasks never reappear in the queue and participants on different hosts can converge through the same filter
+
+Templates under `references/templates/` provide ready-made schemas. Custom Teams define their own, but the structure above is required. Do not let a Team ship without the schema written down.
+
+## Team contract binding
+
+The canonical Team artifact only works if participants actually read it before acting. The default binding path reuses the bundled `clawmem` skill's existing turn loop — no per-host install is needed, and the mechanism is the same whether the team lives on one machine or across many.
+
+Role names are user-defined. Do not assume `main` / `worker` / `reviewer` unless the user or the chosen template declares those roles. Whatever role names the contract defines, every one of them uses the same binding path:
+
+1. Store the contract as a stable ClawMem memory node, labeled with a stable pair such as `kind:convention topic:team-contract`. The orchestrating agent analyzes the user's setup to decide where it lives — a dedicated team / coordination repo, or the task repo itself. Either is valid; state the choice in the blueprint.
+2. Every task issue this Team creates opens its body with an explicit citation, for example:
+   > Team contract: `memory_get #<contract-id>` (kind:convention topic:team-contract) before acting. Labels and terminal closure are defined there.
+3. The bundled `clawmem` skill already instructs every ClawMem-compliant agent to call `memory_get` when a specific memory id is mentioned. The returned body comes back as regular tool output, not wrapped by auto-recall as "historical notes".
+
+Defensive inline: also include the Workflow Label Schema's most critical rules directly in the task body (allowed labels plus the `done ⇒ state:closed` rule), so a participant that skips the fetch still sees the minimum.
+
+Do not rely on auto-recall alone to deliver the Team contract to participants. The plugin frames auto-recall as background context, not as binding instructions — use the explicit `memory_get` citation above.
 
 ## Workflow
 
@@ -107,11 +137,17 @@ For `main-worker-summary-queue.md`:
 
 ## Required output
 
-Before ending any major phase, summarize:
-- chosen path
-- why that path fits
-- environment readiness state
-- participant readiness state
-- runtime delegation readiness state
-- the blueprint or mutation plan
-- the next concrete step
+Every major phase ends with two layers (see [references/communication.md](references/communication.md)):
+
+1. Plain-language summary for the user
+   - what this Team will do, in one or two sentences and domain terms
+   - who plays each role and what the user still has to decide
+   - the single next concrete step, translated into the user's words
+
+2. Technical detail, separated and only when helpful
+   - chosen path and why it fits
+   - environment, participant, and runtime delegation readiness state
+   - the blueprint or mutation plan
+   - the Workflow Label Schema and terminal closure rule when relevant
+
+Default to the user's current language for layer 1. Keep schema identifiers (`kind:*`, `topic:*`, `queue:task`, `task-status:done`, `state:closed`, etc.) machine-readable in both layers.
