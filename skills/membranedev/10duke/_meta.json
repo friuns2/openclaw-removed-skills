@@ -3,9 +3,15 @@
   "slug": "10duke",
   "displayName": "10Duke",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775451815545,
-    "commit": "https://github.com/openclaw/skills/commit/97bce62b0c44b1da0afb3f5ebc5b2530e0db88af"
+    "version": "1.0.1",
+    "publishedAt": 1776889672728,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775451815545,
+      "commit": "https://github.com/openclaw/skills/commit/97bce62b0c44b1da0afb3f5ebc5b2530e0db88af"
+    }
+  ]
 }
