@@ -3,11 +3,16 @@
   "slug": "hh-openclaw-agent",
   "displayName": "HH OpenClaw Agent",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776224702510,
-    "commit": "https://github.com/openclaw/skills/commit/a9df250412299e1de950d23fad730f5f02f03512"
+    "version": "1.0.6",
+    "publishedAt": 1777036064366,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776224702510,
+      "commit": "https://github.com/openclaw/skills/commit/a9df250412299e1de950d23fad730f5f02f03512"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1775894505869,

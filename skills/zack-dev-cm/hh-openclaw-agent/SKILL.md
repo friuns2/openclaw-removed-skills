@@ -1,6 +1,7 @@
 ---
 name: hh-openclaw-agent
-description: Public OpenClaw skill for preparing a reviewed hh.ru application packet, executing the browser flow in a logged-in profile, and capturing one auditable submission bundle.
+description: HH OpenClaw Agent is a public ClawHub hh.ru application skill. Use it when the user says "hh openclaw agent", "hh job apply automation", "hh.ru browser application", or wants a reviewed hh.ru application packet with logged-in browser execution and an auditable submission bundle.
+version: 1.0.6
 homepage: https://github.com/zack-dev-cm/hh-openclaw-agent
 license: MIT-0
 user-invocable: true
@@ -8,6 +9,8 @@ metadata: {"openclaw":{"homepage":"https://github.com/zack-dev-cm/hh-openclaw-ag
 ---
 
 # HH OpenClaw Agent
+
+Search intent: `hh openclaw agent`, `hh.ru apply`, `job application browser automation`, `career submission bundle`
 
 ## Goal
 
