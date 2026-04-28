@@ -3,9 +3,15 @@
   "slug": "bitwarden-integration",
   "displayName": "Bitwarden",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775477051136,
-    "commit": "https://github.com/openclaw/skills/commit/3aab34bfefb4d6bd96e795ebf7265a2ddf96c1af"
+    "version": "1.0.1",
+    "publishedAt": 1776890378203,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775477051136,
+      "commit": "https://github.com/openclaw/skills/commit/3aab34bfefb4d6bd96e795ebf7265a2ddf96c1af"
+    }
+  ]
 }
