@@ -3,9 +3,15 @@
   "slug": "porter",
   "displayName": "Porter",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775567284048,
-    "commit": "https://github.com/openclaw/skills/commit/ca41fbe0efadd5809435f6959bb0b69570550c2a"
+    "version": "1.0.1",
+    "publishedAt": 1776898985760,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775567284048,
+      "commit": "https://github.com/openclaw/skills/commit/ca41fbe0efadd5809435f6959bb0b69570550c2a"
+    }
+  ]
 }
