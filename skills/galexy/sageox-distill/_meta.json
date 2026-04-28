@@ -1,11 +1,17 @@
 {
   "owner": "galexy",
   "slug": "sageox-distill",
-  "displayName": "Sageox Distill Team Memory",
+  "displayName": "Sageox Distill",
   "latest": {
-    "version": "0.2.0",
-    "publishedAt": 1776234386617,
-    "commit": "https://github.com/openclaw/skills/commit/7ca42b163c8c10407193089eda572ec0b94342f1"
+    "version": "0.2.1",
+    "publishedAt": 1776979998904,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.2.0",
+      "publishedAt": 1776234386617,
+      "commit": "https://github.com/openclaw/skills/commit/7ca42b163c8c10407193089eda572ec0b94342f1"
+    }
+  ]
 }
