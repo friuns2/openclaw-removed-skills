@@ -3,9 +3,15 @@
   "slug": "nordic-api-gateway",
   "displayName": "Nordic Api Gateway",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775729261402,
-    "commit": "https://github.com/openclaw/skills/commit/31e85d48c55834870a0e0e7337d411294172b1d6"
+    "version": "1.0.1",
+    "publishedAt": 1776899813985,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775729261402,
+      "commit": "https://github.com/openclaw/skills/commit/31e85d48c55834870a0e0e7337d411294172b1d6"
+    }
+  ]
 }
