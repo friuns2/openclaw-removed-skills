@@ -124,27 +124,70 @@ Compares two dynamic values using ValueRef.
 
 ### schedule_match — Time Window Check
 
-Checks if the current time falls within a specified schedule.
+Checks if the current time falls within a specified schedule. Each boundary (from/to)
+can independently be a fixed clock time or a sun event (sunrise/sunset) with an offset.
 
 **Config (`CfgScheduleMatch`)**:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `days` | int[] | no | Days of week: 0=Sun, 1=Mon, ..., 6=Sat. Empty = all days |
-| `from` | string | no | Start time `"HH:MM"` (24h). Empty = 00:00 |
-| `to` | string | no | End time `"HH:MM"` (24h). Empty = 23:59 |
+| `from_type` | string | no | `"fixed"`, `"sunrise"`, or `"sunset"`. Default: `"fixed"` |
+| `from` | string | no | Start time `"HH:MM"` (24h). Only used when `from_type` is `"fixed"`. Empty = 00:00 |
+| `from_offset_min` | int | no | Offset in minutes for sun events (-720 to 720). Negative = before, positive = after |
+| `to_type` | string | no | `"fixed"`, `"sunrise"`, or `"sunset"`. Default: `"fixed"` |
+| `to` | string | no | End time `"HH:MM"` (24h). Only used when `to_type` is `"fixed"`. Empty = 23:59 |
+| `to_offset_min` | int | no | Offset in minutes for sun events (-720 to 720) |
 | `timezone` | string | no | Timezone, e.g. `"Asia/Shanghai"`. Empty = system default |
 
 **Output handles**: `true`, `false`
 
-**Example — weekdays 9AM to 6PM**:
+**Note**: Sun-based boundaries require system geographic location to be configured
+(via Settings → Location Config). If location is not configured, validation will report
+a `system_location` error. Cross-midnight windows (e.g. sunset → sunrise) are supported.
+
+**Example — weekdays 9AM to 6PM (fixed)**:
 ```json
 {
   "config": {
     "days": [1, 2, 3, 4, 5],
+    "from_type": "fixed",
     "from": "09:00",
-    "to": "18:00",
-    "timezone": "Asia/Shanghai"
+    "to_type": "fixed",
+    "to": "18:00"
+  }
+}
+```
+
+**Example — sunrise to sunset (daytime only)**:
+```json
+{
+  "config": {
+    "from_type": "sunrise",
+    "to_type": "sunset"
+  }
+}
+```
+
+**Example — 30 min before sunset to sunrise (night mode with offset)**:
+```json
+{
+  "config": {
+    "from_type": "sunset",
+    "from_offset_min": -30,
+    "to_type": "sunrise"
+  }
+}
+```
+
+**Example — mixed: fixed start, end at sunset**:
+```json
+{
+  "config": {
+    "from_type": "fixed",
+    "from": "08:00",
+    "to_type": "sunset",
+    "to_offset_min": -15
   }
 }
 ```
@@ -286,7 +329,7 @@ Sends a system notification or email.
     "smtp_host": "smtp.example.com",
     "smtp_port": 587,
     "smtp_user": "user@example.com",
-    "smtp_pass": "password",
+    "smtp_pass": "SMTP_PASSWORD_PLACEHOLDER",
     "smtp_ssl": false,
     "email_to": "admin@example.com"
   }
@@ -297,8 +340,8 @@ Sends a system notification or email.
 
 Publishes a message to an MQTT broker.
 
-> **Security**: If `broker_uri` points to a remote host, device data is transmitted over
-> the network. Use TLS (`ssl://`) for remote brokers and avoid `tls_skip_verify: true`
+> **Security**: If `broker_uri` points outside the trusted LAN, device data is transmitted over
+> the network. Use TLS (`ssl://`) for non-local brokers and avoid `tls_skip_verify: true`
 > in production.
 
 **Config (`CfgMqttPublish`)**:
@@ -324,25 +367,9 @@ Publishes a message to an MQTT broker.
 }
 ```
 
-**Example — publish to remote broker with auth**:
-```json
-{
-  "config": {
-    "broker_uri": "ssl://mqtt.example.com:8883",
-    "username": "myuser",
-    "password": "mypass",
-    "tls_skip_verify": false,
-    "topic": "alerts/temperature",
-    "payload": "{\"temp\": {{trigger.new_value}}, \"device\": \"{{trigger.device_uuid}}\"}",
-    "qos": 1,
-    "retain": false
-  }
-}
-```
-
 ### http_request — HTTP Request
 
-Makes an HTTP request to an external URL.
+Makes an HTTP request to a reviewed URL.
 
 > **Security**: This node sends data outside the local network. Verify the target URL and
 > any included headers or body content before enabling the workflow. Do not use URLs from
@@ -363,7 +390,7 @@ Makes an HTTP request to an external URL.
 {
   "config": {
     "method": "POST",
-    "url": "https://api.example.com/webhook",
+    "url": "http://lan-notifier.local/api/events",
     "headers": { "Content-Type": "application/json" },
     "body": "{\"temperature\": {{trigger.new_value}}}",
     "timeout_s": 10

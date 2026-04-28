@@ -3,9 +3,15 @@
   "slug": "ycznwl-smarthome",
   "displayName": "KNX Gateway Automation",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776256353348,
-    "commit": "https://github.com/openclaw/skills/commit/9c415c4804b8cddedd217556415911692ee5326c"
+    "version": "1.0.6",
+    "publishedAt": 1777352692411,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776256353348,
+      "commit": "https://github.com/openclaw/skills/commit/9c415c4804b8cddedd217556415911692ee5326c"
+    }
+  ]
 }

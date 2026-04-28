@@ -1116,17 +1116,18 @@ to the `targets` array within the same `knx_send` node.
 
 ---
 
-## Example 10: HTTP Request — Call External Webhook on Smoke Alert
+## Example 10: HTTP Request — Notify LAN Service on Smoke Alert
 
-When smoke is detected, send a local system notification and call an external HTTP endpoint
-(e.g. a security system, a home notification service, or n8n/Home Assistant webhook).
+When smoke is detected, send a local system notification and notify a reviewed LAN service
+(for example a local security panel, local notification service, or Home Assistant instance).
+Use off-LAN endpoints only when the user explicitly asks for them and approves the exact URL.
 
 ```json
 {
   "schema_version": 1,
   "workflow": {
-    "name": "Smoke Alert Webhook",
-    "description": "System notify + HTTP call when smoke sensor fires",
+    "name": "Smoke Alert LAN Notify",
+    "description": "System notify + LAN HTTP call when smoke sensor fires",
     "timeout_s": 30,
     "cooldown_ms": 300000,
     "flow_data": {
@@ -1161,13 +1162,12 @@ When smoke is detected, send a local system notification and call an external HT
           "uuid": "n2",
           "node_type": "action",
           "node_subtype": "http_request",
-          "label": "Call Security Webhook",
+          "label": "Notify LAN Service",
           "config": {
             "method": "POST",
-            "url": "https://security.example.com/api/alerts",
+            "url": "http://lan-notifier.local/api/alerts",
             "headers": {
-              "Content-Type": "application/json",
-              "X-API-Key": "your-api-key-here"
+              "Content-Type": "application/json"
             },
             "body": "{\"event\": \"smoke\", \"device\": \"{{trigger.device_uuid}}\", \"value\": {{trigger.new_value}}}",
             "timeout_s": 10
@@ -1201,7 +1201,7 @@ When smoke is detected, send a local system notification and call an external HT
 }
 ```
 
-**Graph**: `trigger(smoke=true) ─┬→ notify(system error)` / `└→ http_request(POST to security endpoint)`
+**Graph**: `trigger(smoke=true) ─┬→ notify(system error)` / `└→ http_request(POST to LAN endpoint)`
 
 Both nodes receive the trigger output directly — they run in parallel (both are in separate
 branches from the same trigger). `cooldown_ms: 300000` prevents repeated alerts within 5 minutes.

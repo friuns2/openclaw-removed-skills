@@ -126,14 +126,17 @@ with [devices.md](devices.md). Common patterns:
 |-------------|--------|--------|---------|
 | `light` | `turn_on` | `{}` | Turn on a light |
 | `light` | `turn_off` | `{}` | Turn off a light |
-| `light_dimmer` | `set_brightness` | `{ "brightness": 50 }` | Set to 50% |
-| `light_tunable` | `set_color_temperature` | `{ "color_temperature": 3000 }` | Set warm white |
+| `light_dimmer` | `set_brightness` | `{ "brightness": 50 }` | Set to 50% (auto powers light on) |
+| `light_tunable` | `set_color_temperature` | `{ "color_temperature": 3000 }` | Set warm white (range 1000–10000 K, see [devices.md](devices.md)) |
+| `light_rgb` | `set_color` | `{ "color": "#FF8800" }` | Set hex color (NOT `hue`/`saturation`) |
 | `curtain` | `close` | `{}` | Close curtain |
 | `curtain` | `set_position` | `{ "position": 50 }` | Half open |
 | `blind` | `set_slat_position` | `{ "slat_position": 45 }` | Tilt slats |
 | `ac` | `set_mode` | `{ "mode": "cool" }` | Cooling mode |
 | `ac` | `set_target_temperature` | `{ "target_temperature": 24 }` | Set to 24°C |
+| `ac` | `set_fan_speed_mode` | `{ "fan_speed_mode": "high" }` | AC default enum: `auto/low/medium/high` |
 | `fan` | `set_fan_speed` | `{ "fan_speed": 70 }` | 70% speed |
+| `fan` | `set_fan_speed_mode` | `{ "fan_speed_mode": "level2" }` | Fan default enum: `level1/level2/level3` (NOT `low/high` — see [devices.md](devices.md#fan_speed--fan-speed-control)) |
 | `switch` | `turn_off` | `{}` | Turn off outlet |
 | `lock` | `lock` | `{}` | Lock door |
 
