@@ -3,9 +3,15 @@
   "slug": "sendowl",
   "displayName": "Sendowl",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775358498027,
-    "commit": "https://github.com/openclaw/skills/commit/e6e5893030504159eef04fc4bae282d3db46f312"
+    "version": "1.0.1",
+    "publishedAt": 1776886124109,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775358498027,
+      "commit": "https://github.com/openclaw/skills/commit/e6e5893030504159eef04fc4bae282d3db46f312"
+    }
+  ]
 }
