@@ -3,11 +3,16 @@
   "slug": "fei-du",
   "displayName": "Fei Du",
   "latest": {
-    "version": "1.0.10",
-    "publishedAt": 1776731961139,
-    "commit": "https://github.com/openclaw/skills/commit/87c1ce46b470aa4f90715074bcda315bde529a34"
+    "version": "1.0.16",
+    "publishedAt": 1777364492754,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.10",
+      "publishedAt": 1776731961139,
+      "commit": "https://github.com/openclaw/skills/commit/87c1ce46b470aa4f90715074bcda315bde529a34"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1776196885434,
