@@ -3,9 +3,15 @@
   "slug": "review-elixir",
   "displayName": "Review Elixir",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775852561849,
-    "commit": "https://github.com/openclaw/skills/commit/72afdbafa21dc5c840d4800ef7e69b7700c4357b"
+    "version": "1.0.1",
+    "publishedAt": 1776831117148,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775852561849,
+      "commit": "https://github.com/openclaw/skills/commit/72afdbafa21dc5c840d4800ef7e69b7700c4357b"
+    }
+  ]
 }
