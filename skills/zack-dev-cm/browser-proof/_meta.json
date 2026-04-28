@@ -3,11 +3,16 @@
   "slug": "browser-proof",
   "displayName": "Browser Proof",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776224681850,
-    "commit": "https://github.com/openclaw/skills/commit/5e29f66cda650463f3842867d8c37530d6800447"
+    "version": "1.0.4",
+    "publishedAt": 1777036069825,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776224681850,
+      "commit": "https://github.com/openclaw/skills/commit/5e29f66cda650463f3842867d8c37530d6800447"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775840512542,

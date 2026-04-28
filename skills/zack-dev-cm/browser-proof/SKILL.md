@@ -1,6 +1,7 @@
 ---
 name: browser-proof
-description: Public ClawHub skill for capturing browser QA and debugging evidence as a machine-readable bundle with steps, artifacts, checks, and a shareable report.
+description: Browser Proof is a public ClawHub browser-QA evidence skill. Use it when the user says "browser proof", "browser QA report", "browser debugging evidence", or wants a machine-readable bundle with steps, artifacts, checks, and a shareable report.
+version: 1.0.4
 homepage: https://github.com/zack-dev-cm/browser-proof
 license: MIT-0
 user-invocable: true
@@ -8,6 +9,8 @@ metadata: {"openclaw":{"homepage":"https://github.com/zack-dev-cm/browser-proof"
 ---
 
 # Browser Proof
+
+Search intent: `browser proof`, `browser QA`, `browser debugging evidence`, `QA evidence pack`
 
 ## Goal
 
@@ -28,6 +31,7 @@ It does not replace Playwright, OpenClaw, or a test runner.
 - browser debugging needs expected result, actual result, and artifacts captured in one place
 - you need a clean handoff from OpenClaw, Playwright, or manual QA to another engineer
 - the same browser issue keeps getting re-explained from chat history instead of one artifact bundle
+- a Chrome extension publish or review flow needs proof against the exact packaged ZIP and browser version
 
 ## Quick Start
 
@@ -61,6 +65,13 @@ It does not replace Playwright, OpenClaw, or a test runner.
 - Failed steps should include either a note or at least one issue key.
 - Attach a screenshot for every failed step and for important checkpoints.
 - Keep statuses limited to `passed`, `failed`, or `blocked`.
+
+### Chrome extension rules
+
+- Record the exact ZIP or unpacked extension path, manifest version, extension ID when available, and Chrome version in session metadata or the first step.
+- For action popup flows, record the selected text or input source, action clicked, target language or option, and observed result.
+- Capture extension errors, console output, and API availability states when the claim depends on browser APIs.
+- If a Chrome Web Store draft is already pending review, capture status evidence only; do not turn a proof run into a cancel/resubmit instruction unless a verified acceptance blocker exists.
 
 ### Bundle rules
 
