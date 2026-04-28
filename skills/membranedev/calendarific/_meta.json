@@ -3,9 +3,15 @@
   "slug": "calendarific",
   "displayName": "Calendarific",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775660664616,
-    "commit": "https://github.com/openclaw/skills/commit/435d5d8e99a65a1a34d0b588b265d4f51caa9b70"
+    "version": "1.0.1",
+    "publishedAt": 1776897161123,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775660664616,
+      "commit": "https://github.com/openclaw/skills/commit/435d5d8e99a65a1a34d0b588b265d4f51caa9b70"
+    }
+  ]
 }
