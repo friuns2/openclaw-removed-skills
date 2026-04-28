@@ -3,9 +3,15 @@
   "slug": "document-diff",
   "displayName": "Document Diff",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1775365119930,
-    "commit": "https://github.com/openclaw/skills/commit/4900a2a19bf83b25a8dc84bc4444fa703075cd2f"
+    "version": "0.1.2",
+    "publishedAt": 1776777405711,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1775365119930,
+      "commit": "https://github.com/openclaw/skills/commit/4900a2a19bf83b25a8dc84bc4444fa703075cd2f"
+    }
+  ]
 }
