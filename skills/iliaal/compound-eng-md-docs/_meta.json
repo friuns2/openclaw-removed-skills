@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-md-docs",
-  "displayName": "md-docs",
+  "displayName": "ia-md-docs",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518973199,
-    "commit": "https://github.com/openclaw/skills/commit/90bc50e1b38639e7b1a1a3eb172f007004f6dfe6"
+    "version": "3.0.4",
+    "publishedAt": 1777300709466,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518973199,
+      "commit": "https://github.com/openclaw/skills/commit/90bc50e1b38639e7b1a1a3eb172f007004f6dfe6"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004194705,
