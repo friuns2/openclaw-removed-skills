@@ -3,9 +3,15 @@
   "slug": "flourish",
   "displayName": "Flourish",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775617467109,
-    "commit": "https://github.com/openclaw/skills/commit/2fe6d171805ed5dd4f30f26bd363dc3e3a5afcb5"
+    "version": "1.0.1",
+    "publishedAt": 1776896307105,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775617467109,
+      "commit": "https://github.com/openclaw/skills/commit/2fe6d171805ed5dd4f30f26bd363dc3e3a5afcb5"
+    }
+  ]
 }
