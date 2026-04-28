@@ -3,9 +3,15 @@
   "slug": "infisical",
   "displayName": "Infisical",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775412250399,
-    "commit": "https://github.com/openclaw/skills/commit/f771fb46aaa392aa48bca73f65a8120ee51e9690"
+    "version": "1.0.1",
+    "publishedAt": 1776889348457,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775412250399,
+      "commit": "https://github.com/openclaw/skills/commit/f771fb46aaa392aa48bca73f65a8120ee51e9690"
+    }
+  ]
 }
