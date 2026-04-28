@@ -3,9 +3,15 @@
   "slug": "forescout",
   "displayName": "Forescout",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775444748642,
-    "commit": "https://github.com/openclaw/skills/commit/8ca10ed6a9c736e5160f2595df9c708b11a54921"
+    "version": "1.0.1",
+    "publishedAt": 1776897856782,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775444748642,
+      "commit": "https://github.com/openclaw/skills/commit/8ca10ed6a9c736e5160f2595df9c708b11a54921"
+    }
+  ]
 }
