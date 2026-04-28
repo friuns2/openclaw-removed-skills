@@ -3,9 +3,15 @@
   "slug": "2chat",
   "displayName": "2Chat",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775390667018,
-    "commit": "https://github.com/openclaw/skills/commit/ced8c9e5f5094ed901fe1f1efaaffc94f97fea5f"
+    "version": "1.0.1",
+    "publishedAt": 1776888838181,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775390667018,
+      "commit": "https://github.com/openclaw/skills/commit/ced8c9e5f5094ed901fe1f1efaaffc94f97fea5f"
+    }
+  ]
 }
