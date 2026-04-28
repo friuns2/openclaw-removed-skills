@@ -3,11 +3,16 @@
   "slug": "api-device-list1",
   "displayName": "Closeli Open Device List Query",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776352263310,
-    "commit": "https://github.com/openclaw/skills/commit/f85f72b2f3d5b7ed001ea5ec28c8ccd4e9051542"
+    "version": "1.0.2",
+    "publishedAt": 1776822008065,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776352263310,
+      "commit": "https://github.com/openclaw/skills/commit/f85f72b2f3d5b7ed001ea5ec28c8ccd4e9051542"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775632965684,

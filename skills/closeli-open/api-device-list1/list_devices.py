@@ -14,7 +14,7 @@ API_KEY 获取优先级：
 网关地址获取优先级：
   1. 环境变量 AI_GATEWAY_HOST
   2. 配置文件 ~/.openclaw/.env 中的 AI_GATEWAY_HOST
-  3. 默认值 https://ai-open-gateway.closeli.cn
+  3. 默认值 https://ai-open.icloseli.com
 
 TLS 证书验证：
   默认启用。设置环境变量 AI_GATEWAY_VERIFY_SSL=false 可禁用（仅限开发环境）。
@@ -35,7 +35,7 @@ except ImportError:
     sys.exit(1)
 
 # 默认网关地址
-DEFAULT_API_HOST = "https://ai-open-gateway.closeli.cn"
+DEFAULT_API_HOST = "https://ai-open.icloseli.com"
 
 
 def load_env_file():
