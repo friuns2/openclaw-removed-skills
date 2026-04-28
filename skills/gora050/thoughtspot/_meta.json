@@ -3,9 +3,15 @@
   "slug": "thoughtspot",
   "displayName": "Thoughtspot",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775604978871,
-    "commit": "https://github.com/openclaw/skills/commit/06ab62e929517f2bdae6dab23f99566153468ab6"
+    "version": "1.0.1",
+    "publishedAt": 1776899113267,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775604978871,
+      "commit": "https://github.com/openclaw/skills/commit/06ab62e929517f2bdae6dab23f99566153468ab6"
+    }
+  ]
 }
