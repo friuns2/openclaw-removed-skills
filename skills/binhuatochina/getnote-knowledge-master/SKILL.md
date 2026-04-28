@@ -306,3 +306,65 @@ getnote kb <topic_id> --all -o json
 3. **闭环提醒**：搜索结果后提醒"是否把分析沉淀成新笔记"
 4. **批量优先**：多篇内容尽量批量处理，避免多次 API 调用触发限流
 5. **CLI优先**：所有操作优先用 `getnote` CLI，API作为降级方案
+
+---
+
+
+## 每日知识沉淀（Cron 专用）
+
+> ⚠️ **此节为 Cron 任务专用流程，普通六步法用户请忽略。**
+
+### 核心原则
+
+执行每日知识沉淀时，必须遵循以下关键规则：
+
+1. **必须轮询所有知识库**：不能只查 `eYzMmvnm`（"得到"库），必须用 `getnote kbs -o json` 获取全部知识库列表，**逐一**对每个知识库执行 `kb <topic_id> --all -o json`，筛选目标日期的笔记
+2. **必须使用 `getnote search` 补充全局搜索**：单独用 `kb --all` 只能查特定库，存在笔记分散在不同库的情况。必须用 `getnote search "YYYY-MM-DD" --limit 20 -o json` 做全局补充检索
+3. **写入结果放在"得到"知识库**：日志简报最终写入 `eYzMmvnm`（"得到"知识库），输出笔记的 tag 设为 `日志简报`
+
+### 标准流程
+
+**第一步：获取全部知识库列表**
+```bash
+getnote kbs -o json
+```
+获取所有知识库的 `topic_id`，构建列表 `[EJl3xRj0, yYv9rmDn, eYzMmvnm, ...]`
+
+**第二步：轮询每个知识库**
+```bash
+# 对每个 knowledge_base 执行
+getnote kb <topic_id> --all -o json
+# 筛选 created_at 包含目标日期的笔记（如 2026-04-24）
+```
+
+**第三步：全局搜索补充**
+```bash
+# 用日期做关键词全局搜索
+getnote search "YYYY-MM-DD" --limit 20 -o json
+```
+
+**第四步：读取本地记忆文件**
+```bash
+# 检查记忆文件
+~/.openclaw/workspace/memory/YYYY-MM-DD.md
+~/.openclaw/workspace/memory/YYYY-MM-DD-tech-news.md
+```
+
+**第五步：生成日志简报**
+
+汇总所有来源数据，按标准格式生成日志简报（参考上方格式）。
+
+**第六步：三端归档**
+
+
+| 平台 | 操作 |
+|------|------|
+| 本地文件 | 写入 `~/.openclaw/workspace/日志管理/YYYY-MM-DD-日志简报.md` |
+| Get笔记 | `getnote save <content> --title "日志简报 YYYY-MM-DD | 张公子" --tag 日志简报` → 写入 `eYzMmvnm` |
+| 飞书文档 | 创建 docx 并写入内容，链接同步到飞书群 |
+| 飞书知识库 | 在个人知识库 wiki 中创建对应节点 |
+
+
+**第七步：发送完成通知**
+
+通过飞书群发送通知，包含：数据统计、核心发现摘要、三端链接。
