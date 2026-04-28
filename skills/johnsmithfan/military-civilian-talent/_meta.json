@@ -3,11 +3,16 @@
   "slug": "military-civilian-talent",
   "displayName": "Military Civilian Talent (EN)",
   "latest": {
-    "version": "1.0.0-en2",
-    "publishedAt": 1776678588271,
-    "commit": "https://github.com/openclaw/skills/commit/7cf9796bfca9eefb0649220754510d7884c37de4"
+    "version": "2.0.0",
+    "publishedAt": 1777201577960,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.0-en2",
+      "publishedAt": 1776678588271,
+      "commit": "https://github.com/openclaw/skills/commit/7cf9796bfca9eefb0649220754510d7884c37de4"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776179541196,
