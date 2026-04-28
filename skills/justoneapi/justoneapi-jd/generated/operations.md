@@ -24,9 +24,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getItemDetailV1`
+## `getJdItemDetailV1`
 
 - Method: `GET`
 - Path: `/api/jd/get-item-detail/v1`
@@ -47,9 +47,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getShopItemListV1`
+## `getJdShopItemListV1`
 
 - Method: `GET`
 - Path: `/api/jd/get-shop-item-list/v1`
@@ -71,4 +71,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

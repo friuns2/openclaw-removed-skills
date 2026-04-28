@@ -3,11 +3,16 @@
   "slug": "justoneapi-jd",
   "displayName": "JD.com API",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1776239980384,
-    "commit": "https://github.com/openclaw/skills/commit/bf6946345493a6a24a0399093af6e39e7502972a"
+    "version": "1.0.9",
+    "publishedAt": 1776924459316,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1776239980384,
+      "commit": "https://github.com/openclaw/skills/commit/bf6946345493a6a24a0399093af6e39e7502972a"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1775375329559,

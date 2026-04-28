@@ -47,8 +47,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Comments",
@@ -59,7 +59,7 @@ const manifest = {
     {
       "description": "Get JD.com product Details data, including pricing, images, and shop information, for catalog analysis, product monitoring, and ecommerce research.",
       "method": "GET",
-      "operationId": "getItemDetailV1",
+      "operationId": "getJdItemDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -84,8 +84,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Details",
@@ -96,7 +96,7 @@ const manifest = {
     {
       "description": "Get JD.com shop Product List data, including item titles, prices, and images, for catalog tracking and seller research.",
       "method": "GET",
-      "operationId": "getShopItemListV1",
+      "operationId": "getJdShopItemListV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -130,8 +130,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Shop Product List",
