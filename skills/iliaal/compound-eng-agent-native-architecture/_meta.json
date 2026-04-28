@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-agent-native-architecture",
-  "displayName": "agent-native-architecture",
+  "displayName": "ia-agent-native-architecture",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518919338,
-    "commit": "https://github.com/openclaw/skills/commit/a2f5def096bdff7b50b517278ecc884c8bf76512"
+    "version": "3.0.4",
+    "publishedAt": 1777300644585,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518919338,
+      "commit": "https://github.com/openclaw/skills/commit/a2f5def096bdff7b50b517278ecc884c8bf76512"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004138010,
