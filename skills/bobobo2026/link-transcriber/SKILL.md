@@ -96,6 +96,7 @@ If the platform cannot be inferred reliably, ask the user to specify `douyin` or
 6. Prefer executing the bundled Python runner at `scripts/call_service_example.py` from the installed skill directory.
    Use direct Python standard-library requests only if the bundled runner is unavailable.
    Do not switch to ad-hoc `curl` commands as the primary execution path.
+   When invoked without flags, the bundled runner returns the final structured user-facing text directly. Prefer using that rendered output instead of reformatting the JSON payload yourself.
 7. Create a transcription task with `POST /public/transcriptions`:
 
 Use `https://linktranscriber.store` by default. If `LINK_SKILL_API_BASE_URL` is set, use that override instead.
@@ -119,6 +120,9 @@ Use `https://linktranscriber.store` by default. If `LINK_SKILL_API_BASE_URL` is 
     - `【评论参考】`
 13. In `【评论参考】`, return 2-3 backend-provided comment candidates as-is.
 14. Do not locally rewrite, embellish, or invent alternate comment copy on top of backend-provided `comment_candidates`.
+    Do not shorten candidates with ellipses such as `……`; show the full backend-provided text for each candidate.
+    Treat these candidates as real-user comments addressed to everyone reading the Xiaohongshu comment section, not as assistant replies to the current user.
+    Preserve the Xiaohongshu group invite paragraph exactly when it appears in backend-provided candidates.
 15. If the user explicitly asks for a Xiaohongshu comment version, comment copy, 引流版, 适合发评论区, or 帮我写评论, switch to comment-only mode instead of the default structured output.
 16. In comment-only mode, do not improvise from `summary_markdown`.
 17. Read `comment_candidates` from the completed public result and return those candidates only.
@@ -155,6 +159,9 @@ The public skill should not implement its own reminder scheduler when OpenClaw c
   - `【评论参考】`
 - In `【评论参考】`, return the backend-provided `comment_candidates` only.
 - Do not rewrite, embellish, or add your own alternative comments in `【评论参考】`.
+- Do not collapse long comment candidates with `……` or summary placeholders; preserve full paragraphs and bullet lists.
+- Treat comment candidates as real comments for the Xiaohongshu comment section audience. Do not reshape them into direct assistant replies to the user.
+- Preserve the Xiaohongshu group invite paragraph exactly as returned by the backend.
 - If the user explicitly asks for comment mode, do not return the structured sections.
 - In comment mode, return the backend-provided `comment_candidates` only.
 - In comment mode, do not rewrite, embellish, or add your own alternative comments.

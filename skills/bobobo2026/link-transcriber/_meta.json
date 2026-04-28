@@ -3,11 +3,16 @@
   "slug": "link-transcriber",
   "displayName": "Skill",
   "latest": {
-    "version": "0.1.21",
-    "publishedAt": 1776655950646,
-    "commit": "https://github.com/openclaw/skills/commit/7fcd09fd4989160a5b144173ae1ebc5375e2362c"
+    "version": "0.1.26",
+    "publishedAt": 1776822995825,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.21",
+      "publishedAt": 1776655950646,
+      "commit": "https://github.com/openclaw/skills/commit/7fcd09fd4989160a5b144173ae1ebc5375e2362c"
+    },
     {
       "version": "0.1.11",
       "publishedAt": 1775706960221,
