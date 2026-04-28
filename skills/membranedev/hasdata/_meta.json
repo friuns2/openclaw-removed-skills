@@ -3,9 +3,15 @@
   "slug": "hasdata",
   "displayName": "Hasdata",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534651870,
-    "commit": "https://github.com/openclaw/skills/commit/299dc7fd7fcb4583027553289547370257577d0e"
+    "version": "1.0.1",
+    "publishedAt": 1776891441760,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534651870,
+      "commit": "https://github.com/openclaw/skills/commit/299dc7fd7fcb4583027553289547370257577d0e"
+    }
+  ]
 }
