@@ -3,9 +3,15 @@
   "slug": "sage-300",
   "displayName": "Sage 300",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775729104532,
-    "commit": "https://github.com/openclaw/skills/commit/09bd1ded857b466afcf0e4dc803a22fc6b4f4ec1"
+    "version": "1.0.1",
+    "publishedAt": 1776898433646,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775729104532,
+      "commit": "https://github.com/openclaw/skills/commit/09bd1ded857b466afcf0e4dc803a22fc6b4f4ec1"
+    }
+  ]
 }
