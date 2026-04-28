@@ -3,9 +3,15 @@
   "slug": "zype",
   "displayName": "Zype",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775560048680,
-    "commit": "https://github.com/openclaw/skills/commit/51eb3d6b4eabd8b0441c72498b70b3703fef4620"
+    "version": "1.0.1",
+    "publishedAt": 1776898978645,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775560048680,
+      "commit": "https://github.com/openclaw/skills/commit/51eb3d6b4eabd8b0441c72498b70b3703fef4620"
+    }
+  ]
 }
