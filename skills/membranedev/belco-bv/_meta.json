@@ -3,9 +3,15 @@
   "slug": "belco-bv",
   "displayName": "Belco Bv",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653528638,
-    "commit": "https://github.com/openclaw/skills/commit/adb40ffbbb100b9c1a83bc8f7c8ba6f107da040b"
+    "version": "1.0.1",
+    "publishedAt": 1776896981269,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653528638,
+      "commit": "https://github.com/openclaw/skills/commit/adb40ffbbb100b9c1a83bc8f7c8ba6f107da040b"
+    }
+  ]
 }
