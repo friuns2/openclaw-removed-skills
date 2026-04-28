@@ -3,9 +3,15 @@
   "slug": "navigatr",
   "displayName": "Navigatr",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379983785,
-    "commit": "https://github.com/openclaw/skills/commit/a9a16fe6bbb5691b95acbbb27180a5480e1aca20"
+    "version": "1.0.1",
+    "publishedAt": 1776892225015,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379983785,
+      "commit": "https://github.com/openclaw/skills/commit/a9a16fe6bbb5691b95acbbb27180a5480e1aca20"
+    }
+  ]
 }
