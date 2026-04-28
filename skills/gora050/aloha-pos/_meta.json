@@ -3,9 +3,15 @@
   "slug": "aloha-pos",
   "displayName": "Aloha Pos",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775358472529,
-    "commit": "https://github.com/openclaw/skills/commit/05189e18fa14fb536b9dc0f93d3d1c6372e2559b"
+    "version": "1.0.1",
+    "publishedAt": 1776886110191,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775358472529,
+      "commit": "https://github.com/openclaw/skills/commit/05189e18fa14fb536b9dc0f93d3d1c6372e2559b"
+    }
+  ]
 }
