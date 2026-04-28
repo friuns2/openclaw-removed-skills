@@ -1,11 +1,17 @@
 {
   "owner": "xcya01",
   "slug": "beautify-ui",
-  "displayName": "智能 UI 美化技能，支持 16 种设计风格（Notion/Figma/Linear/Apple 等），自动检测项目类型并生成实时预览",
+  "displayName": "智能 UI 美化技能，支持30种设计风格（Notion/Figma/Linear/Apple 等），自动检测项目类型并生成实时预览",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776135555445,
-    "commit": "https://github.com/openclaw/skills/commit/a8c7183a934f69dc5ad8c0138773f5463aba7315"
+    "version": "3.3.0",
+    "publishedAt": 1776909343974,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776135555445,
+      "commit": "https://github.com/openclaw/skills/commit/a8c7183a934f69dc5ad8c0138773f5463aba7315"
+    }
+  ]
 }
