@@ -3,11 +3,16 @@
   "slug": "wjx-cli-use",
   "displayName": "wjx-cli-use",
   "latest": {
-    "version": "0.1.21",
-    "publishedAt": 1776218083348,
-    "commit": "https://github.com/openclaw/skills/commit/15188fb9126eee2debb69f8da9a5ace853abb52f"
+    "version": "0.3.1",
+    "publishedAt": 1777269957533,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.21",
+      "publishedAt": 1776218083348,
+      "commit": "https://github.com/openclaw/skills/commit/15188fb9126eee2debb69f8da9a5ace853abb52f"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775530700320,
