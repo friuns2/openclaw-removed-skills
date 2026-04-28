@@ -3,9 +3,15 @@
   "slug": "activeprospect",
   "displayName": "Activeprospect",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775604996631,
-    "commit": "https://github.com/openclaw/skills/commit/612573aa133176716dd654834b7d04ec4cb4fb95"
+    "version": "1.0.1",
+    "publishedAt": 1776899120689,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775604996631,
+      "commit": "https://github.com/openclaw/skills/commit/612573aa133176716dd654834b7d04ec4cb4fb95"
+    }
+  ]
 }
