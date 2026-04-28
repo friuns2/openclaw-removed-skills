@@ -3,9 +3,15 @@
   "slug": "trinet",
   "displayName": "Trinet",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775639237593,
-    "commit": "https://github.com/openclaw/skills/commit/4b646d0de31c32f8af7918aca19563a19a526a62"
+    "version": "1.0.1",
+    "publishedAt": 1776899212237,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775639237593,
+      "commit": "https://github.com/openclaw/skills/commit/4b646d0de31c32f8af7918aca19563a19a526a62"
+    }
+  ]
 }
