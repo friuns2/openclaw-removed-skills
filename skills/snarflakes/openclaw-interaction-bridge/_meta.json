@@ -3,11 +3,16 @@
   "slug": "openclaw-interaction-bridge",
   "displayName": "Openclaw Interaction Bridge",
   "latest": {
-    "version": "1.5.0",
-    "publishedAt": 1776319937330,
-    "commit": "https://github.com/openclaw/skills/commit/cd1a2877437f9d3dbfae999fa4e4c02dc32a7c1c"
+    "version": "1.6.3",
+    "publishedAt": 1777262024211,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.0",
+      "publishedAt": 1776319937330,
+      "commit": "https://github.com/openclaw/skills/commit/cd1a2877437f9d3dbfae999fa4e4c02dc32a7c1c"
+    },
     {
       "version": "1.4.0",
       "publishedAt": 1776208365112,
