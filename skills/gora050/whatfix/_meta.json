@@ -3,9 +3,15 @@
   "slug": "whatfix",
   "displayName": "Whatfix",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775508140821,
-    "commit": "https://github.com/openclaw/skills/commit/e9b5dbeb88d71b23e278cffe6daaea8fba14ee8d"
+    "version": "1.0.1",
+    "publishedAt": 1776899401681,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775508140821,
+      "commit": "https://github.com/openclaw/skills/commit/e9b5dbeb88d71b23e278cffe6daaea8fba14ee8d"
+    }
+  ]
 }
