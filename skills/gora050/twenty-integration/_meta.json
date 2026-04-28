@@ -3,9 +3,15 @@
   "slug": "twenty-integration",
   "displayName": "Twenty",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574474127,
-    "commit": "https://github.com/openclaw/skills/commit/efc68b388edaf97a95757f3811718b77f4d3ad7d"
+    "version": "1.0.1",
+    "publishedAt": 1776899054583,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574474127,
+      "commit": "https://github.com/openclaw/skills/commit/efc68b388edaf97a95757f3811718b77f4d3ad7d"
+    }
+  ]
 }
