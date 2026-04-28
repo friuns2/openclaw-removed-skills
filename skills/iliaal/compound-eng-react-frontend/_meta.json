@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-react-frontend",
-  "displayName": "react-frontend",
+  "displayName": "ia-react-frontend",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519022887,
-    "commit": "https://github.com/openclaw/skills/commit/26397132598f8868bacf26d61f8bcf4e1f13f3cb"
+    "version": "3.0.4",
+    "publishedAt": 1777300768668,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519022887,
+      "commit": "https://github.com/openclaw/skills/commit/26397132598f8868bacf26d61f8bcf4e1f13f3cb"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004244420,
