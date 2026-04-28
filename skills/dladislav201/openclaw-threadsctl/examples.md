@@ -9,6 +9,12 @@ This skill works with any OpenClaw text provider. A common setup is:
 
 Image generation is optional. Threads image publishing still requires a final reachable `media_url`.
 
+Run commands from:
+
+```bash
+cd /opt/threads-service-ts/threads-service
+```
+
 ## Publish now
 
 User intent:
@@ -42,7 +48,7 @@ User intent:
 Command:
 
 ```bash
-threadsctl publish image --account main-brand --media-url "https://example.com/image.jpg" --text "..." --alt-text "..." --confirmed
+threadsctl publish image --account main-brand --file "/root/.openclaw/media/tool-image-generation/image-1---real-file.jpg" --text "..." --alt-text "..." --confirmed
 ```
 
 ## Generate an image, then post it
@@ -54,10 +60,16 @@ User intent:
 Recommended flow:
 
 1. Use the configured image generation provider to create the asset.
-2. Make sure the final image is available at a reachable URL.
-3. Publish it with `threadsctl`.
+2. If OpenClaw saved the result to `/root/.openclaw/media/...`, publish it with `--file`.
+3. Use `--media-url` only for already hosted public images.
 
-Command:
+Preferred command for local OpenClaw output:
+
+```bash
+threadsctl publish image --account main-brand --file "/root/.openclaw/media/tool-image-generation/generated-image.jpg" --text "..." --alt-text "..." --confirmed
+```
+
+Hosted-image fallback:
 
 ```bash
 threadsctl publish image --account main-brand --media-url "https://example.com/generated-image.jpg" --text "..." --alt-text "..." --confirmed
