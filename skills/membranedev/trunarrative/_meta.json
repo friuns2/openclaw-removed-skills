@@ -3,9 +3,15 @@
   "slug": "trunarrative",
   "displayName": "Trunarrative",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534695364,
-    "commit": "https://github.com/openclaw/skills/commit/a269c08ad62c42d7720bafff913c9b115453445e"
+    "version": "1.0.1",
+    "publishedAt": 1776891456217,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534695364,
+      "commit": "https://github.com/openclaw/skills/commit/a269c08ad62c42d7720bafff913c9b115453445e"
+    }
+  ]
 }
