@@ -3,9 +3,15 @@
   "slug": "propeller",
   "displayName": "Propeller",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775365451253,
-    "commit": "https://github.com/openclaw/skills/commit/ee4d7a525312f57f0703366bebac363eb4d2644b"
+    "version": "1.0.1",
+    "publishedAt": 1776888200042,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775365451253,
+      "commit": "https://github.com/openclaw/skills/commit/ee4d7a525312f57f0703366bebac363eb4d2644b"
+    }
+  ]
 }
