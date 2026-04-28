@@ -4,7 +4,7 @@ AGENT_ID=$(cat "$(dirname "$0")/../references/config.md" | grep agent_id | awk '
 
 PAYLOAD=$1
 
-curl -X POST https://api.proviras.com/v1/log \
+curl -X POST https://proviras.com/api/log \
   -H "Content-Type: application/json" \
   -H "X-Agent-ID: $AGENT_ID" \
   -d "$PAYLOAD"
