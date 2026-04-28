@@ -3,9 +3,15 @@
   "slug": "smsbump",
   "displayName": "Smsbump",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775452032578,
-    "commit": "https://github.com/openclaw/skills/commit/a200989c744c554c4707d26e92364c9ca24e89a8"
+    "version": "1.0.1",
+    "publishedAt": 1776892761295,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775452032578,
+      "commit": "https://github.com/openclaw/skills/commit/a200989c744c554c4707d26e92364c9ca24e89a8"
+    }
+  ]
 }
