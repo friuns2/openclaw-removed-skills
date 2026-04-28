@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-debugging",
-  "displayName": "debugging",
+  "displayName": "ia-debugging",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518942034,
-    "commit": "https://github.com/openclaw/skills/commit/b1ea1d6ca4a310c55a2922c0721842cb168c3461"
+    "version": "3.0.4",
+    "publishedAt": 1777300672766,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518942034,
+      "commit": "https://github.com/openclaw/skills/commit/b1ea1d6ca4a310c55a2922c0721842cb168c3461"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004161254,
