@@ -3,9 +3,15 @@
   "slug": "twingate",
   "displayName": "Twingate",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775665451813,
-    "commit": "https://github.com/openclaw/skills/commit/853cb985b03bf0565e36be17817b230c5fafd8d1"
+    "version": "1.0.1",
+    "publishedAt": 1776899459070,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775665451813,
+      "commit": "https://github.com/openclaw/skills/commit/853cb985b03bf0565e36be17817b230c5fafd8d1"
+    }
+  ]
 }
