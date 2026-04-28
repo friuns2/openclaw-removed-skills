@@ -3,9 +3,15 @@
   "slug": "dolthub",
   "displayName": "Dolthub",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775714808038,
-    "commit": "https://github.com/openclaw/skills/commit/38b938a50312062e67e6251dfda0f1cb514fcd69"
+    "version": "1.0.2",
+    "publishedAt": 1776899702140,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775714808038,
+      "commit": "https://github.com/openclaw/skills/commit/38b938a50312062e67e6251dfda0f1cb514fcd69"
+    }
+  ]
 }
