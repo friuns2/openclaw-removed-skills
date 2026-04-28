@@ -1,11 +1,17 @@
 {
   "owner": "weina0925",
   "slug": "en",
-  "displayName": "123",
+  "displayName": "测试文件夹上传",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776065334000,
-    "commit": "https://github.com/openclaw/skills/commit/9dbfde993701f19ef87ff982673151ad246a5040"
+    "version": "1.0.3",
+    "publishedAt": 1776935474517,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776065334000,
+      "commit": "https://github.com/openclaw/skills/commit/9dbfde993701f19ef87ff982673151ad246a5040"
+    }
+  ]
 }
