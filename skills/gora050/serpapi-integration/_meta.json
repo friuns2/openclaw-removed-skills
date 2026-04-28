@@ -3,9 +3,15 @@
   "slug": "serpapi-integration",
   "displayName": "Serpapi",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581619808,
-    "commit": "https://github.com/openclaw/skills/commit/d1ebdecf7b976a72a6b31e8f46baef5db77db5fc"
+    "version": "1.0.1",
+    "publishedAt": 1776899068055,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581619808,
+      "commit": "https://github.com/openclaw/skills/commit/d1ebdecf7b976a72a6b31e8f46baef5db77db5fc"
+    }
+  ]
 }
