@@ -3,9 +3,15 @@
   "slug": "ipdataco",
   "displayName": "Ipdataco",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775667903301,
-    "commit": "https://github.com/openclaw/skills/commit/51a3700df2f1521b0017078dbdb36a938e9588fa"
+    "version": "1.0.1",
+    "publishedAt": 1776897597322,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775667903301,
+      "commit": "https://github.com/openclaw/skills/commit/51a3700df2f1521b0017078dbdb36a938e9588fa"
+    }
+  ]
 }
