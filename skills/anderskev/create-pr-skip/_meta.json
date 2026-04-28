@@ -3,9 +3,15 @@
   "slug": "create-pr-skip",
   "displayName": "Create Pr. Skip",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775966696790,
-    "commit": "https://github.com/openclaw/skills/commit/e55646eaffbd12b3ec7214557fe4ba20a46e2203"
+    "version": "1.0.1",
+    "publishedAt": 1776831038704,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775966696790,
+      "commit": "https://github.com/openclaw/skills/commit/e55646eaffbd12b3ec7214557fe4ba20a46e2203"
+    }
+  ]
 }
