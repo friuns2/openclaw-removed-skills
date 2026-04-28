@@ -3,9 +3,15 @@
   "slug": "puppet",
   "displayName": "Puppet",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775660833357,
-    "commit": "https://github.com/openclaw/skills/commit/e853c82799294335b986c24d7d2b507684c8b3c9"
+    "version": "1.0.1",
+    "publishedAt": 1776899381114,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775660833357,
+      "commit": "https://github.com/openclaw/skills/commit/e853c82799294335b986c24d7d2b507684c8b3c9"
+    }
+  ]
 }
