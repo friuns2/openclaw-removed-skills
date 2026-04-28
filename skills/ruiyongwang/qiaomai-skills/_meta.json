@@ -3,9 +3,15 @@
   "slug": "qiaomai-skills",
   "displayName": "Qiaomai Skills",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775963918722,
-    "commit": "https://github.com/openclaw/skills/commit/d4b6e1b9c9382e428941a4b79a4e65505d129216"
+    "version": "1.0.5",
+    "publishedAt": 1776953499775,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775963918722,
+      "commit": "https://github.com/openclaw/skills/commit/d4b6e1b9c9382e428941a4b79a4e65505d129216"
+    }
+  ]
 }

@@ -1,47 +1,31 @@
 {
   "name": "qiaomai-skills",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "OpenClaw智能体增强工具：记忆管理、知识图谱、报告生成",
-  "author": "度量衡",
-  "tags": [
-    "ai-agent",
-    "knowledge-graph",
-    "memory-system",
-    "visualization"
-  ],
+  "author": "QiaoMai",
   "license": "MIT",
+  "tags": ["memory", "knowledge-graph", "report", "agent"],
   "main": "SKILL.md",
-  "engines": {
-    "openclaw": ">=1.0.0"
-  },
-  "files": [
-    "SKILL.md",
-    "core/",
-    "data/"
+  "env": [
+    {
+      "name": "OPENAI_API_KEY",
+      "description": "OpenAI API密钥（可选，用于增强语义理解）",
+      "required": false,
+      "sensitive": true
+    },
+    {
+      "name": "PERPLEXITY_API_KEY",
+      "description": "Perplexity API密钥（可选，用于实时搜索增强）",
+      "required": false,
+      "sensitive": true
+    },
+    {
+      "name": "GROK_API_KEY",
+      "description": "Grok API密钥（可选，用于代码生成辅助）",
+      "required": false,
+      "sensitive": true
+    }
   ],
-  "config": {
-    "path": "~/.qiaomai/config.yaml"
-  },
-  "env": {
-    "required": [],
-    "optional": [
-      {
-        "name": "QIAOMAI_MEMORY_BACKEND",
-        "description": "记忆后端",
-        "default": "memory"
-      },
-      {
-        "name": "OPENAI_API_KEY",
-        "description": "OpenAI API密钥（可选）",
-        "sensitive": true
-      }
-    ]
-  },
-  "clawhub": {
-    "displayName": "荞麦饼 Skills",
-    "summary": "智能体增强工具：记忆管理、知识图谱、报告生成、类案检索",
-    "icon": "🌾",
-    "category": "platform-tools",
-    "pricing": "free"
-  }
+  "permissions": [],
+  "storage": "~/.qiaomai/"
 }

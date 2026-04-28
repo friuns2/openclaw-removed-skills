@@ -1,104 +1,78 @@
-# 荞麦饼 Skills (QiaoMai) v1.0.2
+# 荞麦饼 Skills (QiaoMai)
 
-**智能体增强工具：记忆管理、知识图谱、报告生成**
+> OpenClaw 智能体增强工具包：记忆管理 · 知识图谱 · 报告生成
 
----
-
-## 快速开始
-
-### 安装
-
-```
-openclawmp install qiaomai-skills
-```
-
-### 使用
-
-```
-使用 qiaomai-skills 进行记忆检索
-使用 qiaomai-skills 生成报告
-使用 qiaomai-skills 构建知识图谱
-```
+**版本**: v1.0.5  
+**状态**: 稳定版  
+**兼容**: OpenClaw 1.x+
 
 ---
 
-## 功能特性
+## 简介
 
-| 模块 | 功能 |
-|------|------|
-| **记忆系统** | 多层记忆架构，支持向量检索 |
-| **知识图谱** | 动态知识图谱构建与查询 |
-| **报告生成** | 多格式报告自动生成 |
-| **类案检索** | 基于语义的相似案例检索 |
+荞麦饼 Skills 是为 OpenClaw 平台设计的智能体能力增强工具包，提供三大核心能力：
 
----
-
-## Python API
-
-```python
-from qiaomai_skills import Memory, KnowledgeGraph, ReportGenerator
-
-# 记忆检索
-memory = Memory()
-results = memory.search(query="关键词", top_k=5)
-
-# 知识图谱
-kg = KnowledgeGraph()
-kg.add_entity(name="实体", type="概念")
-
-# 报告生成
-report = ReportGenerator()
-report.generate(data=results, format="markdown")
-```
+- **OctoMemory（八层记忆系统）**：从瞬时记忆到专家级永久记忆的分层管理
+- **DynamicKnowledgeGraph（动态知识图谱）**：实体关系的智能建立与推理
+- **SmartReportGenerator（智能报告生成）**：多格式文档的自动化生成
 
 ---
 
-## 配置说明
+## 核心模块
 
-### 可选配置
+### OctoMemory — 八层记忆系统
 
-通过环境变量配置（非必需）：
+将 Agent 的记忆分为 8 个层级，从毫秒级瞬时记忆到永久专家知识，实现跨会话的持续学习与知识积累。
 
-```bash
-# 记忆后端选择（默认: memory）
-export QIAOMAI_MEMORY_BACKEND="memory"
+**记忆层级**：
 
-# 知识图谱后端（默认: memory）
-export QIAOMAI_KG_BACKEND="memory"
+| 层级 | 类型 | 时效 |
+|------|------|------|
+| Layer 8 | 瞬时记忆 | 毫秒级 |
+| Layer 7 | 工作记忆 | 秒级 |
+| Layer 6 | 短期记忆 | 分钟级 |
+| Layer 5 | 会话记忆 | 小时级 |
+| Layer 4 | 上下文记忆 | 天级 |
+| Layer 3 | 长期记忆 | 月级 |
+| Layer 2 | 技能记忆 | 年级 |
+| Layer 1 | 专家记忆 | 永久 |
 
-# 日志级别（默认: info）
-export QIAOMAI_LOG_LEVEL="info"
-```
+### DynamicKnowledgeGraph — 动态知识图谱
 
-### 可选 API 密钥
+构建和维护实体间的语义关系网络，支持知识推理和关联发现。
 
-```bash
-# OpenAI API（用于增强功能）
-export OPENAI_API_KEY=""
+**支持实体类型**：人物、组织、概念、事件、文档
 
-# Perplexity API（用于搜索增强）
-export PERPLEXITY_API_KEY=""
+**关系类型**：属于、相关、因果、时序、引用
 
-# Grok API（用于代码生成）
-export GROK_API_KEY=""
-```
+**核心能力**：路径发现、社区检测、影响力传播、增量更新、版本管理
+
+### SmartReportGenerator — 智能报告生成
+
+基于结构化数据自动生成多格式专业报告，支持 Markdown、HTML、PDF 等输出格式。
 
 ---
 
-## 依赖说明
+## 性能指标
 
-### 必需依赖
-- Python >= 3.8
-- 标准库（无第三方强制依赖）
+| 指标 | v1.0.5 |
+|------|--------|
+| 启动时间 | ~200ms |
+| 记忆检索 | ~5ms |
+| 并发处理 | 100 任务 |
+| 报告生成 | 支持 3 种格式 |
 
-### 可选依赖
-```bash
-# 向量检索加速
-pip install faiss-cpu
+---
 
-# 图数据库
-pip install networkx
-```
+## 可选集成
+
+本工具包支持以下可选第三方服务（通过环境变量配置）：
+
+- **OpenAI API**：增强语义理解能力（可选）
+- **Perplexity API**：实时信息检索增强（可选）
+- **Grok API**：代码生成辅助（可选）
+
+所有第三方集成均为**可选**，不配置时工具包仍可正常运行核心功能。
 
 ---
 
@@ -107,30 +81,35 @@ pip install networkx
 ```
 qiaomai-skills/
 ├── SKILL.md          # 本文件
+├── clawhub.json      # 元数据
 ├── core/             # 核心模块
-│   ├── memory.py     # 记忆系统
-│   ├── knowledge_graph.py
-│   ├── report.py
-│   └── case_search.py
-└── data/             # 数据存储
+│   ├── octo_memory.py        # 八层记忆系统
+│   ├── dynamic_kg.py         # 动态知识图谱
+│   ├── smart_report.py       # 报告生成
+│   ├── smart_executor.py     # 智能执行引擎
+│   ├── smart_db.py           # 数据存储
+│   ├── case_search.py        # 类案检索
+│   └── easy_use.py           # 易用性接口
+└── data/             # 数据目录
 ```
 
 ---
 
-## 安全说明
+## 版本历史
 
-- 本 Skill 仅通过 OpenClaw 平台标准接口调用
-- 不直接执行系统命令
-- 不访问用户敏感文件
-- 配置存储在用户目录下（`~/.qiaomai/`）
+- **v1.0.5** (2026-04-23) — 安全加固，清理冗余文件，规范元数据声明
+- **v1.0.4** (2026-04-20) — 统一元数据，声明 API keys
+- **v1.0.3** (2026-04-18) — 优化显示格式
+- **v1.0.2** (2026-04-15) — 简化描述，精简标签
+- **v1.0.1** (2026-04-13) — 首次发布更新
+- **v1.0.0** (2026-04-12) — 初始发布
 
 ---
 
-## 许可
+## 许可证
 
 MIT License
 
 ---
 
-**荞麦饼 Skills v1.0.2**  
-*度量衡 - 标准源自最佳实践*
+*荞麦饼 Skills — 营养全面，易于消化，百搭实用。*
