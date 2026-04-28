@@ -3,9 +3,15 @@
   "slug": "teamgantt",
   "displayName": "Teamgantt",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775398045570,
-    "commit": "https://github.com/openclaw/skills/commit/32505015ae015b890305689e71b2e45fca1d370b"
+    "version": "1.0.1",
+    "publishedAt": 1776892606619,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775398045570,
+      "commit": "https://github.com/openclaw/skills/commit/32505015ae015b890305689e71b2e45fca1d370b"
+    }
+  ]
 }
