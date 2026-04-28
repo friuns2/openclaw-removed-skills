@@ -3,9 +3,15 @@
   "slug": "microsoft-graph-api",
   "displayName": "Microsoft Graph Api",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775390898561,
-    "commit": "https://github.com/openclaw/skills/commit/ea62648624429c17b5ab48612c096c074028bdb4"
+    "version": "1.0.1",
+    "publishedAt": 1776892503518,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775390898561,
+      "commit": "https://github.com/openclaw/skills/commit/ea62648624429c17b5ab48612c096c074028bdb4"
+    }
+  ]
 }
