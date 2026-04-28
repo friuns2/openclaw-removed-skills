@@ -3,9 +3,15 @@
   "slug": "scrivito",
   "displayName": "Scrivito",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775559838656,
-    "commit": "https://github.com/openclaw/skills/commit/1f8d2a7dec8813283b69e4f0c92198387a5276d0"
+    "version": "1.0.1",
+    "publishedAt": 1776895593784,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775559838656,
+      "commit": "https://github.com/openclaw/skills/commit/1f8d2a7dec8813283b69e4f0c92198387a5276d0"
+    }
+  ]
 }
