@@ -3,11 +3,16 @@
   "slug": "agent-changelog",
   "displayName": "Agent Changelog",
   "latest": {
-    "version": "1.2.1",
-    "publishedAt": 1776720861583,
-    "commit": "https://github.com/openclaw/skills/commit/f7c818d8656ee9926ad53a53aabb7f3212730c58"
+    "version": "1.2.3",
+    "publishedAt": 1776897916671,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.1",
+      "publishedAt": 1776720861583,
+      "commit": "https://github.com/openclaw/skills/commit/f7c818d8656ee9926ad53a53aabb7f3212730c58"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1776116249112,

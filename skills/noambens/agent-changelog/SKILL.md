@@ -2,7 +2,7 @@
 name: agent-changelog
 description: Advanced handling for agent-changelog requests (history, diffs, restores, rollbacks, snapshots) using git and OpenClaw scripts with clear, user-focused summaries and outputs.
 user-invocable: true
-metadata: {"openclaw":{"requires":{"bins":["git","jq","node"],"env":["OPENCLAW_WORKSPACE","OPENCLAW_CONFIG","PROMPTLAYER_API_KEY"]}}}
+metadata: {"openclaw":{"requires":{"bins":["git","jq","node"],"env":["OPENCLAW_WORKSPACE","OPENCLAW_CONFIG", "PROMPTLAYER_API_KEY"]}}}
 ---
 
 # Agent Changelog
