@@ -3,9 +3,15 @@
   "slug": "tradogram",
   "displayName": "Tradogram",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775304453828,
-    "commit": "https://github.com/openclaw/skills/commit/dd595b69a5472b9f03d35950c8111997b6c4bf0e"
+    "version": "1.0.1",
+    "publishedAt": 1776885905829,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775304453828,
+      "commit": "https://github.com/openclaw/skills/commit/dd595b69a5472b9f03d35950c8111997b6c4bf0e"
+    }
+  ]
 }
