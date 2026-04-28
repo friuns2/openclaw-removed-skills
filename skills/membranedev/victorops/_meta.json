@@ -3,9 +3,15 @@
   "slug": "victorops",
   "displayName": "Victorops",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775703913844,
-    "commit": "https://github.com/openclaw/skills/commit/3814da639fb5d5c3add7a22cc8fa1a466579262e"
+    "version": "1.0.1",
+    "publishedAt": 1776898066371,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775703913844,
+      "commit": "https://github.com/openclaw/skills/commit/3814da639fb5d5c3add7a22cc8fa1a466579262e"
+    }
+  ]
 }
