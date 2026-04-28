@@ -3,9 +3,15 @@
   "slug": "ory",
   "displayName": "Ory",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775621094475,
-    "commit": "https://github.com/openclaw/skills/commit/73d91b92e75f78985c5896a52f4d553e978b6e9f"
+    "version": "1.0.1",
+    "publishedAt": 1776896364879,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775621094475,
+      "commit": "https://github.com/openclaw/skills/commit/73d91b92e75f78985c5896a52f4d553e978b6e9f"
+    }
+  ]
 }
