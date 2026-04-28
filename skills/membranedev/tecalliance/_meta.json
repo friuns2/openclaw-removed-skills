@@ -3,9 +3,15 @@
   "slug": "tecalliance",
   "displayName": "Tecalliance",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775304274164,
-    "commit": "https://github.com/openclaw/skills/commit/044810a09589ac2c2dec2340e8d0b45b2027e058"
+    "version": "1.0.1",
+    "publishedAt": 1776883646970,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775304274164,
+      "commit": "https://github.com/openclaw/skills/commit/044810a09589ac2c2dec2340e8d0b45b2027e058"
+    }
+  ]
 }
