@@ -3,9 +3,15 @@
   "slug": "iris-code-formatter",
   "displayName": "iris-code-formatter",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776243220253,
-    "commit": "https://github.com/openclaw/skills/commit/1b710ca37beb400c19840ef6e434da12ee1c978b"
+    "version": "3.1.0",
+    "publishedAt": 1776482577801,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776243220253,
+      "commit": "https://github.com/openclaw/skills/commit/1b710ca37beb400c19840ef6e434da12ee1c978b"
+    }
+  ]
 }
