@@ -3,9 +3,15 @@
   "slug": "sailthru",
   "displayName": "Sailthru",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775469903667,
-    "commit": "https://github.com/openclaw/skills/commit/de671652e1fa3bc48700d0a590551a6d957f7548"
+    "version": "1.0.1",
+    "publishedAt": 1776890242621,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775469903667,
+      "commit": "https://github.com/openclaw/skills/commit/de671652e1fa3bc48700d0a590551a6d957f7548"
+    }
+  ]
 }
