@@ -3,9 +3,15 @@
   "slug": "alibabacloud-cfw-status-overview",
   "displayName": "Alibabacloud Cfw Status Overview",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775635194861,
-    "commit": "https://github.com/openclaw/skills/commit/464e137fbce4a848d3c1996ded29da119de8fc98"
+    "version": "0.0.2",
+    "publishedAt": 1777363647056,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775635194861,
+      "commit": "https://github.com/openclaw/skills/commit/464e137fbce4a848d3c1996ded29da119de8fc98"
+    }
+  ]
 }
