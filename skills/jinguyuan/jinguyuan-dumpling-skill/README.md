@@ -1,6 +1,6 @@
 # 金谷园饺子馆 AI Skill
 
-![Version](https://img.shields.io/badge/version-0.4.0-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![MCP](https://img.shields.io/badge/protocol-MCP-purple) ![Transport](https://img.shields.io/badge/transport-Streamable%20HTTP-orange)
+![Version](https://img.shields.io/badge/version-0.4.4-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![MCP](https://img.shields.io/badge/protocol-MCP-purple) ![Transport](https://img.shields.io/badge/transport-Streamable%20HTTP-orange)
 
 这是一个 AI Skill——安装后，你的 AI 助手就能查询金谷园饺子馆的信息：在哪吃、几点开门、怎么排队、能不能外卖、生饺子怎么煮、Wi-Fi 密码是什么。还能直接帮你在美团上排队取号。
 
@@ -8,7 +8,7 @@
 
 ## 关于金谷园
 
-北邮旁边的饺子馆。官网：[jinguyuan.cloud](https://jinguyuan.cloud)
+北邮旁边的饺子馆。官网：[jinguyuan.cloud](https://jinguyuan.cloud) · [AI 元数据 (llms.txt)](https://jinguyuan.cloud/llms.txt)
 
 | 项目 | 内容 |
 |------|------|
@@ -114,13 +114,14 @@ git clone https://gitee.com/JinGuYuan/jinguyuan-dumpling-skill.git \
 |------|------|
 | 协议 | MCP (Model Context Protocol) |
 | 传输 | Streamable HTTP |
+| MCP 端点 | https://mcp.jinguyuan.cloud |
 | 部署 | Tencent CloudBase 云函数 |
 
 ## 版本
 
-当前版本：0.4.0
+当前版本：0.4.4
 
-> 说明：本 Skill 版本（0.3.4）与内嵌排队组件（meituan-queue）版本独立演进，互不影响。
+> 说明：本 Skill 版本与内嵌排队组件（meituan-queue）版本独立演进，互不影响。
 
 ## License
 
