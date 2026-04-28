@@ -3,9 +3,15 @@
   "slug": "yespo",
   "displayName": "Yespo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653471923,
-    "commit": "https://github.com/openclaw/skills/commit/6ef76b34ac1df32cd8edcb295b5e1e44e96d1f19"
+    "version": "1.0.1",
+    "publishedAt": 1776896957498,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653471923,
+      "commit": "https://github.com/openclaw/skills/commit/6ef76b34ac1df32cd8edcb295b5e1e44e96d1f19"
+    }
+  ]
 }
