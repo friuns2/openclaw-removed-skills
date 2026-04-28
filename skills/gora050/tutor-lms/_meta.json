@@ -3,9 +3,15 @@
   "slug": "tutor-lms",
   "displayName": "Tutor Lms",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775293529449,
-    "commit": "https://github.com/openclaw/skills/commit/ab2c75d1283b95cb5d4d2892bbfc08fd40907d79"
+    "version": "1.0.1",
+    "publishedAt": 1776885680594,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775293529449,
+      "commit": "https://github.com/openclaw/skills/commit/ab2c75d1283b95cb5d4d2892bbfc08fd40907d79"
+    }
+  ]
 }
