@@ -3,9 +3,15 @@
   "slug": "flexport",
   "displayName": "Flexport",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775588644248,
-    "commit": "https://github.com/openclaw/skills/commit/fdcc805fd5f93c87c63b50493d0ab87837871af0"
+    "version": "1.0.1",
+    "publishedAt": 1776896074371,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775588644248,
+      "commit": "https://github.com/openclaw/skills/commit/fdcc805fd5f93c87c63b50493d0ab87837871af0"
+    }
+  ]
 }
