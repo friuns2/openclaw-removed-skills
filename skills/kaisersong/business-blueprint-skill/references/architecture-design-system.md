@@ -15,6 +15,8 @@
 | `border` | `#1E293B` | 边框 |
 | `grid` | `#1E293B` | 网格线（40px pattern） |
 
+暗黑模式是默认输出。除非用户明确要求亮色模式，否则不得切换到亮色主题。
+
 ### 亮色模式
 
 | Token | 值 | 用途 |
@@ -79,6 +81,14 @@ Clients(左) → Frontend → Backend → Database(右)
 
 所有组件：`rx="8"` 圆角，`stroke-width="2"` 描边。
 
+如果文本、特征列表或标签超出上述尺寸，不得硬压缩成“牙膏图”。优先顺序是：
+1. 增大卡片宽度或高度
+2. 将同层节点换到多行
+3. 扩大画布
+4. 必要时回退到 `freeflow`
+
+禁止通过把整层强行塞成一行、把图例改成浮层、或让底部内容被裁切来维持模板外观。
+
 ### 4.3 Region 边界
 
 - 矩形框：`rx="16"`, `stroke-dasharray="8,4"`, 琥珀色 `#F59E0B`, `opacity="0.4"`
@@ -96,6 +106,47 @@ Clients(左) → Frontend → Backend → Database(右)
 | Data | 紫色 `#A78BFA` | 数据存储描述 |
 
 每张卡片：`rx="10"`, fill `#0F172A`, stroke `#1E293B`, 宽 340-370px, 高 130px。
+
+### 4.5 分层布局约束
+
+- 分层图中的“层”是语义分组，不是强制单行容器。
+- 每层 `1-3` 个节点时可单行展示。
+- 每层 `4-6` 个节点时默认拆成两行，保持卡片尺寸可读。
+- 每层 `7+` 个节点时应扩大画布或直接回退到 `freeflow`，不要继续压缩。
+- Actor / User 角色默认渲染为边栏标签、badge 或 lane header，不应伪装成普通系统卡片。
+
+### 4.6 Legend 位置
+
+- Legend 默认放在左下或底部保留区。
+- Legend 必须参与整体高度计算，不能作为右上角悬浮遮罩。
+- 禁止将 legend 放在 top-right 覆盖标题区或内容区。
+
+### 4.7 画布尺寸与裁切
+
+- `viewBox` 和最终 `height` 必须覆盖：最底部节点、legend、summary cards、footer，再加至少 `32px` 底部留白。
+- 外层 HTML 容器不得使用固定高度裁切内容。
+- 禁止使用 `overflow: hidden` 裁掉最后一层、legend 或 summary cards。
+- 如果模板内容超出当前画布，应增加画布高度或改为多行布局，而不是截断。
+
+### 4.8 完整性阈值
+
+所有几何类完整性检查必须使用阈值配置，而不是凭渲染器里的临时经验判断。
+
+阈值来源：
+- `evals/export-integrity-thresholds.json`
+
+最小阈值集合：
+- `minLabelClearancePx`
+- `legendBottomMarginPx`
+- `legendContentGapPx`
+- `titleOverflowTolerancePx`
+- `cardTextInsetPx`
+
+只要是以下检查，都必须绑定到阈值：
+- label 与折线拐点、卡片边界的最小安全距离
+- legend 与底部/内容区的安全距离
+- 标题文本的溢出容忍度
+- 卡片正文与边框的内边距
 
 ## 5. 视觉元素
 
@@ -136,7 +187,7 @@ Clients(左) → Frontend → Backend → Database(右)
 4. Region 框
 5. 箭头
 6. 节点（rect + text）
-7. Legend
+7. Legend（底部保留区）
 8. Summary Cards
 9. Footer
 

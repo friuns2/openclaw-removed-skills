@@ -63,8 +63,7 @@ def test_write_viewer_package_creates_viewer_and_handoff(tmp_path: Path) -> None
     assert seed_entry["fieldLocks"] == {"meta.title": "human"}
 
     viewer_html = viewer_path.read_text(encoding="utf-8")
-    assert "capability-description" in viewer_html
-    assert "system-description" in viewer_html
+    assert "card-desc" in viewer_html
     assert "原始描述 </script><script>alert('xss')</script>" not in viewer_html
     assert "alert('xss')" in viewer_html
     assert "<\\/script>" in viewer_html

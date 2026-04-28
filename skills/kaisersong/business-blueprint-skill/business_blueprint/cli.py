@@ -8,10 +8,12 @@ from pathlib import Path
 from .export_drawio import export_drawio
 from .export_excalidraw import export_excalidraw
 from .export_html import export_html_viewer
+from .export_integrity import ExportIntegrityError
 from .export_mermaid import export_mermaid
 from .export_svg import export_svg, export_svg_auto, export_product_tree_svg, export_matrix_svg, export_capability_map_svg, export_swimlane_flow_svg
 from .generate import write_plan_output
-from .model import load_json
+from .model import load_json, write_json
+from .projection import build_narrative_projection, default_projection_path
 from .validate import validate_blueprint
 from .viewer import write_viewer_package
 
@@ -19,6 +21,7 @@ from .viewer import write_viewer_package
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="business-blueprint")
     parser.add_argument("--plan", help="Generate only the canonical blueprint JSON.")
+    parser.add_argument("--project", help="Generate canonical projection JSON for downstream skills.")
     parser.add_argument(
         "--generate",
         help="Path to blueprint JSON. Generates free-flow HTML viewer.",
@@ -29,8 +32,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--html", help="Generate self-contained HTML viewer with inline SVG.")
     parser.add_argument("--validate", help="Validate a blueprint and print JSON results.")
     parser.add_argument("--from", dest="from_path", help="Source text or file path.")
+    parser.add_argument("--output", help="Optional output path for projection generation.")
     parser.add_argument("--format", dest="export_format", default="svg",
-                        help="Export format: svg/auto (default: free-flow SVG+HTML), drawio, excalidraw, mermaid, all.")
+                        help="Export format: svg (default: SVG + HTML viewer), drawio, excalidraw, mermaid.")
     _INDUSTRIES = ["common", "finance", "manufacturing", "retail"]
     parser.add_argument("--industry", default="common", choices=_INDUSTRIES,
                         help=f"Template pack name ({', '.join(_INDUSTRIES)}).")
@@ -48,7 +52,21 @@ def main() -> int:
         # 如果 --from 未提供且存在 stdin 数据，则从 stdin 读取
         if not source_text and not args.from_path and not sys.stdin.isatty():
             source_text = sys.stdin.read()
+        if not source_text.strip():
+            print("Error: --plan requires source text. Provide it via --from <text> or pipe from stdin.", file=sys.stderr)
+            print("Example: business-blueprint --plan output.json --from \"My requirements here\"", file=sys.stderr)
+            return 1
         write_plan_output(Path(args.plan), source_text, args.industry, Path.cwd())
+        return 0
+
+    if args.project:
+        blueprint_path = Path(args.project)
+        projection = build_narrative_projection(
+            load_json(blueprint_path),
+            blueprint_path=blueprint_path,
+        )
+        output_path = Path(args.output) if args.output else default_projection_path(blueprint_path)
+        write_json(output_path, projection)
         return 0
 
     if args.generate:
@@ -83,26 +101,21 @@ def main() -> int:
         export_dir.mkdir(parents=True, exist_ok=True)
         html_path = blueprint_path.parent / f"{blueprint_path.stem}.html"
         fmt = args.export_format or "svg"
-        if fmt == "svg":
-            export_svg_auto(blueprint, export_dir / "solution.svg", theme=args.theme)
-            export_html_viewer(blueprint, html_path, theme=args.theme)
-        elif fmt == "drawio":
-            export_drawio(blueprint, export_dir / "solution.drawio")
-        elif fmt == "excalidraw":
-            export_excalidraw(blueprint, export_dir / "solution.excalidraw")
-        elif fmt == "mermaid":
-            export_mermaid(blueprint, export_dir / "solution.mermaid.md")
-        elif fmt == "auto":
-            export_svg_auto(blueprint, export_dir / "solution.auto.svg", theme=args.theme)
-            export_html_viewer(blueprint, html_path, theme=args.theme)
-        elif fmt == "all":
-            export_svg_auto(blueprint, export_dir / "solution.svg", theme=args.theme)
-            export_html_viewer(blueprint, html_path, theme=args.theme)
-            export_drawio(blueprint, export_dir / "solution.drawio")
-            export_excalidraw(blueprint, export_dir / "solution.excalidraw")
-            export_mermaid(blueprint, export_dir / "solution.mermaid.md")
-        else:
-            print(f"Unknown format: {fmt}. Supported: svg, drawio, excalidraw, mermaid, auto, all")
+        try:
+            if fmt == "svg":
+                export_svg_auto(blueprint, export_dir / "solution.svg", theme=args.theme)
+                export_html_viewer(blueprint, html_path, theme=args.theme)
+            elif fmt == "drawio":
+                export_drawio(blueprint, export_dir / "solution.drawio")
+            elif fmt == "excalidraw":
+                export_excalidraw(blueprint, export_dir / "solution.excalidraw")
+            elif fmt == "mermaid":
+                export_mermaid(blueprint, export_dir / "solution.mermaid.md")
+            else:
+                print(f"Unknown format: {fmt}. Supported: svg (default), drawio, excalidraw, mermaid", file=sys.stderr)
+                return 1
+        except ExportIntegrityError as exc:
+            print(json.dumps(exc.to_payload(), ensure_ascii=False, indent=2), file=sys.stderr)
             return 1
         return 0
 
@@ -142,7 +155,10 @@ def _read_source_text(value: str | None) -> str:
     if len(value.encode("utf-8")) > 255:
         return value
     path = Path(value)
-    return path.read_text(encoding="utf-8") if path.exists() else value
+    if not path.exists():
+        return value
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        return handle.read()
 
 
 if __name__ == "__main__":

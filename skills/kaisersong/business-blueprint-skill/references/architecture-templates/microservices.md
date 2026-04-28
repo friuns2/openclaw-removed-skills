@@ -10,6 +10,13 @@
 Clients → API Gateway → [Service A, Service B, Service C] → [DB A, DB B, Cache, MQ]
 ```
 
+这些坐标只是起始参考，不是必须照抄的固定布局。如果服务或数据节点超出当前模板容量：
+- 允许服务列或数据列拆成多行
+- 允许增大画布和 cluster 边界
+- 仍然拥挤时回退到 `freeflow`
+
+不要把所有服务和数据卡片硬塞进同一行，造成牙膏式排版。
+
 ## 组件定义
 
 | 组件 | 类别 | x | y | 宽 | 高 | 特征 |
@@ -43,6 +50,12 @@ Clients → API Gateway → [Service A, Service B, Service C] → [DB A, DB B, C
 - 描边：`#FBBF24`, `stroke-dasharray="8,4"`, `opacity="0.4"`
 - 标签：`Kubernetes Cluster`（x=310, y=110）
 - Clients 在 Cluster 框外左侧
+
+## 图例与画布
+
+- Legend 放在左下或底部保留区，不放右上角。
+- 最终 SVG 高度必须包含最底部节点、legend、summary cards 和 footer。
+- 不得用固定高度容器或裁切把底部内容截断。
 
 ## Summary Cards
 

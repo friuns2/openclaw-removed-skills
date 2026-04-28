@@ -1,6 +1,6 @@
 ---
-name: business-blueprint-skill
-description: Use when turning presales requirements, meeting notes, or solution materials into editable business capability blueprints, swimlane flows, and application architecture diagrams. Use when generating blueprint JSON, static HTML viewers, or exporting to SVG, draw.io, Excalidraw, or Mermaid formats.
+name: kai-business-blueprint
+description: Use when turning presales requirements, meeting notes, or solution materials into editable business capability blueprints, swimlane flows, and application architecture diagrams. Use when generating blueprint JSON, static HTML viewers, or exporting to SVG, draw.io, Excalidraw, or Mermaid formats. When no standard export template applies, default to free-flow output.
 ---
 
 # Business Blueprint Skill
@@ -13,7 +13,7 @@ All generated files (blueprint JSON, viewers, exports) go into `projects/workspa
 
 ```bash
 python -m business_blueprint.cli --plan projects/workspace/solution.blueprint.json --from "..."
-python -m business_blueprint.cli --generate projects/workspace/solution.blueprint.json
+python -m business_blueprint.cli --project projects/workspace/solution.blueprint.json
 python -m business_blueprint.cli --export projects/workspace/solution.blueprint.json
 ```
 
@@ -21,118 +21,170 @@ python -m business_blueprint.cli --export projects/workspace/solution.blueprint.
 
 Choose `--industry` from exactly one of: `"common"`, `"finance"`, `"manufacturing"`, `"retail"`. Select the closest match based on the user's domain and materials; do not invent other values.
 
-| Industry | Seed content |
+| Industry | Hints content |
 |----------|-------------|
-| `common` | Empty skeleton — generic domains |
-| `finance` | Risk control, credit approval, compliance, customer profile |
-| `manufacturing` | Production planning, quality inspection, warehouse, supply chain |
-| `retail` | Store operations, membership, POS, order fulfillment |
+| `common` | No hints — generic domains |
+| `finance` | Risk control, credit, compliance, customer profile, etc. |
+| `manufacturing` | Production planning, quality, warehouse, supply chain, etc. |
+| `retail` | Store operations, membership, POS, order fulfillment, etc. |
 
-Available templates live under `business_blueprint/templates/{industry}/seed.json`.
-Passing an unrecognized value (e.g. `"software"`) will fail at runtime.
+## How to Generate a Blueprint
+
+The AI agent is responsible for entity extraction. The Python tool handles JSON writing, visualization, and export.
+
+### Step 1: Read industry hints
+
+Read the seed template at `business_blueprint/templates/{industry}/seed.json` and get the `industryHints.checklist`.
+
+### Step 2: Extract entities from source text
+
+Using the user's source material AND the industry hints checklist, extract:
+- **capabilities**: business capability areas (name, description)
+- **actors**: roles/people involved (name)
+- **flowSteps**: business process steps (name, actorId, capabilityIds, stepType)
+- **systems**: IT systems that support capabilities (name, description, capabilityIds)
+
+### Step 3: Write the blueprint JSON
+
+Write the JSON file directly to the output path. Use this schema:
+
+```json
+{
+  "version": "1.0",
+  "meta": {
+    "title": "...",
+    "industry": "retail",
+    "revisionId": "rev-YYYYMMDD-NN",
+    "parentRevisionId": null,
+    "lastModifiedAt": "ISO8601",
+    "lastModifiedBy": "ai"
+  },
+  "context": {
+    "goals": [],
+    "scope": [],
+    "assumptions": [],
+    "constraints": [],
+    "sourceRefs": [{"type": "inline-text", "excerpt": "..."}],
+    "clarifyRequests": [],
+    "clarifications": []
+  },
+  "library": {
+    "capabilities": [
+      {"id": "cap-xxx", "name": "...", "level": 1, "description": "...", "ownerActorIds": [], "supportingSystemIds": []}
+    ],
+    "actors": [
+      {"id": "actor-xxx", "name": "..."}
+    ],
+    "flowSteps": [
+      {"id": "flow-xxx", "name": "...", "actorId": "actor-xxx", "capabilityIds": ["cap-xxx"], "systemIds": [], "stepType": "task", "inputRefs": [], "outputRefs": []}
+    ],
+    "systems": [
+      {"id": "sys-xxx", "kind": "system", "name": "...", "aliases": [], "description": "...", "resolution": {"status": "canonical", "canonicalName": "..."}, "capabilityIds": ["cap-xxx"]}
+    ]
+  },
+  "relations": [
+    {"id": "rel-xxx", "type": "supports", "from": "sys-xxx", "to": "cap-xxx", "label": "支撑"}
+  ],
+  "views": [],
+  "editor": {"fieldLocks": {}, "theme": "enterprise-default"},
+  "artifacts": {}
+}
+```
+
+### Step 4: Generate visualizations
+
+```bash
+python -m business_blueprint.cli --export <blueprint.json>
+```
+
+This generates SVG + HTML viewer by default. Use `--format drawio|excalidraw|mermaid` for other formats.
+
+## Export View Selection Policy
+
+Treat export view choice as a routing decision, not a styling preference.
+
+- If a request matches a supported, standard export template, use that template.
+- If there is no standard export template for the requested diagram, fall back to `freeflow`.
+- Do **not** substitute `swimlane`, `matrix`, `product tree`, or other generic views just because they are available.
+- When embedding a blueprint diagram into a report or ad hoc analysis, `freeflow` is the safe default unless the user explicitly asks for a supported standard template.
+
+### Step 5: Generate downstream projection
+
+```bash
+python -m business_blueprint.cli --project <blueprint.json>
+```
+
+This generates `solution.projection.json`, the canonical machine projection consumed by downstream report/slide workflows.
 
 ## Workflow Decision Tree
 
 ```
 User provides raw requirements / meeting notes?
-  → Does a canonical blueprint JSON already exist?
-    → No:  --plan (generate JSON only)
-    → Yes: --generate (JSON + viewer refresh)
-
-User has an existing blueprint JSON to modify?
-  → --edit (refresh viewer only)
+  → AI agent reads hints, extracts entities, writes blueprint JSON
+  → Optionally run --project for downstream machine handoff
+  → Then run --export for visualization
 
 User needs diagram files (SVG, draw.io, etc.)?
-  → --validate first, then --export
+  → --export (default: SVG + HTML viewer)
 
 User unsure about blueprint quality?
   → --validate
+
+User wants downstream report / slide generation?
+  → --project
 ```
 
 ## Commands
 
-1. Use `--plan` when starting from raw source material and no canonical blueprint exists yet.
-2. Use `--generate` after a canonical blueprint exists and the user needs the static viewer package.
-3. Use `--edit` to refresh the viewer for an existing blueprint revision.
-4. Use `--validate` before claiming a blueprint is complete.
-5. Use `--export` when downstream skills need SVG, draw.io, Excalidraw, or Mermaid artifacts.
-
-## Handoff Rules
-
-- Treat `solution.blueprint.json` as the only source of truth.
-- Never treat `solution.viewer.html` as the source of truth.
-- Preserve `editor.fieldLocks` and human-edited fields during regeneration.
-- If `context.clarifyRequests` is non-empty, surface them instead of pretending the blueprint is complete.
+| Command | Description |
+|---------|-------------|
+| `--plan <path> --from <text>` | Generate empty blueprint JSON from source text (AI should prefer writing JSON directly) |
+| `--project <path>` | Generate canonical projection JSON for downstream skills |
+| `--export <path>` | Export SVG + HTML viewer (default), or use `--format` for other formats |
+| `--validate <path>` | Validate a blueprint and print JSON results |
 
 ## Export Formats
 
 | Format | File | Use Case |
 |--------|------|----------|
-| SVG | `solution.exports/solution.svg` | Quick preview, embedding |
-| draw.io | `solution.exports/solution.drawio` | Editable diagrams |
-| Excalidraw | `solution.exports/solution.excalidraw` | Whiteboard-style diagrams |
-| Mermaid | `solution.exports/solution.mermaid.md` | GitHub-native rendering |
+| `svg` (default) | `solution.exports/solution.svg` + HTML viewer | Quick preview, embedding |
+| `drawio` | `solution.exports/solution.drawio` | Editable diagrams |
+| `excalidraw` | `solution.exports/solution.excalidraw` | Whiteboard-style diagrams |
+| `mermaid` | `solution.exports/solution.mermaid.md` | GitHub-native rendering |
 
 ## Collaboration Boundary
 
 This skill produces **semantic intermediate artifacts**. Downstream skills consume them:
 
-- `report-creator` consumes blueprint → assembles reports
-- `slide-creator` consumes blueprint → assembles presentations
+- `report-creator` consumes `solution.projection.json` → assembles reports
+- `slide-creator` consumes `solution.projection.json` → assembles presentations
 - Other skills may consume `relations` → generate PlantUML or other diagram syntax
 - Downstream skills should **never directly edit** `solution.blueprint.json`
+- `solution.handoff.json` is viewer-only metadata, not a downstream narrative input
 
 ## Sandbox Execution
 
 When running in an isolated Python sandbox (Jupyter, notebook, cloud REPL) that auto-installs dependencies:
 
-1. **The sandbox auto-installs `business-blueprint-skill` from PyPI.** Do NOT try to `pip install -e` or use `sys.path` hacks with `__file__` — `__file__` is undefined in Jupyter.
+1. **The sandbox auto-installs `kai-business-blueprint` from PyPI.** Do NOT try to `pip install -e` or use `sys.path` hacks with `__file__` — `__file__` is undefined in Jupyter.
 
-2. **After auto-install, run code like this — copy exactly:**
-   ```python
-   from business_blueprint.cli import main
-   import sys
-   sys.argv = [
-       "business-blueprint",
-       "--plan",
-       "solution.blueprint.json",
-       "--from",
-       "your source text or requirements here",
-       "--industry",
-       "common"
-   ]
-   main()
-   ```
-
-3. **For `--generate` (after blueprint JSON exists):**
-   ```python
-   from pathlib import Path
-   from business_blueprint.generate import write_plan_output
-   source_text = "your source text"
-   output_path = Path("solution.blueprint.json")
-   write_plan_output(output_path, source_text, "common", Path.cwd())
-   ```
-
-4. **For `--export` (after blueprint JSON exists):**
+2. **For `--export` (after blueprint JSON exists):**
    ```python
    from pathlib import Path
    from business_blueprint.model import load_json
-   from business_blueprint.export_svg import export_svg
-   from business_blueprint.export_drawio import export_drawio
-   from business_blueprint.export_excalidraw import export_excalidraw
-   from business_blueprint.export_mermaid import export_mermaid
+   from business_blueprint.export_svg import export_svg_auto
+   from business_blueprint.export_html import export_html_viewer
 
    blueprint_path = Path("solution.blueprint.json")
    blueprint = load_json(blueprint_path)
    export_dir = blueprint_path.with_name("solution.exports")
    export_dir.mkdir(parents=True, exist_ok=True)
-   export_svg(blueprint, export_dir / "solution.svg")
-   export_drawio(blueprint, export_dir / "solution.drawio")
-   export_excalidraw(blueprint, export_dir / "solution.excalidraw")
-   export_mermaid(blueprint, export_dir / "solution.mermaid.md")
+   # Default fallback is freeflow unless a standard export template applies.
+   export_svg_auto(blueprint, export_dir / "solution.svg")
+   export_html_viewer(blueprint, blueprint_path.with_name("solution.blueprint.html"))
    ```
 
-5. **Prohibited patterns in sandbox:**
+3. **Prohibited patterns in sandbox:**
    - `__file__` — undefined in Jupyter
    - `sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))` — will raise NameError
    - `subprocess.run(["business-blueprint", ...])` — sandbox runs Python cells, not shell
@@ -151,17 +203,41 @@ When user requests an architecture diagram (keywords: "架构图", "architecture
 4. Generate a self-contained HTML file with inline SVG following the design system rules.
 5. Write the output file to the same directory as the blueprint JSON.
 
+If the request does not match one of the supported standard templates above, stay on the default `freeflow` export path. Do not switch to another generic view type as a fallback.
+If a standard template would create a squeezed, clipped, or overcrowded diagram, stop using the fixed template geometry and fall back to `freeflow` or a wrapped multi-row layout.
+
+### Route eligibility matrix
+
+Use an explicit route contract before rendering:
+
+| Route | Structural prerequisites | First fallback | Terminal behavior |
+|------|---------------------------|----------------|-------------------|
+| `freeflow` | Any valid blueprint with at least one renderable node or relation | None | If integrity still fails, export exits non-zero with a structural diagnostics payload |
+| `architecture-template` | Recognizable L→R architecture shape, categorized systems, limited per-layer density, and no route-breaking overflow risk | `freeflow` | Same as above |
+| `poster` | Clear layer/group structure with bounded peer density per row or wrapped-row support | wrapped poster or `freeflow` | Same as above |
+| `swimlane` | Actor-owned flow steps with meaningful lane grouping | `freeflow` | Same as above |
+| `hierarchy` | Stable tree/group relationship with low ambiguity in parent-child grouping | `freeflow` | Same as above |
+| `evolution` | Ordered chronological or staged progression data | `freeflow` | Same as above |
+
+Do not invent route heuristics ad hoc inside a renderer. Route eligibility must stay explicit and reviewable.
+
 ### Generation Rules
-- Use dark mode by default (`#020617` bg + 40px grid)
+- Use dark mode by default (`#020617` bg + 40px grid). Only use light mode when the user explicitly asks for it.
 - L→R data flow: Clients(左) → Frontend → Backend → Database(右)
 - Map `systems[].category` to semantic colors from the design system
 - Map `systems[].properties.type == "aws"` → AWS Region boundary box
 - Map `systems[].properties.type == "k8s"` → Kubernetes Cluster boundary box
 - Use `flowSteps[].seqIndex` for L→R ordering
 - Component sizing: 0-1 cap = small(44px h), 2-4 = medium(80px h), 5+ = large(80px h)
+- Layout must be content-driven. Never force every node in a layer into one fixed row if that creates toothpaste-style squeezing.
+- When a layer has more than 3 peer nodes, or labels/features become tight, wrap into multiple rows or widen the canvas before shrinking the content.
+- Render users/actors as actor labels, badges, or lane headers by default. Do not render them as ordinary system cards unless the user explicitly asks for that visual treatment.
+- Legend must live in a bottom safe area and participate in canvas sizing. Never place the legend as a floating overlay in the top-right corner.
+- Final SVG/HTML height must be derived from the bottom-most node, legend, summary cards, and footer plus padding. Do not use fixed-height wrappers or `overflow: hidden` that can clip the last row.
 - Z-order: bg → grid → title → region → arrows → nodes → legend → cards → footer
 - Component border: `rx="8"`, `stroke-width="2"`
 - Region border: `rx="16"`, `stroke-dasharray="8,4"`, `opacity="0.4"`
+- Geometry-sensitive integrity checks must use the numeric thresholds from `evals/export-integrity-thresholds.json`, not prose heuristics.
 
 ### Output
 - Single HTML file: `{blueprint_stem}.html` alongside the blueprint JSON
@@ -170,7 +246,20 @@ When user requests an architecture diagram (keywords: "架构图", "architecture
 
 ## Error Handling
 
-- If source text is too ambiguous to extract any entities: run `--plan` with minimal output, then surface `clarifyRequests`.
 - If `--validate` returns errors: fix structural issues before proceeding to `--export`.
 - If `--validate` returns only warnings: proceed but note the warnings in any handoff.
 - If Python version < 3.12: the package will refuse to install. Use `python3 -m business_blueprint.cli` with system Python as fallback.
+- If a specialized route fails integrity: fall back to its configured fallback route.
+- If `freeflow` also fails integrity: export exits non-zero with a structural diagnostics payload instead of emitting a silently broken artifact.
+
+## Cross-Platform Scope
+
+Phase 2 does not attempt full Windows terminal parity.
+
+Known deferred cases:
+- PowerShell pipe quirks beyond documented CLI contract tests
+- console-default encoding issues outside explicit UTF-8 execution paths
+
+Accepted workaround for encoding-sensitive runs:
+- use `python -m business_blueprint.cli`
+- set `PYTHONIOENCODING=utf-8` where needed
