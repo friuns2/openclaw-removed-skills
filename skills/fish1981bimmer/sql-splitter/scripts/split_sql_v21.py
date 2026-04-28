@@ -3,6 +3,12 @@
 SQL 文件拆分工具 - 多数据库方言支持
 支持 MySQL, PostgreSQL, Oracle, SQL Server, 达梦(DM) 等数据库
 
+v2.1 新功能:
+- 集成详细错误处理和修复建议
+- 添加进度条显示（支持 tqdm）
+- 支持 dry-run 预览模式
+- 返回结构化的 SplitResult 对象
+
 v2.0 重写要点:
 - 使用 BEGIN...END 深度匹配确定存储过程/函数/触发器边界
 - 不再依赖"下一个 CREATE"作为上界，正确处理嵌套 CREATE
@@ -26,6 +32,13 @@ from common import (
 from error_handler import (
     ErrorHandler, SplitError, SplitWarning, SplitResult, ErrorType,
 )
+
+# 尝试导入 tqdm，如果不可用则使用简单进度显示
+try:
+    from tqdm import tqdm
+    HAS_TQDM = True
+except ImportError:
+    HAS_TQDM = False
 
 
 # ============================================================
@@ -586,19 +599,45 @@ def split_sql_file(
     dialect: Optional[SQLDialect] = None,
     verbose: bool = True,
     generate_merge: bool = True,
-) -> Dict:
-    """拆分 SQL 文件"""
+    dry_run: bool = False,
+    show_progress: bool = True,
+) -> SplitResult:
+    """
+    拆分 SQL 文件（增强版）
+    
+    Args:
+        input_file: 输入文件路径
+        output_dir: 输出目录（可选）
+        dialect: SQL方言（可选，自动检测）
+        verbose: 是否显示详细信息
+        generate_merge: 是否生成合并脚本
+        dry_run: 预览模式，不实际生成文件
+        show_progress: 是否显示进度条
+        
+    Returns:
+        SplitResult: 拆分结果对象
+    """
+    errors = []
+    warnings = []
+    created_files = []
+    stats = defaultdict(int)
+    
+    # 读取文件
     try:
         with open(input_file, 'r', encoding='utf-8', errors='replace') as f:
             sql_content = f.read()
     except Exception as e:
-        return {
-            'output_dir': None,
-            'created_files': [],
-            'errors': [f"无法读取文件: {e}"],
-            'stats': {},
-            'total': 0,
-        }
+        errors.append(ErrorHandler.create_file_read_error(input_file, str(e)))
+        return SplitResult(
+            success=False,
+            output_dir=None,
+            files_created=[],
+            errors=errors,
+            warnings=warnings,
+            stats={},
+            total=0,
+            dry_run=dry_run,
+        )
 
     if dialect is None:
         dialect = detect_dialect(sql_content)
@@ -609,7 +648,10 @@ def split_sql_file(
     if output_dir is None:
         output_dir = os.path.splitext(input_file)[0] + '_split'
 
-    os.makedirs(output_dir, exist_ok=True)
+    if not dry_run:
+        os.makedirs(output_dir, exist_ok=True)
+    elif verbose:
+        print(f"[dry-run] 预览模式：将输出到 {output_dir}")
 
     patterns = DIALECT_PATTERNS.get(dialect, DIALECT_PATTERNS[SQLDialect.GENERIC])
 
@@ -643,12 +685,15 @@ def split_sql_file(
         print(f"[scan] 找到 {len(found_objects)} 个对象")
 
     # ---- 提取并保存每个对象 ----
-    created_files = []
-    errors = []
-    stats = defaultdict(int)
     all_objects_info = []  # 用于依赖分析
 
-    for obj in found_objects:
+    # 创建进度条
+    if show_progress and HAS_TQDM and len(found_objects) > 0:
+        iterator = tqdm(found_objects, desc="拆分对象", unit="个")
+    else:
+        iterator = found_objects
+
+    for obj in iterator:
         end_pos = find_object_end(sql_content, dialect, obj['type'], obj['start'])
 
         obj_content = sql_content[obj['start']:end_pos].strip()
@@ -665,7 +710,7 @@ def split_sql_file(
         filepath = os.path.join(output_dir, filename)
 
         # 处理同名文件（追加序号）
-        if os.path.exists(filepath):
+        if not dry_run and os.path.exists(filepath):
             seq = 2
             while os.path.exists(f"{prefix}_{obj['name']}_{seq}.sql"):
                 seq += 1
@@ -673,13 +718,15 @@ def split_sql_file(
             filepath = os.path.join(output_dir, filename)
 
         try:
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write(obj_content)
-                if not obj_content.rstrip().endswith(';'):
-                    # Oracle/DM 不强制加分号（用 / 代替）
-                    if dialect not in (SQLDialect.ORACLE, SQLDialect.DM):
-                        f.write(';')
-                f.write('\n')
+            if not dry_run:
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(obj_content)
+                    if not obj_content.rstrip().endswith(';'):
+                        # Oracle/DM 不强制加分号（用 / 代替）
+                        if dialect not in (SQLDialect.ORACLE, SQLDialect.DM):
+                            f.write(';')
+                    f.write('\n')
+            
             created_files.append(filepath)
             stats[obj['type']] += 1
             all_objects_info.append({
@@ -689,13 +736,17 @@ def split_sql_file(
                 'filename': filename,
             })
             if verbose:
-                print(f"  [ok] {filename}")
+                mode_str = "[dry-run] " if dry_run else ""
+                print(f"  {mode_str}[ok] {filename}")
         except Exception as e:
-            errors.append(f"写入 {filename} 失败: {e}")
+            error = ErrorHandler.create_file_write_error(filename, str(e))
+            errors.append(error)
+            if verbose:
+                print(f"  [error] {filename}: {e}")
 
     # ---- 生成依赖排序的合并脚本 ----
     merge_script_path = None
-    if generate_merge and all_objects_info:
+    if generate_merge and all_objects_info and not dry_run:
         try:
             from dependency_analyzer import DependencyAnalyzer
             analyzer = DependencyAnalyzer(dialect)
@@ -710,17 +761,24 @@ def split_sql_file(
             if verbose:
                 print("  [skip] 依赖分析器不可用，跳过合并脚本生成")
         except Exception as e:
+            warning = ErrorHandler.create_warning(f"合并脚本生成失败: {e}")
+            warnings.append(warning)
             if verbose:
                 print(f"  [warn] 合并脚本生成失败: {e}")
 
-    return {
-        'output_dir': output_dir,
-        'created_files': created_files,
-        'errors': errors,
-        'stats': dict(stats),
-        'total': len(created_files),
-        'merge_script': merge_script_path,
-    }
+    # 返回结构化结果
+    success = len(errors) == 0
+    return SplitResult(
+        success=success,
+        output_dir=output_dir,
+        files_created=created_files,
+        errors=errors,
+        warnings=warnings,
+        stats=dict(stats),
+        total=len(created_files),
+        merge_script=merge_script_path,
+        dry_run=dry_run,
+    )
 
 
 def split_sql_batch(
@@ -750,7 +808,7 @@ def main():
     """命令行入口"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='SQL 文件拆分工具 v2.0')
+    parser = argparse.ArgumentParser(description='SQL 文件拆分工具 v2.1')
     parser.add_argument('input', help='输入 SQL 文件或目录')
     parser.add_argument('output', nargs='?', help='输出目录')
     parser.add_argument('--batch', action='store_true', help='批量处理目录')
@@ -759,6 +817,8 @@ def main():
                         help='指定 SQL 方言')
     parser.add_argument('--no-merge', action='store_true', help='不生成合并脚本')
     parser.add_argument('-q', '--quiet', action='store_true', help='静默模式')
+    parser.add_argument('--dry-run', action='store_true', help='预览模式，不实际生成文件')
+    parser.add_argument('--no-progress', action='store_true', help='不显示进度条')
 
     args = parser.parse_args()
 
@@ -774,6 +834,8 @@ def main():
     dialect = dialect_map.get(args.dialect) if args.dialect else None
     verbose = not args.quiet
     generate_merge = not args.no_merge
+    dry_run = args.dry_run
+    show_progress = not args.no_progress
 
     if args.batch:
         input_paths = [args.input] if ',' not in args.input else args.input.split(',')
@@ -781,12 +843,46 @@ def main():
         total_files = sum(r['total'] for r in results)
         print(f"\n[done] 共创建 {total_files} 个文件")
     else:
-        result = split_sql_file(args.input, args.output, dialect, verbose, generate_merge)
-        if result['errors']:
-            print("\n[error]")
-            for err in result['errors']:
-                print(f"  {err}")
-        print(f"\n[done] 共创建 {result['total']} 个文件")
+        result = split_sql_file(
+            args.input, 
+            args.output, 
+            dialect, 
+            verbose, 
+            generate_merge,
+            dry_run=dry_run,
+            show_progress=show_progress,
+        )
+        
+        # 显示错误和警告
+        if result.errors:
+            print("\n[error] 错误信息:")
+            for err in result.errors:
+                if isinstance(err, SplitError):
+                    print(f"  - {err.message}")
+                    if err.suggestion:
+                        print(f"    建议: {err.suggestion}")
+                else:
+                    print(f"  - {err}")
+        
+        if result.warnings:
+            print("\n[warning] 警告信息:")
+            for warn in result.warnings:
+                if isinstance(warn, SplitWarning):
+                    print(f"  - {warn.message}")
+                else:
+                    print(f"  - {warn}")
+        
+        # 显示统计信息
+        if verbose:
+            print(f"\n[done] 共拆分 {result.total} 个对象")
+            if result.stats:
+                print("[统计]")
+                for obj_type, count in result.stats.items():
+                    print(f"  {obj_type}: {count}")
+            if result.merge_script:
+                print(f"[merge] 合并脚本: {result.merge_script}")
+            if dry_run:
+                print("[dry-run] 预览模式完成，未实际生成文件")
 
 
 if __name__ == '__main__':
