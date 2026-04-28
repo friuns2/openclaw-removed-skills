@@ -3,9 +3,15 @@
   "slug": "whatsable",
   "displayName": "Whatsable",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775311442645,
-    "commit": "https://github.com/openclaw/skills/commit/c866c880b02d140a5feabb24c24579c0f21636be"
+    "version": "1.0.1",
+    "publishedAt": 1776883850398,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775311442645,
+      "commit": "https://github.com/openclaw/skills/commit/c866c880b02d140a5feabb24c24579c0f21636be"
+    }
+  ]
 }
