@@ -3,9 +3,15 @@
   "slug": "tray",
   "displayName": "Tray",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775311425117,
-    "commit": "https://github.com/openclaw/skills/commit/1bf3fcc23e88fd273e6ca880e83e427a99ea1c01"
+    "version": "1.0.1",
+    "publishedAt": 1776883837768,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775311425117,
+      "commit": "https://github.com/openclaw/skills/commit/1bf3fcc23e88fd273e6ca880e83e427a99ea1c01"
+    }
+  ]
 }
