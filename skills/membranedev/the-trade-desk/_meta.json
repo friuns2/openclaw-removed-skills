@@ -3,9 +3,15 @@
   "slug": "the-trade-desk",
   "displayName": "The Trade Desk",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775675044852,
-    "commit": "https://github.com/openclaw/skills/commit/b6b3502169779bd04042fc7c740780a37d0ba0fc"
+    "version": "1.0.1",
+    "publishedAt": 1776897860765,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775675044852,
+      "commit": "https://github.com/openclaw/skills/commit/b6b3502169779bd04042fc7c740780a37d0ba0fc"
+    }
+  ]
 }
