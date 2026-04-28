@@ -22,6 +22,14 @@ def require_existing_path(parser: argparse.ArgumentParser, raw_path: str, label:
     return path
 
 
+def path_is_within(candidate: Path, ancestor: Path) -> bool:
+    try:
+        candidate.relative_to(ancestor)
+    except ValueError:
+        return False
+    return True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", required=True, help="Source file or directory.")
@@ -32,6 +40,12 @@ def main() -> int:
     root = require_existing_path(parser, args.root, "--root")
     out_dir = Path(args.out_dir).expanduser().resolve()
     report_path = Path(args.out).expanduser().resolve()
+    if root.is_dir() and (
+        out_dir == root or path_is_within(out_dir, root) or path_is_within(root, out_dir)
+    ):
+        parser.error("--out-dir must not overlap with --root when --root is a directory")
+    if out_dir.exists() and any(out_dir.iterdir()):
+        parser.error("--out-dir must be empty before redaction starts")
     out_dir.mkdir(parents=True, exist_ok=True)
     report_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -47,6 +61,8 @@ def main() -> int:
     }
 
     for path in iter_candidate_files(root):
+        if out_dir.exists() and path_is_within(path, out_dir):
+            continue
         rel_path = Path(path.name) if root.is_file() else path.relative_to(root)
         text = read_text_if_supported(path)
         if text is None:

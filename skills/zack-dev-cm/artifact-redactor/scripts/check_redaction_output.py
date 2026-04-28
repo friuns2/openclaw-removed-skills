@@ -41,6 +41,20 @@ def load_manual_review_items(path: Path) -> List[dict[str, str]]:
     return items
 
 
+def merge_manual_review_items(*groups: List[dict[str, str]]) -> List[dict[str, str]]:
+    merged: list[dict[str, str]] = []
+    seen_files: set[str] = set()
+    for group in groups:
+        for item in group:
+            file_name = str(item.get("file") or "").strip()
+            reason = str(item.get("reason") or "manual-review-required").strip()
+            if not file_name or file_name in seen_files:
+                continue
+            merged.append({"file": file_name, "reason": reason})
+            seen_files.add(file_name)
+    return merged
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", required=True, help="Redacted output directory or file.")
@@ -56,11 +70,14 @@ def main() -> int:
     findings: list[dict[str, object]] = []
     scanned_files = 0
     skipped_files: list[str] = []
+    output_manual_review_files: list[dict[str, str]] = []
 
     for path in iter_candidate_files(root):
         text = read_text_if_supported(path)
         if text is None:
-            skipped_files.append(str(path.relative_to(root)) if root.is_dir() else path.name)
+            rel_path = str(path.relative_to(root)) if root.is_dir() else path.name
+            skipped_files.append(rel_path)
+            output_manual_review_files.append({"file": rel_path, "reason": "binary-or-unsupported-output"})
             continue
         scanned_files += 1
         rel_path = str(path.relative_to(root)) if root.is_dir() else path.name
@@ -76,7 +93,10 @@ def main() -> int:
             )
 
     try:
-        manual_review_files = load_manual_review_items(redaction_path)
+        manual_review_files = merge_manual_review_items(
+            load_manual_review_items(redaction_path),
+            output_manual_review_files,
+        )
     except ValueError as exc:
         parser.error(str(exc))
     error_count = sum(1 for item in findings if item["severity"] == "error")

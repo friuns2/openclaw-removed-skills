@@ -3,9 +3,15 @@
   "slug": "artifact-redactor",
   "displayName": "Artifact Redactor",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776224672925,
-    "commit": "https://github.com/openclaw/skills/commit/07a7149219e616548cef1665933d9d6cf30769e9"
+    "version": "1.0.6",
+    "publishedAt": 1777036049848,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776224672925,
+      "commit": "https://github.com/openclaw/skills/commit/07a7149219e616548cef1665933d9d6cf30769e9"
+    }
+  ]
 }
