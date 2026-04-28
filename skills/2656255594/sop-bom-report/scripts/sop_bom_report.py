@@ -371,7 +371,6 @@ def parse_sop_file(sop_path: str) -> List[Dict]:
         sheet_content = f.read()
     
     current_page = 0
-    seen_codes = set()  # 去重
     
     # ========== 标准格式提取 ==========
     # AQ列物料编码 + AN列序号(1-20)
@@ -414,10 +413,6 @@ def parse_sop_file(sop_path: str) -> List[Dict]:
         seq = int(seq_str)
         if seq < 1 or seq > 20:
             continue
-        
-        if code in seen_codes:
-            continue
-        seen_codes.add(code)
         
         material_rows.append(row_num)
         
@@ -463,7 +458,6 @@ def parse_sop_file(sop_path: str) -> List[Dict]:
         QTY_COLUMNS = ['BO', 'BP', 'BN', 'BQ']
         
         current_page = 0
-        seen_codes = set()
         material_rows = []  # 收集物料编码所在的行号
         
         for row_match in re.finditer(r'<row r="(\d+)"[^>]*>(.*?)</row>', sheet_content, re.DOTALL):
@@ -510,10 +504,6 @@ def parse_sop_file(sop_path: str) -> List[Dict]:
             
             if not code:
                 continue
-            
-            if code in seen_codes:
-                continue
-            seen_codes.add(code)
             
             material_rows.append(row_num)
             
@@ -603,14 +593,9 @@ def parse_sop_file(sop_path: str) -> List[Dict]:
     # 如果兼容模式仍然没有提取到物料，使用共享字符串直接提取
     if not items:
         logger.info("兼容模式未提取到物料，启用共享字符串直接提取模式")
-        seen_codes = set()
         for i, s in enumerate(shared_strings):
             code = s.strip()
             if MATERIAL_CODE_PATTERN.match(code):
-                if code in seen_codes:
-                    continue
-                seen_codes.add(code)
-                
                 # 获取相邻的名称规格
                 name_spec = ''
                 if i + 1 < len(shared_strings):

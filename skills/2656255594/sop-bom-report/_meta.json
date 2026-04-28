@@ -3,9 +3,15 @@
   "slug": "sop-bom-report",
   "displayName": "Sop Bom Report",
   "latest": {
-    "version": "1.4.2",
-    "publishedAt": 1775902804052,
-    "commit": "https://github.com/openclaw/skills/commit/b6596ce8b6b3c4a16b01e5d909ed54956ddbfebc"
+    "version": "1.4.3",
+    "publishedAt": 1776850425950,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.4.2",
+      "publishedAt": 1775902804052,
+      "commit": "https://github.com/openclaw/skills/commit/b6596ce8b6b3c4a16b01e5d909ed54956ddbfebc"
+    }
+  ]
 }
