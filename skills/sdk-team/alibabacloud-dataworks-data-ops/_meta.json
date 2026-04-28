@@ -3,9 +3,15 @@
   "slug": "alibabacloud-dataworks-data-ops",
   "displayName": "Alibabacloud Dataworks Data Ops",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1776071048270,
-    "commit": "https://github.com/openclaw/skills/commit/717914ca48931823a3e2b8a0e0c6f703dbb49ceb"
+    "version": "0.0.2",
+    "publishedAt": 1776750703641,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1776071048270,
+      "commit": "https://github.com/openclaw/skills/commit/717914ca48931823a3e2b8a0e0c6f703dbb49ceb"
+    }
+  ]
 }
