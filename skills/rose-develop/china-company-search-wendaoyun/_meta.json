@@ -3,9 +3,15 @@
   "slug": "china-company-search-wendaoyun",
   "displayName": "China company search wendaoyun",
   "latest": {
-    "version": "1.1.21",
-    "publishedAt": 1776499531321,
-    "commit": "https://github.com/openclaw/skills/commit/93be5148e3e11b2fcd597660898e66b701958819"
+    "version": "1.2.21",
+    "publishedAt": 1776750936960,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.21",
+      "publishedAt": 1776499531321,
+      "commit": "https://github.com/openclaw/skills/commit/93be5148e3e11b2fcd597660898e66b701958819"
+    }
+  ]
 }
