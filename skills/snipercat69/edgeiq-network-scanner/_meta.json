@@ -1,11 +1,17 @@
 {
   "owner": "snipercat69",
   "slug": "edgeiq-network-scanner",
-  "displayName": "EdgeIQ Network Scanner",
+  "displayName": "Network Scanner",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776187504758,
-    "commit": "https://github.com/openclaw/skills/commit/aec2f7045879f968d75b7cf357c64ba2d98bfd8b"
+    "version": "1.4.0",
+    "publishedAt": 1777136899484,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776187504758,
+      "commit": "https://github.com/openclaw/skills/commit/aec2f7045879f968d75b7cf357c64ba2d98bfd8b"
+    }
+  ]
 }
