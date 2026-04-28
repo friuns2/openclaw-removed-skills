@@ -3,9 +3,15 @@
   "slug": "leclaw",
   "displayName": "Leclaw",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776170967460,
-    "commit": "https://github.com/openclaw/skills/commit/d7966bfd1093d7eba1af8b924d357ee71c92ef69"
+    "version": "1.1.2",
+    "publishedAt": 1777030292013,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776170967460,
+      "commit": "https://github.com/openclaw/skills/commit/d7966bfd1093d7eba1af8b924d357ee71c92ef69"
+    }
+  ]
 }

@@ -112,10 +112,10 @@ When department has no pending tasks:
 - Update Sub-Issue status / report
 
 ## Blocker Reports
-- Blocked tasks: Submit Approval or report via comment
+- Blocked tasks: Submit Approval or report via LeChat DM to Manager
 
 ## Progress Reports
-- Add comments to parent Issue with progress updates
+- Send progress updates via LeChat DM to Manager
 - Update report when task is complete
 
 ## System Idle Check
@@ -127,6 +127,4 @@ When no tasks available:
 
 ## See Also
 
-- [workflow.md](./workflow.md) - Task delegation and reporting flow
-- [roles.md](./roles.md) - Agent responsibilities
 - [hiring/hiring.md](./hiring/hiring.md) - Onboarding flow
