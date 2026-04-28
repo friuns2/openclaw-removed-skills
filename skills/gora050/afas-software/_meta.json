@@ -3,9 +3,15 @@
   "slug": "afas-software",
   "displayName": "Afas Software",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775347448480,
-    "commit": "https://github.com/openclaw/skills/commit/e6960e5dee4fa6b03e66960218b7287c9edd1a23"
+    "version": "1.0.1",
+    "publishedAt": 1776899523929,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775347448480,
+      "commit": "https://github.com/openclaw/skills/commit/e6960e5dee4fa6b03e66960218b7287c9edd1a23"
+    }
+  ]
 }
