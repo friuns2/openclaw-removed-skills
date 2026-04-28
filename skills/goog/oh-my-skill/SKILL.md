@@ -23,9 +23,9 @@ Trigger **proactively** after completing any task that involved:
 - Tool combinations that aren't obvious and took iteration
 
 After such a task completes successfully, say something like:
-> "That was a fairly involved workflow — want me to save it as a reusable skill so you (or I) can repeat it faster next time?"
+> "That was a fairly involved workflow — want me to save it as a reusable skill so you can repeat it easily next time?"
 
-If the user says yes, or explicitly asks to auto-skill, proceed with the steps below.
+If the user says yes, or explicitly asks to generate a skill, proceed with the steps below.
 
 ---
 
@@ -62,21 +62,7 @@ The script applies two layers of masking:
 - `Bill Gates` → `A man`
 - Add more entries in the `LITERAL_REPLACEMENTS` list in `desensitize.py`
 
-**Pattern-based masking** (regex, auto-detected):
-
-| Pattern | Replacement |
-|---|---|
-| Email addresses | `[EMAIL]` |
-| API keys (`sk-`, `pk-`, Bearer) | `[API_KEY]` |
-| JWT tokens | `[JWT_TOKEN]` |
-| IPv4 addresses | `[IP_ADDRESS]` |
-| Phone numbers | `[PHONE]` |
-| Credit card numbers | `[CARD_NUMBER]` |
-| Home/user directory paths | `/home/[USER]/` |
-| URLs with embedded credentials | `[CREDENTIALS]` |
-| SSH private keys | `[PRIVATE_KEY]` |
-| AWS key IDs | `[AWS_KEY_ID]` |
-| `password=`, `token=`, `secret=` lines | `[REDACTED]` |
+**Pattern-based masking** (regex, auto-detected)
 
 Use the **cleaned text** as the source for all subsequent steps.
 
@@ -87,7 +73,7 @@ Write a `SKILL.md` with:
 ```
 ---
 name: <kebab-case-name>
-description: <When to trigger + what it does. Be specific and "pushy" — list all the user phrases and contexts that should trigger this skill.>
+description: <What it does, when to trigger. Be specific and "pushy" — list all the user phrases and contexts that should trigger this skill.>
 ---
 
 # <Skill Title>
