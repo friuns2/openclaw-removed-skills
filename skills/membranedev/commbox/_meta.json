@@ -3,9 +3,15 @@
   "slug": "commbox",
   "displayName": "Commbox",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775358270959,
-    "commit": "https://github.com/openclaw/skills/commit/31b278f45320baad9414a35156ef319df4104d38"
+    "version": "1.0.1",
+    "publishedAt": 1776884365239,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775358270959,
+      "commit": "https://github.com/openclaw/skills/commit/31b278f45320baad9414a35156ef319df4104d38"
+    }
+  ]
 }
