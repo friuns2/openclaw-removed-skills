@@ -3,9 +3,15 @@
   "slug": "privacy-dynamics",
   "displayName": "Privacy Dynamics",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775714673418,
-    "commit": "https://github.com/openclaw/skills/commit/8586745e890e64f0f7a868ab13a42a9c01b289b7"
+    "version": "1.0.1",
+    "publishedAt": 1776898091240,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775714673418,
+      "commit": "https://github.com/openclaw/skills/commit/8586745e890e64f0f7a868ab13a42a9c01b289b7"
+    }
+  ]
 }
