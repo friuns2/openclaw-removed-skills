@@ -117,10 +117,10 @@ Every listing is checked against:
 
 ---
 
-## Want Batch Mode + Saved History?
+## Want Multi-Platform Coverage?
 
-This skill generates one listing at a time. **[ListingBridge](https://listingbridge.phantomworks.io)** adds batch processing, listing version history, A/B comparison, and team collaboration — built for Chinese sellers scaling on Amazon.
+This skill writes Amazon listings. The **[Multi-Platform Listing Optimizer for Non-Native Sellers](https://www.shopclawmart.com/listings/multi-platform-listing-optimizer-for-non-native-sellers-ea202e82)** on ClawMart covers Amazon, Etsy, Shopify, eBay, and TikTok Shop — including platform-specific format rules, cultural adaptation scoring, and a confidence meter that shows how close your listing is to native-level English.
 
 ---
 
-Built by [PhantomWorks](https://phantomworks.io). Scale your Amazon business: [ListingBridge](https://listingbridge.phantomworks.io).
+Built by [PhantomWorks](https://phantomworks.io). Expand beyond Amazon: [Multi-Platform Listing Optimizer](https://www.shopclawmart.com/listings/multi-platform-listing-optimizer-for-non-native-sellers-ea202e82) on ClawMart.
