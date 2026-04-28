@@ -3,9 +3,15 @@
   "slug": "cronfree",
   "displayName": "Cronfree",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775390677884,
-    "commit": "https://github.com/openclaw/skills/commit/ae704a6fb695151b1e20e6c1e45d62da68981088"
+    "version": "1.0.1",
+    "publishedAt": 1776888841787,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775390677884,
+      "commit": "https://github.com/openclaw/skills/commit/ae704a6fb695151b1e20e6c1e45d62da68981088"
+    }
+  ]
 }
