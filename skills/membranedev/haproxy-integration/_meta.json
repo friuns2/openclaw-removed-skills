@@ -3,9 +3,15 @@
   "slug": "haproxy-integration",
   "displayName": "Haproxy",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775545425232,
-    "commit": "https://github.com/openclaw/skills/commit/6002294809d3e48ec880a0e6668bb341f170374e"
+    "version": "1.0.1",
+    "publishedAt": 1776898501013,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775545425232,
+      "commit": "https://github.com/openclaw/skills/commit/6002294809d3e48ec880a0e6668bb341f170374e"
+    }
+  ]
 }
