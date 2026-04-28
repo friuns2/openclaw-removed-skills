@@ -3,11 +3,16 @@
   "slug": "cs-qweather-alert",
   "displayName": "Cs Qweather Alert",
   "latest": {
-    "version": "1.4.0",
-    "publishedAt": 1775754131052,
-    "commit": "https://github.com/openclaw/skills/commit/a015c668f25c3ebed6cda8f04c920ff8a0fbe788"
+    "version": "2.0.0",
+    "publishedAt": 1777220453231,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.4.0",
+      "publishedAt": 1775754131052,
+      "commit": "https://github.com/openclaw/skills/commit/a015c668f25c3ebed6cda8f04c920ff8a0fbe788"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775670584600,
