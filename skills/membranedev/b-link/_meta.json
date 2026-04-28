@@ -3,9 +3,15 @@
   "slug": "b-link",
   "displayName": "B Link",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775437430627,
-    "commit": "https://github.com/openclaw/skills/commit/03b48f8f21e12d29a93839e4ca5697563a6901ee"
+    "version": "1.0.1",
+    "publishedAt": 1776897130402,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775437430627,
+      "commit": "https://github.com/openclaw/skills/commit/03b48f8f21e12d29a93839e4ca5697563a6901ee"
+    }
+  ]
 }
