@@ -3,9 +3,15 @@
   "slug": "jaegertracing",
   "displayName": "Jaegertracing",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297205988,
-    "commit": "https://github.com/openclaw/skills/commit/835f312159dc3e4b09f6dfefae6e5231dfb8b06d"
+    "version": "1.0.1",
+    "publishedAt": 1776885818393,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297205988,
+      "commit": "https://github.com/openclaw/skills/commit/835f312159dc3e4b09f6dfefae6e5231dfb8b06d"
+    }
+  ]
 }
