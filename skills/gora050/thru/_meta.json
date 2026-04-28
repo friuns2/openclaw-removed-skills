@@ -3,9 +3,15 @@
   "slug": "thru",
   "displayName": "Thru",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775372826226,
-    "commit": "https://github.com/openclaw/skills/commit/b50d4740ec16e538f8cb2b806c2cbf6125082413"
+    "version": "1.0.1",
+    "publishedAt": 1776892122835,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775372826226,
+      "commit": "https://github.com/openclaw/skills/commit/b50d4740ec16e538f8cb2b806c2cbf6125082413"
+    }
+  ]
 }
