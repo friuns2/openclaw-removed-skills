@@ -3,11 +3,16 @@
   "slug": "okx-x402-payment",
   "displayName": "Okx 402 Payment",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776333584927,
-    "commit": "https://github.com/openclaw/skills/commit/e3f57e64a332a9cc73609bd6200b89e6614ec382"
+    "version": "2.4.0",
+    "publishedAt": 1776779129355,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776333584927,
+      "commit": "https://github.com/openclaw/skills/commit/e3f57e64a332a9cc73609bd6200b89e6614ec382"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775723162477,
