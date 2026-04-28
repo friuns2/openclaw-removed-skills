@@ -3,9 +3,15 @@
   "slug": "audio-ptbr-autoreply",
   "displayName": "Transcrição e respostas em áudio em PTBR, Português Brasil - Brazillian portuguese transcription and audio answers",
   "latest": {
-    "version": "2.0.2",
-    "publishedAt": 1776147826045,
-    "commit": "https://github.com/openclaw/skills/commit/e0dfc0787558bebf6380f0dad690c3fa6234d42b"
+    "version": "2.1.3",
+    "publishedAt": 1777319896720,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.0.2",
+      "publishedAt": 1776147826045,
+      "commit": "https://github.com/openclaw/skills/commit/e0dfc0787558bebf6380f0dad690c3fa6234d42b"
+    }
+  ]
 }
