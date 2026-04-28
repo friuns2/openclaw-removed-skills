@@ -3,9 +3,15 @@
   "slug": "shiphero",
   "displayName": "Shiphero",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775552678258,
-    "commit": "https://github.com/openclaw/skills/commit/e2c784aa3b2c12fe196dc5b1ca8dd53cf791fd5e"
+    "version": "1.0.2",
+    "publishedAt": 1776895395897,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775552678258,
+      "commit": "https://github.com/openclaw/skills/commit/e2c784aa3b2c12fe196dc5b1ca8dd53cf791fd5e"
+    }
+  ]
 }
