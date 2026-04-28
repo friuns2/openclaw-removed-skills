@@ -3,9 +3,15 @@
   "slug": "interswitch-group",
   "displayName": "Interswitch Group",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775714681831,
-    "commit": "https://github.com/openclaw/skills/commit/0208376c2b1f2107af0177ac99d7c069f85e13f4"
+    "version": "1.0.1",
+    "publishedAt": 1776898094899,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775714681831,
+      "commit": "https://github.com/openclaw/skills/commit/0208376c2b1f2107af0177ac99d7c069f85e13f4"
+    }
+  ]
 }
