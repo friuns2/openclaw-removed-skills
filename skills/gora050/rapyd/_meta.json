@@ -3,9 +3,15 @@
   "slug": "rapyd",
   "displayName": "Rapyd",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653736230,
-    "commit": "https://github.com/openclaw/skills/commit/8d06be94a8b169bf7e853473ffe88e65daaa1938"
+    "version": "1.0.1",
+    "publishedAt": 1776899340484,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653736230,
+      "commit": "https://github.com/openclaw/skills/commit/8d06be94a8b169bf7e853473ffe88e65daaa1938"
+    }
+  ]
 }
