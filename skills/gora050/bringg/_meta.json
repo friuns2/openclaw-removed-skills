@@ -3,9 +3,15 @@
   "slug": "bringg",
   "displayName": "Bringg",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775621229638,
-    "commit": "https://github.com/openclaw/skills/commit/0a2003bd82d8f981c7fa70b6de76b0e212abb9a4"
+    "version": "1.0.1",
+    "publishedAt": 1776899137716,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775621229638,
+      "commit": "https://github.com/openclaw/skills/commit/0a2003bd82d8f981c7fa70b6de76b0e212abb9a4"
+    }
+  ]
 }
