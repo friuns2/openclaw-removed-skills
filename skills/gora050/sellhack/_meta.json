@@ -3,9 +3,15 @@
   "slug": "sellhack",
   "displayName": "Sellhack",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775632061325,
-    "commit": "https://github.com/openclaw/skills/commit/d2b6291c4d92ead1db95c2ea626baa8d517ac754"
+    "version": "1.0.1",
+    "publishedAt": 1776899164865,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775632061325,
+      "commit": "https://github.com/openclaw/skills/commit/d2b6291c4d92ead1db95c2ea626baa8d517ac754"
+    }
+  ]
 }
