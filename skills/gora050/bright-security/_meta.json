@@ -3,9 +3,15 @@
   "slug": "bright-security",
   "displayName": "Bright Security",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775451999740,
-    "commit": "https://github.com/openclaw/skills/commit/e2f1d4bb9a1eaed07eb1285301301689f8183fd5"
+    "version": "1.0.1",
+    "publishedAt": 1776892743325,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775451999740,
+      "commit": "https://github.com/openclaw/skills/commit/e2f1d4bb9a1eaed07eb1285301301689f8183fd5"
+    }
+  ]
 }
