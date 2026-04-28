@@ -3,9 +3,15 @@
   "slug": "spotdraft",
   "displayName": "Spotdraft",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775671586253,
-    "commit": "https://github.com/openclaw/skills/commit/d06440f4015f836c407b5fc2fd8b3e1373f3bde5"
+    "version": "1.0.1",
+    "publishedAt": 1776899496910,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775671586253,
+      "commit": "https://github.com/openclaw/skills/commit/d06440f4015f836c407b5fc2fd8b3e1373f3bde5"
+    }
+  ]
 }
