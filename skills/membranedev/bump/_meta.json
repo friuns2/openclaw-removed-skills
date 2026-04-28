@@ -3,9 +3,15 @@
   "slug": "bump",
   "displayName": "Bump",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775459037954,
-    "commit": "https://github.com/openclaw/skills/commit/0d0f2e3cb3af4773c4b326e5e0b40222687184bb"
+    "version": "1.0.1",
+    "publishedAt": 1776897455271,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775459037954,
+      "commit": "https://github.com/openclaw/skills/commit/0d0f2e3cb3af4773c4b326e5e0b40222687184bb"
+    }
+  ]
 }
