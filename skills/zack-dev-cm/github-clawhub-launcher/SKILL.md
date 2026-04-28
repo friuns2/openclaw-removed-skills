@@ -1,13 +1,16 @@
 ---
 name: github-clawhub-launcher
-description: Public ClawHub skill for preparing, checking, and publishing a GitHub repo plus ClawHub package from one local project folder.
+description: GitHub + ClawHub Launcher is a public ClawHub release-launcher skill. Use it when the user says "github clawhub launcher", "repo release launcher", or wants to prepare, check, and publish a GitHub repo plus ClawHub package from one local project folder.
+version: 1.0.4
 homepage: https://github.com/zack-dev-cm/github-clawhub-launcher
 license: MIT-0
 user-invocable: true
-metadata: {"openclaw":{"homepage":"https://github.com/zack-dev-cm/github-clawhub-launcher","skillKey":"github-clawhub-launcher","requires":{"anyBins":["python3","python","git","gh","npx"]}}}
+metadata: {"openclaw":{"homepage":"https://github.com/zack-dev-cm/github-clawhub-launcher","skillKey":"github-clawhub-launcher","requires":{"bins":["git","gh","npx"],"anyBins":["python3","python"]},"install":[{"kind":"brew","label":"Install GitHub CLI","formula":"gh","bins":["gh"]}]}}
 ---
 
 # GitHub + ClawHub Launcher
+
+Search intent: `github clawhub launcher`, `release launcher`, `github repo publisher`, `clawhub publish flow`
 
 ## Goal
 

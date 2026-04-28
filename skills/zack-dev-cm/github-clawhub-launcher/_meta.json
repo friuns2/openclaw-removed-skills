@@ -3,11 +3,16 @@
   "slug": "github-clawhub-launcher",
   "displayName": "GitHub + ClawHub Launcher",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776224696253,
-    "commit": "https://github.com/openclaw/skills/commit/afe104c8d179e1ad43e8d56973aac3d469899ae1"
+    "version": "1.0.4",
+    "publishedAt": 1777139198496,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776224696253,
+      "commit": "https://github.com/openclaw/skills/commit/afe104c8d179e1ad43e8d56973aac3d469899ae1"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775838340155,
