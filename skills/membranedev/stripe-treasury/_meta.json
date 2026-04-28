@@ -3,9 +3,15 @@
   "slug": "stripe-treasury",
   "displayName": "Stripe Treasury",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775631886096,
-    "commit": "https://github.com/openclaw/skills/commit/8cc4f62514a1631bee758a822d88be46280b49b9"
+    "version": "1.0.1",
+    "publishedAt": 1776896480480,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775631886096,
+      "commit": "https://github.com/openclaw/skills/commit/8cc4f62514a1631bee758a822d88be46280b49b9"
+    }
+  ]
 }
