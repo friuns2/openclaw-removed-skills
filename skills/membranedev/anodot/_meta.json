@@ -3,9 +3,15 @@
   "slug": "anodot",
   "displayName": "Anodot",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775372644716,
-    "commit": "https://github.com/openclaw/skills/commit/d739ceaae9dc30aa69cc772457caa2657725fe33"
+    "version": "1.0.1",
+    "publishedAt": 1776896295537,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775372644716,
+      "commit": "https://github.com/openclaw/skills/commit/d739ceaae9dc30aa69cc772457caa2657725fe33"
+    }
+  ]
 }
