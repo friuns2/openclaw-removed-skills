@@ -3,9 +3,15 @@
   "slug": "zoho-projects-integration",
   "displayName": "Zoho Projects",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775736252556,
-    "commit": "https://github.com/openclaw/skills/commit/c8797cc6b4f3ef5ab44893a84323f8955a28998a"
+    "version": "1.0.1",
+    "publishedAt": 1776898676066,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775736252556,
+      "commit": "https://github.com/openclaw/skills/commit/c8797cc6b4f3ef5ab44893a84323f8955a28998a"
+    }
+  ]
 }
