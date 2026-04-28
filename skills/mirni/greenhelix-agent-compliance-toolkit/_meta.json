@@ -1,0 +1,11 @@
+{
+  "owner": "mirni",
+  "slug": "greenhelix-agent-compliance-toolkit",
+  "displayName": "EU AI Act Compliance for Autonomous Agents",
+  "latest": {
+    "version": "1.3.1",
+    "publishedAt": 1776236924644,
+    "commit": null
+  },
+  "history": []
+}
