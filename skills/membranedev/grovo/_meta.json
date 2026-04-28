@@ -3,9 +3,15 @@
   "slug": "grovo",
   "displayName": "Grovo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775628232027,
-    "commit": "https://github.com/openclaw/skills/commit/ec91ef3fb6b87f2e61cbfffb92efb102baa91916"
+    "version": "1.0.1",
+    "publishedAt": 1776896448615,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775628232027,
+      "commit": "https://github.com/openclaw/skills/commit/ec91ef3fb6b87f2e61cbfffb92efb102baa91916"
+    }
+  ]
 }
