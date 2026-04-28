@@ -1,0 +1,11 @@
+{
+  "owner": "peand-rover",
+  "slug": "editor-job",
+  "displayName": "Editor Job",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776229297480,
+    "commit": null
+  },
+  "history": []
+}
