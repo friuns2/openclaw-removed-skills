@@ -3,9 +3,15 @@
   "slug": "protel",
   "displayName": "Protel",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495043932,
-    "commit": "https://github.com/openclaw/skills/commit/b427a18df0d8b918ac3b50caf58be6d7e3bbeb04"
+    "version": "1.0.1",
+    "publishedAt": 1776890617405,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495043932,
+      "commit": "https://github.com/openclaw/skills/commit/b427a18df0d8b918ac3b50caf58be6d7e3bbeb04"
+    }
+  ]
 }
