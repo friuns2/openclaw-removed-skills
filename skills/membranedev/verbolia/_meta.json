@@ -3,9 +3,15 @@
   "slug": "verbolia",
   "displayName": "Verbolia",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775462639529,
-    "commit": "https://github.com/openclaw/skills/commit/dae59b3300ec5f4c5ca2522457cbb155530c13c1"
+    "version": "1.0.1",
+    "publishedAt": 1776889900010,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775462639529,
+      "commit": "https://github.com/openclaw/skills/commit/dae59b3300ec5f4c5ca2522457cbb155530c13c1"
+    }
+  ]
 }
