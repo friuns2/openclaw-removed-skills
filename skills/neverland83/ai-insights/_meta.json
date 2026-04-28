@@ -1,11 +1,17 @@
 {
   "owner": "neverland83",
   "slug": "ai-insights",
-  "displayName": "Ai Insights",
+  "displayName": "AI Insights",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776164004153,
-    "commit": "https://github.com/openclaw/skills/commit/5bcd08a469d126551288b5b99fe84ba01b1c2ba8"
+    "version": "1.1.1",
+    "publishedAt": 1777207390308,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776164004153,
+      "commit": "https://github.com/openclaw/skills/commit/5bcd08a469d126551288b5b99fe84ba01b1c2ba8"
+    }
+  ]
 }
