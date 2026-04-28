@@ -5,13 +5,21 @@ import argparse
 from common import dump_text, load_json
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Render GitHub and ClawHub publish commands from the launch manifest.")
-    parser.add_argument("--manifest", required=True, help="Launch manifest JSON.")
-    parser.add_argument("--out", required=True, help="Markdown output path.")
-    args = parser.parse_args()
+def render_reviewer_gate_section(manifest: dict) -> str:
+    gate = manifest.get("reviewer_gate") or {}
+    lines = ["## Reviewer Gate", "", "```bash"]
+    if gate.get("script"):
+        lines.append(f"python3 {gate['script']} --repo-root . --skip-codex")
+    if gate.get("pre_push_hook"):
+        lines.append("git config core.hooksPath .githooks")
+        lines.append("# The full gate will run on push through .githooks/pre-push")
+    if not gate.get("script") and not gate.get("pre_push_hook"):
+        lines.append("# no repo-local reviewer gate detected")
+    lines.append("```")
+    return "\n".join(lines)
 
-    manifest = load_json(args.manifest)
+
+def render_commands(manifest: dict) -> str:
     repo_owner = manifest.get("repo_owner", "example-org")
     repo_name = manifest["repo_name"]
     github_description = manifest.get("github_description", "")
@@ -29,6 +37,8 @@ def main() -> None:
     )
 
     sections = [f"""# Publish Commands
+
+{render_reviewer_gate_section(manifest)}
 
 ## GitHub
 
@@ -60,7 +70,16 @@ gh release create {release['tag']} --title "{release['title']}" --notes-file dis
 ```
 """
         )
-    dump_text(args.out, "\n".join(sections))
+    return "\n".join(sections)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Render GitHub and ClawHub publish commands from the launch manifest.")
+    parser.add_argument("--manifest", required=True, help="Launch manifest JSON.")
+    parser.add_argument("--out", required=True, help="Markdown output path.")
+    args = parser.parse_args()
+
+    dump_text(args.out, render_commands(load_json(args.manifest)))
     print(f"Wrote {args.out}")
 
 
