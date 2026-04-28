@@ -3,11 +3,16 @@
   "slug": "justoneapi-tiktok-shop",
   "displayName": "TikTok Shop API",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776240002662,
-    "commit": "https://github.com/openclaw/skills/commit/4a33107050486b228590f15635115d3e4b6c6034"
+    "version": "1.0.6",
+    "publishedAt": 1776924490477,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776240002662,
+      "commit": "https://github.com/openclaw/skills/commit/4a33107050486b228590f15635115d3e4b6c6034"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1775375353424,

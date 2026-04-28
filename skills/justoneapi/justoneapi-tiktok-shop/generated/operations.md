@@ -2,7 +2,7 @@
 
 Generated from JustOneAPI OpenAPI for platform key `tiktok-shop`.
 
-## `getProductDetailV1`
+## `getTiktokShopProductDetailV1`
 
 - Method: `GET`
 - Path: `/api/tiktok-shop/get-product-detail/v1`

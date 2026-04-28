@@ -19,7 +19,7 @@ This skill wraps 2 TikTok Shop operations exposed by JustOneAPI. It is strongest
 ## Representative Operations
 
 - `searchProductsV1`: Product Search — Get TikTok Shop product Search data, including title, price, and sales, for market research and trend analysis, competitor product discovery, and monitoring product popularity in specific regions
-- `getProductDetailV1`: Product Details — Get TikTok Shop product Details data, including title, description, and price, for building product catalogs, price and stock monitoring, and in-depth product analysis
+- `getTiktokShopProductDetailV1`: Product Details — Get TikTok Shop product Details data, including title, description, and price, for building product catalogs, price and stock monitoring, and in-depth product analysis
 
 ## Request Pattern
 
@@ -31,7 +31,7 @@ This skill wraps 2 TikTok Shop operations exposed by JustOneAPI. It is strongest
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `searchProductsV1`, `getProductDetailV1`.
+2. Start with one of these operations when it matches the user's request: `searchProductsV1`, `getTiktokShopProductDetailV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:

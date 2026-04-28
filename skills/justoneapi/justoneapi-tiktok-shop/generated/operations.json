@@ -7,7 +7,7 @@
     {
       "description": "Get TikTok Shop product Details data, including title, description, and price, for building product catalogs, price and stock monitoring, and in-depth product analysis.",
       "method": "GET",
-      "operationId": "getProductDetailV1",
+      "operationId": "getTiktokShopProductDetailV1",
       "parameters": [
         {
           "defaultValue": null,
