@@ -3,9 +3,15 @@
   "slug": "timetastic",
   "displayName": "Timetastic",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534840102,
-    "commit": "https://github.com/openclaw/skills/commit/af2831d2e101ea5bf04a249380b419b85ca51a91"
+    "version": "1.0.1",
+    "publishedAt": 1776893444967,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534840102,
+      "commit": "https://github.com/openclaw/skills/commit/af2831d2e101ea5bf04a249380b419b85ca51a91"
+    }
+  ]
 }
