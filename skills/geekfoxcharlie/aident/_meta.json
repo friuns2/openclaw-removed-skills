@@ -3,11 +3,16 @@
   "slug": "aident",
   "displayName": "AIdent",
   "latest": {
-    "version": "2.1.2",
-    "publishedAt": 1776333300625,
-    "commit": "https://github.com/openclaw/skills/commit/dc1ee0ce0f2b193299d7e1d3be8ebce43704c9d2"
+    "version": "2.2.3",
+    "publishedAt": 1777281509594,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.1.2",
+      "publishedAt": 1776333300625,
+      "commit": "https://github.com/openclaw/skills/commit/dc1ee0ce0f2b193299d7e1d3be8ebce43704c9d2"
+    },
     {
       "version": "2.0.0",
       "publishedAt": 1776169209522,
