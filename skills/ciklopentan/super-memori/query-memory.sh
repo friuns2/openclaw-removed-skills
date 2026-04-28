@@ -88,27 +88,43 @@ def main() -> int:
         degraded_reasons: list[str] = []
         state = read_state()
         profile = host_profile_status()
-        semantic_status = semantic_runtime_status(state)
         skill_gate = skill_recall_gate(args.query)
         hot_query = any(token in args.query.casefold() for token in ["что только что изменилось", "только что изменилось", "что было недавно", "что не завершилось", "какие последние изменения не проверены", "recent changes", "just changed", "latest changes", "unfinished", "unverified"])
         hot_bundle = build_hot_recovery_bundle(query=args.query, limit=max(args.limit, 5)) if hot_query else None
-        semantic_ready = semantic_status["semantic_ready"]
         index_stale = lexical_index_stale(state)
         semantic_stale = semantic_index_stale(state)
-
-        if not semantic_status["qdrant"]:
-            warnings.append("semantic backend unavailable; lexical-only mode active")
-        elif not semantic_status["deps"].get("sentence_transformers") or not semantic_status["deps"].get("numpy"):
-            warnings.append("semantic dependencies missing; lexical-only mode active")
-        elif not semantic_status["model_ready"]:
-            warnings.append(f"local embedding model unavailable; lexical-only mode active ({semantic_status['model_error']})")
-        elif not semantic_status["collection_present"]:
-            warnings.append("semantic collection missing; lexical-only mode active")
-        elif semantic_status["indexed_vectors"] <= 0:
-            warnings.append("semantic collection has no indexed vectors; lexical-only mode active")
-        elif semantic_stale:
-            warnings.append("semantic index is stale; semantic retrieval may miss recent changes")
-            degraded_reasons.append("semantic index is stale")
+        semantic_probe_needed = args.mode in {"auto", "semantic", "hybrid"}
+        if semantic_probe_needed:
+            semantic_status = semantic_runtime_status(state)
+            semantic_ready = semantic_status["semantic_ready"]
+            if not semantic_status["qdrant"]:
+                warnings.append("semantic backend unavailable; lexical-only mode active")
+            elif not semantic_status["deps"].get("sentence_transformers") or not semantic_status["deps"].get("numpy"):
+                warnings.append("semantic dependencies missing; lexical-only mode active")
+            elif not semantic_status["model_ready"]:
+                warnings.append(f"local embedding model unavailable; lexical-only mode active ({semantic_status['model_error']})")
+            elif not semantic_status["collection_present"]:
+                warnings.append("semantic collection missing; lexical-only mode active")
+            elif semantic_status["indexed_vectors"] <= 0:
+                warnings.append("semantic collection has no indexed vectors; lexical-only mode active")
+            elif semantic_stale:
+                warnings.append("semantic index is stale; semantic retrieval may miss recent changes")
+                degraded_reasons.append("semantic index is stale")
+        else:
+            semantic_status = {
+                "deps": {"sentence_transformers": None, "numpy": None},
+                "qdrant": None,
+                "collection_present": None,
+                "collection_info": None,
+                "model_ready": None,
+                "model_error": None,
+                "indexed_vectors": int(state.get("semantic_indexed_vectors") or 0),
+                "semantic_fresh": bool(state.get("semantic_last_indexed_at")) and not semantic_stale,
+                "semantic_last_indexed_at": state.get("semantic_last_indexed_at"),
+                "semantic_ready": False,
+                "host_profile": profile,
+            }
+            semantic_ready = False
 
         mode_used = args.mode
         lexical_results: list[dict] = []
@@ -178,7 +194,11 @@ def main() -> int:
 
         fused_results = apply_recent_filter(fused_results, args.date_from, args.date_to)
         if fused_results and (mode_used in {"hybrid", "semantic"} or args.temporal):
-            fused_results = temporal_relational_rerank(fused_results, limit=max(args.limit * int(profile["retrieval"]["fusion_multiplier"]), profile["retrieval"]["rerank_limit"]))
+            fused_results = temporal_relational_rerank(
+                fused_results,
+                query=args.query,
+                limit=max(args.limit * int(profile["retrieval"]["fusion_multiplier"]), profile["retrieval"]["rerank_limit"]),
+            )
         fused_results = diversify_results(fused_results, limit=max(args.limit, profile["retrieval"]["rerank_limit"]), per_source_cap=int(profile["retrieval"]["diversity_cap"]))
 
         if not fused_results and lexical_error is None:

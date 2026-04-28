@@ -1,7 +1,9 @@
 # super_memori — Stable Host Readiness
 
+> ⚠️ ARCHIVED GATE: This equipped-host promotion path was satisfied for the current stable `4.0.1` line. Keep this file as historical validation criteria, not as pending release work.
+
 ## Purpose
-Define the first equipped-host validation path required before promoting `v4.0.0 candidate` to a stable full-hybrid release.
+Define the first equipped-host validation path that was required before promoting the earlier `v4.0.0 candidate` line into the first stable full-hybrid release later published as `4.0.1`.
 
 ## Required equipped-host conditions
 All must be true on at least one local Ubuntu host:
@@ -29,7 +31,7 @@ All must be true on at least one local Ubuntu host:
 - release gate remains green on the equipped host
 
 ## Blocking outcomes
-Do not promote to stable if any of these are true:
+For the archived pre-stable promotion path, do not promote to stable if any of these are true:
 - embedding model still unavailable locally
 - vector rebuild fails
 - `mode_used` falls back to lexical on the equipped host

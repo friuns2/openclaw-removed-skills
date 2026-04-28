@@ -23,7 +23,9 @@ from agent_change_memory import (  # noqa: E402
     record_hot_change_event,
     record_agent_change,
     record_reverted_change,
+    reconcile_routine_change_history,
     query_current_known_state,
+    audit_change_memory,
 )
 
 
@@ -96,6 +98,52 @@ def main() -> int:
     current = query_current_known_state(target_scope="workspace")
     expect("/etc/demo.conf" in current["current"], "canonical current known state should still come from durable change-memory")
     expect(any("not canonical truth" in (current.get("hot_truth_note") or "") for _ in [0]), "hot buffer should not override canonical truth")
+
+    routine1 = record_agent_change(
+        target_scope="workspace",
+        action_type="reindex",
+        exact_paths=["/tmp/index.db"],
+        command_or_patch_summary="index-memory maintenance path",
+        risk_level="low",
+        verification_state="unverified",
+        status="applied_but_unverified",
+        related_skills=["super-memori"],
+    )
+    routine2 = record_agent_change(
+        target_scope="workspace",
+        action_type="reindex",
+        exact_paths=["/tmp/index.db"],
+        command_or_patch_summary="index-memory maintenance path",
+        risk_level="low",
+        verification_state="unverified",
+        status="applied_but_unverified",
+        related_skills=["super-memori"],
+    )
+    reconciled = reconcile_routine_change_history(
+        target_scope="workspace",
+        action_type="reindex",
+        exact_paths=["/tmp/index.db"],
+        command_or_patch_summary="index-memory maintenance path",
+        risk_level="low",
+        related_skill="super-memori",
+        observed_effect="maintenance completed successfully; health/audit verification passed",
+        verification_steps=["run health-check.sh", "run audit-memory.sh"],
+    )
+    expect(reconciled["status"] == "reconciled", "routine maintenance history should reconcile cleanly")
+    expect(routine1["change_id"] in reconciled["matched_change_ids"], "older routine record should be part of reconciliation set")
+    expect(routine2["change_id"] in reconciled["matched_change_ids"], "latest routine record should be part of reconciliation set")
+    audit = audit_change_memory()
+    expect(reconciled["record"].get("verification_state") == "verified", "kept routine record should end verified")
+    expect(reconciled["record"].get("status") == "applied", "kept routine record should end applied")
+    expect(
+        all(event_id not in set(audit["hot_unverified"]) for event_id in reconciled["updated_hot_events"]),
+        "reconciled routine hot events must no longer remain unverified",
+    )
+    interrupted_events = {item.get("event_id") for item in detect_interrupted_change_sequence(limit=16).get("interrupted", [])}
+    expect(
+        all(event_id not in interrupted_events for event_id in reconciled["updated_hot_events"]),
+        "reconciled routine hot events must no longer remain interrupted",
+    )
 
     for idx in range(80):
         record_hot_change_event(

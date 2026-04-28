@@ -154,7 +154,7 @@ Advanced checks such as duplicate / orphan risk belong to the fuller semantic la
 - Prefer reversible changes to indexing, health scripts, and retrieval contracts.
 - Do not schedule recurring maintenance or audits without explicit approval.
 
-## Current Folder Meaning [MAINTENANCE REFERENCE — FROZEN AT v4.0.0-candidate.23]
+## Current Folder Meaning [MAINTENANCE REFERENCE — ARCHIVED AT v4.0.0-candidate.23; CURRENT STABLE: 4.0.1]
 
 ### Active public entrypoints
 - `query-memory.sh`
@@ -163,7 +163,8 @@ Advanced checks such as duplicate / orphan risk belong to the fuller semantic la
 - `health-check.sh`
 
 These implemented the v4.0.0-candidate.23 local-only runtime at packaging time: lexical retrieval is active by default, semantic/hybrid retrieval exists in code, and host state determines whether semantic/hybrid can activate on this machine.
-Promotion-to-durable-memory remains maintenance-only/manual review, and stable full-hybrid release claims remain blocked until an equipped host passes the stable-host readiness gate.
+This block is historical packaging context, not the current release-state authority. The active stable line is now `4.0.1`; use `SKILL.md`, `references/release-status.md`, and live command outputs for current truth.
+Promotion-to-durable-memory remains maintenance-only/manual review. The stable-host readiness gate described below is archived historical context for the pre-`4.0.1` promotion path, not pending work for the current stable line.
 
 ### Maintenance-only entrypoints and support surfaces
 - `audit-memory.sh`
@@ -183,7 +184,7 @@ These preserve older v2/v3-era behavior as historical reference only.
 They are not the current runtime truth.
 
 ### Current references
-Detailed v4 architecture, contracts, release-state, and host-readiness surfaces live in the `references/` directory. Human maintainers should consult those files when improving the current candidate line.
+Detailed v4 architecture, contracts, release-state, and host-readiness surfaces live in the `references/` directory. Human maintainers should consult those files when improving the current stable line, while treating explicitly archived candidate-era sections as historical only.
 
 ## Backup / Exposure / Risk Notes
 
@@ -225,13 +226,17 @@ The goal is:
 
 That was the packaging bar for the `v4.0.0-candidate.23` candidate line. Current runtime behavior and live health gates override this reference if host state diverges.
 
-## Release interpretation [MAINTENANCE REFERENCE]
+## Release interpretation [MAINTENANCE REFERENCE — ARCHIVED]
+> ⚠️ ARCHIVED: This promotion path was completed for `4.0.1`. Treat the candidate-era notes below as historical reference, not pending work.
+
 - **Historical v3 line (`3.x`)** = lexical-first baseline with degraded semantic reporting and a smaller runtime claim surface
-- **Current line (`4.0.0-candidate.23`)** = v4 candidate where lexical, semantic, hybrid, temporal-relational, audit, change-memory, and change-audit capabilities exist in code, while learning-improvement surfaces remain maintenance-only and host-state activation may still be degraded on a given machine
-- **Stable `4.0.0` release** = reserved for the first equipped-host-verified stable release after runtime behavior, docs, health/audit semantics, and host validation all agree
+- **Archived candidate snapshot (`4.0.0-candidate.23`)** = historical v4 candidate state where lexical, semantic, hybrid, temporal-relational, audit, change-memory, and change-audit capabilities existed in code while learning-improvement surfaces remained maintenance-only and host-state activation could still be degraded on a given machine
+- **Current stable line (`4.0.1`)** = the first equipped-host-verified stable release state for the current-generation local-only runtime, with current host execution truth still read from live command outputs rather than inferred from the release label alone
 
-## Stable-release gate [HUMAN/MAINTENANCE ONLY]
+## Stable-release gate [HUMAN/MAINTENANCE ONLY — ARCHIVED]
 
+> ⚠️ ARCHIVED: This promotion path was completed for `4.0.1`. Keep this checklist only as historical evidence of the pre-stable gate; do not treat it as pending work for the current stable line.
+>
 > ⚠️ This is a stable-release verification checklist for already-implemented runtime features on an equipped host. Weak models must not execute, track, or report on these steps.
 
 Do not skip steps **when verifying on an equipped host**.
@@ -243,7 +248,7 @@ Do not skip steps **when verifying on an equipped host**.
 6. [ ] optional reranker, if enabled, is healthy on an equipped host and documented honestly
 7. [ ] docs, runtime, and health semantics all align before any 4.0.0 stable release
 
-For the short next-steps instruction, read `references/roadmap-to-4.0.0.md`.
+For the short archived promotion instruction, read `references/roadmap-to-4.0.0.md` as historical context only.
 
 </details>
 ## Maintenance Anti-Patterns (human reference)

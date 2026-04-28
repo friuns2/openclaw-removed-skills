@@ -14,4 +14,4 @@ echo "=== Running regression pack ==="
 echo "=== Verifying strict release gate ==="
 ./validate-release.sh --strict
 
-echo "=== Ready for v4.0.0 packaging ==="
+echo "=== Ready for super-memori packaging (current active line) ==="

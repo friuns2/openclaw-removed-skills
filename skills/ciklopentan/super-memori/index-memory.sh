@@ -23,6 +23,7 @@ from super_memori_common import (
     scan_system_hygiene,
     plan_hygiene_cleanup,
     record_agent_change,
+    reconcile_routine_change_history,
     compact_hot_buffer,
 )
 
@@ -96,15 +97,7 @@ def main() -> int:
             if audit["status"] != "ok":
                 payload["warnings"].append("integrity audit reported drift or orphans")
 
-        skill_refresh = refresh_skill_operational_memory()
-        payload["actions"].append({"skill_operational_memory": skill_refresh})
-        hot_buffer_compaction = compact_hot_buffer()
-        payload["actions"].append({"hot_change_buffer": hot_buffer_compaction})
-        hygiene_scan = scan_system_hygiene()
-        payload["actions"].append({"system_hygiene_scan": hygiene_scan})
-        hygiene_plan = plan_hygiene_cleanup(allow_destructive=False)
-        payload["actions"].append({"system_hygiene_cleanup_plan": hygiene_plan})
-        change_record = record_agent_change(
+        maintenance_record = record_agent_change(
             status="applied_but_unverified",
             target_scope="openclaw",
             action_type="reindex",
@@ -119,7 +112,39 @@ def main() -> int:
             command_or_patch_summary="index-memory maintenance path",
             related_skills=["super-memori"],
         )
-        payload["actions"].append({"agent_change_memory": change_record})
+        payload["actions"].append({"agent_change_memory": maintenance_record})
+
+        hot_buffer_compaction = compact_hot_buffer()
+        payload["actions"].append({"hot_change_buffer": hot_buffer_compaction})
+        hygiene_scan = scan_system_hygiene()
+        payload["actions"].append({"system_hygiene_scan": hygiene_scan})
+        hygiene_plan = plan_hygiene_cleanup(allow_destructive=False)
+        payload["actions"].append({"system_hygiene_cleanup_plan": hygiene_plan})
+
+        skill_refresh = refresh_skill_operational_memory()
+        payload["actions"].append({"skill_operational_memory": skill_refresh})
+
+        post_audit = audit_memory_integrity()
+        payload["actions"].append({"post_audit": post_audit})
+        if post_audit["status"] != "ok":
+            payload["warnings"].append("integrity audit reported drift or orphans after maintenance")
+        state_after = read_state()
+        post_semantic = semantic_runtime_status(state_after)
+        if not all(post_semantic["deps"].values()) or not post_semantic["model_ready"]:
+            payload["warnings"].append("semantic layer degraded or unavailable after maintenance")
+
+        if not payload["warnings"]:
+            reconciled = reconcile_routine_change_history(
+                target_scope="openclaw",
+                action_type="reindex",
+                exact_paths=[str(DB_PATH)],
+                command_or_patch_summary="index-memory maintenance path",
+                risk_level="low",
+                related_skill="super-memori",
+                observed_effect="maintenance completed successfully; health/audit verification passed",
+                verification_steps=["run health-check.sh", "run audit-memory.sh"],
+            )
+            payload["actions"].append({"agent_change_memory_reconciled": reconciled})
 
         if args.vacuum:
             conn = ensure_db()

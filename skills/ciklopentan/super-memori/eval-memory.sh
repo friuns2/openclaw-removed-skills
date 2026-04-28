@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+PER_CHECK_TIMEOUT_SECONDS = int(os.environ.get("SUPER_MEMORI_EVAL_TIMEOUT_SECONDS", "20"))
 
 CASES = [
     ("exact retrieval", "exact retrieval honors command/path precision"),
@@ -30,8 +32,14 @@ CASES = [
 
 
 def run(cmd: list[str]) -> tuple[int, str, str]:
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    return proc.returncode, proc.stdout, proc.stderr
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=PER_CHECK_TIMEOUT_SECONDS)
+        return proc.returncode, proc.stdout, proc.stderr
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout or ""
+        stderr = exc.stderr or ""
+        timeout_note = f"timed out after {PER_CHECK_TIMEOUT_SECONDS}s"
+        return 2, stdout, f"{stderr}\n{timeout_note}".strip()
 
 
 def main() -> int:

@@ -7,6 +7,8 @@ Before setting publish-ready state, confirm:
 - [x] Package root contains `CHANGELOG.md`
 - [x] Package root contains `PACKAGING_CHECKLIST.md`
 - [x] Package root contains required public entrypoints: `query-memory.sh`, `memorize.sh`, `index-memory.sh`, `health-check.sh`
+- [x] Package root contains the startup self-heal entrypoint: `startup-self-check.sh`
+- [x] Package root contains the session-start hook assets: `hooks/super-memori-session-start/HOOK.md` and `hooks/super-memori-session-start/handler.js`
 - [x] Maintenance-only entrypoints are present and documented without being mistaken for weak-model public commands: `audit-memory.sh`, `repair-memory.sh`, `list-promotion-candidates.sh`, `validate-release.sh`
 - [x] Package root contains required runtime helper code under `scripts/`
 - [x] Package root contains required references used by the skill
@@ -19,7 +21,7 @@ Before setting publish-ready state, confirm:
 - [x] Stable promotion is blocked until an equipped host passes `references/stable-host-readiness.md`; candidate publication may proceed with explicit host-state qualification
 - [x] No fake `.clawhub/origin.json` is created before a real publish; publish metadata is synced only after actual ClawHub publication
 
-Release checks:
+Release checks (workspace context, not isolated package-root context):
 - `python3 skills/skill-creator-canonical/scripts/quick_validate.py skills/super_memori`
 - `python3 skills/skill-creator-canonical/scripts/validate_weak_models.py skills/super_memori`
 - `cd skills/super_memori && ./health-check.sh`
@@ -29,3 +31,9 @@ Release checks:
 - `test -f skills/super_memori/.clawhubignore`
 - `test -f skills/super_memori/CHANGELOG.md`
 - `test -f skills/super_memori/PACKAGING_CHECKLIST.md`
+- `test -f skills/super_memori/startup-self-check.sh`
+
+Publish gate note:
+- Treat the checklist as a support surface, not the source of truth. Real publish-readiness requires the actual package tree plus strict validation to agree in the intended OpenClaw workspace context.
+- `validate-release.sh --strict` is a workspace-coupled release gate: it depends on sibling validator tooling under `../skill-creator-canonical/` and is not designed as an isolated package-directory check.
+- If any checked file listed above is missing from the real package root, block publish and advance to a new version instead of mutating an already-published line.

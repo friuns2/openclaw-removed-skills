@@ -7,6 +7,7 @@ import math
 import os
 import re
 import sqlite3
+import subprocess
 import time
 import urllib.error
 import urllib.request
@@ -116,6 +117,7 @@ def _change_ops():
         record_reverted_change,
         record_hot_change_event,
         update_hot_change_event_status,
+        reconcile_routine_change_history,
         query_recent_hot_changes,
         query_unverified_recent_changes,
         detect_interrupted_change_sequence,
@@ -140,6 +142,7 @@ def _change_ops():
         "record_reverted_change": record_reverted_change,
         "record_hot_change_event": record_hot_change_event,
         "update_hot_change_event_status": update_hot_change_event_status,
+        "reconcile_routine_change_history": reconcile_routine_change_history,
         "query_recent_hot_changes": query_recent_hot_changes,
         "query_unverified_recent_changes": query_unverified_recent_changes,
         "detect_interrupted_change_sequence": detect_interrupted_change_sequence,
@@ -213,6 +216,10 @@ def update_hot_change_event_status(*args, **kwargs):
     return _change_ops()["update_hot_change_event_status"](*args, **kwargs)
 
 
+def reconcile_routine_change_history(*args, **kwargs):
+    return _change_ops()["reconcile_routine_change_history"](*args, **kwargs)
+
+
 def query_recent_hot_changes(*args, **kwargs):
     return _change_ops()["query_recent_hot_changes"](*args, **kwargs)
 
@@ -248,6 +255,12 @@ TELEMETRY_DB = INDEX_STATE_DIR / "telemetry.db"
 QDRANT_URL = os.environ.get("SUPER_MEMORI_QDRANT_URL", "http://127.0.0.1:6333")
 QDRANT_COLLECTION = os.environ.get("SUPER_MEMORI_QDRANT_COLLECTION", "super_memori")
 EMBED_MODEL = os.environ.get("SUPER_MEMORI_EMBED_MODEL", "intfloat/multilingual-e5-small")
+SEMANTIC_DAEMON_HOST = os.environ.get("SUPER_MEMORI_SEMANTIC_DAEMON_HOST", "127.0.0.1")
+SEMANTIC_DAEMON_PORT = int(os.environ.get("SUPER_MEMORI_SEMANTIC_DAEMON_PORT", "8765"))
+SEMANTIC_DAEMON_URL = f"http://{SEMANTIC_DAEMON_HOST}:{SEMANTIC_DAEMON_PORT}"
+SEMANTIC_DAEMON_HEALTH_PATH = "/health"
+SEMANTIC_DAEMON_EMBED_PATH = "/embed"
+SEMANTIC_DAEMON_SEARCH_PATH = "/semantic-search"
 HYGIENE_DIR = MEMORY_DIR / "semantic" / "system-hygiene"
 HYGIENE_FINDINGS = HYGIENE_DIR / "findings.md"
 HYGIENE_CLEANUP_PLANS = HYGIENE_DIR / "cleanup-plans.md"
@@ -692,6 +705,49 @@ def normalize_compare_text(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip()).casefold()
 
 
+QUERY_STOPWORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "did", "do", "does", "for", "from", "how", "i", "in", "is", "it",
+    "last", "mention", "mentioned", "month", "now", "of", "on", "or", "the", "to", "was", "what", "when", "where",
+    "who", "why", "with", "you", "your",
+}
+
+
+def informative_query_tokens(query: str) -> list[str]:
+    tokens = re.findall(r"[\w-]+", (query or "").casefold())
+    seen: set[str] = set()
+    informative: list[str] = []
+    for token in tokens:
+        if len(token) < 3 or token in QUERY_STOPWORDS or token.isdigit():
+            continue
+        if token in seen:
+            continue
+        seen.add(token)
+        informative.append(token)
+    return informative
+
+
+def semantic_path_penalty(source_path: str) -> float:
+    lowered = (source_path or "").casefold()
+    if "bootstrap" in lowered:
+        return 0.85
+    return 1.0
+
+
+def query_anchor_multiplier(item: dict, *, query: str) -> float:
+    tokens = informative_query_tokens(query)
+    if not tokens:
+        return 1.0
+    blob = " ".join([
+        str(item.get("source_path") or ""),
+        str(item.get("snippet") or ""),
+    ]).casefold()
+    hits = sum(1 for token in tokens if token in blob)
+    if hits <= 0:
+        return 0.94
+    coverage = hits / max(len(tokens), 1)
+    return min(1.24, 1.0 + 0.16 * coverage + 0.04 * max(0, hits - 1))
+
+
 def infer_memory_type(path: Path) -> str:
     try:
         resolved = path.resolve()
@@ -1070,6 +1126,61 @@ def qdrant_ok() -> bool:
         return False
 
 
+def semantic_daemon_request(path: str, *, payload: Optional[dict] = None, timeout: int = 10) -> dict:
+    url = f"{SEMANTIC_DAEMON_URL}{path}"
+    data = None
+    headers = {"Content-Type": "application/json"}
+    if payload is not None:
+        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    method = "POST" if payload is not None else "GET"
+    req = urllib.request.Request(url, data=data, headers=headers, method=method)
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        raw = r.read().decode("utf-8", "ignore")
+        return json.loads(raw) if raw else {}
+
+
+def semantic_daemon_ok() -> bool:
+    try:
+        with urllib.request.urlopen(f"{SEMANTIC_DAEMON_URL}{SEMANTIC_DAEMON_HEALTH_PATH}", timeout=1.5) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
+def ensure_semantic_daemon(timeout: float = 12.0) -> tuple[bool, Optional[str]]:
+    if semantic_daemon_ok():
+        return True, None
+    daemon_script = SKILL_DIR / "scripts" / "semantic_daemon.py"
+    if not daemon_script.exists():
+        return False, f"semantic daemon script missing: {daemon_script}"
+    proc = None
+    try:
+        proc = subprocess.Popen(
+            ["python3", str(daemon_script)],
+            cwd=str(WORKSPACE),
+            env=os.environ.copy(),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as exc:
+        return False, str(exc)
+    deadline = time.time() + timeout
+    last_error = None
+    while time.time() < deadline:
+        if semantic_daemon_ok():
+            return True, None
+        if proc is not None and proc.poll() is not None:
+            if semantic_daemon_ok():
+                return True, None
+            last_error = f"semantic daemon exited with code {proc.returncode}"
+            break
+        time.sleep(0.2)
+    if semantic_daemon_ok():
+        return True, None
+    return False, last_error or "semantic daemon failed to start"
+
+
 def qdrant_collection_info() -> Optional[dict]:
     try:
         data = qdrant_request(f"/collections/{QDRANT_COLLECTION}", timeout=3)
@@ -1123,11 +1234,10 @@ def local_embedding_model_available() -> tuple[bool, Optional[str]]:
     deps = semantic_dependencies_available()
     if not all(deps.values()):
         return False, "embedding dependencies missing"
-    try:
-        get_embedding_model()
+    ready, error = ensure_semantic_daemon()
+    if ready:
         return True, None
-    except Exception as exc:
-        return False, str(exc)
+    return False, error or "semantic daemon unavailable"
 
 
 def semantic_runtime_status(state: Optional[dict] = None) -> dict:
@@ -1176,10 +1286,16 @@ def chunk_point_id(chunk_id: str) -> str:
 def embed_texts(texts: list[str], *, prefix: str) -> list[list[float]]:
     if not texts:
         return []
-    model = get_embedding_model()
-    prepared = [f"{prefix}: {text}" for text in texts]
-    vectors = model.encode(prepared, normalize_embeddings=True)
-    return [vector.tolist() for vector in vectors]
+    ready, error = ensure_semantic_daemon()
+    if not ready:
+        raise RuntimeError(f"semantic daemon unavailable: {error}")
+    data = semantic_daemon_request(
+        SEMANTIC_DAEMON_EMBED_PATH,
+        payload={"texts": texts, "prefix": prefix},
+        timeout=max(30, len(texts) * 5),
+    )
+    vectors = data.get("vectors") or []
+    return [list(vector) for vector in vectors]
 
 
 def rebuild_semantic_index(*, recreate: bool = True, limit: Optional[int] = None) -> dict:
@@ -1286,40 +1402,20 @@ def lexical_search(query: str, memory_type: str = "all", limit: int = 5, reviewe
 
 
 def semantic_search(query: str, *, memory_type: str = "all", limit: int = 5, reviewed_only: bool = False) -> list[dict]:
-    vector = embed_texts([query], prefix="query")[0]
-    must = []
-    if memory_type != "all":
-        must.append({"key": "memory_type", "match": {"value": memory_type}})
-    if reviewed_only:
-        must.append({"key": "reviewed", "match": {"value": 1}})
-    payload = {
-        "vector": vector,
-        "limit": max(limit, 1),
-        "with_payload": True,
-        "score_threshold": SEMANTIC_SCORE_THRESHOLD,
-    }
-    if must:
-        payload["filter"] = {"must": must}
-    data = qdrant_request(f"/collections/{QDRANT_COLLECTION}/points/search", method="POST", payload=payload, timeout=30)
-    hits = data.get("result", [])
-    results = []
-    for hit in hits:
-        point = hit.get("payload") or {}
-        snippet = (point.get("snippet") or point.get("text") or "").strip().replace("\n", " ")
-        results.append({
-            "source_path": point.get("source_path", "?"),
-            "memory_type": point.get("memory_type", "unknown"),
-            "updated_at": point.get("updated_at"),
-            "chunk_id": point.get("chunk_id") or hit.get("id"),
-            "snippet": snippet[:280] + ("..." if len(snippet) > 280 else ""),
-            "reviewed": point.get("reviewed", 1),
-            "semantic_score": hit.get("score", 0.0),
-            "rank": hit.get("score", 0.0),
-            "relation_json": point.get("relation_json") or {},
-            "conflict_status": point.get("conflict_status") or "none",
-            "source_confidence": float(point.get("source_confidence") or 0.5),
-        })
-    return results
+    ready, error = ensure_semantic_daemon()
+    if not ready:
+        raise RuntimeError(f"semantic daemon unavailable: {error}")
+    data = semantic_daemon_request(
+        SEMANTIC_DAEMON_SEARCH_PATH,
+        payload={
+            "query": query,
+            "memory_type": memory_type,
+            "limit": max(limit, 1),
+            "reviewed_only": reviewed_only,
+        },
+        timeout=30,
+    )
+    return data.get("results") or []
 
 
 def reciprocal_rank_fuse(lexical_results: list[dict], semantic_results: list[dict], *, limit: int = 5) -> list[dict]:
@@ -1361,7 +1457,7 @@ def freshness_days(updated_at: Optional[str]) -> Optional[float]:
     return max(0.0, (time.time() - ts) / 86400.0)
 
 
-def temporal_relational_rerank(results: list[dict], *, limit: int = 5) -> list[dict]:
+def temporal_relational_rerank(results: list[dict], *, query: str = "", limit: int = 5) -> list[dict]:
     if not results:
         return []
     rescored: list[dict] = []
@@ -1385,10 +1481,14 @@ def temporal_relational_rerank(results: list[dict], *, limit: int = 5) -> list[d
             "superseded": 0.72,
             "contradicted": 0.65,
         }.get(conflict_status, 1.0)
-        score = base * freshness_multiplier * confidence_multiplier * reviewed_multiplier * conflict_multiplier
+        path_multiplier = semantic_path_penalty(str(item.get("source_path") or ""))
+        anchor_multiplier = query_anchor_multiplier(item, query=query)
+        score = base * freshness_multiplier * confidence_multiplier * reviewed_multiplier * conflict_multiplier * path_multiplier * anchor_multiplier
         rescored.append(dict(item))
         rescored[-1]["freshness_days"] = age_days
         rescored[-1]["relation_hits"] = []
+        rescored[-1]["query_anchor_multiplier"] = round(anchor_multiplier, 4)
+        rescored[-1]["path_penalty_multiplier"] = round(path_multiplier, 4)
         base_scores.append(score)
 
     scores = list(base_scores)

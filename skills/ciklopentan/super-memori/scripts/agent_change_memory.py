@@ -410,6 +410,12 @@ def _append_jsonl(path: Path, record: dict) -> None:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
+def _write_jsonl(path: Path, records: list[dict]) -> None:
+    _ensure_dir()
+    lines = [json.dumps(record, ensure_ascii=False) for record in records]
+    path.write_text(("\n".join(lines) + ("\n" if lines else "")), encoding="utf-8")
+
+
 def _write_markdown_index(records: list[dict]) -> None:
     lines = ["# Agent Change Index", "#tags: agent-change-memory, system-change-log, rollback, audit", ""]
     for record in records[-100:]:
@@ -463,6 +469,20 @@ def _read_records() -> list[dict]:
     return records
 
 
+def _rewrite_change_artifacts(records: list[dict]) -> None:
+    _write_jsonl(CHANGE_LOG, records)
+    _write_markdown_index(records)
+    _write_category_history(PACKAGE_HISTORY, "Package History", records, "package_names")
+    _write_category_history(CONFIG_HISTORY, "Config History", records, "exact_paths")
+    _write_category_history(SERVICE_HISTORY, "Service History", records, "services_touched")
+    _write_rollbacks(records)
+    state = read_state()
+    state["agent_change_last_updated_at"] = now_iso()
+    state["agent_change_record_count"] = len(records)
+    state["hot_change_buffer_last_updated_at"] = now_iso()
+    write_state(state)
+
+
 def _persist_record(record: dict) -> dict:
     _ensure_dir()
     state = read_state()
@@ -487,15 +507,7 @@ def _persist_record(record: dict) -> dict:
     )
     _append_jsonl(CHANGE_LOG, record)
     records = _read_records()
-    _write_markdown_index(records)
-    _write_category_history(PACKAGE_HISTORY, "Package History", records, "package_names")
-    _write_category_history(CONFIG_HISTORY, "Config History", records, "exact_paths")
-    _write_category_history(SERVICE_HISTORY, "Service History", records, "services_touched")
-    _write_rollbacks(records)
-    state["agent_change_last_updated_at"] = now_iso()
-    state["agent_change_record_count"] = len(records)
-    state["hot_change_buffer_last_updated_at"] = now_iso()
-    write_state(state)
+    _rewrite_change_artifacts(records)
     if hot_result.get("status") == "written":
         update_hot_change_event_status(hot_result["event_id"], linked_change_id=record["change_id"], verification_state=record.get("verification_state"), status=record.get("status"))
     return {"status": "written", "change_id": record["change_id"], "record": record, "hot_buffer": hot_result}
@@ -561,6 +573,106 @@ def record_reverted_change(**kwargs) -> dict:
     kwargs.setdefault("verification_state", "verified")
     kwargs.setdefault("rollback_possible", True)
     return record_agent_change(**kwargs)
+
+
+def reconcile_routine_change_history(*, target_scope: str, action_type: str, exact_paths: list[str] | None = None, command_or_patch_summary: str | None = None, risk_level: str = "low", related_skill: str | None = None, observed_effect: str = "", verification_steps: list[str] | None = None) -> dict:
+    normalized_paths = _normalize_paths(exact_paths)
+    verification_steps = _normalize_list(verification_steps)
+    records = _read_records()
+    matches = []
+    for idx, record in enumerate(records):
+        if record.get("target_scope") != target_scope:
+            continue
+        if record.get("action_type") != action_type:
+            continue
+        if normalized_paths and _normalize_paths(record.get("exact_paths")) != normalized_paths:
+            continue
+        if command_or_patch_summary and (record.get("command_or_patch_summary") or "") != command_or_patch_summary:
+            continue
+        if risk_level and (record.get("risk_level") or "") != risk_level:
+            continue
+        if related_skill and related_skill not in (record.get("related_skills") or []):
+            continue
+        matches.append((idx, record))
+
+    kept_record = None
+    collapsed_ids = []
+    if matches:
+        kept_index, kept_record = matches[-1]
+        collapsed_ids = [record.get("change_id") for idx, record in matches[:-1]]
+        updated = dict(kept_record)
+        updated["status"] = "applied"
+        updated["verification_state"] = "verified"
+        updated["validation_state"] = "applied"
+        updated["freshness"] = "current"
+        updated["confidence"] = max(float(updated.get("confidence", 0.7) or 0.7), 0.9)
+        if observed_effect:
+            updated["observed_effect"] = observed_effect
+        if verification_steps:
+            updated["verification_steps"] = verification_steps
+        notes = [str(note) for note in (updated.get("notes") or []) if note]
+        if collapsed_ids:
+            notes = [note for note in notes if not str(note).startswith("routine-maintenance-reconciled:")]
+            notes.append(f"routine-maintenance-reconciled:{len(collapsed_ids)} older record(s): {', '.join(collapsed_ids)}")
+        updated["notes"] = notes
+        records = [record for idx, record in enumerate(records) if idx not in {match_idx for match_idx, _ in matches[:-1]}]
+        kept_index = next(i for i, record in enumerate(records) if record.get("change_id") == kept_record.get("change_id"))
+        records[kept_index] = updated
+        kept_record = updated
+        _rewrite_change_artifacts(records)
+    else:
+        created = record_agent_change(
+            target_scope=target_scope,
+            action_type=action_type,
+            exact_paths=normalized_paths,
+            command_or_patch_summary=command_or_patch_summary or action_type,
+            risk_level=risk_level,
+            verification_state="verified",
+            status="applied",
+            freshness="current",
+            observed_effect=observed_effect,
+            verification_steps=verification_steps,
+            related_skills=[related_skill] if related_skill else [],
+        )
+        kept_record = created.get("record", {})
+
+    matched_ids = {record.get("change_id") for _, record in matches}
+    if kept_record.get("change_id"):
+        matched_ids.add(kept_record.get("change_id"))
+    payload = _hot_buffer_payload()
+    touched_events = []
+    canonical_event_kept = False
+    for event in payload.get("entries", []):
+        event_match = False
+        if event.get("linked_change_id") in matched_ids:
+            event_match = True
+        elif command_or_patch_summary and event.get("command_or_patch_summary") == command_or_patch_summary and event.get("action_type") == action_type and event.get("target_scope") == target_scope:
+            if not normalized_paths or _normalize_paths(event.get("affected_paths")) == normalized_paths:
+                event_match = True
+        if not event_match:
+            continue
+        event["linked_change_id"] = kept_record.get("change_id")
+        event["residue_risk"] = "low"
+        if not canonical_event_kept:
+            event["status"] = "applied"
+            event["verification_state"] = "verified"
+            event["active_final_state"] = True
+            canonical_event_kept = True
+        else:
+            event["status"] = "reverted"
+            event["verification_state"] = "verified"
+            event["active_final_state"] = False
+        touched_events.append(event.get("event_id"))
+    _write_hot_buffer(payload)
+    compact_hot_buffer()
+    return {
+        "status": "reconciled",
+        "change_id": kept_record.get("change_id"),
+        "collapsed_change_ids": collapsed_ids,
+        "matched_change_ids": sorted(change_id for change_id in matched_ids if change_id),
+        "updated_hot_events": [event_id for event_id in touched_events if event_id],
+        "record": kept_record,
+    }
 
 
 def query_change_history(*, query: str | None = None, limit: int = 20, scope: str | None = None, status: str | None = None) -> list[dict]:

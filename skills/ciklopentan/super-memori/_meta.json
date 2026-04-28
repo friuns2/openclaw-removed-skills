@@ -1,13 +1,18 @@
 {
   "owner": "ciklopentan",
   "slug": "super-memori",
-  "displayName": "Super Memori",
+  "displayName": "super-memori",
   "latest": {
-    "version": "4.0.0-candidate.25",
-    "publishedAt": 1776691885937,
-    "commit": "https://github.com/openclaw/skills/commit/d041effceecf6bd3871adf52de301ec735815c13"
+    "version": "4.0.23",
+    "publishedAt": 1777265246833,
+    "commit": null
   },
   "history": [
+    {
+      "version": "4.0.0-candidate.25",
+      "publishedAt": 1776691885937,
+      "commit": "https://github.com/openclaw/skills/commit/d041effceecf6bd3871adf52de301ec735815c13"
+    },
     {
       "version": "4.0.0-candidate.15",
       "publishedAt": 1776070830957,

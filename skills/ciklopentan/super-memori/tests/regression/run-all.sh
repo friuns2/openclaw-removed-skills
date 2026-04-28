@@ -8,3 +8,4 @@ python3 tests/test_repair_plan.py
 python3 tests/test_semantic_unbuilt_state.py
 python3 tests/test_promotion_candidates.py
 python3 tests/test_hot_change_buffer.py
+python3 tests/test_startup_self_check_surface.py
