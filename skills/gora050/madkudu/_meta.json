@@ -3,9 +3,15 @@
   "slug": "madkudu",
   "displayName": "Madkudu",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574426263,
-    "commit": "https://github.com/openclaw/skills/commit/900ffcc14c30927cbc41f852937a029469f468ab"
+    "version": "1.0.1",
+    "publishedAt": 1776899015883,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574426263,
+      "commit": "https://github.com/openclaw/skills/commit/900ffcc14c30927cbc41f852937a029469f468ab"
+    }
+  ]
 }
