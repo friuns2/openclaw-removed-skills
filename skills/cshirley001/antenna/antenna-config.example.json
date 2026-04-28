@@ -2,7 +2,7 @@
   "max_message_length": 10000,
   "default_target_session": "agent:<your-agent-id>:main",
   "relay_agent_id": "antenna",
-  "relay_agent_model": "openai/gpt-5.4",
+  "relay_agent_model": "openai/gpt-5.4-nano",
   "local_agent_id": "<your-agent-id>",
   "install_path": "/absolute/path/to/skills/antenna",
   "log_enabled": true,

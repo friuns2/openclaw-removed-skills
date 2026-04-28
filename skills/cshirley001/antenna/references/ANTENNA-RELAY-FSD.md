@@ -253,7 +253,7 @@ echo "<raw_message>" | antenna-relay.sh --stdin
 | Property | Value |
 |---|---|
 | Agent ID | `antenna` |
-| Model | `openai/gpt-5.4` (current stable relay model) |
+| Model | `openai/gpt-5.4-nano` (current recommended relay model) |
 | Workspace | `~/.openclaw/agents/antenna/` or `~/clawd/agents/antenna/` |
 | Purpose | Execute relay script, then relay into the target session. Nothing else. |
 
@@ -347,7 +347,7 @@ Two possible paths. Two possible tool calls. Zero ambiguity. Any lightweight mod
   "max_message_length": 10000,
   "default_target_session": "agent:<local_agent_id>:main",
   "relay_agent_id": "antenna",
-  "relay_agent_model": "openai/gpt-5.4",
+  "relay_agent_model": "openai/gpt-5.4-nano",
   "note": "Use a full provider/model ID, not a local alias, for portability",
   "local_agent_id": "<your-agent-id>",
   "install_path": "<absolute-path-to-skill-directory>",
@@ -374,7 +374,7 @@ Two possible paths. Two possible tool calls. Zero ambiguity. Any lightweight mod
 | `max_message_length` | int | 10000 | Max message body chars. Reject if exceeded. |
 | `default_target_session` | string | `"main"` | Target session when sender doesn't specify |
 | `relay_agent_id` | string | `"antenna"` | Agent ID for the relay agent |
-| `relay_agent_model` | string | `"openai/gpt-5.4"` | Full provider/model ID for the relay agent. Use a specific model, not a local alias, for portability. |
+| `relay_agent_model` | string | `"openai/gpt-5.4-nano"` | Full provider/model ID for the relay agent. Use a specific model, not a local alias, for portability. |
 | `local_agent_id` | string | (required) | Local primary agent ID (for resolving `main` → `agent:<id>:main`). |
 | `install_path` | string | (required) | Absolute path to this skill directory on the host. Used by the agent to resolve script paths. |
 | `log_enabled` | bool | `true` | Enable transaction logging |
@@ -458,7 +458,10 @@ antenna peers exchange pubkey [--bare]
 antenna peers exchange initiate <peer-id> [--pubkey <age1...>] [--print] [--send-email --email <addr>]
 antenna peers exchange import [file|-] [--yes]
 antenna peers exchange reply <peer-id> [options]
+antenna bundle verify <file> [--json] [--force-expired] [--no-decrypt]   # read-only inspector
 ```
+
+`antenna bundle verify` is a read-only sibling of `peers exchange import`. It runs the same shape / endpoint URL / freshness validation (shared via `lib/bundles.sh`), decrypts the bundle in place, and prints a safe summary. It never mutates `antenna-peers.json` or `antenna-config.json`, and it never prints raw `from_hooks_token` / `from_identity_secret` values — only presence booleans in human and `--json` output. Intended use: sanity-check a bootstrap bundle that arrived via email / chat / ClawReef before committing to `import`.
 
 ### Operational model
 

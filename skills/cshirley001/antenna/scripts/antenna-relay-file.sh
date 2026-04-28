@@ -23,10 +23,26 @@ if [[ ! -f "$INPUT_FILE" ]]; then
     exit 1
 fi
 
+# REF-403: tighten file & parent-dir perms since the envelope contains the
+# plaintext auth header. Best-effort — caller may not own the parent dir.
+chmod 0600 "$INPUT_FILE" 2>/dev/null || true
+INPUT_DIR="$(dirname "$INPUT_FILE")"
+case "$INPUT_DIR" in
+    /tmp/antenna-relay)
+        chmod 0700 "$INPUT_DIR" 2>/dev/null || true
+        ;;
+esac
+
 cleanup_input_file() {
+    # REF-403: input file holds plaintext envelope with auth header.
+    # Best-effort wipe before unlink (no-op on tmpfs, helps on disk-backed /tmp).
     case "$INPUT_FILE" in
         /tmp/antenna-relay/*|/tmp/antenna-relay-msg.*)
-            rm -f "$INPUT_FILE" 2>/dev/null || true
+            if [[ -f "$INPUT_FILE" ]]; then
+                command -v shred >/dev/null 2>&1 && shred -u "$INPUT_FILE" 2>/dev/null && return
+                : > "$INPUT_FILE" 2>/dev/null || true
+                rm -f "$INPUT_FILE" 2>/dev/null || true
+            fi
             ;;
     esac
 }

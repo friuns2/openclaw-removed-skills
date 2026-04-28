@@ -23,8 +23,21 @@ if [[ $# -lt 1 ]]; then
 fi
 
 B64_MESSAGE="$1"
+# REF-403: temp file holds plaintext envelope including auth header.
+# Create with strict 0600 perms and best-effort wipe on exit.
+umask 077
 TMPFILE=$(mktemp /tmp/antenna-relay-msg.XXXXXX)
-trap 'rm -f "$TMPFILE"' EXIT
+chmod 0600 "$TMPFILE" 2>/dev/null || true
+
+cleanup_tmpfile() {
+  if [[ -f "$TMPFILE" ]]; then
+    # Best-effort overwrite before unlink (no-op on tmpfs, helps on disk-backed /tmp)
+    command -v shred >/dev/null 2>&1 && shred -u "$TMPFILE" 2>/dev/null && return
+    : > "$TMPFILE" 2>/dev/null || true
+    rm -f "$TMPFILE" 2>/dev/null || true
+  fi
+}
+trap cleanup_tmpfile EXIT
 
 # Decode the base64 argument back to the original raw message
 printf '%s' "$B64_MESSAGE" | base64 -d > "$TMPFILE" 2>/dev/null

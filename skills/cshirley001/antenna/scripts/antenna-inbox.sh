@@ -17,7 +17,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$SKILL_DIR/antenna-config.json"
-QUEUE_PATH=$(jq -r '.inbox_queue_path // "antenna-inbox.json"' "$CONFIG_FILE" 2>/dev/null || echo "antenna-inbox.json")
+# shellcheck source=../lib/config.sh
+source "$SKILL_DIR/lib/config.sh"
+QUEUE_PATH=$(config_inbox_queue_path)
 
 # Resolve relative paths against skill dir
 if [[ "$QUEUE_PATH" != /* ]]; then
@@ -42,8 +44,8 @@ err()   { echo -e "${RED}✗${NC}  $*" >&2; }
 
 log_entry() {
   local log_enabled log_path
-  log_enabled=$(jq -r '.log_enabled // true' "$CONFIG_FILE" 2>/dev/null || echo "true")
-  log_path=$(jq -r '.log_path // "antenna.log"' "$CONFIG_FILE" 2>/dev/null || echo "antenna.log")
+  log_enabled=$(config_log_enabled)
+  log_path=$(config_log_path)
 
   if [[ "$log_enabled" != "true" ]]; then
     return 0

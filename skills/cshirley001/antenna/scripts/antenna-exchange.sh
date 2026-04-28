@@ -5,7 +5,7 @@
 #   antenna peers exchange keygen [--force]
 #   antenna peers exchange pubkey [--bare] [--email <addr> [--account <name>] --send-email] [--email <addr> --send-email]
 #   antenna peers exchange initiate <peer-id> [options]
-#   antenna peers exchange import [file|-] [--yes]
+#   antenna peers exchange import [file|-] [--yes] [--force-expired]
 #   antenna peers exchange reply <peer-id> [options]
 #
 # Legacy/manual compatibility:
@@ -21,6 +21,15 @@ SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 PEERS_FILE="$SKILL_DIR/antenna-peers.json"
 CONFIG_FILE="$SKILL_DIR/antenna-config.json"
 SECRETS_DIR="$SKILL_DIR/secrets"
+
+# shellcheck source=../lib/peers.sh
+source "$SKILL_DIR/lib/peers.sh"
+# shellcheck source=../lib/config.sh
+source "$SKILL_DIR/lib/config.sh"
+# REF-2000: shape/freshness validators live in lib/bundles.sh so this script
+# and antenna-bundle.sh stay in lockstep.
+# shellcheck source=../lib/bundles.sh
+source "$SKILL_DIR/lib/bundles.sh"
 EXCHANGE_KEY_FILE="$SECRETS_DIR/antenna-exchange.agekey"
 EXCHANGE_PUB_FILE="$SECRETS_DIR/antenna-exchange.agepub"
 FALLBACK_LEGACY=false
@@ -48,7 +57,7 @@ Encrypted flow (preferred):
   antenna peers exchange keygen [--force]
   antenna peers exchange pubkey [--bare] [--email <addr> [--account <name>] --send-email]
   antenna peers exchange initiate <peer-id> [options]
-  antenna peers exchange import [file|-] [--yes]
+  antenna peers exchange import [file|-] [--yes] [--force-expired]
   antenna peers exchange reply <peer-id> [options]
 
 Options for initiate / reply:
@@ -65,6 +74,7 @@ Options for initiate / reply:
 
 Options for import:
   --yes                         Skip confirmation prompts and accept allowlist updates
+  --force-expired               Import an expired bundle anyway
 
 Legacy/manual compatibility:
   antenna peers exchange <peer-id> --export
@@ -147,19 +157,12 @@ ensure_core_files() {
   mkdir -p "$SECRETS_DIR"
 }
 
-self_id() {
-  jq -r 'to_entries[] | select((.value | type) == "object" and (.value.url? | type) == "string" and .value.self == true) | .key' "$PEERS_FILE" 2>/dev/null || true
-}
-
-peer_exists() {
-  local peer_id="$1"
-  jq -e --arg p "$peer_id" 'has($p)' "$PEERS_FILE" >/dev/null 2>&1
-}
-
-peer_field() {
-  local peer_id="$1" field="$2"
-  jq -r --arg p "$peer_id" --arg f "$field" '.[$p][$f] // empty' "$PEERS_FILE" 2>/dev/null || true
-}
+# self_id / peer_exists / peer_field are thin wrappers over lib/peers.sh
+# (kept for call-site compatibility; the shared implementation lives in the
+# library so adding new scripts reuses the same predicates).
+self_id()     { peers_self_id; }
+peer_exists() { peers_exists "$1"; }
+peer_field()  { peers_get "$1" "$2"; }
 
 self_field() {
   local field="$1" sid
@@ -170,13 +173,13 @@ self_field() {
 
 log_path() {
   local p
-  p=$(jq -r '.log_path // "antenna.log"' "$CONFIG_FILE" 2>/dev/null || echo "antenna.log")
+  p=$(config_log_path)
   [[ "$p" == /* ]] && printf '%s\n' "$p" || printf '%s\n' "$SKILL_DIR/$p"
 }
 
 log_entry() {
   local enabled path
-  enabled=$(jq -r '.log_enabled // true' "$CONFIG_FILE" 2>/dev/null || echo "true")
+  enabled=$(config_log_enabled)
   [[ "$enabled" == "true" ]] || return 0
   path="$(log_path)"
   mkdir -p "$(dirname "$path")"
@@ -379,6 +382,178 @@ default_himalaya_account() {
   himalaya account list -o json 2>/dev/null | jq -r 'map(select(.default == true)) | .[0].name // empty' 2>/dev/null || true
 }
 
+# REF-616: himalaya v1.2.0 does not expose per-account email addresses via its
+# JSON CLI output (`himalaya account list -o json` returns only name/backend/default).
+# The configured address lives in the TOML config. Read it directly, honoring
+# $HIMALAYA_CONFIG first, then $XDG_CONFIG_HOME/himalaya/config.toml, then
+# $HOME/.config/himalaya/config.toml. Returns empty if the account or its
+# email key cannot be found.
+himalaya_config_path() {
+  if [[ -n "${HIMALAYA_CONFIG:-}" && -f "$HIMALAYA_CONFIG" ]]; then
+    printf '%s\n' "$HIMALAYA_CONFIG"
+    return 0
+  fi
+  local xdg="${XDG_CONFIG_HOME:-$HOME/.config}"
+  if [[ -f "$xdg/himalaya/config.toml" ]]; then
+    printf '%s\n' "$xdg/himalaya/config.toml"
+    return 0
+  fi
+  if [[ -f "$HOME/.config/himalaya/config.toml" ]]; then
+    printf '%s\n' "$HOME/.config/himalaya/config.toml"
+    return 0
+  fi
+  return 0  # empty output, caller handles
+}
+
+himalaya_account_email() {
+  local want_account="$1"
+  [[ -n "$want_account" ]] || return 0
+  local cfg_file
+  cfg_file="$(himalaya_config_path)"
+  [[ -n "$cfg_file" && -f "$cfg_file" ]] || return 0
+  awk -v a="$want_account" '
+    /^\[accounts\./ {
+      in_sec = ($0 == "[accounts." a "]")
+      next
+    }
+    /^\[/ { in_sec = 0; next }
+    in_sec && /^[[:space:]]*email[[:space:]]*=/ {
+      sub(/^[[:space:]]*email[[:space:]]*=[[:space:]]*"/, "")
+      sub(/".*$/, "")
+      print
+      exit
+    }
+  ' "$cfg_file"
+}
+
+# Emits one TSV line per configured himalaya account: name<TAB>email<TAB>default
+# where "default" is "true" or "false". Accounts without a resolvable email
+# are skipped (they would hard-fail at send time anyway).
+himalaya_accounts_list() {
+  have_cmd himalaya || return 0
+  local names_json names default_json default_name name email
+  names_json="$(himalaya account list -o json 2>/dev/null || true)"
+  [[ -n "$names_json" ]] || return 0
+  default_name="$(printf '%s' "$names_json" | jq -r 'map(select(.default == true)) | .[0].name // empty' 2>/dev/null || true)"
+  while IFS= read -r name; do
+    [[ -n "$name" ]] || continue
+    email="$(himalaya_account_email "$name")"
+    [[ -n "$email" ]] || continue
+    if [[ "$name" == "$default_name" ]]; then
+      printf '%s\t%s\ttrue\n' "$name" "$email"
+    else
+      printf '%s\t%s\tfalse\n' "$name" "$email"
+    fi
+  done < <(printf '%s' "$names_json" | jq -r '.[].name // empty' 2>/dev/null || true)
+}
+
+# REF-616: selection-only account picker. Takes the current account name as
+# $1 and prints the chosen account name to stdout. UX is tightly constrained:
+# the caller has already confirmed a default; this is only invoked when the
+# operator wants to switch to a different configured account. No free text is
+# accepted — only a numeric selection from the available accounts.
+select_himalaya_account() {
+  local current_account="$1"
+  local -a names=() emails=() defaults=()
+  local line name email is_default
+  while IFS=$'\t' read -r name email is_default; do
+    [[ -n "$name" ]] || continue
+    names+=("$name")
+    emails+=("$email")
+    defaults+=("$is_default")
+  done < <(himalaya_accounts_list)
+
+  if (( ${#names[@]} == 0 )); then
+    # Should not reach here (caller checks first), but bail safely.
+    printf '%s\n' "$current_account" >&2
+    printf '%s\n' "$current_account"
+    return 0
+  fi
+
+  echo >&2
+  echo -e "${BOLD}Available himalaya accounts:${NC}" >&2
+  local i
+  for (( i=0; i<${#names[@]}; i++ )); do
+    local marker=""
+    [[ "${defaults[i]}" == "true" ]] && marker="  (default)"
+    [[ "${names[i]}" == "$current_account" ]] && marker="${marker}  ${DIM}← current${NC}"
+    printf '  %d) %-20s %s%b\n' "$((i+1))" "${names[i]}" "${emails[i]}" "$marker" >&2
+  done
+  echo >&2
+
+  # Default the picker to the current selection's index.
+  local default_idx=1
+  for (( i=0; i<${#names[@]}; i++ )); do
+    if [[ "${names[i]}" == "$current_account" ]]; then
+      default_idx=$((i+1))
+      break
+    fi
+  done
+
+  local choice
+  prompt choice "Select account [1-${#names[@]}]" "$default_idx"
+  # Strict numeric validation — no free text.
+  if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 )) || (( choice > ${#names[@]} )); then
+    warn "Invalid selection '$choice'; keeping current account '$current_account'." >&2
+    printf '%s\n' "$current_account"
+    return 0
+  fi
+  printf '%s\n' "${names[$((choice-1))]}"
+}
+
+# REF-616: interactive From confirm loop. Takes an initial account name (must
+# already have a resolvable email) and loops:
+#   - display From / To / Subject
+#   - [Y/n/change-account] when >1 configured account available
+#   - [Y/n] when only 1 configured account
+# Prints the confirmed account name to stdout on accept, or empty on abort.
+confirm_from_account() {
+  local account="$1" email_to="$2" subject="$3"
+  local account_count
+  account_count="$(himalaya_accounts_list | wc -l | awk '{print $1}')"
+  local email
+
+  while true; do
+    email="$(himalaya_account_email "$account")"
+    echo >&2
+    echo -e "${BOLD}Send email${NC}" >&2
+    printf '  %-9s %s  %s(himalaya account %s%s%s)%s\n' \
+      "From:" "$email" "$DIM" "'" "$account" "'" "$NC" >&2
+    printf '  %-9s %s\n' "To:" "$email_to" >&2
+    printf '  %-9s %s\n' "Subject:" "$subject" >&2
+    echo >&2
+
+    local choices_label default_choice reply
+    if (( account_count > 1 )); then
+      choices_label="Send? [Y/n/change-account]"
+      default_choice="y"
+    else
+      choices_label="Send? [Y/n]"
+      default_choice="y"
+    fi
+    read -rp "$(echo -e "${CYAN}?${NC}  ${choices_label} [${default_choice}]: ")" reply
+    reply="${reply:-$default_choice}"
+    reply="${reply,,}"
+
+    case "$reply" in
+      y|yes) printf '%s\n' "$account"; return 0 ;;
+      n|no)  printf '' ; return 1 ;;
+      c|change|change-account|a|account)
+        if (( account_count <= 1 )); then
+          warn "Only one himalaya account is configured ('$account'); nothing to switch to." >&2
+          continue
+        fi
+        account="$(select_himalaya_account "$account")"
+        continue
+        ;;
+      *)
+        warn "Please answer y (send), n (abort), or change-account (switch account)." >&2
+        continue
+        ;;
+    esac
+  done
+}
+
 send_bundle_email() {
   local email_to="$1" bundle_file="$2" peer_id="$3" account="${4:-}"
   [[ -f "$bundle_file" ]] || die "Bundle file not found: $bundle_file"
@@ -422,11 +597,20 @@ bundle text, as email formatting may corrupt the base64 encoding."
     fi
     [[ -n "$account" ]] || die "No email account found. Install gog or himalaya, or use the bundle file manually."
 
+    # REF-616: resolve the account's real email from himalaya config.toml.
+    # Hard-fail if the account is not configured with an email — never fall
+    # back to antenna@localhost (SMTP relays reject it or spam-filter it).
+    local from_addr
+    from_addr="$(himalaya_account_email "$account")"
+    if [[ -z "$from_addr" ]]; then
+      local cfg_hint
+      cfg_hint="$(himalaya_config_path)"
+      [[ -n "$cfg_hint" ]] || cfg_hint="${XDG_CONFIG_HOME:-$HOME/.config}/himalaya/config.toml"
+      die "Could not resolve email address for himalaya account '$account'. Check [accounts.$account].email in $cfg_hint"
+    fi
+
     local raw_file bundle_b64
     bundle_b64=$(base64 "$bundle_file")
-    local from_addr
-    from_addr=$(himalaya account list -a "$account" -o json 2>/dev/null | jq -r '.[0].email // empty' 2>/dev/null || true)
-    [[ -n "$from_addr" ]] || from_addr="antenna@localhost"
 
     raw_file=$(mktemp)
     cat > "$raw_file" <<EOF
@@ -452,7 +636,7 @@ ${bundle_b64}
 EOF
     himalaya message send -a "$account" < "$raw_file" >/dev/null
     rm -f "$raw_file"
-    ok "Sent encrypted bundle email to $email_to via himalaya"
+    ok "Sent encrypted bundle email to $email_to via himalaya ($from_addr)"
     return 0
   fi
 
@@ -461,7 +645,9 @@ EOF
 
 ensure_peer_entry_updated() {
   local peer_id="$1" url="$2" token_ref="$3" secret_ref="$4" agent_id="$5" display_name="$6" exchange_pubkey="$7"
-  local tmp
+  local tmp preserve_self
+  # REF-600 defense-in-depth: if the existing entry is flagged as self, keep it that way.
+  preserve_self=$(jq -r --arg p "$peer_id" '.[$p].self // false | tostring' "$PEERS_FILE" 2>/dev/null || echo "false")
   tmp=$(mktemp)
   jq \
     --arg peer "$peer_id" \
@@ -471,25 +657,34 @@ ensure_peer_entry_updated() {
     --arg agent_id "$agent_id" \
     --arg display_name "$display_name" \
     --arg exchange_pubkey "$exchange_pubkey" \
-    '.[$peer] = ((.[$peer] // {}) + {
+    --arg preserve_self "$preserve_self" \
+    '
+    # Merge the provided fields into the existing entry, keeping existing
+    # values for any empty-string inputs. Use `*` to preserve unmentioned keys.
+    .[$peer] = ((.[$peer] // {}) * {
       url: (if $url == "" then (.[$peer].url // "") else $url end),
       token_file: (if $token_ref == "" then (.[$peer].token_file // "") else $token_ref end),
       peer_secret_file: (if $secret_ref == "" then (.[$peer].peer_secret_file // "") else $secret_ref end),
       agentId: (if $agent_id == "" then (.[$peer].agentId // "antenna") else $agent_id end),
       display_name: (if $display_name == "" then (.[$peer].display_name // null) else $display_name end),
       exchange_public_key: (if $exchange_pubkey == "" then (.[$peer].exchange_public_key // null) else $exchange_pubkey end)
-    })' \
+    })
+    # REF-600 defense-in-depth: preserve the existing .self flag across updates.
+    # Even if the merge object above did not list .self, this restores it when
+    # the entry was previously the self-peer. The primary guard in import_bundle
+    # should prevent ever reaching this path for the self-peer, but this keeps
+    # the invariant local to the writer.
+    | if ($preserve_self == "true") then .[$peer].self = true else . end
+    ' \
     "$PEERS_FILE" > "$tmp" && mv "$tmp" "$PEERS_FILE"
 }
 
 update_allowlists() {
   local peer_id="$1" add_inbound="$2" add_outbound="$3"
-  local tmp
-  tmp=$(mktemp)
-  jq --arg p "$peer_id" --argjson add_in "$add_inbound" --argjson add_out "$add_outbound" '
+  config_mutate '
     .allowed_inbound_peers = ((.allowed_inbound_peers // []) | if $add_in and (index($p) | not) then . + [$p] else . end) |
     .allowed_outbound_peers = ((.allowed_outbound_peers // []) | if $add_out and (index($p) | not) then . + [$p] else . end)
-  ' "$CONFIG_FILE" > "$tmp" && mv "$tmp" "$CONFIG_FILE"
+  ' --arg p "$peer_id" --argjson add_in "$add_inbound" --argjson add_out "$add_outbound"
 }
 
 legacy_export_runtime_secret() {
@@ -499,14 +694,20 @@ legacy_export_runtime_secret() {
   secret="$(read_secret_file "$abs")"
   validate_runtime_secret "$secret"
 
+  warn "This is the legacy/manual fallback. It is weaker than the encrypted Layer A bundle flow."
+  info "Share it only over a trusted secure channel."
+  info "Preferred: antenna peers exchange initiate $peer_id --pubkey <age1...>"
+  info "Legacy peer import command: antenna peers exchange $peer_id --import-value <that-secret>"
+
+  if ! is_tty; then
+    die "Refusing to print the runtime identity secret to non-interactive stdout. Re-run in a terminal, or use the encrypted Layer A bundle flow instead."
+  fi
+
   echo
   echo -e "${BOLD}Local runtime identity secret for $(self_id):${NC}"
   echo
   echo "$secret"
   echo
-  warn "This is the legacy/manual fallback. It is weaker than the encrypted Layer A bundle flow."
-  info "Share it only over a trusted secure channel."
-  info "Peer import command: antenna peers exchange $peer_id --import-value <that-secret>"
 }
 
 legacy_import_runtime_secret() {
@@ -535,9 +736,14 @@ legacy_import_runtime_secret() {
   log_entry "LEGACY-IMPORT | peer:${peer_id} | status:ok"
 }
 
-build_plaintext_bundle() {
+# REF-603: stream the plaintext bundle JSON to stdout instead of landing it on
+# disk. Callers pipe this directly into `age` so the runtime identity secret,
+# hooks token, and exchange key never touch the filesystem in cleartext. The
+# old temp-file variant had no cleanup trap, so a mid-flow `die` (bad pubkey,
+# disk full) or SIGINT would leave `/tmp/tmp.XXXXXXXX` behind with full secrets.
+build_plaintext_bundle_stdout() {
   local target_peer_id="$1" notes="$2"
-  local sid display_name endpoint agent_id token_file token secret_file secret exchange_pubkey bundle_json
+  local sid display_name endpoint agent_id token_file token secret_file secret exchange_pubkey
   sid="$(self_id)"
   [[ -n "$sid" ]] || die "No self peer found in peers file. Run 'antenna setup' first."
 
@@ -545,7 +751,21 @@ build_plaintext_bundle() {
   endpoint="$(self_field 'url')"
   agent_id="$(self_field 'agentId')"
   [[ -n "$endpoint" ]] || die "Self peer is missing url in antenna-peers.json"
-  [[ -n "$agent_id" ]] || agent_id="$(jq -r '.relay_agent_id // "antenna"' "$CONFIG_FILE" 2>/dev/null || echo "antenna")"
+  # REF-1313: refuse to emit a bundle whose self endpoint is not a real URL.
+  # Defense against a locally-corrupted self-peer propagating to every peer
+  # that imports bundles from us (the "url: main" incident, 2026-04-21).
+  if ! validate_peer_url "$endpoint" false 2>/tmp/antenna-urlcheck.$$; then
+    local _reason
+    _reason="$(cat /tmp/antenna-urlcheck.$$ 2>/dev/null || true)"
+    rm -f /tmp/antenna-urlcheck.$$
+    die "Self peer URL is not valid: ${_reason:-unknown}
+
+Refusing to emit a bootstrap bundle with a malformed endpoint. Fix your self
+peer in antenna-peers.json (or re-run 'antenna setup') so .url is a real
+https:// URL that peers can reach, then try again."
+  fi
+  rm -f /tmp/antenna-urlcheck.$$
+  [[ -n "$agent_id" ]] || agent_id="$(config_relay_agent_id)"
 
   token_file="$(self_hooks_token_file)"
   token="$(read_token_file "$token_file")"
@@ -559,7 +779,6 @@ build_plaintext_bundle() {
   exchange_pubkey="$(current_exchange_pubkey)"
   validate_age_pubkey "$exchange_pubkey"
 
-  bundle_json=$(mktemp)
   jq -n \
     --arg generated_at "$(now_iso)" \
     --arg expires_at "$(expiry_iso)" \
@@ -588,19 +807,20 @@ build_plaintext_bundle() {
       from_exchange_pubkey: $from_exchange_pubkey,
       expected_peer_id: (if $expected_peer_id == "" then null else $expected_peer_id end),
       notes: (if $notes == "" then null else $notes end)
-    }' > "$bundle_json"
-  printf '%s\n' "$bundle_json"
+    }'
 }
 
-encrypt_bundle_to_file() {
-  local bundle_json="$1" recipient_pubkey="$2" output_file="$3"
+# REF-603: encrypt straight from stdin so the plaintext bundle never exists as
+# a file. `age` already supports stdin input when given `-` as its input arg.
+encrypt_bundle_from_stdin() {
+  local recipient_pubkey="$1" output_file="$2"
   mkdir -p "$(dirname "$output_file")"
-  age -a -r "$recipient_pubkey" -o "$output_file" "$bundle_json"
+  age -a -r "$recipient_pubkey" -o "$output_file" -
 }
 
 run_bundle_command() {
   local mode="$1" peer_id="$2" pubkey_arg="$3" pubkey_file_arg="$4" email="$5" account="$6" output_path="$7" print_bundle="$8" send_email="$9" notes="${10}" assume_yes="${11}" legacy_mode="${12}"
-  local recipient_pubkey self_peer bundle_json output_file existing_pubkey display_name
+  local recipient_pubkey self_peer output_file existing_pubkey display_name
 
   self_peer="$(self_id)"
   [[ -n "$self_peer" ]] || die "No self peer found in peers file. Run 'antenna setup' first."
@@ -629,11 +849,14 @@ run_bundle_command() {
   [[ -n "$recipient_pubkey" ]] || die "No recipient exchange public key provided. Use --pubkey, --pubkey-file, or store exchange_public_key for that peer."
   validate_age_pubkey "$recipient_pubkey"
 
-  bundle_json="$(build_plaintext_bundle "$peer_id" "$notes")"
   output_file="${output_path:-$(default_output_path "$self_peer" "$peer_id")}"
   output_file="$(resolve_path "$output_file")"
-  encrypt_bundle_to_file "$bundle_json" "$recipient_pubkey" "$output_file"
-  rm -f "$bundle_json"
+  # REF-603: stream plaintext JSON directly from jq into age. The plaintext
+  # (which carries from_identity_secret, from_hooks_token, from_exchange_pubkey)
+  # exists only in the pipe between processes and is never written to disk.
+  # If age fails, the pipe fails loudly via set -o pipefail and no output file
+  # is created; there is nothing on disk to leak or clean up.
+  build_plaintext_bundle_stdout "$peer_id" "$notes" | encrypt_bundle_from_stdin "$recipient_pubkey" "$output_file"
 
   display_name="$(peer_field "$peer_id" 'display_name')"
   ok "Created encrypted bootstrap bundle for $peer_id${display_name:+ ($display_name)}"
@@ -657,18 +880,22 @@ run_bundle_command() {
     # Interactive: offer to email the bundle
     echo
     if prompt_yn "Email this bundle to the peer?" "y"; then
-      local interactive_email interactive_account
+      local interactive_email interactive_account=""
       prompt interactive_email "Recipient email address"
       if [[ -n "$interactive_email" ]]; then
-        interactive_account=""
+        # REF-616: selection-only From confirmation. If himalaya is present
+        # and at least one account resolves to a real email, show the
+        # From/To/Subject preview and let the operator Y / n / change-account.
+        # No free-text account name entry.
         if have_cmd himalaya; then
           local default_acct
           default_acct="$(default_himalaya_account)"
-          if [[ -n "$default_acct" ]]; then
-            if ! prompt_yn "Send from himalaya account '$default_acct'?" "y"; then
-              prompt interactive_account "Himalaya account name"
-            else
-              interactive_account="$default_acct"
+          if [[ -n "$default_acct" ]] && [[ -n "$(himalaya_account_email "$default_acct")" ]]; then
+            local bundle_subject="Antenna bootstrap bundle from $(self_id) for ${peer_id}"
+            interactive_account="$(confirm_from_account "$default_acct" "$interactive_email" "$bundle_subject" || true)"
+            if [[ -z "$interactive_account" ]]; then
+              info "Email aborted. Bundle file remains at: $output_file"
+              return 0
             fi
           fi
         fi
@@ -701,15 +928,39 @@ decrypt_bundle_to_json() {
 
 validate_bundle_json() {
   local bundle_json="$1"
-  jq -e '
-    .schema_version == 1 and
-    .bundle_type == "antenna-bootstrap" and
-    (.from_peer_id | type == "string" and length > 0) and
-    (.from_endpoint_url | type == "string" and length > 0) and
-    (.from_hooks_token | type == "string" and length > 0) and
-    (.from_identity_secret | type == "string" and test("^[0-9a-f]{64}$")) and
-    (.from_exchange_pubkey | type == "string" and startswith("age1"))
-  ' "$bundle_json" >/dev/null || die "Decrypted bundle JSON is missing required fields or is malformed."
+  # REF-2000: shape check is delegated to lib/bundles.sh so the import
+  # path and `antenna bundle verify` agree on what "valid" means.
+  local _shape_reason
+  if ! _shape_reason="$(bundle_shape_reason "$bundle_json" 2>&1 >/dev/null)"; then
+    die "Decrypted bundle JSON is missing required fields or is malformed: ${_shape_reason:-unknown reason}"
+  fi
+
+  # REF-1313: enforce URL shape on the incoming endpoint. Prior to this,
+  # any non-empty string (e.g. "main") would pass and land verbatim in the
+  # receiver's peer record, later causing mis-routed sends with a real
+  # hook token attached. Independent of sender-side checks so a peer on
+  # an older or broken toolchain cannot poison our state.
+  local _url_reason
+  if ! _url_reason="$(bundle_endpoint_url_reason "$bundle_json" 2>&1 >/dev/null)"; then
+    die "Decrypted bundle has an invalid ${_url_reason:-from_endpoint_url}
+
+Refusing to import. Ask the sender to fix their self peer's .url (it must be
+a real https:// URL) and regenerate the bundle."
+  fi
+}
+
+validate_bundle_freshness() {
+  local bundle_json="$1" force_expired="${2:-false}"
+  local now expires_at
+  now="$(now_iso)"
+  expires_at="$(jq -r '.expires_at' "$bundle_json")"
+
+  if [[ "$force_expired" == "true" ]]; then
+    return 0
+  fi
+
+  jq -e --arg now "$now" '.expires_at >= $now' "$bundle_json" >/dev/null || \
+    die "Bundle expired at ${expires_at} (now: ${now}). Ask the sender to regenerate, or re-run with --force-expired if you really want to import it."
 }
 
 print_import_preview() {
@@ -733,17 +984,40 @@ print_import_preview() {
       warn "Bundle says it was intended for '$expected_peer', but this host identifies as '$self_peer'."
     fi
   fi
+
+  # REF-600: surface self-identity collision clearly at preview time.
+  local bundle_peer
+  bundle_peer=$(jq -r '.from_peer_id' "$bundle_json")
+  if [[ -n "$bundle_peer" && "$bundle_peer" == "$self_peer" ]]; then
+    warn "Bundle claims to be FROM peer '$bundle_peer' — the same ID this host uses for itself."
+    warn "Import will be refused to protect the self-peer entry. Rename the remote peer and re-issue."
+  fi
 }
 
 import_bundle() {
-  local input_path="$1" assume_yes="$2"
+  local input_path="$1" assume_yes="$2" force_expired="${3:-false}"
   local bundle_json peer_id display_name endpoint agent_id exchange_pubkey expected_peer self_peer
   local existing_url existing_name existing_token_ref existing_secret_ref existing_agent
   local token_ref token_abs secret_ref secret_abs add_inbound add_outbound
   local hooks_token identity_secret
 
   bundle_json="$(decrypt_bundle_to_json "$input_path")"
+  # REF-603: the decrypted bundle contains from_identity_secret + from_hooks_token
+  # in cleartext on disk. Guarantee cleanup on EVERY exit path, including any
+  # `die` from validate_bundle_json / validate_bundle_freshness / print_import_preview,
+  # SIGINT during the confirm prompt, or a failure of the write steps below.
+  # Previously only happy-path `rm -f` calls ran, so a failed validate could
+  # leave the plaintext sitting in /tmp until the next reboot.
+  #
+  # The trap command uses double quotes so "$bundle_json" is expanded now, at
+  # trap-install time. This matters because bundle_json is `local`: under
+  # `set -u`, a trap that referenced it at fire time (after the local scope
+  # collapses on RETURN) would blow up with "unbound variable". mktemp paths
+  # are safe to embed verbatim — no shell metachars.
+  # shellcheck disable=SC2064
+  trap "rm -f '$bundle_json' 2>/dev/null || true" RETURN EXIT INT TERM
   validate_bundle_json "$bundle_json"
+  validate_bundle_freshness "$bundle_json" "$force_expired"
 
   self_peer="$(self_id)"
   [[ -n "$self_peer" ]] || die "No self peer found in peers file. Run 'antenna setup' first."
@@ -759,6 +1033,26 @@ import_bundle() {
 
   validate_age_pubkey "$exchange_pubkey"
   validate_runtime_secret "$identity_secret"
+
+  # REF-600: primary guard against self-identity hijack.
+  # A bundle must never be allowed to overwrite the local self-peer entry.
+  # The self-peer is determined by '.self: true' in antenna-peers.json, not
+  # by the from_peer_id in an (even validly encrypted) bundle. Refuse before
+  # any writes occur; no --yes override is accepted for this condition.
+  # REF-603: the RETURN/EXIT trap installed above handles bundle_json removal;
+  # no explicit `rm -f` needed here.
+  if [[ "$peer_id" == "$self_peer" ]]; then
+    log_entry "INBOUND-BOOTSTRAP | from:${peer_id} | status:refused | reason:self_identity_collision"
+    die "Refusing import: bundle claims peer_id='${peer_id}', which is this host's own self-peer.
+
+This could indicate:
+  - A bundle accidentally addressed to the wrong side of an exchange.
+  - An attacker attempting to hijack the self-peer identity.
+
+Self-peer identity is derived from antenna-peers.json (.self == true) and
+cannot be rewritten by import. If the remote needs a different name, have
+them re-run 'antenna setup' with a distinct peer_id and issue a new bundle."
+  fi
 
   print_import_preview "$bundle_json" "$self_peer"
 
@@ -815,7 +1109,8 @@ import_bundle() {
 
   echo
   info "Next step: if you need to reciprocate, run: antenna peers exchange reply $peer_id"
-  rm -f "$bundle_json"
+  # REF-603: bundle_json removal is handled by the RETURN/EXIT trap installed at
+  # the top of import_bundle. Nothing to do here.
 }
 
 cmd_keygen() {
@@ -873,9 +1168,16 @@ Or save the attached .agepub file and use:
     fi
     [[ -n "$account" ]] || { rm -f "$pubkey_file"; die "No email account found."; }
 
+    # REF-616: resolve account email from himalaya config.toml — no antenna@localhost fallback.
     local from_addr raw_file
-    from_addr=$(himalaya account list -a "$account" -o json 2>/dev/null | jq -r '.[0].email // empty' 2>/dev/null || true)
-    [[ -n "$from_addr" ]] || from_addr="antenna@localhost"
+    from_addr="$(himalaya_account_email "$account")"
+    if [[ -z "$from_addr" ]]; then
+      rm -f "$pubkey_file"
+      local cfg_hint
+      cfg_hint="$(himalaya_config_path)"
+      [[ -n "$cfg_hint" ]] || cfg_hint="${XDG_CONFIG_HOME:-$HOME/.config}/himalaya/config.toml"
+      die "Could not resolve email address for himalaya account '$account'. Check [accounts.$account].email in $cfg_hint"
+    fi
 
     raw_file=$(mktemp)
     cat > "$raw_file" <<EOF
@@ -900,7 +1202,7 @@ ${pubkey}
 EOF
     himalaya message send -a "$account" < "$raw_file" >/dev/null
     rm -f "$raw_file" "$pubkey_file"
-    ok "Sent exchange public key to $email_to via himalaya"
+    ok "Sent exchange public key to $email_to via himalaya ($from_addr)"
     return 0
   fi
 
@@ -939,18 +1241,19 @@ cmd_pubkey() {
       # Interactive: offer to email
       echo
       if prompt_yn "Email this public key to a peer?" "y"; then
-        local interactive_email interactive_account
+        local interactive_email interactive_account=""
         prompt interactive_email "Recipient email address"
         if [[ -n "$interactive_email" ]]; then
-          interactive_account=""
+          # REF-616: selection-only From confirmation (see send_bundle_email path).
           if have_cmd himalaya; then
             local default_acct
             default_acct="$(default_himalaya_account)"
-            if [[ -n "$default_acct" ]]; then
-              if ! prompt_yn "Send from himalaya account '$default_acct'?" "y"; then
-                prompt interactive_account "Himalaya account name"
-              else
-                interactive_account="$default_acct"
+            if [[ -n "$default_acct" ]] && [[ -n "$(himalaya_account_email "$default_acct")" ]]; then
+              local pubkey_subject="Antenna exchange public key from $(self_id)"
+              interactive_account="$(confirm_from_account "$default_acct" "$interactive_email" "$pubkey_subject" || true)"
+              if [[ -z "$interactive_account" ]]; then
+                info "Email aborted."
+                return 0
               fi
             fi
           fi
@@ -996,14 +1299,16 @@ cmd_import() {
   shift || true
   [[ -n "$input_path" ]] || input_path="-"
   local assume_yes=false
+  local force_expired=false
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --yes) assume_yes=true; shift ;;
+      --force-expired) force_expired=true; shift ;;
       -h|--help) usage; exit 0 ;;
       *) die "Unknown option for import: $1" ;;
     esac
   done
-  import_bundle "$input_path" "$assume_yes"
+  import_bundle "$input_path" "$assume_yes" "$force_expired"
 }
 
 cmd_legacy_peer_entry() {

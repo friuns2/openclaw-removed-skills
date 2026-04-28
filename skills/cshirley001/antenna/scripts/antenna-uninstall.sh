@@ -170,15 +170,46 @@ cleanup_gateway_config() {
   fi
   ok "Backed up gateway config: $backup_path"
 
+  local antenna_agent_id
+  antenna_agent_id="$({
+    jq -r '.agents.list // [] | map(select(.id == "antenna" or .name == "antenna" or (.name // "" | ascii_downcase) == "antenna relay"))[0].id // empty' "$GATEWAY_CONFIG" 2>/dev/null
+    jq -r 'if (.agents | type) == "array" then (.agents | map(select(.id == "antenna" or .name == "antenna" or (.name // "" | ascii_downcase) == "antenna relay"))[0].id // empty) else empty end' "$GATEWAY_CONFIG" 2>/dev/null
+    jq -r 'if (.agents.entries | type) == "object" and (.agents.entries.antenna? != null) then "antenna" else empty end' "$GATEWAY_CONFIG" 2>/dev/null
+    jq -r 'if (.agents.antenna? != null) then "antenna" else empty end' "$GATEWAY_CONFIG" 2>/dev/null
+  } | sed '/^$/d' | head -1)"
+
   tmp="$(mktemp)"
-  jq '
+  jq --arg antenna_id "${antenna_agent_id:-antenna}" '
     if (.agents | type) == "array" then
-      .agents |= map(select(.id != "antenna"))
+      .agents |= map(select(.id != $antenna_id))
     else
       .
     end
+    | if (.agents | type) == "object" then
+        if (.agents.list | type) == "array" then
+          .agents.list |= map(select(.id != $antenna_id))
+        else
+          .
+        end
+      else
+        .
+      end
+    | if (.agents | type) == "object" then
+        if (.agents.entries | type) == "object" then
+          .agents.entries |= del(.[$antenna_id])
+        else
+          .
+        end
+      else
+        .
+      end
+    | if (.agents | type) == "object" and .agents[$antenna_id]? != null then
+        .agents |= del(.[$antenna_id])
+      else
+        .
+      end
     | if (.hooks | type) == "object" then
-        .hooks.allowedAgentIds = ((.hooks.allowedAgentIds // []) | map(select(. != "antenna")))
+        .hooks.allowedAgentIds = ((.hooks.allowedAgentIds // []) | map(select(. != $antenna_id)))
       else
         .
       end
