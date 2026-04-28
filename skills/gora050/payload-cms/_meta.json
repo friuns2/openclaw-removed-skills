@@ -3,9 +3,15 @@
   "slug": "payload-cms",
   "displayName": "Payload Cms",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775701057652,
-    "commit": "https://github.com/openclaw/skills/commit/52c265a71088aa4830c5f72eddf39b364e3e3750"
+    "version": "1.0.2",
+    "publishedAt": 1776899670887,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775701057652,
+      "commit": "https://github.com/openclaw/skills/commit/52c265a71088aa4830c5f72eddf39b364e3e3750"
+    }
+  ]
 }
