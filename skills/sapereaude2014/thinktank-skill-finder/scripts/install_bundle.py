@@ -125,7 +125,11 @@ def powershell_quote(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
 
 
-def run_cli_command(command: str, args: List[str]) -> subprocess.CompletedProcess[str]:
+def run_cli_command(
+    command: str,
+    args: List[str],
+    cwd: Path | None = None,
+) -> subprocess.CompletedProcess[str]:
     if os.name == "nt":
         shell_path = resolve_command("pwsh") or resolve_command("powershell")
         if not shell_path:
@@ -142,6 +146,7 @@ def run_cli_command(command: str, args: List[str]) -> subprocess.CompletedProces
             encoding="utf-8",
             errors="replace",
             capture_output=True,
+            cwd=str(cwd) if cwd else None,
         )
 
     shell_path = resolve_command("bash") or resolve_command("sh")
@@ -160,11 +165,27 @@ def run_cli_command(command: str, args: List[str]) -> subprocess.CompletedProces
         encoding="utf-8",
         errors="replace",
         capture_output=True,
+        cwd=str(cwd) if cwd else None,
     )
 
 
 def combined_output(result: subprocess.CompletedProcess[str]) -> str:
     return "\n".join(part for part in [result.stdout, result.stderr] if part).strip()
+
+
+def default_install_workdir() -> Path:
+    return Path.home() / ".agents"
+
+
+def resolve_install_target(workdir: str, skills_dir: str) -> Tuple[Path, str, Path]:
+    workdir_path = Path(workdir).expanduser().resolve()
+    skills_dir_norm = skills_dir.strip().replace("\\", "/").strip("/")
+    if not skills_dir_norm:
+        print("Error: install dir must not be empty.", file=sys.stderr)
+        sys.exit(1)
+
+    install_path = workdir_path.joinpath(*skills_dir_norm.split("/"))
+    return workdir_path, skills_dir_norm, install_path
 
 
 def list_bundles(rows: List[dict]) -> None:
@@ -238,7 +259,7 @@ def collect_skills(rows: List[dict], bundle_ids: List[str], mode: str) -> Tuple[
     return skills, empty_bundles
 
 
-def install_skills(skills: List[str], registry: str) -> None:
+def install_skills(skills: List[str], registry: str, workdir: str, skills_dir: str) -> None:
     """Install skills using clawdhub CLI."""
     if not skills:
         print("Error: No skill slugs found for the selected bundle(s).", file=sys.stderr)
@@ -251,6 +272,11 @@ def install_skills(skills: List[str], registry: str) -> None:
         )
         sys.exit(1)
 
+    workdir_path, skills_dir_norm, install_path = resolve_install_target(workdir, skills_dir)
+    workdir_path.mkdir(parents=True, exist_ok=True)
+    install_path.mkdir(parents=True, exist_ok=True)
+
+    print(f"Install target: {install_path}")
     print("Skills to install:")
     for slug in skills:
         print(f"  - {slug}")
@@ -260,7 +286,17 @@ def install_skills(skills: List[str], registry: str) -> None:
         print(f"Installing {slug}...")
         result = run_cli_command(
             "clawdhub",
-            ["install", slug, "--no-input", f"--registry={registry}"],
+            [
+                "--workdir",
+                str(workdir_path),
+                "--dir",
+                skills_dir_norm,
+                "install",
+                slug,
+                "--no-input",
+                f"--registry={registry}",
+            ],
+            cwd=workdir_path,
         )
         if result.returncode == 0:
             stdout = combined_output(result)
@@ -282,7 +318,17 @@ def install_skills(skills: List[str], registry: str) -> None:
             print(f"Mirror missing {slug}; falling back to clawdhub official registry...")
             fallback_result = run_cli_command(
                 "clawdhub",
-                ["install", slug, "--no-input", "--registry=https://clawhub.ai"],
+                [
+                    "--workdir",
+                    str(workdir_path),
+                    "--dir",
+                    skills_dir_norm,
+                    "install",
+                    slug,
+                    "--no-input",
+                    "--registry=https://clawhub.ai",
+                ],
+                cwd=workdir_path,
             )
             if fallback_result.returncode == 0:
                 fallback_output = combined_output(fallback_result)
@@ -320,6 +366,16 @@ def main() -> None:
         help="Install mode (default: restricted)",
     )
     parser.add_argument("--registry", default="https://cn.clawhub-mirror.com", help="Registry URL")
+    parser.add_argument(
+        "--workdir",
+        default=str(default_install_workdir()),
+        help="ClawdHub workdir (default: ~/.agents)",
+    )
+    parser.add_argument(
+        "--dir",
+        default="skills",
+        help="Skills directory relative to --workdir (default: skills)",
+    )
 
     args = parser.parse_args()
 
@@ -341,6 +397,8 @@ def main() -> None:
     print(f"Selected bundles: {' '.join(args.bundles)}")
     print(f"Install mode: {args.mode}")
     print(f"  {MODE_INFO[args.mode]}")
+    workdir_path, skills_dir_norm, install_path = resolve_install_target(args.workdir, args.dir)
+    print(f"Install destination: {install_path}")
     skills, empty_bundles = collect_skills(rows, args.bundles, args.mode)
 
     for bundle_id in empty_bundles:
@@ -356,7 +414,7 @@ def main() -> None:
         )
         sys.exit(1)
 
-    install_skills(skills, args.registry)
+    install_skills(skills, args.registry, str(workdir_path), skills_dir_norm)
 
 
 if __name__ == "__main__":

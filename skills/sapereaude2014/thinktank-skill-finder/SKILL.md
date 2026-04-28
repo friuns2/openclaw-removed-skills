@@ -1,16 +1,12 @@
 ---
 name: thinktank-skill-finder
-description: ThinkTank Skill Finder. 面向智库研究场景的技能检索与技能包安装。
-author: MAMA
-metadata:
-  openclaw:
-    emoji: 🔎
-    requires:
-      bins: [clawdhub]
+description: ThinkTank Skill Finder. 面向智库研究场景的技能检索、推荐、比选与技能包安装。用户提到“找 skill”“推荐 skill”“安装 skill”“装一套研究技能”“给我配智库研究工具链”“有没有适合行业研究/学术研究/新闻监测/报告写作/画图/PDF/表格/PPT 的 skill”时使用。
 ---
-# ThinkTank Skill Finder v1.0.8
+# ThinkTank Skill Finder v1.0.9
 
 面向智库研究场景的一站式 Skill 发现与安装工具。支持通过 ClawdHub 镜像进行检索与安装，便于中国网络环境使用；既可按需推荐和安装单个 Skill，也可直接安装智库研究核心包，以及学术研究、动态监测、分析建模等增强包。技能包安装默认使用 `restricted` 模式，不安装需要 API Key 或依赖中国以外网络的 skill；如需完整能力，可切换到 `standard` 模式。个别 skill 若中国镜像暂未收录，脚本会自动回退到 ClawdHub 官方源安装。
+
+路径约定：本文所有路径都相对于本 skill 目录。执行前先定位 `skills/thinktank-skill-finder/`，下文用 `<skill_dir>` 表示。默认安装目标是用户目录下的 `.agents/skills/`；也就是安装到 `<user_home>/.agents/skills/<skill-name>/`，适合 Trae IDE 这类读取 `.agents/skills/` 的环境。
 
 ## 功能
 
@@ -54,24 +50,27 @@ clawdhub install <skill-name> --no-input
 
 ```bash
 # 列出可用的技能包
-python3 ~/.openclaw/workspace/skills/thinktank-skill-finder/scripts/install_bundle.py --list
+cd <skill_dir> && python scripts/install_bundle.py --list
 
 # 安装核心包（默认 restricted 模式）
-python3 ~/.openclaw/workspace/skills/thinktank-skill-finder/scripts/install_bundle.py thinktank-core
+cd <skill_dir> && python scripts/install_bundle.py thinktank-core
 
 # 安装多个包（自动去重）
-python3 ~/.openclaw/workspace/skills/thinktank-skill-finder/scripts/install_bundle.py thinktank-core academic-research-plus
+cd <skill_dir> && python scripts/install_bundle.py thinktank-core academic-research-plus
 
 # 完整安装模式
-python3 ~/.openclaw/workspace/skills/thinktank-skill-finder/scripts/install_bundle.py thinktank-core --mode standard
+cd <skill_dir> && python scripts/install_bundle.py thinktank-core --mode standard
+
+# 如果要覆盖默认安装目录，可显式指定 clawdhub workdir/dir
+cd <skill_dir> && python scripts/install_bundle.py thinktank-core --workdir "D:/demo/.agents" --dir skills
 ```
 
 ### 5. 验证安装
 
 ```bash
-clawdhub list
-或者：
-ls ~/.openclaw/workspace/skills/<skill-name>/SKILL.md
+clawdhub --workdir ~/.agents --dir skills list
+或者查看单个 Skill 详情：
+clawdhub --workdir ~/.agents --dir skills inspect <skill-name>
 ```
 
 ## 工作流程
@@ -122,7 +121,7 @@ ls ~/.openclaw/workspace/skills/<skill-name>/SKILL.md
    → 推荐安装
 
 安装命令: clawdhub install market-research-agent --no-input --registry=https://cn.clawhub-mirror.com
-安装后验证: ls ~/.openclaw/workspace/skills/market-research-agent/SKILL.md
+安装后验证: clawdhub --workdir ~/.agents --dir skills inspect market-research-agent
 ```
 
 ---
