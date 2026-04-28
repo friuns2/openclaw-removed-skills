@@ -3,9 +3,15 @@
   "slug": "volterra",
   "displayName": "Volterra",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775660696979,
-    "commit": "https://github.com/openclaw/skills/commit/36526729f8b6437eedd7b11ba55383a00e0d2f01"
+    "version": "1.0.1",
+    "publishedAt": 1776897184905,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775660696979,
+      "commit": "https://github.com/openclaw/skills/commit/36526729f8b6437eedd7b11ba55383a00e0d2f01"
+    }
+  ]
 }
