@@ -3,9 +3,15 @@
   "slug": "asta-skill",
   "displayName": "Asta Skill",
   "latest": {
-    "version": "0.2.1",
-    "publishedAt": 1775628900895,
-    "commit": "https://github.com/openclaw/skills/commit/89b6d75bfd8048dbb37305d439b7b8015666de24"
+    "version": "0.2.7",
+    "publishedAt": 1777005985942,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.2.1",
+      "publishedAt": 1775628900895,
+      "commit": "https://github.com/openclaw/skills/commit/89b6d75bfd8048dbb37305d439b7b8015666de24"
+    }
+  ]
 }
