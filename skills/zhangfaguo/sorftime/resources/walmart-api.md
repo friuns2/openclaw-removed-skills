@@ -1,100 +1,14 @@
-# Walmart API Skill
+> 公共参考见 [`_common.md`](./_common.md)：CLI 调用模板、Domain 表（Walmart domain=21）、错误码、返回结构、限流约束。本文档只描述 Walmart 类目与产品接口独有的参数与字段。
 
-## 基本信息
-- **名称**: walmart-api
-- **描述**: Sorftime Walmart平台API调用工具，支持美国站的类目、产品、关键词数据查询
-- **激活条件**: 当用户提到Walmart、沃尔玛电商、sorftime-cli Walmart相关操作时自动激活
-- **依赖**: sorftime-cli 已全局安装并配置有效Account-SK
+# Walmart 类目与产品接口（5 个）
+
+**本文件接口**：CategoryTree、CategoryRequest、ProductRequest、ProductTrendRequest、ProductSalesVolume
 
 ---
 
-## 前置配置
+## 一、类目市场类接口
 
-### 1. 安装sorftime-cli
-```bash
-npm install -g sorftime-cli
-```
-
-### 2. 配置账户
-```bash
-# 添加账户
-sorftime add <profile-name> <your-account-sk>
-
-# 切换到默认账户
-sorftime use <profile-name>
-```
-
-### 3. 权限认证说明
-- API采用HttpPost方式进行数据处理
-- 需要在请求头设置Authorization参数：`header["Authorization"] = "BasicAuth <Key>"`
-- 设置ContentType：`header["ContentType"] = "application/json;charset=UTF-8"`
-- CLI会自动处理权限认证
-
----
-
-## Domain参数说明
-
-| domain值 | 站点代码 | 站点名称 | 备注 |
-|---------|---------|---------|------|
-| 21 | us | 美国站 | 唯一支持的站点 |
-
-**注意**: Walmart API仅支持美国站（domain=21）
-
----
-
-## 通用返回结构
-
-所有接口返回统一结构：
-```json
-{
-  "Code": 0,
-  "Message": null,
-  "Data": {},
-  "RequestLeft": 9999,
-  "RequestConsumed": 1,
-  "RequestCount": 1
-}
-```
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| Code | Integer | 响应码：0=成功，非0=失败 |
-| Message | String | 响应信息，失败时返回错误描述 |
-| Data | Object/Array | 接口返回的业务数据 |
-| RequestLeft | Integer | 当月剩余请求次数 |
-| RequestConsumed | Integer | 本次请求消耗的次数 |
-| RequestCount | Integer | 本分钟内请求计数 |
-
----
-
-## 重要说明
-
-### 1. 销量说明
-- **预估月销量** (listingSalesVolumeOfMonth): 基于产品当前的排名预估未来30天的销量，评估产品销量时建议使用这个值
-- **月销量**: 过去30天销量
-- **与Sorftime软件/插件的区别**: Sorftime软件/插件的月销量均为预估月销量，而API明确区分两者
-
-### 2. 类目权限
-- 如果客户未开通通用类目权限，查询数据时默认限于专属类目
-
-### 3. 积分系统
-- 监控相关功能涉及积分消耗
-- 每月10号凌晨自动清空上期未用完部分并发放新积分
-
-### 4. 货币单位
-- 价格、销售额等数值单位为当地货币最小单位
-- 例如美国站：单位为美分，1999表示$19.99
-
-### 5. 请求频率
-- 最高10次/秒，建议批量查询时控制速度
-
----
-
-## 接口列表
-
-### 一、类目市场类接口
-
-#### 1. 类目树 (CategoryTree)
+### 1. 类目树 (CategoryTree)
 - **接口说明**: 返回Walmart全量类目树结构
 - **消耗请求数**: 5次
 - **注意**: 
@@ -124,7 +38,7 @@ sorftime use <profile-name>
 
 ---
 
-#### 2. 类目市场报告 (CategoryRequest)
+### 2. 类目市场报告 (CategoryRequest)
 - **接口说明**: 查询类目Best Seller Top 80产品数据
 - **消耗请求数**: 5次
 - **注意**: 数据范围为best seller top 80
@@ -140,9 +54,9 @@ sorftime use <profile-name>
 
 ---
 
-### 二、产品类接口
+## 二、产品类接口
 
-#### 3. 产品数据查询 (ProductRequest)
+### 3. 产品数据查询 (ProductRequest)
 - **接口说明**: 查询单个产品的详细信息
 - **消耗请求数**: 1次
 - **请求参数**:
@@ -205,7 +119,7 @@ sorftime use <profile-name>
 
 ---
 
-#### 4. 产品历史趋势 (ProductTrendRequest)
+### 4. 产品历史趋势 (ProductTrendRequest)
 - **接口说明**: 查询产品历史趋势数据（销量、价格、评论、排名等）
 - **消耗请求数**: 2次
 - **请求参数**:
@@ -248,7 +162,7 @@ sorftime use <profile-name>
 
 ---
 
-#### 5. 产品官方公布子体销量 (ProductSalesVolume)
+### 5. 产品官方公布子体销量 (ProductSalesVolume)
 - **接口说明**: 查询产品官方公布的产品销量历史数据，最早自2024-01开始
 - **消耗请求数**: 1次
 - **请求参数**:
@@ -282,196 +196,6 @@ sorftime use <profile-name>
 
 ---
 
-### 三、关键词类接口
-
-#### 6. 关键词查询 (KeywordQuery)
-- **接口说明**: 查询当前热搜关键词清单
-- **消耗请求数**: 5次
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | pattern | Object | 是 | 查询模式，见KeywordQueryPatternObject |
-  | pageIndex | Integer | 否 | 查询第几页，默认1 |
-  | pageSize | Integer | 否 | 每页条数，最小20，默认20，最大200 |
-- **KeywordQueryPatternObject结构**:
-  | 字段 | 类型 | 说明 |
-  |------|------|------|
-  | keyword | String | 查询的关键词 |
-  | rankCondition | String Array | 周排名筛选条件：[最小值,最大值] |
-  | searchVolumeCondition | String Array | 近30日搜索量筛选条件：[最小值,最大值] |
-- **使用示例**:
-  ```bash
-  # 查询热门关键词
-  sorftime api KeywordQuery '{"pattern": {}, "pageIndex": 1, "pageSize": 50}' --domain 21
-  
-  # 筛选排名1-5000的关键词
-  sorftime api KeywordQuery '{"pattern": {"rankCondition": ["1", "5000"]}, "pageIndex": 1, "pageSize": 50}' --domain 21
-  
-  # 筛选搜索量大于10000的关键词
-  sorftime api KeywordQuery '{"pattern": {"searchVolumeCondition": ["10000"]}, "pageIndex": 1, "pageSize": 50}' --domain 21
-  ```
-
----
-
-#### 7. 关键词近15日搜索结果产品 (KeywordSearchResults)
-- **接口说明**: 近15日关键词搜索结果产品，仅支持当前的热搜词
-- **消耗请求数**: 5次
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | keyword | String | 是 | 关键词 |
-  | pageIndex | Integer | 否 | 查询第几页，默认1 |
-  | pageSize | Integer | 否 | 每页条数，最小20，默认20，最大200 |
-- **使用示例**:
-  ```bash
-  sorftime api KeywordSearchResults '{"keyword": "water bottle", "pageIndex": 1, "pageSize": 50}' --domain 21
-  ```
-- **返回数据**: ProductSummeryObject Array
-
----
-
-#### 8. 关键词详情 (KeywordRequest)
-- **接口说明**: 关键词详情查询
-- **消耗请求数**: 1次
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | keyword | String | 是 | 关键词 |
-- **使用示例**:
-  ```bash
-  sorftime api KeywordRequest '{"keyword": "water bottle"}' --domain 21
-  ```
-- **返回字段说明** (KeywordSummeryObject):
-  | 字段 | 类型 | 说明 |
-  |------|------|------|
-  | keyword | String | 关键词 |
-  | keywordCNName | String | 关键词中文名称 |
-  | images | String Array | 某次搜索结果前10个产品图片 |
-  | update | String | 最新更新时间 |
-  | rank | Integer | 周搜索排名 |
-  | searchVolume | Integer | 近30天搜索量 |
-  | productCount | Integer | 竞品数量 |
-  | searchFirstPageAvgPrice | Integer | 首页自然位产品平均价格（美分） |
-  | searchFirstPageAvgReviews | Integer | 首页自然位产品平均评论数 |
-  | searchFirstPageAvgStar | Number | 首页自然位产品平均星级（如4.5） |
-
----
-
-#### 9. 产品反查关键词 (ProductRequestKeywordv2)
-- **接口说明**: 查询该产品近30天站内在哪些关键词搜索结果的前3页中曝光
-- **消耗请求数**: 1次
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | productId | String | 是 | 需要查询的productId |
-  | pageIndex | Integer | 否 | 查询第几页，默认1 |
-  | pageSize | Integer | 否 | 每页条数，最小20，默认20，最大200 |
-- **使用示例**:
-  ```bash
-  sorftime api ProductRequestKeywordv2 '{"productId": "12345678", "pageIndex": 1, "pageSize": 50}' --domain 21
-  ```
-- **返回字段说明** (ProductKeywordItemObject):
-  | 字段 | 类型 | 说明 |
-  |------|------|------|
-  | ShowShare | Number | 在此产品的反查关键词中，此词贡献的流量占比 |
-  | recentlyPosition | String | 最近一次曝光位，格式："1,2/18"表示第1页第2位，共18个位置 |
-  | organicPosition | String | 最近一次自然曝光位 |
-  | adPosition | String | 最近一次广告曝光位 |
-  | keyword | Object | 关键词详情（KeywordSummeryObject） |
-
----
-
-#### 10. 查延伸关键词 (KeywordExtends)
-- **接口说明**: 基于关键词查延伸词
-- **消耗请求数**: 5次
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | keyword | String | 是 | 查询的关键词 |
-  | pageIndex | Integer | 否 | 查询第几页，默认1 |
-  | pageSize | Integer | 否 | 每页条数，最小20，默认20，最大200 |
-- **使用示例**:
-  ```bash
-  sorftime api KeywordExtends '{"keyword": "water bottle", "pageIndex": 1, "pageSize": 50}' --domain 21
-  ```
-
----
-
-### 四、关键词词库管理
-
-#### 11. 添加关键词到词库 (FavoriteKeyword)
-- **接口说明**: 添加关键词到我的关键词词库（不限为热搜关键词）
-- **消耗请求数**: 1次
-- **注意**: 
-  - API的词库和Sorftime专业版的收藏夹不互通
-  - 相同收藏夹下关键词不能重复（不同收藏夹下可以）
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | keyword | String | 是 | 需要收藏的词 |
-  | dict | String | 否 | 指定收藏夹，不存在则新建。不指定则添加到`未分类` |
-- **使用示例**:
-  ```bash
-  # 添加到未分类收藏夹
-  sorftime api FavoriteKeyword '{"keyword": "water bottle"}' --domain 21
-  
-  # 添加到指定收藏夹
-  sorftime api FavoriteKeyword '{"keyword": "water bottle", "dict": "我的词库"}' --domain 21
-  ```
-- **返回**: 
-  - 0: 收藏成功
-  - 1: 此关键词已存在无需重复收藏
-  - 9: 收藏失败
-
----
-
-#### 12. 移动/删除词库关键词 (ChangeFavoriteKeyword)
-- **接口说明**: 移动关键词到指定收藏夹或删除关键词
-- **消耗请求数**: 0次
-- **注意**: 单个收藏夹最多只能收藏2000个关键词
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | keyword | String | 是 | 已收藏的词 |
-  | dict | String | 否 | 指定收藏夹，不指定则操作`未分类`收藏夹 |
-  | command | String | 是 | del=删除；move=<文件夹名称>=移动 |
-- **使用示例**:
-  ```bash
-  # 删除关键词
-  sorftime api ChangeFavoriteKeyword '{"keyword": "water bottle", "command": "del"}' --domain 21
-  
-  # 移动到指定文件夹
-  sorftime api ChangeFavoriteKeyword '{"keyword": "water bottle", "command": "move=热门词"}' --domain 21
-  ```
-- **返回**: 
-  - 0: 操作成功
-  - 9: 词未添加收藏
-
----
-
-#### 13. 查询词库关键词 (GetFavoriteKeyword)
-- **接口说明**: 查询词库
-- **消耗请求数**: 1次
-- **请求参数**:
-  | 参数 | 类型 | 必填 | 说明 |
-  |------|------|------|------|
-  | command | String | 是 | all=全部词；dict=<名称>=指定文件夹；dict=文件夹列表 |
-  | page | Integer | 否 | 分页查询，默认1，每页最多100条 |
-- **使用示例**:
-  ```bash
-  # 查询全部词
-  sorftime api GetFavoriteKeyword '{"command": "all", "page": 1}' --domain 21
-  
-  # 查询指定文件夹
-  sorftime api GetFavoriteKeyword '{"command": "dict=我的词库", "page": 1}' --domain 21
-  
-  # 查询文件夹列表
-  sorftime api GetFavoriteKeyword '{"command": "dict"}' --domain 21
-  ```
-- **返回格式**: JSON数组 `["kw1","kw2",...]`
-
----
-
 ## 注意事项
 
 1. **数据准确性**: 
@@ -496,19 +220,6 @@ sorftime use <profile-name>
 
 ---
 
-## 常见错误
-
-| 错误码 | 说明 | 解决方案 |
-|--------|------|----------|
-| 0 | 成功 | - |
-| 401 | 认证失败 | 检查Account-SK是否有效 |
-| 403 | 权限不足 | 检查套餐权限或请求次数，确认类目权限 |
-| 404 | 接口不存在 | 检查接口名称拼写 |
-| 429 | 请求频率超限 | 降低请求速度，等待1分钟后重试 |
-| 500 | 服务器内部错误 | 稍后重试，或联系Sorftime客服 |
-
----
-
 ## 最佳实践
 
 ### 1. 完整的类目分析流程
@@ -526,37 +237,13 @@ sorftime api ProductRequest '{"productId": "12345678"}' --domain 21
 sorftime api ProductTrendRequest '{"productId": "12345678"}' --domain 21
 ```
 
-### 2. 关键词研究流程
-```bash
-# 步骤1: 产品反查关键词
-sorftime api ProductRequestKeywordv2 '{"productId": "12345678"}' --domain 21
-
-# 步骤2: 查询关键词详情
-sorftime api KeywordRequest '{"keyword": "water bottle"}' --domain 21
-
-# 步骤3: 拓展相关关键词
-sorftime api KeywordExtends '{"keyword": "water bottle", "pageSize": 100}' --domain 21
-
-# 步骤4: 查询关键词搜索结果
-sorftime api KeywordSearchResults '{"keyword": "water bottle", "pageSize": 50}' --domain 21
-
-# 步骤5: 收藏高价值关键词
-sorftime api FavoriteKeyword '{"keyword": "water bottle", "dict": "核心词"}' --domain 21
-```
-
-### 3. 产品销量分析
+### 2. 产品销量分析
 ```bash
 # 查询官方公布的子体销量历史
 sorftime api ProductSalesVolume '{"productId": "12345678", "queryDate": "2024-01-01", "queryEndDate": "2024-03-31"}' --domain 21
 ```
 
-### 4. 关键词筛选
-```bash
-# 筛选周排名1-5000且搜索量大于10000的关键词
-sorftime api KeywordQuery '{"pattern": {"rankCondition": ["1", "5000"], "searchVolumeCondition": ["10000"]}, "pageSize": 100}' --domain 21
-```
-
-### 5. 产品对比分析
+### 3. 产品对比分析
 ```bash
 # 批量查询多个产品
 sorftime api ProductRequest '{"productId": "prod1"}' --domain 21

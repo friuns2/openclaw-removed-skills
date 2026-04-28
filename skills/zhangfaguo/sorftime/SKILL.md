@@ -1,143 +1,56 @@
 ---
-name: sorftime
-description: Sorftime 多平台电商数据分析API支持，覆盖亚马逊、Shopee、沃尔玛等平台的类目、产品、关键词、监控等功能
-trigger:
-  keywords: ["sorftime", "亚马逊数据", "shopee数据", "沃尔玛数据", "电商数据分析"]
-  prefix: []
-  regex: []
-enabled: true
+name: sorftime-cli
+description: >
+  通过 sorftime-cli 调用 Sorftime 跨境电商全量数据接口（Amazon 43 + Shopee 5 + Walmart 13 = 61 个 endpoint）。
+  当用户或智能体需要：写脚本批量查询 ASIN/类目/关键词/Best Seller/跟卖/子体销量/产品评论，
+  自定义编排多个接口完成灵活工作流（如批量采集 → 交叉分析 → 定时监控），
+  **必须**使用本技能。
+  触发词：sorftime api、sorftime cli、调用 sorftime、批量查 ASIN、批量类目数据、
+  sorftime endpoint、自定义 sorftime 工作流、写 sorftime 脚本、sorftime 接口手册、
+  amazon 接口、shopee 接口、walmart 接口、sorftime 批量获取、监控注册、跟卖预警脚本、
+  子体销量、关键词监控部署、Best Seller 榜单抓取、类目趋势分析脚本、
+  跨平台对比（Amazon+Shopee+Walmart）。
 ---
 
-# Sorftime API Skills
+# Sorftime CLI Skill
 
-Sorftime 提供多平台电商数据分析 API，目前已按平台和功能模块拆分为独立的 Skill 文件。
+Sorftime 提供 Amazon、Shopee、Walmart 三大电商平台的数据分析 API，通过 `sorftime-cli` 命令行工具调用。
 
-Sorftime provides multi-platform e-commerce data analysis APIs, currently split into independent Skill files by platform and functional module.
+## 前置配置
 
-## Amazon 亚马逊平台 Skills / Amazon Platform Skills
-
-### 1. 类目市场分析 (amazon-category)
-- **路径 / Path**: `resources/amazon-category.md`
-- **功能 / Function**: 类目树、Best Sellers、热销产品、市场趋势分析 | Category tree, Best Sellers, hot products, market trend analysis
-- **接口数量 / API Count**: 4个核心接口 | 4 core APIs
-- **适用场景 / Use Cases**: 类目选择和评估、市场容量分析、竞争程度评估、历史趋势追踪 | Category selection and evaluation, market capacity analysis, competition assessment, historical trend tracking
-- **关键接口 / Key APIs**:
-  - CategoryTree: 获取类目树结构 | Get category tree structure
-  - CategoryRequest: 查询Best Seller产品 | Query Best Seller products
-  - CategoryProducts: 查询全部热销产品 | Query all hot-selling products
-  - CategoryTrend: 查询40种市场趋势指标 | Query 40 market trend metrics
-
-### 2. 产品数据查询 (amazon-product)
-- **路径 / Path**: `resources/amazon-product.md`
-- **功能 / Function**: 产品详情、搜索、趋势、评论、子体数据等 | Product details, search, trends, reviews, variation data, etc.
-- **接口数量 / API Count**: 13个接口 | 13 APIs
-- **适用场景 / Use Cases**: 竞品分析、产品筛选、评论分析、子体销量追踪、图搜相似产品 | Competitive analysis, product filtering, review analysis, variation sales tracking, image-based similar product search
-- **关键接口 / Key APIs**:
-  - ProductRequest: 产品详情查询（支持批量，最多10个ASIN）| Product detail query (supports batch, up to 10 ASINs)
-  - ProductQuery: 多维度产品搜索（16种查询类型）| Multi-dimensional product search (16 query types)
-  - ProductReviewsQuery: 产品评论查询 | Product review query
-  - AsinSalesVolume: 官方子体销量数据 | Official variation sales volume data
-  - SimilarProductRealtimeRequest: 图搜相似产品 | Image-based similar product search
-
-### 3. 关键词研究 (amazon-keyword)
-- **路径 / Path**: `resources/amazon-keyword.md`
-- **功能 / Function**: 关键词查询、拓展、反查、排名追踪、词库管理 | Keyword query, expansion, reverse lookup, ranking tracking, word library management
-- **接口数量 / API Count**: 12个接口 | 12 APIs
-- **适用场景 / Use Cases**: 关键词挖掘、ASIN反查关键词、关键词排名追踪、关键词词库管理 | Keyword mining, ASIN reverse keyword lookup, keyword ranking tracking, keyword library management
-- **关键接口 / Key APIs**:
-  - KeywordRequest: 关键词详情 | Keyword details
-  - KeywordExtends: 延伸关键词 | Extended keywords
-  - ASINRequestKeywordv2: ASIN反查关键词 | ASIN reverse keyword lookup
-  - ASINKeywordRanking: ASIN关键词排名趋势 | ASIN keyword ranking trends
-  - FavoriteKeyword: 关键词收藏管理 | Keyword favorites management
-
-### 4. 数据监控 (amazon-monitoring)
-- **路径 / Path**: `resources/amazon-monitoring.md`
-- **功能 / Function**: 关键词排名监控、榜单监控、跟卖&库存监控 | Keyword ranking monitoring, leaderboard monitoring, hijacker & inventory monitoring
-- **接口数量 / API Count**: 14个接口 | 14 APIs
-- **适用场景 / Use Cases**: 关键词排名实时监控、Best Seller榜单追踪、跟卖预警、库存监控 | Real-time keyword ranking monitoring, Best Seller leaderboard tracking, hijacker alerts, inventory monitoring
-- **注意 / Note**: 监控类接口消耗积分而非request | Monitoring APIs consume points rather than requests
-- **关键接口 / Key APIs**:
-  - KeywordBatchSubscription: 关键词监控注册 | Keyword monitoring registration
-  - BestSellerListSubscription: 榜单监控注册 | Leaderboard monitoring registration
-  - ProductSellerSubscription: 跟卖&库存监控 | Hijacker & inventory monitoring
-  - KeywordBatchScheduleDetail: 提取监控数据 | Extract monitoring data
-
-### 5. 智能分析助手 (amazon-sorftimeAgent)
-- **路径 / Path**: `resources/amazon-sorftimeAgent.md`
-- **功能 / Function**: 选品建议、市场洞察、竞品分析、策略优化 | Product selection suggestions, market insights, competitive analysis, strategy optimization
-- **适用场景 / Use Cases**: 新产品选品咨询、市场机会发现、竞品深度分析、关键词策略优化、定价策略建议 | New product selection consultation, market opportunity discovery, in-depth competitive analysis, keyword strategy optimization, pricing strategy suggestions
-
----
-
-## Shopee 虾皮平台 Skill / Shopee Platform Skill
-
-### Shopee API (shopee-api)
-- **路径 / Path**: `resources/shopee-api.md`
-- **支持站点 / Supported Sites**: 越南、印尼、新加坡、泰国、马来西亚、中国台湾、菲律宾、巴西（8个站点）| Vietnam, Indonesia, Singapore, Thailand, Malaysia, Taiwan, Philippines, Brazil (8 sites)
-- **Domain范围 / Domain Range**: 201-208
-- **功能 / Function**: 类目、产品、店铺数据查询 | Category, product, and shop data query
-- **关键接口 / Key APIs**: CategoryTree、CategoryRequest、ProductRequest、ProductTrend、ShopRequest
-
----
-
-## Walmart 沃尔玛平台 Skill / Walmart Platform Skill
-
-### Walmart API (walmart-api)
-- **路径 / Path**: `resources/walmart-api.md`
-- **支持站点 / Supported Sites**: 美国站 | US Site
-- **Domain范围 / Domain Range**: 21
-- **功能 / Function**: 类目、产品、关键词数据查询 | Category, product, and keyword data query
-- **关键接口 / Key APIs**: CategoryTree、CategoryRequest、ProductRequest、ProductTrendRequest、KeywordQuery
-
----
-
-## 快速开始 / Quick Start
-
-### 1. 安装sorftime-cli / Install sorftime-cli
+### 安装与认证
 ```bash
+# 安装 CLI
 npm install -g sorftime-cli
-```
 
-### 2. 配置账户 / Configure Account
-```bash
-# 添加账户 / Add account
-sorftime add <profile-name> <your-account-sk>
-
-# 切换到默认账户 / Switch to default account
+# 添加账户 （profile-name 可以任意命名， api-key 在 Sorftime 官网获取）
+sorftime add <profile-name> <api-key>
+# 激活账号
 sorftime use <profile-name>
+
 ```
 
-### 3. 选择对应的 Skill / Select the Appropriate Skill
-根据你要分析的平台和功能，查看对应的 Skill 文档获取详细的 API 使用说明。
-Choose the corresponding Skill documentation based on the platform and function you want to analyze for detailed API usage instructions.
+### 账户管理
+```bash
+# 列出所有账户
+sorftime list / sorftime ls
 
----
+# 切换当前活跃账户
+sorftime use <profile-name>
 
-## Amazon 支持站点 / Amazon Supported Sites
+# 查看当前活跃账户
+sorftime whoami
 
-| domain值 | 站点代码 | 站点名称 | 所属区域 |
-|---------|---------|---------|---------|
-| 1 | us | 美国站 | 北美 |
-| 6 | ca | 加拿大站 | 北美 |
-| 10 | mx | 墨西哥站 | 北美 |
-| 13 | br | 巴西站 | 南美 |
-| 2 | gb | 英国站 | 欧洲 |
-| 3 | de | 德国站 | 欧洲 |
-| 4 | fr | 法国站 | 欧洲 |
-| 8 | es | 西班牙站 | 欧洲 |
-| 9 | it | 意大利站 | 欧洲 |
-| 11 | ae | 阿联酋站 | 中东 |
-| 14 | sa | 沙特站 | 中东 |
-| 7 | jp | 日本站 | 亚洲 |
-| 5 | in | 印度站 | 亚洲 |
-| 12 | au | 澳大利亚站 | 大洋洲 |
+# 删除账户
+sorftime remove <profile-name>
+```
 
----
+### 通用命令格式
+```bash
+sorftime api <接口名称> '{"参数JSON"}' --domain <站点数字ID>
+```
 
-## 通用说明 / General Notes
-
-### 返回结构 / Response Structure
+### 通用返回结构
 所有接口返回统一结构：
 ```json
 {
@@ -149,51 +62,89 @@ Choose the corresponding Skill documentation based on the platform and function 
   "RequestCount": 1
 }
 ```
+- `Code=0` 成功，非0失败
+- `RequestLeft` 当月剩余请求次数
+- `RequestConsumed` 本次消耗次数
 
-### 常见错误 / Common Errors
-| 错误码 | 说明 / Description | 解决方案 / Solution |
+### 常见错误码
+
+| 错误码 | 说明 | 处理方式 |
 |--------|------|----------|
-| 0 | 成功 / Success | - |
-| 4 | 积分余额不足 / Insufficient points | 充值或等待下月重置 / Recharge or wait for monthly reset |
-| 97 | ASIN不存在 / ASIN not found | 检查ASIN是否正确 / Verify ASIN is correct |
-| 98 | 采集失败 / Collection failed | 稍后重试 / Retry later |
-| 99 | 正在实时抓取 / Real-time crawling in progress | 等待5分钟后重试 / Wait 5 minutes and retry |
-| 401 | 认证失败 / Authentication failed | 检查Account-SK是否有效 / Verify Account-SK is valid |
-| 403 | 权限不足 / Insufficient permissions | 检查套餐权限或请求次数 / Check plan permissions or request count |
-| 429 | 请求频率超限 / Rate limit exceeded | 降低请求速度 / Reduce request rate |
-| 500 | 服务器内部错误 / Internal server error | 稍后重试 / Retry later |
+| 0 | 成功 | - |
+| 4 | 积分余额不足 | 引导用户充值或等待下月重置 |
+| 97 | ASIN/产品不存在 | 提醒用户检查参数 |
+| 98 | 采集失败 | 稍后重试 |
+| 99 | 正在实时抓取 | 等待5分钟后重试 |
+| 401 | 认证失败 | 引导用户重新执行 `sorftime add` |
+| 403 | 权限不足 | 检查套餐权限 |
+| 429 | 频率超限 | 降低请求速度，等待1分钟后重试 |
+
+
+---
+## Resources 目录索引（按需加载）
+
+> 所有 resources 文件头部均指向 `_common.md` 获取 CLI 模板、Domain 表、错误码。本索引只列接口清单与跳转。
+
+### 公共参考
+
+| 文件 | 内容 |
+|------|------|
+| [`_common.md`](resources/_common.md) | Amazon/Shopee/Walmart Domain 表、完整错误码（0/4/97/98/99/-999 + HTTP 401/403/429/500）、通用返回结构、CLI 调用模板 |
+
+### Amazon（43 个 endpoint）
+
+| 文件 | 接口数 | 接口清单 |
+|------|--------|---------|
+| [`amazon-category.md`](resources/amazon-category.md) | 4 | CategoryTree、CategoryRequest、CategoryProducts、CategoryTrend |
+| [`amazon-product.md`](resources/amazon-product.md) | 8 | ProductRequest、ProductSearch、AsinSalesVolume、ProductVariationHistory、ProductTrend、ProductReviewsCollection、ProductReviewsCollectionStatusQuery、ProductReviewsQuery |
+| [`amazon-product-realtime.md`](resources/amazon-product-realtime.md) | 5 | ProductRealtimeRequest、ProductRealtimeRequestStatusQuery、SimilarProductRealtimeRequest、SimilarProductRealtimeRequestStatusQuery、SimilarProductRealtimeRequestCollection |
+| [`amazon-keyword.md`](resources/amazon-keyword.md) | 12 | KeywordQuery、KeywordRequest、KeywordSearchResults、KeywordSearchResultTrend、KeywordExtends、CategoryRequestKeyword、ASINRequestKeywordv2、KeywordProductRanking、ASINKeywordRanking、FavoriteKeyword、ChangeFavoriteKeyword、GetFavoriteKeyword |
+| [`amazon-monitoring.md`](resources/amazon-monitoring.md) | — | 监控通用规则：period 表达式、积分消耗、站点矩阵、任务状态流转。**接口详情跳转到 3 个子文件。** |
+| [`amazon-monitoring-keyword.md`](resources/amazon-monitoring-keyword.md) | 5 | KeywordBatchSubscription、KeywordTasks、KeywordBatchTaskUpdate、KeywordBatchScheduleList、KeywordBatchScheduleDetail |
+| [`amazon-monitoring-bestseller.md`](resources/amazon-monitoring-bestseller.md) | 4 | BestSellerListSubscription、BestSellerListTask、BestSellerListDelete、BestSellerListDataCollect |
+| [`amazon-monitoring-seller.md`](resources/amazon-monitoring-seller.md) | 5 | ProductSellerSubscription、ProductSellerTasks、ProductSellerTaskUpdate、ProductSellerTaskScheduleList、ProductSellerTaskScheduleDetail |
+| [`amazon-recipes.md`](resources/amazon-recipes.md) | — | **多接口编排配方**：选品流程、竞品深挖、监控部署、趋势追踪、跨平台对比。展示 CLI 比 MCP 灵活的核心场景。 |
+
+### Shopee（5 个 endpoint）
+
+| 文件 | 接口数 | 接口清单 |
+|------|--------|---------|
+| [`shopee-api.md`](resources/shopee-api.md) | 5 | CategoryTree、CategoryRequest、ProductRequest、ProductTrend、ShopRequest |
+
+### Walmart（13 个 endpoint）
+
+| 文件 | 接口数 | 接口清单 |
+|------|--------|---------|
+| [`walmart-api.md`](resources/walmart-api.md) | 5 | CategoryTree、CategoryRequest、ProductRequest、ProductTrendRequest、ProductSalesVolume |
+| [`walmart-keyword.md`](resources/walmart-keyword.md) | 8 | KeywordQuery、KeywordSearchResults、KeywordRequest、ProductRequestKeywordv2、KeywordExtends、FavoriteKeyword、ChangeFavoriteKeyword、GetFavoriteKeyword |
 
 ---
 
-## Skill 组织结构 / Skill Directory Structure
+## 目录结构
 
 ```
-skill/
-└── sorftime/
-    ├── SKILL.md                          # 本文件：总索引 / This file: master index
-    └── resources/
-        ├── amazon-category.md            # 亚马逊类目数据 / Amazon category data
-        ├── amazon-product.md             # 亚马逊产品数据查询 / Amazon product data query
-        ├── amazon-keyword.md             # 亚马逊关键词研究 / Amazon keyword research
-        ├── amazon-monitoring.md          # 亚马逊数据监控 / Amazon data monitoring
-        ├── amazon-sorftimeAgent.md       # Sorftime智能分析助手 / Sorftime AI analysis assistant
-        ├── shopee-api.md                 # Shopee平台API / Shopee platform API
-        └── walmart-api.md                # Walmart平台API / Walmart platform API
+sorftime-cli/
+├── SKILL.md                              # 本文件：主索引 + 触发器 + 分流声明
+└── resources/
+    ├── _common.md                        # 公共：Domain 表 / 错误码 / 返回结构 / CLI 模板
+    ├── amazon-category.md                # Amazon 类目 4 接口
+    ├── amazon-product.md                 # Amazon 产品核心 8 接口
+    ├── amazon-product-realtime.md        # Amazon 产品实时采集 5 接口
+    ├── amazon-keyword.md                 # Amazon 关键词 12 接口
+    ├── amazon-monitoring.md              # Amazon 监控通用规则（索引）
+    ├── amazon-monitoring-keyword.md      # Amazon 关键词监控 5 接口
+    ├── amazon-monitoring-bestseller.md   # Amazon Best Seller 监控 4 接口
+    ├── amazon-monitoring-seller.md       # Amazon 跟卖监控 5 接口
+    ├── amazon-recipes.md                 # 多接口编排配方（CLI 差异化场景）
+    ├── shopee-api.md                     # Shopee 5 接口
+    ├── walmart-api.md                    # Walmart 类目+产品 5 接口
+    └── walmart-keyword.md                # Walmart 关键词+词库 8 接口
 ```
 
 ---
 
-## 使用建议 / Usage Guide
+## 重要规则
 
-### 亚马逊相关数据获取 / Amazon Data Access
-1. 从 `resources/amazon-category.md` 开始学习类目分析 / Start with `resources/amazon-category.md` to learn category analysis
-2. 逐步掌握 `resources/amazon-product.md` 的产品查询 / Progress to product queries in `resources/amazon-product.md`
-3. 深入学习 `resources/amazon-keyword.md` 的关键词研究 / Dive deeper into keyword research in `resources/amazon-keyword.md`
-4. 根据需要设置 `resources/amazon-monitoring.md` 的监控任务 / Set up monitoring tasks in `resources/amazon-monitoring.md` as needed
-5. 根据需求通过 `resources/amazon-sorftimeAgent.md` 创建智能分析任务 / Create intelligent analysis tasks via `resources/amazon-sorftimeAgent.md` as needed
-
-### Shopee相关数据获取 / Shopee Data Access
-从 `resources/shopee-api.md` 学习提供的数据接口 / Learn the available data APIs from `resources/shopee-api.md`
-
-### 沃尔玛相关数据获取 / Walmart Data Access
-从 `resources/walmart-api.md` 学习提供的数据接口 / Learn the available data APIs from `resources/walmart-api.md`
+1. **不要猜测 domain 值** — 始终使用上述站点速查表中的准确值
+2. **JSON 参数用单引号包裹** — `sorftime api XXX '{"key": "value"}'`
+6. **大响应设置超时** — CategoryTree 返回约10MB+数据，建议设置较长超时时间

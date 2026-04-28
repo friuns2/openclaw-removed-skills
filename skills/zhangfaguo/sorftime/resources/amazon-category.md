@@ -1,86 +1,8 @@
-# Amazon Category Market API Skill
+> 公共参考见 [`_common.md`](./_common.md)：CLI 调用模板、Domain 表、错误码、返回结构、限流约束。本文档只描述 Amazon 类目接口独有的参数与字段。
 
-## 基本信息
-- **名称**: amazon-category
-- **描述**: Sorftime 亚马逊类目市场数据查询工具，支持类目树、Best Sellers、热销产品、市场趋势等查询
-- **激活条件**: 当用户提到亚马逊类目分析、类目树、Best Seller、类目趋势、市场分析时自动激活
-- **依赖**: sorftime-cli 已全局安装并配置有效Account-SK
+# Amazon 类目接口（4 个）
 
----
-
-## 前置配置
-
-### 1. 安装sorftime-cli
-```bash
-npm install -g sorftime-cli
-```
-
-### 2. 配置账户
-```bash
-# 添加账户
-sorftime add <profile-name> <your-account-sk>
-
-# 切换到默认账户
-sorftime use <profile-name>
-```
-
----
-
-## Domain参数说明（亚马逊14个站点）
-
-| domain值 | 站点代码 | 站点名称 | 所属区域 |
-|---------|---------|---------|---------|
-| 1 | us | 美国站 | 北美 |
-| 6 | ca | 加拿大站 | 北美 |
-| 10 | mx | 墨西哥站 | 北美 |
-| 13 | br | 巴西站 | 南美 |
-| 2 | gb | 英国站 | 欧洲 |
-| 3 | de | 德国站 | 欧洲 |
-| 4 | fr | 法国站 | 欧洲 |
-| 8 | es | 西班牙站 | 欧洲 |
-| 9 | it | 意大利站 | 欧洲 |
-| 11 | ae | 阿联酋站 | 中东 |
-| 14 | sa | 沙特站 | 中东 |
-| 7 | jp | 日本站 | 亚洲 |
-| 5 | in | 印度站 | 亚洲 |
-| 12 | au | 澳洲站 | 大洋洲 |
-
----
-
-## 通用返回结构
-
-```json
-{
-  "Code": 0,
-  "Message": null,
-  "Data": {},
-  "RequestLeft": 9999,
-  "RequestConsumed": 1,
-  "RequestCount": 1
-}
-```
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| Code | Integer | 响应码：0=成功，非0=失败 |
-| Message | String | 响应信息，失败时返回错误描述 |
-| Data | Object/Array | 接口返回的业务数据 |
-| RequestLeft | Integer | 当月剩余请求次数 |
-| RequestConsumed | Integer | 本次请求消耗的次数 |
-| RequestCount | Integer | 本分钟内请求计数 |
-
----
-
-## 重要说明
-
-1. **历史回看限制**: 部分站点不支持历史回看（印度in=5、阿联酋ae=11、澳大利亚au=12、巴西br=13、沙特sa=14）
-2. **请求频率**: 最高10次/秒
-3. **类目排除**: 系统会排除不适合三方卖家的类目（如app、音像、书籍、音乐、食品、数字游戏等）
-4. **数据样本**: Best Seller数据为选定时间范围内每天Top100按ParentAsin去重后组合
-
----
-
-## 接口列表
+**本文件接口**：CategoryTree、CategoryRequest、CategoryProducts、CategoryTrend
 
 ### 1. 类目树 (CategoryTree)
 - **接口说明**: 返回Best Seller类目树结构
@@ -244,19 +166,6 @@ sorftime use <profile-name>
 2. **历史回看**: 历史回看功能在部分站点不可用（印度、阿联酋、澳大利亚、巴西、沙特）
 3. **天跨度限制**: 历史回看的天跨度有效范围为3-40天
 4. **请求频率**: 最高10次/秒
-
----
-
-## 常见错误
-
-| 错误码 | 说明 | 解决方案 |
-|--------|------|----------|
-| 0 | 成功 | - |
-| 401 | 认证失败 | 检查Account-SK是否有效 |
-| 403 | 权限不足 | 检查套餐权限或请求次数 |
-| 404 | 接口不存在 | 检查接口名称拼写 |
-| 429 | 请求频率超限 | 降低请求速度，等待1分钟后重试 |
-| 500 | 服务器内部错误 | 稍后重试，或联系Sorftime客服 |
 
 ---
 

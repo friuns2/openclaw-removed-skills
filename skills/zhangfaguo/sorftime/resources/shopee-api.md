@@ -1,101 +1,9 @@
-# Shopee API Skill
+> 公共参考见 [`_common.md`](./_common.md)：CLI 调用模板、Domain 表（Shopee 201-208）、错误码、返回结构、Shopee gzip+base64 解码说明、saleIsCorrection 字段说明、限流约束。本文档只描述 Shopee 接口独有的参数与字段。
 
-## 基本信息
-- **名称**: shopee-api
-- **描述**: Sorftime Shopee平台API调用工具，支持越南、印尼、新加坡等8个站点的类目、产品、店铺数据查询
-- **激活条件**: 当用户提到Shopee、虾皮、东南亚电商、sorftime-cli Shopee相关操作时自动激活
-- **依赖**: sorftime-cli 已全局安装并配置有效Account-SK
 
----
+# Shopee 接口（5 个）
 
-## 前置配置
-
-### 1. 安装sorftime-cli
-```bash
-npm install -g sorftime-cli
-```
-
-### 2. 配置账户
-```bash
-# 添加账户
-sorftime add <profile-name> <your-account-sk>
-
-# 切换到默认账户
-sorftime use <profile-name>
-```
-
-### 3. 权限认证说明
-- API采用HttpPost方式进行数据处理
-- 需要在请求头设置Authorization参数：`header["Authorization"] = "BasicAuth <Key>"`
-- 设置ContentType：`header["ContentType"] = "application/json;charset=UTF-8"`
-- CLI会自动处理权限认证和数据解码（gzip+base64）
-
----
-
-## Domain参数说明（Shopee 8个站点）
-
-| domain值 | 站点代码 | 站点名称 | 所属区域 |
-|---------|---------|---------|---------|
-| 201 | vn | 越南站 | 东南亚 |
-| 202 | id | 印尼站 | 东南亚 |
-| 203 | sg | 新加坡站 | 东南亚 |
-| 204 | th | 泰国站 | 东南亚 |
-| 205 | my | 马来西亚站 | 东南亚 |
-| 206 | tw | 中国台湾站 | 东亚 |
-| 207 | ph | 菲律宾站 | 东南亚 |
-| 208 | br | 巴西站 | 南美 |
-
----
-
-## 通用返回结构
-
-所有接口返回统一结构：
-```json
-{
-  "Code": 0,
-  "Message": null,
-  "Data": {},
-  "RequestLeft": 9999,
-  "RequestConsumed": 1,
-  "RequestCount": 1
-}
-```
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| Code | Integer | 响应码：0=成功，非0=失败 |
-| Message | String | 响应信息，失败时返回错误描述 |
-| Data | Object/Array | 接口返回的业务数据 |
-| RequestLeft | Integer | 当月剩余请求次数 |
-| RequestConsumed | Integer | 本次请求消耗的次数 |
-| RequestCount | Integer | 本分钟内请求计数 |
-
----
-
-## 重要说明
-
-### 1. 数据解码
-- Shopee平台的返回结果使用gzip压缩并转化成base64字符串
-- CLI会自动处理base64解码和gzip解压，用户无需手动处理
-- 接收到的数据为base64字符串，CLI会先还原成byte[]，再gzip解压获得原文
-
-### 2. 销量说明
-- **预估月销量**: 基于产品当前的排名预估未来30天的销量
-- **近30日销量**: 过去30天的实际销量
-- **销量校准**: 由于Shopee存在"数据灌蜜"的情况，系统会反向校对销量数据
-  - 当`saleIsCorrection=true`时，表示已做销量校准
-  - 此时建议调用ProductTrend接口重新拉取销量趋势数据
-
-### 3. 积分系统
-- 监控相关功能涉及积分消耗
-- 每月10号凌晨自动清空上期未用完部分并发放新积分
-
-### 4. 请求频率
-- 最高10次/秒，建议批量查询时控制速度
-
----
-
-## 接口列表
+**本文件接口**：CategoryTree、CategoryRequest、ProductRequest、ProductTrend、ShopRequest
 
 ### 一、类目市场类接口
 
@@ -271,19 +179,6 @@ sorftime use <profile-name>
 
 1. **请求频率**: 最高10次/秒，建议批量查询时控制速度
 2. **账户配置**: 所有接口默认使用当前活跃profile的Account-SK
-
----
-
-## 常见错误
-
-| 错误码 | 说明 | 解决方案 |
-|--------|------|----------|
-| 0 | 成功 | - |
-| 401 | 认证失败 | 检查Account-SK是否有效 |
-| 403 | 权限不足 | 检查套餐权限或请求次数 |
-| 404 | 接口不存在 | 检查接口名称拼写 |
-| 429 | 请求频率超限 | 降低请求速度，等待1分钟后重试 |
-| 500 | 服务器内部错误 | 稍后重试，或联系Sorftime客服 |
 
 ---
 
