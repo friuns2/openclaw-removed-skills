@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const manifest = {
   "baseUrl": "https://api.justoneapi.com",
-  "description": "Analyze Xiaohongshu Creator Marketplace (Pugongying) workflows with JustOneAPI, including creator Profile, data Summary, and follower Growth History across 25 operations.",
+  "description": "Analyze Xiaohongshu Creator Marketplace (Pugongying) workflows with JustOneAPI, including creator Profile, data Summary, and follower Growth History across 24 operations.",
   "displayName": "Xiaohongshu Creator Marketplace (Pugongying)",
   "openapi": "3.1.0",
   "platformKey": "xiaohongshu-pgy",
@@ -87,8 +87,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Core Metrics",
@@ -214,8 +214,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Search",
@@ -251,8 +251,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Profile",
@@ -312,8 +312,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Follower Growth History",
@@ -322,7 +322,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower Profile data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.",
+      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower distribution data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.",
       "method": "GET",
       "operationId": "apiSolarKolDataUserIdFansProfileV1",
       "parameters": [
@@ -349,11 +349,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Follower Profile",
+      "summary": "Follower Distribution",
       "tags": [
         "Xiaohongshu Creator Marketplace (Pugongying)"
       ]
@@ -386,8 +386,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Cost Effectiveness Analysis",
@@ -423,8 +423,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Content Tags",
@@ -460,8 +460,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Feature Tags",
@@ -557,8 +557,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Notes",
@@ -606,8 +606,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Data Summary",
@@ -643,8 +643,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Follower Summary",
@@ -653,7 +653,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) note Performance Rates data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.",
+      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) note performance metrics data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.",
       "method": "GET",
       "operationId": "apiSolarKolDataV3NotesRateV1",
       "parameters": [
@@ -729,11 +729,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Note Performance Rates",
+      "summary": "Note Performance Metrics",
       "tags": [
         "Xiaohongshu Creator Marketplace (Pugongying)"
       ]
@@ -775,8 +775,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Similar Creators",
@@ -812,8 +812,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Details",
@@ -907,8 +907,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Core Metrics",
@@ -953,8 +953,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Cost Effectiveness Analysis",
@@ -963,65 +963,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) creator Performance Overview data, including audience, content performance, and commercial indicators, for quick evaluation.",
-      "method": "GET",
-      "operationId": "getKolDataSummaryV1",
-      "parameters": [
-        {
-          "defaultValue": null,
-          "description": "User authentication token.",
-          "enumValues": [],
-          "location": "query",
-          "name": "token",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": null,
-          "description": "KOL ID.",
-          "enumValues": [],
-          "location": "query",
-          "name": "kolId",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": null,
-          "description": "Business type.\n\nAvailable Values:\n- `_0`: Normal notes\n- `_1`: Cooperation notes",
-          "enumValues": [
-            "_0",
-            "_1"
-          ],
-          "location": "query",
-          "name": "business",
-          "required": true,
-          "schemaType": "string"
-        },
-        {
-          "defaultValue": false,
-          "description": "Enable cache.",
-          "enumValues": [],
-          "location": "query",
-          "name": "acceptCache",
-          "required": false,
-          "schemaType": "boolean"
-        }
-      ],
-      "path": "/api/xiaohongshu-pgy/get-kol-data-summary/v1",
-      "requestBody": null,
-      "responses": [
-        {
-          "description": "default response",
-          "statusCode": "default"
-        }
-      ],
-      "summary": "Creator Performance Overview",
-      "tags": [
-        "Xiaohongshu Creator Marketplace (Pugongying)"
-      ]
-    },
-    {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) creator Performance Overview data, including audience, content performance, and commercial indicators, for quick evaluation.",
+      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) summary data, including activity, engagement, and audience growth, for creator evaluation, campaign planning, and creator benchmarking.",
       "method": "GET",
       "operationId": "getKolDataSummaryV2",
       "parameters": [
@@ -1069,17 +1011,17 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Creator Performance Overview",
+      "summary": "Data Summary",
       "tags": [
         "Xiaohongshu Creator Marketplace (Pugongying)"
       ]
     },
     {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower Profile data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.",
+      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower distribution data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.",
       "method": "GET",
       "operationId": "getKolFansPortraitV1",
       "parameters": [
@@ -1115,17 +1057,17 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Follower Profile",
+      "summary": "Follower Distribution",
       "tags": [
         "Xiaohongshu Creator Marketplace (Pugongying)"
       ]
     },
     {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower Analysis data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and creator benchmarking.",
+      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower summary data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and creator benchmarking.",
       "method": "GET",
       "operationId": "getKolFansSummaryV1",
       "parameters": [
@@ -1161,17 +1103,17 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Follower Analysis",
+      "summary": "Follower Summary",
       "tags": [
         "Xiaohongshu Creator Marketplace (Pugongying)"
       ]
     },
     {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower Growth Trend data, including historical audience changes over time, for creator evaluation, campaign planning, and creator benchmarking.",
+      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) follower growth history data, including historical audience changes over time, for creator evaluation, campaign planning, and creator benchmarking.",
       "method": "GET",
       "operationId": "getKolFansTrendV1",
       "parameters": [
@@ -1231,11 +1173,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Follower Growth Trend",
+      "summary": "Follower Growth History",
       "tags": [
         "Xiaohongshu Creator Marketplace (Pugongying)"
       ]
@@ -1243,7 +1185,7 @@ const manifest = {
     {
       "description": "Get Xiaohongshu Creator Marketplace (Pugongying) creator Profile data, including audience and pricing data, for influencer vetting, benchmark analysis, and campaign planning.",
       "method": "GET",
-      "operationId": "getKolInfoV1",
+      "operationId": "getXiaohongshuPgyKolInfoV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -1277,8 +1219,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Profile",
@@ -1371,8 +1313,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Creator Note List",
@@ -1381,7 +1323,7 @@ const manifest = {
       ]
     },
     {
-      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) note Performance Rates data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.",
+      "description": "Get Xiaohongshu Creator Marketplace (Pugongying) note performance metrics data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.",
       "method": "GET",
       "operationId": "getKolNoteRateV1",
       "parameters": [
@@ -1466,11 +1408,11 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
-      "summary": "Note Performance Rates",
+      "summary": "Note Performance Metrics",
       "tags": [
         "Xiaohongshu Creator Marketplace (Pugongying)"
       ]
@@ -1478,7 +1420,7 @@ const manifest = {
     {
       "description": "Get Xiaohongshu Creator Marketplace (Pugongying) note Details data, including media and engagement signals, for content analysis, archiving, and campaign review.",
       "method": "GET",
-      "operationId": "getNoteDetailV1",
+      "operationId": "getXiaohongshuPgyNoteDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -1512,8 +1454,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Details",

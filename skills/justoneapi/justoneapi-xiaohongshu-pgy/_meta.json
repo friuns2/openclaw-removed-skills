@@ -3,11 +3,16 @@
   "slug": "justoneapi-xiaohongshu-pgy",
   "displayName": "Xiaohongshu Creator Marketplace (Pugongying) API",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776240037568,
-    "commit": "https://github.com/openclaw/skills/commit/d054abea0d1e9f6d3f5cbbc593e16dbbf6980dff"
+    "version": "1.0.4",
+    "publishedAt": 1776924520698,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776240037568,
+      "commit": "https://github.com/openclaw/skills/commit/d054abea0d1e9f6d3f5cbbc593e16dbbf6980dff"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775377598953,

@@ -1,6 +1,6 @@
 ---
 name: Xiaohongshu Creator Marketplace (Pugongying) API
-description: Analyze Xiaohongshu Creator Marketplace (Pugongying) workflows with JustOneAPI, including creator Profile, data Summary, and follower Growth History across 25 operations.
+description: Analyze Xiaohongshu Creator Marketplace (Pugongying) workflows with JustOneAPI, including creator Profile, data Summary, and follower Growth History across 24 operations.
 author: JustOneAPI
 homepage: https://api.justoneapi.com
 metadata: {"openclaw":{"homepage":"https://api.justoneapi.com","primaryEnv":"JUST_ONE_API_TOKEN","requires":{"bins":["node"],"env":["JUST_ONE_API_TOKEN"]},"skillKey":"justoneapi_xiaohongshu_pgy"}}
@@ -8,7 +8,7 @@ metadata: {"openclaw":{"homepage":"https://api.justoneapi.com","primaryEnv":"JUS
 
 # Xiaohongshu Creator Marketplace (Pugongying)
 
-This skill wraps 25 Xiaohongshu Creator Marketplace (Pugongying) operations exposed by JustOneAPI. It is strongest for creator Profile, data Summary, follower Growth History, and follower Summary. Expect common inputs such as `userId`, `acceptCache`, `kolId`, `business`, `dateType`.
+This skill wraps 24 Xiaohongshu Creator Marketplace (Pugongying) operations exposed by JustOneAPI. It is strongest for creator Profile, data Summary, follower Growth History, and follower Summary. Expect common inputs such as `userId`, `acceptCache`, `kolId`, `business`, `dateType`.
 
 ## When To Use It
 
@@ -26,7 +26,7 @@ This skill wraps 25 Xiaohongshu Creator Marketplace (Pugongying) operations expo
 
 ## Request Pattern
 
-- 25 operations are available in this skill.
+- 24 operations are available in this skill.
 - HTTP methods used here: `GET`.
 - The most common non-token parameters are `userId`, `acceptCache`, `kolId`, `business`, `dateType`.
 - All operations in this skill are parameter-driven requests; none require a request body.

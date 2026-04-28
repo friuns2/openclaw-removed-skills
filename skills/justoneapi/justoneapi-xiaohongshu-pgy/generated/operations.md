@@ -48,7 +48,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarCooperatorBloggerV2V1`
 
@@ -105,7 +105,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarCooperatorUserBloggerUserIdV1`
 
@@ -128,7 +128,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataUserIdFansOverallNewHistoryV1`
 
@@ -163,14 +163,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataUserIdFansProfileV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/api/solar/kol/data/userId/fans_profile/v1`
-- Summary: Follower Profile
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower Profile data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.
+- Summary: Follower Distribution
+- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower distribution data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.
 - Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
 
 ### Parameters
@@ -186,7 +186,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataV2CostEffectiveV1`
 
@@ -209,7 +209,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataV2KolContentTagsV1`
 
@@ -232,7 +232,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataV2KolFeatureTagsV1`
 
@@ -255,7 +255,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataV2NotesDetailV1`
 
@@ -306,7 +306,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataV3DataSummaryV1`
 
@@ -335,7 +335,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataV3FansSummaryV1`
 
@@ -358,14 +358,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolDataV3NotesRateV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/api/solar/kol/dataV3/notesRate/v1`
-- Summary: Note Performance Rates
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) note Performance Rates data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.
+- Summary: Note Performance Metrics
+- Description: Get Xiaohongshu Creator Marketplace (Pugongying) note performance metrics data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.
 - Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
 
 ### Parameters
@@ -406,7 +406,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarKolGetSimilarKolV1`
 
@@ -430,7 +430,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `apiSolarNoteNoteIdDetailV1`
 
@@ -453,7 +453,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolDataCoreV1`
 
@@ -502,7 +502,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolCostEffectiveV1`
 
@@ -526,44 +526,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
-
-## `getKolDataSummaryV1`
-
-- Method: `GET`
-- Path: `/api/xiaohongshu-pgy/get-kol-data-summary/v1`
-- Summary: Creator Performance Overview
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) creator Performance Overview data, including audience, content performance, and commercial indicators, for quick evaluation.
-- Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
-
-### Parameters
-
-| Name | In | Required | Type | Default | Description |
-| --- | --- | --- | --- | --- | --- |
-| `token` | `query` | yes | `string` | n/a | User authentication token. |
-| `kolId` | `query` | yes | `string` | n/a | KOL ID. |
-| `business` | `query` | yes | `string` | n/a | Business type.
-
-Available Values:
-- `_0`: Normal notes
-- `_1`: Cooperation notes |
-| enum | values | no | n/a | n/a | `_0`, `_1` |
-| `acceptCache` | `query` | no | `boolean` | `false` | Enable cache. |
-
-### Request body
-
-No request body.
-
-### Responses
-
-- `default`: default response
+- `200`: OK
 
 ## `getKolDataSummaryV2`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/get-kol-data-summary/v2`
-- Summary: Creator Performance Overview
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) creator Performance Overview data, including audience, content performance, and commercial indicators, for quick evaluation.
+- Summary: Data Summary
+- Description: Get Xiaohongshu Creator Marketplace (Pugongying) summary data, including activity, engagement, and audience growth, for creator evaluation, campaign planning, and creator benchmarking.
 - Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
 
 ### Parameters
@@ -586,14 +556,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolFansPortraitV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/get-kol-fans-portrait/v1`
-- Summary: Follower Profile
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower Profile data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.
+- Summary: Follower Distribution
+- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower distribution data, including audience demographics, interests, and distribution metrics, for creator evaluation, campaign planning, and creator benchmarking.
 - Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
 
 ### Parameters
@@ -610,14 +580,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolFansSummaryV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/get-kol-fans-summary/v1`
-- Summary: Follower Analysis
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower Analysis data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and creator benchmarking.
+- Summary: Follower Summary
+- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower summary data, including core metrics, trend signals, and performance indicators, for creator evaluation, campaign planning, and creator benchmarking.
 - Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
 
 ### Parameters
@@ -634,14 +604,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolFansTrendV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/get-kol-fans-trend/v1`
-- Summary: Follower Growth Trend
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower Growth Trend data, including historical audience changes over time, for creator evaluation, campaign planning, and creator benchmarking.
+- Summary: Follower Growth History
+- Description: Get Xiaohongshu Creator Marketplace (Pugongying) follower growth history data, including historical audience changes over time, for creator evaluation, campaign planning, and creator benchmarking.
 - Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
 
 ### Parameters
@@ -670,9 +640,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getKolInfoV1`
+## `getXiaohongshuPgyKolInfoV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/get-kol-info/v1`
@@ -694,7 +664,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolNoteListV1`
 
@@ -740,14 +710,14 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getKolNoteRateV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/get-kol-note-rate/v1`
-- Summary: Note Performance Rates
-- Description: Get Xiaohongshu Creator Marketplace (Pugongying) note Performance Rates data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.
+- Summary: Note Performance Metrics
+- Description: Get Xiaohongshu Creator Marketplace (Pugongying) note performance metrics data, including core metrics, trend signals, and performance indicators, for content efficiency analysis, creator benchmarking, and campaign planning.
 - Tags: `Xiaohongshu Creator Marketplace (Pugongying)`
 
 ### Parameters
@@ -789,9 +759,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getNoteDetailV1`
+## `getXiaohongshuPgyNoteDetailV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu-pgy/get-note-detail/v1`
@@ -813,4 +783,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
