@@ -8,11 +8,18 @@ Source:
   - https://docs.tensorlake.ai/sandboxes/agentic-rl-reproducible-env.md
   - https://docs.tensorlake.ai/sandboxes/agentic-swarm-intelligence.md
   - https://docs.tensorlake.ai/sandboxes/gspo-agentic-rl.md
-SDK version: tensorlake 0.4.42
-Last verified: 2026-04-08
+SDK version: tensorlake 0.5.0
+Last verified: 2026-04-27
 -->
 
 # TensorLake Sandbox Advanced Patterns
+
+## Table of Contents
+
+- [Skills in Sandboxes](#skills-in-sandboxes)
+- [AI Code Execution](#ai-code-execution)
+- [Data Analysis](#data-analysis)
+- [CI/CD Build Pipelines](#cicd-build-pipelines)
 
 ## Skills in Sandboxes
 
@@ -102,24 +109,25 @@ const image = new Image({
 ### Image Creation
 
 ```bash
-tl sbx image create template.py --name claude-code-skills
-tl sbx new --image claude-code-skills
+tl sbx image create Dockerfile --registered-name claude-code-skills
+tl sbx create --image claude-code-skills
 ```
 
 ### Runtime Installation (SDK)
 
 ```python
-from tensorlake.sandbox import SandboxClient
+from tensorlake.sandbox import Sandbox
 
-client = SandboxClient()
-
-with client.create_and_connect() as sandbox:
+sandbox = Sandbox.create()
+try:
     sandbox.run("bash", ["-c", "apt-get update && apt-get install -y nodejs npm"])
     sandbox.run("bash", ["-c", "npm install -g skills"])
     sandbox.run("bash", ["-c", "skills add tensorlakeai/tensorlake-skills --all -y --copy"])
 
     result = sandbox.run("find", ["/", "-name", "SKILL.md", "-type", "f", "-not", "-path", "*/node_modules/*"])
     print(result.stdout)
+finally:
+    sandbox.terminate()
 ```
 
 ---
@@ -128,20 +136,24 @@ with client.create_and_connect() as sandbox:
 
 Use sandboxes as LLM tool-call targets for safe code execution.
 
+> **⚠ Each tool call is a fresh Python process.** `sandbox.run("python", ["-c", code])` spawns a new interpreter every time. Files written to disk and packages installed via `pip` **do** persist across calls in the same sandbox. Python variables, imports, and module-level state **do not**. If a user (or an earlier message) describes this as a "REPL session" or asks for "persistent variables between turns," correct the framing — the sandbox is a persistent *filesystem*, not a persistent *interpreter*.
+
 ### Architecture Pattern
 
 1. Create a single sandbox at session start
-2. Maintain it across multiple tool calls (state persists)
+2. Reuse it across tool calls — files and installed packages persist; Python variables/imports do NOT (each run is a fresh process)
 3. Close when done
 
 **Python:**
 
 ```python
-sandbox = client.create_and_connect(
+from tensorlake.sandbox import Sandbox
+
+sandbox = Sandbox.create(
     cpus=1.0,
     memory_mb=1024,
     timeout_secs=600,
-    allow_internet_access=False  # important for untrusted code
+    allow_internet_access=False,  # important for untrusted code
 )
 
 result = sandbox.run("python", ["-c", code])
@@ -151,13 +163,9 @@ result = sandbox.run("python", ["-c", code])
 **TypeScript:**
 
 ```typescript
-import { SandboxClient } from "tensorlake";
+import { Sandbox } from "tensorlake";
 
-const client = SandboxClient.forCloud({
-  apiKey: process.env.TENSORLAKE_API_KEY,
-});
-
-const sandbox = await client.createAndConnect({
+const sandbox = await Sandbox.create({
   cpus: 1.0,
   memoryMb: 1024,
   timeoutSecs: 600,
@@ -180,15 +188,14 @@ try {
   console.log(output);
 } finally {
   await sandbox.terminate();
-  client.close();
 }
 ```
 
 ### Snapshots for Pre-installed Dependencies
 
 ```python
-snapshot = client.snapshot_and_wait(sandbox.sandbox_id)
-sandbox = client.create_and_connect(snapshot_id=snapshot.snapshot_id)
+snapshot = sandbox.checkpoint()
+sandbox = Sandbox.create(snapshot_id=snapshot.snapshot_id)
 ```
 
 ### Integration Patterns
@@ -201,11 +208,19 @@ sandbox = client.create_and_connect(snapshot_id=snapshot.snapshot_id)
 
 ### Best Practices
 
-- **Reuse sandboxes** — creating new ones per tool call adds cold-start latency and loses state
-- **Set `allow_internet_access=False`** for untrusted code
-- **Pre-install deps via snapshots** or let agents `pip install` on demand
-- **Tear down** with `sandbox.close()` or `sandbox.terminate()` when the session ends
-- Files and packages persist across calls, but each Python invocation is a fresh process (re-import required)
+- **Reuse sandboxes** — creating new ones per tool call adds cold-start latency and loses filesystem state
+- **Set `allow_internet_access=False`** for untrusted code. If you need `pip install` on demand, pre-bake deps into a custom image or snapshot instead of flipping internet access on for untrusted code
+- **Pre-install deps via snapshots** or let agents `pip install` on demand (only in trusted setups)
+- **Tear down** with `sandbox.terminate()` when the session ends
+
+### Anti-patterns
+
+Do not work around the fresh-process model by building a persistent interpreter:
+
+- **Don't use `start_process` + `write_stdin`** to keep a long-running `python` kernel alive and pipe code into it. `sandbox.run("python", ["-c", code])` is the supported shape. A long-running stdin-fed kernel is not a documented pattern and gives up the clean per-call stdout/stderr/exit_code contract.
+- **Don't tell the downstream LLM that variables persist across turns** in its system prompt. They don't. Tell it instead: "You have a persistent workspace directory and installed packages; module imports and variables reset between calls — write intermediate state to `/workspace/` if you need it across turns."
+- **Don't flip `allow_internet_access=True` to enable pip for untrusted code.** Pre-install dependencies into a custom `Image` or a snapshot, then boot the sandbox from that snapshot with `snapshot_id=`.
+- **Don't fabricate methods or fields.** There is no `sandbox.exec()`, `sandbox.python()`, `sandbox.eval()`, `sandbox.repl()`, or `persistent=True` / `repl_mode=True` / `session=True` kwarg. The return object has `stdout`, `stderr`, `exit_code` — not `.output`, `.result`, or `.logs`.
 
 ---
 
@@ -217,12 +232,11 @@ Run parallel data analysis and model benchmarking in isolated sandboxes.
 
 ```python
 import asyncio, json
-from tensorlake.sandbox import SandboxClient
+from tensorlake.sandbox import Sandbox
 
 def run_model_benchmark(model_name, sklearn_path):
     """Synchronous benchmark — one sandbox per model."""
-    client = SandboxClient()
-    sandbox = client.create_and_connect()
+    sandbox = Sandbox.create()
     try:
         sandbox.run("pip", ["install", "--user", "--break-system-packages", "numpy", "scikit-learn"])
         module, cls = sklearn_path.rsplit(".", 1)
@@ -245,7 +259,7 @@ print(json.dumps({{"model": "{model_name}", "accuracy": round(acc, 4), "time": r
         result = sandbox.run("python", ["-c", code])
         return json.loads(result.stdout)
     finally:
-        sandbox.close()
+        sandbox.terminate()
 
 async def main():
     models = {
@@ -286,7 +300,7 @@ Use sandboxes as ephemeral, isolated build containers.
 
 ```python
 import os
-from tensorlake.sandbox import SandboxClient
+from tensorlake.sandbox import Sandbox
 
 def copy_to_sandbox(sandbox, local_dir, sandbox_dir):
     """Recursively copy a local directory into the sandbox."""
@@ -298,8 +312,7 @@ def copy_to_sandbox(sandbox, local_dir, sandbox_dir):
             with open(os.path.join(root, f), "rb") as fh:
                 sandbox.write_file(f"{dest}/{f}", fh.read())
 
-client = SandboxClient()
-sandbox = client.create_and_connect()
+sandbox = Sandbox.create()
 try:
     # Upload project files
     copy_to_sandbox(sandbox, "./my_project", "/workspace/project")
@@ -323,7 +336,7 @@ try:
     # Download artifacts from the sandbox
     wheel_bytes = sandbox.read_file("/workspace/project/dist/my_project.whl")
 finally:
-    sandbox.close()
+    sandbox.terminate()
 ```
 
 **Key `sandbox.run()` parameters:**

@@ -14,11 +14,18 @@ Source:
   - https://docs.tensorlake.ai/platform/playground/sample-documents.md
   - https://docs.tensorlake.ai/platform/security.md
   - https://docs.tensorlake.ai/platform/sso.md
-SDK version: tensorlake 0.4.42
-Last verified: 2026-04-08
+SDK version: tensorlake 0.5.0
+Last verified: 2026-04-24
 -->
 
 # TensorLake Platform Reference
+
+## Table of Contents
+
+- [Authentication](#authentication)
+- [Access Control](#access-control)
+- [Webhooks](#webhooks)
+- [EU Data Residency](#eu-data-residency)
 
 ## Authentication
 

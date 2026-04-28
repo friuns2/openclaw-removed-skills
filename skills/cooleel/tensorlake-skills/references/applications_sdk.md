@@ -23,12 +23,32 @@ Source:
   - https://docs.tensorlake.ai/applications/sandboxes.md
   - https://docs.tensorlake.ai/applications/guides/streaming-progress.md
   - https://docs.tensorlake.ai/applications/guides/logging.md
-  - https://docs.tensorlake.ai/applications/guides/autoscaling.md
-SDK version: tensorlake 0.4.42
-Last verified: 2026-04-08
+SDK version: tensorlake 0.5.0
+Last verified: 2026-04-24
 -->
 
 # TensorLake Applications SDK Reference
+
+## Table of Contents
+
+- [Imports](#imports)
+- [Decorators](#decorators)
+- [Calling Functions](#calling-functions)
+- [Input/Output Serialization](#inputoutput-serialization)
+- [Map & Reduce](#map--reduce)
+- [Future API](#future-api)
+- [Async Functions](#async-functions)
+- [Running Applications](#running-applications)
+- [Durable Execution](#durable-execution)
+- [RequestContext](#requestcontext)
+- [Image Builder](#image-builder)
+- [File Type](#file-type)
+- [Retries](#retries)
+- [Scaling](#scaling)
+- [Cron Scheduler](#cron-scheduler)
+- [Exceptions](#exceptions)
+- [Secrets](#secrets)
+- [Observability](#observability)
 
 ## Imports
 

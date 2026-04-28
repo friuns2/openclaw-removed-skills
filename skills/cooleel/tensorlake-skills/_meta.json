@@ -3,9 +3,15 @@
   "slug": "tensorlake-skills",
   "displayName": "tensorlake",
   "latest": {
-    "version": "2.3.0",
-    "publishedAt": 1776186850850,
-    "commit": "https://github.com/openclaw/skills/commit/9fb4b43b677960d792e2cda164de0691bf5b903e"
+    "version": "2.5.5",
+    "publishedAt": 1777392936388,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.3.0",
+      "publishedAt": 1776186850850,
+      "commit": "https://github.com/openclaw/skills/commit/9fb4b43b677960d792e2cda164de0691bf5b903e"
+    }
+  ]
 }
