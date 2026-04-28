@@ -3,9 +3,15 @@
   "slug": "appcircle",
   "displayName": "Appcircle",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297229991,
-    "commit": "https://github.com/openclaw/skills/commit/0345195459857b3a5a91dac7acb02da3c7e3f51c"
+    "version": "1.0.1",
+    "publishedAt": 1776885839332,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297229991,
+      "commit": "https://github.com/openclaw/skills/commit/0345195459857b3a5a91dac7acb02da3c7e3f51c"
+    }
+  ]
 }
