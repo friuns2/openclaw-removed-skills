@@ -1,57 +1,30 @@
 ---
-name: cn-express-tracker
-description: |
-  中文快递追踪助手。根据快递单号自动识别快递公司，查询实时物流状态。
-  支持国内外主流快递，使用快递100免费接口，无需API Key。
-  当用户说"快递"、"查快递"、"物流"、"单号"、"包裹到哪了"时触发。
-  Keywords: 快递, 物流, 单号, 追踪, 包裹, delivery, tracking
+name: cn-kuaidi-tracker
+description: "快递追踪助手。输入快递单号查询物流状态，自动识别快递公司。"
 metadata: {"openclaw": {"emoji": "📦"}}
 ---
 
-# 📦 快递追踪助手
+# 快递追踪助手
 
-查快递，更轻松。
+输入单号，查询物流状态。
 
-## 核心功能
+## 功能
+- 输入单号查询物流
+- 自动识别快递公司
+- 本地追踪列表管理
 
-| 功能 | 说明 |
-|------|------|
-| 添加追踪 | `添加快递 SF1234567890` |
-| 查询单个 | `查 SF1234567890` / `顺丰SF1234567890到哪了` |
-| 查看列表 | `查快递` / `我的快递`，显示所有追踪快递状态 |
-| 删除快递 | `删除快递 SF1234567890` |
-| 清除所有 | `清除快递` |
-
-## 使用方式
-
+## 用法
 ```bash
-# 添加快递到追踪列表
 python3 scripts/express_tracker.py "添加快递 SF1234567890"
-
-# 查询单个快递（自动识别公司）
 python3 scripts/express_tracker.py "查 SF1234567890"
-
-# 指定公司查询
-python3 scripts/express_tracker.py "查 1234567890123 公司:顺丰"
-
-# 查看所有追踪快递
 python3 scripts/express_tracker.py "查快递"
-
-# 删除追踪
-python3 scripts/express_tracker.py "删除 SF1234567890"
 ```
 
-## 支持的快递公司
+## 支持快递公司
+顺丰、中通、圆通、韵达、申通、极兔、京东、EMS、邮政、德邦
 
-顺丰速运、中通、圆通、韵达、申通、极兔、京东、EMS、中国邮政、德邦
+## 数据接口
+快递100公开查询接口，无需注册。
 
 ## 数据存储
-
-`~/.qclaw/skills/cn-express-tracker/data/express.json`
-
-## 注意事项
-
-- 快递100接口无需API Key，免费额度充足
-- 部分快递公司需要真实在途物流才可查询
-- 首次查询会自动添加到追踪列表
-- 自动识别主流快递公司单号格式
+本地JSON文件：`~/.qclaw/skills/cn-express-tracker/data/express.json`

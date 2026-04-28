@@ -1,11 +1,17 @@
 {
   "owner": "freedompixels",
   "slug": "cn-kuaidi-tracker",
-  "displayName": "cn-express-tracker",
+  "displayName": "快递追踪助手",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776237611116,
-    "commit": "https://github.com/openclaw/skills/commit/feeaf517ad69d37363400481a78c5f114c7a56ba"
+    "version": "1.1.1",
+    "publishedAt": 1776858917434,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776237611116,
+      "commit": "https://github.com/openclaw/skills/commit/feeaf517ad69d37363400481a78c5f114c7a56ba"
+    }
+  ]
 }
