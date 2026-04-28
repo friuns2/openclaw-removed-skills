@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "agnicpay-pay-for-service",
-  "displayName": "Pay for Service",
+  "displayName": "Agnic Pay for Service",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775599228759,
-    "commit": "https://github.com/openclaw/skills/commit/c2aa51b0d717262240f57399145a1b70d1261de3"
+    "version": "2.0.2",
+    "publishedAt": 1776953289218,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775599228759,
+      "commit": "https://github.com/openclaw/skills/commit/c2aa51b0d717262240f57399145a1b70d1261de3"
+    }
+  ]
 }
