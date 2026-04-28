@@ -179,7 +179,7 @@
   <!-- Hero -->
   <div class="hero">
     <div class="container">
-      <div class="hero-badge">v1.1.0 &mdash; 新增 6 种图表预设</div>
+      <div class="hero-badge">v1.3.0 &mdash; 新增样式预设</div>
       <h1>drawio-<span>skill</span></h1>
       <p>从文本到专业图表。通过自然语言生成 draw.io 文件，支持自检、迭代优化和 ML 模型图。</p>
       <div class="hero-install">
@@ -221,9 +221,14 @@
           <p>添加 <code>flowAnimation=1</code> 即可在箭头上显示移动动画。适合数据流和管道图的 SVG 导出。</p>
         </div>
         <div class="feature-card">
+          <div class="feature-icon">&#x1F3A8;</div>
+          <h3>样式预设</h3>
+          <p>用一个 <code>.drawio</code> 文件或图片"教会" Skill 你的风格，命名保存后可在后续图表中复用。内置 3 种预设：<code>default</code>、<code>corporate</code>、<code>handdrawn</code>。</p>
+        </div>
+        <div class="feature-card">
           <div class="feature-icon">&#x1F310;</div>
-          <h3>5 大平台、零配置</h3>
-          <p>Claude Code、OpenClaw、Hermes、Codex、SkillsMP &mdash; 仅需一个 SKILL.md + draw.io 桌面版，无需 MCP、Node.js。</p>
+          <h3>6 大平台、零配置</h3>
+          <p>Claude Code、Opencode、OpenClaw、Hermes、Codex、SkillsMP &mdash; 仅需一个 SKILL.md + draw.io 桌面版，无需 MCP、Node.js。</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#x1F4BB;</div>
@@ -283,6 +288,7 @@
           <tr><td>嵌入式导出</td><td class="cross">&#x2717;</td><td class="check">&#x2713; --embed-diagram</td></tr>
           <tr><td>浏览器降级</td><td class="cross">&#x2717;</td><td class="check">&#x2713; diagrams.net URL</td></tr>
           <tr><td>自动启动桌面版</td><td class="cross">&#x2717;</td><td class="check">&#x2713; 导出后打开 .drawio</td></tr>
+          <tr><td>样式预设</td><td class="cross">&#x2717;</td><td class="check">&#x2713; 学习、保存并应用命名样式</td></tr>
         </tbody>
       </table>
       </div>
@@ -296,6 +302,7 @@
       <p class="section-sub">选择你的平台，10 秒搞定。</p>
       <div class="tabs" role="tablist" aria-label="安装平台">
         <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-claude" onclick="switchTab(event, 'tab-claude')">Claude Code</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="tab-opencode" onclick="switchTab(event, 'tab-opencode')">Opencode</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="tab-openclaw" onclick="switchTab(event, 'tab-openclaw')">OpenClaw</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="tab-skillsmp" onclick="switchTab(event, 'tab-skillsmp')">SkillsMP</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="tab-clawhub" onclick="switchTab(event, 'tab-clawhub')">ClawHub</button>
@@ -307,6 +314,16 @@ git clone https://github.com/Agents365-ai/drawio-skill.git ~/.claude/skills/draw
 
 # 项目级安装
 git clone https://github.com/Agents365-ai/drawio-skill.git .claude/skills/drawio-skill</pre>
+      </div>
+      <div id="tab-opencode" class="tab-content" role="tabpanel">
+        <pre># 全局安装（Opencode 原生路径）
+git clone https://github.com/Agents365-ai/drawio-skill.git ~/.config/opencode/skills/drawio-skill
+
+# 项目级安装
+git clone https://github.com/Agents365-ai/drawio-skill.git .opencode/skills/drawio-skill
+
+# 也可自动识别已有的 Claude Code 安装
+# （~/.claude/skills/ 和 .claude/skills/ 会被自动读取）</pre>
       </div>
       <div id="tab-openclaw" class="tab-content" role="tabpanel">
         <pre># 通过 ClawHub 安装

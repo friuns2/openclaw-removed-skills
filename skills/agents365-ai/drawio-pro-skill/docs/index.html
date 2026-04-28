@@ -190,7 +190,7 @@
   <!-- Hero -->
   <div class="hero">
     <div class="container">
-      <div class="hero-badge">v1.1.0 &mdash; Now with 6 Diagram Presets</div>
+      <div class="hero-badge">v1.3.0 &mdash; Now with Style Presets</div>
       <h1>drawio-<span>skill</span></h1>
       <p>From text to professional diagrams. Generate draw.io files from natural language with self-check, iterative refinement, and ML model support.</p>
       <div class="hero-install">
@@ -232,9 +232,14 @@
           <p>Add <code>flowAnimation=1</code> for moving dot animations along arrows. Ideal for data-flow and pipeline diagrams in SVG.</p>
         </div>
         <div class="feature-card">
+          <div class="feature-icon">&#x1F3A8;</div>
+          <h3>Style Presets</h3>
+          <p>Teach the skill your visual style from a <code>.drawio</code> file or image. Save by name and apply to future diagrams. 3 built-ins included: <code>default</code>, <code>corporate</code>, <code>handdrawn</code>.</p>
+        </div>
+        <div class="feature-card">
           <div class="feature-icon">&#x1F310;</div>
-          <h3>5 Platforms, Zero Config</h3>
-          <p>Claude Code, OpenClaw, Hermes, Codex, SkillsMP &mdash; just one SKILL.md file + draw.io desktop. No MCP, no Node.js.</p>
+          <h3>6 Platforms, Zero Config</h3>
+          <p>Claude Code, Opencode, OpenClaw, Hermes, Codex, SkillsMP &mdash; just one SKILL.md file + draw.io desktop. No MCP, no Node.js.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#x1F4BB;</div>
@@ -294,6 +299,7 @@
           <tr><td>Embed diagram in export</td><td class="cross">&#x2717;</td><td class="check">&#x2713; --embed-diagram</td></tr>
           <tr><td>Browser fallback</td><td class="cross">&#x2717;</td><td class="check">&#x2713; diagrams.net URL</td></tr>
           <tr><td>Auto-launch desktop app</td><td class="cross">&#x2717;</td><td class="check">&#x2713; Opens .drawio for fine-tuning</td></tr>
+          <tr><td>Style presets</td><td class="cross">&#x2717;</td><td class="check">&#x2713; Learn, save &amp; apply named styles</td></tr>
         </tbody>
       </table>
       </div>
@@ -307,6 +313,7 @@
       <p class="section-sub">Pick your platform. Takes 10 seconds.</p>
       <div class="tabs" role="tablist" aria-label="Installation platforms">
         <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-claude" onclick="switchTab(event, 'tab-claude')">Claude Code</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="tab-opencode" onclick="switchTab(event, 'tab-opencode')">Opencode</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="tab-openclaw" onclick="switchTab(event, 'tab-openclaw')">OpenClaw</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="tab-skillsmp" onclick="switchTab(event, 'tab-skillsmp')">SkillsMP</button>
         <button class="tab" role="tab" aria-selected="false" aria-controls="tab-clawhub" onclick="switchTab(event, 'tab-clawhub')">ClawHub</button>
@@ -318,6 +325,16 @@ git clone https://github.com/Agents365-ai/drawio-skill.git ~/.claude/skills/draw
 
 # Project-level install
 git clone https://github.com/Agents365-ai/drawio-skill.git .claude/skills/drawio-skill</pre>
+      </div>
+      <div id="tab-opencode" class="tab-content" role="tabpanel">
+        <pre># Global install (Opencode-native path)
+git clone https://github.com/Agents365-ai/drawio-skill.git ~/.config/opencode/skills/drawio-skill
+
+# Project-level install
+git clone https://github.com/Agents365-ai/drawio-skill.git .opencode/skills/drawio-skill
+
+# Also auto-detected from existing Claude Code install
+# (~/.claude/skills/ and .claude/skills/ are read automatically)</pre>
       </div>
       <div id="tab-openclaw" class="tab-content" role="tabpanel">
         <pre># Via ClawHub registry

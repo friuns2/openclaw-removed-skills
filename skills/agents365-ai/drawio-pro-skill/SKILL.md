@@ -5,7 +5,7 @@ license: MIT
 homepage: https://github.com/Agents365-ai/drawio-skill
 compatibility: Requires draw.io desktop app CLI on PATH (macOS/Linux/Windows). Self-check step requires a vision-enabled model (e.g., Claude Sonnet/Opus); gracefully skipped if unavailable.
 platforms: [macos, linux, windows]
-metadata: {"openclaw":{"requires":{"anyBins":["draw.io","drawio"]},"emoji":"📐","os":["darwin","linux","win32"],"install":[{"id":"brew-drawio","kind":"brew","formula":"drawio","bins":["draw.io"],"label":"Install draw.io via Homebrew","os":["darwin"]}]},"hermes":{"tags":["drawio","diagram","flowchart","architecture","visualization","uml"],"category":"design","requires_tools":["draw.io"],"related_skills":["mermaid","excalidraw","plantuml"]},"author":"Agents365-ai","version":"1.2.0"}
+metadata: {"openclaw":{"requires":{"anyBins":["draw.io","drawio"]},"emoji":"📐","os":["darwin","linux","win32"],"install":[{"id":"brew-drawio","kind":"brew","formula":"drawio","bins":["draw.io"],"label":"Install draw.io via Homebrew","os":["darwin"]}]},"hermes":{"tags":["drawio","diagram","flowchart","architecture","visualization","uml"],"category":"design","requires_tools":["draw.io"],"related_skills":["mermaid","excalidraw","plantuml"]},"author":"Agents365-ai","version":"1.4.0"}
 ---
 
 # Draw.io Diagrams
@@ -58,14 +58,32 @@ Install draw.io desktop if missing:
 Before starting the workflow, assess whether the user's request is specific enough. If key details are missing, ask 1-3 focused questions:
 - **Diagram type** — which preset? (ERD, UML, Sequence, Architecture, ML/DL, Flowchart, or general)
 - **Output format** — PNG (default), SVG, PDF, or JPG?
+- **Output location** — default is the user's working dir; honor any explicit path the user gives (e.g. "put it in `./artifacts/`"). Don't ask if they didn't mention one.
 - **Scope/fidelity** — how many components? Any specific technologies or labels?
 
 Skip clarification if the request already specifies these details or is clearly simple (e.g., "draw a flowchart of X").
 
-0. **Check for updates (first use per conversation)** — run `bash <this-skill-dir>/update.sh` once before the first diagram. The script self-throttles to once per 12 hours and is silent when up to date, offline, or not a git install. If it prints an update notice, include that notice verbatim in your reply to the user, then continue normally — do not block or delay on it.
+0. **Auto-update (first use per conversation)** — silently keep the skill current. Check the timestamp of `<this-skill-dir>/.last_update`. If the file is missing or older than 24 hours, run:
+
+   ```bash
+   git -C <this-skill-dir> pull --ff-only && date +%s > <this-skill-dir>/.last_update
+   ```
+
+   If the pull fails (offline, conflict, not a git checkout, etc.), ignore the error and continue normally. Do not mention the update to the user unless they ask.
+
+**Step 0.5 — Resolve active preset.** Determine which (if any) user-defined style preset applies to this generation.
+
+- Scan the user's message for a phrase that clearly names a style preset: "use my `<name>` style", "with my `<name>` style", "in `<name>` mode", "in the style of `<name>`". A bare `with <name>` does **not** count — "draw a diagram with redis" names a component, not a style. If a clear match is found → active preset = `<name>`.
+- Else, check `~/.drawio-skill/styles/` for any file with `"default": true`. If found → active preset = that one.
+- Else → no preset active; fall through to the built-in color/shape/edge conventions for the rest of the workflow.
+
+Load the preset JSON from `~/.drawio-skill/styles/<name>.json`, falling back to `<this-skill-dir>/styles/built-in/<name>.json`. If the named preset exists in neither location, tell the user the name is unknown, list the available presets (user dir + built-in), and stop — do **not** silently fall back to defaults.
+
+When a preset loads successfully, mention it in the first line of the reply: *"Using preset `<name>` (confidence: `<level>`)."* See the **Applying a preset** subsection below for how the preset changes color/shape/edge/font decisions.
+
 1. **Check deps** — verify `draw.io --version` succeeds; note platform for correct CLI path
 2. **Plan** — identify shapes, relationships, layout (LR or TB), group by tier/layer
-3. **Generate** — write `.drawio` XML file to disk (output dir same as user's working dir)
+3. **Generate** — write `.drawio` XML file to disk. Default output dir is the user's working dir; if the user specified an output path or directory (e.g. `./artifacts/`, `docs/images/`), use that instead — `mkdir -p` the target dir first. Apply the same dir choice to PNG/SVG/PDF exports in steps 4 and 7.
 4. **Export draft** — run CLI to produce PNG for preview
 5. **Self-check** — use the agent's built-in vision capability to read the exported PNG, catch obvious issues, auto-fix before showing user (requires a vision-enabled model such as Claude Sonnet/Opus)
 6. **Review loop** — show image to user, collect feedback, apply targeted XML edits, re-export, repeat until approved
@@ -119,6 +137,84 @@ Once the user approves:
 - Report file paths for both the `.drawio` source file and exported image(s)
 - **Auto-launch:** offer to open the `.drawio` file in draw.io desktop for fine-tuning — `open diagram.drawio` (macOS), `xdg-open` (Linux), `start` (Windows)
 - Confirm files are saved and ready to use
+
+## Style Presets
+
+A **style preset** is a named JSON file that captures a user's visual preferences — palette, shape vocabulary, fonts, edge style. When a preset is active, it fully replaces the built-in conventions described in the `### Applying a preset` subsection below (under `## Draw.io XML Structure`).
+
+**Locations, in lookup order:**
+1. `~/.drawio-skill/styles/<name>.json` — user presets (survive `git pull`).
+2. `<this-skill-dir>/styles/built-in/<name>.json` — built-ins shipped with the skill (`default`, `corporate`, `handdrawn`).
+
+A user preset shadows a built-in of the same name.
+
+Only user presets can have `"default": true`. When the user says *"make `<built-in-name>` my default"*, copy the built-in JSON to `~/.drawio-skill/styles/<name>.json` first, then set `default: true` on the copy — leave the shipped built-in untouched.
+
+**Name normalisation:** always lowercase the user-provided name before writing or looking up files (the preset schema enforces lowercase; uppercase names will fail validation).
+
+### Learn flow
+
+**Triggers:** "learn my style from `<path>` as `<name>`", "save this as `<name>` style", "remember this style as `<name>`".
+
+**Dispatch by file extension:**
+- `.drawio`, `.xml` → XML path
+- `.png`, `.jpg`, `.jpeg`, `.svg` (rasterized flat image) → image path
+
+**Steps:**
+
+1. **Load the extraction reference.** Read `references/style-extraction.md` into context.
+2. **Extract** following the XML path or image path procedure in the reference.
+3. **Normalize and build candidate.** Convert the user-provided preset name to lowercase. Use this normalized name for ALL file paths in this flow. Build the candidate preset JSON and write it to `/tmp/drawio-preset-<name>.json` (where `<name>` is the already-normalized name). Do **not** save to `~/.drawio-skill/styles/<name>.json` yet.
+4. **Render a sample** using the sample-diagram skeleton in `references/style-extraction.md`, parameterized by the candidate preset. Export PNG to `./preset-<name>-sample.png` using the same `draw.io -x -f png -e -s 2 -o ./preset-<name>-sample.png /tmp/drawio-preset-<name>.drawio` command the main workflow uses.
+5. **Show the user:**
+   - Preset summary table (palette hex values, shapes per role, font, edge style, extras).
+   - The sample PNG path (and embed the image if the environment supports it).
+   - Provenance line: `source.type`, `source.path`, `extracted_at`, `confidence`.
+6. **Wait for approval:**
+   - "save" / "looks good" → write candidate to `~/.drawio-skill/styles/<name>.json`. Create `~/.drawio-skill/styles/` if it doesn't exist. Delete tempfile and sample PNG.
+   - "change `<field>` to `<value>`" → edit the in-memory candidate, re-render, re-ask.
+   - "cancel" / "abort" / "no" → delete tempfile and sample PNG; nothing saved.
+
+**Error behavior:**
+
+| Failure | Behavior |
+|---|---|
+| Source path does not exist | Stop; report path not found. |
+| XML parse fails | Stop; report the parse error; suggest opening the file in drawio desktop to repair. |
+| Image vision unavailable | Stop; tell user to re-run on a vision-capable model or provide the `.drawio` file. |
+| Extraction yields 0 vertices / shapes | Stop; refuse to save. |
+| Extraction yields <3 distinct color pairs | Continue; mark `confidence: "low"` (image) or `"medium"` (XML); warn in summary. |
+| Preset name collides with existing user preset | Ask: overwrite, or pick a new name. |
+| Preset name collides with a built-in preset | Save to user dir (shadows the built-in); warn once. |
+| Sample render fails | Still show summary; note "could not render sample — saving on your OK anyway". Do not block. |
+
+### Management operations
+
+All operations are natural language — no slash commands.
+
+*Apply name normalisation (lowercase) to all `<name>`, `<a>`, `<b>` arguments before any file operation.*
+
+| User says | Agent does |
+|---|---|
+| "list my styles", "what styles do I have", "show me my style presets" | Read `~/.drawio-skill/styles/` and `<this-skill-dir>/styles/built-in/`. Print a table: `name`, `location` (user/built-in), `source.type`, `confidence`, `default` flag. Built-ins shadowed by a user preset are marked so. |
+| "show my `<name>` style", "what's in `<name>`" | Print the preset JSON (pretty-printed) + a one-line summary (source, confidence, is-default). |
+| "make `<name>` the default", "set `<name>` as default" | If `<name>` is a user preset: set `default: true` on it; clear `default` on any other user preset that had it; save both files. If `<name>` is a built-in: copy `<this-skill-dir>/styles/built-in/<name>.json` → `~/.drawio-skill/styles/<name>.json` first, then set `default: true` on the copy. Never mutate the shipped built-in. |
+| "remove default", "unset default" | Clear `default: true` from whichever user preset has it. |
+| "delete `<name>`", "remove `<name>`" | Confirm first. Then `rm ~/.drawio-skill/styles/<name>.json`. Refuse to delete files under `<this-skill-dir>/styles/built-in/` — suggest shadowing with a user preset of the same name. |
+| "rename `<a>` to `<b>`" | `mv ~/.drawio-skill/styles/<a>.json ~/.drawio-skill/styles/<b>.json`, then update the `name` field inside. Fails if `<a>` is a built-in (offer to copy-then-rename instead). |
+| "learn my style from `<path>` as `<name>`" | Dispatch to the Learn flow above. |
+
+### Preset file validation
+
+When loading any preset (for generation or management), do a lightweight structural check:
+- Required top-level fields present (`name`, `version`, `palette`, `roles`, `shapes`, `font`, `edges`).
+- `version === 1`.
+- Every populated palette slot has both `fillColor` and `strokeColor` as `#RRGGBB`.
+- `confidence` ∈ {`"low"`, `"medium"`, `"high"`} if present.
+
+On validation failure:
+- **During generation:** warn the user, fall back to built-in conventions for this one diagram, do not mutate the file.
+- **During learn:** refuse to save the candidate; report which field failed.
 
 ## Draw.io XML Structure
 
@@ -254,7 +350,35 @@ When multiple edges connect to the same shape, assign different entry/exit point
 
 **Rule:** if a shape has N connections on one side, space them evenly (e.g., 3 connections on bottom → exitX = 0.25, 0.5, 0.75)
 
+### Applying a preset
+
+When the Workflow's step *Resolve active preset* identified a preset, it fully replaces the built-in palette, shape keywords, edge defaults, and font for this diagram — do not mix values from the built-in color table below.
+
+**Color lookup.** For each role a shape plays (service / database / queue / gateway / error / external / security), resolve `preset.roles[role]` to a slot name, then `preset.palette[<slot>]` to the `(fillColor, strokeColor)` pair. If `roles[role]` is unset or the resolved slot is `null`, follow this fallback ladder:
+
+1. Try the role's canonical slot (`service→primary`, `database→success`, `queue→warning`, `gateway→accent`, `error→danger`, `external→neutral`, `security→secondary`).
+2. If that slot is also empty, pick the most-populated non-null slot in the preset.
+3. Never reach into the built-in color table below — the preset is authoritative.
+
+**Decision and container shapes** are not in `preset.roles` — they have shape vocabulary (`preset.shapes.decision`, `preset.shapes.container`) but no role-to-slot mapping. Pick their colors as follows:
+- **Decision** (rhombus) → use `preset.palette.warning` (the canonical yellow slot in the built-in conventions). If `warning` is empty, apply the slot-fallback ladder above starting from `warning`.
+- **Container** (swimlane) → use the palette slot matching the tier/grouping the container represents (e.g., a "Services" tier container uses `primary`; a "Data" tier uses `success`). If no tier signal is available, default to `primary`.
+
+**Shape keywords.** Use `preset.shapes[role]` as the **prefix** of the vertex style string (before `whiteSpace=wrap;html=1;...`). Example: for a database role, if `preset.shapes.database = "shape=cylinder3"`, the vertex style starts `shape=cylinder3;whiteSpace=wrap;html=1;fillColor=...`. The six named shape keys are `service`, `database`, `queue`, `decision`, `external`, `container`. Roles `gateway`, `error`, and `security` reuse `preset.shapes.service` unless the preset explicitly populates a key with their name.
+
+**Edges.** Use `preset.edges.style` as the base edge style string. Append `preset.edges.arrow`. Per-edge routing keys (`exitX/exitY/entryX/entryY/...`) are still added by the usual routing rules in the rest of this document. If the flow between two shapes matches a token from `preset.edges.dashedFor` (either because the user's prompt used that word, or because one end of the edge plays a role whose typical relation is "optional"), append `;dashed=1` to the edge style.
+
+**Fonts.** Append `fontFamily=<preset.font.fontFamily>;fontSize=<preset.font.fontSize>` to every vertex style. Container headers and swimlane titles additionally get `fontSize=<preset.font.titleFontSize>;fontStyle=1` when `preset.font.titleBold` is `true`.
+
+**Extras.**
+- `preset.extras.sketch === true` → append `sketch=1` to every vertex style and every edge style.
+- `preset.extras.globalStrokeWidth !== 1` (any value other than the drawio default of 1, including `0.5`) → append `strokeWidth=<n>` to every vertex style and every edge style.
+
+**Interaction with diagram-type presets (ERD / UML / Sequence / ML / Flowchart).** Diagram-type presets earlier in this document set structural style keywords that the user preset must preserve (e.g., ERD tables rely on `shape=table;startSize=30;container=1;childLayout=tableLayout;...`). The rule: keep the diagram-type preset's structural keywords, then layer the user preset's color / font / edge / extras on top. When a diagram-type preset hardcodes a color (`fillColor=#dae8fc`, etc.) that conflicts with the user preset, the user preset's color wins. Exception: `fillColor=none` is structural — do not replace it with a palette color.
+
 ### Color palette (fillColor / strokeColor)
+
+*Used only when no preset is active (see "Applying a preset" above).*
 
 | Color name | fillColor | strokeColor | Use for |
 |-----------|-----------|-------------|---------|
@@ -319,6 +443,9 @@ draw.io -x -f svg -o diagram.svg input.drawio
 
 # PDF export
 draw.io -x -f pdf -o diagram.pdf input.drawio
+
+# Custom output directory (e.g. CI artifacts dir) — create if missing, then export there
+mkdir -p ./artifacts && draw.io -x -f png -e -s 2 -o ./artifacts/diagram.drawio.png input.drawio
 ```
 
 **Key flags:**
@@ -326,7 +453,7 @@ draw.io -x -f pdf -o diagram.pdf input.drawio
 - `-f` — format: `png`, `svg`, `pdf`, `jpg`
 - `-e` — embed diagram XML in output (PNG, SVG, PDF only) — exported file remains editable in draw.io
 - `-s` — scale: `1`, `2`, `3` (2 recommended for PNG)
-- `-o` — output file path (use `.drawio.png` double extension when embedding)
+- `-o` — output file path; accepts any directory (e.g. `./artifacts/diagram.drawio.png`) — `mkdir -p` the target dir first. Use `.drawio.png` double extension when embedding.
 - `-b` — border width around diagram (default: 0, recommend 10)
 - `-t` — transparent background (PNG only)
 - `--page-index 0` — export specific page (default: all)
@@ -340,8 +467,11 @@ When the draw.io desktop CLI is unavailable, generate a browser-editable URL by 
 python3 -c "
 import zlib, base64, urllib.parse, sys
 xml = open(sys.argv[1]).read()
-compressed = zlib.compress(xml.encode('utf-8'), 9)
-encoded = base64.urlsafe_b64encode(compressed).decode('utf-8')
+# Raw deflate (no zlib header) — diagrams.net uses mxGraph's raw inflate
+c = zlib.compressobj(9, zlib.DEFLATED, -zlib.MAX_WBITS)
+compressed = c.compress(xml.encode('utf-8')) + c.flush()
+# Standard base64 (atob rejects url-safe -/_); strip any newlines
+encoded = base64.b64encode(compressed).decode('utf-8').replace('\n', '')
 print('https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&edit=_blank#R' + urllib.parse.quote(encoded, safe=''))
 " input.drawio
 ```

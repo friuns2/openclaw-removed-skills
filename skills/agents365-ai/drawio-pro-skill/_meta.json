@@ -3,11 +3,16 @@
   "slug": "drawio-pro-skill",
   "displayName": "Drawio Skill",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1776581756123,
-    "commit": "https://github.com/openclaw/skills/commit/c685290189226a6489da1e4bd99e5780488290b6"
+    "version": "1.4.0",
+    "publishedAt": 1776939629572,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1776581756123,
+      "commit": "https://github.com/openclaw/skills/commit/c685290189226a6489da1e4bd99e5780488290b6"
+    },
     {
       "version": "1.1.1",
       "publishedAt": 1775456190814,
