@@ -3,9 +3,15 @@
   "slug": "zoho-forms",
   "displayName": "Zoho Forms",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775351033179,
-    "commit": "https://github.com/openclaw/skills/commit/a60a50ecc2043bf6b109e2c12010a392dd0a5a97"
+    "version": "1.0.1",
+    "publishedAt": 1776884200248,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775351033179,
+      "commit": "https://github.com/openclaw/skills/commit/a60a50ecc2043bf6b109e2c12010a392dd0a5a97"
+    }
+  ]
 }
