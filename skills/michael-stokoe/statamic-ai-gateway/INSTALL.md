@@ -116,19 +116,7 @@ curl -s -H "Authorization: Bearer $SITE_TOKEN" \
 
 ### Expected: success
 
-```json
-{
-    "ok": true,
-    "tool": "capabilities",
-    "result": {
-        "capabilities": {
-            "entry.create": { "enabled": true, "target_type": "entry", "requires_confirmation": false },
-            "cache.clear": { "enabled": true, "target_type": "cache", "requires_confirmation": true }
-        }
-    },
-    "meta": {}
-}
-```
+A JSON response with `ok: true` listing each tool's `enabled` state, `target_type`, and `requires_confirmation` flag. The exact tools vary per site.
 
 ### Troubleshooting
 
