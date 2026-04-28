@@ -3,9 +3,15 @@
   "slug": "visitor-queue",
   "displayName": "Visitor Queue",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775693841902,
-    "commit": "https://github.com/openclaw/skills/commit/a5c1a0539c8c9b4cde07761219ec6b6c82b9b718"
+    "version": "1.0.1",
+    "publishedAt": 1776902824029,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775693841902,
+      "commit": "https://github.com/openclaw/skills/commit/a5c1a0539c8c9b4cde07761219ec6b6c82b9b718"
+    }
+  ]
 }
