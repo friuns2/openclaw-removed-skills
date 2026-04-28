@@ -1,11 +1,17 @@
 {
   "owner": "snipercat69",
   "slug": "edgeiq-xss-scanner",
-  "displayName": "EdgeIQ XSS Scanner",
+  "displayName": "Xss Scanner",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776187495522,
-    "commit": "https://github.com/openclaw/skills/commit/92208eb263c18b0f96f45cdc1d3089e7ec5eadeb"
+    "version": "1.4.0",
+    "publishedAt": 1777136902065,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776187495522,
+      "commit": "https://github.com/openclaw/skills/commit/92208eb263c18b0f96f45cdc1d3089e7ec5eadeb"
+    }
+  ]
 }
