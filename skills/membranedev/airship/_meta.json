@@ -3,9 +3,15 @@
   "slug": "airship",
   "displayName": "Airship",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534630618,
-    "commit": "https://github.com/openclaw/skills/commit/d591390832b668956ff93613c076e3d13162f131"
+    "version": "1.0.1",
+    "publishedAt": 1776891434292,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534630618,
+      "commit": "https://github.com/openclaw/skills/commit/d591390832b668956ff93613c076e3d13162f131"
+    }
+  ]
 }
