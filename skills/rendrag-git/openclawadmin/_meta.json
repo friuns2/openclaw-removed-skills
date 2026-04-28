@@ -1,11 +1,17 @@
 {
   "owner": "rendrag-git",
   "slug": "openclawadmin",
-  "displayName": "OpenClaw Admin",
+  "displayName": "Openclaw Admin Skill",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776106855989,
-    "commit": "https://github.com/openclaw/skills/commit/a9ce10441b0e732b79cbcb68e0b616444280067c"
+    "version": "1.0.3",
+    "publishedAt": 1776945292976,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776106855989,
+      "commit": "https://github.com/openclaw/skills/commit/a9ce10441b0e732b79cbcb68e0b616444280067c"
+    }
+  ]
 }
