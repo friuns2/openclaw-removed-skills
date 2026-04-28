@@ -3,9 +3,15 @@
   "slug": "timebuzzer",
   "displayName": "Timebuzzer",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775725171334,
-    "commit": "https://github.com/openclaw/skills/commit/a7164612cb3459bfa8d2a22ad7022e54e1344321"
+    "version": "1.0.1",
+    "publishedAt": 1776898398987,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775725171334,
+      "commit": "https://github.com/openclaw/skills/commit/a7164612cb3459bfa8d2a22ad7022e54e1344321"
+    }
+  ]
 }
