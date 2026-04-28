@@ -1,6 +1,6 @@
 ---
 name: agentic-commerce-news
-description: "Agentic Commerce 每周产品快报 — 搜索过去一周内大V（VC、企业家、AI领袖）推荐的 Agentic Commerce 相关创业产品和动态，生成结构化新闻简报。支持定时任务（如每天早上8点自动执行）。当用户提到 agentic commerce 新闻、AI commerce 最新动态、agent shopping 本周新产品、agentic 电商创业新闻、或输入 /agentic-commerce-news 时使用。当用户说'帮我看看 agentic commerce 这周有什么新动态'或'设置一个定时任务每天早上推送 agentic commerce 新闻'，也应该触发此 skill。"
+description: "Agentic Commerce Weekly Briefing — Scans X/Twitter, industry media, and VC announcements from the past 7 days to surface startups, products, funding rounds, and opinions endorsed by influential voices (VCs, founders, AI leaders) in the agentic commerce space, then produces a structured news briefing. Supports scheduled execution (e.g., daily at 8am). Use whenever the user mentions agentic commerce news, AI commerce updates, AI shopping agent startups, agent checkout products, or invokes /agentic-commerce-news. Also trigger on requests like 'what's new in agentic commerce this week', 'who's funding AI shopping startups', or 'set up a daily digest of agentic commerce updates' — even when the user doesn't name the skill explicitly."
 ---
 
 # Agentic Commerce News
