@@ -34,7 +34,7 @@ GSC and GA4 share the same Google Service Account. Create it once to use for bot
 cp /path/to/downloaded/my-site-analytics-xxxx.json "$DATA_DIR/configs/"
 ```
 
-All scripts (`gsc_query.py`, `ga4_query.py`, `ga4_funnel.py`) auto-discover the `*.json` key file from `$DATA_DIR/configs/` — no need to configure the path in `.env`. If multiple JSON files exist, the first one (alphabetically) is used.
+All scripts (`gsc_query.py`, `ga4_query.py`, `ga4_funnel.py`) auto-discover the `*.json` key file from `$DATA_DIR/configs/` via the shared `utils.py` module — no need to configure the path in `.env` or set `GOOGLE_APPLICATION_CREDENTIALS`. If multiple JSON files exist, the first one (alphabetically) is used.
 
 ### Step 4: Authorize in Search Console (for GSC)
 
@@ -104,10 +104,18 @@ The site URL is read from `SITE_URL` (shared with GSC). No separate Bing URL var
 
 ## 3. Install Dependencies
 
+Create a Python 3.12 virtual environment via `uv` and install dependencies:
+
 ```bash
-python3 -m venv "$DATA_DIR/venv" && source "$DATA_DIR/venv/bin/activate"
-pip install -r scripts/requirements.txt
+uv venv "$DATA_DIR/venv" --python 3.12
+uv pip install -p "$DATA_DIR/venv" -r scripts/pyproject.toml
 ```
+
+> **Note**: All Python script executions MUST activate the venv first. After activation, use `python` directly:
+> ```bash
+> source "$DATA_DIR/venv/bin/activate"
+> python scripts/xxx.py ...
+> ```
 
 ---
 
@@ -116,6 +124,7 @@ pip install -r scripts/requirements.txt
 ### Mode A: API Auto-Collection
 
 ```bash
+source "$DATA_DIR/venv/bin/activate"
 set -a; source "$DATA_DIR/.env"; set +a
 
 # GSC data
@@ -196,6 +205,8 @@ curl -s "${PSI_BASE}&strategy=desktop${PSI_KEY_PARAM}" > "$DATA_DIR/data/psi_des
 ---
 
 ## 5. GSC Script Reference (gsc_query.py)
+
+> All example commands below assume the venv has been activated: `source "$DATA_DIR/venv/bin/activate"`
 
 Scripts auto-read `GSC_SITE_URL` from `$DATA_DIR/.env` and auto-discover the Service Account JSON key from `$DATA_DIR/configs/`.
 
@@ -285,6 +296,8 @@ Save custom query output to `$DATA_DIR/data/gsc_*.json`.
 
 ## 6. GA4 Script Reference (ga4_query.py)
 
+> All example commands below assume the venv has been activated: `source "$DATA_DIR/venv/bin/activate"`
+
 Scripts auto-read `GA4_PROPERTY_ID` from `$DATA_DIR/.env` and auto-discover the Service Account JSON key from `$DATA_DIR/configs/`.
 
 ### Preset Query Templates
@@ -298,6 +311,12 @@ python scripts/ga4_query.py --preset geo_distribution        # Geographic distri
 python scripts/ga4_query.py --preset landing_pages           # Landing pages
 python scripts/ga4_query.py --preset user_behavior           # User behavior
 python scripts/ga4_query.py --preset conversion_events       # Conversion events
+python scripts/ga4_query.py --preset demographics_age        # Age distribution (requires Google Signals)
+python scripts/ga4_query.py --preset demographics_gender     # Gender distribution (requires Google Signals)
+python scripts/ga4_query.py --preset demographics_geo        # Country + city distribution
+python scripts/ga4_query.py --preset demographics_language   # Language distribution
+python scripts/ga4_query.py --preset demographics_interests  # Interest categories (requires Google Signals)
+python scripts/ga4_query.py --preset new_vs_returning        # New vs returning users
 ```
 
 The `--property-id` CLI flag overrides `GA4_PROPERTY_ID` from `.env`.
@@ -309,7 +328,7 @@ python scripts/ga4_query.py \
     --dimensions pagePath,deviceCategory \
     --metrics sessions,bounceRate,averageSessionDuration \
     --start-date 2025-01-01 --end-date 2025-03-01 \
-    --order-by "-sessions" --limit 200
+    --order-by="-sessions" --limit 200
 ```
 
 ### Date Formats
@@ -358,10 +377,18 @@ Both absolute and relative dates are supported:
 | `landing_pages` | Landing page performance; optimize entry experience |
 | `user_behavior` | User behavior paths and engagement depth |
 | `conversion_events` | Conversion event tracking and funnel analysis |
+| `demographics_age` | User age distribution with engagement and conversion metrics |
+| `demographics_gender` | User gender distribution with engagement and conversion metrics |
+| `demographics_geo` | User geographic distribution (country + city) |
+| `demographics_language` | User language distribution |
+| `demographics_interests` | User interest categories (requires Google Signals) |
+| `new_vs_returning` | New vs returning user comparison with engagement depth |
 
 ---
 
 ## 7. GA4 Funnel Exploration (ga4_funnel.py)
+
+> All example commands below assume the venv has been activated: `source "$DATA_DIR/venv/bin/activate"`
 
 ### API Coverage
 
@@ -595,6 +622,8 @@ Google has **not** released any API for path exploration. Alternatives:
 ---
 
 ## 8. Bing Webmaster Script Reference (bing_query.py)
+
+> All example commands below assume the venv has been activated: `source "$DATA_DIR/venv/bin/activate"`
 
 | Item | Details |
 |------|---------|
