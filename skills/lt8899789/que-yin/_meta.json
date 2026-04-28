@@ -3,11 +3,16 @@
   "slug": "que-yin",
   "displayName": "Que Yin",
   "latest": {
-    "version": "1.0.10",
-    "publishedAt": 1776731952054,
-    "commit": "https://github.com/openclaw/skills/commit/07a782060cf50e6b854048f139772ad9e6afe94a"
+    "version": "1.0.16",
+    "publishedAt": 1777364486084,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.10",
+      "publishedAt": 1776731952054,
+      "commit": "https://github.com/openclaw/skills/commit/07a782060cf50e6b854048f139772ad9e6afe94a"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1776196875312,
