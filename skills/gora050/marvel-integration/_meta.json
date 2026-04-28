@@ -3,9 +3,15 @@
   "slug": "marvel-integration",
   "displayName": "Marvel",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534813183,
-    "commit": "https://github.com/openclaw/skills/commit/0425db6244652f677a264cfeae13803634f4aaa0"
+    "version": "1.0.1",
+    "publishedAt": 1776893427909,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534813183,
+      "commit": "https://github.com/openclaw/skills/commit/0425db6244652f677a264cfeae13803634f4aaa0"
+    }
+  ]
 }
