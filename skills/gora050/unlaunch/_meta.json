@@ -3,9 +3,15 @@
   "slug": "unlaunch",
   "displayName": "Unlaunch",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379991389,
-    "commit": "https://github.com/openclaw/skills/commit/33c5ee634eeb2127447d5165225961a8f81f8777"
+    "version": "1.0.1",
+    "publishedAt": 1776892228907,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379991389,
+      "commit": "https://github.com/openclaw/skills/commit/33c5ee634eeb2127447d5165225961a8f81f8777"
+    }
+  ]
 }
