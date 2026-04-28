@@ -3,9 +3,15 @@
   "slug": "deftship",
   "displayName": "Deftship",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775304463017,
-    "commit": "https://github.com/openclaw/skills/commit/6a2005e9c860d386d30cf610bb3dc1d76a6220b9"
+    "version": "1.0.1",
+    "publishedAt": 1776885910397,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775304463017,
+      "commit": "https://github.com/openclaw/skills/commit/6a2005e9c860d386d30cf610bb3dc1d76a6220b9"
+    }
+  ]
 }
