@@ -10,8 +10,77 @@ function git(args) {
   });
 }
 
+function gitOrEmpty(args) {
+  try {
+    return git(args);
+  } catch {
+    return "";
+  }
+}
+
 function escapeTable(value) {
   return String(value || "").replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
+function stripQuotes(value) {
+  return value
+    .trim()
+    .replace(/^['"]|['"]$/g, "")
+    .trim();
+}
+
+function extractYamlDescription(skillMd) {
+  const match = skillMd.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return "";
+
+  const lines = match[1].split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const singleLine = line.match(/^description:\s*(.*)$/);
+    if (singleLine) return stripQuotes(singleLine[1]);
+
+    if (/^description:\s*[>|]/.test(line)) {
+      const block = [];
+      for (let next = index + 1; next < lines.length; next += 1) {
+        if (!/^\s+/.test(lines[next])) break;
+        block.push(lines[next].trim());
+      }
+      return block.join(" ").trim();
+    }
+  }
+
+  return "";
+}
+
+function extractJsonDescription(metaJson) {
+  if (!metaJson.trim()) return "";
+  try {
+    const parsed = JSON.parse(metaJson);
+    return (
+      parsed.description ||
+      parsed.desc ||
+      parsed.summary ||
+      parsed.openclaw?.description ||
+      ""
+    );
+  } catch {
+    return "";
+  }
+}
+
+function extractDescription(row) {
+  const skillMd = gitOrEmpty([
+    "show",
+    `${row.parentHash}:${row.skillDir}/SKILL.md`,
+  ]);
+  const fromSkill = extractYamlDescription(skillMd);
+  if (fromSkill) return fromSkill;
+
+  const metaJson = gitOrEmpty([
+    "show",
+    `${row.parentHash}:${row.skillDir}/_meta.json`,
+  ]);
+  return extractJsonDescription(metaJson);
 }
 
 const currentSkillPaths = new Set(
@@ -65,6 +134,10 @@ rows.sort(
     a.skillDir.localeCompare(b.skillDir),
 );
 
+for (const row of rows) {
+  row.description = extractDescription(row);
+}
+
 const zvecRows = rows.filter((row) => /zvec/i.test(row.skillDir));
 
 function skillLink(row) {
@@ -85,10 +158,10 @@ function groupByDay(items) {
 }
 
 function tableForRows(items) {
-  let table = "| Owner | Skill | Path | Delete commit |\n";
-  table += "| --- | --- | --- | --- |\n";
+  let table = "| Owner | Skill | Description | Path | Delete commit |\n";
+  table += "| --- | --- | --- | --- | --- |\n";
   for (const row of items) {
-    table += `| ${escapeTable(row.owner)} | ${escapeTable(row.skill)} | ${skillLink(row)} | ${commitLink(row)} |\n`;
+    table += `| ${escapeTable(row.owner)} | ${escapeTable(row.skill)} | ${escapeTable(row.description)} | ${skillLink(row)} | ${commitLink(row)} |\n`;
   }
   return table;
 }
@@ -110,10 +183,10 @@ output +=
   "git -C skills checkout f36973c80e^ -- skills/emre-koc/zvec-local-rag-service\n";
 output += "```\n\n";
 output += "## zvec\n\n";
-output += "| Skill | Removed | Delete commit |\n";
-output += "| --- | --- | --- |\n";
+output += "| Skill | Description | Removed | Delete commit |\n";
+output += "| --- | --- | --- | --- |\n";
 for (const row of zvecRows) {
-  output += `| ${skillLink(row)} | ${row.deletedDate} | ${commitLink(row)} |\n`;
+  output += `| ${skillLink(row)} | ${escapeTable(row.description)} | ${row.deletedDate} | ${commitLink(row)} |\n`;
 }
 output += "\n";
 output += "## Removed Skills\n\n";
