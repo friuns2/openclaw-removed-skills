@@ -3,9 +3,15 @@
   "slug": "databox",
   "displayName": "Databox",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775552708539,
-    "commit": "https://github.com/openclaw/skills/commit/00b222ad693045bde663154d4a4596796cf4ecba"
+    "version": "1.0.1",
+    "publishedAt": 1776895401613,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775552708539,
+      "commit": "https://github.com/openclaw/skills/commit/00b222ad693045bde663154d4a4596796cf4ecba"
+    }
+  ]
 }
