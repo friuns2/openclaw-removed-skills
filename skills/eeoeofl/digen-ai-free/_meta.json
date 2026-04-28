@@ -1,11 +1,17 @@
 {
   "owner": "eeoeofl",
   "slug": "digen-ai-free",
-  "displayName": "DigenAI (Free)",
+  "displayName": "Digen Ai Free",
   "latest": {
-    "version": "1.1.3",
-    "publishedAt": 1776256104787,
-    "commit": "https://github.com/openclaw/skills/commit/f45ec55d4adbeabffb89b86dcdc35c81a1e9cbb9"
+    "version": "1.3.0",
+    "publishedAt": 1777027419156,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.3",
+      "publishedAt": 1776256104787,
+      "commit": "https://github.com/openclaw/skills/commit/f45ec55d4adbeabffb89b86dcdc35c81a1e9cbb9"
+    }
+  ]
 }

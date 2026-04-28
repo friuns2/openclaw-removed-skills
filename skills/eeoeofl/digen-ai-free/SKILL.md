@@ -1,26 +1,28 @@
 ---
 name: digen-ai
-description: "DigenAI image and video generation for OpenClaw. Supports text-to-image, image-to-video, and text-to-video. Image generation via api.digen.ai; video generation via new API with Bearer token. Triggers on: generate image, generate video, Digen AI, text to image, image to video, text to video. API key available via Telegram bot @digen_skill_bot (send /key)."
+description: "DigenAI image and video generation for OpenClaw. Supports image-to-video and text-to-image. Video generation via api.cowork.digen.ai with Bearer token. Triggers on: generate image, generate video, Digen AI, text to image, image to video, text to video. API key available at https://claw.digen.ai or via Discord/Telegram."
 ---
 
 # DigenAI Skill
 
-Generate images from text prompts and videos from images or text via DigenAI API.
+Generate images from text prompts and videos from images via DigenAI API.
 
 ## ⚠️ First Time Users: Get Your Free API Key
 
-**Video generation requires a free API key.**
+**Video generation requires a free API key (starts with `ak_`).**
 
 ### How to Get Your API Key
 
-1. Open our Telegram bot: **https://t.me/digen_skill_bot**
-2. Send the command: `/key`
-3. Copy your API key (starts with `dg_`)
+1. **Visit:** https://claw.digen.ai
+2. **Or join Discord:** https://discord.gg/SRhbTt9hwp
+3. **Or contact Telegram:** @digen_skill_bot
 
 Your API key is used as:
 ```
 Authorization: Bearer YOUR_API_KEY
 ```
+
+**Note:** The API uses `https://api.cowork.digen.ai` as the base URL.
 
 ---
 
@@ -29,13 +31,7 @@ Authorization: Bearer YOUR_API_KEY
 ```python
 from digen_ai_client import DigenAIClient
 
-# Image generation (old API) — requires DIGEN_TOKEN + DIGEN_SESSION_ID
-client = DigenAIClient(
-    old_api_token="your_token",
-    old_api_session="your_session"
-)
-
-# Video generation (new API) — requires API Key
+# Video generation — requires API Key (ak_xxx)
 client = DigenAIClient(api_key="ak_xxxxxxxxxxxxxxxxxxxx")
 ```
 
@@ -50,19 +46,14 @@ client = DigenAIClient(api_key="ak_xxxxxxxxxxxxxxxxxxxx")
 |-------|-------------|
 | `default` | High quality model |
 
-### Resolutions
-| Ratio | Size |
-|-------|------|
-| Multiple | Standard resolutions supported |
-
 ### Example
 
 ```python
 from digen_ai_client import DigenAIClient
 
 client = DigenAIClient(
-    old_api_token="your_digen_token",
-    old_api_session="your_digen_session"
+    old_api_token="your_token",
+    old_api_session="your_session"
 )
 
 result = client.generate_image_sync(
@@ -83,14 +74,20 @@ else:
 
 **Uses new API with Bearer API Key**
 
+### ⚠️ Important: Use `model="turbo"`
+
+The video generation API requires `model="turbo"` parameter (not `default`).
+
 ### Available Models
-| `default` | High quality, fast generation | 10s |
+| Model | Description | Max Duration |
+|-------|-------------|--------------|
+| `turbo` | Fast and high quality generation | 10s |
 
-### Modes
-- **Text-to-Video**: text prompt only
-- **Image-to-Video**: image URL with optional motion prompt
+### Video Types
+- **Image-to-Video**: ✅ Works - requires `image_url` + `prompt`
+- **Text-to-Video**: ⚠️ May not work with all API keys (depends on credits)
 
-### Example: Image-to-Video
+### Example: Image-to-Video (Recommended)
 
 ```python
 from digen_ai_client import DigenAIClient
@@ -100,9 +97,8 @@ client = DigenAIClient(api_key="ak_xxxxxxxxxxxxxxxxxxxx")
 result = client.generate_video_sync(
     image_url="https://your-image.jpg",
     prompt="gentle camera pan left, neon lights twinkling",
-    model="default",
-    duration=5,
-    aspect_ratio="1:1"
+    model="turbo",  # IMPORTANT: use "turbo", not "default"
+    duration=5
 )
 
 if result["success"]:
@@ -112,17 +108,22 @@ else:
     print(f"❌ Error: {result.get('error')}")
 ```
 
-### Example: Text-to-Video
+### Example: Text-to-Video (May Not Work)
 
 ```python
 client = DigenAIClient(api_key="ak_xxxxxxxxxxxxxxxxxxxx")
 
 result = client.generate_video_sync(
     prompt="A cute cat playing piano in a cozy room, soft lighting",
-    model="default",
-    duration=5,
-    aspect_ratio="1:1"
+    model="turbo",
+    duration=5
 )
+
+if result["success"]:
+    print(f"✅ Video: {result['video_url']}")
+else:
+    print(f"❌ Error: {result.get('error')}")
+    # Note: Text-to-Video may fail if your API key only has image-to-video credits
 ```
 
 ---
@@ -177,8 +178,10 @@ export DIGEN_API_KEY="ak_xxxxxxxxxxxxxxxxxxxx"
 
 ```
 ❌ API Key Not Found!
-Join our Discord: https://discord.gg/4shAQahd
-Go to #api-key channel → send !key
+
+Get your free API key:
+- Visit: https://claw.digen.ai
+- Or join Discord: https://discord.gg/SRhbTt9hwp
 ```
 
 ### Error Codes (New API)
@@ -204,7 +207,7 @@ Go to #api-key channel → send !key
 | `POST` | `/b/v1/video/generate` | Generate video |
 | `GET` | `/b/v1/video/{id}` | Get video status |
 
-Base URL: `[New API endpoint]`
+Base URL: `https://api.cowork.digen.ai`
 
 ### Old API Endpoints (Image)
 
@@ -221,9 +224,13 @@ Base URL: `https://api.digen.ai`
 
 - `scripts/digen_ai_client.py` - Python client with sync/async support
 - `scripts/batch_generate.py` - Batch image generation utility
+- `assets/telegram-bot.py` - Telegram bot for API key distribution
+- `assets/discord-bot.py` - Discord bot for API key distribution
 
 ## Tips
 
-- Image generation: poll every 3 seconds, timeout 120s
+- **Video model**: Always use `model="turbo"` (not `default` or `seedance-2.0`)
+- **Image-to-Video**: Requires `image_url` parameter
+- **Text-to-Video**: May not work with all API keys
 - Video generation: poll every 5 seconds, timeout 300s
-- Resolution: 720p or 1080p
+- Image generation: poll every 3 seconds, timeout 120s

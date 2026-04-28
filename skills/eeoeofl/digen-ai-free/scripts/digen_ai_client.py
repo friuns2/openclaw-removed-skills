@@ -22,7 +22,7 @@ OLD_API_BASE = "https://api.digen.ai"
 
 # ============ 新 API (视频生成) ============
 # Base URL for video generation & key management
-NEW_API_BASE = "https://api.new-digen.ai"
+NEW_API_BASE = "https://api.cowork.digen.ai"
 
 # ============ 错误提示信息 ============
 NO_API_KEY_MESSAGE = """
@@ -31,9 +31,11 @@ NO_API_KEY_MESSAGE = """
 To use DigenAI Video Generation, you need a free API key.
 
 📌 How to get your API key:
-   1. Open: https://t.me/digen_skill_bot
-   2. Send: /key
-   3. Copy your API key (starts with dg_)
+   1. Visit: https://claw.digen.ai
+   2. Or join our Discord: https://discord.gg/SRhbTt9hwp
+   3. Or contact us on Telegram: @digen_skill_bot
+
+Your API key starts with `ak_`
 
 Then set: export DIGEN_API_KEY="your_key_here"
 """
@@ -96,6 +98,21 @@ class DigenAIClient:
         return {
             "Authorization": f"Bearer {self.api_key}",
         }
+
+    def _shorten_url(self, url: str) -> Optional[str]:
+        """将长 URL 转换为短 URL (TinyURL)"""
+        if not url:
+            return None
+        try:
+            resp = requests.get(
+                f"https://tinyurl.com/api-create.php?url={requests.utils.quote(url)}",
+                timeout=10
+            )
+            if resp.status_code == 200 and resp.text.startswith("https://"):
+                return resp.text
+            return url
+        except Exception:
+            return url  # 失败时返回原始 URL
 
     def _new_request(self, method: str, endpoint: str,
                      data: Optional[Dict] = None,
@@ -182,10 +199,10 @@ class DigenAIClient:
         self,
         prompt: str = None,
         image_url: str = None,
-        model: str = "default",
+        model: str = "turbo",
         duration: int = 5,
-        aspect_ratio: str = "1:1",
-        resolution: str = "1080p",
+        aspect_ratio: str = "16:9",
+        resolution: str = "720p",
         image_end_url: str = None,
         webhook_url: str = None,
         **kwargs
@@ -198,10 +215,10 @@ class DigenAIClient:
         Args:
             prompt: 文本提示词 (可选)
             image_url: 输入图片 URL (可选, 图生视频)
-            model: wan (默认) | turbo | 2.6
+            model: turbo (默认) | seedance-2.0
             duration: 5 或 10 秒
             aspect_ratio: 16:9 | 9:16 | 1:1
-            resolution: 720p | 1080p
+            resolution: 720p | 1080p (turbo model)
             image_end_url: 结束帧图片 URL (可选)
             webhook_url: 完成回调 URL (可选)
 
@@ -261,6 +278,7 @@ class DigenAIClient:
             "status": result.get("status"),  # pending | processing | completed | failed
             "progress": result.get("progress", 0),
             "video_url": result.get("output", {}).get("video_url"),
+            "video_url_short": self._shorten_url(result.get("output", {}).get("video_url")),
             "thumbnail_url": result.get("output", {}).get("thumbnail_url"),
             "error": result.get("error"),
             "created_at": result.get("created_at"),
@@ -529,7 +547,7 @@ if __name__ == "__main__":
             client = DigenAIClient(api_key=api_key)
             result = client.generate_video(
                 prompt="A cute cat playing piano in a cozy room, soft lighting",
-                model="wan",
+                model="turbo",
                 duration=5,
                 aspect_ratio="16:9",
             )

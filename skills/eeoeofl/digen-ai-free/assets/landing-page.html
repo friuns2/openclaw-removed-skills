@@ -647,7 +647,7 @@
                     </div>
                     <div class="key-feature">
                         <span class="check">✓</span>
-                        <span data-i18n="hero.feature2">Free text-to-video & image-to-video</span>
+                        <span data-i18n="hero.feature2">Image-to-video fully works</span>
                     </div>
                     <div class="key-feature">
                         <span class="check">✓</span>
@@ -686,20 +686,21 @@ result = client.generate_image_sync(
     resolution=<span class="string">"1:1"</span>
 )
 
-<span class="comment"># Video Generation</span>
+<span class="comment"># Video Generation (Image-to-Video)</span>
 result = client.generate_video_sync(
     image_url=<span class="string">"https://example.com/img.jpg"</span>,
     prompt=<span class="string">"camera pans left"</span>,
-    model=<span class="string">"default"</span>
+    model=<span class="string">"turbo"</span>
 )
                 </div>
 
                 <div class="api-key-cta">
                     <h4>🔑 Free API Key</h4>
-                    <p>Get your free API key via Telegram or Discord</p>
+                    <p>Get your free API key via Portal, Discord or Telegram</p>
                     <div style="display: flex; gap: 8px;">
-                        <a href="https://t.me/digen_skill_bot" class="btn btn-telegram" target="_blank" style="flex:1; justify-content: center;">Telegram Bot →</a>
-                        <a href="https://discord.gg/4shAQahd" class="btn btn-discord" target="_blank" style="flex:1; justify-content: center;">Discord →</a>
+                        <a href="https://claw.digen.ai" class="btn btn-primary" target="_blank" style="flex:1; justify-content: center;">Portal →</a>
+                        <a href="https://t.me/digen_skill_bot" class="btn btn-telegram" target="_blank" style="flex:1; justify-content: center;">Telegram →</a>
+                        <a href="https://discord.gg/SRhbTt9hwp" class="btn btn-discord" target="_blank" style="flex:1; justify-content: center;">Discord →</a>
                     </div>
                 </div>
             </div>
@@ -731,15 +732,15 @@ result = client.generate_video_sync(
             <div class="cmd-card">
                 <div class="cmd-card-icon">🎬</div>
                 <h3 data-i18n="cmd.video.title">Image to Video</h3>
-                <p data-i18n="cmd.video.desc">Transform static images into dynamic videos</p>
-                <div class="cmd-example">high quality video generation</div>
+                <p data-i18n="cmd.video.desc">Transform static images into dynamic videos — fully working!</p>
+                <div class="cmd-example">model=turbo, 5-10s duration</div>
             </div>
 
             <div class="cmd-card">
                 <div class="cmd-card-icon">✍️</div>
                 <h3 data-i18n="cmd.txtvideo.title">Text to Video</h3>
-                <p data-i18n="cmd.txtvideo.desc">Directly generate video from text descriptions</p>
-                <div class="cmd-example">seconds: 5 / 10</div>
+                <p data-i18n="cmd.txtvideo.desc">Directly generate video from text descriptions (may need credits)</p>
+                <div class="cmd-example">depends on API key credits</div>
             </div>
 
             <div class="cmd-card">
@@ -760,8 +761,8 @@ result = client.generate_video_sync(
         <!-- Developer CTA -->
         <div class="dev-cta" id="build">
             <h3>🦞 Developer Recruitment</h3>
-            <p>Build AI applications with DigenAI Skill — short drama generators, ad materials, design tools... Get tech support and your free API key via Telegram bot.</p>
-            <a href="https://t.me/digen_skill_bot" class="btn btn-telegram" target="_blank">Join Telegram Bot</a>
+            <p>Build AI applications with DigenAI Skill — short drama generators, ad materials, design tools... Get tech support and your free API key via Portal or community.</p>
+            <a href="https://claw.digen.ai" class="btn btn-primary" target="_blank">Get API Key</a>
         </div>
     </section>
 
@@ -770,10 +771,13 @@ result = client.generate_video_sync(
         <h2 data-i18n="community.title">Join the Community</h2>
         <p data-i18n="community.desc">Get free API key, exchange ideas with developers, explore AI creation together</p>
         <div class="community-btns">
-            <a href="https://t.me/digen_skill_bot" class="btn btn-telegram" target="_blank" style="padding: 16px 32px; font-size: 15px;">
-                🔑 Get Free API Key on Telegram
+            <a href="https://claw.digen.ai" class="btn btn-primary" target="_blank" style="padding: 16px 32px; font-size: 15px;">
+                🔑 Get Free API Key
             </a>
-            <a href="https://discord.gg/4shAQahd" class="btn btn-discord" target="_blank" style="padding: 16px 32px; font-size: 15px;">
+            <a href="https://t.me/digen_skill_bot" class="btn btn-telegram" target="_blank" style="padding: 16px 32px; font-size: 15px;">
+                Telegram
+            </a>
+            <a href="https://discord.gg/SRhbTt9hwp" class="btn btn-discord" target="_blank" style="padding: 16px 32px; font-size: 15px;">
                 💬 Join Discord
             </a>
         </div>
@@ -806,7 +810,7 @@ result = client.generate_video_sync(
                 "hero.feature3": "Multiple output formats supported",
                 "hero.feature4": "CDN acceleration, global fast access",
                 "hero.codeTitle": "Quick Start",
-                "hero.keyDesc": "Get your free API key — open https://t.me/digen_skill_bot and send /key",
+                "hero.keyDesc": "Get your free API key at https://claw.digen.ai",
                 "hero.keyDiscord": "Telegram Bot →",
                 "commands.title": "Supported Commands",
                 "commands.subtitle": "Powerful AI generation with simple commands",
@@ -848,7 +852,7 @@ result = client.generate_video_sync(
                 "hero.feature3": "多种分辨率和比例可选",
                 "hero.feature4": "CDN 加速，全球极速访问",
                 "hero.codeTitle": "快速开始",
-                "hero.keyDesc": "加入社区，免费领取 API Key",
+                "hero.keyDesc": "访问 https://claw.digen.ai 获取免费 API Key",
                 "hero.keyTg": "Telegram",
                 "hero.keyDiscord": "Telegram",
                 "commands.title": "支持的指令",
@@ -891,7 +895,7 @@ result = client.generate_video_sync(
                 "hero.feature3": "複数の解像度と比率",
                 "hero.feature4": "CDN 加速、グローバル高速アクセス",
                 "hero.codeTitle": "クイックスタート",
-                "hero.keyDesc": "コミュニティに参加して無料 API Key を取得",
+                "hero.keyDesc": "https://claw.digen.ai で無料 API Key を取得",
                 "hero.keyTg": "Telegram",
                 "hero.keyDiscord": "Telegram",
                 "commands.title": "対応コマンド",
@@ -934,7 +938,7 @@ result = client.generate_video_sync(
                 "hero.feature3": "여러 해상도 및 비율",
                 "hero.feature4": "CDN 가속, 글로벌 고속 액세스",
                 "hero.codeTitle": "빠른 시작",
-                "hero.keyDesc": "커뮤니티에 참여하여 무료 API Key 받기",
+                "hero.keyDesc": "https://claw.digen.ai에서 무료 API Key 받기",
                 "hero.keyTg": "Telegram",
                 "hero.keyDiscord": "Telegram",
                 "commands.title": "지원 명령어",
@@ -977,7 +981,7 @@ result = client.generate_video_sync(
                 "hero.feature3": "Múltiples resoluciones y proporciones",
                 "hero.feature4": "Aceleración CDN, acceso rápido global",
                 "hero.codeTitle": "Inicio rápido",
-                "hero.keyDesc": "Únete a la comunidad para obtener tu API Key gratis",
+                "hero.keyDesc": "Obtén tu API Key gratis en https://claw.digen.ai",
                 "hero.keyTg": "Telegram",
                 "hero.keyDiscord": "Telegram",
                 "commands.title": "Comandos soportados",
