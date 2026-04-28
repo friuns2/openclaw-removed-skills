@@ -3,9 +3,15 @@
   "slug": "dc-bank",
   "displayName": "Dc Bank",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775631878734,
-    "commit": "https://github.com/openclaw/skills/commit/64a7071f9d94d63cf47ab264303c9a34ee19f989"
+    "version": "1.0.1",
+    "publishedAt": 1776896476888,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775631878734,
+      "commit": "https://github.com/openclaw/skills/commit/64a7071f9d94d63cf47ab264303c9a34ee19f989"
+    }
+  ]
 }
