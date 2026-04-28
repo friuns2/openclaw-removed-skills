@@ -3,9 +3,15 @@
   "slug": "humanity",
   "displayName": "Humanity",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775560029863,
-    "commit": "https://github.com/openclaw/skills/commit/8214827efc5643c9d73882014506e93791309ab6"
+    "version": "1.0.1",
+    "publishedAt": 1776898970369,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775560029863,
+      "commit": "https://github.com/openclaw/skills/commit/8214827efc5643c9d73882014506e93791309ab6"
+    }
+  ]
 }
