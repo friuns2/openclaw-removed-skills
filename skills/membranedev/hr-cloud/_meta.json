@@ -3,9 +3,15 @@
   "slug": "hr-cloud",
   "displayName": "Hr Cloud",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775631870042,
-    "commit": "https://github.com/openclaw/skills/commit/93a19653abef3ed5675544c2bfa064e309712097"
+    "version": "1.0.2",
+    "publishedAt": 1776896473033,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775631870042,
+      "commit": "https://github.com/openclaw/skills/commit/93a19653abef3ed5675544c2bfa064e309712097"
+    }
+  ]
 }
