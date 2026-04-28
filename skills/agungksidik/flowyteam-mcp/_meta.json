@@ -1,11 +1,17 @@
 {
   "owner": "agungksidik",
   "slug": "flowyteam-mcp",
-  "displayName": "FlowyTeam",
+  "displayName": "Flowyteam Mcp",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775993719276,
-    "commit": "https://github.com/openclaw/skills/commit/eb68f613970770f41a9a0edb83fcd902260b98df"
+    "version": "1.1.2",
+    "publishedAt": 1777338394222,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775993719276,
+      "commit": "https://github.com/openclaw/skills/commit/eb68f613970770f41a9a0edb83fcd902260b98df"
+    }
+  ]
 }
