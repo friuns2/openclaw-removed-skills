@@ -3,9 +3,15 @@
   "slug": "lamden",
   "displayName": "Lamden",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775567085621,
-    "commit": "https://github.com/openclaw/skills/commit/83a6b60bbb457a102689f244c692f76d963572a6"
+    "version": "1.0.1",
+    "publishedAt": 1776895762049,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775567085621,
+      "commit": "https://github.com/openclaw/skills/commit/83a6b60bbb457a102689f244c692f76d963572a6"
+    }
+  ]
 }
