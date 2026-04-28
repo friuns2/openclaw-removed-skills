@@ -3,9 +3,15 @@
   "slug": "ontask",
   "displayName": "Ontask",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775665443575,
-    "commit": "https://github.com/openclaw/skills/commit/11d5beec70654337055ff8ec8e5956491d27f5f4"
+    "version": "1.0.1",
+    "publishedAt": 1776899454252,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775665443575,
+      "commit": "https://github.com/openclaw/skills/commit/11d5beec70654337055ff8ec8e5956491d27f5f4"
+    }
+  ]
 }
