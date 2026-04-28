@@ -1,6 +1,6 @@
 ---
 name: posthero
-version: 1.0.0
+version: 1.1.0
 title: PostHero — Social Media Manager
 description: Schedule and publish social media posts across LinkedIn, Twitter/X, Instagram, Facebook, YouTube, TikTok, Threads, and Bluesky using the PostHero API. Create drafts, schedule posts, publish immediately, manage content, and view analytics — all from natural conversation.
 license: MIT
@@ -21,7 +21,7 @@ keywords:
   - bluesky
 metadata:
   openclaw:
-    emoji: "🦸"
+    emoji: '🦸'
     primaryEnv: POSTHERO_API_KEY
     requires:
       env:
@@ -54,16 +54,16 @@ LinkedIn, Twitter/X, Instagram, Facebook, YouTube, TikTok, Threads, Bluesky
 
 ## Character Limits
 
-| Platform | Limit |
-|----------|-------|
-| Twitter/X | 280 per tweet |
-| Bluesky | 300 per post |
-| Threads | 500 per post |
-| LinkedIn | 3000 |
-| Instagram | 2200 |
-| Facebook | 63206 |
-| TikTok | 2200 (caption) |
-| YouTube | 5000 (description) |
+| Platform  | Limit              |
+| --------- | ------------------ |
+| Twitter/X | 280 per tweet      |
+| Bluesky   | 300 per post       |
+| Threads   | 500 per post       |
+| LinkedIn  | 3000               |
+| Instagram | 2200               |
+| Facebook  | 63206              |
+| TikTok    | 2200 (caption)     |
+| YouTube   | 5000 (description) |
 
 ## Workflow
 
@@ -76,6 +76,7 @@ When the user asks to create or schedule a post:
 5. Create the post with the appropriate parameters
 
 When the user asks about analytics or post performance:
+
 1. Call the analytics endpoints with the appropriate platform
 2. Present the data in a clear, readable format
 
@@ -93,6 +94,7 @@ curl -H "Authorization: Bearer $POSTHERO_API_KEY" \
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -139,22 +141,27 @@ curl -X POST \
 
 **Request body:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `text` | string | Yes | The post content |
-| `platforms` | array | Yes | Array of `{ platform, accountId }` objects |
-| `schedule` | string | No | ISO 8601 UTC datetime. Omit for draft |
-| `publishNow` | boolean | No | Set `true` to publish immediately |
-| `isThread` | boolean | No | Set `true` for threads. Separate posts with `\n\n` in text |
-| `platformContent` | object | No | Per-platform text overrides (see below) |
-| `media` | object | No | Media attachments (see below) |
+| Field             | Type    | Required | Description                                                                                                                                                 |
+| ----------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `text`            | string  | Yes      | The post content                                                                                                                                            |
+| `platforms`       | array   | Yes      | Array of `{ platform, accountId }` objects                                                                                                                  |
+| `schedule`        | string  | No       | ISO 8601 UTC datetime. Omit for draft                                                                                                                       |
+| `publishNow`      | boolean | No       | Set `true` to publish immediately                                                                                                                           |
+| `isThread`        | boolean | No       | Informational only. Threading is auto-detected per platform from `\n\n\n` (triple newline) separators in each platform's text — you don't need to set this. |
+| `platformContent` | object  | No       | Per-platform text overrides (see below)                                                                                                                     |
+| `media`           | object  | No       | Media attachments (see below)                                                                                                                               |
+| `isAutoPlug`      | boolean | No       | LinkedIn-only. Schedule a chain of comments on the user's own LinkedIn post after publish (see Auto-plug below)                                             |
+| `autoPlug`        | array   | No       | Comments to schedule when `isAutoPlug` is `true`. Each entry: `{ comment, delay, image? }`                                                                  |
 
 **Behavior:**
+
 - No `schedule` and no `publishNow` → creates a **draft**
 - `schedule` provided → creates a **scheduled** post
 - `publishNow: true` → **publishes immediately**
 
 **Platform content overrides** (optional per-platform text):
+
+The top-level `text` field is the canonical default for every platform. Set `platformContent.<platform>.text` only when you need a different copy for that specific platform — providing the override automatically marks that platform as unsynced and leaves all other platforms reading the top-level `text`. This includes LinkedIn: send `platformContent.linkedin.text` for a LinkedIn-specific version, and the top-level `text` stays untouched for the rest.
 
 ```json
 {
@@ -200,9 +207,61 @@ curl -X POST \
 
 Use URLs returned by the media upload endpoint. Up to 4 images, or 1 video, or 1 carousel PDF.
 
-**Threads:** Set `isThread: true` and separate each post with `\n\n` (double line break) in the text. Works for Twitter (280 chars/tweet), Bluesky (300 chars/post), and Threads (500 chars/post).
+**Threads:** Threading is auto-detected per platform from `\n\n\n` (triple newline) separators in each platform's text. No `isThread` flag needed.
+
+- Works for Twitter (280 chars/tweet), Bluesky (300 chars/post), and Threads (500 chars/post).
+- Each platform threads independently. To thread on X but post a single long-form on LinkedIn, put `\n\n\n` only in `platformContent.twitter.text` and leave LinkedIn's text without separators.
+
+Example — thread on X, single long-form on LinkedIn, from one post:
+
+```json
+{
+  "platforms": [
+    { "platform": "linkedin", "accountId": "abc123" },
+    { "platform": "twitter", "accountId": "def456" }
+  ],
+  "platformContent": {
+    "linkedin": {
+      "text": "Long LinkedIn post. Multiple paragraphs fine — no triple newlines, so this stays as a single post."
+    },
+    "twitter": {
+      "text": "Tweet 1 — hook.\n\n\nTweet 2 — context.\n\n\nTweet 3 — CTA."
+    }
+  }
+}
+```
+
+**Auto-plug (LinkedIn comments):** schedule follow-up comments on the user's own LinkedIn post after it publishes. Useful for "drop the link in the first comment" patterns, follow-up CTAs, or thread-style replies. **LinkedIn only** — other platforms ignore these fields.
+
+- Set `isAutoPlug: true`.
+- Provide `autoPlug` as an array of `{ comment, delay, image? }` entries.
+- `delay` is in **milliseconds**. The first entry fires that long after the post publishes; each subsequent entry fires that long after the previous comment.
+- `image` is optional — pass any HTTPS URL (or one returned by `/media/upload`).
+- After each comment posts, the entry gets a `commentIdOnPlatform` field on subsequent GETs.
+
+Example — publish a LinkedIn post with two follow-up comments:
+
+```json
+{
+  "text": "Just shipped our new API! Excited to see what people build with it.",
+  "platforms": [{ "platform": "linkedin", "accountId": "abc123" }],
+  "isAutoPlug": true,
+  "autoPlug": [
+    {
+      "comment": "Docs are here: https://posthero.ai/docs/api",
+      "delay": 60000
+    },
+    {
+      "comment": "Reply or DM if you hit anything weird — happy to help.",
+      "delay": 180000
+    }
+  ],
+  "publishNow": true
+}
+```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -230,14 +289,15 @@ curl -H "Authorization: Bearer $POSTHERO_API_KEY" \
 
 **Query parameters:**
 
-| Param | Description |
-|-------|-------------|
-| `status` | Filter: `draft`, `scheduled`, `published`, `failed` |
+| Param      | Description                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| `status`   | Filter: `draft`, `scheduled`, `published`, `failed`                                               |
 | `platform` | Filter: `linkedin`, `twitter`, `instagram`, `facebook`, `youtube`, `tiktok`, `threads`, `bluesky` |
-| `page` | Page number (default 1) |
-| `limit` | Posts per page (default 20, max 100) |
+| `page`     | Page number (default 1)                                                                           |
+| `limit`    | Posts per page (default 20, max 100)                                                              |
 
 Response:
+
 ```json
 {
   "success": true,
@@ -326,6 +386,7 @@ curl -X POST \
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -364,6 +425,7 @@ curl -X POST \
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -389,12 +451,12 @@ curl -H "Authorization: Bearer $POSTHERO_API_KEY" \
 
 **Query parameters:**
 
-| Param | Required | Description |
-|-------|----------|-------------|
-| `platform` | Yes | `twitter`, `threads`, `instagram`, `tiktok`, `youtube` |
-| `accountId` | No | Filter by specific account |
-| `start` | No | Start date (YYYY-MM-DD) |
-| `end` | No | End date (YYYY-MM-DD) |
+| Param       | Required | Description                                            |
+| ----------- | -------- | ------------------------------------------------------ |
+| `platform`  | Yes      | `twitter`, `threads`, `instagram`, `tiktok`, `youtube` |
+| `accountId` | No       | Filter by specific account                             |
+| `start`     | No       | Start date (YYYY-MM-DD)                                |
+| `end`       | No       | End date (YYYY-MM-DD)                                  |
 
 ---
 
@@ -409,13 +471,13 @@ curl -H "Authorization: Bearer $POSTHERO_API_KEY" \
 
 **Query parameters:**
 
-| Param | Required | Description |
-|-------|----------|-------------|
-| `platform` | Yes | `twitter`, `threads`, `instagram`, `tiktok`, `youtube` |
-| `metric` | No | `likes`, `impressions`, `comments`, `saves`, `watchMinutes` |
-| `limit` | No | Number of posts (default 10) |
-| `start` | No | Start date (YYYY-MM-DD) |
-| `end` | No | End date (YYYY-MM-DD) |
+| Param      | Required | Description                                                 |
+| ---------- | -------- | ----------------------------------------------------------- |
+| `platform` | Yes      | `twitter`, `threads`, `instagram`, `tiktok`, `youtube`      |
+| `metric`   | No       | `likes`, `impressions`, `comments`, `saves`, `watchMinutes` |
+| `limit`    | No       | Number of posts (default 10)                                |
+| `start`    | No       | Start date (YYYY-MM-DD)                                     |
+| `end`      | No       | End date (YYYY-MM-DD)                                       |
 
 ---
 
@@ -453,15 +515,15 @@ All errors return:
 }
 ```
 
-| Code | HTTP | Description |
-|------|------|-------------|
-| `UNAUTHORIZED` | 401 | Missing or invalid API key |
-| `FORBIDDEN` | 403 | Plan doesn't include API |
-| `NOT_FOUND` | 404 | Resource not found |
-| `VALIDATION_ERROR` | 400 | Invalid request body |
-| `ACCOUNT_NOT_FOUND` | 400 | Social account not found or not owned by user |
-| `RATE_LIMITED` | 429 | Too many API requests |
-| `PUBLISH_FAILED` | 500 | Publishing failed on one or more platforms |
+| Code                | HTTP | Description                                   |
+| ------------------- | ---- | --------------------------------------------- |
+| `UNAUTHORIZED`      | 401  | Missing or invalid API key                    |
+| `FORBIDDEN`         | 403  | Plan doesn't include API                      |
+| `NOT_FOUND`         | 404  | Resource not found                            |
+| `VALIDATION_ERROR`  | 400  | Invalid request body                          |
+| `ACCOUNT_NOT_FOUND` | 400  | Social account not found or not owned by user |
+| `RATE_LIMITED`      | 429  | Too many API requests                         |
+| `PUBLISH_FAILED`    | 500  | Publishing failed on one or more platforms    |
 
 ## Rate Limits
 
@@ -470,6 +532,7 @@ All errors return:
 - Media uploads: 200 per month
 
 Response headers on every request:
+
 ```
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 45
@@ -482,6 +545,6 @@ X-RateLimit-Reset: 1710500000
 - Times must be ISO 8601 UTC format (e.g. `2026-04-15T09:00:00Z`)
 - When the user says a time like "tomorrow at 9am", convert to UTC based on context
 - For cross-posting to multiple platforms, include all platform/accountId pairs in the `platforms` array
-- Thread mode uses `\n\n` as separator — respect per-platform character limits
+- Threading is auto-detected per platform from `\n\n\n` (triple newline) separators in the platform's text — respect per-platform character limits
 - Media URLs must come from the /media/upload endpoint (S3 URLs)
 - DELETE only removes from PostHero, not from the social media platform
