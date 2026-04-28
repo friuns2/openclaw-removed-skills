@@ -3,9 +3,15 @@
   "slug": "chatti",
   "displayName": "Chatti",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775667852223,
-    "commit": "https://github.com/openclaw/skills/commit/1b933acc5dd1f10bbd69abf98ce77f28505551a9"
+    "version": "1.0.1",
+    "publishedAt": 1776897557215,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775667852223,
+      "commit": "https://github.com/openclaw/skills/commit/1b933acc5dd1f10bbd69abf98ce77f28505551a9"
+    }
+  ]
 }
