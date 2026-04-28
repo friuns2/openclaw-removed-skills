@@ -3,9 +3,15 @@
   "slug": "munity",
   "displayName": "Munity",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775660851883,
-    "commit": "https://github.com/openclaw/skills/commit/32663b5151411036e9b39bee27a8cf82a3b909f3"
+    "version": "1.0.1",
+    "publishedAt": 1776899388146,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775660851883,
+      "commit": "https://github.com/openclaw/skills/commit/32663b5151411036e9b39bee27a8cf82a3b909f3"
+    }
+  ]
 }
