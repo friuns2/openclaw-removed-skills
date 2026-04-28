@@ -3,9 +3,15 @@
   "slug": "timely-time-tracking",
   "displayName": "Timely Time Tracking",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775614012063,
-    "commit": "https://github.com/openclaw/skills/commit/8c8e017dacec79f3e7c3b3614dfbc1693174f525"
+    "version": "1.0.1",
+    "publishedAt": 1776899786522,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775614012063,
+      "commit": "https://github.com/openclaw/skills/commit/8c8e017dacec79f3e7c3b3614dfbc1693174f525"
+    }
+  ]
 }
