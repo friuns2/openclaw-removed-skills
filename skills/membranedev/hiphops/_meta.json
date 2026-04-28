@@ -3,9 +3,15 @@
   "slug": "hiphops",
   "displayName": "Hiphops",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775628208881,
-    "commit": "https://github.com/openclaw/skills/commit/a190d189aa131af0feb878210e6af3a02d73b8fb"
+    "version": "1.0.1",
+    "publishedAt": 1776896324012,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775628208881,
+      "commit": "https://github.com/openclaw/skills/commit/a190d189aa131af0feb878210e6af3a02d73b8fb"
+    }
+  ]
 }
