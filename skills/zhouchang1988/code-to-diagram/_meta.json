@@ -3,11 +3,16 @@
   "slug": "code-to-diagram",
   "displayName": "code-to-diagram",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776671057590,
-    "commit": "https://github.com/openclaw/skills/commit/41d0ea7d7a2357ab221c2e14fcc2c4e508a690ca"
+    "version": "1.0.2",
+    "publishedAt": 1776749108500,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776671057590,
+      "commit": "https://github.com/openclaw/skills/commit/41d0ea7d7a2357ab221c2e14fcc2c4e508a690ca"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775729022256,
