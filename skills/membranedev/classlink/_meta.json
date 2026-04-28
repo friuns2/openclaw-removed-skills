@@ -3,9 +3,15 @@
   "slug": "classlink",
   "displayName": "Classlink",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775628271759,
-    "commit": "https://github.com/openclaw/skills/commit/f7e5cbc9f2081bfd4f324607ff933092739a0b40"
+    "version": "1.0.1",
+    "publishedAt": 1776896463494,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775628271759,
+      "commit": "https://github.com/openclaw/skills/commit/f7e5cbc9f2081bfd4f324607ff933092739a0b40"
+    }
+  ]
 }
