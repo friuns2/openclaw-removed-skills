@@ -3,9 +3,15 @@
   "slug": "cloudquery",
   "displayName": "Cloudquery",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297216758,
-    "commit": "https://github.com/openclaw/skills/commit/8d1c12d1fbc1dbd3b44c9d6e2bf177d132cb8574"
+    "version": "1.0.1",
+    "publishedAt": 1776885828961,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297216758,
+      "commit": "https://github.com/openclaw/skills/commit/8d1c12d1fbc1dbd3b44c9d6e2bf177d132cb8574"
+    }
+  ]
 }
