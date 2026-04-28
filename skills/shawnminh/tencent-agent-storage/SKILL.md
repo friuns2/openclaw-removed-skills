@@ -225,20 +225,20 @@ User triggers file upload
   → Step 4: Deliver the download link with execution notice
 ```
 
-> **IMPORTANT**: 默认必须使用 `conflictStrategy: "ask"` 上传。这样当云端已存在同名文件时，脚本会返回错误，Agent 可以询问用户如何处理。**只有用户明确说了 "覆盖"/"替换" 或 "重命名" 时，才使用对应的 `conflictStrategy: "overwrite"` 或 `conflictStrategy: "rename"`。**
+> **IMPORTANT**: 默认使用 `conflictStrategy: "rename"` 上传。当云端已存在同名文件时，脚本会自动重命名（如 `file(1).pdf`），确保上传始终成功并返回正确的下载链接。**只有用户明确说了 "覆盖"/"替换" 时，才使用 `conflictStrategy: "overwrite"`；用户明确要求先确认时，才使用 `conflictStrategy: "ask"`。**
 
 ### Step 2: Upload
 
 **Single file (默认):**
 
 ```bash
-node scripts/agent-storage.js upload '{"localPath":"/path/to/file.pdf","conflictStrategy":"ask"}'
+node scripts/agent-storage.js upload '{"localPath":"/path/to/file.pdf","conflictStrategy":"rename"}'
 ```
 
 **Upload to specific directory:**
 
 ```bash
-node scripts/agent-storage.js upload '{"localPath":"/path/to/photo.jpg","remotePath":"photos/photo.jpg","conflictStrategy":"ask"}'
+node scripts/agent-storage.js upload '{"localPath":"/path/to/photo.jpg","remotePath":"photos/photo.jpg","conflictStrategy":"rename"}'
 ```
 
 **User explicitly requested overwrite:**
@@ -250,13 +250,15 @@ node scripts/agent-storage.js upload '{"localPath":"/path/to/report.pdf","confli
 **Batch upload:**
 
 ```bash
-node scripts/agent-storage.js upload '{"localPath":"/path/to/file1.pdf","conflictStrategy":"ask"}'
-node scripts/agent-storage.js upload '{"localPath":"/path/to/file2.docx","conflictStrategy":"ask"}'
+node scripts/agent-storage.js upload '{"localPath":"/path/to/file1.pdf","conflictStrategy":"rename"}'
+node scripts/agent-storage.js upload '{"localPath":"/path/to/file2.docx","conflictStrategy":"rename"}'
 ```
 
 #### Conflict handling
 
-When using `conflictStrategy: "ask"` (默认), if a same-name file already exists, the script returns `{"success":false,"conflict":true}`. Agent must then ask the user:
+When using `conflictStrategy: "rename"` (默认), if a same-name file already exists, the script automatically renames the file (e.g. `file(1).pdf`) and completes the upload, ensuring a valid download link is always returned.
+
+When using `conflictStrategy: "ask"`, if a same-name file already exists, the script returns `{"success":false,"conflict":true}`. Agent must then ask the user:
 
 > 云端已存在同名文件 `{filename}`，你想怎么处理？
 >
@@ -268,9 +270,9 @@ When using `conflictStrategy: "ask"` (默认), if a same-name file already exist
 
 | Strategy | Behavior | When to use |
 |----------|----------|-------------|
-| `ask` (**默认，必须使用**) | 同名文件存在时返回错误，Agent 询问用户 | 用户未表明偏好时 |
+| `rename` (**默认**) | 同名文件存在时自动重命名，确保上传成功并返回正确链接 | 大多数场景，需要保证用户拿到下载链接 |
 | `overwrite` | 直接覆盖已有文件 | 用户明确说 "覆盖", "替换", "更新文件" |
-| `rename` | 自动重命名 → `file(1).pdf` | 用户明确说 "重命名", "改名上传" |
+| `ask` | 同名文件存在时返回错误，Agent 询问用户 | 用户明确要求先确认时 |
 
 ### Step 4: Deliver link + execution notice
 
@@ -321,7 +323,7 @@ node scripts/agent-storage.js upload '<json>'
 **JSON 参数：**
 - `localPath`（必填）：本地文件绝对路径，支持 `~` 展开
 - `remotePath`（可选）：云端目标路径，省略则上传到根目录并保留原文件名
-- `conflictStrategy`（可选）：`ask`（默认）| `rename` | `overwrite`
+- `conflictStrategy`（可选）：`rename`（默认）| `ask` | `overwrite`
 
 **Output:**
 
@@ -386,7 +388,7 @@ node scripts/agent-storage.js list '<json>'
 npm install -g smh-node-sdk
 
 # Step 1: 上传文件
-node scripts/agent-storage.js upload '{"localPath":"/path/to/report.pdf","conflictStrategy":"ask"}'
+node scripts/agent-storage.js upload '{"localPath":"/path/to/report.pdf","conflictStrategy":"rename"}'
 
 # Step 2: 查询文件信息
 node scripts/agent-storage.js info '{"remotePath":"report.pdf"}'
@@ -426,15 +428,15 @@ node scripts/agent-storage.js list '{"dirPath":"/","limit":20}'
 - **NEVER** 硬编码或暴露 SMH 凭证给用户
 - **NEVER** 未经用户主动要求就上传其本地个人文件
 - **NEVER** 跳过执行通知："链接已生成，有效期 2 小时，可直接在浏览器或手机中打开"
-- **NEVER** 在用户未明确表态时使用 `conflictStrategy: "rename"` 或 `conflictStrategy: "overwrite"`
+- **NEVER** 在用户未明确要求覆盖时使用 `conflictStrategy: "overwrite"`
 - **NEVER** 把含 `accessToken` 的中转链接（如 `https://api.tencentsmh.cn/...?access_token=...`）发给用户。返回给用户的**必须是带 COS 签名的直链**（域名为 `*.tencentsmhuc.cn`，参数含 `q-sign-algorithm` 和 `q-signature`），即脚本输出的 `downloadUrl` 字段
 - **NEVER** 截断、省略或用 `...` 缩写链接。发给用户的下载链接/预览链接**必须是脚本返回的完整 URL**，一个字符都不能少。链接通常很长（含签名参数），这是正常的，**必须原样完整输出**
 
 ### Common mistakes
 
 - 用户说"上传文件"但没指定路径 → 追问："你要上传哪个文件？告诉我文件路径或文件名就行。"
-- 用户说"确定上传 xxx"或"把 xxx 发给我" → 直接执行上传（`conflictStrategy: "ask"`）
-- **同名文件冲突**：上传时必须使用 `conflictStrategy: "ask"`。如果返回 `conflict: true`，必须询问用户选择覆盖、重命名或取消
+- 用户说"确定上传 xxx"或"把 xxx 发给我" → 直接执行上传（`conflictStrategy: "rename"`）
+- **同名文件冲突**：默认使用 `conflictStrategy: "rename"`，自动重命名保证上传成功。只有用户明确要求覆盖时才用 `overwrite`，用户明确要求先确认时才用 `ask`
 - 文件默认上传到云空间根目录，用户可通过 `remotePath` 参数指定目标路径
 - 下载链接为通过 SDK `infoFile({ purpose: 'download' })` 获取的带签名 COS 直链（`https://bucket-xxxxx.tencentsmhuc.cn/...?q-sign-algorithm=sha1&q-signature=...`），可直接在浏览器或手机中打开预览/下载，**有效期约 2 小时**。**必须原样完整输出此链接，禁止截断或省略任何部分**
 - 批量上传按顺序处理（不并行），避免 API 过载
