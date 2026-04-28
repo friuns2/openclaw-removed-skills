@@ -3,9 +3,15 @@
   "slug": "run-test-plan",
   "displayName": "Run Test Plan",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775940731565,
-    "commit": "https://github.com/openclaw/skills/commit/8afcfb80aea151e21c7712d9d7af1f8dedf6e806"
+    "version": "1.0.1",
+    "publishedAt": 1776831398269,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775940731565,
+      "commit": "https://github.com/openclaw/skills/commit/8afcfb80aea151e21c7712d9d7af1f8dedf6e806"
+    }
+  ]
 }
