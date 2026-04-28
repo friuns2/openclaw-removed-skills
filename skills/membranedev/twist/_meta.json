@@ -3,9 +3,15 @@
   "slug": "twist",
   "displayName": "Twist",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775628239618,
-    "commit": "https://github.com/openclaw/skills/commit/ce6322627ff320fa33ef575152710a4bad869f9f"
+    "version": "1.0.1",
+    "publishedAt": 1776896452622,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775628239618,
+      "commit": "https://github.com/openclaw/skills/commit/ce6322627ff320fa33ef575152710a4bad869f9f"
+    }
+  ]
 }
