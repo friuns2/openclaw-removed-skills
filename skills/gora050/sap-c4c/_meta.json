@@ -3,9 +3,15 @@
   "slug": "sap-c4c",
   "displayName": "Sap C4C",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297244506,
-    "commit": "https://github.com/openclaw/skills/commit/9aad9bd8d7e11ae38ebdabf5fd2cddf4ae26d6b9"
+    "version": "1.0.1",
+    "publishedAt": 1776885857287,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297244506,
+      "commit": "https://github.com/openclaw/skills/commit/9aad9bd8d7e11ae38ebdabf5fd2cddf4ae26d6b9"
+    }
+  ]
 }
