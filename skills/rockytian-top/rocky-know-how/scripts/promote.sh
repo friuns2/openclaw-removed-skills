@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how Tag 晋升机制 v2.8.3
+# rocky-know-how Tag 晋升机制 v3.3.0
 # 用法: promote.sh
 # 检查 7 天内同一 Tag 出现 ≥3 次，自动晋升到 HOT (memory.md)
 # 环境变量: WORKSPACE, STATE_DIR (由 record.sh 传入)
@@ -26,7 +26,13 @@ cleanup_promote() {
 }
 trap 'cleanup_promote' EXIT
 
-echo "=== Tag 晋升检查 (v2.8.3) ==="
+# v2.0: 7天检查周期（之前是30天）
+CUTOFF_DATE=$(date -v-7d +%Y%m%d 2>/dev/null || date -d "7 days ago" +%Y%m%d)
+TODAY=$(date +%Y%m%d)
+
+[ ! -f "$ERRORS_FILE" ] && echo "经验诀窍文件不存在，跳过晋升检查" && exit 0
+
+echo "=== Tag 晋升检查 (v3.3.0) ==="
 echo "检查周期: ${CUTOFF_DATE} - ${TODAY} (7天窗口)"
 echo "目标 HOT: $MEMORY_FILE"
 echo ""
@@ -35,12 +41,6 @@ echo ""
 if [ ! -f "$MEMORY_FILE" ]; then
   printf "# HOT Memory\n\n## 已确认偏好\n\n## 活跃模式\n\n## 最近（最近7天）\n\n" > "$MEMORY_FILE"
 fi
-
-[ ! -f "$ERRORS_FILE" ] && echo "经验诀窍文件不存在，跳过晋升检查" && exit 0
-
-# v2.0: 7天检查周期（之前是30天）
-CUTOFF_DATE=$(date -v-7d +%Y%m%d 2>/dev/null || date -d "7 days ago" +%Y%m%d)
-TODAY=$(date +%Y%m%d)
 
 # 清理旧临时文件（由 trap EXIT 统一清理）
 

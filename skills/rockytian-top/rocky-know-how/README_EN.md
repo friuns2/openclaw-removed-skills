@@ -1,153 +1,134 @@
-# 📚 rocky-know-how
+# rocky-know-how v3.4.8
 
-> OpenClaw Learning Knowledge Skill v2.8.14  
-> Core: **Search on failure, write after solving, learnings shared across agents**
+**Experience & Knowledge Auto-Learning System for OpenClaw Agents**
 
-[English](./README_EN.md) | [Complete Guide](./SKILL-GUIDE.md) | [Architecture](./ARCHITECTURE.md)
+> Enable AI Agents to learn from failures and automatically record successes, forming a complete experience closed-loop.
 
----
-
-## 🎯 Core Innovations
-
-### 1. 🤖 Hook Fully Automatic Draft Review (v2.8.14 NEW)
-
-**before_reset Hook automatically triggers**:
-```
-Task fails → Try solutions → Success
-    ↓
-before_reset Hook triggers
-    ↓
-1. Auto generate draft (drafts/draft-*.json)
-2. Auto call auto-review.sh
-3. Auto review → Search similar → Create/Append
-4. Auto write to experiences.md ✅
-5. Auto archive draft ✅
-```
-
-**Zero manual intervention, fully end-to-end automated!**
-
-### 2. 🔍 Dual Search Engines
-
-- LM Studio available → Vector semantic search
-- LM Studio unavailable → Keyword search (auto-fallback)
-- Results ranked by relevance
-
-### 3. 📊 Tag Promotion Rule
-
-- Same Tag used ≥3 times in 7 days
-- Auto-promote to TOOLS.md
-- Fast access to common issues
+[![Version](https://img.shields.io/badge/version-3.4.8-blue)]()
+[![Models Tested](https://img.shields.io/badge/models_tested-deepseek_v4%20%7C%20glm_5.1%20%7C%20minimax_m2.7-green)]()
+[![Code Lines](https://img.shields.io/badge/code-4632_lines-orange)]()
 
 ---
 
-## 🚀 Quick Start
+## Overview
 
-### Install (One-command)
+rocky-know-how is a **fully automatic experience learning system** designed for OpenClaw Agents. Through 4-event Hook integration, it achieves a complete closed-loop: automatic experience extraction from conversations → LLM intelligent judgment → triple-layer storage management.
+
+**Key Features:**
+- Full Auto-Closed-Loop — Auto-extract on compaction → LLM judge → write experience, zero manual intervention
+- LLM Dual-Judgment — First judges if worth saving, then decides create vs append
+- Triple-Layer Storage — HOT (always loaded) / WARM (on-demand) / COLD (archive)
+- 5-Layer Security — Regex injection prevention, path traversal filtering, concurrent write lock, dedup promotion, degradation fallback
+- Multi-Provider — Supports deepseek / glm / minimax / stepfun (including OAuth)
+- 3-Model Verified — deepseek-v4, glm-5.1, minimax-m2.7 all passed forward & reverse testing
+
+---
+
+## Quick Start
+
+### Install
+
 ```bash
-openclaw skills install rocky-know-how
+git clone https://gitee.com/rocky_tian/skill.git
+cd skill/rocky-know-how
+bash scripts/install.sh
 ```
 
-### Search Experience
+### Core Commands
+
 ```bash
-bash ~/.openclaw/skills/rocky-know-how/scripts/search.sh nginx 502
-```
+# Search experiences
+bash scripts/search.sh "keyword"
 
-### Write Experience (Manual)
-```bash
-bash ~/.openclaw/skills/rocky-know-how/scripts/record.sh \
-  "Problem" "Error encountered" "Solution" "Prevention" "tag1,tag2" "area"
-```
+# Write experience
+bash scripts/record.sh "problem" "pitfall" "solution" "prevention" "tag1,tag2" "area"
 
-### Fully Automatic Draft Review (Hook Auto-triggered)
-```bash
-# No manual run needed! before_reset Hook triggers automatically
-# auto-review.sh: scan → review → write → archive
-```
+# View all
+bash scripts/search.sh --all
 
----
-
-## 📦 Script List
-
-| Script | Description | Trigger |
-|--------|-------------|---------|
-| **auto-review.sh** | 🤖 **Fully Automatic Draft Review** (Recommended) | Hook auto |
-| search.sh | Search experiences | Manual |
-| record.sh | Write new experience | Manual |
-| summarize-drafts.sh | Scan drafts, generate suggestions | Manual |
-| append-record.sh | Append to existing experience | Called by auto-review.sh |
-| update-record.sh | Update existing experience | Manual |
-| promote.sh | Tag promotion check | Cron/Manual |
-| compact.sh | Compress & deduplicate | Cron/Manual |
-| archive.sh | Archive old data | Cron/Manual |
-
----
-
-## 🔄 Complete Workflow
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Stage 1: Auto Draft Generation (Hook)                       │
-├─────────────────────────────────────────────────────────────┤
-│ before_reset triggers → generateDraft() → drafts/draft-*.json│
-└─────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────┐
-│ Stage 2: Auto Review & Write (Hook calls auto-review.sh)   │
-├─────────────────────────────────────────────────────────────┤
-│ Scan drafts → Extract keywords → Search similar → Create/Append→Archive │
-└─────────────────────────────────────────────────────────────┘
+# Statistics dashboard
+bash scripts/stats.sh
 ```
 
 ---
 
-## 🔒 Security & Performance
+## Architecture
 
-| Feature | Description |
-|---------|-------------|
-| Concurrent Safety | `.write_lock` directory lock |
-| Input Validation | ID format, path, length checks |
-| Regex Escaping | Prevent injection |
-| Path Traversal Detection | `../` and `\` blocked |
-| Auto Fallback | Switch to keyword if LM Studio unavailable |
+### 4-Event Driven
 
----
+| Event | Trigger | Function |
+|-------|---------|----------|
+| `agent:bootstrap` | Agent startup | Inject experience reminder into systemPrompt |
+| `before_compaction` | Before compression | Extract task/tools/errors → save to pending/ |
+| `after_compaction` | After compression | Core: LLM dual-judge → draft → write → archive |
+| `before_reset` | Before session reset | Fallback save pending context |
 
-## 📂 Storage Structure
+### Triple-Layer Storage
 
 ```
 ~/.openclaw/.learnings/
-├── experiences.md          ← Main experience database
-├── memory.md              ← HOT layer (≤100 lines)
-├── domains/               ← WARM layer (domain isolated)
-│   ├── infra.md
-│   ├── code.md
-│   └── global.md
-├── drafts/                ← Drafts (Hook auto-generated)
-│   └── archive/           ← Processed draft archive
-└── vectors/               ← Vector index
+├── experiences.md    ← Main data (v1 compatible)
+├── memory.md         ← HOT layer (≤100 lines, always loaded)
+├── domains/          ← WARM layer (by area: infra, code, global...)
+├── projects/         ← WARM layer (by project)
+├── archive/          ← COLD layer (90+ days)
+├── drafts/           ← Auto-generated drafts (LLM judged)
+└── pending/          ← Session context (before processing)
 ```
 
 ---
 
-## 📖 Version History
+## Safety & Security
 
-| Version | Date | Highlights |
-|---------|------|------------|
-| **v2.8.14** | 2026-04-24 | 🤖 **Hook Fully Automatic Integration** |
-| v2.8.13 | 2026-04-24 | Root docs update |
-| v2.8.12 | 2026-04-24 | Full auto test verified |
-| v2.8.11 | 2026-04-24 | SKILL-GUIDE.md complete guide |
-| v2.8.10 | 2026-04-24 | auto-review.sh auto review |
-| v2.8.9 | 2026-04-24 | ARCHITECTURE.md architecture design |
-
----
-
-## 🔗 Links
-
-- [ClawHub](https://clawhub.ai/skills/rocky-know-how)
-- [GitHub](https://github.com/rockytian-top/skill.git)
-- [Gitee](https://gitee.com/rocky_tian/skill.git)
+| Mechanism | Implementation |
+|-----------|---------------|
+| Regex injection prevention | `escape_grep()` sed escaping |
+| Path traversal filtering | `replace(/[^a-zA-Z0-9_-]/g, '')` |
+| Concurrent write lock | `.write_lock/` directory atomic lock |
+| Tag dedup promotion | record.sh dedup + promote.sh ≥3x/7days threshold |
+| Graceful degradation | LLM → keyword → write, triple fallback chain |
 
 ---
 
-**Maintainer**: 大颖 (fs-daying) | **Version**: v2.8.14
+## Code Statistics
+
+| Module | Lines |
+|--------|------:|
+| handler.js (Core Hook) | 1,110 |
+| 17 Scripts | 3,522 |
+| **Total** | **4,632** |
+
+---
+
+## Verified Testing
+
+### Models Tested
+
+| Model | Provider | Forward Test | Reverse Test | Status |
+|-------|----------|:------------:|:------------:|:------:|
+| deepseek-v4 | deepseek (api-key) | ✅ Pass | ✅ 144/150 | Verified |
+| glm-5.1 | zai (api-key) | ✅ Pass | ✅ 146/150 | Verified |
+| MiniMax-M2.7-highspeed | minimax-portal (OAuth) | ✅ Pass | ✅ 146/150 | Verified |
+
+---
+
+## Key Advantages
+
+1. **Zero-config auto-learning** — Hook events automatically capture experience, no manual trigger needed
+2. **LLM dual-judgment** — First judges if worth saving, then decides create vs append
+3. **Triple degradation** — LLM → keyword → write, never loses data
+4. **Multi-provider** — Supports OpenAI, Anthropic, OAuth providers (zai/stepfun/minimax)
+5. **Production proven** — 45+ real experiences, 2.6MB data, stable operation
+6. **Safety first** — 5 security mechanisms (regex injection, path traversal, write lock, etc.)
+
+---
+
+## Repositories
+
+- **Gitee**: https://gitee.com/rocky_tian/skill
+- **GitHub**: https://github.com/rocky-tian/skill
+- **ClawHub**: https://clawhub.ai/skills/rocky-know-how
+
+---
+
+_Version: 3.4.8 | Tested: 2026-04-25 | License: MIT_

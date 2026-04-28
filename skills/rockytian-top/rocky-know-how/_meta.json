@@ -1,13 +1,18 @@
 {
   "owner": "rockytian-top",
   "slug": "rocky-know-how",
-  "displayName": "rocky-know-how",
+  "displayName": "Rocky Know-How",
   "latest": {
-    "version": "2.8.15",
-    "publishedAt": 1776967870518,
-    "commit": "https://github.com/openclaw/skills/commit/815c2e0f5df675738740329d604ece4710a93192"
+    "version": "3.4.8",
+    "publishedAt": 1777121920193,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.8.15",
+      "publishedAt": 1776967870518,
+      "commit": "https://github.com/openclaw/skills/commit/815c2e0f5df675738740329d604ece4710a93192"
+    },
     {
       "version": "2.0.5",
       "publishedAt": 1776742978657,

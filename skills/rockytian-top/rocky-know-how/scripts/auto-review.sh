@@ -1,10 +1,11 @@
 #!/bin/bash
 # ============================================================
-# 全自动草稿审核脚本 - v2.0
-# 草稿 → AI判断 → 同类检测 → 自动新增/追加 → 写入experiences.md → 自动晋升
+# 全自动草稿审核脚本 - v2.1
+# 草稿 → AI判断 → AI优化增强 → 同类检测 → 自动新增/追加 → 写入experiences.md → 自动晋升
 # ============================================================
 
-set -e
+# 从 set -e 改为显式错误处理
+set -E
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LEARNINGS_DIR="$HOME/.openclaw/.learnings"
@@ -39,11 +40,26 @@ process_draft() {
     problem=$(python3 -c "import json; print(json.load(open('$draft_file')).get('problem',''))" 2>/dev/null || echo "")
     tried=$(python3 -c "import json; print(json.load(open('$draft_file')).get('tried',''))" 2>/dev/null || echo "")
     solution=$(python3 -c "import json; print(json.load(open('$draft_file')).get('solution',''))" 2>/dev/null || echo "")
+    prevention=$(python3 -c "import json; print(json.load(open('$draft_file')).get('prevention',''))" 2>/dev/null || echo "")
     tags=$(python3 -c "import json; print(','.join(json.load(open('$draft_file')).get('tags',[])))" 2>/dev/null || echo "draft")
     area=$(python3 -c "import json; print(json.load(open('$draft_file')).get('area','global'))" 2>/dev/null || echo "global")
     
+    # 如果没有AI生成的prevention，使用默认值
+    if [ -z "$prevention" ]; then
+        prevention="No similar problems"
+    fi
+    
     if [ -z "$problem" ]; then
         log "WARN: Draft empty, skipping"
+        return
+    fi
+    
+    # 跳过 solution 不完整的草稿（防止写入"待补充"到 experiences.md）
+    if [ -z "$solution" ] || [ "$solution" = "待补充" ]; then
+        log "SKIP: solution 未完成 (待补充)，跳过此草稿"
+        mv "$draft_file" "$ARCHIVE_DIR/"
+        log "Archived: $draft_id (skipped - incomplete)"
+        log ""
         return
     fi
     
@@ -52,10 +68,11 @@ process_draft() {
     
     log "Problem: $problem"
     log "Tags: $tags"
+    log "Prevention: $prevention"
     log "Keywords: $keywords"
     
     # 搜索同类经验
-    similar_ids=$(bash "$SCRIPT_DIR/search.sh" $keywords 2>/dev/null | grep -oE 'EXP-[0-9]{8}-[0-9]{4}' | head -5 || echo "")
+    similar_ids=$(bash "$SCRIPT_DIR/search.sh" $keywords 2>/dev/null | grep -oE 'EXP-[0-9]{8}-[0-9]{3}' | head -5 || echo "")
     
     if [ -n "$similar_ids" ]; then
         # 有同类经验 → 追加新方式
@@ -72,7 +89,7 @@ process_draft() {
         # 无同类经验 → 新增
         log "No similar found, creating new..."
         
-        bash "$SCRIPT_DIR/record.sh" "$problem" "$tried" "$solution" "No similar problems" "$tags" "$area" 2>&1 | tee -a "$LOG_FILE"
+        bash "$SCRIPT_DIR/record.sh" "$problem" "$tried" "$solution" "$prevention" "$tags" "$area" 2>&1 | tee -a "$LOG_FILE"
         
         # 移动草稿到归档
         mv "$draft_file" "$ARCHIVE_DIR/"

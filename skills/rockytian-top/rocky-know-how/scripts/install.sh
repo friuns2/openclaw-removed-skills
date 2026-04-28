@@ -1,8 +1,8 @@
 #!/bin/bash
-# rocky-know-how 一键安装脚本 v2.8.3
+# rocky-know-how 一键安装脚本 v3.3.0
 set -e
 
-VERSION="2.8.3"
+VERSION="3.3.0"
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPTS_DIR/lib/common.sh"

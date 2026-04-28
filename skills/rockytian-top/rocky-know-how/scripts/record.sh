@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 写入经验诀窍 v2.8.3
+# rocky-know-how 写入经验诀窍 v3.3.0
 # 用法: record.sh [--dry-run] [--namespace global|domain|project] "<问题>" "<踩坑过程>" "<正确方案>" "<预防>" "<tags>" [area|domain]
 # 例: record.sh "排查网站只看进程" "第1次:只看进程→报正常" "curl验证" "必须curl" "troubleshooting" infra
 
@@ -112,12 +112,25 @@ if ! $AUTO_MODE && [ ${#ARGS[@]} -lt 5 ]; then
 fi
 
 if ! $SKIP_NORMAL_ASSIGN; then
-  PROBLEM="${ARGS[0]}"
-  FAILURES="${ARGS[1]}"
-  SOLUTION="${ARGS[2]}"
-  PREVENT="${ARGS[3]}"
-  TAGS="${ARGS[4]}"
-  NS_VALUE="${ARGS[5]:-}"
+# 校验必填参数不能为空
+if [ -z "${ARGS[0]}" ]; then
+    echo "❌ 错误: 问题(参数1)不能为空"
+    exit 1
+fi
+PROBLEM="${ARGS[0]}"
+FAILURES="${ARGS[1]}"
+SOLUTION="${ARGS[2]}"
+PREVENT="${ARGS[3]}"
+TAGS="${ARGS[4]}"
+NS_VALUE="${ARGS[5]:-}"
+
+# 清洗换行符：将换行替换为空格（防止格式破坏）
+PROBLEM=$(printf '%s' "$PROBLEM" | tr '\n\r' '  ')
+FAILURES=$(printf '%s' "$FAILURES" | tr '\n\r' '  ')
+SOLUTION=$(printf '%s' "$SOLUTION" | tr '\n\r' '  ')
+PREVENT=$(printf '%s' "$PREVENT" | tr '\n\r' '  ')
+TAGS=$(printf '%s' "$TAGS" | tr '\n\r' '  ')
+NS_VALUE=$(printf '%s' "$NS_VALUE" | tr '\n\r' '  ')
 fi
 
 # 验证参数安全性（路径穿越检测）
@@ -162,7 +175,9 @@ generate_id() {
     if [ $retry -ge $max_retry ]; then
       echo "⚠️  ID生成超时（锁竞争超过5秒），使用随机后缀" >&2
       rmdir "$lock_dir" 2>/dev/null
-      echo "${prefix}$(date +%s%N | head -c 12)"
+      # 跨平台兼容: macOS date 不支持 %N (纳秒)，用 python3 取纳秒
+      local nano_suffix=$(python3 -c 'import time; t=str(time.time_ns()); print(t[:12])' 2>/dev/null || echo "$RANDOM$$")
+      echo "${prefix}${nano_suffix}"
       return
     fi
   done
@@ -253,7 +268,7 @@ check_duplicate() {
       [ "$tag_total" -eq 0 ] && tag_total=1
       local tag_ratio=$((tag_match * 100 / tag_total))
       if [ "$tag_ratio" -ge 70 ]; then
-        # Tags 重叠度≥50%即拦截（不需要文字相似度检查）
+        # Tags 重叠度≥70%即拦截（不需要文字相似度检查）
         found_id="$exist_id"
         found_summary="$exist_problem"
         break
@@ -275,8 +290,26 @@ check_duplicate() {
 init_file "$ERRORS_FILE" "# 经验诀窍"
 
 # R6 fix: 获取写入锁（保护去重、ID生成、写入手拉手，防止 TOCTOU 竞态）
+# R7 fix: 写锁超时机制（5秒自动清理残留锁）
 if ! $DRY_RUN; then
   WRITE_LOCK_DIR="$SHARED_DIR/.write_lock"
+  LOCK_AGE_MAX=5  # 最大锁年龄（秒）
+
+  # 检查残留锁是否过期
+  if [ -d "$WRITE_LOCK_DIR" ]; then
+    # 跨平台兼容: macOS stat -f %m, Linux stat -c %Y
+    local lock_mtime
+    if [ "$(uname)" = "Darwin" ]; then
+      lock_mtime=$(stat -f %m "$WRITE_LOCK_DIR" 2>/dev/null || echo 0)
+    else
+      lock_mtime=$(stat -c %Y "$WRITE_LOCK_DIR" 2>/dev/null || echo 0)
+    fi
+    LOCK_AGE=$(($(date +%s) - lock_mtime))
+    if [ "$LOCK_AGE" -gt "$LOCK_AGE_MAX" ]; then
+      rmdir "$WRITE_LOCK_DIR" 2>/dev/null
+    fi
+  fi
+
   if ! mkdir "$WRITE_LOCK_DIR" 2>/dev/null; then
     echo "❌ 写入冲突，请稍后重试"
     exit 1
