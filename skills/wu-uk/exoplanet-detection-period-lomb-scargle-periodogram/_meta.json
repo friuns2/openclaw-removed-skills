@@ -1,0 +1,11 @@
+{
+  "owner": "wu-uk",
+  "slug": "exoplanet-detection-period-lomb-scargle-periodogram",
+  "displayName": "lomb-scargle-periodogram",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1776229672074,
+    "commit": null
+  },
+  "history": []
+}
