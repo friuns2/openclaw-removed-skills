@@ -3,9 +3,15 @@
   "slug": "datawrapper",
   "displayName": "Datawrapper",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775365591730,
-    "commit": "https://github.com/openclaw/skills/commit/0bd5df8ae9ea69f7bd7011675c5783e2265651d8"
+    "version": "1.0.1",
+    "publishedAt": 1776892031407,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775365591730,
+      "commit": "https://github.com/openclaw/skills/commit/0bd5df8ae9ea69f7bd7011675c5783e2265651d8"
+    }
+  ]
 }
