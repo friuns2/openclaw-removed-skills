@@ -3,9 +3,15 @@
   "slug": "voodoo-sms",
   "displayName": "Voodoo Sms",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775671568442,
-    "commit": "https://github.com/openclaw/skills/commit/16bd664d73a267da87ceac4bfeb57516f6e7dfbb"
+    "version": "1.0.1",
+    "publishedAt": 1776899481727,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775671568442,
+      "commit": "https://github.com/openclaw/skills/commit/16bd664d73a267da87ceac4bfeb57516f6e7dfbb"
+    }
+  ]
 }
