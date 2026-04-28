@@ -3,9 +3,15 @@
   "slug": "preflight-integration",
   "displayName": "Preflight",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775718585502,
-    "commit": "https://github.com/openclaw/skills/commit/c92094c82daa19a41d79d38972a156f2e8228845"
+    "version": "1.0.1",
+    "publishedAt": 1776899773790,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775718585502,
+      "commit": "https://github.com/openclaw/skills/commit/c92094c82daa19a41d79d38972a156f2e8228845"
+    }
+  ]
 }
