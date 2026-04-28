@@ -3,9 +3,15 @@
   "slug": "opslevel",
   "displayName": "Opslevel",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581677798,
-    "commit": "https://github.com/openclaw/skills/commit/5c53830866dc16ffad441cef80b72579d32a599c"
+    "version": "1.0.1",
+    "publishedAt": 1776899086803,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581677798,
+      "commit": "https://github.com/openclaw/skills/commit/5c53830866dc16ffad441cef80b72579d32a599c"
+    }
+  ]
 }
