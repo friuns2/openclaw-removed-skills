@@ -3,9 +3,15 @@
   "slug": "todo4google",
   "displayName": "Todo4google",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776187013597,
-    "commit": "https://github.com/openclaw/skills/commit/9ed32e263d1e3e45c8f8f80c0df83e6c57d0e657"
+    "version": "1.0.1",
+    "publishedAt": 1776874287480,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776187013597,
+      "commit": "https://github.com/openclaw/skills/commit/9ed32e263d1e3e45c8f8f80c0df83e6c57d0e657"
+    }
+  ]
 }
