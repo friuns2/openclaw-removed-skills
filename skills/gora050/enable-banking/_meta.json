@@ -3,9 +3,15 @@
   "slug": "enable-banking",
   "displayName": "Enable Banking",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495269837,
-    "commit": "https://github.com/openclaw/skills/commit/219bee13681097b4081193bd8b8162ab1bd5ea6f"
+    "version": "1.0.1",
+    "publishedAt": 1776893254703,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495269837,
+      "commit": "https://github.com/openclaw/skills/commit/219bee13681097b4081193bd8b8162ab1bd5ea6f"
+    }
+  ]
 }
