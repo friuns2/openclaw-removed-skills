@@ -21,8 +21,15 @@
     "vault_path": null,
     "note": "设置 enabled=true 并指定 vault_path 以启用 Obsidian 同步。编译后的 wiki/ 会自动同步到 vault/知识库/ 目录。"
   },
+  "shared_kb": {
+    "enabled": true,
+    "path": "~/.openclaw/kb/shared",
+    "note": "跨 Agent 共享的长期知识库。默认 kb-search 会同时搜 agent + shared。禁用后所有 kb-* 命令需显式 --scope shared 才能访问共享层。"
+  },
   "search": {
     "default_format": "markdown",
-    "max_results": 20
+    "max_results": 20,
+    "default_scopes": ["agent", "shared"],
+    "note": "default_scopes 控制 kb-search 未传 --scope 时聚合哪些作用域。"
   }
 }
