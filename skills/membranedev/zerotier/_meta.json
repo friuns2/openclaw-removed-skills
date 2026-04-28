@@ -3,9 +3,15 @@
   "slug": "zerotier",
   "displayName": "Zerotier",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775631847578,
-    "commit": "https://github.com/openclaw/skills/commit/b4a2b348fcb3cacc2c8ab448bdb91b3d5a8e740e"
+    "version": "1.0.1",
+    "publishedAt": 1776896468979,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775631847578,
+      "commit": "https://github.com/openclaw/skills/commit/b4a2b348fcb3cacc2c8ab448bdb91b3d5a8e740e"
+    }
+  ]
 }
