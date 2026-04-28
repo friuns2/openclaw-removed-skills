@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-compound-docs",
-  "displayName": "compound-docs",
+  "displayName": "ia-compound-docs",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518936178,
-    "commit": "https://github.com/openclaw/skills/commit/f3e689b96d3f1c695c0eb837aec5747bd27fc691"
+    "version": "3.0.4",
+    "publishedAt": 1777300665951,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518936178,
+      "commit": "https://github.com/openclaw/skills/commit/f3e689b96d3f1c695c0eb837aec5747bd27fc691"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004155473,
