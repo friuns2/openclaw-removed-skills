@@ -1,0 +1,11 @@
+{
+  "owner": "agents365-ai",
+  "slug": "figshare-skill",
+  "displayName": "figshare-skill",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1775625365194,
+    "commit": null
+  },
+  "history": []
+}
