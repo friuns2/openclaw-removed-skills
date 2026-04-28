@@ -3,9 +3,15 @@
   "slug": "brainstorm-beagle",
   "displayName": "Brainstorm Beagle",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966674037,
-    "commit": "https://github.com/openclaw/skills/commit/cc8b7e063db5d7de145aa0aa61607dea89f8b449"
+    "version": "1.0.2",
+    "publishedAt": 1776831001591,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966674037,
+      "commit": "https://github.com/openclaw/skills/commit/cc8b7e063db5d7de145aa0aa61607dea89f8b449"
+    }
+  ]
 }
