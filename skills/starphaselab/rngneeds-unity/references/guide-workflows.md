@@ -97,6 +97,34 @@ Strong examples to reach for:
 
 This is useful when the answer should explain design tradeoffs, not only method names.
 
+## Card deck extensions workflow
+
+When the user is really describing a card-flow system, teach this sequence:
+
+1. Author a starting deck recipe with a `ProbabilityList<Card>`.
+2. Build one live `ProbabilityList<Card>` per zone such as draw pile, hand, discard, or table.
+3. Use deck helpers for card movement and reordering.
+4. Shuffle or cut the live deck when order should change.
+5. Use weighted picks only if another part of the design is actually probability-table driven.
+
+Good docs-shaped advice:
+
+- top of deck is index `0`
+- moving a `ProbabilityItem<T>` between zones preserves card-level state better than recreating raw values
+- `TryDrawTopItem(...)` plus `TryPlaceItemOnBottom(...)` is the core draw/discard pattern
+- `DealItemToDeck(...)` is a strong fit when one zone should transfer its top card directly to another
+
+## Inspectable shuffle-plan workflow
+
+When the user wants the shuffle itself to be visible or explainable, teach this sequence:
+
+1. choose a shuffle method such as `DeckShuffleMethods.Riffle`, `Overhand`, or `CutNearHalf`
+2. call `CreateShufflePlan(...)`
+3. inspect or log the plan steps
+4. apply the plan with `ApplyShufflePlan(...)`
+
+Use this framing for tutorial content, debug tools, and “make the shuffle feel physical” requests.
+
 ## Tone and framing
 
 When responding in a docs-like mode:

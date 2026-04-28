@@ -64,6 +64,37 @@ The parent list also needs `list.IsDepletable = true`.
 
 That is useful, but it no longer represents the same distribution as “pick once and ignore disabled/depleted results.”
 
+## Weighted picks and deck operations solve different problems
+
+Do not answer a top-of-deck or hand/discard workflow with `PickValue()` just because cards are involved.
+
+Use weighted picks for outcome selection.
+Use deck extensions for ordered card flow.
+
+If the user says “draw from top”, “put on bottom”, “shuffle deck”, or “move from draw pile to hand”, treat that as a deck-order problem first.
+
+## Shuffle helpers do not use weighted selection
+
+Deck shuffle helpers reorder by seeded index/random operations.
+
+They do **not** consult item probabilities the way `PickValue()` does.
+
+Common mistaken assumption: “My higher-probability card should stay more likely to appear near the top after a shuffle.”
+
+That is not what these helpers are for. They are deck-order tools, not weighted pick tools.
+
+## Manual index traversal is now a fallback, not the default deck answer
+
+Manual traversal still works for custom behavior.
+
+But when the built-in deck helpers already match the gameplay, prefer them over custom loops. They communicate intent better and usually preserve moved `ProbabilityItem<T>` references correctly.
+
+## Deck reordering changes positional gameplay and clears history-sensitive assumptions
+
+Cutting, reversing, applying shuffle plans, and moving cards between zones changes item order directly.
+
+That means any reasoning tied to previous positions or pick history should be re-checked after a reorder.
+
 ## Very small enabled probability can cause skipped selection
 
 RNGNeeds has fail-safe protection when maintaining pick count would otherwise take too long or hang because enabled probability is tiny.

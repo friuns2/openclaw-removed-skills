@@ -1,6 +1,6 @@
 ---
 name: rngneeds-unity
-description: Teach agents how to design, implement, explain, and debug gameplay randomness with the RNGNeeds Unity plugin. Use when a request involves RNGNeeds types or concepts such as ProbabilityList, ProbabilityItem, PLCollection, weighted picks, loot tables, gacha, spawn tables, dialogue weighting, AI choice weighting, repeat prevention, depletable lists, influence providers, pick history, seeding, or custom selection methods in Unity/C#.
+description: Teach agents how to design, implement, explain, and debug gameplay randomness with the RNGNeeds Unity plugin. Use when a request involves RNGNeeds types or concepts such as ProbabilityList, ProbabilityItem, PLCollection, weighted picks, loot tables, gacha, spawn tables, dialogue weighting, AI choice weighting, repeat prevention, depletable lists, card deck extensions, deck order, draw pile, discard pile, hand, graveyard, shuffle plans, influence providers, pick history, seeding, or custom selection methods in Unity/C#.
 ---
 
 # rngneeds-unity
@@ -22,18 +22,20 @@ Use this skill for RNGNeeds-specific work. If the request is only about generic 
 - **Answer tutorial, support, or docs-style questions**: read `references/guide-workflows.md` first, then `references/examples.md`.
 - **Explain weird probabilities or surprising results**: read `references/pitfalls.md` and `references/core-concepts.md`.
 - **Build dynamic odds from game state**: read `references/core-concepts.md`, `references/api-surface.md`, and `references/examples.md`.
-- **Model decks, limited rewards, or finite stock**: read `references/common-patterns.md`, `references/pitfalls.md`, and `references/examples.md`.
+- **Model decks, draw piles, discard piles, hands, graveyards, limited rewards, or finite stock**: read `references/decision-guide.md`, `references/common-patterns.md`, `references/pitfalls.md`, and `references/examples.md`.
 
 ## Guardrails
 
 - Distinguish **BaseProbability** from the final **Probability** used during selection.
 - Distinguish **disabled** items from **removed** items, and **depletable** items from infinite ones.
+- Distinguish **weighted selection** from **deck-order operations**. If the user cares about top, bottom, hand, discard, cut, or shuffle order, prefer deck extensions over `PickValue()`.
 - Warn that disabled items still occupy probability space, and if selection lands on one that pick is ignored. Disabled or depleted states can reduce result count unless `MaintainPickCountIfDisabled` is enabled.
 - Warn that repeat prevention changes behavior: `Spread` is fast but more biased, `Repick` is lower bias, `Shuffle` preserves distribution better but does not guarantee zero repeats between separate picks.
 - Warn that influenced lists recalculate before selection, and final displayed outcomes may normalize.
 - Warn that `PickValues()` returns a shared internal list reference. Copy it if the caller must keep results after another pick.
 - Prefer `TryPickValue(...)` when failure matters, especially for value types where `default(T)` can look like a real result.
 - Note that if an item's value implements `IProbabilityInfluenceProvider`, it overrides an external provider assigned to that item.
+- Note that deck extensions are order-centric and use simple seeded index/random operations, not the list's weighted selection methods.
 - Prefer `KeepSeed` or a custom seed provider for deterministic behavior instead of ad hoc randomness hacks.
 - Reach for custom selection methods only when built-in behavior does not satisfy the requirement.
 

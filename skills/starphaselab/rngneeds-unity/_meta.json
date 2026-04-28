@@ -3,9 +3,15 @@
   "slug": "rngneeds-unity",
   "displayName": "RNGNeeds Unity",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1775729797563,
-    "commit": "https://github.com/openclaw/skills/commit/ce5482b1d0d0961b910f28d181267cf37ae86394"
+    "version": "0.1.1",
+    "publishedAt": 1776856111927,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1775729797563,
+      "commit": "https://github.com/openclaw/skills/commit/ce5482b1d0d0961b910f28d181267cf37ae86394"
+    }
+  ]
 }
