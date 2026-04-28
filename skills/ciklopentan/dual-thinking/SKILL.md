@@ -3,7 +3,7 @@ name: dual-thinking
 description: Second-opinion consultation plus automatic skill-engineering escalation for reviews, rewrites, hardening, weak-model optimization, packaging, testing, and publish readiness.
 ---
 
-# Dual Thinking Method — v8.5.21
+# Dual Thinking Method — v8.5.24
 
 **Purpose:** consult a second model, then escalate skill topics into structured, patch-bearing skill engineering instead of generic advice when the topic is a skill or skill-adjacent artifact. In the next candidate line, the method also includes a self-evolution lens for self-review and native-domain-adjacent review without changing the public three-step architecture.
 
@@ -14,7 +14,7 @@ Reference files and later narrative sections may explain, test, or exemplify the
 
 ### Core lock
 1. Order is always `SELF_POSITION` -> `CONSULTANT_POSITION` -> `SYNTHESIS`. The main agent owns synthesis and the final round decision.
-2. The first consultant-bearing round on a new skill topic must paste the real artifact inline broadly enough for exact-wording review. Path-only references, `FILE:` labels without body text, shell snippets, unresolved placeholders, short summaries, and partial fragments that do not actually cover the claim under review do not count as pasted artifact.
+2. The first consultant-bearing round on a new skill topic must paste the real artifact inline broadly enough for exact-wording review. Path-only references, `FILE:` labels without body text, shell snippets, unresolved placeholders, short summaries, and partial fragments that do not actually cover the claim under review do not count as pasted artifact. In fresh, replacement, or recovery consultant sessions, `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, accepted-state summaries, patch summaries, or an intention to repaste later do not count as pasted artifact either.
 3. In `api` and `multi`, produce `SELF_POSITION` before any consultant call. Do not jump from consultant response directly to final decision.
 4. The consultant-shaped minimum is `consultant_verdict`, `strongest_finding`, and `proposed_fix`. If consultant-bearing extraction still cannot reach that minimum after the allowed retry, downgrade to `analysis-only` or mark the round invalid.
 5. The minimum required round block is always `ROUND`, `TOPIC`, `MODE`, `SESSION`, `DECISION`, `VALIDATION_STATUS`, `PATCH_STATUS`, `CONTINUATION_SIGNAL`, `NEXT_ACTION`, `CHAT_CONTINUITY`, `RESUME_SNIPPET`.
@@ -52,6 +52,7 @@ Evaluate conditions in order. Execute the first matching next action exactly onc
 |---|---|---|
 | consultant-visible prompt contains path-only artifact references, `FILE:` labels without body text, shell snippets instead of artifact text, unresolved placeholders such as `$(cat ...)`, hidden-local assertions, or thin excerpts that do not actually cover the exact claim being reviewed | set `VALIDATION_STATUS: blocked`, emit `BLOCKED_STATE: artifact-not-pasted`, ask once for sufficient inline artifact text, and stop patching until the artifact is really pasted | 1 |
 | `BLOCKED_STATE: artifact-not-pasted` persists after the one allowed ask | downgrade to `analysis-only`, set `CONSULTANT_POSITION_STATUS: omitted-invalid`, and stop the patch loop for that scope | 0 additional |
+| a fresh, replacement, or recovery consultant session is about to receive only `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, an accepted-state summary, a patch summary, or a narrow delta without the real baseline artifact body in that same outbound payload | set `VALIDATION_STATUS: blocked`, emit `BLOCKED_STATE: artifact-not-pasted`, replace the outbound request with a real baseline repaste in that same session, and do not count or send the narrowed prompt first | 1 |
 | consultant response is missing any member of the consultant-shaped minimum (`consultant_verdict`, `strongest_finding`, `proposed_fix`) | set `CONSULTANT_QUALITY: failed` and retry once with the narrow consultant template | 1 |
 | `CONSULTANT_QUALITY: failed` still holds after the one allowed retry | downgrade to `analysis-only`, keep the contiguous status block honest, and do not pretend a consultant-bearing success occurred | 0 additional |
 | validation failed or blocked after a real patch | execute the `State Transition & Rollback Gate`, refresh continuity from the reverted artifact, and mark the patch attempt failed for that scope; do not continue the patch loop there unless a new materially different fix is proposed from the failure evidence | 1 |
@@ -145,6 +146,8 @@ Binding rules:
 - Prefer evidence that matches the actual scope, hardware class, runtime constraints, deployment model, and operator requirements of the requested artifact.
 - Reject trend cargo-culting. A fashionable approach is not authority unless it materially improves the artifact within the binding constraints.
 - Before any current-date or latest-practice conclusion, record what external evidence categories or sources were actually inspected, or emit an explicit blocked or narrowed state naming what was not checked.
+- That record must appear in visible round output as an explicitly labeled `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` entry inside `SYNTHESIS`, `SYNTHESIS_COMPACT`, `SYNC_POINT`, or an explicitly labeled accepted-state summary for the current decision surface; hidden reasoning or unlabeled narrative mention does not satisfy this lock.
+- A round where this lock is active and the required visible `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` label is absent must set `VALIDATION_STATUS: blocked` and `BLOCKED_STATE: grounding-evidence-not-labeled`; the round is not passed.
 - If live internet inspection is unavailable, disallowed, too weak, or too indirect for a grounded claim, narrow the claim honestly to offline-only, provisional, or not-verified-against-current-public-trends.
 - No later section may downgrade this lock into advice, a soft preference, or a best-effort suggestion.
 
@@ -178,6 +181,8 @@ Binding rules:
 - When the artifact can still be improved generically without the missing OpenClaw runtime evidence, improvements may continue, but every OpenClaw-specific claim must remain explicitly limited by the missing-surface state.
 - When real local OpenClaw behavior conflicts with generic best practice, prefer the real OpenClaw behavior for OpenClaw-targeted optimization unless the user explicitly asks for portability-first design instead.
 - Before any OpenClaw-specific convergence or readiness conclusion, record which OpenClaw runtime surfaces were actually inspected, or emit an explicit blocked or narrowed state that names the missing surfaces.
+- That record must appear in visible round output as an explicitly labeled `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` entry inside `SYNTHESIS`, `SYNTHESIS_COMPACT`, `SYNC_POINT`, or an explicitly labeled accepted-state summary for the current decision surface; hidden reasoning or unlabeled narrative mention does not satisfy this lock.
+- A round where this lock is active and the required visible `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` label is absent must set `VALIDATION_STATUS: blocked` and `BLOCKED_STATE: grounding-evidence-not-labeled`; the round is not passed.
 - Inspecting only the local skill corpus is not enough when the task depends on how OpenClaw itself loads, routes, constrains, validates, or executes that artifact.
 - No later section may downgrade this lock into advice, a soft preference, or a best-effort suggestion.
 
@@ -348,10 +353,11 @@ Binding rules:
 - Replacement consultant session means no excerpt rights by default.
 - In those sessions, the arbiter must repaste the real artifact as fully as practical, or a genuinely sufficient canonical excerpt bundle that fully covers the exact claims under review, before any narrowing is allowed.
 - Excerpt use becomes lawful only after that baseline artifact payload is visibly present in that same consultant session.
+- `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, accepted-state summaries, patch summaries, and intent-to-repaste notes are continuity aids only; they do not satisfy baseline visibility and they do not create excerpt rights by themselves.
 - If baseline visibility in that same session is uncertain, treat it as not proven.
 - If baseline visibility in that same session is not proven, the round is invalid and must not be counted toward any user-declared quota, round total, convergence claim, or release-readiness claim.
-- After an `artifact not pasted`, `not visible`, or equivalent consultant response, the next step must be a real baseline repaste in that same session or a new recovery session; do not answer with another summary, pointer, or thin excerpt.
-- Paraphrase, wrapper text, intent summary, path mention, or assumed continuity does not satisfy this lock.
+- After an `artifact not pasted`, `not visible`, or equivalent consultant response, the next step must be a real baseline repaste in that same session or a new recovery session; do not answer with another summary, pointer, thin excerpt, or accepted-state digest.
+- Paraphrase, wrapper text, intent summary, path mention, assumed continuity, or continuity-only summary artifacts do not satisfy this lock.
 - A later section may clarify or strengthen this lock, but it may not weaken, soften, bypass, or reinterpret it into best-effort behavior.
 
 ## Baseline Visibility Stability Lock
@@ -372,6 +378,7 @@ Before any external consultant call, check all:
 - If the answer depends on prior rounds, did I explicitly resend the needed prior-round text to this same consultant?
 - Am I silently relaxing the context-isolation invariant for convenience, brevity, token savings, or payload reduction?
 - If this is a fresh, replacement, or recovery consultant session, did I prove visible baseline repaste in this same session before using any excerpt?
+- Am I mistaking `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, an accepted-state summary, or a patch summary for proof that the baseline artifact was repasted in the outbound payload?
 - If anything required is missing, stop and resend the missing context in text or acknowledge that it was not provided.
 
 ## Reference Manual Boundary
@@ -572,6 +579,7 @@ Clarification:
 - first consultant-bearing round on a new skill topic should use a baseline artifact payload, not a thin summary
 - later narrower prompts are valid only after that baseline context already exists in the same visible consultant session
 - fresh/recovery/replacement consultant sessions have no excerpt rights until that visible baseline is repasted and therefore proven in that same session
+- `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, accepted-state summaries, and patch summaries do not substitute for that baseline repaste in fresh/recovery/replacement sessions
 - if you switch consultants, do not assume the new consultant inherits the other consultant's pasted context; repaste what the new consultant needs
 - do not assume the consultant can infer unseen artifact sections from the skill name, file path, repository, prior hidden state, or your private local work
 - if you want the consultant to reason about code, checks, logs, tests, or validation, paste that material in text

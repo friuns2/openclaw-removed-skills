@@ -20,3 +20,5 @@ Promotion status: reference-candidate after the current-date trend-grounding rat
 - the `Current-date Internet Trend Grounding Lock`, `Current-date Internet Trend Grounding Stability Lock`, and `Current-date Internet Trend Grounding Anti-Patterns` remain inline above the Reference Manual Boundary and are supported, not shadowed, by subordinate reference/test surfaces
 - release/evidence/test surfaces explicitly cover `BLOCKEDSTATE: current-date-trend-not-grounded`, the current-date trend-grounding recovery branch, the round-1 / round-2 internet-assisted minimum floor for in-scope current-date-sensitive work, and the self-evolution live-public-evidence requirement
 - current bugfix/clarification work remains honest about the frozen `v8.5.9 reference-release` baseline and does not smuggle new structural doctrine into the line without explicit evidence
+- grounding-sensitive conclusions now require an explicitly labeled visible `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` record rather than hidden or unlabeled mention
+- omission of that required visible label now fails closed as `VALIDATION_STATUS: blocked` with `BLOCKED_STATE: grounding-evidence-not-labeled`

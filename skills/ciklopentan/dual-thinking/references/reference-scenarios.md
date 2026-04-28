@@ -179,6 +179,8 @@ These are the required scenarios for the frozen reference line.
 - live public evidence categories or sources are inspected when allowed and materially relevant
 - if live inspection is unavailable, disallowed, too weak, or too indirect, the claim is explicitly narrowed rather than overstated
 - the strongest compatible constrained-local interpretation wins over generic trend cargo-culting
+- the round's visible decision surface includes an explicitly labeled `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` record for grounding-sensitive conclusions
+- if that required visible grounding label is absent while the lock is active, the round fails closed as `VALIDATION_STATUS: blocked` with `BLOCKED_STATE: grounding-evidence-not-labeled`
 
 ## 10. freeze-compatibility
 ### Setup
@@ -271,6 +273,7 @@ These are the required scenarios for the frozen reference line.
 
 ### Pass conditions
 - fresh/recovery/replacement sessions fail closed until visible baseline repaste exists in that same session
+- continuity-only payloads such as `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, accepted-state summaries, and patch summaries are rejected as substitutes for baseline repaste in those sessions
 - narrowing rights appear only after visible baseline proof in that session
 - stronger baseline-visibility interpretation wins over convenience or payload-size arguments
 

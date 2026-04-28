@@ -1,5 +1,19 @@
 # Changelog
 
+## 8.5.24 - 2026-04-25
+- Hardened both grounding locks with an inline fail-closed consequence: if the required visible `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` label is absent while the lock is active, the round must emit `VALIDATION_STATUS: blocked` and `BLOCKED_STATE: grounding-evidence-not-labeled` and is not passed.
+- Kept the frozen-line patch small by reusing existing validation/blocked-state machinery instead of adding new round schema or retry procedure.
+
+## 8.5.23 - 2026-04-25
+- Tightened both grounding locks so inspected external/runtime evidence or blocked/narrowed grounding state must appear in visible round output as explicitly labeled `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` rather than being satisfiable by hidden reasoning or unlabeled narrative.
+- Kept the frozen-line patch budget honest by closing the grounding-accountability gap without adding a new mandatory minimum round-block field.
+- Advanced the visible candidate line to `8.5.23` after the accepted grounding-evidence visibility clarification.
+
+## 8.5.22 - 2026-04-25
+- Hardened fresh/recovery/replacement-session baseline law so continuity-only artifacts (`STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, accepted-state summaries, patch summaries) are explicitly forbidden as substitutes for real baseline repaste.
+- Added a fail-closed Recovery Decision Tree branch that blocks a narrowed outbound consultant request when a fresh/recovery/replacement session would otherwise receive continuity-only context without the real baseline artifact body.
+- Tightened the pre-send checklist and baseline-visibility wording so invalid recovery prompts are stopped before send rather than being rationalized after the fact.
+
 ## 8.5.21 - 2026-04-14
 - Canonicalized Recovery Decision Tree state/block key names to the same underscore-separated forms used by the live runtime contract (`VALIDATION_STATUS`, `BLOCKED_STATE`, `CONSULTANT_QUALITY`, `CONSULTANT_POSITION_STATUS`, `SYNC_POINT`, `STATE_SNAPSHOT`, `RESUME_SNIPPET`, `SYNC_DRIFT`).
 - Synced subordinate runtime/failure/test surfaces to that recovery-key canonicalization so weak-model parsing and recovery routing no longer rely on mixed naming styles.

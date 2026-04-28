@@ -1,8 +1,8 @@
 # Reference Test Log
 #tags: skills review
 
-Validation run: 2026-04-14T20:40:00+08:00
-Validated version: `v8.5.21`
+Validation run: 2026-04-25T23:05:00+08:00
+Validated version: `v8.5.24`
 Prior frozen line: `v8.5.9 reference-release`
 Frozen current baseline: `v8.5.9 reference-release`
 Current line state: `reference-candidate`
@@ -28,8 +28,9 @@ Current line state: `reference-candidate`
 ## Convergence summary
 - rounds 1-2 accepted two narrow current-date seams: first, fresh live internet evidence later in the run now overrides stale earlier-round external findings when the artifact is materially unchanged; second, that evidence-refresh rule now explicitly excludes stale session residue or unsupported consultant restatement from counting as refreshed external evidence
 - the live line now includes a non-weakenable Baseline Visibility Fail-Closed Lock: fresh, replacement, and recovery consultant sessions have no excerpt rights until visible baseline repaste is proven in that same session, and invalid visibility rounds must not be counted
-- support/reference/test surfaces were synchronized to the strengthened `v8.5.21` inline contract without changing the public three-step runtime architecture
+- support/reference/test surfaces were synchronized to the strengthened `v8.5.24` inline contract without changing the public three-step runtime architecture
+- fresh/recovery/replacement sessions now fail closed not only on missing baseline repaste, but also on continuity-only substitution attempts (`STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, accepted-state summaries, patch summaries) before send
 - subordinate files now explicitly support the `Current-date Internet Trend Grounding Lock`, its stability lock, its anti-patterns, the round-1 / round-2 internet-assisted minimum floor, the evidence-refresh rule, and the guardrail that ties it only to genuinely fresh live external evidence visible in the current round
-- subordinate recovery/evidence/test surfaces now cover `BLOCKED_STATE: current-date-trend-not-grounded`, the matching current-date trend-grounding branch, the evidence-refresh rule with its guardrail, the recovery-key canonicalization, and the orchestrator late-answer minimum wait-floor rule
+- subordinate recovery/evidence/test surfaces now cover `BLOCKED_STATE: current-date-trend-not-grounded`, the matching current-date trend-grounding branch, the evidence-refresh rule with its guardrail, the visible-label `GROUNDING_EVIDENCE:` / `BLOCKED_STATE:` requirement for grounding-sensitive conclusions, the fail-closed `grounding-evidence-not-labeled` consequence, the recovery-key canonicalization, and the orchestrator late-answer minimum wait-floor rule
 - subordinate self-evolution support still covers live public trend, architecture, implementation, benchmark, and maintainer evidence when allowed and materially relevant
 - targeted sync validation passed for the updated support surfaces

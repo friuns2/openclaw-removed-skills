@@ -1,7 +1,7 @@
 # Runtime Contract
 #tags: skills review
 
-Version note: aligned with the live Dual Thinking v8.5.21 reference-candidate line after the recovery-key canonicalization sync and frozen-reference version-honesty fix on top of the non-weakenable baseline-visibility fail-closed lock release.
+Version note: aligned with the live Dual Thinking v8.5.24 reference-candidate line after the grounding-evidence fail-closed consequence hardening pass on top of the grounding-evidence visibility line.
 
 ## External Required Output
 Keep these rules short and machine-checkable.
@@ -117,6 +117,8 @@ Rules:
 - Literal command substitutions such as `$(cat path/to/file)` count as unresolved placeholders when they appear in the transmitted prompt body.
 - If a prompt only references where the artifact lives instead of embedding the text itself, treat that round as `artifact not pasted`.
 - If the claim under review depends on local checks, code, logs, tests, or validation output, paste those exact results in text before asking the consultant to rely on them.
+- When a current-date or OpenClaw grounding lock is active for the round's conclusion surface, the inspected evidence/surfaces record or blocked/narrowed state must appear in visible round output as an explicitly labeled `GROUNDING_EVIDENCE:` or `BLOCKED_STATE:` entry rather than as hidden reasoning or unlabeled narrative.
+- If such a grounding-sensitive round omits the required visible label while the lock is active, it must set `VALIDATION_STATUS: blocked` and `BLOCKED_STATE: grounding-evidence-not-labeled`; the round is not passed.
 
 ## Consultant blindness clarification
 
@@ -141,7 +143,7 @@ For the first consultant-bearing round on a new skill topic, do not use summary-
 
 Paste the artifact as fully as practical, or paste a large enough canonical excerpt bundle that really covers the issue.
 
-Only after that baseline context exists may later rounds narrow to smaller relevant excerpts within that same consultant's own continuing session. Fresh, replacement, and recovery consultant sessions have no excerpt rights until visible baseline repaste is proven in that same session.
+Only after that baseline context exists may later rounds narrow to smaller relevant excerpts within that same consultant's own continuing session. Fresh, replacement, and recovery consultant sessions have no excerpt rights until visible baseline repaste is proven in that same session. `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, accepted-state summaries, patch summaries, and intent-to-repaste notes are continuity aids only; they do not satisfy baseline visibility or create excerpt rights by themselves.
 
 Clarification:
 - the consultant must see the artifact itself, not only a summary about it
@@ -256,6 +258,7 @@ SYNC_POINT:
 | artifact not pasted | ask once, request inline artifact, no path-only review |
 | artifact represented only by paths, filenames, `FILE:` labels without body text, shell snippets, or literal placeholders like `$(cat ...)` | treat as `artifact not pasted`; repaste the actual text inline before continuing |
 | fresh/recovery/replacement consultant session is using excerpts without proven visible baseline repaste in that same session | mark the round invalid, do not count it toward any quota or convergence claim, and repaste the real baseline artifact before continuing |
+| a fresh/recovery/replacement consultant session is about to receive only `STATE_SNAPSHOT`, `SYNC_POINT`, `RESUME_SNIPPET`, an accepted-state summary, a patch summary, or a narrow delta without the real baseline artifact body in that same outbound payload | block the outbound narrowed prompt, replace it with a real baseline repaste in that same session, and do not count or send the narrowed prompt first |
 | second request still no artifact | switch to `analysis-only` and stop patch loop |
 | self opinion is vague | tighten `SELF_POSITION` before asking the consultant |
 | consultant slow after successful submit | if the prompt was successfully submitted and no explicit failure signal appears, keep waiting; do not narrow, downgrade, or declare the round weak only because a long prompt is thinking slowly |

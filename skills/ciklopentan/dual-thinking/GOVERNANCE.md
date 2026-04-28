@@ -7,7 +7,7 @@ It does not override the executable runtime law in `SKILL.md`.
 
 ```text
 `v8.5.9` is the frozen prior reference-release line.
-`v8.5.21` is the active candidate line for the recovery-key canonicalization sync and frozen-reference version-honesty fix on top of the non-weakenable baseline-visibility fail-closed lock release.
+`v8.5.24` is the active candidate line for the grounding-evidence fail-closed consequence hardening pass on top of the grounding-evidence visibility line.
 Historical accepted checkpoint: `v8.5.13` is the prior published reference-release line before the support-surface sync publish.
 Historical accepted checkpoint: `v8.5.11` is the older frozen prior reference-release line.
 Historical accepted checkpoint: `v8.5.8` is the older frozen prior reference-release line.

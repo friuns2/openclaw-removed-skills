@@ -50,7 +50,7 @@ Release checks:
 - `node -e "const {listTextFiles}=require('/home/irtual/.npm-global/lib/node_modules/clawhub/dist/skills.js'); listTextFiles('/home/irtual/.openclaw/workspace/skills/dual-thinking').then(files=>{const hasReview=files.some(f=>f.relPath.startsWith('review/')); console.log(hasReview ? 'REVIEW_INCLUDED' : 'REVIEW_EXCLUDED'); process.exit(hasReview ? 1 : 0);});"`
 
 Reference line checklist:
-- active version target for this release step: `8.5.21`
+- active version target for this release step: `8.5.24`
 - `SKILL.md` classified honestly as the active `reference-candidate`, `reference-verified`, or `reference-release` line for the current release step
 - `GOVERNANCE.md` present for non-runtime policy/governance detail
 - `references/round-output-contract.md` synced
@@ -58,4 +58,4 @@ Reference line checklist:
 - `references/runtime-contract.md`, `references/self-evolution-lens.md`, `references/failure-handling.md`, `references/reference-scenarios.md`, `references/reference-release-checklist.md`, `references/verification-evidence.md`, and `references/reference-test-log.md` synced to the live inline current-date trend-grounding lock family
 - required scenario tests recorded in `references/verification-evidence.md` and `references/reference-test-log.md`
 - release/evidence/test surfaces explicitly cover `BLOCKED_STATE: current-date-trend-not-grounded`, the current-date trend-grounding recovery branch, the round-1 / round-2 internet-assisted minimum floor for in-scope current-date-sensitive work, and the self-evolution live-public-evidence requirement
-- version strategy explicitly distinguishes the frozen `v8.5.9 reference-release` baseline from the active `v8.5.21` candidate/release line
+- version strategy explicitly distinguishes the frozen `v8.5.9 reference-release` baseline from the active `v8.5.24` candidate/release line
