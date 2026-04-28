@@ -3,9 +3,15 @@
   "slug": "turbosmtp",
   "displayName": "Turbosmtp",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775397850380,
-    "commit": "https://github.com/openclaw/skills/commit/55fbed9838de512312de63f78fa22dcbbb83209c"
+    "version": "1.0.1",
+    "publishedAt": 1776889055150,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775397850380,
+      "commit": "https://github.com/openclaw/skills/commit/55fbed9838de512312de63f78fa22dcbbb83209c"
+    }
+  ]
 }
