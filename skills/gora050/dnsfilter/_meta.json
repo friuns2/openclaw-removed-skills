@@ -3,9 +3,15 @@
   "slug": "dnsfilter",
   "displayName": "Dnsfilter",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379959174,
-    "commit": "https://github.com/openclaw/skills/commit/57f7722e4740955f088d2d8768b4738ab594e2a2"
+    "version": "1.0.1",
+    "publishedAt": 1776892126921,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379959174,
+      "commit": "https://github.com/openclaw/skills/commit/57f7722e4740955f088d2d8768b4738ab594e2a2"
+    }
+  ]
 }
