@@ -3,9 +3,15 @@
   "slug": "spacelift",
   "displayName": "Spacelift",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775365459556,
-    "commit": "https://github.com/openclaw/skills/commit/f626fc95fc4700605af05618f5c743cfac5c9b76"
+    "version": "1.0.1",
+    "publishedAt": 1776888203803,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775365459556,
+      "commit": "https://github.com/openclaw/skills/commit/f626fc95fc4700605af05618f5c743cfac5c9b76"
+    }
+  ]
 }
