@@ -35,19 +35,19 @@ def get_index_data():
         for line in lines:
             if not line.strip():
                 continue
-            # 腾讯接口返回格式: v_sh000001="1~上证指数~000001~..."
-            # 需要去掉 v_ 前缀后再解析
+            # 腾讯接口返回格式: v_sh000001="1~上证指数~000001~4089.23~4093.25~4081.03~543777803~0~0~0.00~0~0.00~0~0.00~0~0.00~0~0.00~0~0.00~0~0.00~0~0.00~0~0.00~0~~20260424144000~-4.02~-0.10~4092.61~4061.15~...
+            # parts[0]="sh000001=\"1" (含前缀残留), [1]=名称, [2]=代码, [3]=当前价, [4]=昨收, [31]=涨跌额, [32]=涨跌幅%, [33]=今高, [34]=今低
             content = line.lstrip("v_")
             parts = content.split("~")
-            if len(parts) < 32:
+            if len(parts) < 35:
                 continue
-            code = parts[2].strip().lstrip("sh").lstrip("sz")  # 统一去掉sh/sz前缀
+            code = parts[2].strip().lstrip("sh").lstrip("sz")
             name = parts[1].strip()
             price = float(parts[3]) if parts[3] else 0
-            change_pct = float(parts[32]) if parts[32] else 0
             prev_close = float(parts[4]) if parts[4] else price
-            high = float(parts[33]) if parts[33] else 0
-            low = float(parts[34]) if parts[34] else 0
+            change_pct = float(parts[32]) if parts[32] else 0   # 涨跌幅%
+            high = float(parts[33]) if parts[33] else 0        # 今高
+            low = float(parts[34]) if parts[34] else 0          # 今低
             result[code] = {
                 "name": name,
                 "price": price,
@@ -151,5 +151,22 @@ def main():
         else:
             print(f"  ❌ {name}: 推送失败，errcode={err}")
 
+# ── 防重复运行锁 ─────────────────────────────────────────────
+_LOCK_FILE = "/tmp/a_stock_intraday.lock"
+
+def _acquire_lock():
+    if os.path.exists(_LOCK_FILE):
+        print(f"[LOCK] 已有实例在运行 ({_LOCK_FILE})，退出。")
+        sys.exit(0)
+    open(_LOCK_FILE, "w").close()
+
+def _release_lock():
+    if os.path.exists(_LOCK_FILE):
+        os.remove(_LOCK_FILE)
+
 if __name__ == "__main__":
-    main()
+    _acquire_lock()
+    try:
+        main()
+    finally:
+        _release_lock()

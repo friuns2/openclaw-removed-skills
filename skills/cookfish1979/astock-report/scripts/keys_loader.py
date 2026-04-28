@@ -37,6 +37,26 @@ def get_tushare_token() -> str:
     """读取 Tushare token，优先 env.vars"""
     return os.environ.get("TUSHARE_TOKEN", "") or load_key("tushare", "token")
 
+def get_mx_api_key() -> str:
+    """读取妙想 MX API Key，优先 env.vars，回退 mx_api_key.ini"""
+    val = os.environ.get("MX_APIKEY", "")
+    if val:
+        return val
+    for fname in ("mx_api_key.ini", "mx_api.ini"):
+        path = os.path.join(KEYS_DIR, fname)
+        if os.path.exists(path):
+            cfg = configparser.ConfigParser(delimiters=("=",), comment_prefixes=("#"))
+            cfg.read(path, encoding="utf-8")
+            for sect in cfg.sections():
+                for opt in ("key", "mkt_api_key", "api_key"):
+                    try:
+                        v = cfg.get(sect, opt).strip()
+                        if v:
+                            return v
+                    except Exception:
+                        pass
+    return ""
+
 # ── Webhook 推送 ────────────────────────────────────────────────
 def wx_push(text: str) -> int:
     payload = json.dumps({"msgtype": "text", "text": {"content": text}}, ensure_ascii=False)

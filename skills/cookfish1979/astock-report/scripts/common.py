@@ -76,11 +76,8 @@ def ts():
 
 def get_ipo_report_period(ref_date=None):
     """
-    周期：当前周周三 ~ 下周一（固定6天）。
-
-    找包含 ref_date 的当前周周三作为周期起点：
-      offset = 0 if Mon else (weekday - 2) % 7
-      Mon=0, Tue=1, Wed=6, Thu=0, Fri=2, Sat=3, Sun=4
+    周期：本周一 ~ 本周五（固定5天）。
+    用于 IPO 周报，每周六触发时覆盖本周一至周五的完整交易周数据。
 
     Returns:
         (period_start: datetime, period_end: datetime,
@@ -88,8 +85,7 @@ def get_ipo_report_period(ref_date=None):
     """
     if ref_date is None:
         ref_date = now_bj()
-    w = ref_date.weekday()
-    offset = (w - 3) % 7
-    period_start = ref_date - timedelta(days=offset)
-    period_end   = period_start + timedelta(days=6)
-    return period_start, period_end, period_start.strftime("%m月%d日"), period_end.strftime("%m月%d日")
+    # 本周一（weekday() 0=Monday）
+    monday = ref_date - timedelta(days=ref_date.weekday())
+    friday = monday + timedelta(days=4)
+    return monday, friday, monday.strftime("%m月%d日"), friday.strftime("%m月%d日")

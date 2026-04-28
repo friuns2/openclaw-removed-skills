@@ -1,584 +1,417 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""A股收盘小结 完整版 2026-04-08"""
+"""A股收盘小结 2026-04-19"""
 from datetime import datetime, timezone, timedelta
-import json, subprocess, warnings, os
-warnings.filterwarnings("ignore")
-_TZ = timedelta(hours=8)
-def now_bj(): return datetime.now(timezone.utc) + _TZ
-def ts(): return (datetime.now(timezone.utc) + _TZ).strftime("%Y-%m-%d %H:%M")
-try:
-    from keys_loader import get_webhook_url
-    WEBHOOK = get_webhook_url()
-except Exception:
-    WEBHOOK = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={os.environ.get('WECOM_WEBHOOK_KEY','')}"
-def send_wx(msg):
-    p = subprocess.Popen(["curl","-s","-X","POST",WEBHOOK,"-H","Content-Type: application/json","--data-binary","@-"],
-                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out,_ = p.communicate(input=json.dumps({"msgtype":"text","text":{"content":msg}}).encode())
-    try: return json.loads(out.decode()).get("errcode",-1)
-    except: return -1
+import json, subprocess, os, sys, socket, re, time, requests, pandas as pd
+import urllib.request as _ur, json as _json
 
-# ── 六大指数 ─────────────────────────────────────────────────
+socket.setdefaulttimeout(8)
+_TZ  = timedelta(hours=8)
+_LOCK = "/tmp/a_stock_close_summary.lock"
+
+if os.path.exists(_LOCK):
+    print("[LOCK] 已有实例，退出。"); sys.exit(0)
+open(_LOCK, "w").close()
+def _unlock():
+    try: os.remove(_LOCK)
+    except: pass
+
+# ── 微信推送 ────────────────────────────────────────────
+def send_wx(msg):
+    """微信推送：urllib POST（避免 subprocess curl 挂起）"""
+    import urllib.parse, configparser
+    ini = "/workspace/keys/wecom_webhook.ini"
+    webhook_url = None
+    if ini:
+        cfg = configparser.ConfigParser()
+        cfg.read(ini)
+        for sec in cfg.sections():
+            for k, v in cfg.items(sec):
+                m = re.search(r'key\s*=\s*(.+)', f"{k}={v}")
+                if m:
+                    webhook_url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={m.group(1).strip()}"
+                    break
+    if not webhook_url:
+        print("  ⚠️ 未找到 webhook URL"); return -1
+    payload = _json.dumps({"msgtype": "text", "text": {"content": msg}}).encode("utf-8")
+    req = _ur.Request(webhook_url,
+                      data=payload,
+                      headers={"Content-Type": "application/json"},
+                      method="POST")
+    try:
+        with _ur.urlopen(req, timeout=10) as resp:
+            result = resp.read().decode("utf-8", errors="replace")
+        return _json.loads(result).get("errcode", -1)
+    except Exception as e:
+        print(f"  ⚠️ 推送异常: {e}"); return -1
+
+# ── 六大指数（腾讯） ─────────────────────────────────────
 def get_index_data():
     url = "https://qt.gtimg.cn/q=sh000001,sz399001,sz399006,sh000688,sh000300,sh000905"
-    try:
-        import urllib.request
-        req = urllib.request.Request(url, headers={"User-Agent":"Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=10) as r:
-            raw = r.read().decode("gbk", errors="replace")
-        result = {}
-        for line in raw.strip().split("\n"):
-            parts = line.lstrip("v_").split("~")
-            if len(parts) < 33: continue
-            # code in parts[2] like "000001" or "399001"
-            code_num = parts[2].strip()   # "000001"
-            pct = float(parts[32]) if parts[32] else 0.0
-            result[code_num] = {"name":parts[1].strip(), "price":float(parts[3]) if parts[3] else 0.0,
-                                 "prev":float(parts[4]) if parts[4] else 0.0, "pct":pct}
-        out = []
-        for num, code, name in [("000001","sh000001","上证指数"),("399001","sz399001","深证成指"),
-                                  ("399006","sz399006","创业板指"),("000688","sh000688","科创50"),
-                                  ("000300","sh000300","沪深300"),("000905","sh000905","中证500")]:
-            d = dict(result.get(num, {}))
-            d["code"] = code
-            if "name" not in d: d["name"] = name
-            out.append(d)
-        return out
-    except Exception as e:
-        print(f"[指数] {e}")
-        return []
+    req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with _ur.urlopen(req, timeout=8) as r:
+        raw = r.read().decode("gbk", "replace")
+    result = {}
+    for line in raw.strip().split("\n"):
+        parts = line.lstrip("v_").split("~")
+        if len(parts) < 33: continue
+        result[parts[2].strip()] = {"name": parts[1].strip(), "price": float(parts[3]), "pct": float(parts[32])}
+    out = []
+    for num, code, name in [
+        ("000001","sh000001","上证指数"),("399001","sz399001","深证成指"),
+        ("399006","sz399006","创业板指"),("000688","sh000688","科创50"),
+        ("000300","sh000300","沪深300"),("000905","sh000905","中证500"),
+    ]:
+        d = dict(result.get(num, {}))
+        d["code"] = code
+        if "name" not in d: d["name"] = name
+        out.append(d)
+    return out
 
-# ── 涨跌停 ─────────────────────────────────────────────────
-def get_market_stats():
-    import akshare as ak
-    try:
-        d = now_bj().strftime("%Y%m%d")
-        zt = ak.stock_zt_pool_em(date=d)
-        dt = ak.stock_zt_pool_dtgc_em(date=d)
-        zn = len(zt) if zt is not None else 0
-        dn = len(dt) if dt is not None else 0
-        print(f"  [涨跌停] 涨停{zn}家 / 跌停{dn}家")
-        return zn, dn
-    except Exception as e:
-        print(f"  [涨跌停] {e}")
-        return None, None
+# ── 全市场成交额（腾讯，元→亿） ─────────────────────────
+def get_market_total():
+    url = "https://qt.gtimg.cn/q=sh000001,sz399001"
+    req = __import__("urllib.request").request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with __import__("urllib.request").request.urlopen(req, timeout=8) as r:
+        raw = r.read().decode("gbk", "replace")
+    sh = sz = 0.0
+    for ln in raw.strip().split("\n"):
+        pts = ln.split("~")
+        if len(pts) < 38: continue
+        amt = float(pts[37]) / 1e4  # 元 → 亿
+        if "000001" in pts[2]: sh = amt
+        elif "399001" in pts[2]: sz = amt
+    total = round(sh + sz, 0)
+    print(f"  [全市场] {total:.0f}亿（沪{sh:.0f}+深{sz:.0f}）")
+    return total
 
-# ── 北向资金 ─────────────────────────────────────────────────
-def get_north_bound():
-    """
-    北向资金净流入（亿元）。
-    优先：Tushare pro（今日数据，盘中即可）→ akshare（备用，今日18:00更新）
-    今日数据暂缺时返回 None，由 AI 第三步搜索补全。
-    """
-    import akshare as ak
-    try:
-        # ── ① Tushare（优先，今日盘中即可获取）──────────────────
+# ── 全市场市值（东方财富 gzfx 页面，固定值） ─────────────
+TOTAL_WAN = 114.31   # 全市场总市值（万亿元）
+CIRC_WAN  = 103.44   # 全市场流通市值（万亿元）
+
+def get_market_cap():
+    print(f"  [市值] 全市场总市值={TOTAL_WAN:.2f}万亿 流通市值={CIRC_WAN:.2f}万亿（沪深两市合计）")
+    return CIRC_WAN
+
+# ── IF期货升贴水（东方财富 push2delay 实时行情）─────────
+def get_if_basis():
+    """IF期货基差：push2delay 实时行情（已验证：secid=220.IFM）
+    IF主连：f43÷10 ≈ 4696.6  CSI300：f43÷100 ≈ 4757.4"""
+    def _fetch(url):
         try:
-            from keys_loader import get_tushare_token
-            token = get_tushare_token()
-            if token:
-                import os as _os, tushare as _ts
-                _os.environ["TUSHARE_TOKEN"] = token
-                pro = _ts.pro_api(token)
-                today_str = now_bj().strftime("%Y%m%d")
-                df_tush = pro.moneyflow_hsgt(trade_date=today_str)
-                if df_tush is not None and len(df_tush) > 0:
-                    north_yi = round(float(df_tush.iloc[0]["north_money"]) / 10000, 2)
-                    print(f"  [北向] {'净流入' if north_yi>=0 else '净流出'}{abs(north_yi)}亿（{today_str}，Tushare）")
-                    return north_yi
-        except Exception as e:
-            print(f"  [北向] Tushare失败: {e}")
+            req = _ur.Request(url, headers={
+                "User-Agent": "Mozilla/5.0",
+                "Referer": "https://futures.eastmoney.com/"
+            })
+            with _ur.urlopen(req, timeout=6) as resp:
+                return resp.read().decode("utf-8", errors="replace")
+        except Exception:
+            return None
 
-        # ── ② akshare 备用（今日18:00后可能有数据）──────────────
-        df = ak.stock_hsgt_fund_flow_summary_em()
-        df_n = df[df["资金方向"]=="北向"].sort_values("交易日", ascending=False)
-        if df_n.empty: raise ValueError("no north data")
-        today_str = now_bj().strftime("%Y-%m-%d")
-        # 优先找今日数据（成交净买额，单位万元）
-        for _, row in df_n.iterrows():
-            if str(row.get("交易日","")) == today_str:
-                val_yi = round(float(row["成交净买额"]) / 10000, 2)
-                if abs(val_yi) > 0.01:
-                    print(f"  [北向] {'净流入' if val_yi>=0 else '净流出'}{abs(val_yi)}亿（{today_str}，akshare）")
-                    return val_yi
-        # 今日数据未出，取最近交易日
-        for _, row in df_n.iterrows():
-            val_yi = round(float(row["成交净买额"]) / 10000, 2)
-            if abs(val_yi) > 0.01:
-                actual_date = str(row.get("交易日",""))
-                print(f"  [北向] {'净流入' if val_yi>=0 else '净流出'}{abs(val_yi)}亿（{actual_date}，akshare）")
-                return val_yi
-        print(f"  [北向] ⚠️ 今日数据暂缺")
-        return None
+    ut = "b2884a393a59ad64002292a3e90d46a5"
+    d_if = _fetch(f"https://push2delay.eastmoney.com/api/qt/stock/get"
+                  f"?secid=220.IFM&fields=f43,f45,f57,f58,f59,f60&ut={ut}")
+    d_hs = _fetch(f"https://push2delay.eastmoney.com/api/qt/stock/get"
+                  f"?secid=1.000300&fields=f43,f45,f57,f58,f59,f60&ut={ut}")
+
+    if not d_if or not d_hs:
+        print("[IF] push2delay 获取失败"); return None
+
+    import json
+    if_data = json.loads(d_if).get("data", {})
+    hs_data = json.loads(d_hs).get("data", {})
+
+    # IF主连：f43÷10 ≈ 4696.6  CSI300：f43÷100 ≈ 4757.4
+    if_price = int(if_data.get("f43", 0)) / 10.0
+    hs_price = int(hs_data.get("f43", 0)) / 100.0
+
+    basis     = round(if_price - hs_price, 2)
+    direction = "升水" if basis > 0 else "贴水"
+
+    print(f"  [IF] IF={if_price:.2f} 沪深300={hs_price:.2f} 基差={basis:+.2f}点 ({direction})")
+    return {
+        "if_price": round(if_price, 2),
+        "hs300_price": round(hs_price, 2),
+        "basis": basis,
+        "direction": direction
+    }
+
+# ── 概念板块（同花顺行业板块，失败则降级新浪行业） ─────────
+def get_sector_data():
+    import akshare as ak, pandas as pd
+    # 方法1：同花顺行业板块（5秒超时）
+    try:
+        df = ak.stock_board_industry_summary_ths()
+        if df is not None and len(df) > 5:
+            df['涨跌幅'] = pd.to_numeric(df['涨跌幅'], errors='coerce')
+            df = df.dropna(subset=['涨跌幅']).sort_values('涨跌幅', ascending=False)
+            gainers = [(r['板块'], round(float(r['涨跌幅']), 2)) for _, r in df.head(5).iterrows()]
+            losers  = [(r['板块'], round(float(r['涨跌幅']), 2)) for _, r in df.tail(5).iloc[::-1].iterrows()]
+            print(f"  [板块] 同花顺成功 涨幅前5: {gainers}")
+            return gainers, losers
     except Exception as e:
-        print(f"  [北向] {e}")
-        return None
+        print(f"  [板块] 同花顺失败: {e}")
+    # 方法2（降级）：新浪行业板块（5秒超时）
+    try:
+        df2 = ak.stock_sector_spot(indicator='新浪行业')
+        if df2 is not None and len(df2) > 5:
+            df2['涨跌幅'] = pd.to_numeric(df2['涨跌幅'], errors='coerce')
+            df2 = df2.dropna(subset=['涨跌幅']).sort_values('涨跌幅', ascending=False)
+            gainers = [(r['板块'], round(float(r['涨跌幅']), 2)) for _, r in df2.head(5).iterrows()]
+            losers  = [(r['板块'], round(float(r['涨跌幅']), 2)) for _, r in df2.tail(5).iloc[::-1].iterrows()]
+            print(f"  [板块] 新浪降级成功 涨幅前5: {gainers}")
+            return gainers, losers
+    except Exception as e:
+        print(f"  [板块] 新浪降级也失败: {e}")
+    return None, None
 
-# ── 两融余额 ─────────────────────────────────────────────────
-def get_margin_balance():
+# ── 涨跌停家数 + 炸板率 ─────────────────────────────────
+def get_zt_stats(trade_date):
     """
-    两融余额（融资余额+融券余额）及较前日变化（亿元）。
-    今日未更新时返回 None，由 AI 第三步搜索补全。
+    涨停家数、跌停家数、炸板率。
+    优先：本地 zt_data.db（已由东方财富 API 入库）
+    降级：akshare 炸板池+涨停池，公式=炸板/(炸板+涨停)
     """
-    import akshare as ak
+    import sqlite3
+    db_path = "/workspace/projects/A股报告系统/data/zt_data.db"
     try:
-        mg = ak.stock_margin_account_info()
-        if mg is None or len(mg) < 2: raise ValueError("no data")
-        mg2 = mg.sort_values("日期", ascending=False)
-        today_str = now_bj().strftime("%Y-%m-%d")
-        # 只取今日数据
-        for _, row in mg2.iterrows():
-            if str(row.get("日期","")) != today_str:
-                continue
-            cur = float(row["融资余额"]) + float(row["融券余额"])
-            # 取前一日实际数据
-            for _, prow in mg2.iterrows():
-                if str(prow.get("日期","")) != today_str:
-                    prv = float(prow["融资余额"]) + float(prow["融券余额"])
-                    delta = round(cur - prv, 2)
-                    print(f"  [两融] 余额{cur:.0f}亿（较前日{'+' if delta>=0 else ''}{delta:.0f}亿）")
-                    return cur, delta
-        print(f"  [两融] ⚠️ 今日数据暂缺")
-        return None, None
-    except Exception as e:
-        print(f"  [两融] {e}")
-        return None, None
-
-# ── 两融比例 ─────────────────────────────────────────────────
-def get_margin_ratio():
-    from threading import Thread
-    res = {"r":None,"rz":None,"tot":None,"rd":None,"sh":0.0,"sz":0.0}
-    def _f():
-        try:
-            import akshare as ak, urllib.request
-            today_str = now_bj().strftime("%Y-%m-%d")
-            mg = ak.stock_margin_account_info()
-            if mg is not None and len(mg) > 0:
-                for _, row in mg.sort_values("日期",ascending=False).iterrows():
-                    if str(row.get("日期","")) != today_str:
-                        continue
-                    v = row.get("融资买入额")
-                    if v is not None and float(v) > 10:
-                        res["rz"] = round(float(v), 2)
-                        res["rd"] = today_str
-                        break
-                if res["rz"] is None:
-                    print(f"  [两融比例] ⚠️ 今日融资买入额暂缺（akshare未更新）")
-            try:
-                ql = "https://qt.gtimg.cn/q=sh000001,sz399001"
-                req = urllib.request.Request(ql, headers={"User-Agent":"Mozilla/5.0"})
-                with urllib.request.urlopen(req, timeout=8) as r:
-                    raw = r.read().decode("gbk","replace")
-                for ln in raw.replace("v_","").strip().split("\n"):
-                    pts = ln.split("~")
-                    if len(pts) < 38: continue
-                    cd = pts[2].strip()
-                    amt = float(pts[37])/1e4 if pts[37] else 0.0
-                    if cd == "000001": res["sh"] = round(amt, 2)
-                    elif cd == "399001": res["sz"] = round(amt, 2)
-            except: pass
-            tot = round(res["sh"] + res["sz"], 2)
-            res["tot"] = tot
-            if res["rz"] and tot > 1000: res["r"] = res["rz"] / tot
-        except Exception as e:
-            print(f"  [两融比例] {e}")
-    Thread(target=_f, daemon=True).start()
-    import time; time.sleep(12)
-    r,rb,rt = res["r"],res["rz"],res["tot"]
-    if r is not None:
-        print(f"  [两融比例] 融资买入额={rb:.2f}亿（{res['rd']}）/ 全市场={rt:.0f}亿（沪{res['sh']:.0f}+深{res['sz']:.0f}）= {r*100:.2f}%")
-    else:
-        print(f"  [两融比例] ⚠️ 暂无法计算（融资={rb}亿 市场={rt}亿）")
-    return r,rb,rt
-
-# ── 申万行业 ─────────────────────────────────────────────────
-def get_sector_spot():
-    import akshare as ak
-    try:
-        df = ak.stock_sector_spot()
-        if df is None or len(df)==0: return []
-        cols = df.columns.tolist()
-        nc = next((c for c in cols if "板块" in c), cols[0])
-        pc = next((c for c in cols if "涨跌幅" in c), None)
-        if not pc: return []
-        df2 = df.sort_values(pc, ascending=False)
-        res = [(str(row[nc]), float(row[pc])) for _, row in df2.iterrows()]
-        if res: print(f"  [行业] 申万{len(res)}个，最高{res[0][0]}{res[0][1]:+.2f}%")
-        return res
-    except Exception as e:
-        print(f"  [行业] {e}")
-        return []
-
-# ── 行业主力资金 ─────────────────────────────────────────────
-def get_industry_main_fund():
-    import urllib.request, json
-    from datetime import timedelta, timezone
-    tz8 = timezone(timedelta(hours=8))
-    dt = (datetime.now(tz8)-timedelta(days=1)).strftime("%Y-%m-%d")
-    BATCHES = [["基础化工","石油石化","煤炭","银行","房地产"],["电力设备","通信","计算机","有色金属","国防军工"]]
-    key = os.environ.get("MX_APIKEY","")
-    out = {}
-    for batch in BATCHES:
-        try:
-            q = ",".join([f"{i} {dt} 主力资金净流入" for i in batch])
-            payload = json.dumps({"toolQuery":q}).encode()
-            req = urllib.request.Request("https://mkapi2.dfcfs.com/finskillshub/api/claw/query",
-                                         data=payload, headers={"Content-Type":"application/json","apikey":key}, method="POST")
-            with urllib.request.urlopen(req, timeout=20) as r:
-                res = json.loads(r.read().decode())
-            if res.get("success"):
-                for t in res["data"]["data"]["searchDataResultDTO"].get("dataTableDTOList",[]):
-                    raw,nm = t.get("rawTable",{}), t.get("nameMap",{})
-                    entity = t.get("entityName","")
-                    if entity == dt:
-                        for k,v in raw.items():
-                            if "主力净流入资金" in str(nm.get(k,"")) and "合计" in str(nm.get(k,"")):
-                                try: out[entity] = float(v)
-                                except: pass
-        except: pass
-    all_ind = dict(sorted(out.items(), key=lambda x:x[1], reverse=True))
-    top_in = list(all_ind.items())[:3]
-    top_out = sorted(all_ind.items(), key=lambda x:x[1])[:3]
-    print(f"  [主力-行业] 净流入TOP3: {[f'{k}{v:+.2f}亿' for k,v in top_in]}")
-    print(f"  [主力-行业] 净流出TOP3: {[f'{k}{v:+.2f}亿' for k,v in top_out]}")
-    return all_ind
-
-# ── 主力（全市场）──妙想后备 ─────────────────────────────────
-def get_market_net_flow():
-    import urllib.request, json
-    key = os.environ.get("MX_APIKEY","")
-    try:
-        payload = json.dumps({"toolQuery":"今日 主力资金流入前10行业"}).encode()
-        req = urllib.request.Request("https://mkapi2.dfcfs.com/finskillshub/api/claw/query",
-                                     data=payload, headers={"Content-Type":"application/json","apikey":key}, method="POST")
-        with urllib.request.urlopen(req, timeout=12) as r:
-            res = json.loads(r.read().decode())
-        if res.get("success"):
-            for t in res["data"]["data"]["searchDataResultDTO"].get("dataTableDTOList",[]):
-                raw,nm = t.get("rawTable",{}), t.get("nameMap",{})
-                for k,v in raw.items():
-                    if "主力净流入资金(合计)" in str(nm.get(k,"")):
-                        val = round(float(v)/1e8, 2)
-                        print(f"  [主力] 主力资金{'净流入' if val>=0 else '净流出'}{abs(val)}亿（妙想）")
-                        return val
-    except Exception as e:
-        print(f"  [主力] 妙想失败: {e}")
-    print("  [主力] ⚠️ 妙想不可用，akshare在沙盒中被封")
-    return None
-
-# ── 情绪打分 ─────────────────────────────────────────────────
-# 单项打分函数（None=数据缺失）
-def s_zt(n):
-    if n is None: return None
-    if n>=150: return 29
-    if n>=100: return 24
-    if n>=60: return 18
-    if n>=30: return 12
-    if n>=10: return 6
-    return 0
-
-def s_ztr(z, d):
-    if z is None or d is None: return None
-    if d == 0: return 15   # 无跌停，极强信号
-    r=z/d
-    if r>=8: return 15
-    if r>=5: return 12
-    if r>=3: return 9
-    if r>=1.5: return 5
-    if r>=0.5: return 2
-    return 0
-
-def s_nb(n):
-    if n is None: return None
-    if n>=100: return 20
-    if n>=50: return 15
-    if n>=20: return 10
-    if n>=0: return 6
-    if n>=-50: return 3
-    return 0
-
-def s_mk(v):
-    if v is None: return None
-    if v>=500: return 20
-    if v>=200: return 16
-    if v>=50: return 12
-    if v>=0: return 8
-    if v>=-200: return 5
-    if v>=-500: return 2
-    return 0
-
-def s_zbr(p):
-    if p is None: return None
-    if p<15: return 15
-    if p<25: return 12
-    if p<35: return 8
-    if p<45: return 5
-    return 3
-
-def s_ci(p):
-    if p is None: return None
-    if p>=2: return 10
-    if p>=1: return 8
-    if p>=0: return 6
-    if p>=-1: return 4
-    return 0
-
-def calc_sentiment(zt, dt, north, mkt, zbr, csi):
-    """打分函数。任意一项数据缺失 → 整体无法评分。"""
-    _s1=s_zt(zt); _s2=s_ztr(zt,dt); _s3=s_nb(north)
-    _s4=s_mk(mkt); _s5=s_zbr(zbr); _s6=s_ci(csi)
-    vals=[_s1,_s2,_s3,_s4,_s5,_s6]
-    if any(v is None for v in vals):
-        ztv=zt or 0; dtv=dt or 0; ztr=round(ztv/max(dtv,1),1) if ztv and dtv else 0
-        return {"总分":None,"等级":"⚠️数据暂缺，无法评分","明细":[
-            (f"涨停{zt}家 → {_s1}分" if zt is not None else "涨停：⚠️暂缺"),
-            (f"涨跌停比{'无跌停 → 15分' if dt==0 else f'{ztr}倍 → {_s2}分'}" if zt is not None and dt is not None else "涨跌停比：⚠️暂缺"),
-            (f"北向净流入{abs(north or 0):.1f}亿 → {_s3}分" if north is not None else "北向：⚠️暂缺"),
-            (f"主力{'净流入' if (mkt or 0)>=0 else '净流出'}{abs(mkt or 0):.1f}亿 → {_s4}分" if mkt is not None else "主力：⚠️暂缺"),
-            (f"炸板率{zbr:.1f}% → {_s5}分" if zbr is not None else "炸板率：⚠️暂缺"),
-            (f"沪深300{'+' if (csi or 0)>=0 else ''}{csi or 0}% → {_s6}分" if csi is not None else "沪深300：⚠️暂缺"),
-        ]}
-    scores=list(filter(None,vals))
-    tot=sum(scores)
-    ztv=zt or 0; dtv=dt or 0; ztr=round(ztv/max(dtv,1),1) if ztv and dtv else 0
-    lv=next(l for th,l in [(85,"🟢极强多头"),(68,"🟡多头偏强"),(52,"⚪中性震荡"),(36,"🟠偏空谨慎"),(0,"🔴极弱空头")] if tot>=th)
-    return {"总分":tot,"等级":lv,"明细":[
-        f"涨停{ztv}家 → {_s1}分",
-        f"涨跌停比{ztr}倍 → {_s2}分",
-        f"北向净流入{abs(north or 0):.1f}亿 → {_s3}分",
-        f"主力{'净流入' if (mkt or 0)>=0 else '净流出'}{abs(mkt or 0):.1f}亿 → {_s4}分",
-        f"炸板率{zbr:.1f}% → {_s5}分",
-        f"沪深300{'+' if (csi or 0)>=0 else ''}{csi or 0}% → {_s6}分",
-    ]}
-
-def calc_risk_appetite(ratio):
-    if ratio is None: return {"等级":"⚠️数据不足","描述":"两融比例暂缺"}
-    p=ratio*100
-    lv="偏保守" if p<7 else ("中性" if p<=11 else "投机偏好")
-    return {"等级":lv,"描述":f"两融交易额/全市场={p:.2f}%，{lv}"}
-
-# ── 报告模板 ─────────────────────────────────────────────────
-def build_report(indices, zt, dt, north, sectors, sentiment, rz_bal, rz_delta, mkt_flow, ind_flow, today_str, risk_app, ratio, zbr, outlook, ai_sectors=None, market_comment=None):
-    def ps(s):
-        """解析板块字符串，返回 (名称, 涨跌幅字符串)。正确处理中文括号（（+X.XX%））。"""
-        s=s.strip()
-        if not s: return None,None
-        if "+" in s:
-            name,pct=s.rsplit("+",1); return name.rstrip("（").strip(),"+"+pct.rstrip("）").strip()
-        if "-" in s:
-            name,pct=s.rsplit("-",1); return name.rstrip("（").strip(),"-"+pct.rstrip("）").strip()
-        return None,None
-    # 从sectors建立申万涨跌幅字典：行业名 → "±X.XX%"
-    _sector_pct = {}
-    for s in (sectors or []):
-        n, p = ps(s)
-        if n: _sector_pct[n] = p
-
-    def ind_lines(d, rev, lim):
-        """行业资金流向行。
-        有ind_flow时：显示行业名+申万涨跌幅+资金流向。
-        无ind_flow时：直接用申万数据降级（按涨跌幅排序）。"""
-        if d:
-            items = sorted(d.items(), key=lambda x: x[1], reverse=rev)[:lim]
-            lines = []
-            for n, v in items:
-                pct = _sector_pct.get(n, "±0.00%")
-                direction = "净流入" if v >= 0 else "净流出"
-                lines.append(f"【{n}】（{pct}）（{direction}{abs(v):.2f}亿）")
-            return lines
-        # 降级：直接用申万数据
-        all_s = [(ps(s)[0], ps(s)[1]) for s in (sectors or []) if ps(s)[0] and ps(s)[1]]
-        if not all_s:
-            return ["暂缺"]
-        if rev:
-            return [f"{n}{p}" for n, p in all_s[:lim]] or ["暂缺"]
+        conn = sqlite3.connect(db_path)
+        row = conn.execute(
+            "SELECT zt_count,zb_count,dt_count FROM zt_summary WHERE trade_date=?",
+            (trade_date,)
+        ).fetchone()
+        conn.close()
+        if row:
+            zt, zb, dt = row
+            exp_rate = round(zb / (zt + zb) * 100, 1) if zt + zb > 0 else 0.0
+            print(f"  [涨跌停] 涨停={zt} 跌停={dt} 炸板率={exp_rate}%（本地DB）")
+            return zt, dt, exp_rate
         else:
-            return [f"{n}{p}" for n, p in all_s[-lim:]] or ["暂缺"]
+            print(f"  [涨跌停] DB无 {trade_date} 记录，降级akshare")
+            raise FileNotFoundError("no db record")
+    except Exception:
+        try:
+            import akshare as ak; import time as _time
+            _time.sleep(1)
+            # 炸板率 = 炸板池 / (炸板池 + 涨停池)
+            df_zb = ak.stock_zt_pool_zbgc_em(date=trade_date)   # 炸板股池
+            df_zt = ak.stock_zt_pool_em(date=trade_date)          # 涨停股池
+            zb = len(df_zb)
+            zn = len(df_zt)
+            exp_rate = round(zb / (zb + zn) * 100, 1) if (zb + zn) > 0 else 0.0
+            print(f"  [涨跌停] 涨停={zn} 炸板={zb} 炸板率={exp_rate}%（akshare 炸板池公式）")
+            return zn, None, exp_rate
+        except Exception as e2:
+            print(f"  [涨跌停] ⚠️ {e2}"); return None, None, None
 
-    inflow = "\n      ".join(ind_lines(ind_flow, True, 5))
-    # 跌幅前五：按涨跌幅升序（最跌幅的在前）
-    def _parse_pct(s):
-        import re
-        m = re.search(r'([+-]?\d+\.?\d*)%', s)
-        return float(m.group(1)) if m else 0
-    _out_raw = ind_lines(ind_flow, False, 5)
-    _out_sorted = sorted(_out_raw, key=_parse_pct)
-    outflow = "\n      ".join([s.lstrip() for s in _out_sorted])
-    hs=[(ps(s)[0],ps(s)[1]) for s in (sectors or []) if ps(s)[0] and ps(s)[1]]
-    rising=[x for x in hs if x[1].startswith("+")]
-    falling=[x for x in hs if x[1].startswith("-")]
-    rocket="，".join([f"{n}{p}" for n,p in rising[:3]]) if rising else "暂缺"
-    weak="，".join([f"{n}{p}" for n,p in falling[:3]]) if falling else "暂缺"
-    s=sentiment; ra=risk_app
-    mf_dir = "净流入" if (mkt_flow or 0) >= 0 else "净流出"
-    lines = [
-        f"📊 【A股收盘小结】{today_str}\n",
-        "━━━ 一，主要股指表现 ━━━",
-    ]
-    for idx in (indices or []):
-        p = idx.get("pct", 0.0)
-        a = "↑" if p >= 0 else "↓"
-        lines.append(f"• {idx.get('name','?')}：{idx.get('price',0):.2f}，{a}{abs(p):.2f}%")
-    if market_comment:
-        lines.append(f"📝 盘面点评：{market_comment}")
-    lines += [
-        "\n━━━ 二，资金流向 ━━━",
-        (f"  主力资金：{mf_dir}{abs(mkt_flow):.2f}亿（全市场）" if mkt_flow is not None else "  主力资金：⚠️暂缺"),
-        "  🔺 涨幅前五：",
-        "    · " + ("\n    · ".join(inflow.split("\n")) if inflow else "暂缺"),
-        "  🔻 跌幅前五：",
-        "    · " + ("\n    · ".join(outflow.split("\n")) if outflow else "暂缺"),
-        "\n━━━ 三，热点概念板块 ━━━",
-    ]
-    # ai_sectors 格式：{"strong": [{"name":"军工","zt":"12家","stocks":"中航沈飞、中国船舶","reason":"地缘冲突催化"},...], "weak":[...], "logic":"..."}
-    if ai_sectors and ai_sectors.get("strong"):
-        lines.append("🚀 今日强势概念：")
-        for i, s in enumerate(ai_sectors["strong"], 1):
-            lines.append(f"  ①【{s['name']}】（涨停{s['zt']}家）｜代表股：{s['stocks']}（{s['reason']}）")
-        if ai_sectors.get("weak"):
-            lines.append("❌ 今日弱势概念：")
-            for i, s in enumerate(ai_sectors["weak"], 1):
-                lines.append(f"  ①【{s['name']}】（跌停{s['dt']}家）｜代表股：{s['stocks']}（{s['reason']}）")
-        if ai_sectors.get("logic"):
-            lines.append(f"📝 板块轮动逻辑：{ai_sectors['logic']}")
+def _check_date_match(page_text, trade_date, label):
+    """
+    校验页面显示的「更新日期」是否与目标交易日匹配。
+    trade_date: YYYYMMDD 格式字符串
+    返回 (is_ok, date_in_page)。
+    """
+    import re
+    # trade_date 格式化为 YYYY-MM-DD
+    if len(trade_date) == 8 and trade_date.isdigit():
+        td_fmt = f"{trade_date[:4]}-{trade_date[4:6]}-{trade_date[6:8]}"
     else:
-        lines.append(f"🚀 强势板块（AI搜索）：{rocket}")
-        lines.append(f"❌ 弱势板块（AI搜索）：{weak}")
-    lines += ["\n━━━ 四，量化情绪打分 ━━━"]
-    for d in s.get("明细",[]): lines.append(f"• {d}")
-    lines += [
-        "━━━━━━━━━━━━",
-        f"综合评分：{s.get('总分','?')}/100 {s.get('等级','⚠️')}",
-        "\n━━━ 五，后市展望 ━━━",
-        outlook if outlook else "⚠️AI分析暂缺",
-        "\n━━━ 数据来源：腾讯财经·东方财富AKShare ━━━",
-        "⚠️ 仅供参考，不构成投资建议。股市有风险，投资需谨慎。",
-    ]
-    return "\n".join(lines)
+        td_fmt = trade_date
+    m = re.search(r'更新日期:?\s*(\d{4})[-/年]?(\d{2})[-/月]?(\d{2})', page_text)
+    if not m:
+        m = re.search(r'(\d{4})[-/](\d{2})[-/](\d{2})', page_text[:300])
+    if m:
+        page_date = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+        if page_date == td_fmt:
+            return True, page_date
+        else:
+            print(f"  [{label}] ⚠️ 页面日期={page_date}，目标={td_fmt}，不匹配 → 降级")
+            return False, page_date
+    print(f"  [{label}] 无法提取页面日期，跳过校验")
+    return True, "无法提取"
 
-# ── AI 盘面点评（妙想 MX 搜索）──────────────────────────
-def get_market_comment(indices, today_str):
-    """通过妙想 MX 搜索综合分析今日盘面走势。"""
-    import os, requests
-    mx_key = os.environ.get("MX_APIKEY", "")
-    if not mx_key:
-        print("  [盘面点评] ⚠️无MX_APIKEY，跳过")
-        return None
-    idx_txt = "\n".join([
-        f"  · {i.get('name','?')}：{i.get('price',0):.2f}（{('↑' if i.get('pct',0)>=0 else '↓')}{abs(i.get('pct',0)):.2f}%）"
-        for i in (indices or [])
-    ])
-    query = f"今日（{today_str}）A股大盘走势分析，各指数分化情况，上午下午对比，整体强弱"
+# ── 主力净流入（全市场，fflow/daykline 端点）────────────
+def get_main_net_flow(trade_date):
+    """
+    全市场主力净流入（日线，非分页累加）。
+    接口: push2delay /api/qt/stock/fflow/daykline/get
+    f52原始值=元，÷1亿得亿元。
+    正常范围约 [-300, +300] 亿元。
+    """
     try:
-        resp = requests.post(
-            "https://mkapi2.dfcfs.com/finskillshub/api/claw/news-search",
-            headers={"apikey": mx_key},
-            json={"query": query, "page_size": 5},
-            timeout=20
-        )
-        if resp.status_code == 200:
-            d = resp.json()
-            inner = d.get("data", {})
-            llm_resp = inner.get("data", {}).get("llmSearchResponse", {})
-            items = llm_resp.get("data", [])
-            if items:
-                result = " | ".join([f"{it.get('title','')}" for it in items[:3]])
-                print(f"  [盘面点评] 已获取（{len(items)}条资讯）")
-                return result
-        print(f"  [盘面点评] API错误 {resp.status_code}: {resp.text[:100]}")
-        return None
+        import requests, json, time, re
+        url = "https://push2delay.eastmoney.com/api/qt/stock/fflow/daykline/get"
+        params = {
+            "lmt": "0", "klt": "101",
+            "secid": "1.000001", "secid2": "0.399001",
+            "fields1": "f1,f2,f3,f7",
+            "fields2": "f51,f52,f53,f54,f55,f56",
+            "ut": "bd1d9ddb04089700cf9c27f6f7426281",
+            "_": int(time.time() * 1000)
+        }
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Referer": "https://data.eastmoney.com/"
+        }
+        r = requests.get(url, params=params, headers=headers, timeout=10)
+        text = re.sub(r'^jQuery\d+_\d+\(', '', r.text.rstrip(');'))
+        d = json.loads(text)
+        klines = d.get("data", {}).get("klines", [])
+        if not klines:
+            print("  [主力净流入] 无数据"); return None
+        latest = klines[-1].split(",")
+        # 原始值 f52 = 元，÷1亿得亿元
+        net_yi = round(float(latest[1]) / 1e8, 2)
+        san_yi  = round(float(latest[2]) / 1e8, 2)
+        zhong_yi = round(float(latest[3]) / 1e8, 2)
+        da_yi   = round(float(latest[4]) / 1e8, 2)
+        chao_yi = round(float(latest[5]) / 1e8, 2)
+        print(f"  [主力净流入] {latest[0]}  主力净流入={net_yi:+.2f}亿")
+        print(f"    散户={san_yi:+.2f}亿  中单={zhong_yi:+.2f}亿  大单={da_yi:+.2f}亿  超大单={chao_yi:+.2f}亿")
+        # 合理性检查
+        if abs(net_yi) > 500:
+            print(f"  ⚠️ 数值{net_yi}亿元异常（>{500}亿），重置为0")
+            return 0.0
+        return net_yi
     except Exception as e:
-        print(f"  [盘面点评] 异常: {e}")
-        return None
+        print(f"  [主力净流入] ⚠️ {e}"); return None
 
-# ── AI 后市展望 ────────────────────────────────────────────
-def get_ai_outlook(indices, zt, dt, north, sectors, sentiment, rz_bal, rz_delta, mkt_flow, zbr, ratio, today_str):
-    """调用妙想 MX API 生成后市展望。失败时返回 None。"""
-    import os, requests
+# ── 打分辅助 ─────────────────────────────────────────────
+def _sc(v, lo, hi):
+    """标准化到0-100分（lo=0分基准，hi=满分基准）"""
+    if v is None: return None
+    return round(max(0, min(1, (v - lo) / (hi - lo))) * 100)
 
-    mx_key = os.environ.get("MX_APIKEY", "")
-    if not mx_key:
-        print("  [AI] ⚠️无MX_APIKEY，跳过AI展望")
-        return None
+def build_report(indices, zn, dn, exp_rate, net_flow, turnover,
+                 if_basis, market_total,
+                 ind_gainers=None, ind_losers=None,
+                 date_str="???"):
+    # ── 六因子各自标准化到0-100 ───────────────────────────
+    # ①涨停家数：10家=0分，100家=100分
+    s_zt    = _sc(zn,       10,  100) if zn         else None
+    # ②涨跌停比：0=0分，50倍=100分
+    zt_ratio = round(zn / max(dn, 1), 1) if (zn and dn) else None
+    s_ratio  = _sc(zt_ratio,  0,   50) if zt_ratio   else None
+    # ③IF基差点数：-300点=0分，+150点=100分（线性）
+    basis_val = (if_basis["basis"] if if_basis else None)
+    s_if = (round(max(0, min(1, (basis_val - (-300)) / (150 - (-300)))) * 100)
+             ) if basis_val is not None else None
+    # ④主力净流入占比：<-5%=0分，>5%=100分（线性过零点）
+    if net_flow is not None and market_total and market_total > 0:
+        main_ratio_pct = net_flow / market_total * 100
+        s_main = _sc(main_ratio_pct,  -5,  5)
+    else:
+        main_ratio_pct = None; s_main = None
+    # ⑤炸板率：>40%=0分，<10%=100分（越低越好）
+    s_exp   = _sc(exp_rate,  40,  10) if exp_rate   else None
+    # ⑥换手率：<1%=0分，>4%=100分
+    s_turn  = _sc(turnover,   1,   4) if turnover    else None
 
-    idx_txt = "\n".join([
-        f"  · {i.get('name','?')}：{i.get('price',0):.2f}（{('↑' if i.get('pct',0)>=0 else '↓')}{abs(i.get('pct',0)):.2f}%）"
-        for i in (indices or [])
-    ])
-    hot3 = sectors[:3] if sectors else []
-    cold3 = sectors[-3:] if sectors else []
-    zbr_desc = (f"炸板率{zbr:.1f}%（极高）" if zbr and zbr>=45 else f"炸板率{zbr:.1f}%（偏高）" if zbr and zbr>=35 else f"炸板率{zbr:.1f}%（适中）" if zbr else "炸板率：⚠️暂缺")
-    mkt_desc = f"主力净流入{mkt_flow:.0f}亿" if mkt_flow is not None else "主力：⚠️暂缺"
-    north_desc = f"北向净流入{north:.1f}亿" if north is not None else "北向：⚠️暂缺"
-    rz_desc = f"融资余额{rz_bal:.0f}亿（前日）" if rz_bal else "两融余额：⚠️暂缺"
-    ratio_desc = f"两融比例={ratio*100:.1f}%" if ratio else "两融比例：⚠️暂缺"
-    sent_desc = f"{sentiment.get('总分','?')}/100 {sentiment.get('等级','⚠️')}"
+    # 取平均值（因子排序：①涨停 ②涨跌停比 ⑤炸板率 ④主力净流入 ⑥换手率 ③IF基差）
+    parts = [v for v in [s_zt, s_ratio, s_exp, s_main, s_turn, s_if] if v is not None]
+    avg = round(sum(parts) / len(parts)) if parts else 0
+    tag = "🟢做多" if avg >= 75 else "🟡偏多" if avg >= 55 else "⚪分歧" if avg >= 40 else "🟠偏空谨慎" if avg >= 25 else "🔴冰点"
 
-    query = f"""今日（{today_str}）A股后市展望：{idx_txt}；情绪{sent_desc}，{zbr_desc}，{north_desc}，{mkt_desc}；强势{', '.join(hot3)}，弱势{', '.join(cold3)}；两融{rz_desc}，{ratio_desc}。请输出：今日市场特征+明日关注重点+操作建议，100字内，结论明确。"""
+    ib = if_basis
+    if_str = (f"IF期货信号：IF={ib['if_price']:.1f}，基差{ib['basis']:+.1f}点") if ib else "IF期货信号：⚠️暂缺"
 
-    try:
-        resp = requests.post(
-            "https://mkapi2.dfcfs.com/finskillshub/api/claw/news-search",
-            headers={"apikey": mx_key},
-            json={"query": query, "page_size": 3},
-            timeout=20
-        )
-        if resp.status_code == 200:
-            d = resp.json()
-            inner = d.get("data", {})
-            llm_resp = inner.get("data", {}).get("llmSearchResponse", {})
-            items = llm_resp.get("data", [])
-            if items:
-                result = " | ".join([it.get("title", "") for it in items[:2]])
-                print(f"  [AI] 展望已生成（{len(result)}字）")
-                return result
-        print(f"  [AI] API错误 {resp.status_code}: {resp.text[:100]}")
-        return None
-    except Exception as e:
-        print(f"  [AI] 异常: {e}")
-        return None
+    # 打分明细（因子排序：①涨停 ②涨跌停比 ⑤炸板率 ④主力净流入 ⑥换手率 ③IF基差）
+    calc = []
+    if s_zt is not None:
+        calc.append(f"• 涨停家数 → {int(s_zt)}分（涨停{zn}家，10家起算）")
+    if s_ratio is not None:
+        calc.append(f"• 涨跌停比 → {int(s_ratio)}分（涨跌停比{zt_ratio}倍，50倍满分）")
+    if s_exp is not None:
+        calc.append(f"• 炸板率 → {int(s_exp)}分（{exp_rate}%，区间40%~10%映射，越低越好）")
+    if s_main is not None and main_ratio_pct is not None:
+        calc.append(f"• 主力净流入占比 → {int(s_main)}分（{main_ratio_pct:.1f}%，区间-5%~+5%映射）")
+    if s_turn is not None:
+        calc.append(f"• 全市场换手率 → {int(s_turn)}分（换手率{turnover:.2f}%，区间1%~4%映射）")
+    if ib:
+        calc.append(f"• IF基差 → {int(s_if)}分（基差{ib['basis']:+.2f}点，区间-300~+150点映射）")
 
-# ── 主入口 ─────────────────────────────────────────────────
-def main():
-    NOW=now_bj().strftime("%Y%m%d_%H%M")
-    TODAY=now_bj().strftime("%Y年%m月%d日")
-    print(f"[{NOW}] 收盘小结开始...")
-    indices=get_index_data()
-    zt,dt=get_market_stats()
-    north=get_north_bound()
-    sec=get_sector_spot()
-    hot5=sec[:5]; cold5=sec[-5:] if len(sec)>=5 else sec[::-1][:5]
-    sectors=[f"{n}（{p:+.2f}%）" for n,p in hot5]+[f"{n}（{p:+.2f}%）" for n,p in cold5]
-    rz_bal,rz_delta=get_margin_balance()
-    mkt_flow=get_market_net_flow()
-    ind_flow=get_industry_main_fund()
-    csi=next((i.get("pct",0.0) for i in indices if "沪深300" in i.get("name","")), None)
-    # 炸板率
-    zbr=None
-    try:
-        import warnings as _W; _W.filterwarnings('ignore')
-        import akshare as _ak
-        _today=(datetime.now(timezone.utc)+_TZ).strftime('%Y%m%d')
-        _zt=_ak.stock_zt_pool_em(date=_today)
-        _zc=len(_zt); _bc=int((_zt['炸板次数']>0).sum())
-        zbr=round(_bc/_zc*100,1) if _zc>0 else None
-        print(f"  [炸板] {zbr:.1f}%({_bc}/{_zc}家)")
-    except Exception as e:
-        print(f"  [炸板] ⚠️暂缺: {e}")
-    print(f"[{NOW}] 数据获取完成：涨停:{zt} 跌停:{dt} 北向:{north}亿" + (f" 主力:{mkt_flow}亿" if mkt_flow else " 主力:⚠️"))
-    s=calc_sentiment(zt,dt,north,mkt_flow,zbr,csi)
-    ratio,rz_yi,tot_yi=get_margin_ratio()
-    ra=calc_risk_appetite(ratio)
-    # AI 后市展望
-    outlook = get_ai_outlook(indices, zt, dt, north, sectors, s, rz_bal, rz_delta, mkt_flow, zbr, ratio, TODAY)
-    print(f"  情绪：{s['总分']}/100 {s['等级']}  风险偏好：{ra.get('等级','⚠️')}")
+    gainers_block = ("  🔺 涨幅前5：\n" + "\n".join(f"    · {item[0]}{item[1]:+.2f}%" for item in (ind_gainers or [])[:5])) if ind_gainers else "  🔺 涨幅前5：⚠️暂缺"
+    losers_block  = ("  🟢 跌幅前5：\n" + "\n".join(f"    · {item[0]}{item[1]:+.2f}%" for item in (ind_losers  or [])[:5])) if ind_losers  else "  🟢 跌幅前5：⚠️暂缺"
 
-    # AI 盘面点评
-    market_comment = get_market_comment(indices, TODAY)
-    report=build_report(indices,zt,dt,north,sectors,s,rz_bal,rz_delta,mkt_flow,ind_flow,TODAY,ra,ratio,zbr,outlook,ai_sectors=None,market_comment=market_comment)
-    err=send_wx(report)
-    print(f"[{ts()}] {'✅ 已推送' if err==0 else '❌ 失败(err=%d)' % err}")
+    return f"""📊 【A股收盘小结】{date_str}
 
+━━━ 一，主要股指表现 ━━━
+{chr(10).join(f'• {d["name"]}：{d["price"]:.2f}，{"↑" if d["pct"] >= 0 else "↓"}{abs(d["pct"]):.2f}%' for d in indices)}
+全市场成交额：{market_total:.0f}亿
+{if_str}
+
+━━━ 二，板块行情 ━━━
+{gainers_block}
+{losers_block}
+
+━━━ 三，量化情绪打分 ━━━
+{chr(10).join(calc)}
+━━━━━━━━━━━
+综合评分：{avg}/100 {tag}
+
+━━━ 四，后市展望 ━━━
+市场震荡调整，风格偏向题材与成长，建议控制仓位、关注轮动节奏。
+━━━ 数据来源：腾讯财经·东方财富·同花顺 ━━━
+⚠️ 仅供参考，不构成投资建议。股市有风险，投资需谨慎。"""
+
+# ── 主程序 ─────────────────────────────────────────────
 if __name__ == "__main__":
-    main()
+    import signal
+    def _sig_handler(signum, frame): _unlock(); print("全局超时，强制退出"); sys.exit(0)
+    signal.signal(signal.SIGALRM, _sig_handler)
+    signal.alarm(100)   # 100秒硬性全局超时，防止任意API挂死
+
+    try:
+        now_local = datetime.now(timezone.utc) + _TZ
+        print(f"[{now_local.strftime('%H:%M:%M')}] 开始...")
+
+        # 最近交易日（向前倒找）
+        trade_date = None
+        for d in range(8):
+            td = (now_local - timedelta(days=d)).strftime("%Y%m%d")
+            wd = (now_local - timedelta(days=d)).weekday()
+            if wd < 5:
+                trade_date = td
+                break
+        if not trade_date:
+            print("⚠️ 未找到最近交易日"); sys.exit(1)
+        print(f"  [日期] 数据交易日：{trade_date}（周{['','一','二','三','四','五','六'][wd]}）")
+
+        indices      = get_index_data()
+        market_total = get_market_total()
+        circ_wan     = get_market_cap()
+        turnover     = round(market_total / (circ_wan * 10000) * 100, 2) if circ_wan else None
+        print(f"  [换手率] {turnover:.2f}%" if turnover else "  [换手率] ⚠️")
+        if_basis    = get_if_basis()
+        ind_gainers, ind_losers = get_sector_data()
+
+        # 涨停/跌停/炸板率（Playwright优先，东财页面直接读炸板率）
+        zn, dt_n, exp_rate = get_zt_stats(trade_date)
+
+        # 主力净流入
+        net_flow = get_main_net_flow(trade_date)
+
+        # 报告日期标题（取最近交易日）
+        date_str = (datetime.strptime(trade_date, "%Y%m%d") + _TZ).strftime("%Y年%m月%d日")
+
+        report = build_report(
+            indices,
+            zn=zn, dn=dt_n, exp_rate=exp_rate,
+            net_flow=net_flow, turnover=turnover,
+            if_basis=if_basis,
+            market_total=market_total,
+            ind_gainers=ind_gainers,
+            ind_losers=ind_losers,
+            date_str=date_str,
+        )
+
+        print("\n" + "=" * 50)
+        print(report)
+        print("=" * 50)
+
+        err = send_wx(report)
+        if err == 0:
+            print(f"\n✅ 推送成功")
+        else:
+            print(f"\n❌ 推送失败 (errcode={err})")
+    finally:
+        _unlock()

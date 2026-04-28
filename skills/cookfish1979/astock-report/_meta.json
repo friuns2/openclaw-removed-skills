@@ -1,13 +1,18 @@
 {
   "owner": "cookfish1979",
   "slug": "astock-report",
-  "displayName": "A股报告生成与推送技能",
+  "displayName": "A Stock Report",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1775815530116,
-    "commit": "https://github.com/openclaw/skills/commit/71c6f111df31c924a44b21fd17dac35fc5b55e07"
+    "version": "1.2.3",
+    "publishedAt": 1777109616675,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1775815530116,
+      "commit": "https://github.com/openclaw/skills/commit/71c6f111df31c924a44b21fd17dac35fc5b55e07"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775349676669,
