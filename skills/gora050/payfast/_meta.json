@@ -3,9 +3,15 @@
   "slug": "payfast",
   "displayName": "Payfast",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775427490294,
-    "commit": "https://github.com/openclaw/skills/commit/b1d0e27163a2ad25e9984742e305a1d9e7356cfc"
+    "version": "1.0.1",
+    "publishedAt": 1776892631098,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775427490294,
+      "commit": "https://github.com/openclaw/skills/commit/b1d0e27163a2ad25e9984742e305a1d9e7356cfc"
+    }
+  ]
 }
