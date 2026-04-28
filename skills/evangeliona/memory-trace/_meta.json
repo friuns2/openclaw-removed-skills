@@ -1,13 +1,18 @@
 {
   "owner": "evangeliona",
   "slug": "memory-trace",
-  "displayName": "Memory Trace",
+  "displayName": "Trace",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776417859241,
-    "commit": "https://github.com/openclaw/skills/commit/5a64ce12b113659e41edd8475a20a089dfa5b1e9"
+    "version": "1.0.9",
+    "publishedAt": 1777213827027,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776417859241,
+      "commit": "https://github.com/openclaw/skills/commit/5a64ce12b113659e41edd8475a20a089dfa5b1e9"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775986372402,

@@ -40,6 +40,157 @@ def sanitize_name(name):
     return safe if safe else "unknown"
 
 
+# ── 音色目录（从 voice_catalog.json 加载） ──────────────────────────────────
+CATALOG_PATH = Path(__file__).parent / "voice_catalog.json"
+_catalog = json.loads(CATALOG_PATH.read_text(encoding="utf-8")) if CATALOG_PATH.exists() else {}
+
+def _build_voice_map(lang="zh-CN"):
+    """从 catalog 构建 {voice_key: {id, name, desc}}"""
+    result = {}
+    for provider in ("minimax", "edge"):
+        if provider not in _catalog:
+            continue
+        prov_data = _catalog[provider]
+        # 支持多语言嵌套
+        if lang in prov_data:
+            data = prov_data[lang]
+        elif isinstance(prov_data, dict) and "male" in prov_data:
+            data = prov_data  # 直接是性别层
+        else:
+            continue
+        for gender_key in ("male", "female", "special"):
+            if gender_key in data:
+                for vk, vinfo in data[gender_key].items():
+                    result[vk] = vinfo  # {"id": ..., "name": ..., "desc": ...}
+    return result
+
+_MINIMAX_MAP = {}
+_EDGE_MAP = {}
+if "minimax" in _catalog:
+    for lang, lang_data in _catalog["minimax"].items():
+        for gender_key in ("male", "female"):
+            if gender_key in lang_data:
+                for vk, vinfo in lang_data[gender_key].items():
+                    _MINIMAX_MAP[vk] = vinfo
+if "edge" in _catalog:
+    for lang, lang_data in _catalog["edge"].items():
+        for gender_key in ("male", "female", "special"):
+            if gender_key in lang_data:
+                for vk, vinfo in lang_data[gender_key].items():
+                    _EDGE_MAP[vk] = vinfo
+
+# Edge 中文音色 ID 映射（catalog 中只有 key，这补全 ID）
+_EDGE_VOICE_IDS = {
+    "xiaoxiao": "zh-CN-XiaoxiaoNeural",
+    "xiaoyi":   "zh-CN-XiaoyiNeural",
+    "yunxi":    "zh-CN-YunxiNeural",
+    "yunjian":  "zh-CN-YunjianNeural",
+    "yunyang":  "zh-CN-YunyangNeural",
+    "yunxia":   "zh-CN-YunxiaNeural",
+    "xiaobei":  "zh-CN-liaoning-XiaobeiNeural",
+    "xiaoni":   "zh-CN-shaanxi-XiaoniNeural",
+}
+
+# ── 音色推断规则表 ──────────────────────────────────────────────────────────
+# 格式: (is_female, age_group, *personality_tags) → voice_key
+# age_group: "young" | "middle" | "elder"
+_VOICE_RULES = [
+    # ── 男性 ──
+    # 青年
+    ("male", "young",  "cold",        "male-qn-badao"),
+    ("male", "young",  "cold",        "Chinese (Mandarin)_Unrestrained_Young_Man"),
+    ("male", "young",  "warm",        "Chinese (Mandarin)_Gentleman"),
+    ("male", "young",  "sunny",       "male-qn-daxuesheng"),
+    ("male", "young",  "sunny",       "Chinese (Mandarin)_Pure-hearted_Boy"),
+    ("male", "young",  "deep",        "Chinese (Mandarin)_Lyrical_Voice"),
+    ("male", "young",  "humor",       "Chinese (Mandarin)_Straightforward_Boy"),
+    ("male", "young",  "righteous",   "Chinese (Mandarin)_Straightforward_Boy"),
+    # 中年
+    ("male", "middle", "cold",        "Chinese (Mandarin)_Unrestrained_Young_Man"),
+    ("male", "middle", "warm",        "Chinese (Mandarin)_Gentleman"),
+    ("male", "middle", "sunny",       "Chinese (Mandarin)_Reliable_Executive"),
+    ("male", "middle", "deep",        "Chinese (Mandarin)_Male_Announcer"),
+    ("male", "middle", "humor",       "Chinese (Mandarin)_Radio_Host"),
+    ("male", "middle", "default",     "Chinese (Mandarin)_Reliable_Executive"),
+    # 老年
+    ("male", "elder",  "default",     "Chinese (Mandarin)_Humorous_Elder"),
+    # ── 女性 ──
+    # 青年
+    ("female", "young", "warm",       "Chinese (Mandarin)_Warm_Girl"),
+    ("female", "young", "warm",        "female-tianmei"),
+    ("female", "young", "sunny",       "female-shaonv"),
+    ("female", "young", "sunny",       "Chinese (Mandarin)_Lively_Girl"),
+    ("female", "young", "cold",        "Chinese (Mandarin)_Mature_Woman"),
+    ("female", "young", "cold",        "female-yujie"),
+    ("female", "young", "deep",        "Chinese (Mandarin)_Warm_Girl"),
+    ("female", "young", "humor",       "Chinese (Mandarin)_Crisp_Girl"),
+    # 中年
+    ("female", "middle", "warm",      "Chinese (Mandarin)_Sweet_Lady"),
+    ("female", "middle", "cold",       "Chinese (Mandarin)_Mature_Woman"),
+    ("female", "middle", "sunny",      "female-chengshu"),
+    ("female", "middle", "deep",       "Chinese (Mandarin)_Wise_Women"),
+    ("female", "middle", "humor",     "Chinese (Mandarin)_Warm_Bestie"),
+    ("female", "middle", "default",    "Chinese (Mandarin)_Mature_Woman"),
+    # 老年
+    ("female", "elder", "default",     "Chinese (Mandarin)_Kind-hearted_Elder"),
+]
+
+
+def infer_voice_type(personality_keywords, occupation="", relation="", gender="male"):
+    """
+    根据角色性格关键词、职业、身份、性别，从 voice_catalog.json 中匹配最适合的音色。
+    
+    Returns:
+        tuple: (voice_key, voice_id, description, edge_voice_id)
+    """
+    text = " ".join(personality_keywords).lower() + " " + occupation.lower() + " " + relation.lower()
+    is_female = gender.lower() in ("female", "f", "女")
+    gender_tag = "female" if is_female else "male"
+
+    # ── 性格关键词 ──
+    cold     = any(k in text for k in ["霸道", "冷漠", "强势", "冷酷", "腹黑", "高冷", "独断", "偏执", "占有欲", "控制", "专制", "威严"])
+    warm     = any(k in text for k in ["温柔", "善良", "体贴", "温暖", "柔和", "关怀", "善解", "宠溺", "呵护", "包容"])
+    sunny    = any(k in text for k in ["开朗", "阳光", "活泼", "乐观", "热情", "积极", "外向", "明亮", "爽朗"])
+    deep     = any(k in text for k in ["深沉", "内敛", "忧郁", "敏感", "细腻", "沉默", "冷静", "克制"])
+    humor    = any(k in text for k in ["幽默", "风趣", "诙谐", "搞笑", "逗比", "调皮", "恶作剧"])
+    righteous = any(k in text for k in ["正直", "热血", "正义", "坚毅", "勇敢", "执念", "不服输"])
+
+    # ── 年龄推断 ──
+    student = any(k in text for k in ["学生", "少年", "青年", "新手", "学员"])
+    elder   = any(k in text for k in ["爷爷", "老人", "长辈", "退休", "老年"])
+    age_group = "elder" if elder else ("young" if student else "middle")
+
+    # ── 性格标签（按优先级取第一个匹配） ──
+    if cold:     ptag = "cold"
+    elif warm:    ptag = "warm"
+    elif sunny:   ptag = "sunny"
+    elif deep:    ptag = "deep"
+    elif humor or righteous: ptag = "humor"
+    else:         ptag = "default"
+
+    # ── 查规则表 ──
+    voice_key = None
+    for (g_tag, a_tag, p_rule, v_key) in _VOICE_RULES:
+        if g_tag == gender_tag and a_tag == age_group and p_rule == ptag:
+            voice_key = v_key
+            break
+
+    # fallback
+    if not voice_key:
+        voice_key = "male-qn-jingying" if not is_female else "female-yujie"
+
+    # ── 取音色信息 ──
+    vinfo = _MINIMAX_MAP.get(voice_key, {})
+    voice_id  = vinfo.get("id", voice_key)
+    voice_desc = vinfo.get("name", "") + "｜" + vinfo.get("desc", "")
+
+    # Edge voice
+    edge_key = voice_key if voice_key in _EDGE_MAP else list(_EDGE_MAP.keys())[0]
+    edge_voice = _EDGE_VOICE_IDS.get(edge_key, "zh-CN-XiaoxiaoNeural")
+
+    return (voice_key, voice_id, voice_desc, edge_voice)
+
+
 def create_soulpod(source_path, character_name, output_name=None):
     """
     完整流程：从素材文件生成 SoulPod 包
@@ -99,6 +250,7 @@ def create_soulpod(source_path, character_name, output_name=None):
     profile = {
         "name": character_name,
         "alias": [character_name],
+        "gender": personality.get("gender", "male"),  # 从素材自动推断
         "birth_year": None,
         "death_year": None,
         "relation": "小说/剧本角色",
@@ -135,6 +287,16 @@ def create_soulpod(source_path, character_name, output_name=None):
     with open(pod_dir / "system_prompts.txt", "w", encoding="utf-8") as f:
         f.write(prompts)
 
+    # 音色推测
+    print(f"\n🎵 Step 3.5: 音色推测...")
+    voice_key, voice_id, voice_desc, edge_voice = infer_voice_type(
+        personality["keywords"], 
+        occupation=profile.get("occupation", ""),
+        relation=profile.get("relation", ""),
+        gender=profile.get("gender", "male")
+    )
+    print(f"   推荐音色：{voice_desc}")
+    
     # config.json
     config = {
         "soulpod_version": "0.1.0",
@@ -155,7 +317,11 @@ def create_soulpod(source_path, character_name, output_name=None):
             "max_history": 20,
             "save_transcript": True,
             "transcript_dir": "conversations/"
-        }
+        },
+        "tts_provider": "minimax",
+        "minimax_voice_id": voice_key,
+        "voice_description": voice_desc,
+        "edge_voice": edge_voice
     }
     with open(pod_dir / "config.json", "w", encoding="utf-8") as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
