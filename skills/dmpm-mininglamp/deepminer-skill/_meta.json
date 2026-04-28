@@ -1,0 +1,11 @@
+{
+  "owner": "dmpm-mininglamp",
+  "slug": "deepminer-skill",
+  "displayName": "DeepMiner Skills",
+  "latest": {
+    "version": "1.4.0",
+    "publishedAt": 1776068414185,
+    "commit": null
+  },
+  "history": []
+}
