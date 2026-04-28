@@ -3,9 +3,15 @@
   "slug": "howto-docs",
   "displayName": "Howto Docs",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775852548986,
-    "commit": "https://github.com/openclaw/skills/commit/02abf38ebd87db7ffa535de64b54d69c48f41a8b"
+    "version": "1.0.1",
+    "publishedAt": 1776831057375,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775852548986,
+      "commit": "https://github.com/openclaw/skills/commit/02abf38ebd87db7ffa535de64b54d69c48f41a8b"
+    }
+  ]
 }
