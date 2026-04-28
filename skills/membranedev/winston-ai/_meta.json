@@ -3,9 +3,15 @@
   "slug": "winston-ai",
   "displayName": "Winston Ai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775631909463,
-    "commit": "https://github.com/openclaw/skills/commit/cda8c8ec0c87841248dfcf8b8a62cf7391507702"
+    "version": "1.0.1",
+    "publishedAt": 1776896487832,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775631909463,
+      "commit": "https://github.com/openclaw/skills/commit/cda8c8ec0c87841248dfcf8b8a62cf7391507702"
+    }
+  ]
 }
