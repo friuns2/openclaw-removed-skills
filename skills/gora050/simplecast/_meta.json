@@ -3,9 +3,15 @@
   "slug": "simplecast",
   "displayName": "Simplecast",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775383703802,
-    "commit": "https://github.com/openclaw/skills/commit/a3e147c4e61a1fced69e7c3c19b6f302ea870905"
+    "version": "1.0.1",
+    "publishedAt": 1776892265011,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775383703802,
+      "commit": "https://github.com/openclaw/skills/commit/a3e147c4e61a1fced69e7c3c19b6f302ea870905"
+    }
+  ]
 }
