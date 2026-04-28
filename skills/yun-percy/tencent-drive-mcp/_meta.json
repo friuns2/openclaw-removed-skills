@@ -3,11 +3,16 @@
   "slug": "tencent-drive-mcp",
   "displayName": "Tencent Drive(Weiyun) MCP",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776666420243,
-    "commit": "https://github.com/openclaw/skills/commit/4f475036f54f51e4ae49804676a94f84e457dce6"
+    "version": "1.0.4",
+    "publishedAt": 1776771852899,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776666420243,
+      "commit": "https://github.com/openclaw/skills/commit/4f475036f54f51e4ae49804676a94f84e457dce6"
+    },
     {
       "version": "1.0.2",
       "publishedAt": 1775552633343,
