@@ -3,9 +3,15 @@
   "slug": "digital-manager-guru",
   "displayName": "Digital Manager Guru",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775469934182,
-    "commit": "https://github.com/openclaw/skills/commit/2acb72df63889b7a71341cf61f8f661e0a60e70a"
+    "version": "1.0.1",
+    "publishedAt": 1776890361190,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775469934182,
+      "commit": "https://github.com/openclaw/skills/commit/2acb72df63889b7a71341cf61f8f661e0a60e70a"
+    }
+  ]
 }
