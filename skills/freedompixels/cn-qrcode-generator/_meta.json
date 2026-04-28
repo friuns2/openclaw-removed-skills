@@ -3,11 +3,16 @@
   "slug": "cn-qrcode-generator",
   "displayName": "二维码生成工具",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776642950141,
-    "commit": "https://github.com/openclaw/skills/commit/e88e0a772e47560092cef38c2ef68187555a7f9a"
+    "version": "1.2.0",
+    "publishedAt": 1777329899210,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776642950141,
+      "commit": "https://github.com/openclaw/skills/commit/e88e0a772e47560092cef38c2ef68187555a7f9a"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1776205940325,
