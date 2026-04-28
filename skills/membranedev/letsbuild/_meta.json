@@ -3,9 +3,15 @@
   "slug": "letsbuild",
   "displayName": "Letsbuild",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775405039658,
-    "commit": "https://github.com/openclaw/skills/commit/f05c3a56bd1c9b5b0b01f4f87e4645bc8f37cde2"
+    "version": "1.0.1",
+    "publishedAt": 1776889306036,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775405039658,
+      "commit": "https://github.com/openclaw/skills/commit/f05c3a56bd1c9b5b0b01f4f87e4645bc8f37cde2"
+    }
+  ]
 }
