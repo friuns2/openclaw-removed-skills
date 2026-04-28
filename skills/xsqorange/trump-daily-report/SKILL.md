@@ -1,26 +1,38 @@
 ---
 name: trump-daily-report
-description: 每日特朗普动态追踪报告技能。自动采集特朗普前一日Truth Social/社交媒体发言，监控美国主流媒体（CNBC/Bloomberg/Reuters/WSJ/FT/NYT等）对特朗普言论的报道，分析其对金融市场的影响，于每日9:00前生成并推送中英双语分析报告。支持报告历史记忆、趋势对比分析、情境变化追踪和市场预测。
+description: 每日特朗普动态追踪报告。采集Truth Social/Twitter及美国媒体(Bloomberg/CNBC/Reuters/WSJ/FT)信息，生成中英双语市场分析报告，支持早报(8:00)和晚报(16:00)双时段及收盘对照分析。
 author: Trump Daily Report Skill
-version: 1.0.3
-config:
-  - name: feishu_group_id
-    type: string
-    required: true
-    description: 飞书群ID，用于推送报告。获取方式：在飞书群设置中查看群ID
-  - name: memory_path
-    type: string
-    required: true
-    description: 报告历史存档路径，建议使用工作区目录如 ./memory/trump-daily
-  - name: target_user_id
-    type: string
-    required: false
-    description: 可选 - 指定推送用户的open_id，报告将只发送给该用户
+version: 1.2.1
+summary:
+  zh: |
+    每日特朗普动态追踪报告（v1.1.6）。采集Truth Social/Twitter及美国媒体(Bloomberg/CNBC/Reuters/WSJ/FT)信息，生成中英双语市场分析报告。
+    
+    **核心功能**：Truth Social追踪、媒体监控、外汇/股市/商品分析、A股/港股预测、早报(8:00)+晚报(16:00)双时段
+    
+    **数据源**: Bloomberg, CNBC, Reuters, WSJ, FT, BBC News, Agent Reach (r.jina.ai)
+    
+    **v1.2.1 更新**：Agent Reach 零配置搜索已加入——当 Tavily 限额满时，使用 r.jina.ai 抓取 BBC/彭博等新闻，无需 API key。
+  en: |
+    Trump Daily Report (v1.1.6). Track Trump posts and US media, bilingual market analysis. Morning(8:00) + Evening(16:00) reports.
+    
+    **v1.2.0 Updates**
+    - 中英文双语完整版：早报/晚报均生成CN+EN双版本
+    - 英文报告先发，中文报告后发，便于一览+深度阅读
+    - 报告差异化：早报侧重预测，晚报侧重复盘+深度持仓分析
 
-env:
-  - name: TAVILY_API_KEY
-    required: true
-    description: Tavily搜索API密钥，用于采集新闻和市场数据。请从 https://tavily.com 获取API密钥
+**v1.1.2 Updates**
+    - Added commodity data sources (gold/oil/natural gas)
+    - Fixed 04/13 report file save path issue
+    - Added prediction verification tracking
+    
+    **Core Features**
+    - 🐦 Truth Social + Twitter post tracking
+    - 📰 US major media real-time monitoring
+    - 📊 FX/Stock/Commodity/Bond market analysis
+    - 🌏 A-Share and HK-Share impact prediction
+    - 🔮 Forward-looking market forecasting
+    
+    **数据源**: Bloomberg, CNBC, Reuters, WSJ, FT, Kitco, OilPrice, EIA
 ---
 
 # 特朗普动态日报
@@ -28,39 +40,6 @@ env:
 ## 概述
 
 自动追踪特朗普前一日社交媒体发言及美国主流媒体相关报道，**与历史报告对比分析**市场趋势变化，生成具有预测性的**中英双语综合报告**。
-
-## ⚠️ 权限说明
-
-本技能需要以下权限：
-- **读取/写入本地文件** - 用于保存报告历史
-- **使用 tavily_search/tavily_extract** - 用于搜索新闻和市场数据
-- **发送飞书消息** - 用于推送报告到指定群
-
-**隐私保护：**
-- 所有数据默认保存在本地工作区
-- 只会推送报告摘要到您指定的飞书群
-- 不会收集或传输敏感个人信息
-
-**认证说明：**
-- **飞书认证**：通过 OpenClaw 平台内置的飞书集成处理，无需单独配置API密钥。只需在参数中指定 `feishu_group_id` 即可推送消息。
-- **Tavily认证**：通过 `TAVILY_API_KEY` 环境变量配置（见下文env配置）
-
-## 配置要求
-
-首次使用前，请确保已完成以下配置：
-
-1. **飞书群ID** (必需) - 在技能参数中设置 `feishu_group_id`
-2. **本地存储路径** (必需) - 在技能参数中设置 `memory_path`，建议 `./memory/trump-daily`
-3. **Tavily API** (必需) - 确保已配置 `TAVILY_API_KEY` 环境变量
-
-### 环境变量
-
-| 变量名 | 必需 | 说明 |
-|--------|------|------|
-| `TAVILY_API_KEY` | 是 | Tavily搜索API密钥，从 https://tavily.com 获取 |
-| `TRUMP_DAILY_MEMORY_PATH` | 否 | 趋势分析脚本使用的路径，与 `memory_path` 参数作用相同 |
-
-**注意**：`memory_path`（技能参数）和 `TRUMP_DAILY_MEMORY_PATH`（环境变量）指向同一目录，设置其中之一即可。
 
 ## 核心功能
 
@@ -91,6 +70,65 @@ env:
 - `executive order`, `policy`, `White House`, `congress`
 - 市场相关词：`market`, `stock`, `rally`, `selloff`, `bond`, `yield`, `oil`, `gold`
 
+### 大宗商品数据源（黄金/原油/天然气）
+当报告涉及能源市场或避险情绪时，**必须**使用以下专用数据源获取黄金和原油价格：
+
+| 品种 | 首选数据源 | 搜索关键词 |
+|------|-----------|-----------|
+| 黄金 | Kitco (kitco.com) | `gold price today` / `XAU USD` |
+| 黄金 | Gold-Eagle (gold-eagle.com) | `gold rate` |
+| 原油 | OilPrice.com | `brent crude price today` |
+| 原油 | EIA (eia.gov) | `crude oil price` |
+| 原油 | CNBC Commodities | `oil price` |
+| 天然气 | Natural Gas Intelligence | `natural gas price` |
+| 综合 | Bloomberg Commodities | `commodities markets` |
+
+**商品数据搜索策略：**
+1. 使用 `tavily_search(topic=finance)` 搜索黄金/原油价格
+2. 使用 `web_fetch` 直接抓取 Kitco 或 OilPrice 当日价格
+3. 在报告中标注格式：`黄金：$XXXX [Kitco, HH:MM]` 或 `布伦特原油：$XX.XX [OilPrice, HH:MM]`
+4. **禁止**仅凭历史均值或推断填补价格数据
+
+### 🆕 Agent Reach 零配置搜索（v1.3.0）
+**当 Tavily 返回 432 错误（使用限额满）时，切换 Agent Reach：**
+
+**BBC News 搜索（最可靠）：**
+```bash
+python -c "
+import urllib.request
+url = 'https://r.jina.ai/https://www.bbc.com/news/world/us_and_canada'
+req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+resp = urllib.request.urlopen(req, timeout=15)
+data = resp.read().decode('utf-8', errors='replace')
+with open('memory/trump_draft.txt', 'w', encoding='utf-8') as f: f.write(data)
+print('OK')
+"
+```
+
+**抓取具体文章：**
+```bash
+python -c "
+import urllib.request
+url = 'https://r.jina.ai/https://www.bbc.com/news/articles/ARTICLE_ID'
+req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+resp = urllib.request.urlopen(req, timeout=15)
+data = resp.read().decode('utf-8', errors='replace')
+fname = 'memory/' + url.split('/')[-1] + '.txt'
+with open(fname, 'w', encoding='utf-8') as f: f.write(data)
+print('OK')
+"
+```
+
+**适用场景：**
+- 新闻检索（BBC News、The Straits Times、新加坡联合早报等）
+- 突发新闻追踪（Iran War、Trump Policy、Trade War 等）
+- 市场评论文章抓取
+
+**限制：**
+- r.jina.ai 对部分媒体（WSJ、NYT、Reuters、AP）返回 451/403，需换其他源
+- BBC News 和 Straits Times 可用，优先使用 BBC 获取美国政治新闻
+- 编码问题：Windows PowerShell 打印可能报错，重要输出应写入文件
+
 ## 工作流程
 
 ### 步骤1：读取历史报告（记忆检索）
@@ -120,6 +158,36 @@ Trump tariff [昨天日期]
 Trump Iran [昨天日期]
 Trump market [昨天日期]
 ```
+
+**【重要】同步获取大宗商品数据：**
+在步骤2和步骤3之间，**必须**执行以下商品数据查询：
+
+1. **黄金价格查询：**
+   ```
+   tavily_search(topic=finance, query="gold price XAU USD today")
+   web_fetch(url="https://kitco.com") 提取当日黄金现货价格
+   ```
+
+2. **原油价格查询：**
+   ```
+   tavily_search(topic=finance, query="brent crude oil price today")
+   web_fetch(url="https://oilprice.com") 提取当日原油价格
+   ```
+
+3. **天然气价格查询（如能源危机情境）：**
+   ```
+   tavily_search(topic=finance, query="natural gas price Europe today")
+   ```
+
+4. **美元指数查询：**
+   ```
+   tavily_search(topic=finance, query="US dollar index DXY today")
+   ```
+
+**数据标注要求：**
+- 所有价格必须标注来源和时间，格式：`[来源, HH:MM]`
+- 未能获取的数据标注`[未能获取]`，不得推断
+- 商品数据在市场影响分析章节中与上期进行对比
 
 ### 步骤3：搜索主流媒体对特朗普的报道
 
@@ -172,7 +240,7 @@ Trump [昨天日期] Reuters
 | 标普500 | ±X.X% [来源] | ±X.X% [来源] | ↑/↓/→ |
 | 纳斯达克 | ±X.X% [来源] | ±X.X% [来源] | ↑/↓/→ |
 | 布伦特原油 | $XX [来源] | $XX [来源] | ↑/↓/→ |
-| 黄金 | $XXXX [来源] | $XXXX [来源] | ↑/↓/→ |
+| 黄金 | $X,XXX [来源] | $X,XXX [来源] | ↑/↓/→ |
 | 美元指数 | XXX [来源] | XXX [来源] | ↑/↓/→ |
 
 ━━━ 🔀 情境变化分析 ━━━
@@ -220,72 +288,27 @@ Trump [昨天日期] Reuters
 [标注需要关注的风险点]
 ```
 
----
-
-## 英文报告模板（仅参考，生成时使用上方中文模板）
-
-```
-📊 Trump Daily Report
-📅 [YYYY-MM-DD] | Report No.: [N]
-*Data Sources: [list] | Query Time: [time]*
-
-━━━ 🔄 Prior Day Review ━━━
-• Core Topic: [Previous day's main topic]
-• Market Sentiment: [Previous sentiment]
-• Key Price Levels:
-  - S&P 500: ±X% [source]
-  - Brent Crude: $XX [source]
-  - Gold: $XXXX [source]
-  - Dollar Index: XXX [source]
-
-━━━ 🐦 Trump's Social Media Activity ━━━
-📍 [Time] [Platform]
-[Quoted statement]
-
-📍 Iran/Tariffs/Other Key Issues:
-[Brief summary]
-
-━━━ 📰 Mainstream Media Coverage ━━━
-🔵 [Media Name]: [Headline]
-   Key Takeaway: 1-2 sentence summary
-
-━━━ 📉 Market Impact Analysis ━━━
-| Asset | Current | Prior | Change |
-|-------|---------|-------|--------|
-| S&P 500 | ±X.X% [source] | ±X.X% [source] | ↑/↓/→ |
-| Nasdaq | ±X.X% [source] | ±X.X% [source] | ↑/↓/→ |
-| Brent Crude | $XX [source] | $XX [source] | ↑/↓/→ |
-| Gold | $XXXX [source] | $XXXX [source] | ↑/↓/→ |
-| Dollar Index | XXX [source] | XXX [source] | ↑/↓/→ |
-
-━━━ 🔀 Sentiment & Situation Change Analysis ━━━
-【New Developments】vs Prior Day:
-1. [Change point 1]
-2. [Change point 2]
-
-【Market Sentiment Shift】
-  Prior: [Risk-off/Neutral/Risk-on]
-  Current: [Risk-off/Neutral/Risk-on]
-  Reason: [Brief explanation]
-
-【Topic Evolution】
-  [e.g., From tariff war → Middle East situation] → [New direction]
-
-━━━ 📈 Forward Outlook (1-3 Day View) ━━━
-• Short-term Direction: [Bullish/Bearish/Ranging]
-• Key Risk Points:
-  - ⚠️ [Risk 1]
-  - ⚠️ [Risk 2]
-• Trading Advice: [Cautious/Aggressive/Watchful]
-• Events to Watch: [Date/Event]
-
-━━━ ⚠️ Risk Alerts ━━━
-[Alert points to monitor]
-```
-
 ### 步骤5：保存报告到记忆文件
 
+**⚠️ 重要：使用配置参数 `memory_path`**
+
+- `memory_path` 由配置文件或 cron 任务参数传递（默认 `./memory/trump-daily`）
+- 如果 `memory_path` 目录不存在，agent 应先创建该目录
+- 禁止硬编码任何绝对路径
+
 **必须执行三个保存操作：**
+
+1. **中文完整报告存档**：
+   - 路径：`{memory_path}/{YYYY-MM-DD}_CN.md`
+   - 内容：中文版完整报告
+
+3. **英文完整报告存档**：
+   - 路径：`{memory_path}/{YYYY-MM-DD}_EN.md`
+   - 内容：英文版完整报告
+
+4. **更新摘要索引**（中英双语摘要）：
+   - 路径：`{memory_path}/index.md`
+   - 格式：中英双语摘要+核心数据
 
 1. **中文完整报告存档**
    - 路径：`{memory_path}/{YYYY-MM-DD}_CN.md`
@@ -352,6 +375,13 @@ Trump [昨天日期] Reuters
    - 市场评论中"可能"、"或许"属于预判，可以包含
    - **具体价格/百分比数据**必须来自实际查询，禁止推断
    - 如果某项数据缺失，直接标注缺失，不推算不填补
+
+5. **大宗商品数据要求（黄金/原油/天然气）**：
+   - **必须**在步骤2-3之间使用专用数据源查询价格
+   - 优先使用 Kitco（黄金）、OilPrice/EIA（原油）
+   - 黄金价格格式：`$X,XXX [Kitco, HH:MM]`
+   - 原油价格格式：`$XX.XX [OilPrice, HH:MM]`
+   - 如果专用源失败，使用 `tavily_search(topic=finance, query="gold price today")` 作为后备
 
 ### 内容质量标准
 
