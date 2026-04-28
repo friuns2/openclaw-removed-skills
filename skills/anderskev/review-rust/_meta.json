@@ -3,9 +3,15 @@
   "slug": "review-rust",
   "displayName": "Review Rust",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966742149,
-    "commit": "https://github.com/openclaw/skills/commit/3dc957b280106c495b85c6d039eaf50dbea00498"
+    "version": "1.0.2",
+    "publishedAt": 1776831351184,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966742149,
+      "commit": "https://github.com/openclaw/skills/commit/3dc957b280106c495b85c6d039eaf50dbea00498"
+    }
+  ]
 }
