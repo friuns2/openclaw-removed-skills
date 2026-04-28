@@ -3,11 +3,16 @@
   "slug": "surface-cli",
   "displayName": "Surface Cli",
   "latest": {
-    "version": "0.2.0",
-    "publishedAt": 1776687089511,
-    "commit": "https://github.com/openclaw/skills/commit/4051d376d08addb9b477af357c175218ee26ef21"
+    "version": "0.3.5",
+    "publishedAt": 1776939073172,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.2.0",
+      "publishedAt": 1776687089511,
+      "commit": "https://github.com/openclaw/skills/commit/4051d376d08addb9b477af357c175218ee26ef21"
+    },
     {
       "version": "0.1.1",
       "publishedAt": 1775402508569,
