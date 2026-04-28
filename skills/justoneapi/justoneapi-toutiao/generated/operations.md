@@ -2,7 +2,7 @@
 
 Generated from JustOneAPI OpenAPI for platform key `toutiao`.
 
-## `getArticleDetailV1`
+## `getToutiaoArticleDetailV1`
 
 - Method: `GET`
 - Path: `/api/toutiao/get-article-detail/v1`
@@ -23,9 +23,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserDetailV1`
+## `getToutiaoUserDetailV1`
 
 - Method: `GET`
 - Path: `/api/toutiao/get-user-detail/v1`
@@ -46,9 +46,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchV1`
+## `searchToutiaoV1`
 
 - Method: `GET`
 - Path: `/api/toutiao/search/v1`
@@ -71,7 +71,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchV2`
 
@@ -94,4 +94,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

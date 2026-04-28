@@ -19,9 +19,9 @@ This skill wraps 4 Toutiao operations exposed by JustOneAPI. It is strongest for
 
 ## Representative Operations
 
-- `getArticleDetailV1`: Article Details — Get Toutiao article Details data, including article ID, title, and author information, for content performance analysis and media monitoring and verifying article authenticity and metadata retrieval
-- `getUserDetailV1`: User Profile — Get Toutiao user Profile data, including user ID, nickname, and avatar, for influencer profiling and audience analysis and monitoring creator performance and growth
-- `searchV1`: App Keyword Search — Get Toutiao app Keyword Search data, including matching articles, videos, and authors, for topic discovery and monitoring
+- `getToutiaoArticleDetailV1`: Article Details — Get Toutiao article Details data, including article ID, title, and author information, for content performance analysis and media monitoring and verifying article authenticity and metadata retrieval
+- `getToutiaoUserDetailV1`: User Profile — Get Toutiao user Profile data, including user ID, nickname, and avatar, for influencer profiling and audience analysis and monitoring creator performance and growth
+- `searchToutiaoV1`: App Keyword Search — Get Toutiao app Keyword Search data, including matching articles, videos, and authors, for topic discovery and monitoring
 - `searchV2`: Web Keyword Search — Get Toutiao web Keyword Search data, including this is the PC version of the search API. Note that it currently only supports retrieving the first page of results, for first-page discovery of articles, videos, and authors for trend research and monitoring
 
 ## Request Pattern
@@ -34,7 +34,7 @@ This skill wraps 4 Toutiao operations exposed by JustOneAPI. It is strongest for
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getArticleDetailV1`, `getUserDetailV1`, `searchV1`, `searchV2`.
+2. Start with one of these operations when it matches the user's request: `getToutiaoArticleDetailV1`, `getToutiaoUserDetailV1`, `searchToutiaoV1`, `searchV2`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -55,6 +55,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the Toutiao task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `getArticleDetailV1`, explain why the returned fields answer the user's question.
+- When using `getToutiaoArticleDetailV1`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `keyword`, `id`, `page`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

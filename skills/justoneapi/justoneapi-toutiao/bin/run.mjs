@@ -13,7 +13,7 @@ const manifest = {
     {
       "description": "Get Toutiao article Details data, including article ID, title, and author information, for content performance analysis and media monitoring and verifying article authenticity and metadata retrieval.",
       "method": "GET",
-      "operationId": "getArticleDetailV1",
+      "operationId": "getToutiaoArticleDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -38,8 +38,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Article Details",
@@ -50,7 +50,7 @@ const manifest = {
     {
       "description": "Get Toutiao user Profile data, including user ID, nickname, and avatar, for influencer profiling and audience analysis and monitoring creator performance and growth.",
       "method": "GET",
-      "operationId": "getUserDetailV1",
+      "operationId": "getToutiaoUserDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -75,8 +75,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -87,7 +87,7 @@ const manifest = {
     {
       "description": "Get Toutiao app Keyword Search data, including matching articles, videos, and authors, for topic discovery and monitoring.",
       "method": "GET",
-      "operationId": "searchV1",
+      "operationId": "searchToutiaoV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -130,8 +130,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "App Keyword Search",
@@ -167,8 +167,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Web Keyword Search",

@@ -3,11 +3,16 @@
   "slug": "justoneapi-toutiao",
   "displayName": "Toutiao API",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1776240006597,
-    "commit": "https://github.com/openclaw/skills/commit/dad69f4b56cee80d3c9f90541c7171b23cbdd99c"
+    "version": "1.0.7",
+    "publishedAt": 1776924494962,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1776240006597,
+      "commit": "https://github.com/openclaw/skills/commit/dad69f4b56cee80d3c9f90541c7171b23cbdd99c"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1775375357258,
