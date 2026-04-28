@@ -3,9 +3,15 @@
   "slug": "browserless",
   "displayName": "Browserless",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775487868808,
-    "commit": "https://github.com/openclaw/skills/commit/c86697d1e316f0d67d6afdaaa92a2b2a0968a1a4"
+    "version": "1.0.2",
+    "publishedAt": 1776890487629,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775487868808,
+      "commit": "https://github.com/openclaw/skills/commit/c86697d1e316f0d67d6afdaaa92a2b2a0968a1a4"
+    }
+  ]
 }
