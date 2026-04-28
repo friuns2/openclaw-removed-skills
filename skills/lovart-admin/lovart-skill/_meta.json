@@ -1,13 +1,18 @@
 {
   "owner": "lovart-admin",
   "slug": "lovart-skill",
-  "displayName": "Lovart API Skills",
+  "displayName": "Lovart Skill",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776673686762,
-    "commit": "https://github.com/openclaw/skills/commit/1608aba517621a293b4a6a4bf6ca4fd6426caa5b"
+    "version": "1.0.8",
+    "publishedAt": 1776926188400,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776673686762,
+      "commit": "https://github.com/openclaw/skills/commit/1608aba517621a293b4a6a4bf6ca4fd6426caa5b"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1776066803524,
