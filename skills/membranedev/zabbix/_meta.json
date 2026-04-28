@@ -3,9 +3,15 @@
   "slug": "zabbix",
   "displayName": "Zabbix",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775639053902,
-    "commit": "https://github.com/openclaw/skills/commit/80692f58141791fc3b82f850300367f885ea9055"
+    "version": "1.0.1",
+    "publishedAt": 1776896619630,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775639053902,
+      "commit": "https://github.com/openclaw/skills/commit/80692f58141791fc3b82f850300367f885ea9055"
+    }
+  ]
 }
