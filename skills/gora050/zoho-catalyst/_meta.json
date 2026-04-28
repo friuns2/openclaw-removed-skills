@@ -3,9 +3,15 @@
   "slug": "zoho-catalyst",
   "displayName": "Zoho Catalyst",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775452040046,
-    "commit": "https://github.com/openclaw/skills/commit/966778f5421ae039337cf2080c7ed5b147d55a0d"
+    "version": "1.0.1",
+    "publishedAt": 1776892776198,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775452040046,
+      "commit": "https://github.com/openclaw/skills/commit/966778f5421ae039337cf2080c7ed5b147d55a0d"
+    }
+  ]
 }
