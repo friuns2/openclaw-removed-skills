@@ -3,9 +3,15 @@
   "slug": "kvk",
   "displayName": "Kvk",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775527618040,
-    "commit": "https://github.com/openclaw/skills/commit/e783fad21f3e19f30d3c90d55d9c902f36d75e2f"
+    "version": "1.0.1",
+    "publishedAt": 1776893403345,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775527618040,
+      "commit": "https://github.com/openclaw/skills/commit/e783fad21f3e19f30d3c90d55d9c902f36d75e2f"
+    }
+  ]
 }
