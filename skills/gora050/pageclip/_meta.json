@@ -3,9 +3,15 @@
   "slug": "pageclip",
   "displayName": "Pageclip",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653693823,
-    "commit": "https://github.com/openclaw/skills/commit/4cf3ae626e079b5b2f5d5a4f771b069faf32cedc"
+    "version": "1.0.1",
+    "publishedAt": 1776899328164,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653693823,
+      "commit": "https://github.com/openclaw/skills/commit/4cf3ae626e079b5b2f5d5a4f771b069faf32cedc"
+    }
+  ]
 }
