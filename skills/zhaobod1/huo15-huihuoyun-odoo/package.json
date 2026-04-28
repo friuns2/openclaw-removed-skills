@@ -1,0 +1,51 @@
+{
+  "name": "@huo15/huo15-huihuoyun-odoo",
+  "version": "1.10.0",
+  "description": "火一五·辉火云企业套件插件 — 自然语言操作辉火云企业套件，实施经理助手，77 个工具覆盖任务、活动闭环、日历、邮件（含模板）、内部动态 chatter（发评论/内部记录/历史）、附件/文档、关注者、CRM、项目/里程碑治理、工单闭环（改/关/派）、审批通过/拒绝、财务、销售、知识库、批量更新、撤销；跨渠道通知基座（企微/钉钉/飞书）+ per-agent 偏好 + 入站回复写回内部动态 + v1.10 共享凭据：组织内配一次，全员跨渠道复用，禁止重复询问密码",
+  "type": "module",
+  "main": "index.ts",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ],
+    "build": {
+      "openclawVersion": "2026.4.10"
+    },
+    "compat": {
+      "pluginApi": ">=2026.2.24"
+    }
+  },
+  "keywords": [
+    "openclaw",
+    "plugin",
+    "huohuoyun",
+    "huihuoyun",
+    "erp",
+    "huo15",
+    "crm",
+    "helpdesk",
+    "invoice"
+  ],
+  "author": "jobzhao15",
+  "license": "MIT",
+  "peerDependencies": {
+    "openclaw": ">=2026.2.24"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  },
+  "files": [
+    "index.ts",
+    "openclaw.plugin.json",
+    "src/**/*",
+    "SKILL.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://cnb.cool/huo15/tools/huo15-huihuoyun-odoo"
+  }
+}
