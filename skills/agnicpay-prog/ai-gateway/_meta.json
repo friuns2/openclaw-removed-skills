@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "ai-gateway",
-  "displayName": "AI Gateway",
+  "displayName": "Agnic AI Gateway",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775592174625,
-    "commit": "https://github.com/openclaw/skills/commit/86ae9e9a3e0017f61427c1a68dc007e4464bcf7d"
+    "version": "2.0.2",
+    "publishedAt": 1776953672822,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775592174625,
+      "commit": "https://github.com/openclaw/skills/commit/86ae9e9a3e0017f61427c1a68dc007e4464bcf7d"
+    }
+  ]
 }
