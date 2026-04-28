@@ -3,9 +3,15 @@
   "slug": "alibabacloud-sas-openclaw-security",
   "displayName": "Alibabacloud Sas Openclaw Security",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1775642009914,
-    "commit": "https://github.com/openclaw/skills/commit/654b237cb6b47cfb6e210de42d4e9159dff6e7ca"
+    "version": "0.0.2",
+    "publishedAt": 1777028797981,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1775642009914,
+      "commit": "https://github.com/openclaw/skills/commit/654b237cb6b47cfb6e210de42d4e9159dff6e7ca"
+    }
+  ]
 }
