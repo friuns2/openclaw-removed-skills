@@ -3,9 +3,15 @@
   "slug": "fintechblocks",
   "displayName": "Fintechblocks",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775567111204,
-    "commit": "https://github.com/openclaw/skills/commit/ed538eaa18f8fbd025f1c5c2ea923a5605ebf798"
+    "version": "1.0.1",
+    "publishedAt": 1776895772944,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775567111204,
+      "commit": "https://github.com/openclaw/skills/commit/ed538eaa18f8fbd025f1c5c2ea923a5605ebf798"
+    }
+  ]
 }
