@@ -3,9 +3,15 @@
   "slug": "cortex-xsoar",
   "displayName": "Cortex Xsoar",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775405024333,
-    "commit": "https://github.com/openclaw/skills/commit/cc14322e5cb7fd8de9fbea59edadeb49a75c253c"
+    "version": "1.0.1",
+    "publishedAt": 1776889298888,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775405024333,
+      "commit": "https://github.com/openclaw/skills/commit/cc14322e5cb7fd8de9fbea59edadeb49a75c253c"
+    }
+  ]
 }
