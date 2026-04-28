@@ -3,9 +3,15 @@
   "slug": "caspio",
   "displayName": "Caspio",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775646250600,
-    "commit": "https://github.com/openclaw/skills/commit/cc02d4eed2e53253628d6b83623fbd47947cb1a9"
+    "version": "1.0.1",
+    "publishedAt": 1776896829289,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775646250600,
+      "commit": "https://github.com/openclaw/skills/commit/cc02d4eed2e53253628d6b83623fbd47947cb1a9"
+    }
+  ]
 }
