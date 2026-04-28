@@ -3,9 +3,15 @@
   "slug": "font-awesome-integration",
   "displayName": "Font Awesome",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775703886064,
-    "commit": "https://github.com/openclaw/skills/commit/cfd9378b47d7449f762c9f11d28c7bf2732c64bc"
+    "version": "1.0.1",
+    "publishedAt": 1776898052229,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775703886064,
+      "commit": "https://github.com/openclaw/skills/commit/cfd9378b47d7449f762c9f11d28c7bf2732c64bc"
+    }
+  ]
 }
