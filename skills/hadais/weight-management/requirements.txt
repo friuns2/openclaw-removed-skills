@@ -1,5 +1,5 @@
 # requirements.txt
-# 减肥管理 SKILL 依赖声明
+# 减肥管理 Skill v2.0 依赖
 
 # 仅使用 Python 标准库，无外部依赖
 # Standard library only, no external dependencies

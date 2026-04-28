@@ -3,9 +3,15 @@
   "slug": "weight-management",
   "displayName": "Weight Management 体重管理",
   "latest": {
-    "version": "2.0.0",
-    "publishedAt": 1775582260077,
-    "commit": "https://github.com/openclaw/skills/commit/4694a8ec630a142c4a52a97993a2eabcd7db515b"
+    "version": "2.0.2",
+    "publishedAt": 1777049547911,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.0.0",
+      "publishedAt": 1775582260077,
+      "commit": "https://github.com/openclaw/skills/commit/4694a8ec630a142c4a52a97993a2eabcd7db515b"
+    }
+  ]
 }

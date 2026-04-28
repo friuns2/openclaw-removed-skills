@@ -5,18 +5,14 @@
 使用 Mifflin-St Jeor 公式
 
 安全说明：
-- 仅使用 Python 标准库（argparse, math）
+- 仅使用标准库（argparse, math）
 - 无文件写入操作
 - 无网络请求
 - 仅内存计算，返回结果
-- 不访问用户私有数据
 """
 
 import argparse
 import math
-
-# NOTE: 仅使用标准库，无外部依赖
-# 安全的临时计算，不写入任何文件
 
 def calculate_bmr(weight, height, age, gender):
     """
@@ -65,18 +61,13 @@ def calculate_tdee(bmr, activity_level):
 def main():
     """
     主函数：解析参数，计算并输出结果
-    
-    安全说明：
-    - 仅内存计算
-    - 无文件写入
-    - 无网络请求
     """
     parser = argparse.ArgumentParser(
         description='计算 TDEE（每日总能量消耗）',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 安全说明：
-- 仅使用 Python 标准库
+- 仅使用标准库（argparse, math）
 - 无文件写入操作
 - 无网络请求
 - 仅内存计算，返回结果
@@ -90,11 +81,13 @@ def main():
     
     args = parser.parse_args()
     
-    # 仅内存计算，不写入任何文件
+    # 计算 BMR
     bmr = calculate_bmr(args.weight, args.height, args.age, args.gender)
+    
+    # 计算 TDEE
     tdee = calculate_tdee(bmr, args.activity)
     
-    # 输出结果到控制台（不写入文件）
+    # 输出结果
     print(f"基础代谢（BMR）：{bmr:.0f} 卡/天")
     print(f"每日总消耗（TDEE）：{tdee:.0f} 卡/天")
     print(f"减重建议摄入：{tdee - 500:.0f} 卡/天（缺口 500 卡）")
