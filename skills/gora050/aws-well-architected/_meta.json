@@ -3,9 +3,15 @@
   "slug": "aws-well-architected",
   "displayName": "Aws Well Architected",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775372815862,
-    "commit": "https://github.com/openclaw/skills/commit/b4e4d89aa11b189ce9f983ea7c7a19dd5b176f4e"
+    "version": "1.0.1",
+    "publishedAt": 1776892119388,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775372815862,
+      "commit": "https://github.com/openclaw/skills/commit/b4e4d89aa11b189ce9f983ea7c7a19dd5b176f4e"
+    }
+  ]
 }
