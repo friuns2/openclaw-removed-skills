@@ -3,9 +3,15 @@
   "slug": "snatchbot",
   "displayName": "Snatchbot",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775718317684,
-    "commit": "https://github.com/openclaw/skills/commit/719da7c068e8ac6677f791a4a6e2fdd4f1965711"
+    "version": "1.0.1",
+    "publishedAt": 1776898291015,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775718317684,
+      "commit": "https://github.com/openclaw/skills/commit/719da7c068e8ac6677f791a4a6e2fdd4f1965711"
+    }
+  ]
 }
