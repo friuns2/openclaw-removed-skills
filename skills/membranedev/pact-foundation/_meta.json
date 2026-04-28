@@ -3,9 +3,15 @@
   "slug": "pact-foundation",
   "displayName": "Pact Foundation",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653463824,
-    "commit": "https://github.com/openclaw/skills/commit/f9f98510620c451d13b0cc90394e3d250fd80fb8"
+    "version": "1.0.1",
+    "publishedAt": 1776896954081,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653463824,
+      "commit": "https://github.com/openclaw/skills/commit/f9f98510620c451d13b0cc90394e3d250fd80fb8"
+    }
+  ]
 }
