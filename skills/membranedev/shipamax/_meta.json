@@ -3,9 +3,15 @@
   "slug": "shipamax",
   "displayName": "Shipamax",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775588666865,
-    "commit": "https://github.com/openclaw/skills/commit/56e445d04607a3668eee8a70cde09ecdc62f90cc"
+    "version": "1.0.2",
+    "publishedAt": 1776896089947,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775588666865,
+      "commit": "https://github.com/openclaw/skills/commit/56e445d04607a3668eee8a70cde09ecdc62f90cc"
+    }
+  ]
 }
