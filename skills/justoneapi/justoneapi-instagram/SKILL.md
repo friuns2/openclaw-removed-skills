@@ -19,9 +19,9 @@ This skill wraps 5 Instagram operations exposed by JustOneAPI. It is strongest f
 
 ## Representative Operations
 
-- `getUserDetailV1`: User Profile — Get Instagram user Profile data, including follower count, following count, and post count, for obtaining basic account metadata for influencer vetting, tracking follower growth and audience reach over time, and mapping user handles to specific profile stats
-- `getPostDetailV1`: Post Details — Get Instagram post Details data, including post caption, media content (images/videos), and publish time, for analyzing engagement metrics (likes/comments) for a specific post and archiving post content and media assets for content analysis
-- `getUserPostsV1`: User Published Posts — Get Instagram user Published Posts data, including post code, caption, and media type, for monitoring recent publishing activity of a specific user and building a historical record of content for auditing or analysis
+- `getInstagramUserDetailV1`: User Profile — Get Instagram user Profile data, including follower count, following count, and post count, for obtaining basic account metadata for influencer vetting, tracking follower growth and audience reach over time, and mapping user handles to specific profile stats
+- `getInstagramPostDetailV1`: Post Details — Get Instagram post Details data, including post caption, media content (images/videos), and publish time, for analyzing engagement metrics (likes/comments) for a specific post and archiving post content and media assets for content analysis
+- `getInstagramUserPostsV1`: User Published Posts — Get Instagram user Published Posts data, including post code, caption, and media type, for monitoring recent publishing activity of a specific user and building a historical record of content for auditing or analysis
 - `searchReelsV1`: Reels Search — Get Instagram reels Search data, including post ID, caption, and author profile, for tracking trends and viral content via specific keywords or hashtags and discovering high-engagement reels within a particular niche
 
 ## Request Pattern
@@ -34,7 +34,7 @@ This skill wraps 5 Instagram operations exposed by JustOneAPI. It is strongest f
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getUserDetailV1`, `getPostDetailV1`, `getUserPostsV1`, `searchReelsV1`.
+2. Start with one of these operations when it matches the user's request: `getInstagramUserDetailV1`, `getInstagramPostDetailV1`, `getInstagramUserPostsV1`, `searchReelsV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -55,6 +55,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the Instagram task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `getUserDetailV1`, explain why the returned fields answer the user's question.
+- When using `getInstagramUserDetailV1`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `paginationToken`, `username`, `code`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

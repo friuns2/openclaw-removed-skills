@@ -3,11 +3,16 @@
   "slug": "justoneapi-instagram",
   "displayName": "Instagram API",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1776239974975,
-    "commit": "https://github.com/openclaw/skills/commit/a431f40b323144c470749bd0e341d5d0f3741afc"
+    "version": "1.0.8",
+    "publishedAt": 1776924454202,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1776239974975,
+      "commit": "https://github.com/openclaw/skills/commit/a431f40b323144c470749bd0e341d5d0f3741afc"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1775375325894,

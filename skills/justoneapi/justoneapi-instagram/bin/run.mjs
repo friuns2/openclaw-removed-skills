@@ -13,7 +13,7 @@ const manifest = {
     {
       "description": "Get Instagram post Details data, including post caption, media content (images/videos), and publish time, for analyzing engagement metrics (likes/comments) for a specific post and archiving post content and media assets for content analysis.",
       "method": "GET",
-      "operationId": "getPostDetailV1",
+      "operationId": "getInstagramPostDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -38,8 +38,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Post Details",
@@ -50,7 +50,7 @@ const manifest = {
     {
       "description": "Get Instagram user Profile data, including follower count, following count, and post count, for obtaining basic account metadata for influencer vetting, tracking follower growth and audience reach over time, and mapping user handles to specific profile stats.",
       "method": "GET",
-      "operationId": "getUserDetailV1",
+      "operationId": "getInstagramUserDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -75,8 +75,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -87,7 +87,7 @@ const manifest = {
     {
       "description": "Get Instagram user Published Posts data, including post code, caption, and media type, for monitoring recent publishing activity of a specific user and building a historical record of content for auditing or analysis.",
       "method": "GET",
-      "operationId": "getUserPostsV1",
+      "operationId": "getInstagramUserPostsV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -121,8 +121,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Posts",
@@ -167,8 +167,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Hashtag Posts Search",
@@ -213,8 +213,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Reels Search",

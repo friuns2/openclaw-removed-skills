@@ -2,7 +2,7 @@
 
 Generated from JustOneAPI OpenAPI for platform key `instagram`.
 
-## `getPostDetailV1`
+## `getInstagramPostDetailV1`
 
 - Method: `GET`
 - Path: `/api/instagram/get-post-detail/v1`
@@ -23,9 +23,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserDetailV1`
+## `getInstagramUserDetailV1`
 
 - Method: `GET`
 - Path: `/api/instagram/get-user-detail/v1`
@@ -46,9 +46,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserPostsV1`
+## `getInstagramUserPostsV1`
 
 - Method: `GET`
 - Path: `/api/instagram/get-user-posts/v1`
@@ -70,7 +70,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchHashtagPostsV1`
 
@@ -94,7 +94,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchReelsV1`
 
@@ -118,4 +118,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
