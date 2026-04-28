@@ -3,9 +3,15 @@
   "slug": "okay",
   "displayName": "Okay",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775304420334,
-    "commit": "https://github.com/openclaw/skills/commit/21d6e67c25d9817ff7a75eadfe71e4c869de8fcd"
+    "version": "1.0.1",
+    "publishedAt": 1776885893710,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775304420334,
+      "commit": "https://github.com/openclaw/skills/commit/21d6e67c25d9817ff7a75eadfe71e4c869de8fcd"
+    }
+  ]
 }
