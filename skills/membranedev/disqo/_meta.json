@@ -3,9 +3,15 @@
   "slug": "disqo",
   "displayName": "Disqo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775358263762,
-    "commit": "https://github.com/openclaw/skills/commit/6b1eccfc5649bf216c4c035a1c50f98e42a73b09"
+    "version": "1.0.1",
+    "publishedAt": 1776884360501,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775358263762,
+      "commit": "https://github.com/openclaw/skills/commit/6b1eccfc5649bf216c4c035a1c50f98e42a73b09"
+    }
+  ]
 }
