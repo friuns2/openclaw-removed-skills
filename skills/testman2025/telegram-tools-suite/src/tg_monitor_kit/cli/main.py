@@ -19,6 +19,7 @@ def main() -> None:
         action="store_true",
         help="只执行一轮后退出（不调度等待）",
     )
+    sub.add_parser("send-schedule", help="按配置执行定时群发（长驻）")
     sub.add_parser("groups", help="列出已加入的群")
     sub.add_parser("account-info", help="打印当前登录账号信息")
 
@@ -54,6 +55,10 @@ def main() -> None:
         cfg = load_config()
         acquire_monitor_lock(cfg.project_root, "tg_join_from_list.lock")
         asyncio.run(run_join_daemon(once=args.once))
+    elif args.command == "send-schedule":
+        from tg_monitor_kit.send import run_send_daemon
+
+        asyncio.run(run_send_daemon())
     elif args.command == "groups":
         from tg_monitor_kit.group_query import print_group_list, get_all_joined_groups
         # 强制刷新最新群列表

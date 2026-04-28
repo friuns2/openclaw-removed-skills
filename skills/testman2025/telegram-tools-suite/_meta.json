@@ -3,11 +3,16 @@
   "slug": "telegram-tools-suite",
   "displayName": "Telegram Tools Suite",
   "latest": {
-    "version": "1.2.3",
-    "publishedAt": 1776420193291,
-    "commit": "https://github.com/openclaw/skills/commit/99f3938442313d0de8f9392f811b1abcf67c23c5"
+    "version": "1.3.3",
+    "publishedAt": 1776824289841,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.3",
+      "publishedAt": 1776420193291,
+      "commit": "https://github.com/openclaw/skills/commit/99f3938442313d0de8f9392f811b1abcf67c23c5"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776253284638,
