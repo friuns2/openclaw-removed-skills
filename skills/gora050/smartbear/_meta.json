@@ -3,9 +3,15 @@
   "slug": "smartbear",
   "displayName": "Smartbear",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775335365208,
-    "commit": "https://github.com/openclaw/skills/commit/2dfccea72f795ea918ef310a5f9acf709e246ef6"
+    "version": "1.0.1",
+    "publishedAt": 1776885978584,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775335365208,
+      "commit": "https://github.com/openclaw/skills/commit/2dfccea72f795ea918ef310a5f9acf709e246ef6"
+    }
+  ]
 }
