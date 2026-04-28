@@ -64,10 +64,8 @@ export function registerSelfCheck(api: OpenClawPluginApi, config?: SelfCheckConf
   const errorKeywords = config?.errorKeywords ?? DEFAULT_ERROR_KEYWORDS;
   const blockOnEmpty = config?.blockOnEmpty ?? false;
 
-  // ── Hook: before_agent_reply ──
-  // 注意: 内部 API，通过 Jiti 运行时解析，跳过 TS 类型检查
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  api.on("before_agent_reply" as any, (event: any, ctx: any): any => {
+  // ── Hook: before_agent_reply ──（v5.7.8: typed via openclaw 4.24 SDK）
+  api.on("before_agent_reply", (event, ctx) => {
     const agentId = (ctx?.agentId ?? DEFAULT_AGENT_ID).trim();
     const body: string = event?.cleanedBody ?? "";
     const issues: string[] = [];
@@ -82,7 +80,7 @@ export function registerSelfCheck(api: OpenClawPluginApi, config?: SelfCheckConf
     if (checkNoReply) {
       const trimmed = body.trim().toUpperCase();
       if (trimmed === "NO_REPLY" || trimmed === "HEARTBEAT_OK") {
-        return {};
+        return; // void = 不接管
       }
     }
 
@@ -130,7 +128,8 @@ export function registerSelfCheck(api: OpenClawPluginApi, config?: SelfCheckConf
       };
     }
 
-    return {};
+    // void = 不接管，让原回复正常发送
+    return;
   });
 
   api.logger.info("[enhance] 输出自检模块已加载（before_agent_reply hook，非阻断式）");

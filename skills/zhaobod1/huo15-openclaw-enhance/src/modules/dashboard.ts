@@ -17,11 +17,17 @@ import {
   getRecentSafetyEvents,
   getAllAgentIds,
   getOrCreatePet,
+  getLatestTodos,
+  listTodos,
+  listChapters,
+  listScheduledBindings,
+  searchMemories,
 } from "../utils/sqlite-store.js";
 import { resolveOpenClawHome } from "../utils/resolve-home.js";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DEFAULT_AGENT_ID, type DashboardConfig, type Workflow, type NotificationQueue } from "../types.js";
+import { buildSnapshot } from "./statusline.js";
 
 function loadAllWorkflows(openclawDir: string): Workflow[] {
   const path = join(openclawDir, "memory", "enhance-workflows.json");
@@ -118,11 +124,31 @@ const DASHBOARD_HTML = `<!DOCTYPE html>
 </div>
 
 <div class="section">
-  <h2>工作流</h2>
+  <h2>当前任务 (TodoWrite)</h2>
+  <div id="todos"></div>
+</div>
+
+<div class="section">
+  <h2>章节时间线</h2>
+  <div id="chapters"></div>
+</div>
+
+<div class="section">
+  <h2>定时工作流 (openclaw cron 桥)</h2>
+  <div id="loops"></div>
+</div>
+
+<div class="section">
+  <h2>子任务孵化 (spawn-task)</h2>
+  <div id="spawnTasks"></div>
+</div>
+
+<div class="section">
+  <h2>工作流 (旧式触发词)</h2>
   <div id="workflows"></div>
 </div>
 
-<footer>龙虾增强包 v1.5.0 &mdash; 多 Agent 隔离 | <a href="/plugins/enhance/pet" style="color:#ff6b35">&#x1F525; 小火苗</a></footer>
+<footer>龙虾增强包 v2.2.0 &mdash; 非侵入式增强 &middot; 记忆以龙虾为主 | <a href="/plugins/enhance/pet" style="color:#ff6b35">&#x1F525; 小火苗</a></footer>
 
 <script>
 // 本地仪表盘：仅请求同域 /plugins/enhance/api/status，无外部网络调用
@@ -209,6 +235,73 @@ function load() {
     });
 }
 
+function statusIcon(s) {
+  if (s === 'completed') return '✅';
+  if (s === 'in_progress') return '▶';
+  return '⭕';
+}
+
+function loadTodos() {
+  var path = '/plugins/enhance/api/todos';
+  if (currentAgent) path += '?agent=' + encodeURIComponent(currentAgent);
+  fetch(path).then(function(r){return r.json()}).then(function(d){
+    if (!d.todos || !d.todos.length) {
+      document.getElementById('todos').innerHTML = '<p class="empty">暂无 todos。Agent 可调用 enhance_todo_write 登记。</p>';
+      return;
+    }
+    var rows = d.todos.map(function(t){
+      return '<tr><td>' + statusIcon(t.status) + '</td><td>' + esc(t.content) + '</td><td style="color:#666">' + esc(t.active_form || '') + '</td><td>' + esc(t.updated_at) + '</td></tr>';
+    });
+    document.getElementById('todos').innerHTML = buildTable(['状态','任务','进行中表述','更新'], rows);
+  }).catch(function(){});
+}
+
+function loadChapters() {
+  var path = '/plugins/enhance/api/chapters';
+  if (currentAgent) path += '?agent=' + encodeURIComponent(currentAgent);
+  fetch(path).then(function(r){return r.json()}).then(function(d){
+    if (!d.chapters || !d.chapters.length) {
+      document.getElementById('chapters').innerHTML = '<p class="empty">暂无章节。Agent 可调用 enhance_mark_chapter。</p>';
+      return;
+    }
+    var rows = d.chapters.slice(0, 20).map(function(c){
+      return '<tr><td>' + esc(c.created_at) + '</td><td>' + esc(c.title) + '</td><td style="color:#888">' + esc(c.summary || '') + '</td></tr>';
+    });
+    document.getElementById('chapters').innerHTML = buildTable(['时间','标题','摘要'], rows);
+  }).catch(function(){});
+}
+
+function loadLoops() {
+  var path = '/plugins/enhance/api/loops';
+  if (currentAgent) path += '?agent=' + encodeURIComponent(currentAgent);
+  fetch(path).then(function(r){return r.json()}).then(function(d){
+    if (!d.loops || !d.loops.length) {
+      document.getElementById('loops').innerHTML = '<p class="empty">暂无定时工作流。调用 enhance_loop_register 登记。</p>';
+      return;
+    }
+    var rows = d.loops.map(function(l){
+      return '<tr><td>' + (l.enabled ? '●' : '○') + '</td><td>' + esc(l.name) + '</td><td><span class="agent-tag">' + esc(l.agent_id) + '</span></td><td><code>' + esc(l.cron_ref) + '</code></td><td>' + esc(l.last_fired_at || '从未') + '</td></tr>';
+    });
+    document.getElementById('loops').innerHTML = buildTable(['状态','名称','Agent','cron','上次触发'], rows);
+  }).catch(function(){});
+}
+
+function loadSpawnTasks() {
+  var path = '/plugins/enhance/api/spawn-tasks';
+  if (currentAgent) path += '?agent=' + encodeURIComponent(currentAgent);
+  fetch(path).then(function(r){return r.json()}).then(function(d){
+    if (!d.entries || !d.entries.length) {
+      document.getElementById('spawnTasks').innerHTML = '<p class="empty">暂无孵化子任务。调用 enhance_spawn_task 登记。</p>';
+      return;
+    }
+    var rows = d.entries.map(function(e){
+      var text = esc((e.content || '').slice(0, 160));
+      return '<tr><td>#' + e.id + '</td><td>' + esc(e.created_at) + '</td><td style="white-space:pre-wrap">' + text + '</td></tr>';
+    });
+    document.getElementById('spawnTasks').innerHTML = buildTable(['ID','时间','内容摘要'], rows);
+  }).catch(function(){});
+}
+
 function toggleNotif() {
   var p = document.getElementById('notifPanel');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
@@ -242,9 +335,24 @@ function loadPetBadge() {
 
 var params = new URLSearchParams(location.search);
 currentAgent = params.get('agent') || '';
-load();
-loadNotif();
-loadPetBadge();
+function refreshAll() {
+  load();
+  loadNotif();
+  loadPetBadge();
+  loadTodos();
+  loadChapters();
+  loadLoops();
+  loadSpawnTasks();
+}
+refreshAll();
+// 原 switchAgent 只触发 load()，这里扩展为全量刷新
+switchAgent = function(v){
+  currentAgent = v;
+  var u = new URL(location.href);
+  if (v) u.searchParams.set('agent', v); else u.searchParams.delete('agent');
+  history.replaceState(null, '', u);
+  refreshAll();
+};
 </script>
 </body>
 </html>`;
@@ -440,6 +548,53 @@ export function registerDashboard(api: OpenClawPluginApi, _config?: DashboardCon
         return true;
       }
 
+      // 状态栏快照 JSON（供 Control UI / 外部嵌入）
+      if (pathname === "/plugins/enhance/api/statusline") {
+        const db = sharedDb ?? getDb(openclawDir);
+        const agentId = url.searchParams.get("agent") || DEFAULT_AGENT_ID;
+        const sessionId = url.searchParams.get("session") || "";
+        const snap = notifyQueue ? buildSnapshot(db, agentId, sessionId, notifyQueue) : null;
+        sendJson(res, snap ?? { error: "notifyQueue not available" });
+        return true;
+      }
+
+      // Todos 列表（最近一个 session）
+      if (pathname === "/plugins/enhance/api/todos") {
+        const db = sharedDb ?? getDb(openclawDir);
+        const agentId = url.searchParams.get("agent") || DEFAULT_AGENT_ID;
+        const todos = getLatestTodos(db, agentId);
+        sendJson(res, { agentId, todos });
+        return true;
+      }
+
+      // Chapter marks
+      if (pathname === "/plugins/enhance/api/chapters") {
+        const db = sharedDb ?? getDb(openclawDir);
+        const agentId = url.searchParams.get("agent") || DEFAULT_AGENT_ID;
+        const sessionId = url.searchParams.get("session") || undefined;
+        const chapters = listChapters(db, agentId, sessionId, 50);
+        sendJson(res, { agentId, chapters });
+        return true;
+      }
+
+      // 定时工作流桥列表
+      if (pathname === "/plugins/enhance/api/loops") {
+        const db = sharedDb ?? getDb(openclawDir);
+        const agentId = url.searchParams.get("agent") || undefined;
+        const loops = listScheduledBindings(db, agentId);
+        sendJson(res, { loops });
+        return true;
+      }
+
+      // 子任务孵化清单（从 memory 里过滤 tag=spawn-task）
+      if (pathname === "/plugins/enhance/api/spawn-tasks") {
+        const db = sharedDb ?? getDb(openclawDir);
+        const agentId = url.searchParams.get("agent") || DEFAULT_AGENT_ID;
+        const entries = searchMemories(db, agentId, { keyword: "spawn-task", limit: 30 });
+        sendJson(res, { agentId, entries });
+        return true;
+      }
+
       // 宠物独立页面
       if (pathname === "/plugins/enhance/pet") {
         sendHtml(res, PET_PAGE_HTML);
@@ -452,5 +607,5 @@ export function registerDashboard(api: OpenClawPluginApi, _config?: DashboardCon
     },
   });
 
-  api.logger.info("[enhance] 仪表盘模块已加载（多 Agent 视图 + 小火苗 + 通知），访问 /plugins/enhance/");
+  api.logger.info("[enhance] 仪表盘模块已加载（v2.2.0：Todos / 章节 / 定时 / Spawn-task），访问 /plugins/enhance/");
 }

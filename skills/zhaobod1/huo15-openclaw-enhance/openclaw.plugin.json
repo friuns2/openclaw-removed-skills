@@ -1,14 +1,33 @@
 {
   "id": "enhance",
   "name": "火一五·克劳德·龙虾增强插件",
-  "description": "借鉴 Claude Code 优秀设计：结构化记忆、工具安全守卫、提示词增强、工作流自动化、仪表盘",
-  "version": "1.4.0",
+  "description": "非侵入式增强 OpenClaw 2026.4.24+：记忆整合、工具安全、任务/章节/工作流、模式闸门、statusline、定时任务桥接、仪表盘、生命周期监听。v5.7.10 新增 native-memory-surfacer：解决'第二天失忆'——每个 session 开局自动 surface ~/.claude/projects 下相关 .md memory 文件锚点(零侵入只读、零工具 schema、零 child_process)。继承 v5.7.8 全面适配 openclaw 4.24 SDK 等",
+  "version": "2.4.10",
+  "enabledByDefault": true,
+  "uiHints": {
+    "toolTier": { "control": "select", "label": "工具分层" },
+    "configDoctor.enabled": { "control": "switch", "label": "配置诊断" },
+    "skillRecommender.enabled": { "control": "switch", "label": "技能推荐" },
+    "sessionLifecycle.enabled": { "control": "switch", "label": "会话生命周期" },
+    "nativeMemorySurfacer.enabled": { "control": "switch", "label": "原生记忆 surface" },
+    "transcriptSearch.enabled": { "control": "switch", "label": "历史会话搜索" }
+  },
+  "activation": {
+    "onAgentHarnesses": ["claude", "openclaw-default"]
+  },
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
     "properties": {
+      "toolTier": {
+        "type": "string",
+        "enum": ["minimal", "balanced", "full"],
+        "default": "balanced",
+        "description": "工具分层（v5.6+）：minimal=10 工具仅核心 / balanced=18 工具默认 / full=26 工具完整。降低每轮 prompt 工具 schema 总量。修改后需重启 openclaw。"
+      },
       "memory": {
         "type": "object",
+        "description": "增强记忆：本地 SQLite 分类记忆 + 通过 corpus supplement 喂给龙虾原生记忆引擎（不绕过龙虾）",
         "properties": {
           "enabled": { "type": "boolean", "default": true },
           "autoCapture": { "type": "boolean", "default": true },
@@ -17,6 +36,7 @@
       },
       "safety": {
         "type": "object",
+        "description": "工具安全补充：仅补充龙虾原生 tools.allow/deny 未覆盖的细粒度规则",
         "properties": {
           "enabled": { "type": "boolean", "default": true },
           "rules": {
@@ -27,31 +47,120 @@
                 "tool": { "type": "string" },
                 "pattern": { "type": "string" },
                 "pathPattern": { "type": "string" },
-                "action": { "type": "string", "enum": ["block", "log", "allow"] },
+                "action": { "type": "string", "enum": ["block", "hardblock", "log", "allow"] },
                 "reason": { "type": "string" }
               },
               "required": ["tool", "action"]
             },
             "default": []
           },
-          "defaultAction": { "type": "string", "enum": ["allow", "log"], "default": "allow" }
+          "defaultAction": { "type": "string", "enum": ["allow", "log"], "default": "allow" },
+          "enableRetry": { "type": "boolean", "default": true }
         }
       },
       "prompt": {
         "type": "object",
+        "description": "提示词增强：仅注入龙虾内置系统提示词缺失的章节（qualityGuidelines）",
         "properties": {
           "enabled": { "type": "boolean", "default": true },
           "sections": {
             "type": "array",
-            "items": { "type": "string" },
-            "default": ["qualityGuidelines", "memoryContext"]
+            "items": { "type": "string", "enum": ["qualityGuidelines"] },
+            "default": ["qualityGuidelines"]
           }
         }
       },
       "workflows": {
         "type": "object",
+        "description": "工作流触发器（关键词 → 指令注入）",
         "properties": {
           "enabled": { "type": "boolean", "default": true }
+        }
+      },
+      "todos": {
+        "type": "object",
+        "description": "Claude-Code 风格任务追踪（enhance_todo_write）",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true }
+        }
+      },
+      "chapters": {
+        "type": "object",
+        "description": "会话章节标记（enhance_mark_chapter，仪表盘可跳转）",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true }
+        }
+      },
+      "mode": {
+        "type": "object",
+        "description": "模式闸门：plan/explore 模式下自动拦截写入类工具",
+        "properties": {
+          "enabled": { "type": "boolean", "default": false },
+          "defaultMode": { "type": "string", "enum": ["normal", "plan", "explore"], "default": "normal" }
+        }
+      },
+      "statusline": {
+        "type": "object",
+        "description": "状态栏：项目/模式/记忆命中/宠物状态实时快照（HTTP /plugins/enhance/api/statusline）",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true }
+        }
+      },
+      "scheduledTasks": {
+        "type": "object",
+        "description": "定时任务桥：注册龙虾 cron-cli 可触发的工作流钩子",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true }
+        }
+      },
+      "transcriptSearch": {
+        "type": "object",
+        "description": "v5.7 历史会话全文搜索：流式扫 ~/.openclaw/agents/<agent>/sessions/*.jsonl，照搬 Claude Desktop transcriptSearchWorker 算法（无索引、无新表、纯只读）",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true }
+        }
+      },
+      "configDoctor": {
+        "type": "object",
+        "description": "v5.7.3 启动期诊断 openclaw.json 陷阱配置（缺失 reserveTokensFloor / model maxTokens 过大），只读不修改用户配置",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "minReserveTokensFloor": { "type": "number", "default": 5000 },
+          "maxReserveTokensFloor": { "type": "number", "default": 100000 },
+          "maxModelMaxTokens": { "type": "number", "default": 32000 }
+        }
+      },
+      "skillRecommender": {
+        "type": "object",
+        "description": "v5.7.5 按用户需求挑已装 skill / 推荐未装 huo15-* / 给自建规划。算法照搬 Claude Desktop loadSkills 的 name+description 匹配，按需工具暴露",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "installedThreshold": { "type": "number", "default": 0.25, "description": "已装命中相关度阈值，低于则触发未装/自建建议" },
+          "cacheTtlSec": { "type": "number", "default": 60, "description": "skill 扫描结果缓存秒数" }
+        }
+      },
+      "sessionLifecycle": {
+        "type": "object",
+        "description": "v5.7.7 接入 openclaw 4.22 的 session_start / session_end / before_reset / subagent_spawned / subagent_ended hook 闭环 session 生命周期。每个 hook 都做 30 秒 dedup 去重 + 仅写入 enhance 自有表，不污染龙虾原生 memory",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "enableSessionStart": { "type": "boolean", "default": true },
+          "enableSessionEnd": { "type": "boolean", "default": true },
+          "enableBeforeReset": { "type": "boolean", "default": true },
+          "enableSubagent": { "type": "boolean", "default": true },
+          "debug": { "type": "boolean", "default": false }
+        }
+      },
+      "nativeMemorySurfacer": {
+        "type": "object",
+        "description": "v5.7.10 解决'第二天失忆'：每个 session 第一次 before_prompt_build 时按 cwd/git remote 评分,主动 surface ~/.claude/projects/-<cwd>/memory/*.md 的 L1 memory 文件锚点(只 surface name + description + Read 路径,不复制正文,不写任何文件)。零侵入只读、零工具 schema、零 child_process(读 .git/config 替代 git remote)",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "memoryDir": { "type": "string", "description": "显式指定 memory 目录;不指定则按 cwd 推断" },
+          "maxFiles": { "type": "number", "default": 5 },
+          "descriptionMaxChars": { "type": "number", "default": 80 },
+          "threshold": { "type": "number", "default": 0.15 },
+          "debug": { "type": "boolean", "default": false }
         }
       },
       "dashboard": {
@@ -65,8 +174,45 @@
         "description": "小火苗宠物 + 智能贴士",
         "properties": {
           "enabled": { "type": "boolean", "default": true },
-          "showPet": { "type": "boolean", "default": true, "description": "显示小火苗状态" },
-          "showTip": { "type": "boolean", "default": true, "description": "显示今日贴士" }
+          "name": { "type": "string" },
+          "color": { "type": "string", "enum": ["orange", "blue", "purple", "green", "white"] }
+        }
+      },
+      "tips": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "injectInPrompt": { "type": "boolean", "default": false },
+          "cooldownMinutes": { "type": "number", "default": 30 }
+        }
+      },
+      "notifications": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "maxRetained": { "type": "number", "default": 200 }
+        }
+      },
+      "selfCheck": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "checkEmpty": { "type": "boolean", "default": true },
+          "checkNoReply": { "type": "boolean", "default": true },
+          "checkErrorKeywords": { "type": "boolean", "default": true },
+          "checkExcessiveLength": { "type": "boolean", "default": false },
+          "maxLength": { "type": "number", "default": 20000 },
+          "blockOnEmpty": { "type": "boolean", "default": false }
+        }
+      },
+      "contextPruner": {
+        "type": "object",
+        "description": "记忆相关性过滤（仅用于 corpus supplement 的 search 排序，不绕过龙虾原生注入）",
+        "properties": {
+          "enabled": { "type": "boolean", "default": true },
+          "threshold": { "type": "number", "default": 0.5 },
+          "maxEntries": { "type": "number", "default": 5 },
+          "debug": { "type": "boolean", "default": false }
         }
       }
     }

@@ -1,7 +1,7 @@
 {
   "name": "@huo15/openclaw-enhance",
-  "version": "5.0.1",
-  "description": "火一五·克劳德·龙虾增强插件 v2.1 — 对标 Claude Code Agent Harness 六层能力：结构化记忆、工具安全守卫、提示词增强、工作流自动化、仪表盘、输出自检、Context裁剪、自动重试、任务规划、记忆整合（corpus supplement）、条件分支工作流、任务状态追踪",
+  "version": "5.7.10",
+  "description": "火一五·克劳德·龙虾增强插件 v5.7.10 — 新增 native-memory-surfacer：每个 session 第一次 before_prompt_build 时按 cwd / git remote 评分,主动 surface ~/.claude/projects/-<cwd>/memory/*.md 的 L1 memory 文件锚点(name + description + Read 路径,不复制内容),解决「第二天失忆」。零侵入(只读 .md)、零工具 schema(纯 hook)、零 child_process(读 .git/config 替代 git remote)。继承 v5.7.8 全面适配 openclaw 2026.4.24 + v5.7.7 session-lifecycle + v5.7.5 skill-recommender + v5.7.4 扫 bare pluginApi + v5.7.3 config-doctor + v5.7.2 hardening + v5.7.1 hot-fix + v5.7 transcript-search + v5.6 工具分层。",
   "type": "module",
   "main": "index.ts",
   "openclaw": {
@@ -9,10 +9,10 @@
       "./index.ts"
     ],
     "build": {
-      "openclawVersion": "2026.4.10"
+      "openclawVersion": "2026.4.24"
     },
     "compat": {
-      "pluginApi": "2026.2.24"
+      "pluginApi": ">=2026.4.24"
     }
   },
   "bin": {
@@ -29,7 +29,7 @@
   "author": "jobzhao15",
   "license": "MIT",
   "peerDependencies": {
-    "openclaw": ">=2026.0.0"
+    "openclaw": "^2026.4.24"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.49",

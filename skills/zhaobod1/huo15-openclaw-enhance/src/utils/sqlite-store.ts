@@ -7,7 +7,19 @@
 import Database from "better-sqlite3";
 import { join } from "node:path";
 import { existsSync, mkdirSync } from "node:fs";
-import type { MemoryEntry, MemoryCategory, FlamePet, FlameColor, FlameStats, Notification, NotificationLevel, NotificationSource } from "../types.js";
+import type {
+  MemoryEntry,
+  MemoryCategory,
+  FlamePet,
+  FlameColor,
+  FlameStats,
+  Notification,
+  NotificationLevel,
+  NotificationSource,
+  TodoEntry,
+  TodoStatus,
+  ChapterMark,
+} from "../types.js";
 
 const SCHEMA_V2 = `
 CREATE TABLE IF NOT EXISTS memories (
@@ -104,6 +116,77 @@ function migrateV2ToV3(db: Database.Database): void {
   }
 }
 
+/**
+ * v4 → v5 迁移：memories 表新增 why / how_to_apply 结构化正文字段
+ * （对齐 Claude Code feedback/project 记忆的 Why + How-to-apply 两段式）
+ */
+function migrateV4ToV5(db: Database.Database): void {
+  const memoryCols = db.prepare("PRAGMA table_info(memories)").all() as Array<{ name: string }>;
+  const hasCol = (n: string) => memoryCols.some((c) => c.name === n);
+  if (memoryCols.length > 0 && !hasCol("why")) {
+    db.exec("ALTER TABLE memories ADD COLUMN why TEXT DEFAULT NULL");
+  }
+  if (memoryCols.length > 0 && !hasCol("how_to_apply")) {
+    db.exec("ALTER TABLE memories ADD COLUMN how_to_apply TEXT DEFAULT NULL");
+  }
+}
+
+/**
+ * v3 → v4 迁移：todos / chapters / scheduled_task_bindings
+ */
+function migrateV3ToV4(db: Database.Database): void {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>;
+  const tableNames = new Set(tables.map((t) => t.name));
+
+  if (!tableNames.has("todos")) {
+    db.exec(`
+      CREATE TABLE todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        agent_id TEXT NOT NULL DEFAULT 'main',
+        session_id TEXT NOT NULL DEFAULT '',
+        content TEXT NOT NULL,
+        active_form TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','in_progress','completed')),
+        position INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      );
+      CREATE INDEX idx_todos_agent_session ON todos(agent_id, session_id);
+      CREATE INDEX idx_todos_agent_status ON todos(agent_id, status);
+    `);
+  }
+
+  if (!tableNames.has("chapters")) {
+    db.exec(`
+      CREATE TABLE chapters (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        agent_id TEXT NOT NULL DEFAULT 'main',
+        session_id TEXT NOT NULL DEFAULT '',
+        title TEXT NOT NULL,
+        summary TEXT DEFAULT '',
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+      CREATE INDEX idx_chapters_agent_session ON chapters(agent_id, session_id, created_at DESC);
+    `);
+  }
+
+  if (!tableNames.has("scheduled_task_bindings")) {
+    db.exec(`
+      CREATE TABLE scheduled_task_bindings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        agent_id TEXT NOT NULL DEFAULT 'main',
+        name TEXT NOT NULL,
+        cron_ref TEXT NOT NULL,
+        instructions TEXT NOT NULL DEFAULT '',
+        enabled INTEGER NOT NULL DEFAULT 1,
+        last_fired_at TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+      CREATE INDEX idx_scheduled_agent ON scheduled_task_bindings(agent_id);
+    `);
+  }
+}
+
 let _db: Database.Database | null = null;
 
 export function getDb(openclawDir: string): Database.Database {
@@ -126,8 +209,31 @@ export function getDb(openclawDir: string): Database.Database {
 
   // v2 → v3: 新增宠物和通知表
   migrateV2ToV3(_db);
+  // v3 → v4: todos / chapters / scheduled_task_bindings
+  migrateV3ToV4(_db);
+  // v4 → v5: memories 加 why / how_to_apply
+  migrateV4ToV5(_db);
+
+  // v5.7.2: 启动期清理 safety_log / notifications 90 天前的旧记录，避免无限增长
+  // 异步 fire-and-forget，不阻塞插件加载
+  try {
+    _db.exec(`
+      DELETE FROM safety_log WHERE created_at < datetime('now', '-90 days');
+      DELETE FROM notifications WHERE created_at < datetime('now', '-90 days');
+    `);
+  } catch {
+    // 静默失败 — 旧表不存在或权限错误不影响插件正常工作
+  }
 
   return _db;
+}
+
+/** v5.7.2: 暴露给运维 / enhance_memory_purge 调用的清理函数 */
+export function purgeOldSafetyLogs(db: Database.Database, retentionDays: number = 90): { deleted: number } {
+  const result = db
+    .prepare(`DELETE FROM safety_log WHERE created_at < datetime('now', ?)`)
+    .run(`-${retentionDays} days`);
+  return { deleted: result.changes };
 }
 
 // ── 记忆操作（全部按 agentId 隔离）──
@@ -140,12 +246,22 @@ export function storeMemory(
   tags: string = "",
   importance: number = 5,
   sessionId: string = "",
+  extras: { why?: string; howToApply?: string } = {},
 ): MemoryEntry {
   const stmt = db.prepare(
-    `INSERT INTO memories (agent_id, category, content, tags, importance, session_id)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO memories (agent_id, category, content, tags, importance, session_id, why, how_to_apply)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   );
-  const result = stmt.run(agentId, category, content, tags, Math.min(10, Math.max(1, importance)), sessionId);
+  const result = stmt.run(
+    agentId,
+    category,
+    content,
+    tags,
+    Math.min(10, Math.max(1, importance)),
+    sessionId,
+    extras.why ?? null,
+    extras.howToApply ?? null,
+  );
   return db.prepare("SELECT * FROM memories WHERE id = ?").get(result.lastInsertRowid) as MemoryEntry;
 }
 
@@ -179,7 +295,7 @@ export function searchMemories(
   const limit = opts.limit ?? 20;
 
   return db
-    .prepare(`SELECT * FROM memories ${where} ORDER BY importance DESC, created_at DESC LIMIT ?`)
+    .prepare(`SELECT * FROM memories ${where} ORDER BY importance DESC, created_at DESC, id DESC LIMIT ?`)
     .all(...params, limit) as MemoryEntry[];
 }
 
@@ -192,6 +308,44 @@ export function getRecentMemories(db: Database.Database, agentId: string, limit:
 export function deleteMemory(db: Database.Database, agentId: string, id: number): boolean {
   const result = db.prepare("DELETE FROM memories WHERE id = ? AND agent_id = ?").run(id, agentId);
   return result.changes > 0;
+}
+
+/**
+ * 按 tag / category / contentLike 批量清理记忆（agentId 隔离）。
+ * dry_run=true 时只 SELECT 不 DELETE，返回匹配条数（v5.7.1 hot-fix 用）。
+ */
+export function purgeMemories(
+  db: Database.Database,
+  agentId: string,
+  opts: {
+    tag?: string;
+    category?: MemoryCategory;
+    contentLike?: string;
+    dryRun?: boolean;
+  },
+): { matched: number } {
+  const conditions: string[] = ["agent_id = ?"];
+  const params: unknown[] = [agentId];
+  if (opts.tag) {
+    conditions.push("tags LIKE ?");
+    params.push(`%${opts.tag}%`);
+  }
+  if (opts.category) {
+    conditions.push("category = ?");
+    params.push(opts.category);
+  }
+  if (opts.contentLike) {
+    conditions.push("content LIKE ?");
+    params.push(`%${opts.contentLike}%`);
+  }
+  const where = `WHERE ${conditions.join(" AND ")}`;
+  const matched = (db.prepare(`SELECT COUNT(*) AS c FROM memories ${where}`).get(...params) as {
+    c: number;
+  }).c;
+  if (!opts.dryRun) {
+    db.prepare(`DELETE FROM memories ${where}`).run(...params);
+  }
+  return { matched };
 }
 
 export function getMemoryStats(db: Database.Database, agentId?: string): Record<string, number> {
@@ -421,4 +575,196 @@ export function pruneNotifications(db: Database.Database, maxRetained: number): 
       )
     `).run(maxRetained);
   }
+}
+
+// ── Todo 操作 ──
+
+export interface TodoInput {
+  content: string;
+  activeForm: string;
+  status?: TodoStatus;
+}
+
+export function replaceTodos(
+  db: Database.Database,
+  agentId: string,
+  sessionId: string,
+  todos: TodoInput[],
+): TodoEntry[] {
+  const tx = db.transaction(() => {
+    db.prepare("DELETE FROM todos WHERE agent_id = ? AND session_id = ?").run(agentId, sessionId);
+    const insert = db.prepare(
+      `INSERT INTO todos (agent_id, session_id, content, active_form, status, position)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    );
+    todos.forEach((t, i) => {
+      insert.run(agentId, sessionId, t.content, t.activeForm, t.status ?? "pending", i);
+    });
+  });
+  tx();
+  return listTodos(db, agentId, sessionId);
+}
+
+export function listTodos(db: Database.Database, agentId: string, sessionId?: string): TodoEntry[] {
+  if (sessionId) {
+    return db
+      .prepare(
+        `SELECT * FROM todos WHERE agent_id = ? AND session_id = ? ORDER BY position ASC, id ASC`,
+      )
+      .all(agentId, sessionId) as TodoEntry[];
+  }
+  return db
+    .prepare(
+      `SELECT * FROM todos WHERE agent_id = ? ORDER BY updated_at DESC, position ASC LIMIT 200`,
+    )
+    .all(agentId) as TodoEntry[];
+}
+
+export function updateTodoStatus(
+  db: Database.Database,
+  agentId: string,
+  sessionId: string,
+  position: number,
+  status: TodoStatus,
+): TodoEntry | null {
+  db.prepare(
+    `UPDATE todos SET status = ?, updated_at = datetime('now')
+     WHERE agent_id = ? AND session_id = ? AND position = ?`,
+  ).run(status, agentId, sessionId, position);
+  return (
+    (db
+      .prepare(`SELECT * FROM todos WHERE agent_id = ? AND session_id = ? AND position = ?`)
+      .get(agentId, sessionId, position) as TodoEntry | undefined) ?? null
+  );
+}
+
+export function getLatestTodos(db: Database.Database, agentId: string): TodoEntry[] {
+  const sessionRow = db
+    .prepare(
+      `SELECT session_id FROM todos WHERE agent_id = ? ORDER BY updated_at DESC LIMIT 1`,
+    )
+    .get(agentId) as { session_id?: string } | undefined;
+  if (!sessionRow?.session_id) return [];
+  return listTodos(db, agentId, sessionRow.session_id);
+}
+
+// ── Chapter 操作 ──
+
+export function addChapter(
+  db: Database.Database,
+  agentId: string,
+  sessionId: string,
+  title: string,
+  summary = "",
+): ChapterMark {
+  const r = db
+    .prepare(
+      `INSERT INTO chapters (agent_id, session_id, title, summary) VALUES (?, ?, ?, ?)`,
+    )
+    .run(agentId, sessionId, title, summary);
+  return db
+    .prepare(`SELECT * FROM chapters WHERE id = ?`)
+    .get(r.lastInsertRowid) as ChapterMark;
+}
+
+export function listChapters(
+  db: Database.Database,
+  agentId: string,
+  sessionId?: string,
+  limit = 50,
+): ChapterMark[] {
+  if (sessionId) {
+    return db
+      .prepare(
+        `SELECT * FROM chapters WHERE agent_id = ? AND session_id = ? ORDER BY created_at ASC LIMIT ?`,
+      )
+      .all(agentId, sessionId, limit) as ChapterMark[];
+  }
+  return db
+    .prepare(
+      `SELECT * FROM chapters WHERE agent_id = ? ORDER BY created_at DESC LIMIT ?`,
+    )
+    .all(agentId, limit) as ChapterMark[];
+}
+
+// ── Scheduled task binding 操作 ──
+
+export interface ScheduledTaskBinding {
+  id: number;
+  agent_id: string;
+  name: string;
+  cron_ref: string;
+  instructions: string;
+  enabled: number;
+  last_fired_at: string | null;
+  created_at: string;
+}
+
+export function upsertScheduledBinding(
+  db: Database.Database,
+  agentId: string,
+  name: string,
+  cronRef: string,
+  instructions: string,
+): ScheduledTaskBinding {
+  const existing = db
+    .prepare(`SELECT * FROM scheduled_task_bindings WHERE agent_id = ? AND name = ?`)
+    .get(agentId, name) as ScheduledTaskBinding | undefined;
+  if (existing) {
+    db.prepare(
+      `UPDATE scheduled_task_bindings SET cron_ref = ?, instructions = ?, enabled = 1 WHERE id = ?`,
+    ).run(cronRef, instructions, existing.id);
+    return {
+      ...existing,
+      cron_ref: cronRef,
+      instructions,
+      enabled: 1,
+    };
+  }
+  const r = db
+    .prepare(
+      `INSERT INTO scheduled_task_bindings (agent_id, name, cron_ref, instructions) VALUES (?, ?, ?, ?)`,
+    )
+    .run(agentId, name, cronRef, instructions);
+  return db
+    .prepare(`SELECT * FROM scheduled_task_bindings WHERE id = ?`)
+    .get(r.lastInsertRowid) as ScheduledTaskBinding;
+}
+
+export function listScheduledBindings(
+  db: Database.Database,
+  agentId?: string,
+): ScheduledTaskBinding[] {
+  if (agentId) {
+    return db
+      .prepare(
+        `SELECT * FROM scheduled_task_bindings WHERE agent_id = ? ORDER BY created_at DESC`,
+      )
+      .all(agentId) as ScheduledTaskBinding[];
+  }
+  return db
+    .prepare(`SELECT * FROM scheduled_task_bindings ORDER BY created_at DESC`)
+    .all() as ScheduledTaskBinding[];
+}
+
+export function disableScheduledBinding(
+  db: Database.Database,
+  agentId: string,
+  name: string,
+): boolean {
+  const r = db
+    .prepare(
+      `UPDATE scheduled_task_bindings SET enabled = 0 WHERE agent_id = ? AND name = ?`,
+    )
+    .run(agentId, name);
+  return r.changes > 0;
+}
+
+export function touchScheduledBindingFired(
+  db: Database.Database,
+  id: number,
+): void {
+  db.prepare(
+    `UPDATE scheduled_task_bindings SET last_fired_at = datetime('now') WHERE id = ?`,
+  ).run(id);
 }

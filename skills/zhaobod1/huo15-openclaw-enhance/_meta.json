@@ -3,9 +3,15 @@
   "slug": "huo15-openclaw-enhance",
   "displayName": "Huo15 Openclaw Enhance",
   "latest": {
-    "version": "5.0.1",
-    "publishedAt": 1776139641297,
-    "commit": "https://github.com/openclaw/skills/commit/30d7b361e1a1aa9389147165234cd151f1906c27"
+    "version": "5.7.10",
+    "publishedAt": 1777340287669,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "5.0.1",
+      "publishedAt": 1776139641297,
+      "commit": "https://github.com/openclaw/skills/commit/30d7b361e1a1aa9389147165234cd151f1906c27"
+    }
+  ]
 }
