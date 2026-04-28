@@ -128,8 +128,8 @@ async function sendVerificationCode(params) {
     ...params,
     ticket: "ticket_123",
     randStr: "randstr_123",
-    sceneType: 1,
-  });
+    sceneType: 1
+   });
 }
 
 /**
@@ -144,7 +144,7 @@ async function loginWithVerificationCode(params) {
       imei: "imei_123",
       imsi: "imsi_123",
       longitude: 113.938383,
-      latitude: 22.545545,
+      latitude: 22.545545
     },
     true,
   );

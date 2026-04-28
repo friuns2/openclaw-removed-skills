@@ -6,21 +6,7 @@ metadata:
   {
     "openclaw":
       {
-        "requires":
-          {
-            "bins": ["node", "openclaw"],
-            "env": ["RUQI_CLIENT_MCP_TOKEN", "RUQI_CHANNEL", "RUQI_TARGET"],
-          },
-        "install":
-          [
-            {
-              "id": "npm",
-              "kind": "node",
-              "package": "axios",
-              "bins": [],
-              "label": "Install axios",
-            },
-          ],
+        "requires": { "bins": ["node", "openclaw"] },
       },
   }
 ---
@@ -160,20 +146,45 @@ metadata:
 
 ## 🚨 订单轮询（创建订单后必须执行）
 
+**正确写法：**
 ```javascript
 exec({
-  command: `RUQI_CLIENT_MCP_TOKEN=<Token> RUQI_CHANNEL=<channel> RUQI_TARGET=<target> node scripts/ruqi_poll_with_screenshot.js --orderId <orderId>`,
+  command: "node",
+  args: [
+    "scripts/ruqi_poll_with_screenshot.js",
+    "--orderId", orderId,
+    "--phone", phone
+  ],
+  env: {
+    RUQI_CLIENT_MCP_TOKEN: Token,
+    RUQI_CHANNEL: channel,
+    RUQI_TARGET: target
+  },
   background: true,
 });
 ```
 
-| 渠道    | channel   | target 格式   |
-| ------- | --------- | ------------- |
-| 飞书    | `feishu`  | `user:ou_xxx` |
-| QQ      | `qqbot`   | `c2c:xxx`     |
-| Discord | `discord` | `user:123456` |
+**❌ 错误示例：**
+```javascript
+// channel/target 不能作为命令行参数传递！
+node scripts/ruqi_poll_with_screenshot.js --orderId xxx --channel feishu --target user:ou_xxx
+```
 
-> Token 从 TOOLS.md 读取；channel/target 从会话上下文获取；轮询每 30 秒执行，状态 ≥ 8 时自动退出。
+**环境变量传递方式：** 通过 `env` 对象传递，无需创建临时脚本文件。
+
+**变量来源：**
+| 变量 | 来源 |
+|------|------|
+| Token/phone | TOOLS.md |
+| channel/target | 会话上下文 |
+| orderId | 上下文（订单创建后） |
+
+**渠道参数对照：**
+| 渠道 | channel | target 格式 |
+|------|---------|-------------|
+| 飞书 | `feishu` | `user:ou_xxx` |
+| QQ | `qqbot` | `c2c:xxx` |
+| Discord | `discord` | `user:123456` |
 
 ---
 
@@ -189,21 +200,21 @@ exec({
 | -------------------------------- | ---------- | --------------------------------------------------------------------------------------- |
 | `send_verification_code`         | 发送验证码 | `--phone`                                                                               |
 | `login_with_verification_code`   | 验证码登录 | `--phone --msgCode`                                                                     |
-| `text_search`                    | 地址解析   | `--keyword` → 返回 lat/lng/address                                                      |
-| `get_recommended_boarding_point` | 推荐上车点 | `--latitude --longitude` → 返回上车点列表（含名称、距离、经纬度）                       |
-| `estimate_price`                 | 价格预估   | `--startLat --startLng --endLat --endLng --startAddress --endAddress` → 返回 estimateId |
-| `create_ride_order`              | 创建订单   | `--estimateId --fromLat --fromLng --fromAddress --toLat --toLng --toAddress`            |
-| `query_ride_order`               | 查询订单   | `--orderId`                                                                             |
-| `cancel_order`                   | 取消订单   | `--orderId`                                                                             |
-| `get_driver_location`            | 司机位置   | `--orderId`                                                                             |
+| `text_search`                    | 地址解析   | `--phone --keyword` → 返回 lat/lng/address                                                      |
+| `get_recommended_boarding_point` | 推荐上车点 | `--phone --latitude --longitude` → 返回上车点列表（含名称、距离、经纬度）                       |
+| `estimate_price`                 | 价格预估   | `--phone --startLat --startLng --endLat --endLng --startAddress --endAddress` → 返回 estimateId |
+| `create_ride_order`              | 创建订单   | `--phone --estimateId --fromLat --fromLng --fromAddress --toLat --toLng --toAddress`            |
+| `query_ride_order`               | 查询订单   | `--phone --orderId`                                                                             |
+| `cancel_order`                   | 取消订单   | `--phone --orderId`                                                                             |
+| `get_driver_location`            | 司机位置   | `--phone --orderId`                                                                             |
 
 ### 辅助工具
 
 | 工具                     | 功能       | 必需参数                                  |
 | ------------------------ | ---------- | ----------------------------------------- |
-| `driving_route_planning` | 路线规划   | `--startLat --startLng --endLat --endLng` |
-| `nearby_search`          | 周边搜索   | `--keyword`                               |
-| `reverse_geocode`        | 逆地址编码 | `--lat --lng`                             |
+| `driving_route_planning` | 路线规划   | `--phone --startLat --startLng --endLat --endLng` |
+| `nearby_search`          | 周边搜索   | `--phone --keyword`                               |
+| `reverse_geocode`        | 逆地址编码 | `--phone --lat --lng`                             |
 
 ---
 
@@ -223,6 +234,7 @@ exec({
 | ------------------- | ---------------- | --------------------- |
 | TOKEN 未配置        | 首次使用未登录   | 执行登录流程          |
 | 验证码错误          | 用户输入错误     | 提示重新输入或重发    |
+| token失效          | token 过期       | 执行登录流程          |
 | estimateId 不能为空 | 未先调用价格预估 | 先调用 estimate_price |
 | 必传参数缺失        | 参数不完整       | 补齐参数              |
 | HTTP 请求失败       | 网络问题         | 检查网络状态          |

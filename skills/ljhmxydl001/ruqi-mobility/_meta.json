@@ -3,9 +3,15 @@
   "slug": "ruqi-mobility",
   "displayName": "ruqi-mobility",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776326581295,
-    "commit": "https://github.com/openclaw/skills/commit/2246b8705ad64223518648fc4ddab00ca9115952"
+    "version": "1.0.2",
+    "publishedAt": 1777345494659,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776326581295,
+      "commit": "https://github.com/openclaw/skills/commit/2246b8705ad64223518648fc4ddab00ca9115952"
+    }
+  ]
 }
