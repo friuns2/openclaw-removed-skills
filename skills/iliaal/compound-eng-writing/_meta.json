@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-writing",
-  "displayName": "writing",
+  "displayName": "ia-writing",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519071975,
-    "commit": "https://github.com/openclaw/skills/commit/a2c198d7e210ee30f22fd0a86c46bb13335af2e7"
+    "version": "3.0.4",
+    "publishedAt": 1777300826807,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519071975,
+      "commit": "https://github.com/openclaw/skills/commit/a2c198d7e210ee30f22fd0a86c46bb13335af2e7"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004287767,
