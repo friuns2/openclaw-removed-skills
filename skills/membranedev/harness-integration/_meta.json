@@ -3,9 +3,15 @@
   "slug": "harness-integration",
   "displayName": "Harness",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775390641169,
-    "commit": "https://github.com/openclaw/skills/commit/9a823f8be26f35c476cdccab8754b079fa80eb74"
+    "version": "1.0.1",
+    "publishedAt": 1776888830610,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775390641169,
+      "commit": "https://github.com/openclaw/skills/commit/9a823f8be26f35c476cdccab8754b079fa80eb74"
+    }
+  ]
 }
