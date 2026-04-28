@@ -3,11 +3,16 @@
   "slug": "spectyra",
   "displayName": "Spectyra - OpenClaw Workflow & Cost Optimizer",
   "latest": {
-    "version": "1.0.23",
-    "publishedAt": 1776654864688,
-    "commit": "https://github.com/openclaw/skills/commit/c5a8718f28cece03cf39d24e29db116dfa458c26"
+    "version": "1.0.25",
+    "publishedAt": 1776838132504,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.23",
+      "publishedAt": 1776654864688,
+      "commit": "https://github.com/openclaw/skills/commit/c5a8718f28cece03cf39d24e29db116dfa458c26"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1775893245002,
