@@ -3,9 +3,15 @@
   "slug": "clyde",
   "displayName": "Clyde",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775470039458,
-    "commit": "https://github.com/openclaw/skills/commit/d08d89c86cbdd1c937c142b305cd11b9e5409eff"
+    "version": "1.0.1",
+    "publishedAt": 1776892850255,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775470039458,
+      "commit": "https://github.com/openclaw/skills/commit/d08d89c86cbdd1c937c142b305cd11b9e5409eff"
+    }
+  ]
 }
