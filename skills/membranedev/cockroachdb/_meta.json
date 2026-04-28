@@ -3,9 +3,15 @@
   "slug": "cockroachdb",
   "displayName": "Cockroachdb",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775621053644,
-    "commit": "https://github.com/openclaw/skills/commit/6326e7408c141f8b54c4074dd1641545543f470a"
+    "version": "1.0.1",
+    "publishedAt": 1776896338075,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775621053644,
+      "commit": "https://github.com/openclaw/skills/commit/6326e7408c141f8b54c4074dd1641545543f470a"
+    }
+  ]
 }
