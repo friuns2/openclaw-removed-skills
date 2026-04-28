@@ -3,9 +3,15 @@
   "slug": "oh-dear",
   "displayName": "Oh Dear",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775437405867,
-    "commit": "https://github.com/openclaw/skills/commit/161633d78be843b704c61cc7defd10a4768a2f54"
+    "version": "1.0.1",
+    "publishedAt": 1776897119165,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775437405867,
+      "commit": "https://github.com/openclaw/skills/commit/161633d78be843b704c61cc7defd10a4768a2f54"
+    }
+  ]
 }
