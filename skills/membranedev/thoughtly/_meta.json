@@ -3,9 +3,15 @@
   "slug": "thoughtly",
   "displayName": "Thoughtly",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775315038995,
-    "commit": "https://github.com/openclaw/skills/commit/b0342c5609d672bed815f1000207468b1d49daa1"
+    "version": "1.0.1",
+    "publishedAt": 1776884010642,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775315038995,
+      "commit": "https://github.com/openclaw/skills/commit/b0342c5609d672bed815f1000207468b1d49daa1"
+    }
+  ]
 }
