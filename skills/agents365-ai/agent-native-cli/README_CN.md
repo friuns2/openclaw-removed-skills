@@ -1,6 +1,6 @@
 # agent-native-cli — AI 智能体原生 CLI 设计与评审 Skill
 
-[English](README.md)
+[English](README.md) · [文档站点](https://agents365-ai.github.io/agent-native-cli/zh.html)
 
 ## 功能说明
 
@@ -39,7 +39,7 @@
 | 设计委托式认证 | 否 | 是 — 人类管理认证生命周期；智能体使用 token |
 | 区分环境变量与 CLI 参数的信任级别 | 否 | 是 — 定向信任模型 |
 | 生成优先级重构计划 | 少见 | 始终 — P0 / P1 / P2，含示例 |
-| 按 10 项标准对 CLI 评分 | 否 | 是 — 每项 0–2 分，含最终判定 |
+| 按 14 项标准对 CLI 评分 | 否 | 是 — 每项 0–2 分，含最终判定 |
 
 ## 适用场景
 
@@ -52,6 +52,16 @@
 - 从 CLI Schema 生成 SKILL.md 或 skill 文档
 
 ## skill 安装
+
+### 快速安装 —— 让任意 Agent 帮你装
+
+最简单的方式是请任意一个具备编码能力的 Agent（Claude Code、Codex、Cursor、Aider、Gemini CLI……）把仓库克隆到你所在平台的 skills 目录。把 URL 和目标路径一起写在提示里：
+
+```
+帮我把 https://github.com/Agents365-ai/agent-native-cli 克隆到 ~/.claude/skills/agent-native-cli。
+```
+
+把示例中的目标路径替换为你所在平台的路径 —— 见本节末尾的 **安装路径汇总** 表。由于提示中已经写明了目标路径，这种方式对任何 Agent 都通用，无需依赖 Agent 是否内置 skills 目录约定。对于手边没有 Agent 的场景（CI、全新机器、无人值守脚本），请使用下面各小节里的手动 `git clone` 指令。
 
 ### Claude Code
 
@@ -135,7 +145,7 @@ skills install agent-native-cli
 
 用于 SkillsMP 索引，本仓库使用以下 topics：
 
-`claude-code` `claude-code-skill` `claude-skills` `agent-skills` `skillsmp` `skill-md` `agent-native-cli` `cli-design` `interface-design` `structured-output` `schema-driven` `dry-run` `exit-codes` `tool-design`
+`claude-code` `claude-code-skill` `claude-skills` `agent-skills` `agent-native` `agent-native-cli` `openclaw` `openclaw-skills` `skillsmp` `skill-md` `cli` `cli-design` `interface-design` `structured-output` `schema-driven` `dry-run` `exit-codes` `tool-design`
 
 ## 开源协议
 

@@ -1,6 +1,6 @@
 # agent-native-cli — Agent-Native CLI Design & Review Skill
 
-[中文文档](README_CN.md)
+[中文文档](README_CN.md) · [Docs site](https://agents365-ai.github.io/agent-native-cli/)
 
 ## What it does
 
@@ -39,7 +39,7 @@ The core `SKILL.md` is portable, and this repository includes metadata for the p
 | Design delegated authentication | No | Yes — human manages auth lifecycle; agent uses token |
 | Separate trust levels for env vs. CLI args | No | Yes — directional trust model |
 | Produce prioritized refactor plan | Rarely | Always — P0 / P1 / P2 with examples |
-| Score CLI across 10-criterion rubric | No | Yes — 0–2 per criterion with verdict |
+| Score CLI across 14-criterion rubric | No | Yes — 0–2 per criterion with verdict |
 
 ## When to use
 
@@ -52,6 +52,16 @@ The core `SKILL.md` is portable, and this repository includes metadata for the p
 - Producing a SKILL.md or skill docs from a CLI schema
 
 ## Skill Installation
+
+### Quick install — ask any agent
+
+The simplest install is to ask any code-capable agent (Claude Code, Codex, Cursor, Aider, Gemini CLI, …) to clone the repo into your platform's skills directory. Just hand it the URL and the destination path:
+
+```
+Clone https://github.com/Agents365-ai/agent-native-cli into ~/.claude/skills/agent-native-cli for me.
+```
+
+Substitute the destination for your platform — see the **Installation paths summary** table at the end of this section. Because the prompt names the exact path, this works for any agent regardless of whether it has built-in knowledge of skills conventions. For environments without an agent handy (CI, fresh machines, headless scripts), use the per-platform `git clone` commands in the sub-sections that follow.
 
 ### Claude Code
 
@@ -135,11 +145,37 @@ skills install agent-native-cli
 
 For SkillsMP indexing, this repository uses the following topics:
 
-`claude-code` `claude-code-skill` `claude-skills` `agent-skills` `skillsmp` `skill-md` `agent-native-cli` `cli-design` `interface-design` `structured-output` `schema-driven` `dry-run` `exit-codes` `tool-design`
+`claude-code` `claude-code-skill` `claude-skills` `agent-skills` `agent-native` `agent-native-cli` `openclaw` `openclaw-skills` `skillsmp` `skill-md` `cli` `cli-design` `interface-design` `structured-output` `schema-driven` `dry-run` `exit-codes` `tool-design`
 
 ## License
 
 MIT
+
+## Changelog
+
+### [v1.2.0](https://github.com/Agents365-ai/agent-native-cli/releases/tag/v1.2.0) — April 26, 2026
+
+**2026 Research Update** — Aligned with latest agent-CLI design patterns and benchmarks.
+
+**New Content:**
+- Added hybrid MCP-CLI decision framework with decision matrix (3 scenarios for each pattern)
+- Strengthened Principle 6 with schema versioning in response envelopes and deprecation signals
+- Added Example 8: Schema versioning with drift detection for agent caching scenarios
+- Quantified anti-pattern: eager schema dumps (55K tokens per 10 invocations)
+- Added token efficiency checklist (6 items for evaluating CLI context cost)
+
+**Research Alignment:**
+- Cite 2026 benchmarks: CLI achieves 28% higher task completion, 33% token efficiency vs. MCP-only
+- Added 4 new references: Reinhardt, Chugh, RudderStack on hybrid patterns (2026)
+- Validated all 7 principles through April 2026 production deployments
+
+**Recommendation:** This version reflects the consensus that large production agents (Claude Code, Cursor, Gemini CLI) use both CLI (for local/scriptable tasks) and MCP (for multi-tenant SaaS). Skill remains fundamentally sound; no principles required rewriting.
+
+### v1.1.0 — Early 2026
+
+Initial version with seven principles, 14-criterion rubric, and examples.
+
+---
 
 ## Support
 

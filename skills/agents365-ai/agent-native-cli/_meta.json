@@ -1,11 +1,17 @@
 {
   "owner": "agents365-ai",
   "slug": "agent-native-cli",
-  "displayName": "Agent Native Cli",
+  "displayName": "agent-native-cli",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775730507070,
-    "commit": "https://github.com/openclaw/skills/commit/79b75641eb74d0b342deec99df80bb4b20d92dd2"
+    "version": "1.2.0",
+    "publishedAt": 1777202623992,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775730507070,
+      "commit": "https://github.com/openclaw/skills/commit/79b75641eb74d0b342deec99df80bb4b20d92dd2"
+    }
+  ]
 }
