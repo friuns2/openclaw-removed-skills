@@ -3,11 +3,16 @@
   "slug": "x-comment-feed-posts",
   "displayName": "X Comment Feed Posts",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1776316130274,
-    "commit": "https://github.com/openclaw/skills/commit/3ee1251f9598c8bbd7a5362eacb11ac5130862ab"
+    "version": "1.1.2",
+    "publishedAt": 1776881994684,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1776316130274,
+      "commit": "https://github.com/openclaw/skills/commit/3ee1251f9598c8bbd7a5362eacb11ac5130862ab"
+    },
     {
       "version": "1.0.9",
       "publishedAt": 1776026174574,
