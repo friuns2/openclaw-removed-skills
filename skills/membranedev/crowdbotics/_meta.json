@@ -3,9 +3,15 @@
   "slug": "crowdbotics",
   "displayName": "Crowdbotics",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775675080542,
-    "commit": "https://github.com/openclaw/skills/commit/1d396a0149e5127e30fa88e821aaa32ad2c3179c"
+    "version": "1.0.1",
+    "publishedAt": 1776897880148,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775675080542,
+      "commit": "https://github.com/openclaw/skills/commit/1d396a0149e5127e30fa88e821aaa32ad2c3179c"
+    }
+  ]
 }
