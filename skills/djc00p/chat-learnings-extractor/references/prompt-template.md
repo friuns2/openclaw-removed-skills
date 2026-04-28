@@ -17,7 +17,7 @@ Keep responses focused and concise. Use bullet points. Skip categories if nothin
 
 The conversation will be provided as:
 
-```
+```text
 Title: <chat title>
 Date: <YYYY-MM-DD>
 
@@ -29,22 +29,22 @@ Date: <YYYY-MM-DD>
 Return **only** the structured markdown below. No preamble or explanation:
 
 ```markdown
-## Lessons Learned
+### Lessons Learned
 
 - [bullet point]
 - [bullet point]
 
-## Decisions Made
+### Decisions Made
 
 - [bullet point]
 - [bullet point]
 
-## Patterns Noticed
+### Patterns Noticed
 
 - [bullet point]
 - [bullet point]
 
-## Dead Ends
+### Dead Ends
 
 - [bullet point]
 - [bullet point]
@@ -56,7 +56,7 @@ If a section has no notable content, write just the heading with "None" as a sin
 
 **Input conversation summary:**
 
-```
+```bash
 Title: Rails caching strategy discussion
 Date: 2026-03-15
 
@@ -70,23 +70,23 @@ Date: 2026-03-15
 **Output:**
 
 ```markdown
-## Lessons Learned
+### Lessons Learned
 
 - Fragment caching (view-level) works better than raw query caching for this use case
 - Stale data is a real problem with naive caching strategies
 - Redis with TTL is the standard approach for distributed caching
 
-## Decisions Made
+### Decisions Made
 
 - Chose view fragment caching over query-level caching
 - Will implement with 5-minute TTL based on discussion
 
-## Patterns Noticed
+### Patterns Noticed
 
 - Caching is a tradeoff between freshness and performance
 - First approach often fails, second iteration succeeds
 
-## Dead Ends
+### Dead Ends
 
 - Query result caching — caused stale data issues in production
 ```
