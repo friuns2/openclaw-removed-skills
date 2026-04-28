@@ -1,6 +1,6 @@
 ---
 name: Taobao and Tmall API
-description: Analyze Taobao and Tmall workflows with JustOneAPI, including product Details, product Reviews, and shop Product List across 9 operations.
+description: Analyze Taobao and Tmall workflows with JustOneAPI, including product Details, product Reviews, and shop Product List across 10 operations.
 author: JustOneAPI
 homepage: https://api.justoneapi.com
 metadata: {"openclaw":{"homepage":"https://api.justoneapi.com","primaryEnv":"JUST_ONE_API_TOKEN","requires":{"bins":["node"],"env":["JUST_ONE_API_TOKEN"]},"skillKey":"justoneapi_taobao"}}
@@ -8,7 +8,7 @@ metadata: {"openclaw":{"homepage":"https://api.justoneapi.com","primaryEnv":"JUS
 
 # Taobao and Tmall
 
-This skill wraps 9 Taobao and Tmall operations exposed by JustOneAPI. It is strongest for product Details, product Reviews, shop Product List, and product Search. Expect common inputs such as `itemId`, `page`, `sort`, `userId`, `shopId`.
+This skill wraps 10 Taobao and Tmall operations exposed by JustOneAPI. It is strongest for product Details, product Reviews, shop Product List, and product Search. Expect common inputs such as `itemId`, `page`, `sort`, `userId`, `shopId`.
 
 ## When To Use It
 
@@ -19,14 +19,14 @@ This skill wraps 9 Taobao and Tmall operations exposed by JustOneAPI. It is stro
 
 ## Representative Operations
 
-- `getItemDetailV1`: Product Details — Get Taobao and Tmall product Details data, including pricing, images, and shop details, for product research, catalog monitoring, and ecommerce analysis
+- `getTaobaoItemDetailV1`: Product Details — Get Taobao and Tmall product Details data, including pricing, images, and shop details, for product research, catalog monitoring, and ecommerce analysis
 - `getItemCommentV3`: Product Reviews — Get Taobao and Tmall product Reviews data, including ratings, timestamps, and reviewer signals, for feedback analysis and product research
-- `getShopItemListV1`: Shop Product List — Get Taobao and Tmall shop Product List data, including item titles, prices, and images, for seller research and catalog tracking
+- `getTaobaoShopItemListV1`: Shop Product List — Get Taobao and Tmall shop Product List data, including item titles, prices, and images, for seller research and catalog tracking
 - `searchItemListV1`: Product Search — Get Taobao and Tmall product Search data, including titles, prices, and images, for product discovery
 
 ## Request Pattern
 
-- 9 operations are available in this skill.
+- 10 operations are available in this skill.
 - HTTP methods used here: `GET`.
 - The most common non-token parameters are `itemId`, `page`, `sort`, `userId`, `shopId`.
 - All operations in this skill are parameter-driven requests; none require a request body.
@@ -34,7 +34,7 @@ This skill wraps 9 Taobao and Tmall operations exposed by JustOneAPI. It is stro
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getItemDetailV1`, `getItemCommentV3`, `getShopItemListV1`, `searchItemListV1`.
+2. Start with one of these operations when it matches the user's request: `getTaobaoItemDetailV1`, `getItemCommentV3`, `getTaobaoShopItemListV1`, `searchItemListV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -55,6 +55,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the Taobao and Tmall task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `getItemDetailV1`, explain why the returned fields answer the user's question.
+- When using `getTaobaoItemDetailV1`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `itemId`, `page`, `sort`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const manifest = {
   "baseUrl": "https://api.justoneapi.com",
-  "description": "Analyze Taobao and Tmall workflows with JustOneAPI, including product Details, product Reviews, and shop Product List across 9 operations.",
+  "description": "Analyze Taobao and Tmall workflows with JustOneAPI, including product Details, product Reviews, and shop Product List across 10 operations.",
   "displayName": "Taobao and Tmall",
   "openapi": "3.1.0",
   "platformKey": "taobao",
@@ -59,8 +59,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Reviews",
@@ -71,7 +71,7 @@ const manifest = {
     {
       "description": "Get Taobao and Tmall product Details data, including pricing, images, and shop details, for product research, catalog monitoring, and ecommerce analysis.",
       "method": "GET",
-      "operationId": "getItemDetailV1",
+      "operationId": "getTaobaoItemDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -96,8 +96,45 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
+        }
+      ],
+      "summary": "Product Details",
+      "tags": [
+        "Taobao and Tmall"
+      ]
+    },
+    {
+      "description": "Get Taobao and Tmall product Details data through the task-backed v2 flow. If data is not ready within a short wait, the response returns a pending task status.",
+      "method": "GET",
+      "operationId": "getItemDetailV2",
+      "parameters": [
+        {
+          "defaultValue": null,
+          "description": "Access token for this API service.",
+          "enumValues": [],
+          "location": "query",
+          "name": "token",
+          "required": true,
+          "schemaType": "string"
+        },
+        {
+          "defaultValue": null,
+          "description": "AUnique product identifier on Taobao/Tmall (item ID).",
+          "enumValues": [],
+          "location": "query",
+          "name": "itemId",
+          "required": true,
+          "schemaType": "string"
+        }
+      ],
+      "path": "/api/taobao/get-item-detail/v2",
+      "requestBody": null,
+      "responses": [
+        {
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Details",
@@ -133,8 +170,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Details",
@@ -170,8 +207,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Details",
@@ -207,8 +244,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Details",
@@ -219,7 +256,7 @@ const manifest = {
     {
       "description": "Get Taobao and Tmall shop Product List data, including item titles, prices, and images, for seller research and catalog tracking.",
       "method": "GET",
-      "operationId": "getShopItemListV1",
+      "operationId": "getTaobaoShopItemListV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -265,8 +302,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Shop Product List",
@@ -335,8 +372,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Shop Product List",
@@ -405,8 +442,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Shop Product List",
@@ -492,8 +529,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Product Search",
