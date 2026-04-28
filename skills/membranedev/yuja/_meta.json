@@ -3,9 +3,15 @@
   "slug": "yuja",
   "displayName": "Yuja",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775667924485,
-    "commit": "https://github.com/openclaw/skills/commit/7252aa647c75f261204c907c9084c5b181c4646a"
+    "version": "1.0.1",
+    "publishedAt": 1776897604988,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775667924485,
+      "commit": "https://github.com/openclaw/skills/commit/7252aa647c75f261204c907c9084c5b181c4646a"
+    }
+  ]
 }
