@@ -1,0 +1,11 @@
+{
+  "owner": "xyzhangjf",
+  "slug": "zhoupu-order-import",
+  "displayName": "舟谱订单导入",
+  "latest": {
+    "version": "1.2.0",
+    "publishedAt": 1776049457581,
+    "commit": null
+  },
+  "history": []
+}
