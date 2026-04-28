@@ -1,11 +1,17 @@
 {
   "owner": "freedompixels",
   "slug": "cn-weight-tracker",
-  "displayName": "cn-weight-tracker",
+  "displayName": "体重追踪助手",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776237581988,
-    "commit": "https://github.com/openclaw/skills/commit/0127f858719669d0a6a15f3f6fe7d75db3ed3c6c"
+    "version": "1.1.0",
+    "publishedAt": 1776611796860,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776237581988,
+      "commit": "https://github.com/openclaw/skills/commit/0127f858719669d0a6a15f3f6fe7d75db3ed3c6c"
+    }
+  ]
 }
