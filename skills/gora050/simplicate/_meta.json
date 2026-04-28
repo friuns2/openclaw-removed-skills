@@ -3,9 +3,15 @@
   "slug": "simplicate",
   "displayName": "Simplicate",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775437613049,
-    "commit": "https://github.com/openclaw/skills/commit/09d3a404082663a7e77ead17e04e799c5b36a77a"
+    "version": "1.0.1",
+    "publishedAt": 1776892650670,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775437613049,
+      "commit": "https://github.com/openclaw/skills/commit/09d3a404082663a7e77ead17e04e799c5b36a77a"
+    }
+  ]
 }
