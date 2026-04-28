@@ -3,9 +3,15 @@
   "slug": "budget-insight",
   "displayName": "Budget Insight",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775311459043,
-    "commit": "https://github.com/openclaw/skills/commit/20da31f4ed58d904be49e1c22b68a2c4786f51ad"
+    "version": "1.0.1",
+    "publishedAt": 1776883860655,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775311459043,
+      "commit": "https://github.com/openclaw/skills/commit/20da31f4ed58d904be49e1c22b68a2c4786f51ad"
+    }
+  ]
 }
