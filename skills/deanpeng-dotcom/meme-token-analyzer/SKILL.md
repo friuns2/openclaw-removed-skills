@@ -1,268 +1,126 @@
 ---
 name: meme-token-analyzer
-version: 1.0.2
-description: "Meme Token Analyzer workflow with web search, image generation, data cleaning, and multimodal analysis to output wealth gene detection reports. Use this skill when analyzing meme token sentiment, generating prediction images, and producing professional investment analysis reports. Supports multi-dimensional analysis, intelligent detection, and humorous professional reporting."
+version: 2.0.0
+description: "Meme 代币财富基因检测系统。输入任意代币名称（如 PEPE、DOGE、$SHIB），基于实时 Web 情绪数据输出四维分析报告与 🌟钻石手/🌙登月/🗑️纸手/💩屎币 评级。支持主流币自动识别（BTC/ETH/SOL），无数据时不幻觉。触发词：meme 分析、代币评级、财富基因、PEPE分析、meme coin、rug check、meme token analyze、wealth gene、meme coin rating"
 author: AntalphaAI
 license: MIT
-requires: [python-3.12]
-keywords: [meme, token, sentiment-analysis, image-generation, multimodal, ai, langgraph, wealth-gene, meme-coin-analysis]
-metadata: {"repository":"https://github.com/AntalphaAI/Meme-Token-Analyzer","install":{"type":"python","command":"pip install -r requirements.txt"},"env":[{"name":"COZE_WORKSPACE_PATH","description":"Workspace path for configuration files","required":true,"sensitive":false}],"disclaimer":"This skill only uses COZE_WORKSPACE_PATH. It does NOT use COZE_BUCKET_ENDPOINT_URL, PGDATABASE_URL, or any storage/database credentials."}
+metadata: {"repository":"https://github.com/AntalphaAI/meme-token-analyzer","mcp":{"url":"https://mcp-skills.ai.antalpha.com/mcp","tools":[{"name":"meme-analyze","description":"分析 Meme 代币财富基因，输出 🌟/🌙/🗑️/💩 评级报告"}]}}
 ---
 
-# Meme Token Analyzer Skill
+# Meme Token Analyzer 🚀
 
-This skill guides the implementation of an automated, multimodal Meme token analysis tool using LangGraph and coze-coding-dev-sdk, combining real-time sentiment search, AI-generated prediction images, and comprehensive wealth gene detection analysis.
-
-## Overview
-
-Meme Token Analyzer enables you to build applications that automatically analyze Meme tokens by:
-- 🔍 **Searching** latest news, social media sentiment, and market trends with time range filtering
-- 🎨 **Generating** "Moonshot" prediction images for tokens
-- 🧹 **Cleaning** search results into LLM-friendly summaries
-- 🤖 **Analyzing** sentiment data and visual elements with multimodal AI
-- 💎 **Rating** tokens with a four-tier wealth gene system (Diamond Hand, Moonshot, Paper Hand, Shitcoin)
-
-## Supported Languages
-
-This skill supports Python SDK.
-
-**Mandatory (required): When you use this skill, you MUST immediately open and read the SDK guide for the language you are implementing in for installation, client initialization, and usage examples, and then follow it exactly. Do not guess APIs, do not proceed before reading the corresponding SDK guide.**
-
-- **Python SDK**: Read first: [python/README.md](python/README.md)
-
-## Key Features
-
-### 🔍 Web Search
-- Searches latest news, social media sentiment, and market trends
-- Time range filter (1 month) for fresh data
-- AI-generated summary of search results
-
-### 🎨 Image Generation
-- Creates "Moonshot" prediction images for tokens
-- High-quality 2K resolution images
-- Dynamic, cinematic visual style
-
-### 🧹 Data Cleaning
-- Condenses search results into LLM-friendly summaries
-- Date freshness validation
-- Removes irrelevant information
-
-### 🤖 AI Analysis
-- Multimodal analysis combining sentiment data and visual elements
-- Four-dimensional analysis framework:
-  1. 🎯 **Narrative Magic Analysis** - Name and concept memorability
-  2. 📢 **Community Hype Ability Prediction** - Community activity and shilling intensity
-  3. 🎨 **Visual Gene Detection** - Meme image's viral potential
-  4. 🏆 **Wealth Gene Rating** - Final verdict
-
-### 💎 Wealth Gene Rating System
-- 🌟 **Diamond Hand** - 10000x potential
-- 🌙 **Moonshot** - 100x expected
-- 🗑️ **Paper Hand** - Likely a rug
-- 💩 **Shitcoin** - Stay away
-
-### 🧠 Smart Detection
-- Automatically detects major coins (BTC/ETH/SOL) with cross-border scan perspective
-- Handles missing data gracefully without fabrication
-- Identifies irrelevant search results with appropriate warnings
-
-## Workflow Architecture
-
-### DAG Flow Diagram
-
-```
-                              ┌─────────────────────────────────────┐
-                              │           START                      │
-                              │         (token_name)                 │
-                              └──────────────┬──────────────────────┘
-                                             │
-                      ┌──────────────────────┴──────────────────────┐
-                      │                                             │
-                      ▼                                             ▼
-        ┌─────────────────────────┐                 ┌─────────────────────────┐
-        │      search_node        │                 │     image_gen_node      │
-        │   (Web Search Node)     │                 │  (Image Generation)     │
-        │                         │                 │                         │
-        │  • Search web news      │                 │  • Generate prediction  │
-        │  • Fetch sentiment      │                 │    image for token      │
-        │  • AI summary           │                 │  • 2K resolution        │
-        └───────────┬─────────────┘                 └───────────┬─────────────┘
-                    │                                           │
-                    ▼                                           │
-        ┌─────────────────────────┐                             │
-        │   clean_data_node       │                             │
-        │   (Data Cleaning)       │                             │
-        │                         │                             │
-        │  • Condense results     │                             │
-        │  • Validate dates       │                             │
-        │  • Remove noise         │                             │
-        └───────────┬─────────────┘                             │
-                    │                                           │
-                    └─────────────────┬─────────────────────────┘
-                                      │
-                                      ▼
-                      ┌─────────────────────────────────────┐
-                      │       analysis_node                  │
-                      │   (Wealth Gene Detection)           │
-                      │                                      │
-                      │  • Multimodal analysis              │
-                      │  • Narrative Magic Check            │
-                      │  • Community Hype Prediction        │
-                      │  • Visual Gene Detection            │
-                      │  • Wealth Gene Rating               │
-                      └──────────────┬──────────────────────┘
-                                     │
-                                     ▼
-                      ┌─────────────────────────────────────┐
-                      │              END                     │
-                      │   (analysis_report, image_url)      │
-                      └─────────────────────────────────────┘
-```
-
-### Execution Flow
-
-```
-START
-  ├── search (Web Search) ──> clean_data (Data Cleaning) ──┐
-  └── image_gen (Image Generation) ────────────────────────┤
-                                                            ├─> analysis (Wealth Gene Detection) ──> END
-```
-
-### Node Details
-
-| Node | Type | Input | Output | Description |
-|------|------|-------|--------|-------------|
-| `search_node` | Task | `token_name` | `search_results`, `search_summary` | Web search with AI summary |
-| `image_gen_node` | Task | `token_name` | `generated_image_url` | AI prediction image generation |
-| `clean_data_node` | Task | `search_results`, `search_summary` | `sentiment_data` | Data cleaning and condensation |
-| `analysis_node` | Agent | `sentiment_data`, `generated_image_url` | `analysis_report` | Multimodal wealth gene analysis |
-
-**Parallel Execution**: Search and image generation run in parallel for efficiency.
-
-**Convergence**: Analysis waits for both data cleaning and image generation to complete.
-
-## Input/Output
-
-**Input**:
-- `token_name` (String): Token name, e.g., "PEPE", "SHIB", "Dogecoin"
-
-**Output**:
-- `analysis_report` (String): Humorous and professional wealth gene detection report
-- `generated_image_url` (String): Generated prediction image URL
-
-## Prerequisites
-
-The following packages are already installed:
-- `coze-coding-dev-sdk`: For LLM, search, and image generation clients
-- `langgraph`: For workflow orchestration
-- `langchain-core`: For message types
-- `pydantic`: For data models
-
-## Quick Start
-
-```python
-from langgraph.graph import StateGraph, END, START
-from coze_coding_dev_sdk import LLMClient, SearchClient, ImageGenerationClient
-
-# Define your nodes
-def search_node(state, config, runtime):
-    client = SearchClient(ctx=runtime.context)
-    response = client.search(query=f"{state.token_name} token news", need_summary=True)
-    return {"search_results": response.web_items, "search_summary": response.summary}
-
-# Build your workflow
-builder = StateGraph(GlobalState, input_schema=GraphInput, output_schema=GraphOutput)
-builder.add_node("search", search_node)
-builder.add_edge(START, "search")
-# ... add more nodes and edges
-main_graph = builder.compile()
-```
-
-For complete implementation details, see [python/README.md](python/README.md).
-
-## Use Cases
-
-### Analyze a Single Token
-```python
-result = main_graph.invoke({"token_name": "PEPE"})
-print(result["analysis_report"])
-```
-
-### Batch Analysis
-```python
-tokens = ["PEPE", "SHIB", "DOGE"]
-for token in tokens:
-    result = main_graph.invoke({"token_name": token})
-    print(f"{token}: {result['analysis_report'][:100]}...")
-```
-
-### Integration with Trading Bots
-```python
-def analyze_before_trade(token_name):
-    result = main_graph.invoke({"token_name": token_name})
-    report = result["analysis_report"]
-    
-    if "Diamond Hand" in report:
-        return "BUY", result["generated_image_url"]
-    elif "Shitcoin" in report:
-        return "AVOID", None
-    else:
-        return "RESEARCH", result["generated_image_url"]
-```
-
-## Security Notes
-
-- **Disclaimer**: This skill is an **analysis and entertainment tool only**. It does NOT execute trades, access wallets, connect to blockchain networks, or handle any financial transactions. All crypto/meme token references are for sentiment analysis purposes only.
-- **External Requests**: This skill makes requests to external APIs:
-  - Web search APIs (via coze-coding-dev-sdk)
-  - Image generation APIs (via coze-coding-dev-sdk)
-  - LLM APIs (doubao-seed-1-6-vision-250815)
-- **Data Handling**: Token names and search results are sent to external APIs for analysis. No wallet keys, private keys, or financial credentials are ever requested or stored.
-- **File Persistence**: No local file persistence, all operations are stateless
-- **Sensitive Data**: No API keys stored locally, all handled via SDK
-- **Input Validation**: Token names are validated and sanitized before use
-- **No Storage Dependencies**: This skill does NOT use S3, database, or any persistent storage. All `src/storage/` code and related dependencies (boto3, sqlalchemy, etc.) have been removed from the skill package.
-
-## Best Practices
-
-1. **Use Time Range Filtering**: Always filter search results by time range for fresh data
-2. **Handle Missing Data**: Gracefully handle cases where no search results are found
-3. **Multimodal Analysis**: Combine text and image analysis for comprehensive insights
-4. **Error Handling**: Implement robust error handling for API calls
-5. **Rate Limiting**: Respect API rate limits when analyzing multiple tokens
-
-## Limitations
-
-- Search results depend on public web data availability
-- Image generation quality varies based on token name clarity
-- Analysis is for educational purposes only, not financial advice
-- API rate limits may apply for high-volume usage
-
-## Troubleshooting
-
-**Issue**: Search returns no results
-- **Solution**: Check if token name is correct and publicly known
-- **Solution**: Verify network connectivity and API status
-
-**Issue**: Image generation fails
-- **Solution**: Check if prompt is appropriate and follows content guidelines
-- **Solution**: Verify ImageGenerationClient initialization and API status
-
-**Issue**: Analysis returns empty report
-- **Solution**: Check if sentiment_data and image_url are properly passed
-- **Solution**: Verify LLM model availability and configuration
-
-## Support
-
-For detailed implementation guide:
-- Python SDK: [python/README.md](python/README.md)
-
-For skill-related issues:
-- Check the troubleshooting section
-- Review the complete code examples in python/README.md
-- Ensure all prerequisites are met
+> **Meme 代币财富基因检测系统 V2**
+> 基于 Antalpha MCP Server，接入 llm-proxy 统一管控，全面替代 Coze 方案
 
 ---
 
-**Maintainer**: AntalphaAI  
-**License**: MIT
+## 使用前提
+
+需先完成 Agent 注册（获取 `agent_id`）：
+
+```
+调用 antalpha-register 工具完成注册，保存 agent_id
+```
+
+---
+
+## 核心能力
+
+- 🔍 **实时 Web 搜索**：Tavily API，过滤最近 30 天数据，带 AI 摘要
+- 🤖 **LLM 多维分析**：四维分析框架，via llm-proxy 统一计量计费
+- 💎 **财富基因评级**：四档精准评级，Degen 风格毒舌点评
+- 🧠 **主流币识别**：自动检测 BTC/ETH/SOL 等并切换分析视角
+- 🚫 **无幻觉设计**：无数据时明确说明，不编造价格或社区数据
+
+---
+
+## 触发场景
+
+| 用户说 | 自动执行 |
+|--------|----------|
+| "帮我分析一下 PEPE" | `meme-analyze` |
+| "DOGE 的财富基因是什么" | `meme-analyze` |
+| "$SHIB 值得买吗" | `meme-analyze` |
+| "这个 meme 币怎么样：BONK" | `meme-analyze` |
+| "BTC 算 meme 吗" | `meme-analyze`（自动切换价值币视角） |
+
+---
+
+## MCP Tool 说明
+
+### `meme-analyze`
+
+**输入参数：**
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `token_name` | string | 代币名称或符号，如 PEPE、$SHIB、Bitcoin |
+| `agent_id` | string (UUID) | 从 antalpha-register 获取的 Agent ID |
+
+**输出结构：**
+
+```json
+{
+  "token": "PEPE",
+  "is_major_coin": false,
+  "major_coin_warning": null,
+  "rating": "moonshot",
+  "rating_emoji": "🌙",
+  "rating_label": "登月",
+  "report": {
+    "narrative_magic": "叙事魔力分析...",
+    "community_hype": "社区炒作能力...",
+    "risk_warning": "风险提示..."
+  },
+  "search_summary": "Tavily AI 摘要...",
+  "data_freshness": "ok",
+  "sources": ["https://...", "https://..."],
+  "disclaimer": "本报告仅供娱乐和教育目的，不构成投资建议。"
+}
+```
+
+**评级标准：**
+
+| 评级值 | Emoji | 中文 | 含义 |
+|--------|-------|------|------|
+| `diamond_hand` | 🌟 | 钻石手 | 顶级叙事 + 强社区 + VC 背书，万倍潜力 |
+| `moonshot` | 🌙 | 登月 | 有效叙事 + 活跃社区，百倍合理预期 |
+| `paper_hand` | 🗑️ | 纸手 | 叙事薄弱，高风险 |
+| `shitcoin` | 💩 | 屎币 | 无叙事无社区，立即远离 |
+
+---
+
+## 输出示例
+
+```
+🌙 PEPE — 登月
+
+🎯 叙事魔力：PEPE 是互联网最具代表性的 Meme 形象，文化底蕴深厚，叙事自带传播力。
+📢 社区炒作：Twitter/X 活跃度极高，持仓地址数量庞大，Degen 文化认同感强。
+⚠️ 风险提示：高度投机，价格波动极大，注意仓位控制。
+
+📊 数据新鲜度：✅ 充足
+
+💡 本报告仅供娱乐和教育目的，不构成投资建议。DYOR。
+```
+
+---
+
+## 注意事项
+
+- 分析结果仅供娱乐和教育参考，不构成任何投资建议
+- 主流币（BTC/ETH/SOL 等）会自动切换为价值币分析视角
+- 冷门代币可能因 Web 数据不足而返回 `data_freshness: "no_data"`
+
+---
+
+## 技术架构
+
+- **后端**：NestJS + Antalpha MCP Server
+- **LLM**：via llm-proxy（统一计量，`fast-cheap` tier）
+- **搜索**：Tavily API（30天时间过滤，带 AI 摘要）
+- **版本**：v2.0.0（完全替代 Coze LangGraph 方案）
+
+---
+
+**Maintainer**: AntalphaAI | **License**: MIT
