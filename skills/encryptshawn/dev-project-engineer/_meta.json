@@ -3,9 +3,15 @@
   "slug": "dev-project-engineer",
   "displayName": "Software Engineer for projects",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776019998792,
-    "commit": "https://github.com/openclaw/skills/commit/dc2bc246d67ced736e42f742e73e072cf537af84"
+    "version": "1.0.2",
+    "publishedAt": 1777178405219,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776019998792,
+      "commit": "https://github.com/openclaw/skills/commit/dc2bc246d67ced736e42f742e73e072cf537af84"
+    }
+  ]
 }
