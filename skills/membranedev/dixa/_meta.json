@@ -3,9 +3,15 @@
   "slug": "dixa",
   "displayName": "Dixa",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775617474716,
-    "commit": "https://github.com/openclaw/skills/commit/356184ba31e1e1012d249f80100346504243771e"
+    "version": "1.0.1",
+    "publishedAt": 1776896314040,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775617474716,
+      "commit": "https://github.com/openclaw/skills/commit/356184ba31e1e1012d249f80100346504243771e"
+    }
+  ]
 }
