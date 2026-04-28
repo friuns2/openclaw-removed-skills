@@ -3,9 +3,15 @@
   "slug": "review-tui",
   "displayName": "Review Tui",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775863526556,
-    "commit": "https://github.com/openclaw/skills/commit/0d615a98d4e5b82a5d8dabf7ac69ea33c38d4ef4"
+    "version": "1.0.1",
+    "publishedAt": 1776831167037,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775863526556,
+      "commit": "https://github.com/openclaw/skills/commit/0d615a98d4e5b82a5d8dabf7ac69ea33c38d4ef4"
+    }
+  ]
 }
