@@ -3,9 +3,15 @@
   "slug": "krayin",
   "displayName": "Krayin",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775335347156,
-    "commit": "https://github.com/openclaw/skills/commit/c9fdfe8965ab35ca675a79867f2935a1b8ea1392"
+    "version": "1.0.1",
+    "publishedAt": 1776885970832,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775335347156,
+      "commit": "https://github.com/openclaw/skills/commit/c9fdfe8965ab35ca675a79867f2935a1b8ea1392"
+    }
+  ]
 }
