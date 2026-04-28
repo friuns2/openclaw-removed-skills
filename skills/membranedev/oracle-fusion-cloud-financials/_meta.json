@@ -3,9 +3,15 @@
   "slug": "oracle-fusion-cloud-financials",
   "displayName": "Oracle Fusion Cloud Financials",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775477093146,
-    "commit": "https://github.com/openclaw/skills/commit/3ffba15e7a323544a1555d655443c465c1872dab"
+    "version": "1.0.1",
+    "publishedAt": 1776890393964,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775477093146,
+      "commit": "https://github.com/openclaw/skills/commit/3ffba15e7a323544a1555d655443c465c1872dab"
+    }
+  ]
 }
