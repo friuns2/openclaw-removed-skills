@@ -3,9 +3,15 @@
   "slug": "signicat",
   "displayName": "Signicat",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775398073308,
-    "commit": "https://github.com/openclaw/skills/commit/d6e9f70c30228d9b283a4cc38ea0b2f291e03432"
+    "version": "1.0.1",
+    "publishedAt": 1776892619125,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775398073308,
+      "commit": "https://github.com/openclaw/skills/commit/d6e9f70c30228d9b283a4cc38ea0b2f291e03432"
+    }
+  ]
 }
