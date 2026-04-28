@@ -3,9 +3,15 @@
   "slug": "azuqua",
   "displayName": "Azuqua",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775487837487,
-    "commit": "https://github.com/openclaw/skills/commit/4eb2552853e905f6ba9654c8d66cc91cc58d528b"
+    "version": "1.0.1",
+    "publishedAt": 1776890479527,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775487837487,
+      "commit": "https://github.com/openclaw/skills/commit/4eb2552853e905f6ba9654c8d66cc91cc58d528b"
+    }
+  ]
 }
