@@ -1,0 +1,11 @@
+{
+  "owner": "sdk-team",
+  "slug": "alibabacloud-dsc-audit",
+  "displayName": "Alibabacloud Dsc Audit",
+  "latest": {
+    "version": "0.0.2",
+    "publishedAt": 1777027869472,
+    "commit": null
+  },
+  "history": []
+}
