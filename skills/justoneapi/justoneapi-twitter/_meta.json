@@ -3,11 +3,16 @@
   "slug": "justoneapi-twitter",
   "displayName": "Twitter API",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1776240010196,
-    "commit": "https://github.com/openclaw/skills/commit/ad091e4828bed279899a38cf13219730ee4517a3"
+    "version": "1.0.7",
+    "publishedAt": 1776924499181,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1776240010196,
+      "commit": "https://github.com/openclaw/skills/commit/ad091e4828bed279899a38cf13219730ee4517a3"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1775375361246,

@@ -18,8 +18,8 @@ This skill wraps 2 Twitter operations exposed by JustOneAPI. It is strongest for
 
 ## Representative Operations
 
-- `getUserDetailV1`: User Profile — Get Twitter user Profile data, including account metadata, audience metrics, and verification-related fields, for accessing user profile metadata (e.g., description, location, verification status) and collecting follower and following counts
-- `getUserPostsV1`: User Published Posts — Get Twitter user Published Posts data, including post content, timestamps, and engagement data, for account monitoring and content analysis
+- `getTwitterUserDetailV1`: User Profile — Get Twitter user Profile data, including account metadata, audience metrics, and verification-related fields, for accessing user profile metadata (e.g., description, location, verification status) and collecting follower and following counts
+- `getTwitterUserPostsV1`: User Published Posts — Get Twitter user Published Posts data, including post content, timestamps, and engagement data, for account monitoring and content analysis
 
 ## Request Pattern
 
@@ -31,7 +31,7 @@ This skill wraps 2 Twitter operations exposed by JustOneAPI. It is strongest for
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getUserDetailV1`, `getUserPostsV1`.
+2. Start with one of these operations when it matches the user's request: `getTwitterUserDetailV1`, `getTwitterUserPostsV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -52,6 +52,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the Twitter task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `getUserDetailV1`, explain why the returned fields answer the user's question.
+- When using `getTwitterUserDetailV1`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `restId`, `cursor`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

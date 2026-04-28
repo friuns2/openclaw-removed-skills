@@ -2,7 +2,7 @@
 
 Generated from JustOneAPI OpenAPI for platform key `twitter`.
 
-## `getUserDetailV1`
+## `getTwitterUserDetailV1`
 
 - Method: `GET`
 - Path: `/api/twitter/get-user-detail/v1`
@@ -23,9 +23,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserPostsV1`
+## `getTwitterUserPostsV1`
 
 - Method: `GET`
 - Path: `/api/twitter/get-user-posts/v1`
@@ -47,4 +47,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

@@ -13,7 +13,7 @@ const manifest = {
     {
       "description": "Get Twitter user Profile data, including account metadata, audience metrics, and verification-related fields, for accessing user profile metadata (e.g., description, location, verification status) and collecting follower and following counts.",
       "method": "GET",
-      "operationId": "getUserDetailV1",
+      "operationId": "getTwitterUserDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -38,8 +38,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -50,7 +50,7 @@ const manifest = {
     {
       "description": "Get Twitter user Published Posts data, including post content, timestamps, and engagement data, for account monitoring and content analysis.",
       "method": "GET",
-      "operationId": "getUserPostsV1",
+      "operationId": "getTwitterUserPostsV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -84,8 +84,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Posts",
