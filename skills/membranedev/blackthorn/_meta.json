@@ -3,9 +3,15 @@
   "slug": "blackthorn",
   "displayName": "Blackthorn",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775376229730,
-    "commit": "https://github.com/openclaw/skills/commit/b8fc07cfa1b9d1949fe334fa2e41156920b61e60"
+    "version": "1.0.1",
+    "publishedAt": 1776888317622,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775376229730,
+      "commit": "https://github.com/openclaw/skills/commit/b8fc07cfa1b9d1949fe334fa2e41156920b61e60"
+    }
+  ]
 }
