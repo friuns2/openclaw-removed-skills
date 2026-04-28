@@ -16,6 +16,7 @@ Expected shape:
 - points at `swarmvault.schema.md`
 - mentions `wiki/` and `state/`
 - prefers `wiki/graph/report.md` once compile exists
+- mentions `wiki/graph/share-card.md`, `wiki/graph/share-card.svg`, `wiki/graph/share-kit/`, `swarmvault graph share --post`, `swarmvault graph share --svg`, or `swarmvault graph share --bundle` when the user wants a copyable, visual, or portable summary
 
 ## Managed source prompt
 
@@ -77,6 +78,7 @@ Prompt:
 Expected shape:
 
 - uses `swarmvault graph serve` or `graph export --html`
+- may suggest `swarmvault graph share --post` when a quick copyable summary is enough, `swarmvault graph share --svg [path]` for a visual card, or `swarmvault graph share --bundle [dir]` for a portable share kit
 - may suggest `graph export --report`, `graph export --html-standalone`, `graph export --canvas`, or `graph export --obsidian` when a lighter shareable artifact is a better fit
 - may suggest `swarmvault diff` when the user is asking what a compile changed
 - may use `graph blast <target>` when the user is asking about change impact instead of broad graph browsing

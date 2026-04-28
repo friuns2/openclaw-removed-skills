@@ -11,6 +11,9 @@ swarmvault init --obsidian
 swarmvault scan ./repo --no-serve
 swarmvault source add https://github.com/karpathy/micrograd
 swarmvault diff
+swarmvault graph share --post
+swarmvault graph share --svg ./share-card.svg
+swarmvault graph share --bundle ./share-kit
 swarmvault graph blast ./src/index.ts
 swarmvault query "What are the key concepts?"
 swarmvault graph serve
@@ -24,6 +27,7 @@ swarmvault graph export --report ./graph-report.html
 - `scan --no-serve` leaves a compiled vault behind even when the viewer is not launched
 - `state/sources.json` contains the managed source registry entry
 - `wiki/graph/report.md` exists after compile
+- `wiki/graph/share-card.md`, `wiki/graph/share-card.svg`, and `wiki/graph/share-kit/` exist after compile; `graph share --post` prints copyable text, `graph share --svg [path]` writes the visual card, and `graph share --bundle [dir]` writes the portable share kit
 - `graph export --report` writes a shareable HTML report when the user wants a lighter artifact than the full workspace
 - `wiki/outputs/source-briefs/` contains a source brief
 - `wiki/outputs/` contains the saved query answer
