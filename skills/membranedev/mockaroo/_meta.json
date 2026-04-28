@@ -3,9 +3,15 @@
   "slug": "mockaroo",
   "displayName": "Mockaroo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775617482646,
-    "commit": "https://github.com/openclaw/skills/commit/c5b75ab3d64ec42db266b960088c48e6754f4840"
+    "version": "1.0.1",
+    "publishedAt": 1776896317088,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775617482646,
+      "commit": "https://github.com/openclaw/skills/commit/c5b75ab3d64ec42db266b960088c48e6754f4840"
+    }
+  ]
 }
