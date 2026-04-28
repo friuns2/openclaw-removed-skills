@@ -3,9 +3,15 @@
   "slug": "github-actions-integration",
   "displayName": "Github Actions",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775421711445,
-    "commit": "https://github.com/openclaw/skills/commit/ba8ceaeb2440ac7ae355dbf04b85d35c9d05834b"
+    "version": "1.0.1",
+    "publishedAt": 1776899828512,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775421711445,
+      "commit": "https://github.com/openclaw/skills/commit/ba8ceaeb2440ac7ae355dbf04b85d35c9d05834b"
+    }
+  ]
 }
