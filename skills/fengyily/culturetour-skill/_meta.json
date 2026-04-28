@@ -3,11 +3,16 @@
   "slug": "culturetour-skill",
   "displayName": "文旅素材搜索",
   "latest": {
-    "version": "1.0.21",
-    "publishedAt": 1776653342352,
-    "commit": "https://github.com/openclaw/skills/commit/115f5620eb726edc18a3159e96a19350369e7316"
+    "version": "1.0.22",
+    "publishedAt": 1776758769157,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.21",
+      "publishedAt": 1776653342352,
+      "commit": "https://github.com/openclaw/skills/commit/115f5620eb726edc18a3159e96a19350369e7316"
+    },
     {
       "version": "1.0.13",
       "publishedAt": 1776047041559,
