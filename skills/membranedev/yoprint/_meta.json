@@ -3,9 +3,15 @@
   "slug": "yoprint",
   "displayName": "Yoprint",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495020019,
-    "commit": "https://github.com/openclaw/skills/commit/7cb9f8a5b09c63312c27efcebdbf28dc1964df64"
+    "version": "1.0.1",
+    "publishedAt": 1776890609456,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495020019,
+      "commit": "https://github.com/openclaw/skills/commit/7cb9f8a5b09c63312c27efcebdbf28dc1964df64"
+    }
+  ]
 }
