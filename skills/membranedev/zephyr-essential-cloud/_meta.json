@@ -3,9 +3,15 @@
   "slug": "zephyr-essential-cloud",
   "displayName": "Zephyr Essential Cloud",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775311435194,
-    "commit": "https://github.com/openclaw/skills/commit/ea3595a6cbbefe023c8268f165632d2215f3fe7b"
+    "version": "1.0.1",
+    "publishedAt": 1776883844197,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775311435194,
+      "commit": "https://github.com/openclaw/skills/commit/ea3595a6cbbefe023c8268f165632d2215f3fe7b"
+    }
+  ]
 }
