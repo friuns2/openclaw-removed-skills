@@ -1,0 +1,11 @@
+{
+  "owner": "wu-uk",
+  "slug": "exoplanet-detection-period-light-curve-preprocessing",
+  "displayName": "light-curve-preprocessing",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1776229654145,
+    "commit": null
+  },
+  "history": []
+}
