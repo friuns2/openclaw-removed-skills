@@ -3,9 +3,15 @@
   "slug": "botanalytics",
   "displayName": "Botanalytics",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775729080825,
-    "commit": "https://github.com/openclaw/skills/commit/f1d9dbfd004434b3eba42a4c15581c5db0fa59a0"
+    "version": "1.0.1",
+    "publishedAt": 1776898430029,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775729080825,
+      "commit": "https://github.com/openclaw/skills/commit/f1d9dbfd004434b3eba42a4c15581c5db0fa59a0"
+    }
+  ]
 }
