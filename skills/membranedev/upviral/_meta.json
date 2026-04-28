@@ -3,9 +3,15 @@
   "slug": "upviral",
   "displayName": "Upviral",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775538255506,
-    "commit": "https://github.com/openclaw/skills/commit/15583f5bbf459cb0e86b350b6b78c1f99f3af4b8"
+    "version": "1.0.1",
+    "publishedAt": 1776891681194,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775538255506,
+      "commit": "https://github.com/openclaw/skills/commit/15583f5bbf459cb0e86b350b6b78c1f99f3af4b8"
+    }
+  ]
 }
