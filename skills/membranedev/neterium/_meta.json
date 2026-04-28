@@ -3,9 +3,15 @@
   "slug": "neterium",
   "displayName": "Neterium",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775567068726,
-    "commit": "https://github.com/openclaw/skills/commit/9300a5b408c46dedd7793b19f83cf8c4665a23b0"
+    "version": "1.0.1",
+    "publishedAt": 1776895757983,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775567068726,
+      "commit": "https://github.com/openclaw/skills/commit/9300a5b408c46dedd7793b19f83cf8c4665a23b0"
+    }
+  ]
 }
