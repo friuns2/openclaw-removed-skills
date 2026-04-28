@@ -3,9 +3,15 @@
   "slug": "waratek",
   "displayName": "Waratek",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775351225506,
-    "commit": "https://github.com/openclaw/skills/commit/a2fb1bc13425f589ba06932a4ffb4f5af652d52e"
+    "version": "1.0.1",
+    "publishedAt": 1776886001499,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775351225506,
+      "commit": "https://github.com/openclaw/skills/commit/a2fb1bc13425f589ba06932a4ffb4f5af652d52e"
+    }
+  ]
 }
