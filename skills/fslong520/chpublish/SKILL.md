@@ -1,9 +1,9 @@
 ---
-name: clawhub发布
+name: chpublish
 description: |
   将本地技能发布到 ClawHub 技能市场。自动检查技能目录结构、生成版本号、
   构建 changelog，执行发布命令并验证结果。
-  
+
   **触发场景**：用户说"发布技能"、"发布到 ClawHub"、"上传技能"等。
 
 allowed-tools:
@@ -20,6 +20,33 @@ metadata:
 # ClawHub 技能发布
 
 > 一键发布技能到 ClawHub 技能市场。
+
+## Summary
+
+检查登录→确认技能目录→检测发布历史→推荐Slug→确认参数→执行发布→验证结果。
+
+## Keywords
+
+发布技能、ClawHub、publish、技能市场、上传、版本管理
+
+## Strategy
+
+1. **检查登录**：`clawhub whoami`，未登录则`clawhub login`
+2. **确认目录**：检查SKILL.md存在，读取 frontmatter 获取预设 slug/name
+3. **检测历史**：`clawhub inspect <slug>`判断是否已发布
+4. **分支处理**：
+   - **新技能**：推荐Slug（若SKILL.md未定义）→ 确认参数 → 首次发布
+   - **更新技能**：提取历史版本/name/tags → 自动递增版本 → 保持一致性更新
+5. **执行发布**：`clawhub publish <path> --slug --name --version --changelog --tags`
+6. **验证结果**：检查输出是否成功
+
+## AVOID
+
+- AVOID Slug包含连字符-或下划线_，必须是纯小写字母+数字紧密相连
+- AVOID 更新已发布技能时更改tags，必须与历史版本保持tags和name一致
+- AVOID tags使用中文，只能用英文逗号分隔
+- AVOID 未检测发布历史就发布，必须先`clawhub inspect`判断是否已存在
+- AVOID 未等待用户确认Slug就发布，必须提供3个方案让用户选择
 
 ---
 
@@ -83,28 +110,71 @@ clawhub inspect <候选slug>
 
 ### Step 3: 确定发布参数
 
-#### 3.1 生成 Slug 推荐（强制！）
-在确定发布参数前，**必须**向用户展示 3 个不同维度的 Slug 推荐方案，等待用户选择。
+**⚠️ 关键区分：新技能 vs 更新技能**
+
+根据 Step 2.2 的检测结果，走不同流程：
+
+---
+
+#### 3A. 新技能发布流程（Skill not found）
+
+**3A.1 读取 SKILL.md 获取预设参数**
+先读取技能目录下的 SKILL.md，检查是否已定义：
+- `name` - 技能名称（如有则直接使用）
+- `metadata.slug` 或 frontmatter 中的 slug（如有则直接使用，跳过推荐步骤）
+
+**3A.2 Slug 推荐（仅当 SKILL.md 未定义 slug 时）**
+向用户展示 3 个不同维度的 Slug 推荐方案，等待用户选择。
 **推荐维度示例**：
-1.  **全拼音方案**（适合中文技能）：`mochi`, `poxiao`
-2.  **英文意译方案**（适合通用技能）：`inkpot`, `dawnbreak`
-3.  **功能描述方案**（混合或直白）：`stockanalysis`, `dailyreport`
+1.  **全拼音方案**（适合中文技能）：`mochi`, `banti`
+2.  **英文意译方案**（适合通用技能）：`inkpot`, `ojimport`
+3.  **功能描述方案**（混合或直白）：`problemporter`, `dailyreport`
 
 **⚠️ 推荐铁律**：
 - **禁止符号**：推荐的 Slug 中绝对不能包含 `-` 或 `_`。
 - **纯小写**：所有字母必须小写。
-- **等待确认**：列出方案后，询问用户："哥哥，这几个 Slug 你喜欢哪个？或者你有更好的想法？" 得到回复后才能进行下一步。
+- **等待确认**：列出方案后，询问用户确认。
 
-#### 3.2 确定其他参数
-当用户选定 Slug 后，确认以下参数：
-
+**3A.3 确定其他参数**
 | 参数 | 来源 | 示例 |
 |------|------|------|
-| `--slug` | **用户最终确认的方案** | `poxiao` |
-| `--name` | 技能显示名 | `InkPot` |
-| `--version` | 版本号（询问用户或自动推断） | `2.0.0` |
-| `--changelog` | 更新说明（询问用户） | `Switch to KV format` |
-| `--tags` | 标签（英文，逗号分隔） | `knowledge,learning` |
+| `--slug` | SKILL.md 或用户确认 | `ojimport` |
+| `--name` | SKILL.md 或技能目录名 | `搬题姬` |
+| `--version` | 首次发布默认 `1.0.0` | `1.0.0` |
+| `--changelog` | 询问用户或自动生成 | `首次发布` |
+| `--tags` | SKILL.md 或询问用户 | `oj,algorithm` |
+
+---
+
+#### 3B. 更新技能发布流程（已存在）
+
+**⚠️ 铁律：更新时必须保持 slug、name、tags 与历史一致！**
+
+**3B.1 从 SKILL.md 读取 slug**
+```bash
+# 读取 SKILL.md frontmatter 中的 slug
+```
+
+**3B.2 从 clawhub inspect 输出提取历史信息**
+- **Latest 版本号**：如 `Latest: 1.7.0` → 新版本应为 `1.7.1` 或更高
+- **Tags**：从 Tags 行提取，如 `Tags: algorithm=1.7.0, oj=1.7.0` → tags 为 `algorithm,oj`
+- **Name**：从输出第一行提取，如 `ojimport 搬题姬` → name 为 `搬题姬`
+
+**3B.3 自动递增版本号**
+- 从 `Latest: x.y.z` 提取版本号
+- 默认递增 patch 版本：`x.y.z` → `x.y.(z+1)`
+- 询问用户是否需要 major/minor 版本升级
+
+**3B.4 确定参数**
+| 参数 | 来源 | 示例 |
+|------|------|------|
+| `--slug` | SKILL.md（必须与历史一致） | `ojimport` |
+| `--name` | clawhub inspect（必须与历史一致） | `搬题姬` |
+| `--version` | 历史版本递增 | `1.7.0` → `1.7.1` |
+| `--changelog` | 询问用户本次改动 | `修复 WebSocket 问题` |
+| `--tags` | clawhub inspect（必须与历史一致） | `oj,algorithm,problem` |
+
+---
 
 **⚠️ Slug 命名铁律（最高优先级）**：
 - **❌ 禁止任何符号**：绝对不允许使用连字符 `-`、下划线 `_` 或任何符号！
