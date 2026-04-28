@@ -3,9 +3,15 @@
   "slug": "propstack",
   "displayName": "Propstack",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775628224725,
-    "commit": "https://github.com/openclaw/skills/commit/6adae146be8cd4451f24de6dbd16e94e567d2db7"
+    "version": "1.0.1",
+    "publishedAt": 1776896444924,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775628224725,
+      "commit": "https://github.com/openclaw/skills/commit/6adae146be8cd4451f24de6dbd16e94e567d2db7"
+    }
+  ]
 }
