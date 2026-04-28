@@ -3,9 +3,15 @@
   "slug": "column",
   "displayName": "Column",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297106434,
-    "commit": "https://github.com/openclaw/skills/commit/b5a2939555a13b84581451c88348f7188cbd3bdb"
+    "version": "1.0.1",
+    "publishedAt": 1776883427555,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297106434,
+      "commit": "https://github.com/openclaw/skills/commit/b5a2939555a13b84581451c88348f7188cbd3bdb"
+    }
+  ]
 }
