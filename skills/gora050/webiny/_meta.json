@@ -3,9 +3,15 @@
   "slug": "webiny",
   "displayName": "Webiny",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775335305034,
-    "commit": "https://github.com/openclaw/skills/commit/001625b165be409369ea8f4bc19a55b23cff6d7d"
+    "version": "1.0.1",
+    "publishedAt": 1776885950139,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775335305034,
+      "commit": "https://github.com/openclaw/skills/commit/001625b165be409369ea8f4bc19a55b23cff6d7d"
+    }
+  ]
 }
