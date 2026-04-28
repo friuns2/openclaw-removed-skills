@@ -3,9 +3,15 @@
   "slug": "clayhr",
   "displayName": "Clayhr",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775372608817,
-    "commit": "https://github.com/openclaw/skills/commit/beeca653a2585efdaae1a1ebfbd7558ac0498974"
+    "version": "1.0.1",
+    "publishedAt": 1776896279816,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775372608817,
+      "commit": "https://github.com/openclaw/skills/commit/beeca653a2585efdaae1a1ebfbd7558ac0498974"
+    }
+  ]
 }
