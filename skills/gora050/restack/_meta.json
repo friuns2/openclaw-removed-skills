@@ -3,9 +3,15 @@
   "slug": "restack",
   "displayName": "Restack",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775632113739,
-    "commit": "https://github.com/openclaw/skills/commit/f2d6b19ffd55c0d7d6d45f70a9cbd4f5b8de9121"
+    "version": "1.0.1",
+    "publishedAt": 1776899184169,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775632113739,
+      "commit": "https://github.com/openclaw/skills/commit/f2d6b19ffd55c0d7d6d45f70a9cbd4f5b8de9121"
+    }
+  ]
 }
