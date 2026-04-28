@@ -3,9 +3,15 @@
   "slug": "commandbar",
   "displayName": "Commandbar",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775444859259,
-    "commit": "https://github.com/openclaw/skills/commit/24b547a8bfd24534410f73c27887ef6fc6a79a55"
+    "version": "1.0.1",
+    "publishedAt": 1776892712798,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775444859259,
+      "commit": "https://github.com/openclaw/skills/commit/24b547a8bfd24534410f73c27887ef6fc6a79a55"
+    }
+  ]
 }
