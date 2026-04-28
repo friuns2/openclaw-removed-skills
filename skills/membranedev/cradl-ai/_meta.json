@@ -3,9 +3,15 @@
   "slug": "cradl-ai",
   "displayName": "Cradl Ai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775588690391,
-    "commit": "https://github.com/openclaw/skills/commit/b5a8951ae500af9da5f29529c2d1a4072fae68e0"
+    "version": "1.0.1",
+    "publishedAt": 1776896173980,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775588690391,
+      "commit": "https://github.com/openclaw/skills/commit/b5a8951ae500af9da5f29529c2d1a4072fae68e0"
+    }
+  ]
 }
