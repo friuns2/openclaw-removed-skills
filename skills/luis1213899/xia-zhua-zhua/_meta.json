@@ -1,13 +1,18 @@
 {
   "owner": "luis1213899",
   "slug": "xia-zhua-zhua",
-  "displayName": "Xia Zhua Zhua",
+  "displayName": "Content Catcher",
   "latest": {
-    "version": "2.1.3",
-    "publishedAt": 1776370070320,
-    "commit": "https://github.com/openclaw/skills/commit/cd222dde78516da92c9671b7facf79c63c753ab0"
+    "version": "4.0.1",
+    "publishedAt": 1777051004572,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.1.3",
+      "publishedAt": 1776370070320,
+      "commit": "https://github.com/openclaw/skills/commit/cd222dde78516da92c9671b7facf79c63c753ab0"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775903557296,
