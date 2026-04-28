@@ -3,9 +3,15 @@
   "slug": "sports-digest",
   "displayName": "Sports Digest",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775934230594,
-    "commit": "https://github.com/openclaw/skills/commit/d56c33fa365f0d2f8d6041e149e377c0ab3573fa"
+    "version": "1.0.2",
+    "publishedAt": 1776793668772,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775934230594,
+      "commit": "https://github.com/openclaw/skills/commit/d56c33fa365f0d2f8d6041e149e377c0ab3573fa"
+    }
+  ]
 }
