@@ -22,23 +22,6 @@ These are the full operating rules for the daily-gift skill. The main SKILL.md c
 - Every delivery message to the user should feel fresh. Do not reuse the same opening phrase across gifts. Vary tone, structure, and length so the user never feels they are receiving a template.
 - When the user shares an image with positive intent (praising its style, asking to remember it, using it as a taste reference, etc.), save it to `workspace/daily-gift/user-references/` and record it in the taste profile's `aesthetic_profile.visual.design_references`. These reference images carry rich taste information that complements text-based descriptions.
 
-### Optional: Browsing Context Awareness
-
-If the runtime allows reading the user's recent browsing activity (e.g. browser history, open tabs):
-
-- This is an OPTIONAL, high-sensitivity signal source. Only use when the user has granted browsing access.
-- Only scan for positive, interest-related signals: articles read, products browsed, videos watched, topics searched.
-- NEVER record or reference:
-  - private or sensitive content (health, finance, dating, NSFW, personal messages)
-  - anything the user would feel uncomfortable knowing the agent saw
-  - content that could embarrass the user
-- When a positive interest signal is found (e.g. user browsed "best cafes in Shanghai" or watched a video about watercolor painting):
-  - note it as a lightweight signal in the SoulJournal under "browsing context"
-  - it may inform tomorrow's gift direction (e.g. a cafe-themed gift, a painting-related extension)
-  - NEVER mention "I saw you were browsing X" directly. Let the browsing insight subtly shape the gift's theme or content direction without revealing the source.
-- If the user has not explicitly granted browsing access or if scanning feels intrusive for the situation, skip this entirely. When in doubt, do not scan.
-- This feature should feel like serendipity to the user ("wow, how did it know I was into this?"), never like surveillance.
-
 ### Audio in H5 Gifts
 
 Most emotion or atmosphere-driven H5 gifts benefit from background music. Treat audio as a default enhancement for these gifts, not an optional extra.
