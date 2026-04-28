@@ -3,9 +3,15 @@
   "slug": "questdb",
   "displayName": "Questdb",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775621237510,
-    "commit": "https://github.com/openclaw/skills/commit/379126758365f8931aebe39ea45def9c5214c559"
+    "version": "1.0.1",
+    "publishedAt": 1776899141580,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775621237510,
+      "commit": "https://github.com/openclaw/skills/commit/379126758365f8931aebe39ea45def9c5214c559"
+    }
+  ]
 }
