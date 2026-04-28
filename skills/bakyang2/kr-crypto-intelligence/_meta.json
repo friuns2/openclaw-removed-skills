@@ -1,13 +1,18 @@
 {
   "owner": "bakyang2",
   "slug": "kr-crypto-intelligence",
-  "displayName": "Kr Crypto Intelligence",
+  "displayName": "Kr Crypto Intelligence Skill",
   "latest": {
-    "version": "1.3.0",
-    "publishedAt": 1776352747614,
-    "commit": "https://github.com/openclaw/skills/commit/674196786311bd1220094350d284a1f90448497b"
+    "version": "1.4.1",
+    "publishedAt": 1777307420891,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.0",
+      "publishedAt": 1776352747614,
+      "commit": "https://github.com/openclaw/skills/commit/674196786311bd1220094350d284a1f90448497b"
+    },
     {
       "version": "1.2.6",
       "publishedAt": 1776216757001,
