@@ -3,9 +3,15 @@
   "slug": "securionpay",
   "displayName": "Securionpay",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581635760,
-    "commit": "https://github.com/openclaw/skills/commit/b4622ac8d9228d5dca725de2e22db21f5719522c"
+    "version": "1.0.1",
+    "publishedAt": 1776899072127,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581635760,
+      "commit": "https://github.com/openclaw/skills/commit/b4622ac8d9228d5dca725de2e22db21f5719522c"
+    }
+  ]
 }
