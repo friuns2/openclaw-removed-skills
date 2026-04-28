@@ -3,9 +3,15 @@
   "slug": "the-odds-api",
   "displayName": "The Odds Api",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775701024684,
-    "commit": "https://github.com/openclaw/skills/commit/57f97b8420090b617a26fdfe3c6f8f30539c3124"
+    "version": "1.0.1",
+    "publishedAt": 1776902831633,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775701024684,
+      "commit": "https://github.com/openclaw/skills/commit/57f97b8420090b617a26fdfe3c6f8f30539c3124"
+    }
+  ]
 }
