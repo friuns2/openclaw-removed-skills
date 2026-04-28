@@ -3,9 +3,15 @@
   "slug": "temenos-t24-transact",
   "displayName": "Temenos T24 Transact",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581668882,
-    "commit": "https://github.com/openclaw/skills/commit/adec7e74cacfae7e189d24a4920f14bfe0500af0"
+    "version": "1.0.1",
+    "publishedAt": 1776899083013,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581668882,
+      "commit": "https://github.com/openclaw/skills/commit/adec7e74cacfae7e189d24a4920f14bfe0500af0"
+    }
+  ]
 }
