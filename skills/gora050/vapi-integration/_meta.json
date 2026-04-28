@@ -3,9 +3,15 @@
   "slug": "vapi-integration",
   "displayName": "Vapi",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775701092576,
-    "commit": "https://github.com/openclaw/skills/commit/4f87844663d92e5853dbd6ee462595026dffe039"
+    "version": "1.0.1",
+    "publishedAt": 1776899691543,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775701092576,
+      "commit": "https://github.com/openclaw/skills/commit/4f87844663d92e5853dbd6ee462595026dffe039"
+    }
+  ]
 }
