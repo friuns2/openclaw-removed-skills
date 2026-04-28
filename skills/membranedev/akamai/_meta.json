@@ -3,9 +3,15 @@
   "slug": "akamai",
   "displayName": "Akamai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775376238069,
-    "commit": "https://github.com/openclaw/skills/commit/5554c1332145dc2db340e97ed8d79c8fc20f7657"
+    "version": "1.0.1",
+    "publishedAt": 1776888321045,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775376238069,
+      "commit": "https://github.com/openclaw/skills/commit/5554c1332145dc2db340e97ed8d79c8fc20f7657"
+    }
+  ]
 }
