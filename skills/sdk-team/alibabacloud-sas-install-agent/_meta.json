@@ -3,9 +3,15 @@
   "slug": "alibabacloud-sas-install-agent",
   "displayName": "Alibabacloud Sas Install Agent",
   "latest": {
-    "version": "0.0.1-beta.1",
-    "publishedAt": 1776146499786,
-    "commit": "https://github.com/openclaw/skills/commit/f94b92376c161a7d96122b8fe8dda2a61577a4a6"
+    "version": "0.0.1-beta.2",
+    "publishedAt": 1776843877396,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1-beta.1",
+      "publishedAt": 1776146499786,
+      "commit": "https://github.com/openclaw/skills/commit/f94b92376c161a7d96122b8fe8dda2a61577a4a6"
+    }
+  ]
 }
