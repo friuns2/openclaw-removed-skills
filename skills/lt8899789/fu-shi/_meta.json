@@ -3,11 +3,16 @@
   "slug": "fu-shi",
   "displayName": "Fu Shi",
   "latest": {
-    "version": "1.0.10",
-    "publishedAt": 1776731946744,
-    "commit": "https://github.com/openclaw/skills/commit/3e8357838c3b0617a784a4378cff5959fc223ada"
+    "version": "1.0.16",
+    "publishedAt": 1777364482171,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.10",
+      "publishedAt": 1776731946744,
+      "commit": "https://github.com/openclaw/skills/commit/3e8357838c3b0617a784a4378cff5959fc223ada"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1776196870295,
