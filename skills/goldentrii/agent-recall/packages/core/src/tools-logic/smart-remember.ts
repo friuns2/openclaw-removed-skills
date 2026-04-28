@@ -6,6 +6,8 @@
  */
 
 import { generateSlug, detectContentType } from "../helpers/auto-name.js";
+import { generateTags } from "../helpers/tag-generator.js";
+import { consistencyCheck, type ConsistencyWarning } from "../helpers/consistency.js";
 import { journalCapture } from "./journal-capture.js";
 import { palaceWrite } from "./palace-write.js";
 import { knowledgeWrite } from "./knowledge-write.js";
@@ -27,6 +29,13 @@ export interface SmartRememberResult {
   classification: string;
   auto_name: string;
   result: unknown;
+  /** Exact file path where the memory was stored */
+  file_path?: string;
+  /** Query hint: what to search to find this memory again */
+  retrieval_hint?: string;
+  /** Semantic tags assigned to this memory */
+  tags?: string[];
+  consistency_warnings?: ConsistencyWarning[];
 }
 
 // ---------------------------------------------------------------------------
@@ -102,6 +111,16 @@ function classifyRoute(content: string, context?: string): Route {
 // ---------------------------------------------------------------------------
 
 export async function smartRemember(input: SmartRememberInput): Promise<SmartRememberResult> {
+  if (!input.content || input.content.trim().length < 5) {
+    return {
+      success: false,
+      routed_to: "rejected",
+      classification: "too_short",
+      auto_name: "",
+      result: { error: "Content too short (minimum 5 characters). Memory not saved." },
+    };
+  }
+
   const route = classifyRoute(input.content, input.context);
   const slugResult = generateSlug(input.content);
   const autoName = slugResult.slug;
@@ -118,14 +137,28 @@ export async function smartRemember(input: SmartRememberInput): Promise<SmartRem
       break;
     }
     case "palace_write": {
-      // Use content type as room, auto-name generates the topic
+      // Use content type as room. When "general", pick a better room from context hint or tags.
       const contentType = detectContentType(input.content);
-      const room = contentType === "general" ? "knowledge" : contentType;
+      let room = contentType === "general" ? "knowledge" : contentType;
+
+      // Smarter room routing based on context hint
+      if (input.context) {
+        const ctxLower = input.context.toLowerCase();
+        if (/design|color|theme|style|ui|ux|layout|font/i.test(ctxLower)) room = "design";
+        else if (/architecture|tech.?stack|system|infra/i.test(ctxLower)) room = "architecture";
+        else if (/decision|chose|picked|going.?with/i.test(ctxLower)) room = "decision";
+        else if (/correction|rule|never|always|don.?t/i.test(ctxLower)) room = "alignment";
+        else if (/goal|plan|roadmap|next|priority/i.test(ctxLower)) room = "goals";
+        else if (/blocker|blocked|stuck|waiting/i.test(ctxLower)) room = "blockers";
+      }
+
+      const tags = generateTags(input.content, contentType !== "general" ? contentType : undefined);
       result = await palaceWrite({
         room,
         content: input.content,
         project: input.project,
         auto_name: true,
+        tags,
       });
       break;
     }
@@ -159,11 +192,60 @@ export async function smartRemember(input: SmartRememberInput): Promise<SmartRem
     }
   }
 
+  // Consistency check: find contradictions with existing memories
+  let consistency_warnings: ConsistencyWarning[] | undefined;
+  try {
+    const check = await consistencyCheck(input.content, input.project);
+    if (check.warnings.length > 0) {
+      consistency_warnings = check.warnings;
+    }
+  } catch {
+    // Consistency check is best-effort — never blocks save
+  }
+
+  // Extract file path from the routed result (transparent routing)
+  let file_path: string | undefined;
+  const resultObj = result as Record<string, unknown> | undefined;
+  if (resultObj) {
+    // palace_write returns file_path directly
+    if (typeof resultObj.file_path === "string") file_path = resultObj.file_path;
+    // knowledge_write returns file
+    else if (typeof resultObj.file === "string") file_path = resultObj.file;
+    // awareness_update → show awareness.md path
+    else if (route === "awareness_update") {
+      const root = process.env.HOME ? `${process.env.HOME}/.agent-recall` : "~/.agent-recall";
+      file_path = `${root}/awareness.md`;
+    }
+    // journal_capture → show journal directory
+    else if (route === "journal_capture") {
+      const root = process.env.HOME ? `${process.env.HOME}/.agent-recall` : "~/.agent-recall";
+      const slug = input.project ?? "auto";
+      file_path = `${root}/projects/${slug}/journal/${new Date().toISOString().slice(0, 10)}-log.md`;
+    }
+  }
+
+  // Replace home dir for readability
+  const root = process.env.HOME ?? "";
+  const displayPath = file_path?.replace(root, "~") ?? undefined;
+
+  // Generate retrieval hint from keywords + classification
+  const hintWords = slugResult.keywords.slice(0, 3);
+  const retrieval_hint = hintWords.length > 0
+    ? `recall('${hintWords.join(" ")}')`
+    : undefined;
+
+  // Get tags from the routed result
+  const tags = generateTags(input.content, slugResult.contentType !== "general" ? slugResult.contentType : undefined);
+
   return {
     success: true,
     routed_to: route,
     classification: slugResult.contentType,
     auto_name: autoName,
     result,
+    file_path: displayPath,
+    retrieval_hint,
+    tags,
+    consistency_warnings,
   };
 }

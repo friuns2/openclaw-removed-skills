@@ -3,11 +3,16 @@
   "slug": "agent-recall",
   "displayName": "AgentRecall",
   "latest": {
-    "version": "3.3.17-1",
-    "publishedAt": 1776350562767,
-    "commit": "https://github.com/openclaw/skills/commit/2fc5301f0b4366d366e25f373c4b758fd958b04c"
+    "version": "3.3.27",
+    "publishedAt": 1777017403202,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.3.17-1",
+      "publishedAt": 1776350562767,
+      "commit": "https://github.com/openclaw/skills/commit/2fc5301f0b4366d366e25f373c4b758fd958b04c"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1776156970391,

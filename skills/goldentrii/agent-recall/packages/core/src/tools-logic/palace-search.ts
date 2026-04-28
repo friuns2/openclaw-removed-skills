@@ -3,11 +3,13 @@ import * as path from "node:path";
 import { resolveProject } from "../storage/project.js";
 import { palaceDir } from "../storage/paths.js";
 import { ensurePalaceInitialized, listRooms, recordAccess } from "../palace/rooms.js";
+import { stem, expandQuery } from "../helpers/normalize.js";
 
 export interface PalaceSearchInput {
   query: string;
   room?: string;
   project?: string;
+  limit?: number;
 }
 
 export interface PalaceSearchResult {
@@ -25,6 +27,29 @@ export interface PalaceSearchResult {
   total_matches: number;
 }
 
+/**
+ * Parse YAML frontmatter tags from markdown content.
+ * Looks for `tags: [...]` line between `---` markers.
+ */
+function parseFrontmatterTags(content: string): string[] {
+  // Find the YAML block between --- markers
+  const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!match) return [];
+
+  const yamlBlock = match[1];
+  const tagsLine = yamlBlock.split("\n").find((l) => l.trim().startsWith("tags:"));
+  if (!tagsLine) return [];
+
+  // Parse inline array: tags: ["foo", "bar"] or tags: [foo, bar]
+  const arrayMatch = tagsLine.match(/tags:\s*\[([^\]]*)\]/);
+  if (!arrayMatch) return [];
+
+  return arrayMatch[1]
+    .split(",")
+    .map((t) => t.trim().replace(/^["']|["']$/g, ""))
+    .filter((t) => t.length > 0);
+}
+
 export async function palaceSearch(input: PalaceSearchInput): Promise<PalaceSearchResult> {
   const slug = await resolveProject(input.project);
   ensurePalaceInitialized(slug);
@@ -35,7 +60,9 @@ export async function palaceSearch(input: PalaceSearchInput): Promise<PalaceSear
   // Old approach: lines[i].toLowerCase().includes(fullQuery) required the entire
   // query to appear as one continuous substring — too strict, missed relevant entries.
   // New approach: count matched keywords, compute overlap ratio for scoring.
-  const queryWords = input.query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  // v3.3.21: use stemming + synonym expansion for query words
+  const rawQueryWords = input.query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  const queryWords = expandQuery(rawQueryWords);
   const results: PalaceSearchResult["results"] = [];
 
   const targetRooms = input.room ? rooms.filter((r) => r.slug === input.room) : rooms;
@@ -50,15 +77,28 @@ export async function palaceSearch(input: PalaceSearchInput): Promise<PalaceSear
       const content = fs.readFileSync(filePath, "utf-8");
       const lines = content.split("\n");
 
+      // Parse YAML frontmatter tags for bonus scoring
+      const fileTags = parseFrontmatterTags(content);
+
+      // Check if any query words match file-level tags
+      const tagBonus = queryWords.some((w) =>
+        fileTags.some((t) => t.toLowerCase().includes(w) || w.includes(t.toLowerCase()))
+      ) ? 0.3 : 0;
+
       for (let i = 0; i < lines.length; i++) {
         const lineLower = lines[i].toLowerCase();
         if (queryWords.length === 0) continue;
 
-        // Count how many query keywords appear in this line
-        const matchedWords = queryWords.filter((w) => lineLower.includes(w));
+        // Stem each line word for matching
+        const lineWords = lineLower.split(/\s+/).filter(w => w.length > 2).map(w => stem(w));
+        const lineWordSet = new Set(lineWords);
+
+        // Count how many query keywords match (stemmed OR substring)
+        const matchedWords = queryWords.filter((w) => lineWordSet.has(w) || lineLower.includes(w));
         if (matchedWords.length === 0) continue;
 
-        const keywordScore = matchedWords.length / queryWords.length;
+        const rawKeywordScore = matchedWords.length / queryWords.length;
+        const keywordScore = Math.min(1.0, rawKeywordScore + tagBonus);
 
         // Build excerpt anchored on first keyword match
         const firstKw = matchedWords[0];
@@ -87,7 +127,7 @@ export async function palaceSearch(input: PalaceSearchInput): Promise<PalaceSear
 
   // Sort by keyword_score × salience so most relevant + important rooms surface first
   results.sort((a, b) => (b.keyword_score * b.salience) - (a.keyword_score * a.salience) || a.line - b.line);
-  const limited = results.slice(0, 20);
+  const limited = results.slice(0, input.limit ?? 20);
 
   return { project: slug, query: input.query, results: limited, total_matches: results.length };
 }

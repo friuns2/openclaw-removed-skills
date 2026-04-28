@@ -123,7 +123,12 @@ export { journalDir, journalDirs, palaceDir, roomDir } from "./storage/paths.js"
 export { ensureDir, todayISO, readJsonSafe, writeJsonAtomic } from "./storage/fs-utils.js";
 export { detectProject, resolveProject, listAllProjects } from "./storage/project.js";
 export { getSessionId, journalFileName, captureLogFileName, resetOwnedFiles } from "./storage/session.js";
+export type { SaveType, SmartNameOpts } from "./storage/session.js";
 export { acquireLock, withLock } from "./storage/filelock.js";
+
+// Storage — corrections
+export { writeCorrection, readCorrections, readP0Corrections } from "./storage/corrections.js";
+export type { CorrectionRecord } from "./storage/corrections.js";
 
 // Helpers
 export {
@@ -143,6 +148,16 @@ export { isoWeek, weekKey, groupByWeek, synthesizeWeek } from "./helpers/rollup.
 export { generateSlug, detectContentType, extractKeywords, generateTopicName } from "./helpers/auto-name.js";
 export type { SlugResult, SlugContext } from "./helpers/auto-name.js";
 
+// Helpers — consistency
+export { consistencyCheck } from "./helpers/consistency.js";
+export type { ConsistencyWarning, ConsistencyResult } from "./helpers/consistency.js";
+
+// Helpers — tag generation
+export { generateTags } from "./helpers/tag-generator.js";
+
+// Helpers — normalize (stemming + synonyms)
+export { stem, getSynonyms, expandQuery } from "./helpers/normalize.js";
+
 // Helpers — alignment patterns
 export { readAlignmentLog, extractWatchPatterns } from "./helpers/alignment-patterns.js";
 export type { WatchForPattern } from "./helpers/alignment-patterns.js";
@@ -153,6 +168,7 @@ export { journalWrite, type JournalWriteInput, type JournalWriteResult } from ".
 export { journalCapture, type JournalCaptureInput, type JournalCaptureResult } from "./tools-logic/journal-capture.js";
 export { journalList, type JournalListInput, type JournalListResult } from "./tools-logic/journal-list.js";
 export { journalProjects, type JournalProjectsResult } from "./tools-logic/journal-projects.js";
+export { projectBoard, type ProjectBoardResult, type ProjectEntry, type ProjectStatus } from "./tools-logic/project-board.js";
 export { journalSearch, type JournalSearchInput, type JournalSearchResult } from "./tools-logic/journal-search.js";
 export { journalState, stateFilePath, readState, type JournalStateInput, type JournalStateResult } from "./tools-logic/journal-state.js";
 export { journalColdStart, type JournalColdStartInput, type JournalColdStartResult } from "./tools-logic/journal-cold-start.js";
@@ -170,6 +186,9 @@ export { palaceLint, type PalaceLintInput, type PalaceLintResult, type LintIssue
 export { palaceSearch, type PalaceSearchInput, type PalaceSearchResult } from "./tools-logic/palace-search.js";
 export { awarenessUpdate, type AwarenessUpdateInput, type AwarenessUpdateResult } from "./tools-logic/awareness-update.js";
 export { recallInsight, type RecallInsightInput, type RecallInsightResult } from "./tools-logic/recall-insight.js";
+
+// Tool logic — journal merge
+export { journalMerge, type JournalMergeInput, type MergeReceipt } from "./tools-logic/journal-merge.js";
 
 // Tool logic — smart routing
 export { smartRemember, type SmartRememberInput, type SmartRememberResult } from "./tools-logic/smart-remember.js";
