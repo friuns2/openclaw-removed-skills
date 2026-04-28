@@ -3,9 +3,15 @@
   "slug": "brass",
   "displayName": "Brass",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775311596387,
-    "commit": "https://github.com/openclaw/skills/commit/87f037aed21f649e18678610b39780b5152eb0fa"
+    "version": "1.0.1",
+    "publishedAt": 1776885929620,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775311596387,
+      "commit": "https://github.com/openclaw/skills/commit/87f037aed21f649e18678610b39780b5152eb0fa"
+    }
+  ]
 }
