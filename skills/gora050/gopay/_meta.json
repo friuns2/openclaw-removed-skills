@@ -3,9 +3,15 @@
   "slug": "gopay",
   "displayName": "Gopay",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775556323337,
-    "commit": "https://github.com/openclaw/skills/commit/295a4b0172ccfe5f9e0df6461c26df94bc10196e"
+    "version": "1.0.1",
+    "publishedAt": 1776898833221,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775556323337,
+      "commit": "https://github.com/openclaw/skills/commit/295a4b0172ccfe5f9e0df6461c26df94bc10196e"
+    }
+  ]
 }
