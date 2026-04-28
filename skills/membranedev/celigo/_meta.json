@@ -3,9 +3,15 @@
   "slug": "celigo",
   "displayName": "Celigo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775383471580,
-    "commit": "https://github.com/openclaw/skills/commit/6dc7fc331223eea32374c49f3d37d8ca36a078c4"
+    "version": "1.0.1",
+    "publishedAt": 1776888681942,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775383471580,
+      "commit": "https://github.com/openclaw/skills/commit/6dc7fc331223eea32374c49f3d37d8ca36a078c4"
+    }
+  ]
 }
