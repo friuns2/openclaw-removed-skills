@@ -3,9 +3,15 @@
   "slug": "cloud-elements",
   "displayName": "Cloud Elements",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775632093935,
-    "commit": "https://github.com/openclaw/skills/commit/d23bbd860f5f5cabde2c21759eccf5849f15c64e"
+    "version": "1.0.1",
+    "publishedAt": 1776899176179,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775632093935,
+      "commit": "https://github.com/openclaw/skills/commit/d23bbd860f5f5cabde2c21759eccf5849f15c64e"
+    }
+  ]
 }
