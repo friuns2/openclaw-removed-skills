@@ -3,9 +3,15 @@
   "slug": "chift",
   "displayName": "Chift",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775304223859,
-    "commit": "https://github.com/openclaw/skills/commit/3fd94e78ada9de8fdf7693760fe7be138f5750e6"
+    "version": "1.0.1",
+    "publishedAt": 1776883613185,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775304223859,
+      "commit": "https://github.com/openclaw/skills/commit/3fd94e78ada9de8fdf7693760fe7be138f5750e6"
+    }
+  ]
 }
