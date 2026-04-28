@@ -71,8 +71,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Answer List",
@@ -108,8 +108,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Column Article Details",
@@ -154,8 +154,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Column Article List",
@@ -166,7 +166,7 @@
     {
       "description": "Get Zhihu keyword Search data, including matched results, metadata, and ranking signals, for topic discovery and content research.",
       "method": "GET",
-      "operationId": "searchV1",
+      "operationId": "searchZhihuV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -200,8 +200,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Search",

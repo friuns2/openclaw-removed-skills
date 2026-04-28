@@ -3,11 +3,16 @@
   "slug": "justoneapi-zhihu",
   "displayName": "Zhihu API",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776240049710,
-    "commit": "https://github.com/openclaw/skills/commit/ef0e8f1d3002ee42491484a00ae6b31a72ec153a"
+    "version": "1.0.3",
+    "publishedAt": 1776924535306,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776240049710,
+      "commit": "https://github.com/openclaw/skills/commit/ef0e8f1d3002ee42491484a00ae6b31a72ec153a"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775379236142,

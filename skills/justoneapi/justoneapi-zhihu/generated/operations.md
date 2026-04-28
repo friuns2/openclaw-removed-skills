@@ -32,7 +32,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getColumnArticleDetailV1`
 
@@ -55,7 +55,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getColumnArticleListV1`
 
@@ -79,9 +79,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchV1`
+## `searchZhihuV1`
 
 - Method: `GET`
 - Path: `/api/zhihu/search/v1`
@@ -103,4 +103,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

@@ -77,8 +77,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Answer List",
@@ -114,8 +114,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Column Article Details",
@@ -160,8 +160,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Column Article List",
@@ -172,7 +172,7 @@ const manifest = {
     {
       "description": "Get Zhihu keyword Search data, including matched results, metadata, and ranking signals, for topic discovery and content research.",
       "method": "GET",
-      "operationId": "searchV1",
+      "operationId": "searchZhihuV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -206,8 +206,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Search",
