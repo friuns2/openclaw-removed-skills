@@ -59,8 +59,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Comments",
@@ -96,8 +96,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Comments",
@@ -108,7 +108,7 @@ const manifest = {
     {
       "description": "Get Xiaohongshu (RedNote) note Details data, including media and engagement metrics, for content analysis, archiving, and campaign research.",
       "method": "GET",
-      "operationId": "getNoteDetailV1",
+      "operationId": "getXiaohongshuNoteDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -133,8 +133,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Details",
@@ -170,8 +170,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Details",
@@ -207,8 +207,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Details",
@@ -262,8 +262,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Comment Replies",
@@ -308,8 +308,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Notes",
@@ -354,8 +354,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Notes",
@@ -391,8 +391,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -428,8 +428,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -499,7 +499,7 @@ const manifest = {
         },
         {
           "defaultValue": null,
-          "description": "Note publish time filter.\n\nAvailable Values:\n- `一天内`: Within one day\n- `一周内`: Within a week\n- `半年内`: Within half a year",
+          "description": "Note publish time filter. This parameter is for reference only and does not have much effect.\n\nAvailable Values:\n- `一天内`: Within one day\n- `一周内`: Within a week\n- `半年内`: Within half a year",
           "enumValues": [
             "一天内",
             "一周内",
@@ -515,8 +515,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Search",
@@ -587,8 +587,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Note Search",
@@ -624,8 +624,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Suggestions",
@@ -670,8 +670,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Search",
@@ -682,7 +682,7 @@ const manifest = {
     {
       "description": "Get Xiaohongshu (RedNote) share Link Resolution data, including helping extract note IDs, for downstream note and comment workflows.",
       "method": "GET",
-      "operationId": "shareUrlTransferV1",
+      "operationId": "shareXiaohongshuUrlTransferV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -707,8 +707,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Share Link Resolution",

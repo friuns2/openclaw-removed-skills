@@ -30,7 +30,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getNoteCommentV4`
 
@@ -53,9 +53,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getNoteDetailV1`
+## `getXiaohongshuNoteDetailV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu/get-note-detail/v1`
@@ -76,7 +76,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getNoteDetailV3`
 
@@ -99,7 +99,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getNoteDetailV7`
 
@@ -122,7 +122,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getNoteSubCommentV2`
 
@@ -147,7 +147,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserNoteListV2`
 
@@ -171,7 +171,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserNoteListV4`
 
@@ -195,7 +195,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserV3`
 
@@ -218,7 +218,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserV4`
 
@@ -241,7 +241,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getSearchNoteV2`
 
@@ -274,7 +274,7 @@ Available Values:
 - `_1`: Video
 - `_2`: Normal |
 | enum | values | no | n/a | n/a | `_0`, `_1`, `_2` |
-| `noteTime` | `query` | no | `string` | n/a | Note publish time filter.
+| `noteTime` | `query` | no | `string` | n/a | Note publish time filter. This parameter is for reference only and does not have much effect.
 
 Available Values:
 - `一天内`: Within one day
@@ -288,7 +288,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getSearchNoteV3`
 
@@ -326,7 +326,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchRecommendV1`
 
@@ -349,7 +349,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getSearchUserV2`
 
@@ -373,9 +373,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `shareUrlTransferV1`
+## `shareXiaohongshuUrlTransferV1`
 
 - Method: `GET`
 - Path: `/api/xiaohongshu/share-url-transfer/v1`
@@ -396,4 +396,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
