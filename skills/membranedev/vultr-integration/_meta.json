@@ -3,9 +3,15 @@
   "slug": "vultr-integration",
   "displayName": "Vultr",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534640089,
-    "commit": "https://github.com/openclaw/skills/commit/1e6068591946e0440ca099900ca12fc626aa6c9c"
+    "version": "1.0.1",
+    "publishedAt": 1776891438213,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534640089,
+      "commit": "https://github.com/openclaw/skills/commit/1e6068591946e0440ca099900ca12fc626aa6c9c"
+    }
+  ]
 }
