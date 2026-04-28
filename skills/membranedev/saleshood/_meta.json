@@ -3,9 +3,15 @@
   "slug": "saleshood",
   "displayName": "Saleshood",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775369107862,
-    "commit": "https://github.com/openclaw/skills/commit/24d5be4861a3f22b12d979e27d16f740a59316a2"
+    "version": "1.0.1",
+    "publishedAt": 1776888497357,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775369107862,
+      "commit": "https://github.com/openclaw/skills/commit/24d5be4861a3f22b12d979e27d16f740a59316a2"
+    }
+  ]
 }
