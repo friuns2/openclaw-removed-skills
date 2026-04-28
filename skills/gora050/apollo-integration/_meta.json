@@ -3,9 +3,15 @@
   "slug": "apollo-integration",
   "displayName": "Apollo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775459206928,
-    "commit": "https://github.com/openclaw/skills/commit/e4dd3abe2a38812c8fbc314b37d9e7174d1e483d"
+    "version": "1.0.1",
+    "publishedAt": 1776892805308,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775459206928,
+      "commit": "https://github.com/openclaw/skills/commit/e4dd3abe2a38812c8fbc314b37d9e7174d1e483d"
+    }
+  ]
 }
