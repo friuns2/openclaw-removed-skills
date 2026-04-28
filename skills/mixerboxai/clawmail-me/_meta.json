@@ -1,11 +1,17 @@
 {
   "owner": "mixerboxai",
   "slug": "clawmail-me",
-  "displayName": "ClawMail.me - Email for AI Agents",
+  "displayName": "ClawMail.me - Free Email for AI Agents, no human required!",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775708776608,
-    "commit": "https://github.com/openclaw/skills/commit/2db8f5a3b64113af7037f4b5ab1c25a9089149dd"
+    "version": "1.1.31",
+    "publishedAt": 1777367005665,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775708776608,
+      "commit": "https://github.com/openclaw/skills/commit/2db8f5a3b64113af7037f4b5ab1c25a9089149dd"
+    }
+  ]
 }
