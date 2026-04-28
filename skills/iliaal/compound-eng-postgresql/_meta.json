@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-postgresql",
-  "displayName": "postgresql",
+  "displayName": "ia-postgresql",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519012248,
-    "commit": "https://github.com/openclaw/skills/commit/dead866c76c9d90c9b567094a09a1a553c446f52"
+    "version": "3.0.4",
+    "publishedAt": 1777300757226,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519012248,
+      "commit": "https://github.com/openclaw/skills/commit/dead866c76c9d90c9b567094a09a1a553c446f52"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004233861,
