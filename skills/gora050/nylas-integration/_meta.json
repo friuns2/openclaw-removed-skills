@@ -3,9 +3,15 @@
   "slug": "nylas-integration",
   "displayName": "Nylas",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775437640067,
-    "commit": "https://github.com/openclaw/skills/commit/10f227f39f774e5534efe038d4c0497b10f805c3"
+    "version": "1.0.1",
+    "publishedAt": 1776892698986,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775437640067,
+      "commit": "https://github.com/openclaw/skills/commit/10f227f39f774e5534efe038d4c0497b10f805c3"
+    }
+  ]
 }
