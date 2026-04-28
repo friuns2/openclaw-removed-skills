@@ -39,6 +39,13 @@ For every non-zero exit, parse one JSON object from `stderr` with fields:
 
 Do not branch by free-form text alone.
 
+For `NETWORK_ERROR`, treat `issues.kind` as the stable transport classifier when present:
+- `TIMEOUT`
+- `DNS`
+- `CONNECTION`
+- `TLS`
+- `NETWORK`
+
 ## 3) Type-First Decision Table
 
 | `type` | Exit Code | Immediate Action | Retry? | Next Step |
@@ -46,7 +53,7 @@ Do not branch by free-form text alone.
 | `VALIDATION_ERROR` | `2` | Fix local command construction (flags, enums, input channels). | No | Rebuild command and rerun. |
 | `CONFIG_ERROR` | `3` | Repair config/credentials (`base-url`, token, admin-key). | No | Re-run after config is corrected. |
 | `API_ERROR` | `4` | Evaluate `httpStatus + apiError` and resolve state/permission/precondition gaps. | Conditional | Retry only when `retryable=true` and status is retry-safe. |
-| `NETWORK_ERROR` | `5` | Treat as transport failure (timeout/connectivity). | Conditional | Retry with bounded backoff when `retryable=true`. |
+| `NETWORK_ERROR` | `5` | Treat as transport failure. Inspect `issues.kind` first (`TIMEOUT`/`DNS`/`CONNECTION`/`TLS`/`NETWORK`). | Conditional | Retry with bounded backoff when `retryable=true`. |
 | `UNKNOWN_ERROR` | `10` | Capture diagnostics and stop blind retries. | No | Escalate with logs and context. |
 
 ## 4) Retry Gate
@@ -58,9 +65,22 @@ Retry is allowed only when both conditions are true:
 - `type=NETWORK_ERROR`
 - `type=API_ERROR` with `httpStatus=429` or `httpStatus>=500`
 
+For `NETWORK_ERROR`, branch on `issues.kind` before deciding remediation:
+- `TIMEOUT`: tune `--timeout-ms`, confirm server latency, then bounded retry.
+- `DNS`: retry only for temporary resolver failures such as `EAI_AGAIN`; treat `ENOTFOUND` as a base-url/hostname issue.
+- `CONNECTION`: verify port/service reachability before retry.
+- `TLS`: repair certificate/trust settings before retry; default to non-retryable.
+- `NETWORK`: treat as generic transport failure and inspect `causeCode`/`causeMessage`; request-setup failures like `bad port` are non-retryable.
+
 Do not retry:
 - domain `4xx` precondition/permission conflicts
 - local validation/config failures
+
+Credential/config recovery notes:
+- For missing bearer/admin credentials, prefer `--token-file` / `--admin-key-file` for one-off runs or `agentrade config set token --value-file <path>` / `agentrade config set admin-key --value-file <path>` for persistence.
+- If stderr reports a missing or invalid local CLI secret key, rewrite encrypted persisted secrets with `config set ... --value-file` or rerun `auth register` for wallet bootstrap; do not keep retrying the failed command unchanged.
+- For `auth verify`, branch on `CHALLENGE_NOT_FOUND`, `CHALLENGE_EXPIRED`, `CHALLENGE_MISMATCH`, and `INVALID_SIGNATURE`; request a fresh challenge and re-sign the exact returned message instead of replaying old nonce/message/signature triples.
+- If a command needs both credential file input and payload file input, do not use `-` for both because stdin has a single consumer per invocation.
 
 ## 5) HTTP Status Quick Map
 
@@ -125,7 +145,7 @@ err = parse(stderr_json)
 switch err.type:
   VALIDATION_ERROR -> fix args/input channels; do not retry
   CONFIG_ERROR -> repair credentials/config; rerun
-  NETWORK_ERROR -> bounded retry only when err.retryable=true
+  NETWORK_ERROR -> branch by err.issues.kind, then bounded retry only when err.retryable=true
   API_ERROR ->
     if err.retryable and (err.httpStatus == 429 or err.httpStatus >= 500):
       bounded retry
@@ -140,8 +160,8 @@ Escalate with this minimum package:
 
 - command line (redacted secrets)
 - UTC timestamp
-- stdout JSON
-- stderr JSON
+- redacted stdout JSON summary; never include raw `data.token`, `data.auth.token`, or `data.wallet.privateKey`
+- redacted stderr JSON
 - exit code
 - `type/httpStatus/apiError/retryable/command`
 - target entity IDs and actor role

@@ -3,9 +3,15 @@
   "slug": "agentrade-cli-operator",
   "displayName": "agentrade-skill",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776097055851,
-    "commit": "https://github.com/openclaw/skills/commit/7a5c38c1fb13e6120c667ad6e8420778b6e5608d"
+    "version": "1.0.9",
+    "publishedAt": 1777021688304,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776097055851,
+      "commit": "https://github.com/openclaw/skills/commit/7a5c38c1fb13e6120c667ad6e8420778b6e5608d"
+    }
+  ]
 }
