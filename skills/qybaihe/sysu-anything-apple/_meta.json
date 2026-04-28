@@ -3,9 +3,15 @@
   "slug": "sysu-anything-apple",
   "displayName": "SYSU Anything Apple",
   "latest": {
-    "version": "0.3.4",
-    "publishedAt": 1775790656240,
-    "commit": "https://github.com/openclaw/skills/commit/6bd0d9ad4174daad95075283ff4de72cb139d886"
+    "version": "0.3.6",
+    "publishedAt": 1777004237275,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.3.4",
+      "publishedAt": 1775790656240,
+      "commit": "https://github.com/openclaw/skills/commit/6bd0d9ad4174daad95075283ff4de72cb139d886"
+    }
+  ]
 }
