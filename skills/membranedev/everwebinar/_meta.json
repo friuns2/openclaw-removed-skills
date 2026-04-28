@@ -3,9 +3,15 @@
   "slug": "everwebinar",
   "displayName": "Everwebinar",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775351042442,
-    "commit": "https://github.com/openclaw/skills/commit/2e304331e17986c11de949f93c1759ec1b1b8a59"
+    "version": "1.0.1",
+    "publishedAt": 1776884203747,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775351042442,
+      "commit": "https://github.com/openclaw/skills/commit/2e304331e17986c11de949f93c1759ec1b1b8a59"
+    }
+  ]
 }
