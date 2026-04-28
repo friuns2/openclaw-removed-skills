@@ -3,9 +3,15 @@
   "slug": "resci-retention-science",
   "displayName": "Resci Retention Science",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775311604171,
-    "commit": "https://github.com/openclaw/skills/commit/393453ef2b508e2ccbcf00efe5629f7c35c6f2a9"
+    "version": "1.0.1",
+    "publishedAt": 1776885933708,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775311604171,
+      "commit": "https://github.com/openclaw/skills/commit/393453ef2b508e2ccbcf00efe5629f7c35c6f2a9"
+    }
+  ]
 }
