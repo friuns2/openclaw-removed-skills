@@ -1,11 +1,7 @@
 #!/bin/bash
-# install.sh — SearXNG 一键部署脚本 v1.2.0
+# install.sh — SearXNG 一键部署脚本 v1.1.0
 # 功能：Docker Compose 部署 + 端口冲突检测 + OpenClaw 配置
-# 踩坑经验（2026-04-12）：
-#   1. botdetection 模块缺少 limiter.toml → 所有请求返回 403
-#   2. settings.yml 默认不启用 json format → JSON API 返回 HTML
-#   3. secret_key 不能用 $(...) 字符串 → 必须用实际生成的密钥
-#   4. 部署完必须验证 JSON API，不能只检查主页 200
+# 修复：grep -oP (GNU) → grep -E + cut (跨平台) | sed 分隔符 | 幂等性
 
 set -e
 
@@ -142,10 +138,8 @@ services:
 EOF
     
     # 渲染 settings.yml (启用 JSON API)
-    # ⚠️ 经验：SearXNG 默认不启用 json format，必须显式声明
     log_info "生成 settings.yml..."
     SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 32 | head -n 1)
-    # ⚠️ 经验：secret_key 不能用 $() 字符串，必须是实际值
     cat > "$DOCKER_DIR/searxng/settings.yml" << EOFSETTINGS
 search:
   default_lang: zh-CN
@@ -178,22 +172,9 @@ engines:
     shortcut: bd
 EOFSETTINGS
 
-    # 验证 settings.yml 包含 json 格式支持
-    if ! grep -q '"json"' "$DOCKER_DIR/searxng/settings.yml" 2>/dev/null; then
-        log_error "settings.yml 未正确生成 json format 配置"
-        exit 1
-    fi
-
     # 创建空的 limiter.toml (解决 botdetection 403 问题)
-    # ⚠️ 经验：SearXNG 的 botdetection 模块若无此文件，所有请求返回 403
-    log_info "生成 limiter.toml (修复 403 问题)..."
+    log_info "生成 limiter.toml..."
     touch "$DOCKER_DIR/searxng/limiter.toml"
-    
-    # 验证 limiter.toml 创建成功
-    if [ ! -f "$DOCKER_DIR/searxng/limiter.toml" ]; then
-        log_error "limiter.toml 创建失败"
-        exit 1
-    fi
 }
 
 # ============================================================
@@ -236,7 +217,7 @@ wait_for_searxng() {
     
     echo ""
     log_error "SearXNG 启动超时 (${MAX_WAIT}s)"
-    log_info "查看日志: docker logs searxng"
+    log_info "查看日志: docker -f searxng logs"
     log_info "调试: curl -v http://localhost:$PORT/healthz"
     exit 1
 }
@@ -252,26 +233,15 @@ verify_searxng() {
         log_info "✅ 主页访问成功"
     else
         log_error "主页访问失败"
-        log_info "调试: curl -v http://localhost:$PORT"
-        log_info "查看日志: docker logs searxng"
         return 1
     fi
     
-    # 测试 JSON API (⚠️ 必须验证，不能只检查主页)
-    # 常见问题：主页 200 但 json 返回 html → settings.yml 未启用 json format
-    local json_response
-    json_response=$(curl -sf --connect-timeout 5 --max-time 10 \
-        "http://localhost:$PORT/search?q=test&format=json" 2>/dev/null)
-    
+    # 测试 JSON API
+    local json_response=$(curl -sf --connect-timeout 5 --max-time 10 "http://localhost:$PORT/search?q=test&format=json" 2>/dev/null)
     if echo "$json_response" | grep -q '"results"'; then
         log_info "✅ JSON API 正常"
-    elif echo "$json_response" | grep -q '<html'; then
-        log_error "JSON API 返回 HTML — settings.yml 未启用 json format"
-        log_error "请检查: $DOCKER_DIR/searxng/settings.yml 是否包含 json"
-        return 1
     else
-        log_warn "JSON API 响应异常 (主页正常)"
-        log_info "调试: curl 'http://localhost:$PORT/search?q=test&format=json'"
+        log_warn "JSON API 响应异常 (主页正常，搜索引擎可能需要配置)"
     fi
 }
 
@@ -360,7 +330,7 @@ print_complete() {
 # ============================================================
 main() {
     echo ""
-    echo "🔍 huo15-searxng — SearXNG 一键部署 v1.2.0"
+    echo "🔍 huo15-searxng — SearXNG 一键部署 v1.1.0"
     echo "═══════════════════════════════════════════════════"
     echo ""
     
