@@ -3,9 +3,15 @@
   "slug": "smtp2go",
   "displayName": "Smtp2Go",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775556286819,
-    "commit": "https://github.com/openclaw/skills/commit/96483004c700de2bf041027e189165e5079b48a2"
+    "version": "1.0.1",
+    "publishedAt": 1776898815863,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775556286819,
+      "commit": "https://github.com/openclaw/skills/commit/96483004c700de2bf041027e189165e5079b48a2"
+    }
+  ]
 }
