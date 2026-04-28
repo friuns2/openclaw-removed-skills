@@ -3,9 +3,15 @@
   "slug": "tripai-skill",
   "displayName": "TripAI",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775810849401,
-    "commit": "https://github.com/openclaw/skills/commit/1c5ca796764aad3257bf22fd96729c69219314d6"
+    "version": "1.0.4",
+    "publishedAt": 1776860842926,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775810849401,
+      "commit": "https://github.com/openclaw/skills/commit/1c5ca796764aad3257bf22fd96729c69219314d6"
+    }
+  ]
 }
