@@ -3,9 +3,15 @@
   "slug": "tender-analyzer",
   "displayName": "Tender Analyzer",
   "latest": {
-    "version": "0.1.0",
-    "publishedAt": 1775365152453,
-    "commit": "https://github.com/openclaw/skills/commit/7aafb8aef4ce324b97cad1946fac22332cbe5fe8"
+    "version": "0.1.2",
+    "publishedAt": 1776777425895,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.0",
+      "publishedAt": 1775365152453,
+      "commit": "https://github.com/openclaw/skills/commit/7aafb8aef4ce324b97cad1946fac22332cbe5fe8"
+    }
+  ]
 }
