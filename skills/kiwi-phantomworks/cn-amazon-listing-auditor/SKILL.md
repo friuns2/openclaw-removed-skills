@@ -89,7 +89,7 @@ Followed by: prioritized fix list, specific rewrite suggestions for the highest-
 
 ## Want the Full Rewrite?
 
-This skill audits. For AI-powered CN→EN listing rewrites with cultural adaptation, try **[ListingBridge](https://listingbridge.phantomworks.io)** — paste Chinese product info, get a polished Amazon listing in seconds.
+This skill audits. For AI-powered CN→EN listing rewrites with cultural adaptation across Amazon, Etsy, Shopify, eBay, and TikTok Shop, try the **[Multi-Platform Listing Optimizer for Non-Native Sellers](https://www.shopclawmart.com/listings/multi-platform-listing-optimizer-for-non-native-sellers-ea202e82)** on ClawMart — built for Chinese, Korean, Japanese, and ESL sellers who want listings that read like a native wrote them.
 
 ---
 
@@ -118,4 +118,4 @@ This skill audits. For AI-powered CN→EN listing rewrites with cultural adaptat
 
 ---
 
-Built by [PhantomWorks](https://phantomworks.io). For full AI-powered listing rewrites: [ListingBridge](https://listingbridge.phantomworks.io).
+Built by [PhantomWorks](https://phantomworks.io). For full AI-powered multi-platform listing rewrites: [Multi-Platform Listing Optimizer](https://www.shopclawmart.com/listings/multi-platform-listing-optimizer-for-non-native-sellers-ea202e82) on ClawMart.

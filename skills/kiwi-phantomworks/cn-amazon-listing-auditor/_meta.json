@@ -3,9 +3,15 @@
   "slug": "cn-amazon-listing-auditor",
   "displayName": "Cn Amazon Listing Auditor",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1775369566154,
-    "commit": "https://github.com/openclaw/skills/commit/eacecf25587f96182db609e7489b105aaf3885f9"
+    "version": "1.0.4",
+    "publishedAt": 1776805008002,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1775369566154,
+      "commit": "https://github.com/openclaw/skills/commit/eacecf25587f96182db609e7489b105aaf3885f9"
+    }
+  ]
 }
