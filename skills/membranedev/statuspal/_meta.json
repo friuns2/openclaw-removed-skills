@@ -3,9 +3,15 @@
   "slug": "statuspal",
   "displayName": "Statuspal",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775714624412,
-    "commit": "https://github.com/openclaw/skills/commit/5a5fcc023f123449fe69e07a3fd43924df519f32"
+    "version": "1.0.1",
+    "publishedAt": 1776898075152,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775714624412,
+      "commit": "https://github.com/openclaw/skills/commit/5a5fcc023f123449fe69e07a3fd43924df519f32"
+    }
+  ]
 }
