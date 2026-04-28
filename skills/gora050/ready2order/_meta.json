@@ -3,9 +3,15 @@
   "slug": "ready2order",
   "displayName": "Ready2Order",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775621222382,
-    "commit": "https://github.com/openclaw/skills/commit/ebc91f488779b9260c1f0e290ed88954009b1e1e"
+    "version": "1.0.1",
+    "publishedAt": 1776899134035,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775621222382,
+      "commit": "https://github.com/openclaw/skills/commit/ebc91f488779b9260c1f0e290ed88954009b1e1e"
+    }
+  ]
 }
