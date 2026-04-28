@@ -3,9 +3,15 @@
   "slug": "secureship",
   "displayName": "Secureship",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775559865817,
-    "commit": "https://github.com/openclaw/skills/commit/b22365f267f52d19929c875c844b2d72a1241a20"
+    "version": "1.0.1",
+    "publishedAt": 1776895658728,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775559865817,
+      "commit": "https://github.com/openclaw/skills/commit/b22365f267f52d19929c875c844b2d72a1241a20"
+    }
+  ]
 }
