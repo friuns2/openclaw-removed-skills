@@ -3,9 +3,15 @@
   "slug": "blend",
   "displayName": "Blend",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775383680356,
-    "commit": "https://github.com/openclaw/skills/commit/db6f66ae4bcb96499675b36f9293022f721e66b5"
+    "version": "1.0.1",
+    "publishedAt": 1776892253342,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775383680356,
+      "commit": "https://github.com/openclaw/skills/commit/db6f66ae4bcb96499675b36f9293022f721e66b5"
+    }
+  ]
 }
