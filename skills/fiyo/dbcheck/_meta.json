@@ -1,13 +1,18 @@
 {
   "owner": "fiyo",
   "slug": "dbcheck",
-  "displayName": "DBCheck 数据库巡检",
+  "displayName": "DBCheck 轻量级开源数据库巡检工具",
   "latest": {
-    "version": "2.3.3",
-    "publishedAt": 1776311882108,
-    "commit": "https://github.com/openclaw/skills/commit/577c7e7528fc886dab213a99f5de1d38d428b009"
+    "version": "2.3.5",
+    "publishedAt": 1777301344796,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.3.3",
+      "publishedAt": 1776311882108,
+      "commit": "https://github.com/openclaw/skills/commit/577c7e7528fc886dab213a99f5de1d38d428b009"
+    },
     {
       "version": "1.0.8",
       "publishedAt": 1775992976923,

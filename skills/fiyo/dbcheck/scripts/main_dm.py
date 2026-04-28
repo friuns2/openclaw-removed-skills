@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+#
+# Copyright (c) 2024 DBCheck Contributors
+# sdfiyon@gmail.com
+#
+# This file is part of DBCheck, an open-source database health inspection tool.
+# DBCheck is released under the MIT License.
+# See LICENSE or visit https://opensource.org/licenses/MIT for full license text.
+#
 from version import __version__ as VER
+from i18n import get_lang, t as _t
 
 """
 达梦 DM8 数据库自动化健康巡检工具 {VER}
@@ -24,6 +33,7 @@ import re
 import time
 from pathlib import Path
 import sys, getopt, os
+import getpass
 import docx
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
@@ -54,9 +64,9 @@ try:
     import dmPython as dm_driver
     DM_DRIVER = 'dmPython'
 except ImportError:
-    print("缺少达梦数据库驱动库，请执行以下命令安装：")
+    print(_t("dm8_driver_missing"))
     print("  pip install dmpython")
-    print("  并确保 dpi 动态库（随达梦数据库安装）在系统 PATH 中")
+    print("  " + _t("dm8_driver_path_note"))
     sys.exit(1)
 
 importlib.reload(sys)
@@ -141,6 +151,15 @@ dm_partition_info = SELECT TABLE_OWNER, TABLE_NAME, PARTITION_NAME, HIGH_VALUE, 
 
 # ── 20. 资源限制 ─────────────────────────────
 dm_resource       = SELECT NAME, TYPE, SPACE_LIMIT, SPACE_USED FROM V$RESOURCE_LIMIT;
+
+# ── 21. 长时间运行的SQL（V$LONG_EXEC_SQLS）──────
+dm_long_sql       = SELECT SQL_TEXT, EXEC_TIME, SESS_ID, N_RUNS, FINISH_TIME FROM V$LONG_EXEC_SQLS ORDER BY EXEC_TIME DESC LIMIT 50;
+
+# ── 22. Top SQL（按执行时间排序）───────────────
+dm_top_sql_cpu    = SELECT SQL_TEXT, EXEC_TIME, N_RUNS, SESS_ID FROM V$LONG_EXEC_SQLS ORDER BY N_RUNS DESC LIMIT 30;
+
+# ── 23. Undo 信息 ───────────────────────────
+dm_undo_info      = SELECT NAME AS TABLESPACE_NAME, TYPE$ AS TABLESPACE_TYPE, STATUS$ AS TS_STATUS FROM V$TABLESPACE;
 """
 
 
@@ -170,7 +189,7 @@ class RemoteSystemInfoCollector:
             )
             return True
         except Exception as e:
-            print(f"SSH连接失败 {self.host}:{self.port}: {e}")
+            print(f"SSH {_t('dm8_ssh_conn_fail').format(host=self.host, port=self.port)}: {e}")
             return False
 
     def disconnect(self):
@@ -371,14 +390,14 @@ def execute_query_safe(cursor, sql, item_name=""):
         err_code = str(e.args[0]) if e.args else "0"
         hint = _DM_ERROR_HINTS.get(err_code)
         if hint:
-            print(f"[WARN]  [{item_name}] {hint[0]}\n    💡 建议: {hint[1]}")
+            print(_t("dm8_warn_hint").format(item=item_name, hint0=hint[0], hint1=hint[1]))
         else:
-            print(f"[WARN]  [{item_name}] 数据库错误 ({err_code}): {str(e)[:120]}")
+            print(_t("dm8_warn_db_err").format(item=item_name, code=err_code, e=str(e)[:120]))
         return {"columns": [], "data": []}
 
     except Exception as e:
         err_type = type(e).__name__
-        print(f"[WARN]  [{item_name}] {err_type}: {str(e)[:100]}")
+        print(_t("dm8_warn_exc").format(item=item_name, type=err_type, e=str(e)[:100]))
         return {"columns": [], "data": []}
 
 
@@ -484,13 +503,13 @@ def analyze_health_status(context):
     score = max(0, min(100, score))
 
     if critical_n > 0:
-        status = "严重"
+        status = _t('report.dm_status_critical')
     elif warning_n >= 4:
-        status = "警告"
+        status = _t('report.dm_status_warning')
     elif warning_n > 0:
-        status = "一般"
+        status = _t('report.dm_status_general')
     else:
-        status = "正常"
+        status = _t('report.dm_health_status_ok')
 
     return {
         "status": status,
@@ -552,20 +571,51 @@ def create_word_template(inspector_name="Jack"):
     heading2.font.name = '微软雅黑'
 
     # 封面标题（二号）
-    doc.add_paragraph("达梦数据库健康巡检报告", style='ReportTitle')
+    # Logo 图片
+    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dbcheck_logo.png')
+    if os.path.exists(logo_path):
+        logo_para = doc.add_paragraph()
+        logo_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        logo_run = logo_para.add_run()
+        logo_run.add_picture(logo_path, width=Cm(3.5))
+
+    # 报告标题
+    title_para = doc.add_paragraph()
+    title_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    title_run = title_para.add_run('DM8 ' + 'Database Health Inspection Report')
+    title_run.font.size = Pt(28)
+    title_run.font.bold = True
+    title_run.font.color.rgb = RGBColor(15, 75, 135)
+    title_run.font.name = '微软雅黑'
+
+    # 副标题
+    subtitle_para = doc.add_paragraph()
+    subtitle_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    subtitle_run = subtitle_para.add_run('Database Health Inspection Report')
+    subtitle_run.font.size = Pt(14)
+    subtitle_run.font.color.rgb = RGBColor(100, 100, 100)
+    subtitle_run.font.italic = True
+
+    # 装饰分隔线
+    doc.add_paragraph()
+    line_para = doc.add_paragraph()
+    line_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    line_run = line_para.add_run('━' * 50)
+    line_run.font.color.rgb = RGBColor(15, 75, 135)
+    line_run.font.size = Pt(8)
     doc.add_paragraph("")
 
     # 封面信息表
     info_table = doc.add_table(rows=8, cols=2)
     info_cells = [
-        ("数据库名称",     "{{{ co_name }}}"),
-        ("服务器地址",     "{{{ server_addr }}}"),
-        ("达梦版本",       "{{{ dm_version }}}"),
-        ("服务器主机名",   "{{{ hostname }}}"),
-        ("实例启动时间",   "{{{ uptime_text }}}"),
-        ("巡检人员",       inspector_name),
-        ("服务器平台",     "{{{ platform_text }}}"),
-        ("报告生成时间",   "{{{ report_time }}}"),
+        (self._t('report.dm_fallback_db_name'),     "{{{ co_name }}}"),
+        (self._t('report.dm_fallback_server_addr'), "{{{ server_addr }}}"),
+        (self._t('report.dm_fallback_version'),      "{{{ dm_version }}}"),
+        (self._t('report.dm_fallback_hostname'),    "{{{ hostname }}}"),
+        (self._t('report.dm_fallback_instance_time'), "{{{ uptime_text }}}"),
+        (self._t('report.dm_fallback_inspector'),   inspector_name),
+        (self._t('report.dm_fallback_platform'),   "{{{ platform_text }}}"),
+        (self._t('report.dm_fallback_report_time'), "{{{ report_time }}}"),
     ]
     for i, (label, value) in enumerate(info_cells):
         info_table.cell(i, 0).text = label
@@ -573,38 +623,38 @@ def create_word_template(inspector_name="Jack"):
     info_table.style = 'Table Grid'
 
     # 章节占位符
-    doc.add_paragraph("\n第1章 数据库基本信息", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch1"), style='Heading1Custom')
     doc.add_paragraph("{{{ dm_instance }}}")
 
-    doc.add_paragraph("\n第2章 巡检执行摘要", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch2"), style='Heading1Custom')
     doc.add_paragraph("{{{ health_summary_text }}}")
     doc.add_paragraph("{{{ error_summary_text }}}")
 
-    doc.add_paragraph("\n第3章 表空间使用情况", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch3"), style='Heading1Custom')
     doc.add_paragraph("{{{ dm_tablespace }}}")
 
-    doc.add_paragraph("\n第4章 会话与事务", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch4"), style='Heading1Custom')
     doc.add_paragraph("{{{ dm_sessions }}}")
     doc.add_paragraph("{{{ dm_trx }}}")
 
-    doc.add_paragraph("\n第5章 内存分析", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch5"), style='Heading1Custom')
     doc.add_paragraph("{{{ dm_sga }}}")
     doc.add_paragraph("{{{ dm_memory_info }}}")
 
-    doc.add_paragraph("\n第6章 重做日志与归档", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch6"), style='Heading1Custom')
     doc.add_paragraph("{{{ dm_redo_logs }}}")
 
-    doc.add_paragraph("\n第7章 系统资源监控", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch7"), style='Heading1Custom')
     doc.add_paragraph("{{{ system_info_text }}}")
 
-    doc.add_paragraph("\n第8章 对象与用户安全", style='Heading1Custom')
-    doc.add_paragraph("8.1 无效对象\n{{{ dm_invalid_cnt }}}")
-    doc.add_paragraph("8.2 用户列表\n{{{ dm_users }}}")
+    doc.add_paragraph("\n" + self._t("report.dm_ch8"), style='Heading1Custom')
+    doc.add_paragraph(self._t("report.dm_ch81") + "\n{{{ dm_invalid_cnt }}}")
+    doc.add_paragraph(self._t("report.dm_ch82") + "\n{{{ dm_users }}}")
 
-    doc.add_paragraph("\n第9章 备份与归档", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_ch9"), style='Heading1Custom')
     doc.add_paragraph("{{{ dm_backup }}}")
 
-    doc.add_paragraph("\n第10章 报告说明", style='Heading1Custom')
+    doc.add_paragraph("\n" + self._t("report.dm_fallback_notes_chapter"), style='Heading1Custom')
     doc.add_paragraph("{{{ notes_text }}}")
 
     os.makedirs(template_path, exist_ok=True)
@@ -694,7 +744,7 @@ class getData(object):
 
             if probe_ok:
                 self.conn_db = conn
-                print(f"[OK] DM8 连接成功: {self.user}@{self.H}:{self.P}")
+                print(_t("dm8_conn_ok").format(user=self.user, H=self.H, P=self.P))
             else:
                 err_str = str(probe_error) if probe_error else ''
                 code = get_dm_code(err_str)
@@ -703,7 +753,7 @@ class getData(object):
                 if code == '-2111':
                     for retry_i in range(2):
                         time.sleep(3)
-                        print(f"  [RETRY] 第{retry_i+2}次连接重试 ({self.H}:{self.P})...")
+                        print(_t("dm8_conn_retry").format(n=retry_i+2, H=self.H, P=self.P))
                         try:
                             conn2 = dm_driver.connect(user=self.user, password=self.password,
                                                       server=self.H, port=self.P)
@@ -714,18 +764,18 @@ class getData(object):
                             self.conn_db = conn2
                             try: conn.close()
                             except: pass
-                            print(f"[OK] DM8 连接成功（第{retry_i+2}次重试）: {self.user}@{self.H}:{self.P}")
+                            print(_t("dm8_conn_retry_ok").format(n=retry_i+2, user=self.user, H=self.H, P=self.P))
                             probe_ok = True
                             break
                         except Exception as retry_err:
                             err_r = str(retry_err)
                             code_r = get_dm_code(err_r)
-                            print(f"  重试失败 CODE:{code_r}: {err_r[:80]}")
+                            print(_t("dm8_conn_retry_fail").format(code=code_r, err=err_r[:80]))
                             try: conn2.close()
                             except: pass
                             continue
                 if not probe_ok:
-                    print(f"[FAIL] DM8 连接失败[CODE:{code}]: {hint}")
+                    print(_t("dm8_conn_fail_code").format(code=code, hint=hint))
                     try: conn.close()
                     except: pass
                     self.conn_db = None
@@ -734,7 +784,7 @@ class getData(object):
             err_str = str(e)
             code = get_dm_code(err_str)
             hint = friendly_hint(code, self.H, self.P, self.user)
-            print(f"[FAIL] DM8 连接失败[CODE:{code}]: {hint}")
+            print(_t("dm8_conn_fail_code").format(code=code, hint=hint))
             self.conn_db = None
 
     def print_progress_bar(self, iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
@@ -746,7 +796,7 @@ class getData(object):
             print()
 
     def checkdb(self, sqlfile=''):
-        print("\n开始 DM8 巡检...")
+        print("\n" + _t("dm8_starting"))
         total_steps = 22
         current_step = 0
         cfg = configparser.RawConfigParser()
@@ -756,7 +806,7 @@ class getData(object):
             else:
                 cfg.read(sqlfile, encoding='utf-8')
         except Exception as e:
-            print(f"[FAIL] 读取SQL模板失败: {e}")
+            print(_t("dm8_sql_template_fail").format(e=e))
             return self.context
 
         init_keys = [
@@ -773,7 +823,8 @@ class getData(object):
             "dm_long_sql", "dm_top_sql_cpu",
             "dm_rss_status", "dm_rss_apply",
             "dm_dcinfo", "dm_inst_info",
-            "dm_undo_info", "dm_transactions",
+            "dm_undo_info",
+            "dm_transactions",
             "dm_recyclebin",
             "dm_datafiles",
             "dm_profile_pwd",
@@ -795,7 +846,7 @@ class getData(object):
             self.context.update({"health_summary": [{'health_summary': '运行良好'}]})
             self.context.update({"co_name": [{'DB_NAME': self.db_name}]})
         except Exception as e:
-            print(f"[FAIL] 获取版本失败: {e}")
+            print(_t("dm8_version_fail").format(e=e))
             self.context.update({"dm_version": [{'BANNER': 'Unknown'}]})
 
         # ── 步骤2-21: 执行所有 SQL（容错执行器，单个失败不中断） ─
@@ -804,31 +855,31 @@ class getData(object):
             variables_items = list(cfg.items("variables"))
             for i, (name, stmt) in enumerate(variables_items):
                 current_step = int((i + 1) / len(variables_items) * (total_steps - 6)) + 1
-                self.print_progress_bar(current_step, total_steps, prefix='DM8巡检:', suffix=f'{name} ({i+1}/{len(variables_items)})')
+                self.print_progress_bar(current_step, total_steps, prefix=_t('dm8_progress_prefix'), suffix=f'{name} ({i+1}/{len(variables_items)})')
                 clean_sql = stmt.replace('\n', ' ').replace('\r', ' ').rstrip().rstrip(';').strip()
                 result = execute_query_safe(cursor, clean_sql, item_name=name)
                 self.context[name] = result.get('data', [])
                 time.sleep(0.03)
             cursor.close()
         except Exception as e:
-            print(f'\n[FAIL] 数据库查询循环异常: {e}')
+            print(_t("dm8_query_loop_fail").format(e=e))
 
         # 容错执行结果存入 context
         self.context['_safe_errors'] = getattr(execute_query_safe, '_errors', [])
 
         # ── 步骤: 收集系统信息 ─────────────────────
         current_step = total_steps - 4
-        self.print_progress_bar(current_step, total_steps, prefix='DM8巡检:', suffix='收集系统信息')
+        self.print_progress_bar(current_step, total_steps, prefix=_t('dm8_progress_prefix'), suffix=_t('dm8_progress_sysinfo'))
         try:
             if self.ssh_info and self.ssh_info.get('ssh_host'):
-                print(f"[INFO] 通过SSH收集系统信息: {self.ssh_info['ssh_host']}")
+                print(_t("dm8_ssh_collecting").format(host=self.ssh_info['ssh_host']))
                 collector = RemoteSystemInfoCollector(
                     host=self.ssh_info['ssh_host'], port=self.ssh_info.get('ssh_port', 22),
                     username=self.ssh_info.get('ssh_user', 'root'),
                     password=self.ssh_info.get('ssh_password'), key_file=self.ssh_info.get('ssh_key_file')
                 )
                 if not collector.connect():
-                    print("[WARN] SSH 连接失败，跳过远程系统信息采集")
+                    print(_t("dm8_ssh_conn_fail_skip"))
                     collector = LocalSystemInfoCollector()
             else:
                 collector = LocalSystemInfoCollector()
@@ -839,7 +890,7 @@ class getData(object):
             system_info['disk_list'] = disk_list
             self.context.update({"system_info": system_info})
         except Exception as e:
-            print(f"\n[FAIL] 收集系统信息失败: {e}")
+            print(_t("dm8_sysinfo_fail").format(e=e))
             self.context.update({"system_info": {
                 'hostname': '未知', 'platform': '未知', 'boot_time': '未知',
                 'cpu': {}, 'memory': {},
@@ -849,7 +900,7 @@ class getData(object):
 
         # ── 步骤: 风险分析 ─────────────────────────
         current_step = total_steps - 3
-        self.print_progress_bar(current_step, total_steps, prefix='DM8巡检:', suffix='智能健康评估')
+        self.print_progress_bar(current_step, total_steps, prefix=_t('dm8_progress_prefix'), suffix=_t('dm8_progress_health'))
         self.context.update({"auto_analyze": []})
         self._basic_risk_check()
 
@@ -888,7 +939,7 @@ class getData(object):
 
         # ── 步骤: AI 诊断 ─────────────────────────
         current_step = total_steps - 2
-        self.print_progress_bar(current_step, total_steps, prefix='DM8巡检:', suffix='AI诊断')
+        self.print_progress_bar(current_step, total_steps, prefix=_t('dm8_progress_prefix'), suffix=_t('dm8_progress_ai'))
         self.context['ai_advice'] = ''
         try:
             from analyzer import AIAdvisor
@@ -906,13 +957,49 @@ class getData(object):
             )
             if advisor.enabled:
                 label = self.context.get('co_name', [{}])[0].get('DB_NAME', 'DM8')
-                print(f"\n🤖 正在调用 AI 诊断（{advisor.backend} / {advisor.model}）...")
-                ai_advice = advisor.diagnose('dm8', label, self.context, self.context.get('auto_analyze', []))
+                print(_t("dm8_ai_calling").format(backend=advisor.backend, model=advisor.model))
+                ai_advice = advisor.diagnose('dm8', label, self.context, self.context.get('auto_analyze', []), lang=self._lang)
                 self.context['ai_advice'] = ai_advice
         except Exception:
             self.context['ai_advice'] = ''
 
-        self.print_progress_bar(total_steps, total_steps, prefix='DM8巡检:', suffix='完成 [OK]')
+        # ── 慢查询深度分析（P2）──────────────────────────────
+        self.context['slow_query_result'] = None
+        try:
+            from slow_query_analyzer import DMSlowQueryAnalyzer
+            if self.conn:
+                analyzer = DMSlowQueryAnalyzer()
+                ai_advisor = None
+                try:
+                    from analyzer import AIAdvisor
+                    import json as _json
+                    cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_config.json')
+                    ai_cfg = {}
+                    if os.path.exists(cfg_path):
+                        with open(cfg_path, 'r', encoding='utf-8') as f:
+                            ai_cfg = _json.load(f)
+                    ai_advisor = AIAdvisor(
+                        backend=ai_cfg.get('backend'),
+                        api_key=ai_cfg.get('api_key'),
+                        api_url=ai_cfg.get('api_url'),
+                        model=ai_cfg.get('model')
+                    )
+                except Exception:
+                    pass
+                print("\n\U0001f50d " + self._t('dm8_slow_query_analyzing'))
+                result = analyzer.analyze(self.conn, ai_advisor=ai_advisor, lang=self._lang)
+                self.context['slow_query_result'] = result.to_dict()
+                if result.is_empty():
+                    print("  \u2139\ufe0f  " + self._t('dm8_slow_query_unavailable'))
+                else:
+                    print("  \u2705  " + self._t('dm8_slow_query_ok').format(
+                        count=len(result.top_sql_by_latency)))
+        except ImportError:
+            pass
+        except Exception as e:
+            print("\u26a0\ufe0f 慢查询深度分析失败: %s" % e)
+
+        self.print_progress_bar(total_steps, total_steps, prefix=_t('dm8_progress_prefix'), suffix=_t('dm8_progress_done'))
         return self.context
 
     def _basic_risk_check(self):
@@ -1004,17 +1091,30 @@ class saveDoc(object):
         self.H = H
         self.P = P
         self._dt = _dt
+        # 读取语言设置
+        try:
+            from i18n import get_lang
+            self._lang = get_lang()
+        except Exception:
+            self._lang = 'zh'
+
+    def _t(self, key):
+        try:
+            from i18n import t
+            return t(key, self._lang)
+        except Exception:
+            return key
 
     def contextsave(self):
         try:
             required_keys = ['health_summary', 'auto_analyze', 'dm_version', 'co_name', 'system_info']
             for key in required_keys:
                 if key not in self.context:
-                    if key == 'health_summary':   self.context[key] = [{'health_summary': '运行良好'}]
+                    if key == 'health_summary':   self.context[key] = [{'health_summary': self._t("report.running_ok")}]
                     elif key == 'auto_analyze':    self.context[key] = []
                     elif key == 'dm_version':       self.context[key] = [{'BANNER': 'Unknown'}]
                     elif key == 'system_info':     self.context[key] = {}
-                    else:                          self.context[key] = [{'placeholder': '数据缺失'}]
+                    else:                          self.context[key] = [{'placeholder': self._t("report.data_missing")}]
 
             if 'disk_list' not in self.context['system_info'] or not self.context['system_info']['disk_list']:
                 self.context['system_info']['disk_list'] = [{
@@ -1052,10 +1152,10 @@ class saveDoc(object):
             problem_count = len(self.context.get("auto_analyze", []))
             self.context.update({"problem_count": problem_count})
 
-            if problem_count == 0: health_status = "优秀"
-            elif problem_count <= 3: health_status = "良好"
-            elif problem_count <= 6: health_status = "一般"
-            else: health_status = "需关注"
+            if problem_count == 0: health_status = self._t("report.health_excellent")
+            elif problem_count <= 3: health_status = self._t("report.health_good")
+            elif problem_count <= 6: health_status = self._t("report.health_fair")
+            else: health_status = self._t("report.health_attention")
             self.context.update({"health_status": health_status})
 
             # ── 预格式化基本变量 ──
@@ -1064,7 +1164,7 @@ class saveDoc(object):
             else:
                 self.context['co_name'] = str(self.context.get('co_name', '') or '')
             if isinstance(self.context.get('dm_version'), list) and len(self.context['dm_version']) > 0:
-                self.context['dm_version'] = str(self.context['dm_version'][0].get('BANNER', ''))
+                self.context['dm_version'] = str(self.context['dm_version'][0].get('SVR_VERSION', '') or '')
             else:
                 self.context['dm_version'] = str(self.context.get('dm_version', '') or '')
 
@@ -1094,27 +1194,27 @@ class saveDoc(object):
             mem = sys_info.get('memory', {}) or {}
             disks = sys_info.get('disk_list', []) or []
             lines = []
-            lines.append(f"CPU 使用率\t{cpu.get('usage_percent', 'N/A')}%")
+            lines.append(f"{self._t('report.dm_cpu_usage')}\t{cpu.get('usage_percent', 'N/A')}%")
             used_mb = mem.get('used_mb', 0)
             total_mb = mem.get('total_mb', 0)
             mem_pct = mem.get('usage_percent', 0)
-            lines.append(f"内存使用\t{used_mb} MB / {total_mb} MB ({mem_pct}%)")
+            lines.append(f"{self._t('report.dm_mem_usage')}\t{used_mb} MB / {total_mb} MB ({mem_pct}%)")
             for d in disks[:10] if disks else []:
                 mp = d.get('mountpoint', '/')
                 tg = d.get('total_gb', 0)
                 ug = d.get('used_gb', 0)
                 up = d.get('usage_percent', 0)
-                lines.append(f"磁盘 {mp}\t{up}% (已用 {ug}GB / 共 {tg}GB)")
+                lines.append(f"{self._t('report.dm_disk_usage')} {mp}\t{up}% ({self._t('report.dm_disk_used')} {ug}GB / {self._t('report.dm_disk_total')} {tg}GB)")
             self.context['system_info_text'] = '\n'.join(lines)
 
             # 报告说明
             notes = [
-                "1. 本报告基于达梦 DM8 数据库实时状态生成，反映了生成时刻的数据库健康状况",
-                "2. 报告中空白的项表示未能获取到相关数据，可能是由于权限限制或该功能未启用",
-                "3. 磁盘信息仅显示主要分区的使用率，如需查看完整磁盘信息请使用系统命令 'df -h'",
-                "4. 巡检结果仅供参考，实际运维中请结合具体业务场景进行分析",
-                "5. 建议定期进行数据库巡检，及时发现并解决潜在问题",
-                "6. AI 诊断功能（若启用）生成的建议仅供参考，不构成专业 DBA 意见"
+                self._t('report.dm_note_1'),
+                self._t('report.dm_note_2'),
+                self._t('report.dm_note_3'),
+                self._t('report.dm_note_4'),
+                self._t('report.dm_note_5'),
+                self._t('report.dm_note_6'),
             ]
             self.context['notes_text'] = '\n'.join(notes)
 
@@ -1122,12 +1222,12 @@ class saveDoc(object):
             health = self.context.get('health_analysis')
             if isinstance(health, dict):
                 score = health.get('score', 100)
-                status = health.get('status', '正常')
+                status = health.get('status', self._t('report.dm_health_status_ok'))
                 crit_n = health.get('critical_count', 0)
                 warn_n = health.get('warning_count', 0)
                 hs_lines = [
-                    f"综合评分\t{score}\t状态\t{status}",
-                    f"紧急告警数\t{crit_n}\t警告告警数\t{warn_n}"
+                    f"{self._t('report.dm_health_score')}\t{score}\t{self._t('report.dm_health_status')}\t{status}",
+                    f"{self._t('report.dm_critical_n')}\t{crit_n}\t{self._t('report.dm_warning_n')}\t{warn_n}"
                 ]
                 self.context['health_summary_text'] = '\n'.join(hs_lines)
             else:
@@ -1138,9 +1238,9 @@ class saveDoc(object):
             fail_count = len(errors) if errors else 0
             ok_count = len(list_keys) - fail_count
             es_stat_lines = [
-                f"总SQL数\t{ok_count + fail_count}\t-",
-                f"成功数\t{ok_count}\t-",
-                f"失败数\t{fail_count}\t-"
+                f"{self._t('report.dm_sql_total')}\t{ok_count + fail_count}\t-",
+                f"{self._t('report.dm_sql_ok')}\t{ok_count}\t-",
+                f"{self._t('report.dm_sql_fail')}\t{fail_count}\t-"
             ]
             self.context['error_stats_text'] = '\n'.join(es_stat_lines)
 
@@ -1218,11 +1318,12 @@ class saveDoc(object):
             t = doc.add_table(rows=max(1,len(rows))+1, cols=len(headers), style='Table Grid')
             for j, h in enumerate(headers):
                 cell = t.cell(0, j); cell.text = h
-                _set_cell_bg(cell, 'DCE6F1')
+                _set_cell_bg(cell, '336699')
                 for p in cell.paragraphs:
                     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     for run in p.runs:
                         run.font.size = Pt(9); run.font.name = '微软雅黑'; run.bold = True
+                        run.font.color.rgb = RGBColor(255, 255, 255)
             for i, row_data in enumerate(rows):
                 for j, val in enumerate(row_data):
                     c = t.cell(i+1, j)
@@ -1233,28 +1334,30 @@ class saveDoc(object):
                     c.vertical_alignment = WD_ALIGN_PARAGRAPH.CENTER
             return t
 
-        # 第10章 风险与建议
-        _add_heading("第10章 风险与建议")
+        # 第14章 风险与建议
+        _add_heading(self._t('report.dm_ch14'))
         issues = self.context.get("auto_analyze", [])
         if issues:
-            _add_heading("10.1 问题明细", 2)
-            _add_table(["序号", "项目", "风险等级", "问题描述", "严重程度", "责任人", "修复建议"],
+            _add_heading(self._t('report.dm_ch14_1'), 2)
+            _add_table([self._t('report.dm_col_seq'), self._t('report.dm_col_item'), self._t('report.dm_col_risk_level'),
+                        self._t('report.dm_col_desc'), self._t('report.dm_col_severity'), self._t('report.dm_col_owner'),
+                        self._t('report.dm_col_fix')],
                        [(str(i+1), x.get('col1',''), x.get('col2',''), x.get('col3',''),
                          x.get('col4',''), x.get('col5',''), x.get('fix_sql','')[:200]) for i,x in enumerate(issues)])
             fix_sqls = [(x.get('col1',''), x.get('fix_sql','')) for x in issues if x.get('fix_sql')]
             if fix_sqls:
-                _add_heading("10.2 修复SQL速查", 2)
+                _add_heading(self._t('report.dm_ch14_2'), 2)
                 for fname, sql in fix_sqls:
                     p = doc.add_paragraph(); p.add_run(f"【{fname}】").bold = True
                     doc.add_paragraph(sql, style='List Bullet')
         else:
-            p = doc.add_paragraph("未发现明显风险项，数据库整体运行状况良好")
+            p = doc.add_paragraph(self._t('report.dm_no_risk_found'))
             for r in p.runs: r.font.size = Pt(10.5); r.font.name = '微软雅黑'
 
-        # 第11章 AI 诊断
+        # 第15章 AI 诊断
         ai_text = self.context.get('ai_advice', '')
         if ai_text:
-            _add_heading("第11章 AI 诊断建议")
+            _add_heading(self._t('report.dm_ch15'))
             for line in ai_text.split('\n'):
                 if line.startswith('# '): _add_heading(line[2:], level=2)
                 elif line.startswith('## '): _add_heading(line[3:], level=3)
@@ -1265,11 +1368,13 @@ class saveDoc(object):
                 elif line.strip():
                     doc.add_paragraph(line)
             next_chap = 12
+            notes_chapter = self._t('report.dm_notes_chapter_ai')
         else:
             next_chap = 11
+            notes_chapter = self._t('report.dm_fallback_notes_chapter')
 
         # 第{11|12}章 报告说明（段落形式）
-        _add_heading(f"第{next_chap}章 报告说明")
+        _add_heading(notes_chapter)
         for note in self.context.get('notes_text', '').split('\n'):
             if note.strip():
                 p = doc.add_paragraph(note.strip())
@@ -1297,20 +1402,23 @@ class saveDoc(object):
                 run.font.size = Pt(14) if level == 1 else Pt(12)
             return h
 
-        def _t(hdr, rows):
+        def _tbl(hdr, rows):
             if not rows: return
             max_cols = max(len(hdr), *(len(r) for r in rows))
             tt = doc.add_table(rows=max(1,len(rows))+1, cols=max_cols, style='Table Grid')
             for j, h in enumerate(hdr):
-                c = tt.cell(0, j); c.text = h; _set_cell_bg(c, 'DCE6F1')
+                c = tt.cell(0, j); c.text = h; _set_cell_bg(c, '336699')
                 for p in c.paragraphs:
                     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     for run in p.runs:
                         run.font.size = Pt(9); run.font.name = '微软雅黑'; run.bold = True
+                        run.font.color.rgb = RGBColor(255, 255, 255)
             for i, row in enumerate(rows):
                 for j, val in enumerate(row):
                     if j < max_cols:
-                        c = tt.cell(i+1, j); c.text = str(val)[:200] if val else ''
+                        # 替换换行符和多余空白为单个空格，避免单元格内换行
+                        text = ' '.join(str(val).split()) if val else ''
+                        c = tt.cell(i+1, j); c.text = text[:500] if text else ''
                         for p in c.paragraphs:
                             for run in p.runs:
                                 run.font.size = Pt(9); run.font.name = '微软雅黑'
@@ -1318,9 +1426,9 @@ class saveDoc(object):
 
         def _render(key, max_r=50, label=None):
             val = ctx.get(key, '')
-            if not val or (isinstance(val, str) and val == "无数据"):
+            if not val or (isinstance(val, str) and (val == "无数据" or val == self._t('report.dm_fallback_no_data'))):
                 desc = label if label else key
-                p = doc.add_paragraph(f"{desc}：暂无数据")
+                p = doc.add_paragraph(f"{desc}: {self._t('report.dm_fallback_no_data')}")
                 for r in p.runs: r.font.size = Pt(10.5); r.font.name = '微软雅黑'
                 return
             if isinstance(val, str) and '\t' in val:
@@ -1328,14 +1436,46 @@ class saveDoc(object):
                 if not lines: return
                 hdr = lines[0].split('\t')
                 rows = [ln.split('\t') for ln in lines[1:] if ln.strip()]
-                _t(hdr, rows[:max_r])
+                _tbl(hdr, rows[:max_r])
+            elif isinstance(val, list) and val:
+                # 处理列表格式数据（SQL查询结果）
+                # 检测是否为列表的列表（元组行）
+                if isinstance(val[0], (list, tuple)):
+                    # 多行数据：第一行作为表头
+                    if len(val[0]) > 1:
+                        hdr = [f"Column {i+1}" for i in range(len(val[0]))]
+                        rows = [[str(cell) if cell is not None else '' for cell in row] for row in val[:max_r]]
+                        _tbl(hdr, rows)
+                    else:
+                        # 单列数据：直接显示
+                        rows = [[str(row[0]) if row[0] else ''] for row in val[:max_r]]
+                        _tbl(["Value"], rows)
+                elif isinstance(val[0], dict):
+                    # 列表中的元素是字典（execute_query_safe返回的格式）
+                    keys = list(val[0].keys())
+                    hdr = [str(k) for k in keys]
+                    rows = []
+                    for row_dict in val[:max_r]:
+                        row = []
+                        for k in keys:
+                            v = row_dict.get(k)
+                            # SQL_TEXT字段：合并空格、去换行
+                            if isinstance(v, str) and k == 'SQL_TEXT':
+                                v = ' '.join(v.split())
+                            row.append(str(v) if v is not None else '')
+                        rows.append(row)
+                    _tbl(hdr, rows)
+                else:
+                    # 单行单列或单行多列
+                    p = doc.add_paragraph(str(val)[:500])
+                    for r in p.runs: r.font.size = Pt(10.5); r.font.name = '微软雅黑'
             else:
                 p = doc.add_paragraph(str(val)[:500])
                 for r in p.runs: r.font.size = Pt(10.5); r.font.name = '微软雅黑'
 
         try:
             doc = Document()
-            doc.add_paragraph("达梦数据库健康巡检报告",
+            doc.add_paragraph(self._t("report.dm_title"),
                               style=doc.styles.add_style('ReportTitle', 1))
             doc.styles['ReportTitle'].font.size = Pt(22)
             doc.styles['ReportTitle'].font.bold = True
@@ -1353,94 +1493,126 @@ class saveDoc(object):
                 return str(val) if val else 'N/A'
 
             info_items = [
-                ("数据库名称",   _v('co_name', 'DB_NAME')),
-                ("服务器地址",  _v('server_addr')),
-                ("达梦版本",    _v('dm_version', 'BANNER')),
-                ("服务器主机名", _v('hostname')),
-                ("实例启动时间", _v('uptime_text')),
-                ("巡检人员",    self.inspector_name),
-                ("服务器平台",  _v('platform_text')),
-                ("报告生成时间", _v('report_time')),
+                (self._t('report.dm_fallback_db_name'),   _v('co_name', 'DB_NAME')),
+                (self._t('report.dm_fallback_server_addr'),  _v('server_addr')),
+                (self._t('report.dm_fallback_version'),    _v('dm_version', 'BANNER')),
+                (self._t('report.dm_fallback_hostname'), _v('hostname')),
+                (self._t('report.dm_fallback_instance_time'), _v('uptime_text')),
+                (self._t('report.dm_fallback_inspector'),    self.inspector_name),
+                (self._t('report.dm_fallback_platform'),  _v('platform_text')),
+                (self._t('report.dm_fallback_report_time'), _v('report_time')),
             ]
             t_info = doc.add_table(rows=len(info_items), cols=2, style='Table Grid')
             for i, (k, v) in enumerate(info_items):
                 t_info.cell(i, 0).text = k; _set_cell_bg(t_info.cell(i, 0), 'F2F2F2')
-                t_info.cell(i, 1).text = str(v)
+                t_info.cell(i, 1).text = ' '.join(str(v).split())
                 for cell in [t_info.cell(i, 0), t_info.cell(i, 1)]:
                     for p in cell.paragraphs:
                         for run in p.runs:
                             run.font.size = Pt(10.5); run.font.name = '微软雅黑'
 
 # Ch1 基本信息
-            _add_heading("第1章 数据库基本信息")
+            _add_heading(self._t("report.dm_ch1"))
             _co = ctx.get('co_name', '')
             _dm = ctx.get('dm_version', '')
             if isinstance(_co, list) and _co: _co = _co[0].get('DB_NAME', '')
-            if isinstance(_dm, list) and _dm: _dm = _dm[0].get('BANNER', '')
-            _t(["项目", "值"], [
-                ["实例名称", str(_co)],
-                ["达梦版本", str(_dm)],
-            ])
+            elif not _co: _co = ''
+            if isinstance(_dm, list) and _dm: _dm = _dm[0].get('SVR_VERSION', '')
+            elif not _dm: _dm = ''
+            _tbl([self._t('report.tbl_col_key'), self._t('report.tbl_col_val')],
+                 [[self._t("report.dm_fallback_instance_name"), str(_co)],
+                  [self._t("report.dm_fallback_version"), str(_dm)]])
 
             # Ch2 巡检执行摘要
-            _add_heading("第2章 巡检执行摘要")
+            _add_heading(self._t("report.dm_ch2"))
             hst = ctx.get('health_summary_text', '')
             if hst:
+                _add_heading(self._t('report.dm_ch2_health'), level=2)
+                rows = []
                 for line in hst.split('\n'):
                     if line.strip():
                         parts = line.split('\t')
-                        _t(["项目", "数值"], [parts])
+                        # 每行可能有多个键值对，每2个为一组
+                        for i in range(0, len(parts), 2):
+                            if i+1 < len(parts):
+                                rows.append([parts[i], parts[i+1]])
+                if rows:
+                    _tbl([self._t('report.tbl_col_key'), self._t('report.tbl_col_val')], rows)
 
             est = ctx.get('error_stats_text', '')
             if est:
-                doc.add_paragraph("")
-                p3 = doc.add_paragraph(); r3 = p3.add_run("SQL 执行情况")
-                r3.bold = True; r3.font.size = Pt(12); r3.font.name = '微软雅黑'
+                _add_heading(self._t('report.dm_ch2_sql'), level=2)
                 el = [l.strip() for l in est.strip().split('\n') if l.strip()]
                 if el:
-                    _t(["项目", "数值"], [c.split('\t') for c in el])
+                    data_rows = [c.split('\t') for c in el]
+                    if data_rows:
+                        # 检查第3列是否全为'-'，如果是则只用前2列
+                        max_cols = max(len(r) for r in data_rows)
+                        if max_cols >= 3 and all(r[2] == '-' for r in data_rows if len(r) > 2):
+                            data_rows = [r[:2] for r in data_rows]
+                        _tbl([self._t('report.dm_fallback_sql_name'), self._t('report.dm_fallback_err_code')],
+                             data_rows)
                 edt = ctx.get('error_detail_text', '')
                 if edt and edt != '-':
                     doc.add_paragraph("")
                     dlines = [l.strip() for l in edt.strip().split('\n') if l.strip()]
                     if len(dlines) > 1:
-                        _t(["SQL名称", "错误码", "修复建议"], [l.split('\t') for l in dlines[1:] if l.count('\t') >= 2])
+                        _tbl([self._t("report.dm_fallback_sql_name"),
+                              self._t("report.dm_fallback_err_code"),
+                              self._t("report.dm_fallback_fix_suggest")],
+                             [l.split('\t') for l in dlines[1:] if l.count('\t') >= 2])
 
             # Ch3-10
-            _add_heading("第3章 表空间使用情况")
+            _add_heading(self._t("report.dm_ch3"))
             _render('dm_tablespace', 30)
 
-            _add_heading("第4章 会话与事务")
+            _add_heading(self._t("report.dm_ch4"))
             _render('dm_sessions'); _render('dm_transactions')
 
-            _add_heading("第5章 内存分析")
-            _render('dm_sga', label='SGA 缓冲池汇总')
-            _render('dm_memory', label='各缓冲池详情（SGA）')
+            _add_heading(self._t("report.dm_ch5"))
+            _render('dm_sga', label=self._t('report.dm_fallback_sga_summary'))
+            _render('dm_memory', label=self._t('report.dm_fallback_sga_detail'))
 
-            _add_heading("第6章 重做日志与归档")
+            _add_heading(self._t("report.dm_ch6"))
             _render('dm_redo_logs')
 
-            _add_heading("第7章 系统资源监控")
+            _add_heading(self._t("report.dm_ch7"))
             sit = ctx.get('system_info_text', '')
             if sit:
+                rows = []
                 for line in sit.split('\n'):
                     if line.strip():
                         parts = line.split('\t')
-                        _t(["项目", "详情"], [parts])
+                        # 每行可能有多个键值对，每2个为一组
+                        for i in range(0, len(parts), 2):
+                            if i+1 < len(parts):
+                                rows.append([parts[i], parts[i+1]])
+                if rows:
+                    _tbl([self._t('report.tbl_col_key'), self._t('report.tbl_col_val')], rows)
 
-            _add_heading("第8章 对象与用户安全")
-            _add_heading("8.1 无效对象", 2); _render('dm_invalid_cnt')
-            _add_heading("8.2 用户列表", 2); _render('dm_users', 20)
+            _add_heading(self._t("report.dm_ch8"))
+            _add_heading(self._t("report.dm_ch81"), 2); _render('dm_invalid_cnt')
+            _add_heading(self._t("report.dm_ch82"), 2); _render('dm_users', 20)
 
-            _add_heading("第9章 备份与归档"); _render('dm_backup')
+            _add_heading(self._t("report.dm_ch9")); _render('dm_backup')
 
-            # 第10章由 _append_chapters 统一生成（作为第13章），此处不再重复
+            # 第10章 长时间运行的SQL
+            _add_heading(self._t("report.dm_ch10")); _render('dm_long_sql', 30)
+
+            # 第11章 Top SQL
+            _add_heading(self._t("report.dm_ch11")); _render('dm_top_sql_cpu', 30)
+
+            # 第12章 Undo 信息
+            _add_heading(self._t("report.dm_ch12")); _render('dm_undo_info', 30)
+
+            # 第13章 等待事件统计
+            _add_heading(self._t("report.dm_ch13")); _render('dm_wait_class', 30)
 
             self._append_chapters(doc)
             doc.save(self.ofile)
             return True
         except Exception as e:
-            print(f"备用渲染也失败了: {e}")
+            print(_t("dm8_alt_render_fail").format(e=e))
             import traceback; traceback.print_exc()
             return False
 
@@ -1450,24 +1622,24 @@ class saveDoc(object):
 # ============================================================
 def main():
     print("=" * 60)
-    print("  DBCheck - DM8 巡检工具 " + VER)
+    print("  " + _t("dm8_banner_title") + " " + VER)
     print("=" * 60)
 
     # 交互式收集参数
     db_info = {}
-    db_info['host'] = input("主机地址: ").strip()
-    db_info['port'] = input("端口 [5236]: ").strip() or "5236"
-    db_info['user'] = input("用户名 [SYSDBA]: ").strip() or "SYSDBA"
-    db_info['password'] = input("密码: ").strip()
-    db_info['db_name'] = input("数据库名 [DAMENG]: ").strip() or "DAMENG"
-    inspector_name = input("巡检人员 [Jack]: ").strip() or "Jack"
+    db_info['host'] = input(_t("dm8_host_prompt")).strip()
+    db_info['port'] = input(_t("dm8_port_prompt")).strip() or "5236"
+    db_info['user'] = input(_t("dm8_user_prompt")).strip() or "SYSDBA"
+    db_info['password'] = getpass.getpass(_t("dm8_password_prompt"))
+    db_info['db_name'] = input(_t("dm8_dbname_prompt")).strip() or "DAMENG"
+    inspector_name = input(_t("dm8_inspector_prompt")).strip() or "Jack"
 
-    use_ssh = input("是否配置 SSH 收集系统信息? [y/N]: ").strip().lower()
+    use_ssh = input(_t("dm8_ssh_enable_prompt")).strip().lower()
     if use_ssh == 'y':
-        db_info['ssh_host'] = input("  SSH 主机 [同数据库主机]: ").strip() or db_info['host']
-        db_info['ssh_port'] = int(input("  SSH 端口 [22]: ").strip() or "22")
-        db_info['ssh_user'] = input("  SSH 用户 [root]: ").strip() or "root"
-        db_info['ssh_password'] = input("  SSH 密码 (留空则跳过): ").strip()
+        db_info['ssh_host'] = input(_t("dm8_ssh_host_prompt").format(host=db_info['host'])).strip() or db_info['host']
+        db_info['ssh_port'] = int(input(_t("dm8_ssh_port_prompt")).strip() or "22")
+        db_info['ssh_user'] = input(_t("dm8_ssh_user_prompt")).strip() or "root"
+        db_info['ssh_password'] = getpass.getpass(_t("dm8_ssh_password_prompt"))
     else:
         db_info['ssh_host'] = ''
         db_info['ssh_port'] = 22
@@ -1477,7 +1649,7 @@ def main():
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
     os.makedirs(dir_path, exist_ok=True)
     ofile = os.path.join(dir_path, f"DM8_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx")
-    print(f"报告输出目录: {dir_path}/")
+    print(_t("dm8_report_dir") + f" {dir_path}/")
     ifile = create_word_template(inspector_name)
 
     ssh_info = {}
@@ -1494,8 +1666,8 @@ def main():
                         db_info.get('db_name'), ssh_info)
 
     if inspector.conn_db is None:
-        print("\n[FAIL] 数据库连接失败，请检查参数后重试")
-        input("\n按回车键返回...")
+        print("\n" + _t("dm8_db_conn_fail"))
+        input("\n" + _t("dm8_press_enter_return"))
         return
 
     context = inspector.checkdb()
@@ -1503,13 +1675,13 @@ def main():
         saver = saveDoc(context, ofile, ifile, inspector_name,
                         H=inspector.H, P=inspector.P)
         if saver.contextsave():
-            print(f"\n[OK] 报告已生成: {ofile}")
+            print(f"\n{_t('dm8_report_ok').format(ofile=ofile)}")
         else:
-            print(f"\n[FAIL] 报告生成失败")
+            print(f"\n{_t('dm8_report_fail')}")
     else:
-        print("\n[FAIL] 巡检执行失败")
+        print("\n" + _t("dm8_inspection_fail"))
 
-    cont = input("\n是否返回主菜单? [y/N]: ").strip().lower()
+    cont = input("\n" + _t("dm8_back_menu_prompt")).strip().lower()
     if cont == 'y':
         return
 
@@ -1523,7 +1695,7 @@ if __name__ == '__main__':
         main()
     else:
         # 有参数 → argparse 批处理模式
-        parser = argparse.ArgumentParser(description='DBCheck - DM8 巡检工具 ' + VER)
+        parser = argparse.ArgumentParser(description=_t('dm8_cli_banner_tool') + ' ' + VER)
         parser.add_argument('--host', default='127.0.0.1', help='数据库主机IP')
         parser.add_argument('--port', type=int, default=5236, help='数据库端口（默认5236）')
         parser.add_argument('--user', default='SYSDBA', help='用户名（默认SYSDBA）')
@@ -1539,12 +1711,12 @@ if __name__ == '__main__':
         args = parser.parse_args()
 
         print("=" * 60)
-        print("  DBCheck - DM8 巡检工具 " + VER)
+        print("  " + _t("dm8_banner_title") + " " + VER)
         print("=" * 60)
 
         if args.template:
             tpl = create_word_template(args.inspector)
-            print(f"[OK] DM8 报告模板已生成: {tpl}")
+            print(_t("dm8_template_ok").format(tpl=tpl))
             sys.exit(0)
 
         ofile = args.output or os.path.join(
@@ -1565,7 +1737,7 @@ if __name__ == '__main__':
         inspector = getData(args.host, args.port, args.user, args.password, args.db_name, ssh_info)
 
         if inspector.conn_db is None:
-            print("[FAIL] 数据库连接失败，请检查参数后重试")
+            print(_t("dm8_db_conn_fail"))
             sys.exit(1)
 
         context = inspector.checkdb()
@@ -1573,8 +1745,8 @@ if __name__ == '__main__':
             saver = saveDoc(context, ofile, ifile, args.inspector,
                             H=inspector.H, P=inspector.P)
             if saver.contextsave():
-                print(f"\n[OK] 报告已生成: {ofile}")
+                print(f"\n{_t('dm8_report_ok').format(ofile=ofile)}")
             else:
-                print(f"\n[FAIL] 报告生成失败")
+                print(f"\n{_t('dm8_report_fail')}")
         else:
-            print("\n[FAIL] 巡检执行失败")
+            print("\n" + _t("dm8_inspection_fail"))
