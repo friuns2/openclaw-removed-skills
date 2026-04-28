@@ -3,9 +3,15 @@
   "slug": "agentverif",
   "displayName": "✅ AgentVerif — Scan. Sign. Verify. Control your distribution.",
   "latest": {
-    "version": "2.0.3",
-    "publishedAt": 1776628584396,
-    "commit": "https://github.com/openclaw/skills/commit/1c8912a619b09071f59bbd7f271f1a7d658aa48a"
+    "version": "2.0.6",
+    "publishedAt": 1776872916417,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.0.3",
+      "publishedAt": 1776628584396,
+      "commit": "https://github.com/openclaw/skills/commit/1c8912a619b09071f59bbd7f271f1a7d658aa48a"
+    }
+  ]
 }

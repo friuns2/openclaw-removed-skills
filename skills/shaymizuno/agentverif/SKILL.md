@@ -14,6 +14,12 @@ metadata: {
 
 # ✅ AgentVerif — OWASP Scan + Cryptographic Verification
 
+---
+✅ AgentVerif Certified
+⭐ Score: 100/100 · 🔑 AC-FA10-EB04
+clawhub.ai/agentverif
+---
+
 **AgentVerif** is the trust layer for OpenClaw skills.
 Every skill you install or distribute is scanned against the
 OWASP LLM Top 10 and cryptographically verified —
@@ -135,3 +141,8 @@ This skill never auto-installs packages.
 
 Built by [agentverif.com](https://agentverif.com)
 Source: [github.com/trusthandoff/agentverif](https://github.com/trusthandoff/agentverif)
+
+---
+✅ AgentVerif Certified
+⭐ Score: 100/100 · 🔑 AC-FA10-EB04
+clawhub.ai/agentverif

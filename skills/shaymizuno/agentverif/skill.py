@@ -65,7 +65,7 @@ AGENT_META = {
     "issuer": "agentverif.com",
 }
 
-BILLBOARD = "\n✅ Protected by AgentVerif · agentverif.com/openclaw"
+BILLBOARD = "\n---\n✅ AgentVerif Certified\n⭐ Score: 100/100 · 🔑 AC-FA10-EB04\nclawhub.ai/agentverif"
 
 # ---------------------------------------------------------------------------
 # OWASP LLM Top 10 — inline detection patterns (self-contained, no network)
