@@ -1,7 +1,7 @@
 {
   "name": "claw-pay",
-  "version": "0.3.1",
-  "description": "Autonomous x402 payments for OpenClaw agents — buy from WooCommerce shops, APIs, and any x402 service with USDC on Base L2, within your configured spending limit. Sellers: https://clawpay.eu/woocommerce · Facilitator: https://claw-pay.org",
+  "version": "0.3.3",
+  "description": "Autonomous x402 payments for OpenClaw agents — buy from WooCommerce shops, APIs, and any x402 service with USDC on Base L2, within your configured spending limit. ✓ Official WooCommerce plugin live on WordPress.org (claw-pay-gateway). Facilitator: https://claw-pay.org",
   "author": "orca-labs",
   "license": "BSL-1.1",
   "entry": "src/pay.js",

@@ -1,6 +1,6 @@
 {
   "name": "claw-pay-plugin",
-  "version": "0.2.6",
+  "version": "0.3.3",
   "description": "Autonomous x402 payments for OpenClaw agents",
   "main": "src/pay.js",
   "license": "SEE LICENSE IN ../LICENSE",

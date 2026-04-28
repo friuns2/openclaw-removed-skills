@@ -1,11 +1,17 @@
 {
   "owner": "orca-labs-sudo",
   "slug": "claw-pay",
-  "displayName": "claw-pay",
+  "displayName": "Skill",
   "latest": {
-    "version": "0.3.1",
-    "publishedAt": 1776669578275,
-    "commit": "https://github.com/openclaw/skills/commit/71bc2a5989dbcd76cf567267856f54345b661877"
+    "version": "0.3.3",
+    "publishedAt": 1777031701768,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.3.1",
+      "publishedAt": 1776669578275,
+      "commit": "https://github.com/openclaw/skills/commit/71bc2a5989dbcd76cf567267856f54345b661877"
+    }
+  ]
 }
