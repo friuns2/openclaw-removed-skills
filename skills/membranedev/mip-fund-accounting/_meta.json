@@ -3,9 +3,15 @@
   "slug": "mip-fund-accounting",
   "displayName": "Mip Fund Accounting",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775304256409,
-    "commit": "https://github.com/openclaw/skills/commit/f32c9e59ff73a266f11a020ee094930ca2acc8c0"
+    "version": "1.0.2",
+    "publishedAt": 1776883620880,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775304256409,
+      "commit": "https://github.com/openclaw/skills/commit/f32c9e59ff73a266f11a020ee094930ca2acc8c0"
+    }
+  ]
 }
