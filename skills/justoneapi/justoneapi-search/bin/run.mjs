@@ -13,7 +13,7 @@ const manifest = {
     {
       "description": "Get cross-platform social media search data, including Xiaohongshu, Douyin, Kuaishou, WeChat, Bilibili, Weibo and Zhihu results, for trend research and monitoring.",
       "method": "GET",
-      "operationId": "searchV1",
+      "operationId": "searchCrossPlatformV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -84,8 +84,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Cross-Platform Search",

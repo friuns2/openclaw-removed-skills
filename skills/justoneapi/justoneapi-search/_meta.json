@@ -3,11 +3,16 @@
   "slug": "justoneapi-search",
   "displayName": "Social Media API",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776239991414,
-    "commit": "https://github.com/openclaw/skills/commit/947b28eaab431ec89c1795fb22e1d0db1ce7b374"
+    "version": "1.0.6",
+    "publishedAt": 1776924472696,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776239991414,
+      "commit": "https://github.com/openclaw/skills/commit/947b28eaab431ec89c1795fb22e1d0db1ce7b374"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1775375342557,

@@ -2,7 +2,7 @@
 
 Generated from JustOneAPI OpenAPI for platform key `search`.
 
-## `searchV1`
+## `searchCrossPlatformV1`
 
 - Method: `GET`
 - Path: `/api/search/v1`
@@ -42,4 +42,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
