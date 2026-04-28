@@ -6,10 +6,9 @@
 
 set -e
 
-CAPSULES_DIR="$(dirname "$0")/../capsules"
-MEMORY_LOG="$HOME/.openclaw/workspace/memory/胶囊创建记录.md"
+CAPSULES_DIR="$HOME/.openclaw/workspace/skills/私人胶囊"
+CAPSULES_INDEX="$HOME/.openclaw/workspace/skills/brain-power-up/capsules/capsules.md"
 
-# 解析参数
 NAME="${1:-}"
 TYPE="${2:-}"
 PATTERN="${3:-}"
@@ -20,15 +19,12 @@ if [ -z "$NAME" ] || [ -z "$TYPE" ] || [ -z "$PATTERN" ]; then
   exit 1
 fi
 
-# 生成ID
 DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date +%H%M%S)
 CAP_ID="CAP-$(date +%m%d)-${TIMESTAMP}"
 
-# 创建胶囊目录
 mkdir -p "$CAPSULES_DIR"
 
-# 生成胶囊文件
 CAPSULE_FILE="$CAPSULES_DIR/${CAP_ID}.md"
 
 cat > "$CAPSULE_FILE" << EOF
@@ -68,9 +64,10 @@ EOF
 echo "✅ 胶囊创建成功！"
 echo "文件: $CAPSULE_FILE"
 echo ""
-echo "成熟度说明："
-echo "  raw（原始）— 首次成功，记录但不自动触发"
-echo "  tested（已验证）— 连续成功2次后升级"
-echo "  stable（稳定）— 连续成功5次后升级"
+echo "⚠️ 请手动更新 capsules.md 成熟度索引表："
+echo "   $CAPSULES_INDEX"
 echo ""
-echo "💡 胶囊使用成功后会根据连续成功次数自动升级"
+echo "成熟度说明："
+echo "  raw（原始）    — 首次成功，手动确认后才用"
+echo "  tested（已验证）— 连续成功2次后升级"
+echo "  stable（稳定） — 连续成功5次后升级"

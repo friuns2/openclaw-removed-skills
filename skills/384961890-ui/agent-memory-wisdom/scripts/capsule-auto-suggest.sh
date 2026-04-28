@@ -14,14 +14,11 @@ fi
 echo "🔮 检查是否值得创建胶囊..."
 echo ""
 
-# 判断标准
 SHOULD_CREATE="false"
 REASON=""
 
-# 子任务数量
 SUBAGENT_COUNT=$(echo "$TASK" | grep -o "subagent\|并行\|多个\|多平台" | wc -l | tr -d ' ')
 
-# 任务复杂度
 COMPLEX_KEYWORDS="重构|调研|系统|架构|多步骤|跨平台|自动化"
 if echo "$TASK" | grep -qE "$COMPLEX_KEYWORDS"; then
   COMPLEX="true"
@@ -29,7 +26,6 @@ else
   COMPLEX="false"
 fi
 
-# 执行时长（关键词检测）
 TIME_KEYWORDS="30分钟|20分钟|1小时|长时间|复杂"
 if echo "$TASK" | grep -qE "$TIME_KEYWORDS"; then
   TIME_CONSUME="true"
@@ -37,7 +33,6 @@ else
   TIME_CONSUME="false"
 fi
 
-# 判断逻辑
 if [ "$SUBAGENT_COUNT" -gt 1 ]; then
   SHOULD_CREATE="true"
   REASON="涉及多个并行子任务"
@@ -49,17 +44,18 @@ elif [ "$TIME_CONSUME" = "true" ]; then
   REASON="耗时较长，模式值得复用"
 fi
 
-# 输出建议
 if [ "$SHOULD_CREATE" = "true" ]; then
   echo "✅ 建议创建胶囊"
   echo ""
   echo "原因：$REASON"
   echo ""
   echo "创建命令："
-  echo "  bash scripts/create-capsule.sh \"<胶囊名称>\" \"<任务类型>\" \"<成功模式描述>\""
+  echo "  bash ~/.openclaw/workspace/scripts/create-capsule.sh \"<胶囊名称>\" \"<任务类型>\" \"<成功模式描述>\""
   echo ""
   echo "任务类型选项："
   echo "  research | write | refactor | automation | browser | feishu | fetch | subagent | other"
+  echo ""
+  echo "⚠️ 创建后记得更新 capsules.md 的成熟度列！"
 else
   echo "ℹ️ 当前任务模式较简单，暂不需要创建胶囊"
   echo ""
