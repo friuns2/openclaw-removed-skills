@@ -3,9 +3,15 @@
   "slug": "strategy-review",
   "displayName": "Strategy Review",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966687262,
-    "commit": "https://github.com/openclaw/skills/commit/4d03e186c3337cfe6ac6bf3fdc4761feade17052"
+    "version": "1.0.2",
+    "publishedAt": 1776831025193,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966687262,
+      "commit": "https://github.com/openclaw/skills/commit/4d03e186c3337cfe6ac6bf3fdc4761feade17052"
+    }
+  ]
 }
