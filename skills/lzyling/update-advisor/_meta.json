@@ -3,9 +3,15 @@
   "slug": "update-advisor",
   "displayName": "Update Advisor",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776206602749,
-    "commit": "https://github.com/openclaw/skills/commit/c94fa8a22f014458c8daf8aaea3e87cc24a6bdde"
+    "version": "1.1.1",
+    "publishedAt": 1777352261064,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776206602749,
+      "commit": "https://github.com/openclaw/skills/commit/c94fa8a22f014458c8daf8aaea3e87cc24a6bdde"
+    }
+  ]
 }
