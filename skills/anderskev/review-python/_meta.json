@@ -3,9 +3,15 @@
   "slug": "review-python",
   "displayName": "Review Python",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775863549456,
-    "commit": "https://github.com/openclaw/skills/commit/f0590c5a25ee06ee8170b56dde96f64b69a04d47"
+    "version": "1.0.1",
+    "publishedAt": 1776831270183,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775863549456,
+      "commit": "https://github.com/openclaw/skills/commit/f0590c5a25ee06ee8170b56dde96f64b69a04d47"
+    }
+  ]
 }
