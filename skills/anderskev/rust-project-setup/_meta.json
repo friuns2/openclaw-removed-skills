@@ -3,9 +3,15 @@
   "slug": "rust-project-setup",
   "displayName": "Rust Project Setup",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775966761334,
-    "commit": "https://github.com/openclaw/skills/commit/86a1731a21c2a522cadf9d372f4815e14f4e8d4a"
+    "version": "1.0.2",
+    "publishedAt": 1776831370264,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775966761334,
+      "commit": "https://github.com/openclaw/skills/commit/86a1731a21c2a522cadf9d372f4815e14f4e8d4a"
+    }
+  ]
 }
