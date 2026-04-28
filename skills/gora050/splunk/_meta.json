@@ -3,9 +3,15 @@
   "slug": "splunk",
   "displayName": "Splunk",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775466430418,
-    "commit": "https://github.com/openclaw/skills/commit/0bea1855448931435f3a7ce221f91f62685f82a9"
+    "version": "1.0.1",
+    "publishedAt": 1776892846316,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775466430418,
+      "commit": "https://github.com/openclaw/skills/commit/0bea1855448931435f3a7ce221f91f62685f82a9"
+    }
+  ]
 }
