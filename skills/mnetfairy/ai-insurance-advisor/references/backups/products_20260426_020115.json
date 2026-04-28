@@ -1,9 +1,9 @@
 {
   "_meta": {
     "version": "1.5",
-    "updated_at": "2026-04-26",
+    "updated_at": "2026-04-25",
     "description": "保险产品库整理版，保留在售及有效产品",
-    "total_products": 2517,
+    "total_products": 2509,
     "active_products": 237,
     "dedup_applied": true,
     "verified_count": 45,
@@ -36,7 +36,7 @@
     "new_2025_products_added": 12,
     "enriched_products": 239,
     "cleanup_round2": "removed 8 additional garbage entries",
-    "daily_updated_at": "2026-04-26",
+    "daily_updated_at": "2026-04-25",
     "total_active": 535,
     "total_inactive": 1964,
     "last_updated": "2026-04-18",
@@ -91817,94 +91817,6 @@
       "is_active": true,
       "source": "tavily_daily_update",
       "source_date": "2026-04-25"
-    },
-    {
-      "id": "tavily-中国-总保费首",
-      "name": "总保费首次突破7000亿元",
-      "company": "中国人寿",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
-    },
-    {
-      "id": "tavily-平安-推出了2",
-      "name": "推出了2025年的新保险产品",
-      "company": "平安人寿",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
-    },
-    {
-      "id": "tavily-如意-和附加定",
-      "name": "和附加定期寿险",
-      "company": "如意全能两全保险",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
-    },
-    {
-      "id": "tavily-太平-推出了2",
-      "name": "推出了2025年的新产品",
-      "company": "太平洋人寿",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
-    },
-    {
-      "id": "tavily-新华-在202",
-      "name": "在2025年推出了超200款",
-      "company": "新华保险",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
-    },
-    {
-      "id": "tavily-泰康-推出了2",
-      "name": "推出了2025年的新产品",
-      "company": "泰康保险",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
-    },
-    {
-      "id": "tavily-太平-2025",
-      "name": "2025年推出了新的互联网专属年金保险产品",
-      "company": "太平人寿",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
-    },
-    {
-      "id": "tavily-友邦-推出20",
-      "name": "推出2025年的新保险产品",
-      "company": "友邦保险",
-      "type": "待分类",
-      "listing_time": "2026",
-      "delisting_time": "待核实",
-      "is_active": true,
-      "source": "tavily_daily_update",
-      "source_date": "2026-04-26"
     }
   ]
 }
