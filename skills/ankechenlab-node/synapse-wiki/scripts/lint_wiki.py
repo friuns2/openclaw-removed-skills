@@ -14,6 +14,7 @@ lint_wiki.py — Wiki 健康检查
 
 import sys
 import re
+import argparse
 from pathlib import Path
 from collections import defaultdict
 
@@ -201,11 +202,11 @@ def run_lint(wiki_root: Path) -> dict:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 lint_wiki.py /path/to/wiki")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Wiki 健康检查（死链接/孤立页面/缺失索引）")
+    parser.add_argument("wiki", help="Wiki 根目录路径")
+    args = parser.parse_args()
 
-    wiki_root = Path(sys.argv[1]).resolve()
+    wiki_root = Path(args.wiki).resolve()
 
     if not wiki_root.exists():
         print(f"Error: Wiki root not found: {wiki_root}")

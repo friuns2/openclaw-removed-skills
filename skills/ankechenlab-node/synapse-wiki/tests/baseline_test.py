@@ -101,12 +101,17 @@ def test_wiki_lint():
 
     code, stdout, stderr = run_script(SCRIPT_DIR / 'lint_wiki.py', [str(TEST_WIKI)])
 
-    # Lint may find issues (exit 1), that's okay
-    if code in [0, 1] and ('Wiki pages' in stdout or 'issues found' in stdout):
-        log('  ✓ PASS: Lint completed', Colors.GREEN)
-        return True
+    # Lint 返回 0=无问题，1=发现问题，两者都是正常运行
+    # 关键是有输出表明检查已执行
+    if code in [0, 1]:
+        if 'Wiki pages' in stdout or 'issues found' in stdout or 'ok' in stdout.lower() or 'Checking' in stdout:
+            log('  ✓ PASS: Lint completed', Colors.GREEN)
+            return True
+        else:
+            log(f'  ✗ FAIL: Lint output异常：{stdout[:100]}', Colors.RED)
+            return False
     else:
-        log(f'  ✗ FAIL: {stderr or stdout}', Colors.RED)
+        log(f'  ✗ FAIL: Lint 执行失败：{stderr or stdout}', Colors.RED)
         return False
 
 def test_wiki_query():

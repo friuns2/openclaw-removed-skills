@@ -13,6 +13,7 @@ query.py — Query the Wiki knowledge base
 
 import sys
 import re
+import argparse
 from pathlib import Path
 from datetime import datetime
 
@@ -51,7 +52,8 @@ def read_wiki_pages(wiki_root: Path, pages: list) -> list:
             title_match = re.search(r'^# (.+)$', content, re.MULTILINE)
             if title_match:
                 title = title_match.group(1).strip()
-                if any(p['title'] == title for p in pages) or not pages:
+                # 如果 pages 为空则跳过（没有匹配到 index 条目），否则检查标题是否匹配
+                if pages and any(p['title'] == title for p in pages):
                     results.append({
                         'path': str(md_file.relative_to(wiki_root)),
                         'title': title,
@@ -124,12 +126,13 @@ def query_wiki(wiki_root: Path, query: str) -> str:
 
 
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: python3 query.py /path/to/wiki \"<query>\"")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="查询 Wiki 知识库")
+    parser.add_argument("wiki", help="Wiki 根目录路径")
+    parser.add_argument("query", help="查询文本")
+    args = parser.parse_args()
 
-    wiki_root = Path(sys.argv[1]).resolve()
-    query = sys.argv[2]
+    wiki_root = Path(args.wiki).resolve()
+    query = args.query
 
     if not wiki_root.exists():
         print(f"Error: Wiki root not found: {wiki_root}")

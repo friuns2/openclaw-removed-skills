@@ -5,20 +5,18 @@ description: >
   自动摄取原始资料，增量构建持久化知识网络，支持智能查询和健康检查。
   知识随时间复利积累，越用越聪明。
   当用户提到 wiki、知识库、摄取资料、查询知识、整理文档时使用此技能。
-version: 1.1.0
-date: 2026-04-08
+version: 2.0.1
+updated: 2026-04-15
+date: 2026-04-10
 user-invocable: true
 metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "🧠",
-        "requires": { "bins": ["python3"] },
-        "install": [],
-        "homepage": "https://github.com/openclaw/skills",
-      },
-  }
-tags: [knowledge-base, wiki, documentation, learning, obsidian]
+  openclaw:
+    emoji: "🧠"
+    requires:
+      bins: ["python3"]
+    install: []
+    homepage: "https://github.com/ankechenlab-node/synapse-wiki"
+tags: [knowledge-base, wiki, documentation, learning, obsidian, brain-compatible]
 ---
 
 # Synapse Wiki Skill
@@ -244,6 +242,54 @@ tags: []
 3. 如有新 raw/ 资料，执行 Ingest
 4. 如用户提问，执行 Query（先查 index.md）
 5. 如 ingest 超过 10 次未 lint，执行 Lint
+
+## Brain 调度集成 (v2.0 新增)
+
+Synapse Wiki v2.0 可作为 synapse-brain 的被调度 Hand Agent 运行：
+
+```
+用户 → synapse-brain（意图识别：知识查询/保存）
+         ↓ 路由到 wiki
+       synapse-wiki（执行 ingest/query/lint）
+         ↓ 完成后
+       synapse-brain（汇总 + 状态保存）
+```
+
+通过 Brain 调度使用：
+```bash
+/synapse-brain dispatch "保存这篇 RAG 文章" --skill synapse-wiki
+/synapse-brain dispatch "RAG 是什么？" --skill synapse-wiki
+```
+
+## 与 synapse-code 互操作
+
+synapse-code Pipeline 完成后可自动触发 wiki 知识沉淀：
+
+```
+synapse-code Pipeline 完成
+         ↓ (auto_log enabled)
+    synapse-wiki ingest
+         ↓
+    知识写入 wiki/summaries/
+         ↓
+    包括：技术决策、代码模式、Bug 修复记录
+```
+
+配置方式：
+```json
+{
+  "interop": {
+    "wiki_enabled": true,
+    "wiki_root": "~/my-project/wiki"
+  }
+}
+```
+
+知识沉淀内容：
+- **技术决策** — 为什么选择方案 A 而非 B
+- **代码模式** — 项目中常用的架构模式
+- **Bug 修复** — 遇到的坑和解决方案
+- **API 变更** — 接口设计决策和版本记录
 
 ## 安装
 
