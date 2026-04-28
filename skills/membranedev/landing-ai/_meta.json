@@ -3,9 +3,15 @@
   "slug": "landing-ai",
   "displayName": "Landing Ai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775621045868,
-    "commit": "https://github.com/openclaw/skills/commit/8154b5e0ad61cf94826cb387e36733a883d66757"
+    "version": "1.0.1",
+    "publishedAt": 1776896333999,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775621045868,
+      "commit": "https://github.com/openclaw/skills/commit/8154b5e0ad61cf94826cb387e36733a883d66757"
+    }
+  ]
 }
