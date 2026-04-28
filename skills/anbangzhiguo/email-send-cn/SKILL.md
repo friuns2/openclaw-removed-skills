@@ -1,27 +1,18 @@
 ---
 name: email-send
 description: 基于 Nodemailer 的邮件发送技能。使用 nodemailer + SMTP 向任意邮箱发送邮件。支持 163、QQ、Gmail 等主流 SMTP 服务。当用户请求发送邮件时触发。
-environment_variables:
-  - name: SMTP_HOST
-    description: SMTP 服务器地址
-    required: true
-  - name: SMTP_PORT
-    description: 端口 (25/465/587)
-    required: false
-    default: "465"
-  - name: SMTP_SECURE
-    description: 是否 SSL (true/false)
-    required: false
-    default: "true"
-  - name: SMTP_USER
-    description: 用户名/邮箱
-    required: true
-  - name: SMTP_PASS
-    description: 授权码/密码
-    required: true
-  - name: SMTP_FROM
-    description: 发件人显示名
-    required: false
+metadata:
+  {
+    "openclaw": {
+      "emoji": "📧",
+      "user-invocable": true,
+      "requires": {
+        "env": ["SMTP_HOST", "SMTP_USER", "SMTP_PASS"],
+        "bins": ["node"]
+      },
+      "primaryEnv": "SMTP_PASS"
+    }
+  }
 ---
 
 # Email Send Skill
@@ -69,7 +60,7 @@ SMTP_SECURE=true \
 SMTP_USER=your-email@example.com \
 SMTP_PASS=your-smtp-password \
 SMTP_FROM="Your Name <your-email@example.com>" \
-node /path/to/scripts/send.js \
+node {baseDir}/scripts/send.js \
   --to "recipient@example.com" \
   --subject "Email Subject" \
   --body "Email Body"
