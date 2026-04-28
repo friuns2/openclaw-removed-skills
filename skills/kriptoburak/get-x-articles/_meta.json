@@ -3,9 +3,15 @@
   "slug": "get-x-articles",
   "displayName": "Get X Articles",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776105473551,
-    "commit": "https://github.com/openclaw/skills/commit/aca853706ee43fdde473290bffe0328bd0c5b037"
+    "version": "1.0.1",
+    "publishedAt": 1776903709677,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776105473551,
+      "commit": "https://github.com/openclaw/skills/commit/aca853706ee43fdde473290bffe0328bd0c5b037"
+    }
+  ]
 }
