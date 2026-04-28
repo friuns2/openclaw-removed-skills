@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "agnicpay-search-for-service",
-  "displayName": "Search for Service",
+  "displayName": "Agnic Search for Service",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775599212815,
-    "commit": "https://github.com/openclaw/skills/commit/bcf3cc4e571e38d7d8f6af2b2f2c6de9c7241d52"
+    "version": "2.0.2",
+    "publishedAt": 1776953408776,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775599212815,
+      "commit": "https://github.com/openclaw/skills/commit/bcf3cc4e571e38d7d8f6af2b2f2c6de9c7241d52"
+    }
+  ]
 }
