@@ -3,9 +3,15 @@
   "slug": "huifu-payment-integration",
   "displayName": "Huifu Payment Integration",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1776162685489,
-    "commit": "https://github.com/openclaw/skills/commit/331e509247149465e7abbde5a39ae5b1e8a28491"
+    "version": "1.1.3",
+    "publishedAt": 1777028291376,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1776162685489,
+      "commit": "https://github.com/openclaw/skills/commit/331e509247149465e7abbde5a39ae5b1e8a28491"
+    }
+  ]
 }
