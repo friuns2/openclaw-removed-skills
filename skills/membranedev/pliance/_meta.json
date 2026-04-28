@@ -3,9 +3,15 @@
   "slug": "pliance",
   "displayName": "Pliance",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775664231274,
-    "commit": "https://github.com/openclaw/skills/commit/e11190828cff2674da415ee368a3c83a63a3d430"
+    "version": "1.0.1",
+    "publishedAt": 1776897342128,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775664231274,
+      "commit": "https://github.com/openclaw/skills/commit/e11190828cff2674da415ee368a3c83a63a3d430"
+    }
+  ]
 }
