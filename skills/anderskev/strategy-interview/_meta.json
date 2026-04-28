@@ -3,9 +3,15 @@
   "slug": "strategy-interview",
   "displayName": "Strategy Interview",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775966682953,
-    "commit": "https://github.com/openclaw/skills/commit/1f0430caafdab76b6d32f2a8701c88fd31f9210e"
+    "version": "1.0.3",
+    "publishedAt": 1776831020127,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775966682953,
+      "commit": "https://github.com/openclaw/skills/commit/1f0430caafdab76b6d32f2a8701c88fd31f9210e"
+    }
+  ]
 }
