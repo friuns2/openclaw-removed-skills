@@ -3,11 +3,16 @@
   "slug": "tokenrip-cli",
   "displayName": "Tokenrip CLI",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1776528920251,
-    "commit": "https://github.com/openclaw/skills/commit/a74c60008444964d2d1120cf7e149d0df7d0fc76"
+    "version": "1.3.7",
+    "publishedAt": 1777398297458,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1776528920251,
+      "commit": "https://github.com/openclaw/skills/commit/a74c60008444964d2d1120cf7e149d0df7d0fc76"
+    },
     {
       "version": "1.1.5",
       "publishedAt": 1776192112276,

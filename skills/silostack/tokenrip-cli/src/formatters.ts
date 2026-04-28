@@ -1,3 +1,5 @@
+import { loadTeams } from './teams.js';
+
 export type Formatter = (data: Record<string, unknown>) => string;
 
 export const formatAssetCreated: Formatter = (data) => {
@@ -6,6 +8,15 @@ export const formatAssetCreated: Formatter = (data) => {
   if (data.url) lines.push(`  URL:  ${data.url}`);
   if (data.type) lines.push(`  Type: ${data.type}`);
   if (data.mimeType) lines.push(`  MIME: ${data.mimeType}`);
+  return lines.join('\n');
+};
+
+export const formatAssetPatched: Formatter = (data) => {
+  const lines = [`Patched: ${data.id}`];
+  if (data.alias) lines.push(`  Alias:    ${data.alias}`);
+  if (data.url) lines.push(`  URL:      ${data.url}`);
+  if (data.metadata) lines.push(`  Metadata: ${JSON.stringify(data.metadata)}`);
+  if (data.updatedAt) lines.push(`  Updated:  ${data.updatedAt}`);
   return lines.join('\n');
 };
 
@@ -24,6 +35,7 @@ export const formatAssetList: Formatter = (data) => {
     const type = a.type || '';
     const id = a.id || '';
     lines.push(`  ${type.toString().padEnd(10)} ${title}  (${id})`);
+    if (a.url) lines.push(`             ${a.url}`);
   }
   return lines.join('\n');
 };
@@ -108,7 +120,7 @@ export const formatInbox: Formatter = (data) => {
       const title = a.title ?? '(untitled)';
       const versions = `+${a.new_version_count} ver${a.new_version_count > 1 ? 's' : ''}`;
       const ago = formatTimeAgo(new Date(a.updated_at));
-      lines.push(`  ${title.padEnd(20)}  v${a.latest_version}  ${versions}  ${ago}`);
+      lines.push(`  ${title.padEnd(20)}  v${a.latest_version}  ${versions}  ${ago}  (${a.asset_id})`);
     }
   } else {
     lines.push('ASSETS (none)');
@@ -240,6 +252,7 @@ export const formatAssetDownloaded: Formatter = (data) => {
 export const formatAssetMetadata: Formatter = (data) => {
   const lines = [data.title || '(untitled)'];
   if (data.id) lines.push(`  ID:          ${data.id}`);
+  if (data.url) lines.push(`  URL:         ${data.url}`);
   if (data.type) lines.push(`  Type:        ${data.type}`);
   if (data.mimeType) lines.push(`  MIME:        ${data.mimeType}`);
   if (data.description) lines.push(`  Description: ${data.description}`);
@@ -393,11 +406,90 @@ export const formatSearchResults: Formatter = (data) => {
       const assetType = (r.asset?.asset_type ?? '').padEnd(10);
       const versions = r.asset?.version_count ? `v${r.asset.version_count}` : '';
       lines.push(`  asset   ${assetType}  ${r.id}  ${title}  ${versions}  ${ago}`);
+      if (r.url) lines.push(`          ${r.url}`);
     }
   }
   if (results.length < total) {
     lines.push(`\n  Showing ${results.length} of ${total}. Use --offset ${results.length} for more.`);
   }
+  return lines.join('\n');
+};
+
+export const formatTeamCreated: Formatter = (data) => {
+  const lines = [`Team created: @${data.slug}`];
+  if (data.name && data.name !== data.slug) lines.push(`  Name: ${data.name}`);
+  if (data.id) lines.push(`  ID:   ${data.id}`);
+  return lines.join('\n');
+};
+
+export const formatTeamList: Formatter = (data) => {
+  const teams = data as unknown as Array<{ slug: string; name: string; member_count: number; id: string }>;
+  if (!Array.isArray(teams) || teams.length === 0) return 'No teams found.';
+  const localTeams = loadTeams();
+  const lines = [`${teams.length} team(s):\n`];
+  for (const t of teams) {
+    const alias = localTeams[t.slug]?.alias;
+    const aliasSuffix = alias ? `  (alias: ${alias})` : '';
+    lines.push(`  @${t.slug.padEnd(24)} ${String(t.member_count).padStart(3)} member(s)  ${t.id}${aliasSuffix}`);
+  }
+  return lines.join('\n');
+};
+
+export const formatTeamDetails: Formatter = (data) => {
+  const lines = [`@${data.slug}  —  ${data.name}`];
+  if (data.description) lines.push(`  ${data.description}`);
+  lines.push(`  ID:    ${data.id}`);
+  lines.push(`  Owner: ${data.owner_id}`);
+  const members = data.members as Array<{ agent_id: string; alias?: string | null; joined_at: string }> | undefined;
+  if (Array.isArray(members) && members.length > 0) {
+    lines.push(`  Members (${members.length}):`);
+    for (const m of members) {
+      const label = m.alias ? `${m.alias} (${m.agent_id})` : m.agent_id;
+      lines.push(`    ${label}`);
+    }
+  }
+  return lines.join('\n');
+};
+
+export const formatTeamInvite: Formatter = (data) => {
+  const lines = ['Invite link generated'];
+  if (data.token) lines.push(`  Token:   ${data.token}`);
+  if (data.expires_in) lines.push(`  Expires: ${data.expires_in}`);
+  return lines.join('\n');
+};
+
+export const formatSelfUpdate: Formatter = (data) => {
+  if (data.status === 'failed') {
+    return data.message as string;
+  }
+
+  if (data.status === 'current') {
+    const lines = [`@tokenrip/cli ${data.version} is already current`];
+    if (data.skill_file_path) lines.push(`Skill file: ${data.skill_file_path}`);
+    return lines.join('\n');
+  }
+
+  // updated
+  const lines = [`Updated @tokenrip/cli ${data.from} → ${data.to}`];
+
+  if (data.skill_file_path) {
+    const label = data.skill_changed ? 'Skill file refreshed' : 'Skill file current';
+    lines.push(`${label} → ${data.skill_file_path}`);
+    lines.push('');
+    lines.push(`Reload in Claude Code:  npx skills add tokenrip/cli`);
+    lines.push(`Load manually:          ${data.skill_file_path}`);
+  } else {
+    lines.push('');
+    lines.push('Reload your agent skill:');
+    lines.push('  Claude Code:  npx skills add tokenrip/cli');
+    if (data.skill_url) lines.push(`  Load from:    ${data.skill_url}`);
+  }
+
+  if (data.message) {
+    lines.push('');
+    lines.push(data.message as string);
+  }
+
   return lines.join('\n');
 };
 
