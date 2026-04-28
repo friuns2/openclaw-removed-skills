@@ -3,9 +3,15 @@
   "slug": "imperva",
   "displayName": "Imperva",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775646432007,
-    "commit": "https://github.com/openclaw/skills/commit/2a1dbf4da13a15353a47dba251f537a169f25c6d"
+    "version": "1.0.1",
+    "publishedAt": 1776899306054,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775646432007,
+      "commit": "https://github.com/openclaw/skills/commit/2a1dbf4da13a15353a47dba251f537a169f25c6d"
+    }
+  ]
 }
