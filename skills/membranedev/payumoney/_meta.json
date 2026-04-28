@@ -3,9 +3,15 @@
   "slug": "payumoney",
   "displayName": "Payumoney",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775351071829,
-    "commit": "https://github.com/openclaw/skills/commit/6bc6d82b4d6675c5b87a745dd41adad7c50084e6"
+    "version": "1.0.2",
+    "publishedAt": 1776884208248,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775351071829,
+      "commit": "https://github.com/openclaw/skills/commit/6bc6d82b4d6675c5b87a745dd41adad7c50084e6"
+    }
+  ]
 }
