@@ -3,9 +3,15 @@
   "slug": "nlp-cloud",
   "displayName": "Nlp Cloud",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775545459560,
-    "commit": "https://github.com/openclaw/skills/commit/c0a78b66444d88b63385115e9fc9d85c7f109413"
+    "version": "1.0.1",
+    "publishedAt": 1776898512657,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775545459560,
+      "commit": "https://github.com/openclaw/skills/commit/c0a78b66444d88b63385115e9fc9d85c7f109413"
+    }
+  ]
 }
