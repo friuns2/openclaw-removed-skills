@@ -3,9 +3,15 @@
   "slug": "getform",
   "displayName": "Getform",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775304491165,
-    "commit": "https://github.com/openclaw/skills/commit/9a5bf71e3dba46801763308b8476e058dd8ba103"
+    "version": "1.0.1",
+    "publishedAt": 1776885918581,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775304491165,
+      "commit": "https://github.com/openclaw/skills/commit/9a5bf71e3dba46801763308b8476e058dd8ba103"
+    }
+  ]
 }
