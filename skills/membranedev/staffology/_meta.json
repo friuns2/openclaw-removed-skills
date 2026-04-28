@@ -3,9 +3,15 @@
   "slug": "staffology",
   "displayName": "Staffology",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775617419875,
-    "commit": "https://github.com/openclaw/skills/commit/4b6434953f82389ebf147566e06e144ace253f60"
+    "version": "1.0.1",
+    "publishedAt": 1776896273167,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775617419875,
+      "commit": "https://github.com/openclaw/skills/commit/4b6434953f82389ebf147566e06e144ace253f60"
+    }
+  ]
 }
