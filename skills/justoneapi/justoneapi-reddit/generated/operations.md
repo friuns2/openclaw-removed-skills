@@ -2,7 +2,7 @@
 
 Generated from JustOneAPI OpenAPI for platform key `reddit`.
 
-## `getPostCommentsV1`
+## `getRedditPostCommentsV1`
 
 - Method: `GET`
 - Path: `/api/reddit/get-post-comments/v1`
@@ -24,9 +24,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getPostDetailV1`
+## `getRedditPostDetailV1`
 
 - Method: `GET`
 - Path: `/api/reddit/get-post-detail/v1`
@@ -47,9 +47,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchV1`
+## `searchRedditV1`
 
 - Method: `GET`
 - Path: `/api/reddit/search/v1`
@@ -71,4 +71,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

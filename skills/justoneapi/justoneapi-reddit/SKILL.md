@@ -19,9 +19,9 @@ This skill wraps 3 Reddit operations exposed by JustOneAPI. It is strongest for 
 
 ## Representative Operations
 
-- `getPostDetailV1`: Post Details — Get Reddit post Details data, including author details, subreddit info, and engagement counts, for content analysis, moderation research, and monitoring
-- `getPostCommentsV1`: Post Comments — Get Reddit post Comments data, including text, authors, and timestamps, for discussion analysis and moderation research
-- `searchV1`: Keyword Search — Get Reddit keyword Search data, including titles, authors, and subreddit context, for topic discovery and monitoring
+- `getRedditPostDetailV1`: Post Details — Get Reddit post Details data, including author details, subreddit info, and engagement counts, for content analysis, moderation research, and monitoring
+- `getRedditPostCommentsV1`: Post Comments — Get Reddit post Comments data, including text, authors, and timestamps, for discussion analysis and moderation research
+- `searchRedditV1`: Keyword Search — Get Reddit keyword Search data, including titles, authors, and subreddit context, for topic discovery and monitoring
 
 ## Request Pattern
 
@@ -33,7 +33,7 @@ This skill wraps 3 Reddit operations exposed by JustOneAPI. It is strongest for 
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getPostDetailV1`, `getPostCommentsV1`, `searchV1`.
+2. Start with one of these operations when it matches the user's request: `getRedditPostDetailV1`, `getRedditPostCommentsV1`, `searchRedditV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -54,6 +54,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the Reddit task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `getPostDetailV1`, explain why the returned fields answer the user's question.
+- When using `getRedditPostDetailV1`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `postId`, `after`, `cursor`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.

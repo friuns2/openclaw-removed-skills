@@ -3,11 +3,16 @@
   "slug": "justoneapi-reddit",
   "displayName": "Reddit API",
   "latest": {
-    "version": "1.0.5",
-    "publishedAt": 1776239987797,
-    "commit": "https://github.com/openclaw/skills/commit/57b2089e121b9aca161d9fb4ddc6db3909396fab"
+    "version": "1.0.6",
+    "publishedAt": 1776924468101,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.5",
+      "publishedAt": 1776239987797,
+      "commit": "https://github.com/openclaw/skills/commit/57b2089e121b9aca161d9fb4ddc6db3909396fab"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1775375337761,

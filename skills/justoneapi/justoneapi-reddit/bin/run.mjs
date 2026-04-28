@@ -13,7 +13,7 @@ const manifest = {
     {
       "description": "Get Reddit post Comments data, including text, authors, and timestamps, for discussion analysis and moderation research.",
       "method": "GET",
-      "operationId": "getPostCommentsV1",
+      "operationId": "getRedditPostCommentsV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -47,8 +47,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Post Comments",
@@ -59,7 +59,7 @@ const manifest = {
     {
       "description": "Get Reddit post Details data, including author details, subreddit info, and engagement counts, for content analysis, moderation research, and monitoring.",
       "method": "GET",
-      "operationId": "getPostDetailV1",
+      "operationId": "getRedditPostDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -84,8 +84,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Post Details",
@@ -96,7 +96,7 @@ const manifest = {
     {
       "description": "Get Reddit keyword Search data, including titles, authors, and subreddit context, for topic discovery and monitoring.",
       "method": "GET",
-      "operationId": "searchV1",
+      "operationId": "searchRedditV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -130,8 +130,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Search",
