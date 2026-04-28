@@ -3,9 +3,15 @@
   "slug": "rex",
   "displayName": "Rex",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775397821324,
-    "commit": "https://github.com/openclaw/skills/commit/5c6f023711decd105e6f78edde49eb4021e0b892"
+    "version": "1.0.1",
+    "publishedAt": 1776888862811,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775397821324,
+      "commit": "https://github.com/openclaw/skills/commit/5c6f023711decd105e6f78edde49eb4021e0b892"
+    }
+  ]
 }
