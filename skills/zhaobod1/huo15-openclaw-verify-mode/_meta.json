@@ -3,9 +3,15 @@
   "slug": "huo15-openclaw-verify-mode",
   "displayName": "Huo15 Openclaw Verify Mode",
   "latest": {
-    "version": "2.2.0",
-    "publishedAt": 1775977213233,
-    "commit": "https://github.com/openclaw/skills/commit/193241682fb98b4dc33cc0a5badda9669a751237"
+    "version": "2.2.1",
+    "publishedAt": 1777004151919,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.2.0",
+      "publishedAt": 1775977213233,
+      "commit": "https://github.com/openclaw/skills/commit/193241682fb98b4dc33cc0a5badda9669a751237"
+    }
+  ]
 }
