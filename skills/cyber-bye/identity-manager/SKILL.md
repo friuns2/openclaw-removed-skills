@@ -2,7 +2,36 @@
 name: identity-manager
 description: Create, update, and maintain structured identity entries for every person, org, or group mentioned in conversation. Supports human and AI entity subtypes, group dynamics, pairwise member relations, and enforced soul/memory write-through. Persistent context across sessions.
 version: 2.0.0
-metadata: {"openclaw": {"emoji": "🪪", "homepage": "https://clawhub.ai/skills/identity-manager", "requires": {"bins": []}}}
+metadata:
+  openclaw:
+    emoji: "🪪"
+    homepage: "https://clawhub.ai/skills/identity-manager"
+    requires:
+      bins: []
+      env_vars: []
+      config_paths: []
+    storage:
+      paths:
+        - "identity/"           # Identity entries (person/org/group)
+        - "identity/_index.md"  # Master registry
+        - "identity/_archived/" # Archived entries
+        - "memory/"             # Memory index and schema
+        - "memory/identities.json"
+        - "memory/schema.json"
+        - "memory/hook_log.jsonl"
+        - "soul/"               # Soul context file
+        - "soul/identity_context.md"
+      permissions:
+        - "read"    # Scan existing entries
+        - "write"   # Create/update entries
+        - "append"  # Append to soul and logs
+      retention:
+        policy: "explicit_delete"
+        archived_entries: "never_auto_delete"
+        delete_method: "owner must manually remove files"
+    credentials:
+      required: false
+      description: "No external credentials. Optional IDENTITY_OWNER_NAME env var only."
 ---
 
 # Identity Manager Skill
@@ -283,7 +312,31 @@ salary/financial · legal disputes · health context · confidential negotiation
 
 ---
 
+## Data Retention & Deletion Policy
+
+**Retention:**
+- Identity entries persist until manually archived/deleted by owner
+- Archived entries (`status: archived`) are moved to `identity/_archived/` — never auto-deleted
+- Hook logs (`memory/hook_log.jsonl`) are append-only — owner can truncate at any time
+- Soul file (`soul/identity_context.md`) accumulates events — owner can trim entries
+
+**Deletion:**
+- Owner can delete any entry by removing the file
+- Deleting an entry does NOT auto-delete related group memberships or linked entries
+- Owner should manually clean group `members[]` if deleting a person entry
+- No automatic cascade delete
+
+**Owner Control:**
+- Owner can disable autonomous invocation by setting `IDENTITY_AUTO_SCAN=false`
+- When disabled, skill only runs on explicit `/identity` command
+- Owner can export all data by reading the `identity/` directory
+- Owner can audit all changes via `memory/hook_log.jsonl`
+
+---
+
 ## Folder Structure
+
+All paths are relative to the workspace root and auto-detected on first use. No manual configuration required.
 
 ```
 identity/
@@ -297,7 +350,22 @@ identity/
   _archived/
     <slug>/
       entry.md
+memory/
+  identities.json            ← Central index (JSON)
+  schema.json                ← JSON schema validation
+  hook_log.jsonl            ← Append-only hook log
+soul/
+  identity_context.md        ← Soul write-through file
 ```
+
+### Auto-Initialization
+
+On first run, the skill auto-creates required directories:
+- Creates `identity/` if missing
+- Creates `memory/` with `schema.json`
+- Creates `soul/` with `identity_context.md`
+
+**No required config** — skill works without any owner setup. Entry owner is determined contextually from conversation. No workspace config is read.
 
 ---
 

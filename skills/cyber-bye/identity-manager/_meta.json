@@ -3,9 +3,15 @@
   "slug": "identity-manager",
   "displayName": "Identity Manager",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775887706173,
-    "commit": "https://github.com/openclaw/skills/commit/ec17177d0e15481c7e258fd9653c55035a1b8389"
+    "version": "2.0.1",
+    "publishedAt": 1776859192413,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775887706173,
+      "commit": "https://github.com/openclaw/skills/commit/ec17177d0e15481c7e258fd9653c55035a1b8389"
+    }
+  ]
 }
