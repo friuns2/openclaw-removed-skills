@@ -3,11 +3,16 @@
   "slug": "event-tracking-skill",
   "displayName": "Analytics Tracking Automation — GA4 + GTM Setup via AI",
   "latest": {
-    "version": "1.0.13",
-    "publishedAt": 1776331747361,
-    "commit": "https://github.com/openclaw/skills/commit/08bb2c4240277221223149c576d3aa2afaa47e9d"
+    "version": "1.0.14",
+    "publishedAt": 1776751879300,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.13",
+      "publishedAt": 1776331747361,
+      "commit": "https://github.com/openclaw/skills/commit/08bb2c4240277221223149c576d3aa2afaa47e9d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775552213233,
