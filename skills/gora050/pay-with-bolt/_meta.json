@@ -3,9 +3,15 @@
   "slug": "pay-with-bolt",
   "displayName": "Pay With Bolt",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775527609474,
-    "commit": "https://github.com/openclaw/skills/commit/410aeae4ba81cca5e7efe82819ffe6ead7764bdc"
+    "version": "1.0.1",
+    "publishedAt": 1776893399407,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775527609474,
+      "commit": "https://github.com/openclaw/skills/commit/410aeae4ba81cca5e7efe82819ffe6ead7764bdc"
+    }
+  ]
 }
