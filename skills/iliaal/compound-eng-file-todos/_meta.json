@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-file-todos",
-  "displayName": "file-todos",
+  "displayName": "ia-file-todos",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518951916,
-    "commit": "https://github.com/openclaw/skills/commit/41f6ad5f571b3ada7a8e8dde5ea4b7404e66ff36"
+    "version": "3.0.4",
+    "publishedAt": 1777300684141,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518951916,
+      "commit": "https://github.com/openclaw/skills/commit/41f6ad5f571b3ada7a8e8dde5ea4b7404e66ff36"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004172242,
