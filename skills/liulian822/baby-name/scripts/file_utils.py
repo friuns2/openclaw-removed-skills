@@ -1,13 +1,30 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-文件工具模块 - 订单读写和配置管理
-"""
-
-import os
 import json
-import hashlib
+import os
 import platform
+import yaml
+import hashlib
+
+
+def get_skills_dir() -> str:
+    """获取技能目录路径。"""
+    home_dir = os.path.expanduser("~")
+    return os.path.join(home_dir, ".hermes", "skills", "openclaw-imports", "ai-chunlian")
+
+
+def get_config_path() -> str:
+    """获取配置文件路径。"""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(script_dir, "..", "configs", "config.yaml")
+
+
+def load_config() -> dict:
+    """加载用户配置文件。"""
+    config_path = get_config_path()
+    if not os.path.isfile(config_path):
+        raise RuntimeError(f"配置文件不存在: {config_path}，请先配置你的收款信息")
+    
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
 def get_orders_dir():
@@ -17,33 +34,6 @@ def get_orders_dir():
         return os.path.join(home_dir, "openclaw", "skills", "orders")
     else:
         return os.path.join(home_dir, ".openclaw", "skills", "orders")
-
-
-def get_config_path():
-    """获取配置文件路径"""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(script_dir, '..', 'configs', 'config.json')
-
-
-def load_config() -> dict:
-    """加载配置文件"""
-    config_path = get_config_path()
-    
-    # 如果配置文件不存在，创建默认配置
-    if not os.path.exists(config_path):
-        os.makedirs(os.path.dirname(config_path), exist_ok=True)
-        default_config = {
-            "payTo": "",
-            "amount": 1,
-            "skillName": "baby-name",
-            "description": "宝宝取名服务费用"
-        }
-        with open(config_path, 'w', encoding='utf-8') as f:
-            json.dump(default_config, f, ensure_ascii=False, indent=2)
-        return default_config
-    
-    with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
 
 
 def save_order(indicator: str, order_no: str, order_data: dict):
