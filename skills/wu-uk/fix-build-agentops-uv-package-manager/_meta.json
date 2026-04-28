@@ -1,0 +1,11 @@
+{
+  "owner": "wu-uk",
+  "slug": "fix-build-agentops-uv-package-manager",
+  "displayName": "uv-package-manager",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1776237225482,
+    "commit": null
+  },
+  "history": []
+}
