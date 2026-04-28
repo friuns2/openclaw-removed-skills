@@ -3,9 +3,15 @@
   "slug": "nginx-integration",
   "displayName": "Nginx",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775455514184,
-    "commit": "https://github.com/openclaw/skills/commit/f60f830612be7ddf1f100eb7e276de679cad5988"
+    "version": "1.0.1",
+    "publishedAt": 1776889896298,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775455514184,
+      "commit": "https://github.com/openclaw/skills/commit/f60f830612be7ddf1f100eb7e276de679cad5988"
+    }
+  ]
 }
