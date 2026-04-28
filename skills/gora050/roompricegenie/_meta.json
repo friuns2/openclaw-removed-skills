@@ -3,9 +3,15 @@
   "slug": "roompricegenie",
   "displayName": "Roompricegenie",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653685549,
-    "commit": "https://github.com/openclaw/skills/commit/399e113051e11fb4fd108872e4c923abe52c7fd0"
+    "version": "1.0.1",
+    "publishedAt": 1776899324582,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653685549,
+      "commit": "https://github.com/openclaw/skills/commit/399e113051e11fb4fd108872e4c923abe52c7fd0"
+    }
+  ]
 }
