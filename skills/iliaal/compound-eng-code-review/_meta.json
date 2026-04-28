@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-code-review",
-  "displayName": "code-review",
+  "displayName": "ia-code-review",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518929925,
-    "commit": "https://github.com/openclaw/skills/commit/0a2768a54d54c55c0a663079e18523e59f66b3b3"
+    "version": "3.0.4",
+    "publishedAt": 1777300658519,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518929925,
+      "commit": "https://github.com/openclaw/skills/commit/0a2768a54d54c55c0a663079e18523e59f66b3b3"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004149130,
