@@ -3,9 +3,15 @@
   "slug": "sorry",
   "displayName": "Sorry",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775347440591,
-    "commit": "https://github.com/openclaw/skills/commit/eb7f23cdfa42860038474bc4eebd2749715e5c30"
+    "version": "1.0.1",
+    "publishedAt": 1776899512420,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775347440591,
+      "commit": "https://github.com/openclaw/skills/commit/eb7f23cdfa42860038474bc4eebd2749715e5c30"
+    }
+  ]
 }
