@@ -226,6 +226,10 @@ if wizard_prompt 4 $TOTAL_STEPS "Build a bootstrap bundle for your peer"; then
         echo -e "  ${DIM}Email attachment, scp, carrier pigeon — whatever works.${NC}"
         echo -e "  ${DIM}Just don't paste the contents inline; email clients love to mangle encoded text.${NC}"
 
+        # Default state: no email attempted. We'll flip these when we try.
+        BUNDLE_EMAIL_ATTEMPTED="n"
+        BUNDLE_EMAIL_DELIVERED="n"
+
         if command -v gog >/dev/null 2>&1 || command -v himalaya >/dev/null 2>&1; then
           echo ""
           prompt_value SEND_BUNDLE_EMAIL "Email this bundle to your peer now? (y/N)" "n"
@@ -243,8 +247,23 @@ if wizard_prompt 4 $TOTAL_STEPS "Build a bootstrap bundle for your peer"; then
               if [[ -n "$BUNDLE_EMAIL_ACCOUNT" ]]; then
                 EMAIL_ARGS+=(--account "$BUNDLE_EMAIL_ACCOUNT")
               fi
-              EMAIL_OUTPUT=$(bash "$ANTENNA" "${EMAIL_ARGS[@]}" 2>&1) || true
+              BUNDLE_EMAIL_ATTEMPTED="y"
+              # REF-1206c: capture exit status of the send subcommand and
+              # classify delivery honestly. Previously this was `|| true`
+              # and the wizard then unconditionally printed
+              # "Press Enter once you've sent it off...", which read as a
+              # success confirmation even when both gog and himalaya had
+              # failed. That is a soft-success in a security-critical step;
+              # operators should only see "sent it off" language when the
+              # send actually succeeded.
+              set +e
+              EMAIL_OUTPUT=$(bash "$ANTENNA" "${EMAIL_ARGS[@]}" 2>&1)
+              EMAIL_EXIT=$?
+              set -e
               echo "$EMAIL_OUTPUT"
+              if [[ $EMAIL_EXIT -eq 0 ]]; then
+                BUNDLE_EMAIL_DELIVERED="y"
+              fi
             else
               warn "No email address entered — skipping email send."
             fi
@@ -254,7 +273,24 @@ if wizard_prompt 4 $TOTAL_STEPS "Build a bootstrap bundle for your peer"; then
     fi
   fi
   echo ""
-  wait_for_enter "Press Enter once you've sent it off"
+  # REF-1206c: branch the post-email UX on real delivery status.
+  if [[ "${BUNDLE_EMAIL_ATTEMPTED:-n}" == "y" && "${BUNDLE_EMAIL_DELIVERED:-n}" == "y" ]]; then
+    ok "Bundle emailed. Waiting for your peer to import it and reply."
+  elif [[ "${BUNDLE_EMAIL_ATTEMPTED:-n}" == "y" ]]; then
+    err "Email delivery failed — bundle was NOT sent."
+    if [[ -n "${BUNDLE_FILE:-}" ]]; then
+      echo -e "  ${DIM}Transfer this file manually (scp, USB, encrypted drop):${NC}"
+      echo -e "  ${CYAN}${BUNDLE_FILE}${NC}"
+    fi
+    echo ""
+    prompt_value BUNDLE_DELIVERED_MANUALLY "Did you deliver it out of band? (y/N)" "n"
+    if [[ "${BUNDLE_DELIVERED_MANUALLY,,}" != "y" && "${BUNDLE_DELIVERED_MANUALLY,,}" != "yes" ]]; then
+      warn "Holding here. Re-run the wizard after you've delivered the bundle, or rerun with the bundle file path."
+      exit 0
+    fi
+  else
+    wait_for_enter "Press Enter once you've sent it off"
+  fi
 fi
 
 # ── Step 5: Wait for their bundle ───────────────────────────────────────────

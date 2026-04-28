@@ -3,9 +3,15 @@
   "slug": "telegram-integration",
   "displayName": "Telegram",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775488017119,
-    "commit": "https://github.com/openclaw/skills/commit/8c4a8b67578f91dda3044dd52e974538f5317803"
+    "version": "1.0.1",
+    "publishedAt": 1776893056480,
+    "commit": "https://github.com/openclaw/skills/commit/cfebec2450893d65b95193598222abd05b1a5416"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775488017119,
+      "commit": "https://github.com/openclaw/skills/commit/8c4a8b67578f91dda3044dd52e974538f5317803"
+    }
+  ]
 }

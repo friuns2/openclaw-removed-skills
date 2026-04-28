@@ -3,9 +3,15 @@
   "slug": "mozilla-observatory",
   "displayName": "Mozilla Observatory",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775477228866,
-    "commit": "https://github.com/openclaw/skills/commit/e64183ea20fb6b0de8e287d6215f0af5a7fce146"
+    "version": "1.0.1",
+    "publishedAt": 1776893043998,
+    "commit": "https://github.com/openclaw/skills/commit/8a4a995d3c8588af5f5749d3f4b5a7ceff13f6d3"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775477228866,
+      "commit": "https://github.com/openclaw/skills/commit/e64183ea20fb6b0de8e287d6215f0af5a7fce146"
+    }
+  ]
 }

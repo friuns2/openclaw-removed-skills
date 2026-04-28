@@ -3,9 +3,15 @@
   "slug": "peepl",
   "displayName": "Peepl",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775469896174,
-    "commit": "https://github.com/openclaw/skills/commit/61dbffe1914169095ef2654805d668aa13b67e9a"
+    "version": "1.0.1",
+    "publishedAt": 1776890238726,
+    "commit": "https://github.com/openclaw/skills/commit/13369a33ea1e0b007a7646511553270f25a64167"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775469896174,
+      "commit": "https://github.com/openclaw/skills/commit/61dbffe1914169095ef2654805d668aa13b67e9a"
+    }
+  ]
 }

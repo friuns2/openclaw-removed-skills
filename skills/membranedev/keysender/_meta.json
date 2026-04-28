@@ -3,9 +3,15 @@
   "slug": "keysender",
   "displayName": "Keysender",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775487887915,
-    "commit": "https://github.com/openclaw/skills/commit/7595aab86ed8867162ca252d0a0972246fa45290"
+    "version": "1.0.1",
+    "publishedAt": 1776890495221,
+    "commit": "https://github.com/openclaw/skills/commit/20d09a310c143a9b303b5b2ff404b3a07fa2fe81"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775487887915,
+      "commit": "https://github.com/openclaw/skills/commit/7595aab86ed8867162ca252d0a0972246fa45290"
+    }
+  ]
 }

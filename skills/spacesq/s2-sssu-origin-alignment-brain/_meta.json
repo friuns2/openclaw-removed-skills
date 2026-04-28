@@ -3,9 +3,15 @@
   "slug": "s2-sssu-origin-alignment-brain",
   "displayName": "S2 SSSU Origin Alignment Brain (S2 空间原点对齐与孪生大脑)",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775525808293,
-    "commit": "https://github.com/openclaw/skills/commit/91f0fecde4d9d140c91aa635cee597c0eeaa2f10"
+    "version": "1.2.5",
+    "publishedAt": 1777022382623,
+    "commit": "https://github.com/openclaw/skills/commit/d824297d15045d396714c9a319ee421eba9d3acc"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775525808293,
+      "commit": "https://github.com/openclaw/skills/commit/91f0fecde4d9d140c91aa635cee597c0eeaa2f10"
+    }
+  ]
 }

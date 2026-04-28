@@ -1,21 +1,25 @@
 ---
 name: wjx-mcp-use
-description: "Guide for using wjx-mcp-server MCP tools to interact with the Wenjuanxing (问卷星) platform. Use when the user mentions: 问卷, 调查, 收集, 表单, 投票, 考试, 测评, 满意度, NPS, 问卷星, wjx, survey, questionnaire — or wants to create surveys, query responses, analyze data, manage contacts, or generate SSO links via MCP protocol. Covers 57 tools, 8 resources, and 19 prompts."
+description: "Guide for using wjx-mcp-server MCP tools to interact with the Wenjuanxing (问卷星) platform. Use when the user mentions: 问卷, 调查, 收集, 表单, 投票, 考试, 测评, 满意度, NPS, 问卷星, wjx, survey, questionnaire — or wants to create surveys, query responses, analyze data, manage contacts, or generate SSO links via MCP protocol. Covers 58 tools, 8 resources, and 22 prompts."
 ---
 
 # wjx-mcp-server Usage Guide
 
-wjx-mcp-server 提供 57 个 MCP 工具、8 个参考资源和 19 个 prompt 模板，覆盖问卷星 OpenAPI 的全部能力。
+wjx-mcp-server 提供 58 个 MCP 工具、8 个参考资源和 23 个 prompt 模板，覆盖问卷星 OpenAPI 的全部能力。
 
 ## AI Agent 行为准则（必读）
 
+### 规则 0：创建问卷只用 `create_survey_by_json`（强制）
+
+**禁止使用 `create_survey_by_text` 与 `create_survey`**——除非用户用"DSL"、"文本格式"、"老版接口"等字眼明确要求。原因：DSL 只覆盖 27 种题型而 JSON 覆盖 70+，且 DSL 容易被字符转义破坏。所有题型、投票、考试、表单都走 `create_survey_by_json`。
+
 ### 规则 1：一个需求 = 一个问卷
 
-无论用户要求多少种题型，**必须在一次 `create_survey_by_text` 调用中包含所有题目**。一个问卷可包含任意数量、任意类型的题目。
+无论用户要求多少种题型，**必须在一次 `create_survey_by_json` 调用中包含所有题目**。一个问卷可包含任意数量、任意类型的题目。
 
 ### 规则 2：问卷类型 ≠ 题目类型
 
-"投票/考试/调查"是**问卷类型**（`atype` 参数），不是题型标签。`atype: 3` + `[单选题]` = 投票单选，不存在 `[投票单选题]` 标签。
+"投票/考试/调查"是**问卷类型**（`atype` 参数）。JSONL 创建投票时使用 `qtype:"投票单选"` / `qtype:"投票多选"`，并显式传 `atype: 3`；只有旧 DSL 文本格式才使用普通 `[单选题]` / `[多选题]`，不存在 `[投票单选题]` 标签。
 
 ### 规则 3：不支持的题型要明确告知
 
@@ -34,25 +38,29 @@ wjx-mcp-server 提供 57 个 MCP 工具、8 个参考资源和 19 个 prompt 模
 - **获取 API Key**：让用户访问 `https://<域名>/weixinlogin.aspx?redirecturl=%2Fnewwjx%2Fmanage%2Fuserinfo.aspx%3FshowApiKey%3D1`，微信扫码登录后复制 Key
 - **cli_version 未安装**：可选，安装 `npm install -g wjx-cli` 后用 `wjx init --api-key <key>` 统一配置
 
+### 规则 6：提交答卷无需手动管 jpmversion
+
+`submit_response` 内部会自动 `get_survey` 取最新 `version` 并注入 `jpmversion`，**不要**手动算或省略。仅当外部已自行管理版本时才显式传入 `jpmversion` 参数。问卷被发布/编辑后服务端 `version` 自增，不带最新版本号会被拒绝并报"问卷已被修改请刷新"。
+
 ## 快速路由
 
 | 用户意图 | 工具 |
 |---------|------|
-| 做调查/问卷 | `create_survey_by_text({ text: "...", atype: 1 })` |
-| 做考试/测验 | `create_survey_by_text({ text: "...", atype: 6 })` |
-| 做投票 | `create_survey_by_text({ text: "...", atype: 3 })` |
-| 做表单/报名表 | `create_survey_by_text({ text: "...", atype: 7 })` |
+| 做调查/问卷 | `create_survey_by_json`（支持 70+ 题型） |
+| 做考试/测验 | `create_survey_by_json` + prompt `generate-exam-json`，`atype: 6` |
+| 做投票 | `create_survey_by_json` + `atype: 3` |
+| 做表单/报名表 | `create_survey_by_json` + prompt `generate-form-json`，`atype: 7` |
 | 看问卷结果 | `get_report({ vid })` 统计概览，`query_responses({ vid })` 明细 |
 | 导出答卷数据 | `download_responses({ vid })` |
 | 查看问卷链接 | `build_survey_url({ mode: "edit", activity: vid })` |
 | 分析 NPS | `calculate_nps({ scores: [...] })` |
 | 查当前配置 | `get_config({})` |
 
-## 工具总览（57 tools）
+## 工具总览（58 tools）
 
 | 模块 | 工具数 | 说明 |
 |------|--------|------|
-| 问卷管理 | 12 | create_survey, create_survey_by_text, get_survey, list_surveys, update_survey_status, get/update_survey_settings, delete_survey, get_question_tags, get_tag_details, upload_file, clear_recycle_bin |
+| 问卷管理 | 13 | create_survey_by_json（推荐）, create_survey, create_survey_by_text（已弃用）, get_survey, list_surveys, update_survey_status, get/update_survey_settings, delete_survey, get_question_tags, get_tag_details, upload_file, clear_recycle_bin |
 | 答卷数据 | 9 | query_responses, query_responses_realtime, download_responses, get_report, submit_response, get_winners, modify_response, get_360_report, clear_responses |
 | 通讯录 | 14 | query/add/delete_contacts, add/delete/restore_admin, list/add/modify/delete_departments, list/add/modify/delete_tags |
 | 子账号 | 5 | add/modify/delete/restore/query_sub_accounts |
@@ -65,17 +73,22 @@ wjx-mcp-server 提供 57 个 MCP 工具、8 个参考资源和 19 个 prompt 模
 
 ## 核心工作流
 
-### 创建问卷（推荐 DSL 文本方式）
+### 创建问卷（统一使用 JSON 方式）
+
+**唯一推荐**：所有问卷创建一律使用 `create_survey_by_json`（支持 70+ 题型，覆盖全部 q_type/q_subtype 编码）。
 
 ```
-1. create_survey_by_text({ text: "问卷标题\n\n1. 题目[单选题]\nA. 选项A\nB. 选项B", atype: 6 })
-2. get_survey({ vid: N }) — 验证内容
-3. build_survey_url({ mode: "edit", activity: N }) — 提供编辑链接
+1. 使用 prompt 模板生成题目 JSON（如 generate-survey-json、generate-exam-json 等）
+2. create_survey_by_json({ questions: [...], title: "问卷标题", atype: 1 })
+3. get_survey({ vid: N }) — 验证内容
+4. build_survey_url({ mode: "edit", activity: N }) — 提供编辑链接
 ```
+
+> `create_survey_by_text`（DSL 文本方式）已弃用，仅为兼容保留，新代码不要使用。
 
 **考试问卷（atype=6）注意**：正确答案和每题分值**无法**通过 API 设置。创建后应提供编辑链接，指引用户在网页端配置答案与评分。
 
-DSL 语法详见 `wjx://reference/dsl-syntax` 资源，或 [references/dsl-and-types.md](references/dsl-and-types.md)。
+题型字段映射详见 `wjx://reference/question-types` 资源，或 [references/dsl-and-types.md](references/dsl-and-types.md)。
 
 ### 查询和分析数据
 
@@ -103,7 +116,7 @@ DSL 语法详见 `wjx://reference/dsl-syntax` 资源，或 [references/dsl-and-t
 
 | 资源 URI | 内容 |
 |----------|------|
-| `wjx://reference/dsl-syntax` | DSL 文本语法（create_survey_by_text 用） |
+| `wjx://reference/dsl-syntax` | DSL 文本语法（旧 `create_survey_by_text` 用，已弃用） |
 | `wjx://reference/question-types` | 题型和子类型完整映射表 |
 | `wjx://reference/survey-types` | 问卷类型编码（1=调查, 6=考试 等） |
 | `wjx://reference/survey-statuses` | 问卷状态码 |
@@ -118,7 +131,9 @@ DSL 语法详见 `wjx://reference/dsl-syntax` 资源，或 [references/dsl-and-t
 
 **分析（6）：** nps-analysis, csat-analysis, cross-tabulation, sentiment-analysis, survey-health-check, comparative-analysis
 
-**问卷生成（7）：** generate-survey, generate-nps-survey, generate-360-evaluation, generate-satisfaction-survey, generate-engagement-survey, generate-exam-from-document, generate-exam-from-knowledge
+**问卷生成 — DSL 文本（7，已弃用，保留兼容）：** generate-survey, generate-nps-survey, generate-360-evaluation, generate-satisfaction-survey, generate-engagement-survey, generate-exam-from-document, generate-exam-from-knowledge
+
+**问卷生成 — JSON（3，唯一推荐）：** generate-survey-json, generate-exam-json, generate-form-json
 
 ## 常用枚举值
 

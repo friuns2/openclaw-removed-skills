@@ -14,6 +14,11 @@ SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 PEERS_FILE="$SKILL_DIR/antenna-peers.json"
 CONFIG_FILE="$SKILL_DIR/antenna-config.json"
 
+# shellcheck source=../lib/peers.sh
+source "$SKILL_DIR/lib/peers.sh"
+# shellcheck source=../lib/config.sh
+source "$SKILL_DIR/lib/config.sh"
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 json_ok() {
@@ -57,10 +62,28 @@ sanitize_log_value() {
   echo "$value"
 }
 
+secret_equal_constant_time() {
+  local left="$1" right="$2"
+
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$left" "$right" <<'PY'
+import hmac
+import sys
+sys.exit(0 if hmac.compare_digest(sys.argv[1], sys.argv[2]) else 1)
+PY
+    return $?
+  fi
+
+  local left_hash right_hash
+  left_hash=$(printf '%s' "$left" | sha256sum | awk '{print $1}')
+  right_hash=$(printf '%s' "$right" | sha256sum | awk '{print $1}')
+  [[ "$left_hash" == "$right_hash" ]]
+}
+
 log_entry() {
   local log_enabled log_path
-  log_enabled=$(jq -r '.log_enabled // true' "$CONFIG_FILE" 2>/dev/null || echo "true")
-  log_path=$(jq -r '.log_path // "antenna.log"' "$CONFIG_FILE" 2>/dev/null || echo "antenna.log")
+  log_enabled=$(config_log_enabled)
+  log_path=$(config_log_path)
 
   if [[ "$log_enabled" != "true" ]]; then
     return 0
@@ -98,6 +121,15 @@ fi
 if ! echo "$RAW_MESSAGE" | grep -q '\[/ANTENNA_RELAY\]'; then
   json_malformed "No closing [/ANTENNA_RELAY] marker"
   log_entry "INBOUND  | status:MALFORMED (no closing marker)"
+  exit 0
+fi
+
+# Reject multiple envelope markers (collision/injection attempt)
+OPEN_COUNT=$(echo "$RAW_MESSAGE" | grep -o '\[ANTENNA_RELAY\]' | wc -l | tr -d ' ')
+CLOSE_COUNT=$(echo "$RAW_MESSAGE" | grep -o '\[/ANTENNA_RELAY\]' | wc -l | tr -d ' ')
+if [[ "$OPEN_COUNT" -ne 1 || "$CLOSE_COUNT" -ne 1 ]]; then
+  json_malformed "Multiple envelope markers detected"
+  log_entry "INBOUND  | status:MALFORMED (multiple envelope markers)"
   exit 0
 fi
 
@@ -155,25 +187,77 @@ TIMESTAMP=$(sanitize_log_value "$TIMESTAMP" 32)
 SUBJECT=$(sanitize_log_value "$SUBJECT" 200)
 USER_NAME=$(sanitize_log_value "$USER_NAME" 64)
 
+# ── REF-400: reject reserved envelope markers inside parsed values ──────────
+if [[ "$BODY" == *"[ANTENNA_RELAY]"* ]] || [[ "$BODY" == *"[/ANTENNA_RELAY]"* ]]; then
+  json_malformed "Envelope markers detected inside body"
+  log_entry "INBOUND  | status:MALFORMED (marker in body)"
+  exit 0
+fi
+
+if [[ "$SUBJECT" == *"[ANTENNA_RELAY]"* ]] || [[ "$SUBJECT" == *"[/ANTENNA_RELAY]"* ]] || \
+   [[ "$USER_NAME" == *"[ANTENNA_RELAY]"* ]] || [[ "$USER_NAME" == *"[/ANTENNA_RELAY]"* ]] || \
+   [[ "$REPLY_TO" == *"[ANTENNA_RELAY]"* ]] || [[ "$REPLY_TO" == *"[/ANTENNA_RELAY]"* ]]; then
+  json_malformed "Envelope markers detected inside header values"
+  log_entry "INBOUND  | status:MALFORMED (marker in headers)"
+  exit 0
+fi
+
+# ── REF-1502: extract optional correlation nonce from body ──────────────────
+# The body may contain a `nonce: <value>` line (used by antenna-model-test.sh
+# and anyone else who wants log correlation). Extract it with a strict
+# character class to prevent log injection / ANSI / gigantic values. Default
+# to `-` (absent) when nothing valid is present. This is NOT authentication;
+# peers_get + peer secret verification already did that. The nonce is purely
+# for scoping a receiver-side log scan to one caller's message.
+NONCE=$(echo "$BODY" | grep -m1 -E '^nonce:[[:space:]]*[A-Za-z0-9_-]{1,40}[[:space:]]*$' \
+  | sed -E 's/^nonce:[[:space:]]*([A-Za-z0-9_-]{1,40})[[:space:]]*$/\1/' || true)
+NONCE="${NONCE:--}"
+
 # ── Validate required fields ────────────────────────────────────────────────
 
 if [[ -z "$FROM" ]]; then
   json_reject "Missing required field: from"
-  log_entry "INBOUND  | status:REJECTED (missing from)"
+  log_entry "INBOUND  | nonce:$NONCE | status:REJECTED (missing from)"
   exit 0
 fi
 
 if [[ -z "$TARGET_SESSION" ]]; then
   # Use default from config; if absent, build full key for main session
-  TARGET_SESSION=$(jq -r '.default_target_session // empty' "$CONFIG_FILE" 2>/dev/null || true)
+  TARGET_SESSION=$(config_default_target_session)
   if [[ -z "$TARGET_SESSION" ]]; then
-    LOCAL_AGENT=$(jq -r '.local_agent_id // "agent"' "$CONFIG_FILE" 2>/dev/null || echo "agent")
+    LOCAL_AGENT=$(config_local_agent_id)
     TARGET_SESSION="agent:${LOCAL_AGENT}:main"
   fi
 fi
 
 if [[ -z "$TIMESTAMP" ]]; then
   TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+fi
+
+# ── REF-402: timestamp freshness window to limit replay exposure ───────────
+TIMESTAMP_EPOCH=$(date -u -d "$TIMESTAMP" +%s 2>/dev/null || echo "")
+if [[ -z "$TIMESTAMP_EPOCH" ]]; then
+  json_malformed "Invalid timestamp format"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:MALFORMED (invalid timestamp)"
+  exit 0
+fi
+
+NOW_EPOCH=$(date -u +%s)
+MAX_AGE_SECONDS=$(config_get '.security.max_message_age_seconds' '300')
+MAX_FUTURE_SKEW_SECONDS=$(config_get '.security.max_future_skew_seconds' '60')
+AGE_SECONDS=$((NOW_EPOCH - TIMESTAMP_EPOCH))
+FUTURE_SKEW_SECONDS=$((TIMESTAMP_EPOCH - NOW_EPOCH))
+
+if (( AGE_SECONDS > MAX_AGE_SECONDS )); then
+  json_reject "Message timestamp too old (${AGE_SECONDS}s > ${MAX_AGE_SECONDS}s)" "$FROM"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (timestamp too old: ${AGE_SECONDS}s > ${MAX_AGE_SECONDS}s)"
+  exit 0
+fi
+
+if (( FUTURE_SKEW_SECONDS > MAX_FUTURE_SKEW_SECONDS )); then
+  json_reject "Message timestamp too far in future (${FUTURE_SKEW_SECONDS}s > ${MAX_FUTURE_SKEW_SECONDS}s)" "$FROM"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (timestamp in future: ${FUTURE_SKEW_SECONDS}s > ${MAX_FUTURE_SKEW_SECONDS}s)"
+  exit 0
 fi
 
 # ── Validate sender against allowed inbound peers ───────────────────────────
@@ -186,15 +270,14 @@ ALLOWED=$(jq -r --arg from "$FROM" '
 
 if [[ "$ALLOWED" == "denied" ]]; then
   json_reject "Unknown or disallowed sender: $FROM" "$FROM"
-  log_entry "INBOUND  | from:$FROM | status:REJECTED (not in allowed_inbound_peers)"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (not in allowed_inbound_peers)"
   exit 0
 fi
 
 # Also check peers file for existence
-PEER_EXISTS=$(jq -r --arg from "$FROM" 'has($from) | tostring' "$PEERS_FILE" 2>/dev/null || echo "false")
-if [[ "$PEER_EXISTS" != "true" ]]; then
+if ! peers_exists "$FROM"; then
   json_reject "Unknown peer: $FROM (not in peers registry)" "$FROM"
-  log_entry "INBOUND  | from:$FROM | status:REJECTED (unknown peer)"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (unknown peer)"
   exit 0
 fi
 
@@ -206,7 +289,7 @@ fi
 AUTH_HEADER=$(get_header "auth")
 AUTH_HEADER=$(sanitize_log_value "$AUTH_HEADER" 128)
 
-EXPECTED_SECRET_FILE=$(jq -r --arg from "$FROM" '.[$from].peer_secret_file // empty' "$PEERS_FILE" 2>/dev/null || echo "")
+EXPECTED_SECRET_FILE=$(peers_get "$FROM" peer_secret_file)
 if [[ -n "$EXPECTED_SECRET_FILE" ]]; then
   # Resolve relative paths against skill dir
   if [[ "$EXPECTED_SECRET_FILE" != /* ]]; then
@@ -216,7 +299,7 @@ if [[ -n "$EXPECTED_SECRET_FILE" ]]; then
   if [[ ! -f "$EXPECTED_SECRET_FILE" ]]; then
     # Secret file configured but missing — fail closed
     json_reject "Peer auth configured but secret file missing for: $FROM" "$FROM"
-    log_entry "INBOUND  | from:$FROM | status:REJECTED (peer secret file missing)"
+    log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (peer secret file missing)"
     exit 0
   fi
 
@@ -224,17 +307,17 @@ if [[ -n "$EXPECTED_SECRET_FILE" ]]; then
 
   if [[ -z "$AUTH_HEADER" ]]; then
     json_reject "Peer auth required but no auth header provided (from: $FROM)" "$FROM"
-    log_entry "INBOUND  | from:$FROM | status:REJECTED (missing auth header)"
+    log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (missing auth header)"
     exit 0
   fi
 
-  if [[ "$AUTH_HEADER" != "$EXPECTED_SECRET" ]]; then
+  if ! secret_equal_constant_time "$AUTH_HEADER" "$EXPECTED_SECRET"; then
     # Diagnostic: provide actionable detail without exposing actual secrets
     auth_hint="${AUTH_HEADER:0:6}...${AUTH_HEADER: -4}"
     expected_hint="${EXPECTED_SECRET:0:6}...${EXPECTED_SECRET: -4}"
     diag_msg="Peer auth failed: invalid secret (from: $FROM). Received prefix/suffix: ${auth_hint}, expected prefix/suffix: ${expected_hint}. Likely cause: peer secrets are out of sync. Fix: re-run 'antenna peers exchange' between hosts to resync, or verify peer_secret_file points to the correct file on both sides."
     json_reject "Peer auth failed: invalid secret (from: $FROM)" "$FROM"
-    log_entry "INBOUND  | from:$FROM | status:REJECTED (invalid peer secret) | hint:received=${auth_hint} expected=${expected_hint} | fix:resync peer secrets via 'antenna peers exchange'"
+    log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (invalid peer secret) | hint:received=${auth_hint} expected=${expected_hint} | fix:resync peer secrets via 'antenna peers exchange'"
     exit 0
   fi
 
@@ -250,8 +333,8 @@ fi
 
 RATE_LIMIT_FILE="$SKILL_DIR/antenna-ratelimit.json"
 RATE_LIMIT_LOCK_FILE="${RATE_LIMIT_FILE}.lock"
-PEER_LIMIT=$(jq -r '.rate_limit.per_peer_per_minute // 10' "$CONFIG_FILE" 2>/dev/null || echo "10")
-GLOBAL_LIMIT=$(jq -r '.rate_limit.global_per_minute // 30' "$CONFIG_FILE" 2>/dev/null || echo "30")
+PEER_LIMIT=$(config_rate_limit_per_peer)
+GLOBAL_LIMIT=$(config_rate_limit_global)
 
 mkdir -p "$(dirname "$RATE_LIMIT_FILE")"
 if [[ ! -f "$RATE_LIMIT_FILE" ]]; then
@@ -299,30 +382,55 @@ rate_limit_check_and_record
 
 if [[ "$RATE_VERDICT" == "peer_limited" ]]; then
   json_reject "Rate limited: peer '$FROM' exceeded $PEER_LIMIT messages/minute ($RATE_PEER_COUNT in window)" "$FROM"
-  log_entry "INBOUND  | from:$FROM | status:REJECTED (rate limited: peer $RATE_PEER_COUNT/$PEER_LIMIT per min)"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (rate limited: peer $RATE_PEER_COUNT/$PEER_LIMIT per min)"
   exit 0
 fi
 
 if [[ "$RATE_VERDICT" == "global_limited" ]]; then
   json_reject "Rate limited: global limit exceeded ($RATE_GLOBAL_COUNT/$GLOBAL_LIMIT messages/minute)" "$FROM"
-  log_entry "INBOUND  | from:$FROM | status:REJECTED (rate limited: global $RATE_GLOBAL_COUNT/$GLOBAL_LIMIT per min)"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (rate limited: global $RATE_GLOBAL_COUNT/$GLOBAL_LIMIT per min)"
   exit 0
 fi
 
 # ── Validate message length ─────────────────────────────────────────────────
 
-MAX_LEN=$(jq -r '.max_message_length // 10000' "$CONFIG_FILE" 2>/dev/null || echo "10000")
+MAX_LEN=$(config_max_message_length)
 BODY_LEN=${#BODY}
 
 if [[ "$BODY_LEN" -gt "$MAX_LEN" ]]; then
   json_reject "Message body exceeds max length ($BODY_LEN > $MAX_LEN chars)" "$FROM"
-  log_entry "INBOUND  | from:$FROM | status:REJECTED (over max length: $BODY_LEN > $MAX_LEN)"
+  log_entry "INBOUND  | from:$FROM | nonce:$NONCE | status:REJECTED (over max length: $BODY_LEN > $MAX_LEN)"
+  exit 0
+fi
+
+# ── Validate target session against allowlist (REF-500, pre-inbox gate) ────
+# Full session keys only. Exact match. No expansion — senders must use full keys.
+# Enforced BEFORE the inbox branch so queued messages can never target a
+# session outside allowed_inbound_sessions. The inbox is for human approval of
+# *content/peer*, not for laundering session-target policy around the allowlist.
+
+ALLOWED_SESSIONS=$(jq -r '
+  .allowed_inbound_sessions // [] | .[]
+' "$CONFIG_FILE" 2>/dev/null)
+
+session_allowed() {
+  local target="$1"
+  while IFS= read -r pattern; do
+    [[ -z "$pattern" ]] && continue
+    [[ "$target" == "$pattern" ]] && return 0
+  done <<< "$ALLOWED_SESSIONS"
+  return 1
+}
+
+if ! session_allowed "$TARGET_SESSION"; then
+  json_reject "Session target '$TARGET_SESSION' not in allowed_inbound_sessions" "$FROM"
+  log_entry "INBOUND  | from:$FROM | session:$TARGET_SESSION | nonce:$NONCE | status:REJECTED (session not allowed)"
   exit 0
 fi
 
 # ── Inbox queue check ────────────────────────────────────────────────────────
 
-INBOX_ENABLED=$(jq -r '.inbox_enabled // false' "$CONFIG_FILE" 2>/dev/null || echo "false")
+INBOX_ENABLED=$(config_inbox_enabled)
 
 if [[ "$INBOX_ENABLED" == "true" ]]; then
   # Check auto-approve list
@@ -331,11 +439,11 @@ if [[ "$INBOX_ENABLED" == "true" ]]; then
   ' "$CONFIG_FILE" 2>/dev/null || echo "no")
   
   if [[ "$AUTO_APPROVED" != "yes" ]]; then
-    # Queued messages bypass the session allowlist check below.
-    # Session target is validated at delivery time via sessions_send.
+    # Session target already validated above against allowed_inbound_sessions
+    # (REF-500). Queued messages cannot target disallowed sessions.
     RESOLVED_SESSION="$TARGET_SESSION"
     
-    DISPLAY_NAME=$(jq -r --arg from "$FROM" '.[$from].display_name // $from' "$PEERS_FILE" 2>/dev/null || echo "$FROM")
+    DISPLAY_NAME=$(peers_get "$FROM" display_name); DISPLAY_NAME="${DISPLAY_NAME:-$FROM}"
     
     # Convert UTC timestamp to a friendlier format if possible
     FRIENDLY_TS="$TIMESTAMP"
@@ -385,37 +493,17 @@ ${BODY}"
     
     # Output queued response
     echo "$QUEUE_RESULT"
-    log_entry "INBOUND  | from:$FROM | session:$RESOLVED_SESSION | status:queued | chars:$BODY_LEN"
+    log_entry "INBOUND  | from:$FROM | session:$RESOLVED_SESSION | nonce:$NONCE | status:queued | chars:$BODY_LEN"
     exit 0
   fi
   # Auto-approved peers fall through to normal relay
 fi
 
-# ── Validate target session against allowlist ───────────────────────────────
-# Full session keys only. Exact match. No expansion — senders must use full keys.
-
-ALLOWED_SESSIONS=$(jq -r '
-  .allowed_inbound_sessions // [] | .[]
-' "$CONFIG_FILE" 2>/dev/null)
-
-session_allowed() {
-  local target="$1"
-  while IFS= read -r pattern; do
-    [[ -z "$pattern" ]] && continue
-    [[ "$target" == "$pattern" ]] && return 0
-  done <<< "$ALLOWED_SESSIONS"
-  return 1
-}
-
-if ! session_allowed "$TARGET_SESSION"; then
-  json_reject "Session target '$TARGET_SESSION' not in allowed_inbound_sessions" "$FROM"
-  log_entry "INBOUND  | from:$FROM | session:$TARGET_SESSION | status:REJECTED (session not allowed)"
-  exit 0
-fi
+# Session allowlist already enforced above (REF-500) before the inbox branch.
 
 # ── Format delivery message ─────────────────────────────────────────────────
 
-DISPLAY_NAME=$(jq -r --arg from "$FROM" '.[$from].display_name // $from' "$PEERS_FILE" 2>/dev/null || echo "$FROM")
+DISPLAY_NAME=$(peers_get "$FROM" display_name); DISPLAY_NAME="${DISPLAY_NAME:-$FROM}"
 
 # Convert UTC timestamp to a friendlier format if possible
 FRIENDLY_TS="$TIMESTAMP"
@@ -442,10 +530,10 @@ ${BODY}"
 
 # ── Log ──────────────────────────────────────────────────────────────────────
 
-log_entry "INBOUND  | from:$FROM | session:$TARGET_SESSION | status:relayed | chars:$BODY_LEN"
+log_entry "INBOUND  | from:$FROM | session:$TARGET_SESSION | nonce:$NONCE | status:relayed | chars:$BODY_LEN"
 
 # Check if verbose logging is enabled
-LOG_VERBOSE=$(jq -r '.log_verbose // false' "$CONFIG_FILE" 2>/dev/null || echo "false")
+LOG_VERBOSE=$(config_log_verbose)
 if [[ "$LOG_VERBOSE" == "true" ]]; then
   PREVIEW=$(sanitize_log_value "${BODY:0:100}" 100)
   log_entry "INBOUND  | from:$FROM | preview:${PREVIEW}..."

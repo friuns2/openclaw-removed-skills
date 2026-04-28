@@ -17,8 +17,10 @@ SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 CONFIG_FILE="$SKILL_DIR/antenna-config.json"
 PEERS_FILE="$SKILL_DIR/antenna-peers.json"
 
-# Peer-shape filter: only iterate entries that are objects with a .url string
-PEER_JQ_KEYS='to_entries[] | select((.value | type) == "object" and (.value.url? | type) == "string") | .key'
+# shellcheck source=../lib/peers.sh
+source "$SKILL_DIR/lib/peers.sh"
+# shellcheck source=../lib/config.sh
+source "$SKILL_DIR/lib/config.sh"
 
 # Colors
 RED='\033[0;31m'
@@ -61,13 +63,14 @@ Usage:
   antenna doctor --gateway <path>    Override gateway config path
 
 Checks:
-  1. Antenna config files exist and are valid JSON
-  2. Gateway config exists and is valid JSON
-  3. Hooks are enabled with correct settings
-  4. Antenna agent is registered
-  5. Required allowlist entries are present
-  6. Secret files exist with correct permissions
-  7. Peer connectivity (basic)
+  1.  Antenna config files exist and are valid JSON
+  1b. No orphan peer references in config allowlists
+  2.  Gateway config exists and is valid JSON
+  3.  Hooks are enabled with correct settings
+  4.  Antenna agent is registered
+  5.  Required allowlist entries are present
+  6.  Secret files exist with correct permissions
+  7.  Peer connectivity (basic)
 EOF
       exit 0
       ;;
@@ -129,10 +132,61 @@ if [[ -f "$PEERS_FILE" ]]; then
   if jq empty "$PEERS_FILE" 2>/dev/null; then
     pass "antenna-peers.json exists and is valid JSON"
 
-    # Check self-peer exists
-    local_self=$(jq -r 'to_entries[] | select(.value.self == true) | .key' "$PEERS_FILE" 2>/dev/null || echo "")
+    # Check self-peer exists. `peers_self_id` filters to entries that have
+    # a string .url field, so a self entry without .url wouldn't be found
+    # here. REF-2001: look up a self peer by `self == true` independently of
+    # the shape predicate so we can distinguish "no self at all" from
+    # "self exists but URL is missing."
+    local_self=$(peers_self_id)
+    self_id_any=$(jq -r 'to_entries[] | select((.value | type) == "object" and .value.self == true) | .key' "$PEERS_FILE" 2>/dev/null | head -n 1)
+
     if [[ -n "$local_self" ]]; then
       pass "Self-peer found: $local_self"
+
+      # REF-2001: self-peer URL shape check. The live `url: "main"` incident
+      # (devon1545, 2026-04-21) landed because the validator didn't exist yet.
+      # Now it does; doctor should surface drift here since this is exactly
+      # the class of bug doctor is for.
+      self_url=$(peers_get "$local_self" url)
+      if [[ -z "$self_url" ]]; then
+        fail "Self-peer has no URL configured"
+        hint "Re-run: antenna setup --force  (or set .self.url in antenna-peers.json)"
+      else
+        _url_reason=""
+        if _url_reason="$(validate_peer_url "$self_url" 2>&1 >/dev/null)"; then
+          pass "Self-peer URL looks valid: $self_url"
+        else
+          fail "Self-peer URL is malformed: $self_url (${_url_reason:-invalid URL})"
+          hint "Fix .self.url in antenna-peers.json or re-run: antenna setup --force"
+        fi
+      fi
+
+      # REF-2001 (warn tier): scan other peers' URLs too. Warn, not fail,
+      # because pre-1313 installs may legitimately have non-conforming URLs
+      # that the operator hasn't had a chance to fix yet.
+      bad_peers=()
+      while IFS= read -r pid; do
+        [[ -z "$pid" ]] && continue
+        [[ "$pid" == "$local_self" ]] && continue
+        purl=$(peers_get "$pid" url)
+        [[ -z "$purl" ]] && continue
+        if ! validate_peer_url "$purl" >/dev/null 2>&1; then
+          bad_peers+=("$pid ($purl)")
+        fi
+      done < <(peers_list_ids)
+      if (( ${#bad_peers[@]} > 0 )); then
+        warn "Peers with malformed URLs: ${#bad_peers[@]}"
+        for bp in "${bad_peers[@]}"; do
+          hint "  - $bp"
+        done
+        hint "Re-pair or fix .url in antenna-peers.json"
+      else
+        pass "All peer URLs pass shape validation"
+      fi
+    elif [[ -n "$self_id_any" ]]; then
+      # REF-2001: self entry exists but has no string .url field.
+      fail "Self-peer '$self_id_any' has no URL configured"
+      hint "Re-run: antenna setup --force  (or set .url on the self entry in antenna-peers.json)"
     else
       fail "No self-peer defined (no entry with \"self\": true)"
       hint "Add a self entry to antenna-peers.json or re-run: antenna setup"
@@ -144,6 +198,75 @@ if [[ -f "$PEERS_FILE" ]]; then
 else
   fail "antenna-peers.json not found"
   hint "Run: antenna setup"
+fi
+
+echo ""
+
+# ── 1b. Peer-state drift (REF-2002) ───────────────────────────────────
+#
+# Cross-check peer-scoped allowlists in antenna-config.json against the peer
+# IDs actually present in antenna-peers.json. Orphan entries (allowlist
+# references to peers that no longer exist) are a warn, not a fail: the peer
+# cannot communicate anyway, but the debris is a common migration hazard and
+# previously had to be cleaned up by hand (e.g. the nexus / bruce cleanup).
+#
+# `peers remove <id>` now prunes these lists (REF-1312), but this check covers
+# configs that pre-date that fix or were edited manually.
+
+echo -e "${BOLD}1b. Peer-State Drift${NC}"
+
+if [[ -f "$CONFIG_FILE" ]] && [[ -f "$PEERS_FILE" ]] \
+   && jq empty "$CONFIG_FILE" 2>/dev/null \
+   && jq empty "$PEERS_FILE" 2>/dev/null; then
+
+  # Collect known peer IDs: every top-level key whose value is an object with
+  # a string .url (same predicate lib/peers.sh uses). This is the set of peers
+  # that are actually usable by the rest of Antenna.
+  known_peer_ids=$(jq -r '
+    to_entries
+    | map(select((.value | type) == "object" and (.value.url | type) == "string"))
+    | .[].key
+  ' "$PEERS_FILE" 2>/dev/null | sort -u)
+
+  drift_total=0
+
+  for field in allowed_inbound_peers allowed_outbound_peers inbox_auto_approve_peers; do
+    # Read the list, tolerating missing field. Non-array => empty iteration.
+    mapfile -t entries < <(jq -r --arg f "$field" '
+      if (.[$f] | type) == "array" then .[$f][] else empty end
+    ' "$CONFIG_FILE" 2>/dev/null)
+
+    orphans=()
+    for entry in "${entries[@]}"; do
+      [[ -z "$entry" ]] && continue
+      if ! grep -Fxq -- "$entry" <<<"$known_peer_ids"; then
+        orphans+=("$entry")
+      fi
+    done
+
+    if (( ${#orphans[@]} > 0 )); then
+      drift_total=$((drift_total + ${#orphans[@]}))
+      warn "$field references unknown peer(s): ${#orphans[@]}"
+      # Orphan IDs are always visible (not gated on --fix-hints): the whole
+      # point of the audit is "which peer do I need to look at?". Keep the
+      # actionable remediation command in `hint` so it only shows with
+      # --fix-hints.
+      for orphan in "${orphans[@]}"; do
+        echo -e "       ${YELLOW}- $orphan${NC}"
+      done
+      hint "Prune with: antenna peers remove <peer-id>  (or edit $CONFIG_FILE)"
+    fi
+  done
+
+  if (( drift_total == 0 )); then
+    pass "No orphan peer references in config allowlists"
+  fi
+elif [[ ! -f "$CONFIG_FILE" ]]; then
+  info "Skipped (no antenna-config.json)"
+elif [[ ! -f "$PEERS_FILE" ]]; then
+  info "Skipped (no antenna-peers.json)"
+else
+  info "Skipped (config or peers file is invalid JSON — see earlier checks)"
 fi
 
 echo ""
@@ -295,6 +418,39 @@ else
   echo ""
 fi
 
+# ── 5b. Session allowlist ───────────────────────────────────────────────────
+
+echo -e "${BOLD}5b. Session Allowlist${NC}"
+
+if [[ -f "$CONFIG_FILE" ]]; then
+  local_agent=$(config_local_agent_id)
+
+  needs_main="agent:${local_agent}:main"
+  needs_antenna="agent:${local_agent}:antenna"
+  needs_modeltest="agent:antenna:modeltest"
+
+  for s in "$needs_main" "$needs_antenna"; do
+    if jq -e --arg s "$s" '.allowed_inbound_sessions // [] | index($s)' "$CONFIG_FILE" >/dev/null 2>&1; then
+      pass "session allowlisted: $s"
+    else
+      warn "session not allowlisted: $s"
+      hint "Run: antenna sessions add $s"
+    fi
+  done
+
+  # Model-test session — needed by 'antenna test' (self-registers, but doctor surfaces it)
+  if jq -e --arg s "$needs_modeltest" '.allowed_inbound_sessions // [] | index($s)' "$CONFIG_FILE" >/dev/null 2>&1; then
+    pass "session allowlisted: $needs_modeltest (needed by 'antenna test')"
+  else
+    warn "session not allowlisted: $needs_modeltest (needed by 'antenna test')"
+    hint "'antenna test' self-registers this; or add manually: antenna sessions add $needs_modeltest"
+  fi
+else
+  warn "Cannot check session allowlist — no $CONFIG_FILE"
+fi
+
+echo ""
+
 # ── 6. Secret files ─────────────────────────────────────────────────────────
 
 echo -e "${BOLD}6. Secrets & Permissions${NC}"
@@ -304,7 +460,7 @@ if [[ -f "$PEERS_FILE" ]]; then
     [[ -z "$peer_id" ]] && continue
 
     # Token file
-    tf=$(jq -r --arg p "$peer_id" '.[$p].token_file // empty' "$PEERS_FILE" 2>/dev/null)
+    tf=$(peers_get "$peer_id" token_file)
     if [[ -n "$tf" ]]; then
       # Resolve relative paths
       [[ "$tf" != /* ]] && tf="$SKILL_DIR/$tf"
@@ -323,7 +479,7 @@ if [[ -f "$PEERS_FILE" ]]; then
     fi
 
     # Peer secret file
-    psf=$(jq -r --arg p "$peer_id" '.[$p].peer_secret_file // empty' "$PEERS_FILE" 2>/dev/null)
+    psf=$(peers_get "$peer_id" peer_secret_file)
     if [[ -n "$psf" ]]; then
       [[ "$psf" != /* ]] && psf="$SKILL_DIR/$psf"
 
@@ -336,7 +492,7 @@ if [[ -f "$PEERS_FILE" ]]; then
           hint "chmod 600 $psf"
         fi
       else
-        is_self_check=$(jq -r --arg p "$peer_id" '.[$p].self // false' "$PEERS_FILE" 2>/dev/null)
+        is_self_check=$(peers_get "$peer_id" self)
         if [[ "$is_self_check" == "true" ]]; then
           fail "$peer_id (self): identity secret missing: $psf"
           hint "Run: antenna setup (or openssl rand -hex 32 > $psf && chmod 600 $psf)"
@@ -346,15 +502,181 @@ if [[ -f "$PEERS_FILE" ]]; then
         fi
       fi
     else
-      is_self=$(jq -r --arg p "$peer_id" '.[$p].self // false' "$PEERS_FILE" 2>/dev/null)
+      is_self=$(peers_get "$peer_id" self)
       if [[ "$is_self" == "true" ]]; then
         warn "$peer_id (self): no peer_secret_file configured"
         hint "Run: antenna setup --force (or add peer_secret_file to your self-peer entry)"
       fi
     fi
-  done < <(jq -r "$PEER_JQ_KEYS" "$PEERS_FILE" 2>/dev/null)
+  done < <(peers_list_ids)
 else
   warn "Cannot check secrets — no peers file"
+fi
+
+echo ""
+
+# ── 6b. Secrets-directory hygiene ───────────────────────────────────────────
+#
+# Section 6 audits per-peer secrets *referenced from antenna-peers.json*. It
+# says nothing about files sitting in secrets/ that no peer references anymore
+# (orphans: the file equivalent of the REF-1312 allowlist drift, pre-cleanup
+# `bruce` / `nexus`), and nothing about forgotten `.bak` backups whose perms
+# drift silently over time. It also doesn't check that secrets/ itself is not
+# group/world-readable. This is the file-side counterpart to 1b.
+#
+# Severity is warn, not fail — matching 1b: orphan/backup secret files on
+# disk can't authenticate anyone who isn't in the peer registry, but they are
+# a real migration hygiene signal and an easy leak surface if perms drift.
+
+echo -e "${BOLD}6b. Secrets Directory Hygiene${NC}"
+
+SECRETS_DIR="$SKILL_DIR/secrets"
+
+if [[ ! -d "$SECRETS_DIR" ]]; then
+  info "No secrets directory at $SECRETS_DIR (skipping)"
+else
+  # ---- Directory permissions ----
+  dir_perms=$(stat -c '%a' "$SECRETS_DIR" 2>/dev/null || stat -f '%Lp' "$SECRETS_DIR" 2>/dev/null || echo "unknown")
+  case "$dir_perms" in
+    700|750|500)
+      pass "secrets/ directory permissions OK ($dir_perms)"
+      ;;
+    *)
+      warn "secrets/ directory permissions ($dir_perms) — should be 700"
+      hint "chmod 700 $SECRETS_DIR"
+      ;;
+  esac
+
+  # ---- Classify loose files ----
+  # Build the set of known peer IDs up front.
+  known_peers=""
+  if [[ -f "$PEERS_FILE" ]]; then
+    known_peers=$(peers_list_ids 2>/dev/null | sort -u)
+  fi
+
+  # Known non-peer-scoped files that are expected to live in secrets/.
+  # (The age keypair is Layer A bootstrap material; it isn't tied to one peer.)
+  is_known_nonpeer_file() {
+    case "$1" in
+      antenna-exchange.agekey|antenna-exchange.agepub) return 0 ;;
+      *) return 1 ;;
+    esac
+  }
+
+  # Extract `<peer_id>` from a filename if it looks like a peer-scoped file.
+  # Returns empty if the file doesn't match any known peer-scoped pattern.
+  peer_id_from_filename() {
+    local fn="$1"
+    case "$fn" in
+      antenna-peer-*.secret)
+        fn="${fn#antenna-peer-}"
+        printf '%s\n' "${fn%.secret}"
+        ;;
+      hooks_token_*)
+        printf '%s\n' "${fn#hooks_token_}"
+        ;;
+      peer_secret_*)
+        printf '%s\n' "${fn#peer_secret_}"
+        ;;
+      *)
+        printf '\n'
+        ;;
+    esac
+  }
+
+  is_backup_filename() {
+    case "$1" in
+      *.bak|*.bak.*|*.bak-*|*.backup|*.backup.*|*.backup-*|*~|*.old)
+        return 0
+        ;;
+    esac
+    return 1
+  }
+
+  orphan_list=""
+  backup_list=""
+  unknown_list=""
+  loose_perm_list=""
+
+  while IFS= read -r -d '' entry; do
+    fn="$(basename "$entry")"
+
+    # Any regular file in secrets/ is expected to be 600 / 400 (or 640 at most).
+    f_perms=$(stat -c '%a' "$entry" 2>/dev/null || stat -f '%Lp' "$entry" 2>/dev/null || echo "unknown")
+    case "$f_perms" in
+      600|400) ;;
+      *) loose_perm_list+="$fn|$f_perms"$'\n' ;;
+    esac
+
+    # Classify by filename
+    if is_backup_filename "$fn"; then
+      backup_list+="$fn"$'\n'
+      continue
+    fi
+
+    if is_known_nonpeer_file "$fn"; then
+      continue
+    fi
+
+    pid="$(peer_id_from_filename "$fn" | tr -d '\n')"
+    if [[ -z "$pid" ]]; then
+      unknown_list+="$fn"$'\n'
+      continue
+    fi
+
+    # Does this peer ID exist in the registry?
+    if [[ -z "$known_peers" ]] || ! printf '%s\n' "$known_peers" | grep -qxF "$pid"; then
+      orphan_list+="$fn"$'\n'
+    fi
+  done < <(find "$SECRETS_DIR" -maxdepth 1 -type f -print0 2>/dev/null)
+
+  # ---- Report orphans ----
+  if [[ -n "$orphan_list" ]]; then
+    n=$(printf '%s' "$orphan_list" | grep -c . || true)
+    warn "orphan secret file(s) in secrets/: $n (peer not in registry)"
+    while IFS= read -r f; do
+      [[ -z "$f" ]] && continue
+      printf '      - %s\n' "$f"
+    done <<<"$orphan_list"
+    hint "Review and either re-add the peer or move the file out of secrets/"
+  else
+    pass "No orphan peer secrets in secrets/"
+  fi
+
+  # ---- Report backups ----
+  if [[ -n "$backup_list" ]]; then
+    n=$(printf '%s' "$backup_list" | grep -c . || true)
+    warn "stale backup file(s) in secrets/: $n"
+    while IFS= read -r f; do
+      [[ -z "$f" ]] && continue
+      printf '      - %s\n' "$f"
+    done <<<"$backup_list"
+    hint "Remove or move backups out of secrets/ once they're no longer needed"
+  else
+    pass "No stale backup files in secrets/"
+  fi
+
+  # ---- Report loose permissions across the whole dir ----
+  if [[ -n "$loose_perm_list" ]]; then
+    n=$(printf '%s' "$loose_perm_list" | grep -c . || true)
+    warn "file(s) in secrets/ with loose permissions: $n (should be 600)"
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      printf '      - %s (%s)\n' "${line%|*}" "${line#*|}"
+    done <<<"$loose_perm_list"
+    hint "chmod 600 $SECRETS_DIR/*"
+  fi
+
+  # ---- Report unknown-shape files ----
+  if [[ -n "$unknown_list" ]]; then
+    n=$(printf '%s' "$unknown_list" | grep -c . || true)
+    warn "unrecognized file(s) in secrets/: $n"
+    while IFS= read -r f; do
+      [[ -z "$f" ]] && continue
+      printf '      - %s\n' "$f"
+    done <<<"$unknown_list"
+    hint "Secrets/ should only contain peer-scoped secrets and bootstrap keys; review manually"
+  fi
 fi
 
 echo ""
@@ -367,10 +689,10 @@ if [[ -f "$PEERS_FILE" ]]; then
   while IFS= read -r peer_id; do
     [[ -z "$peer_id" ]] && continue
 
-    is_self=$(jq -r --arg p "$peer_id" '.[$p].self // false' "$PEERS_FILE" 2>/dev/null)
+    is_self=$(peers_get "$peer_id" self)
     [[ "$is_self" == "true" ]] && continue
 
-    peer_url=$(jq -r --arg p "$peer_id" '.[$p].url // empty' "$PEERS_FILE" 2>/dev/null)
+    peer_url=$(peers_get "$peer_id" url)
     [[ -z "$peer_url" ]] && continue
 
     # Quick reachability check (5s timeout)
@@ -388,7 +710,7 @@ if [[ -f "$PEERS_FILE" ]]; then
     else
       warn "$peer_id ($peer_url): responded with HTTP $http_code"
     fi
-  done < <(jq -r "$PEER_JQ_KEYS" "$PEERS_FILE" 2>/dev/null)
+  done < <(peers_list_ids)
 else
   warn "Cannot check connectivity — no peers file"
 fi

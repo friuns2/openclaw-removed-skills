@@ -3,9 +3,15 @@
   "slug": "pdfless",
   "displayName": "Pdfless",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775477196580,
-    "commit": "https://github.com/openclaw/skills/commit/086d4517118220996d3fc02dba344c53fc1daaa4"
+    "version": "1.0.1",
+    "publishedAt": 1776892931612,
+    "commit": "https://github.com/openclaw/skills/commit/b2f32a6fa65ac67a1e8b28e4ffa3681dd8e8fce8"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775477196580,
+      "commit": "https://github.com/openclaw/skills/commit/086d4517118220996d3fc02dba344c53fc1daaa4"
+    }
+  ]
 }

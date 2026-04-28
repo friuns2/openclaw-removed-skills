@@ -3,9 +3,15 @@
   "slug": "mentionlytics",
   "displayName": "Mentionlytics",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495212097,
-    "commit": "https://github.com/openclaw/skills/commit/d3a04be54b6265fcea097c5ef23aad3afda778f1"
+    "version": "1.0.1",
+    "publishedAt": 1776893134471,
+    "commit": "https://github.com/openclaw/skills/commit/ea891aba02b9929470685bed3a020012551b5505"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495212097,
+      "commit": "https://github.com/openclaw/skills/commit/d3a04be54b6265fcea097c5ef23aad3afda778f1"
+    }
+  ]
 }

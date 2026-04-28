@@ -3,9 +3,15 @@
   "slug": "travelport",
   "displayName": "Travelport",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775477234343,
-    "commit": "https://github.com/openclaw/skills/commit/82c192916ef4d59295fc64311b0e34a78c6ae3ba"
+    "version": "1.0.1",
+    "publishedAt": 1776893047564,
+    "commit": "https://github.com/openclaw/skills/commit/d66e5b47f5da8588741c396f9fe313e18454f5bc"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775477234343,
+      "commit": "https://github.com/openclaw/skills/commit/82c192916ef4d59295fc64311b0e34a78c6ae3ba"
+    }
+  ]
 }

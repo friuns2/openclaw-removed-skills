@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-receiving-code-review",
-  "displayName": "receiving-code-review",
+  "displayName": "ia-receiving-code-review",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519027805,
-    "commit": "https://github.com/openclaw/skills/commit/71a4a80c539ac866fbf8a7d0e71f1d449bdfe345"
+    "version": "3.0.4",
+    "publishedAt": 1777300774534,
+    "commit": "https://github.com/openclaw/skills/commit/3af70b9b23408f9d7bfbe92937c37772c6fee92d"
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519027805,
+      "commit": "https://github.com/openclaw/skills/commit/71a4a80c539ac866fbf8a7d0e71f1d449bdfe345"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004249396,

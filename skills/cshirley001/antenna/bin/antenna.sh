@@ -34,6 +34,13 @@ _fix_perms
 PEERS_FILE="$SKILL_DIR/antenna-peers.json"
 CONFIG_FILE="$SKILL_DIR/antenna-config.json"
 
+# shellcheck source=../lib/config.sh
+source "$SKILL_DIR/lib/config.sh"
+# REF-1313: validate_peer_url lives in lib/peers.sh. Sourcing here makes it
+# available to cmd_peers add/update mutation paths.
+# shellcheck source=../lib/peers.sh
+source "$SKILL_DIR/lib/peers.sh"
+
 # ── Peer-shape validation helpers ────────────────────────────────────────────
 # Only iterate entries that look like real peers (object with a .url string).
 # This prevents legacy/malformed nested objects from polluting peer lists.
@@ -78,7 +85,7 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
   esac
 fi
 
-LOG_FILE="$SKILL_DIR/$(jq -r '.log_path // "antenna.log"' "$CONFIG_FILE" 2>/dev/null || echo "antenna.log")"
+LOG_FILE="$SKILL_DIR/$(config_log_path)"
 
 usage() {
   cat <<'EOF'
@@ -113,6 +120,11 @@ Usage:
   antenna peers exchange <id> --import-value <hex> Legacy raw-secret import by value
   antenna peers exchange <id> --export             Legacy raw-secret export
 
+  antenna bundle verify <file>               Verify a received .age.txt bootstrap bundle
+    --json                                    Emit a machine-readable verdict
+    --force-expired                           Don't fail on expired bundles
+    --no-decrypt                              Treat <file> as already-decrypted JSON
+
   antenna inbox list                         Show pending queued messages
   antenna inbox count                        Count pending messages
   antenna inbox show <ref>                   Show full message for a ref
@@ -126,10 +138,10 @@ Usage:
   antenna sessions remove <name> [<name>...] Remove session target(s) (core sessions need --force)
 
   antenna config show                        Show current configuration
-  antenna config set <key> <value>           Update a config value (syncs relay_agent_model to gateway)
+  antenna config set <key> <value> [--no-restart]  Update a config value (syncs relay_agent_model to gateway; skip restart with --no-restart)
 
   antenna model show                         Show current relay model
-  antenna model set <model>                  Set relay model (syncs to gateway + restarts)
+  antenna model set <model> [--no-restart]   Set relay model (syncs to gateway + restarts; skip restart with --no-restart)
 
   antenna log [--tail <n>]                   View transaction log (default: last 20)
   antenna log --since <duration>             Show entries from last N minutes/hours
@@ -297,31 +309,97 @@ cmd_peers() {
 
     add)
       local id="" url="" token_file="" display_name="" peer_secret_file="" exchange_public_key=""
-      id="${1:?Usage: antenna peers add <id> --url <url> --token-file <path> [--peer-secret-file <path>] [--exchange-public-key <age-pub>]}"
+      local force="false" allow_insecure="false"
+      # REF-300: track which fields were explicitly supplied on this invocation so
+      # merge semantics only overwrite keys the user actually passed. Unspecified
+      # fields preserve prior values; unknown top-level fields (e.g. .self set by
+      # peer-exchange) are preserved automatically by the jq merge below.
+      local set_url="false" set_tf="false" set_dn="false" set_psf="false" set_xpk="false"
+      id="${1:?Usage: antenna peers add <id> --url <url> --token-file <path> [--peer-secret-file <path>] [--exchange-public-key <age-pub>] [--display-name <name>] [--force] [--allow-insecure]}"
       shift
       while [[ $# -gt 0 ]]; do
         case "$1" in
-          --url)              url="$2"; shift 2 ;;
-          --token-file)       token_file="$2"; shift 2 ;;
-          --peer-secret-file) peer_secret_file="$2"; shift 2 ;;
-          --exchange-public-key) exchange_public_key="$2"; shift 2 ;;
-          --display-name)     display_name="$2"; shift 2 ;;
+          --url)              url="$2"; set_url="true"; shift 2 ;;
+          --token-file)       token_file="$2"; set_tf="true"; shift 2 ;;
+          --peer-secret-file) peer_secret_file="$2"; set_psf="true"; shift 2 ;;
+          --exchange-public-key) exchange_public_key="$2"; set_xpk="true"; shift 2 ;;
+          --display-name)     display_name="$2"; set_dn="true"; shift 2 ;;
+          --force)            force="true"; shift ;;
+          --allow-insecure)   allow_insecure="true"; shift ;;
           *) echo "Unknown option: $1" >&2; exit 1 ;;
         esac
       done
-      if [[ -z "$url" || -z "$token_file" ]]; then
-        echo "Error: --url and --token-file are required" >&2; exit 1
+
+      # REF-300: detect existing entry and require explicit --force to update.
+      local peer_exists
+      peer_exists=$(jq -r --arg id "$id" 'has($id)' "$PEERS_FILE" 2>/dev/null || echo "false")
+      if [[ "$peer_exists" == "true" && "$force" != "true" ]]; then
+        echo "Error: peer '$id' already exists. Use --force to update (merges only specified fields), or 'antenna peers remove $id' first." >&2
+        exit 1
       fi
+
+      # New peers still require --url and --token-file; --force updates don't.
+      if [[ "$peer_exists" != "true" ]]; then
+        if [[ -z "$url" || -z "$token_file" ]]; then
+          echo "Error: --url and --token-file are required when adding a new peer" >&2; exit 1
+        fi
+      fi
+
+      # REF-1313: if --url was supplied, validate it before touching state.
+      # For pure --force updates that only change, say, --display-name, there's
+      # nothing to validate here. (If the existing .url is already corrupt from
+      # a pre-1313 install, antenna doctor will surface it.)
+      if [[ "$set_url" == "true" ]]; then
+        local _reason
+        if ! _reason="$(validate_peer_url "$url" "$allow_insecure" 2>&1 >/dev/null)"; then
+          echo "Error: --url is not valid: ${_reason:-invalid URL}" >&2
+          exit 1
+        fi
+      fi
+
       local tmp
       tmp=$(mktemp)
-      jq --arg id "$id" --arg url "$url" --arg tf "$token_file" --arg dn "$display_name" --arg psf "$peer_secret_file" --arg xpk "$exchange_public_key" \
-        '.[$id] = {url: $url, token_file: $tf, agentId: "antenna", display_name: (if $dn == "" then null else $dn end), peer_secret_file: (if $psf == "" then null else $psf end), exchange_public_key: (if $xpk == "" then null else $xpk end)}' \
+      # REF-300 / REF-303: merge rather than replace. Only fields explicitly
+      # supplied on this invocation overwrite existing values; unspecified
+      # fields preserve whatever is already in the registry (including unknown
+      # top-level peer-entry fields like .self).
+      jq \
+        --arg id "$id" \
+        --arg url "$url" \
+        --arg tf "$token_file" \
+        --arg dn "$display_name" \
+        --arg psf "$peer_secret_file" \
+        --arg xpk "$exchange_public_key" \
+        --arg set_url "$set_url" \
+        --arg set_tf "$set_tf" \
+        --arg set_dn "$set_dn" \
+        --arg set_psf "$set_psf" \
+        --arg set_xpk "$set_xpk" \
+        '
+          .[$id] = (
+            (.[$id] // {agentId: "antenna"})
+            | (if $set_url == "true" then .url = $url else . end)
+            | (if $set_tf  == "true" then .token_file = $tf else . end)
+            | (if $set_dn  == "true" then .display_name = (if $dn == "" then null else $dn end) else . end)
+            | (if $set_psf == "true" then .peer_secret_file = (if $psf == "" then null else $psf end) else . end)
+            | (if $set_xpk == "true" then .exchange_public_key = (if $xpk == "" then null else $xpk end) else . end)
+            | .agentId = (.agentId // "antenna")
+          )
+        ' \
         "$PEERS_FILE" > "$tmp" && mv "$tmp" "$PEERS_FILE"
-      echo "Added peer: $id ($url)"
-      if [[ -n "$peer_secret_file" ]]; then
+
+      if [[ "$peer_exists" == "true" ]]; then
+        echo "Updated peer: $id"
+        local merged_url
+        merged_url=$(jq -r --arg id "$id" '.[$id].url // ""' "$PEERS_FILE")
+        [[ -n "$merged_url" ]] && echo "  URL: $merged_url"
+      else
+        echo "Added peer: $id ($url)"
+      fi
+      if [[ "$set_psf" == "true" && -n "$peer_secret_file" ]]; then
         echo "Per-peer secret: $peer_secret_file"
       fi
-      if [[ -n "$exchange_public_key" ]]; then
+      if [[ "$set_xpk" == "true" && -n "$exchange_public_key" ]]; then
         echo "Exchange public key: set"
       fi
 
@@ -338,12 +416,10 @@ cmd_peers() {
       fi
 
       if [[ "$add_to_lists" == "true" ]]; then
-        local cfg_tmp
-        cfg_tmp=$(mktemp)
-        jq --arg p "$id" '
+        config_mutate '
           .allowed_inbound_peers = ((.allowed_inbound_peers // []) | if (index($p) | not) then . + [$p] else . end) |
           .allowed_outbound_peers = ((.allowed_outbound_peers // []) | if (index($p) | not) then . + [$p] else . end)
-        ' "$CONFIG_FILE" > "$cfg_tmp" && mv "$cfg_tmp" "$CONFIG_FILE"
+        ' --arg p "$id"
         echo "✓ Added $id to allowed_inbound_peers and allowed_outbound_peers"
       else
         echo "⚠ Peer added but NOT in allowlists. Run: antenna config set allowed_outbound_peers '[\"...\"]' to allow sending."
@@ -383,11 +459,76 @@ cmd_peers() {
       ;;
 
     remove)
-      local id="${1:?Usage: antenna peers remove <id>}"
+      # REF-1312: `antenna peers remove <id>` used to only delete the registry
+      # entry. Orphaned references in allowed_inbound_peers /
+      # allowed_outbound_peers / inbox_auto_approve_peers stayed behind, which
+      # looked fine but meant a future peer with the same id would inherit
+      # stale trust the operator thought they had cleared. The live 'nexus'
+      # cleanup on 2026-04-21 surfaced this. Fix: remove the peer AND prune
+      # every peer-scoped allowlist in one coordinated mutation. Session
+      # allowlists (allowed_inbound_sessions) are NOT pruned because they hold
+      # session strings, not peer ids.
+      local id="${1:?Usage: antenna peers remove <id>}"; shift || true
+
+      local peer_exists
+      peer_exists=$(jq -r --arg id "$id" 'has($id)' "$PEERS_FILE" 2>/dev/null || echo "false")
+
       local tmp
       tmp=$(mktemp)
       jq --arg id "$id" 'del(.[$id])' "$PEERS_FILE" > "$tmp" && mv "$tmp" "$PEERS_FILE"
-      echo "Removed peer: $id"
+
+      if [[ "$peer_exists" == "true" ]]; then
+        echo "Removed peer: $id"
+      else
+        echo "Peer '$id' was not in the registry; pruning allowlists anyway."
+      fi
+
+      # Prune the three peer-scoped allowlists. `config_mutate` is the
+      # idiomatic writer; it already handles atomic swap + gateway sync.
+      local pruned_any="false"
+      local before_in before_out before_auto after_in after_out after_auto
+      before_in=$(jq -r --arg p "$id" '.allowed_inbound_peers // [] | index($p)' "$CONFIG_FILE" 2>/dev/null || echo null)
+      before_out=$(jq -r --arg p "$id" '.allowed_outbound_peers // [] | index($p)' "$CONFIG_FILE" 2>/dev/null || echo null)
+      before_auto=$(jq -r --arg p "$id" '.inbox_auto_approve_peers // [] | index($p)' "$CONFIG_FILE" 2>/dev/null || echo null)
+
+      if [[ "$before_in" != "null" || "$before_out" != "null" || "$before_auto" != "null" ]]; then
+        config_mutate '
+          .allowed_inbound_peers     = ((.allowed_inbound_peers     // []) | map(select(. != $p))) |
+          .allowed_outbound_peers    = ((.allowed_outbound_peers    // []) | map(select(. != $p))) |
+          .inbox_auto_approve_peers  = ((.inbox_auto_approve_peers  // []) | map(select(. != $p)))
+        ' --arg p "$id"
+        pruned_any="true"
+      fi
+
+      if [[ "$pruned_any" == "true" ]]; then
+        [[ "$before_in"   != "null" ]] && echo "  - pruned from allowed_inbound_peers"
+        [[ "$before_out"  != "null" ]] && echo "  - pruned from allowed_outbound_peers"
+        [[ "$before_auto" != "null" ]] && echo "  - pruned from inbox_auto_approve_peers"
+      else
+        echo "  (no allowlist entries to prune)"
+      fi
+
+      # Intentional non-action: secret and token files are NOT deleted here.
+      # Deleting secrets is destructive and hard to undo, so we keep it behind
+      # an explicit operator action. Tell them what's left so the next step
+      # is obvious.
+      local token_file peer_secret_file
+      token_file=$(jq -r --arg id "$id" '.[$id].token_file // empty' "$PEERS_FILE" 2>/dev/null || true)
+      peer_secret_file=$(jq -r --arg id "$id" '.[$id].peer_secret_file // empty' "$PEERS_FILE" 2>/dev/null || true)
+      # (They won't be in $PEERS_FILE anymore because we already deleted the
+      # entry above; walk the conventional paths instead.)
+      local residual=()
+      for candidate in \
+        "$SKILL_DIR/secrets/hooks_token_${id}" \
+        "$SKILL_DIR/secrets/antenna-peer-${id}.secret"
+      do
+        [[ -e "$candidate" ]] && residual+=("$candidate")
+      done
+      if (( ${#residual[@]} > 0 )); then
+        echo "  Leftover secret files (not deleted):"
+        for f in "${residual[@]}"; do echo "    $f"; done
+        echo "  Remove them manually if you're sure you won't re-pair: rm -i ${residual[*]}"
+      fi
       ;;
 
     test)
@@ -430,7 +571,12 @@ cmd_peers() {
   esac
 }
 
-_sync_relay_model_to_gateway() {
+# _write_relay_model_to_gateway_config <model>
+#   Updates the antenna agent's .model field in openclaw.json.
+#   Returns 0 on successful write or when the sync is legitimately skipped
+#   (missing gateway config / antenna agent not registered). Returns non-zero
+#   only on unexpected failures. Never restarts the gateway.
+_write_relay_model_to_gateway_config() {
   local new_model="$1"
   local gateway_cfg=""
   for candidate in "$HOME/.openclaw/openclaw.json" "/home/$USER/.openclaw/openclaw.json"; do
@@ -442,14 +588,14 @@ _sync_relay_model_to_gateway() {
 
   if [[ -z "$gateway_cfg" ]]; then
     echo "⚠  Gateway config not found — skipping gateway sync. Update manually."
-    return
+    return 0
   fi
 
   local has_antenna
   has_antenna=$(jq '[.agents.list // [] | .[] | select(.id == "antenna")] | length' "$gateway_cfg" 2>/dev/null || echo "0")
   if [[ "$has_antenna" -eq 0 ]]; then
     echo "⚠  Antenna agent not registered in gateway config ($gateway_cfg) — skipping gateway sync."
-    return
+    return 0
   fi
 
   local tmp
@@ -458,7 +604,12 @@ _sync_relay_model_to_gateway() {
     .agents.list = [.agents.list[] | if .id == "antenna" then .model = $model else . end]
   ' "$gateway_cfg" > "$tmp" && mv "$tmp" "$gateway_cfg"
   echo "✓  Updated gateway config: antenna agent model → $new_model"
+}
 
+# _restart_gateway
+#   Restarts the OpenClaw gateway if `openclaw` is on PATH, otherwise prints
+#   a reminder to do it manually. Safe to call on its own; no config writes.
+_restart_gateway() {
   if command -v openclaw &>/dev/null 2>&1; then
     echo "↻  Restarting gateway..."
     openclaw gateway restart
@@ -468,13 +619,39 @@ _sync_relay_model_to_gateway() {
   fi
 }
 
+# _sync_relay_model_to_gateway <model> [--no-restart]
+#   Backward-compatible wrapper: writes the relay model into gateway config
+#   and restarts the gateway by default. Pass --no-restart for rapid / batched
+#   callers (e.g. antenna-model-test.sh) that want to bounce the gateway once
+#   at the top instead of per-mutation.
+_sync_relay_model_to_gateway() {
+  local new_model="$1"
+  local restart=true
+  if [[ "${2:-}" == "--no-restart" ]]; then
+    restart=false
+  fi
+
+  _write_relay_model_to_gateway_config "$new_model"
+  if [[ "$restart" == "true" ]]; then
+    _restart_gateway
+  fi
+}
+
+# REF-2000: `antenna bundle verify <file>` — operator-facing shape/freshness
+# check for received .age.txt bootstrap bundles. Read-only; never writes to
+# antenna-peers.json or antenna-config.json. Delegates to scripts/antenna-
+# bundle.sh so the implementation lives with its own regression test.
+cmd_bundle() {
+  bash "$SCRIPTS_DIR/antenna-bundle.sh" "$@"
+}
+
 cmd_sessions() {
   local subcmd="${1:-list}"
   shift || true
 
   local key="allowed_inbound_sessions"
   local local_agent
-  local_agent=$(jq -r '.local_agent_id // "agent"' "$CONFIG_FILE" 2>/dev/null || echo "agent")
+  local_agent=$(config_local_agent_id)
   local defaults="[\"agent:${local_agent}:main\",\"agent:${local_agent}:antenna\"]"
 
   # Normalize a session name to a full key (expand bare names)
@@ -518,10 +695,9 @@ cmd_sessions() {
           skipped=$((skipped + 1))
           continue
         fi
-        local tmp
-        tmp=$(mktemp)
-        jq --argjson d "$defaults" --arg key "$key" --arg n "$name" \
-          '.[$key] = ((.[$key] // $d) + [$n])' "$CONFIG_FILE" > "$tmp" && mv "$tmp" "$CONFIG_FILE"
+        config_mutate \
+          '.[$key] = ((.[$key] // $d) + [$n])' \
+          --argjson d "$defaults" --arg key "$key" --arg n "$name"
         echo "  ✓  Added '$name'"
         added=$((added + 1))
       done
@@ -579,10 +755,9 @@ cmd_sessions() {
           done
         fi
 
-        local tmp
-        tmp=$(mktemp)
-        jq --argjson d "$defaults" --arg key "$key" --arg n "$name" \
-          '.[$key] = ((.[$key] // $d) | map(select(. != $n)))' "$CONFIG_FILE" > "$tmp" && mv "$tmp" "$CONFIG_FILE"
+        config_mutate \
+          '.[$key] = ((.[$key] // $d) | map(select(. != $n)))' \
+          --argjson d "$defaults" --arg key "$key" --arg n "$name"
         echo "  ✓  Removed '$name'"
         removed=$((removed + 1))
       done
@@ -615,25 +790,29 @@ cmd_config() {
       ;;
 
     set)
-      local key="${1:?Usage: antenna config set <key> <value>}"
-      local value="${2:?Usage: antenna config set <key> <value>}"
-      local tmp
-      tmp=$(mktemp)
+      local key="${1:?Usage: antenna config set <key> <value> [--no-restart]}"
+      local value="${2:?Usage: antenna config set <key> <value> [--no-restart]}"
+      shift 2 || true
 
-      # Try to parse value as JSON (number, bool, array); fall back to string
-      if echo "$value" | jq -e '.' &>/dev/null; then
-        jq --arg k "$key" --argjson v "$value" '.[$k] = $v' "$CONFIG_FILE" > "$tmp" 2>/dev/null \
-          || jq --arg k "$key" --arg v "$value" '.[$k] = $v' "$CONFIG_FILE" > "$tmp"
-      else
-        jq --arg k "$key" --arg v "$value" '.[$k] = $v' "$CONFIG_FILE" > "$tmp"
-      fi
+      local no_restart=false
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --no-restart) no_restart=true; shift ;;
+          *) echo "Unknown option: $1" >&2; exit 1 ;;
+        esac
+      done
 
-      mv "$tmp" "$CONFIG_FILE"
+      config_set_field "$key" "$value"
       echo "Set $key = $value"
 
-      # When setting the relay model, also sync to gateway config and restart
+      # When setting the relay model, also sync to gateway config (and
+      # restart unless --no-restart was passed, for rapid batched callers).
       if [[ "$key" == "relay_agent_model" ]]; then
-        _sync_relay_model_to_gateway "$value"
+        if [[ "$no_restart" == "true" ]]; then
+          _sync_relay_model_to_gateway "$value" --no-restart
+        else
+          _sync_relay_model_to_gateway "$value"
+        fi
       fi
       ;;
 
@@ -652,13 +831,15 @@ cmd_model() {
   case "$subcmd" in
     show)
       local model
-      model=$(jq -r '.relay_agent_model // "unset"' "$CONFIG_FILE" 2>/dev/null || echo "unset")
+      model=$(config_relay_agent_model)
       echo "Relay model: $model"
       ;;
 
     set)
-      local model="${1:?Usage: antenna model set <model>}"
-      cmd_config set relay_agent_model "$model"
+      local model="${1:?Usage: antenna model set <model> [--no-restart]}"
+      shift || true
+      # Pass remaining flags through to config set (supports --no-restart).
+      cmd_config set relay_agent_model "$model" "$@"
       ;;
 
     *)
@@ -731,22 +912,22 @@ cmd_status() {
 
   # Config summary
   local model max_len mcs
-  model=$(jq -r '.relay_agent_model // "unset"' "$CONFIG_FILE" 2>/dev/null || echo "unset")
-  max_len=$(jq -r '.max_message_length // 10000' "$CONFIG_FILE" 2>/dev/null || echo "10000")
-  mcs=$(jq -r '.mcs_enabled // false' "$CONFIG_FILE" 2>/dev/null || echo "false")
+  model=$(config_relay_agent_model)
+  max_len=$(config_max_message_length)
+  mcs=$(config_mcs_enabled)
   echo "Relay model: $model"
   echo "Max message: $max_len chars"
   echo "MCS: $mcs"
 
   # Rate limit config
   local rl_peer rl_global
-  rl_peer=$(jq -r '.rate_limit.per_peer_per_minute // 10' "$CONFIG_FILE" 2>/dev/null || echo "10")
-  rl_global=$(jq -r '.rate_limit.global_per_minute // 30' "$CONFIG_FILE" 2>/dev/null || echo "30")
+  rl_peer=$(config_rate_limit_per_peer)
+  rl_global=$(config_rate_limit_global)
   echo "Rate limit: ${rl_peer}/min per peer, ${rl_global}/min global"
 
   # Session allowlist
   local sessions local_agent
-  local_agent=$(jq -r '.local_agent_id // "agent"' "$CONFIG_FILE" 2>/dev/null || echo "agent")
+  local_agent=$(config_local_agent_id)
   sessions=$(jq -r --arg main "agent:'"$local_agent"':main" --arg antenna "agent:'"$local_agent"':antenna" '.allowed_inbound_sessions // [$main,$antenna] | join(", ")' "$CONFIG_FILE" 2>/dev/null || echo "agent:${local_agent}:main, agent:${local_agent}:antenna")
   echo "Session allowlist: $sessions"
 
@@ -904,6 +1085,7 @@ case "$COMMAND" in
   send)     cmd_send "$@" ;;
   msg)      cmd_msg "$@" ;;
   peers)    cmd_peers "$@" ;;
+  bundle)   cmd_bundle "$@" ;;
   inbox)    cmd_inbox "$@" ;;
   sessions) cmd_sessions "$@" ;;
   config)   cmd_config "$@" ;;

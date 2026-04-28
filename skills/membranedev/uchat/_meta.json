@@ -3,9 +3,15 @@
   "slug": "uchat",
   "displayName": "Uchat",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495060313,
-    "commit": "https://github.com/openclaw/skills/commit/06d06abc9371bc174cea3e43094e7adcf8074e0d"
+    "version": "1.0.1",
+    "publishedAt": 1776890644989,
+    "commit": "https://github.com/openclaw/skills/commit/afb22a8fd376c4e177245ace21414b7645e1f438"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495060313,
+      "commit": "https://github.com/openclaw/skills/commit/06d06abc9371bc174cea3e43094e7adcf8074e0d"
+    }
+  ]
 }

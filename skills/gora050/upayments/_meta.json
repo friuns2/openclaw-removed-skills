@@ -3,9 +3,15 @@
   "slug": "upayments",
   "displayName": "Upayments",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775513918134,
-    "commit": "https://github.com/openclaw/skills/commit/08a7a3cd7fcd701628c71b740f97d7343a0f2be2"
+    "version": "1.0.1",
+    "publishedAt": 1776899031929,
+    "commit": "https://github.com/openclaw/skills/commit/6ee2bffed8d3e523519a743bb104a9d8ba9a8444"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775513918134,
+      "commit": "https://github.com/openclaw/skills/commit/08a7a3cd7fcd701628c71b740f97d7343a0f2be2"
+    }
+  ]
 }

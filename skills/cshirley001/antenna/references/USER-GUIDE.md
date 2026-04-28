@@ -2,7 +2,7 @@
 
 **Cross-host messaging for OpenClaw - your agents, their agents, any session, any host.**
 
-*Version 1.2.20 · An AgentSkill from the OpenClaw community*
+*Version 1.2.22 · An AgentSkill from the OpenClaw community*
 
 ---
 
@@ -227,13 +227,15 @@ Antenna takes security seriously. (The lobster jokes? Less seriously.) Trust is 
 |-------|-------------|
 | **HTTPS endpoint** | All traffic travels over encrypted connections. Tailscale Funnel, reverse proxy, VPS - whatever gets you a reachable HTTPS URL. |
 | **Bearer token** | Every webhook request requires a shared bearer token. No token, no entry. |
-| **Per-peer identity secret** | Each peer has a unique 64-character hex secret. Senders include it; receivers verify it. Impersonation doesn't work here. |
+| **Per-peer identity secret** | Each peer has a unique 64-character hex secret. Senders include it; receivers verify it. Impersonation doesn't work here. Secret verification uses constant-time comparison to eliminate timing side-channels. |
 | **Peer allowlists** | Explicit inbound and outbound peer lists. If you're not on the guest list, you're not getting in. |
 | **Session allowlists** | Inbound messages can only target approved session patterns. No sneaking into restricted sessions. |
+| **Envelope marker guard** | Messages whose bodies or header values contain the envelope markers `[ANTENNA_RELAY]` / `[/ANTENNA_RELAY]` are rejected as malformed. Prevents envelope smuggling and fake-header injection. |
+| **Message freshness window** | Each message carries a `timestamp:`. Stale messages (default: older than 5 minutes) and future-dated messages (default: more than 60 seconds ahead) are rejected. Tunable via `.security.max_message_age_seconds` and `.security.max_future_skew_seconds` in `antenna-config.json`. |
 | **Rate limiting** | Per-peer and global throttles prevent relay saturation and API budget burn. |
 | **Untrusted-input framing** | Every relayed message includes a security notice so receiving agents know the content is external. |
 | **Log sanitization** | Peer-supplied values are stripped of control characters before logging. |
-| **File permission audit** | `antenna status` checks token and secret file permissions and warns if anything's too open. |
+| **File permission audit** | `antenna status` checks token and secret file permissions and warns if anything's too open. Relay temp files are created with `umask 077`, chmod 0600, and shredded before unlink on cleanup. |
 
 ### Bootstrap Trust with Encrypted Exchange
 
@@ -265,9 +267,9 @@ Your primary agent's ID (e.g., `lobster`, `betty`). This is used in full session
 
 ### Step 4: Relay Model
 
-The LLM that powers the relay agent. Pick something lightweight and fast - the relay is a courier, not a philosopher. `openai/gpt-5.4` is a solid default. Use a full `provider/model` ID for portability.
+The LLM that powers the relay agent. Pick something lightweight and fast - the relay is a courier, not a philosopher. `openai/gpt-5.4-nano` is the current recommended default based on the current three-way comparison run. Use a full `provider/model` ID for portability.
 
-> **Use case:** Running on a budget? `openai/gpt-5.4-nano-2026-03-17` passes all tests and costs a fraction. Running Antenna on a local box with Ollama? Point it at your local model.
+> **Use case:** Want the best current relay-duty speed/fit? `openai/gpt-5.4-nano` is the recommended default. Prefer a pinned version for stricter reproducibility? `openai/gpt-5.4-nano-2026-03-17` has also passed the suite cleanly. Running Antenna on a local box with Ollama? Point it at your local model.
 
 ### Step 5: Inbox Mode
 
@@ -276,6 +278,8 @@ Optional. When enabled, inbound messages from non-trusted peers are queued for y
 ### Step 6: Hooks Token
 
 The bearer token that protects your webhook endpoint. Setup will try to auto-detect it from your gateway config. If it's not there, it'll offer to generate one for you. Either way, you won't need to hunt for it.
+
+> **Safe to rerun.** If you already have a gateway `hooks.token` set for other consumers, setup preserves it instead of overwriting. Antenna only writes a new token when one isn't already present.
 
 ### After the Questions
 
@@ -288,6 +292,10 @@ Setup automatically:
 - Symlinks the `antenna` CLI to your PATH
 
 Then it offers to launch the pairing wizard.
+
+> **Expert operators - rerunning `antenna setup`.** Setup is idempotent and safe to rerun (e.g., after a `clawhub update`). It forces `sandbox.mode = "off"` on the Antenna agent and seeds a default `tools.deny` list only when one isn't already present. If you've customized `tools.exec` on the Antenna agent for your own reasons, setup now preserves those overrides on rerun instead of silently wiping them. The default advice is still to leave `tools.exec` alone - explicit overrides can cause silent relay failure - but the choice is yours to keep.
+
+> **Legacy secret export refuses non-TTY output.** The legacy `antenna peers exchange <peer> --export` path won't print runtime identity secrets to a non-TTY stdout (pipes, redirections, captured output). Use the encrypted `antenna peers exchange initiate` flow for any automated or remote operator handoff.
 
 ---
 
@@ -333,10 +341,13 @@ Happy messaging! The ocean just got smaller. 🦞 📡
 If you prefer to do things by hand (or if age isn't available):
 
 ```bash
-# Add peer entry
+# Add peer entry (first time only)
 antenna peers add myserver --url https://myserver.example.com --token-file /path/to/token
 
-# Legacy secret exchange
+# Update an existing peer - requires --force, merges only the fields you supply
+antenna peers add myserver --url https://myserver.example.com:8443 --force
+
+# Legacy secret exchange (TTY only - will refuse to pipe secrets to non-terminals)
 antenna peers exchange myserver --legacy
 
 # Test
@@ -346,11 +357,27 @@ antenna peers test myserver
 antenna msg myserver "Hello!"
 ```
 
+> **Why `--force` for existing peers?** Without it, `antenna peers add` refuses to touch a peer you've already paired with - so a stray second invocation can't silently clobber your trust material. With `--force`, only the fields you explicitly pass are updated; everything else (including the peer's exchange public key, identity secret file, display name, and any `self` / unknown-future-field metadata from encrypted exchange) is preserved.
+
 ### After Pairing
 
 Your peer is now in your `antenna-peers.json` with their endpoint, tokens, secrets, and exchange key. Messages flow in both directions. You can pair with as many peers as you want - each one gets its own trust material.
 
 > **Use case:** You pair your home server with your laptop *and* with a colleague's server. The home server can message either one directly. Your colleague can message your server but not your laptop (unless you pair those too). Trust is per-peer, not transitive.
+
+---
+
+## Bundle Exchange & Expiry
+
+Encrypted bootstrap bundles travel through `age` so nothing sensitive hits disk or the wire in the clear:
+
+- **Export never writes plaintext.** `antenna peers exchange initiate` / `reply` streams bundle JSON directly from `jq` into `age` - no plaintext temp file is ever materialized on your side.
+- **Import cleans up immediately.** The decrypted plaintext JSON gets cleaned up on normal return, validation failure, preview failure, write failure, or `Ctrl-C` (SIGINT/SIGTERM). Sensitive fields (`from_identity_secret`, `from_hooks_token`, `from_exchange_pubkey`) never outlive the import step.
+- **Expired bundles are refused.** Bundles carry an expiry timestamp and `antenna peers exchange import` refuses material past its expiry. If you genuinely need to recover from an ancient bundle (disaster-recovery only), pass `--force-expired` to override.
+- **Verify before you import.** `antenna bundle verify <file>` is a read-only dry run. It decrypts the bundle in place, checks shape / endpoint URL / freshness, and prints a safe summary (peer ID, display name, endpoint, generated/expiry, and presence booleans for the hooks token and identity secret — never the raw values). It does not write to `antenna-peers.json` or `antenna-config.json`. Useful flags: `--json` for machine-readable output, `--force-expired` to inspect a past-expiry bundle without importing, `--no-decrypt` if you already have the decrypted JSON. Great for "this bundle came in over an unclear channel, is it even addressed to me?" before committing to `peers exchange import`.
+- **Email send uses your Himalaya config.** `--send-email` doesn't make up a `From:` address. It reads the sender email directly from your Himalaya TOML config (`${HIMALAYA_CONFIG:-~/.config/himalaya/config.toml}`, `[accounts.<name>] email = "..."`) and hard-fails if it can't resolve one. Pass `--account <name>` to pick a specific configured account; interactive prompts let you confirm or switch accounts but never accept a free-text `From:` override.
+
+> **Use case:** You want Antenna to email bootstrap bundles from your personal Gmail but `antenna peers exchange pubkey --email ... --send-email` reports `could not resolve email for account 'personal'`. Check your Himalaya config (`himalaya account list -o json` tells you the account name; the TOML file tells you what email it's bound to). Add `email = "you@example.com"` under `[accounts.personal]` and retry.
 
 ---
 
@@ -451,7 +478,8 @@ Or set up a cron job for automated handling of trusted peers.
 | `antenna pair` | Interactive pairing wizard |
 | `antenna pair --peer-id myserver` | Start wizard with peer ID pre-filled |
 | `antenna peers list` | Show all known peers |
-| `antenna peers add <id> --url <url> --token-file <path>` | Register a peer manually |
+| `antenna peers add <id> --url <url> --token-file <path>` | Register a new peer manually |
+| `antenna peers add <id> --url <url> --force` | Update fields on an existing peer (merges only the flags you pass) |
 | `antenna peers remove <id>` | Remove a peer |
 | `antenna peers test <id>` | Test connectivity to a peer |
 
@@ -461,8 +489,15 @@ Or set up a cron job for automated handling of trusted peers.
 |---------|-------------|
 | `antenna peers exchange keygen` | Generate your age exchange keypair |
 | `antenna peers exchange pubkey [--bare]` | Show your public key |
+| `antenna peers exchange pubkey --email <addr> --send-email [--account <name>]` | Email your pubkey via Himalaya (account must have `email = "..."` in TOML) |
 | `antenna peers exchange initiate <peer> --pubkey <key>` | Create an encrypted bootstrap bundle |
-| `antenna peers exchange import <file>` | Import and decrypt a peer's bundle |
+| `antenna peers exchange initiate <peer> ... --send-email [--account <name>]` | Also deliver bundle inline via Himalaya |
+| `antenna bundle verify <file>` | Read-only: decrypt & sanity-check a bootstrap bundle without importing |
+| `antenna bundle verify <file> --json` | Machine-readable verdict (ok, reasons, warnings, summary) |
+| `antenna bundle verify <file> --force-expired` | Inspect a past-expiry bundle without importing |
+| `antenna bundle verify <file> --no-decrypt` | Treat `<file>` as already-decrypted bundle JSON |
+| `antenna peers exchange import <file>` | Import and decrypt a peer's bundle (refuses expired bundles) |
+| `antenna peers exchange import <file> --force-expired` | Disaster-recovery override: import despite expiry |
 | `antenna peers exchange reply <peer>` | Create a reply bundle after importing |
 
 ### Inbox
@@ -482,18 +517,20 @@ Or set up a cron job for automated handling of trusted peers.
 | Command | What It Does |
 |---------|-------------|
 | `antenna status` | Overview: host, model, peers, security audit |
-| `antenna doctor` | Health check (config, gateway, permissions) |
+| `antenna doctor` | Health check (config, gateway, permissions, drift) |
 | `antenna log [--tail N]` | View the transaction log |
 
 ### Testing
 
 | Command | What It Does |
 |---------|-------------|
-| `antenna test <model>` | Live smoke test with a specific relay model |
+| `antenna test <model>` | Live smoke test with a specific relay model (nonce-scoped PASS and fast-fail) |
 | `antenna test-suite --tier A` | Run deterministic script validation only |
 | `antenna test-suite --model <model>` | Full three-tier test for one model |
 | `antenna test-suite --models "a,b,c"` | Side-by-side comparison (up to 6 models) |
 | `antenna test-suite --report` | Save structured report to `test-results/` |
+
+Model tests generate a per-run `TEST_NONCE` and match both success and pre-delivery rejections by that nonce, so parallel or historical runs never contaminate each other's results and auth/rate-limit failures return a verdict promptly instead of waiting for the full timeout. Tests drive gateway config through the CLI/helper path with a single batched restart rather than restarting per operation.
 
 ### Configuration
 
@@ -557,9 +594,18 @@ OpenAI, Codex, OpenRouter, Nvidia, Ollama, Anthropic, and Google Gemini. Seven p
 | Relay rejected: unknown sender | Peer not in inbound allowlist | Add peer to `allowed_inbound_peers` in receiver's config |
 | Relay rejected: session not allowed | Target session not in allowlist | Add full session key to `allowed_inbound_sessions` (e.g. `antenna sessions add "agent:betty:antv3"`) |
 | Encrypted exchange fails | `age` not installed | Install `age`: `apt install age` or see [age docs](https://github.com/FiloSottile/age) |
-| Email send fails | `himalaya` not installed or OAuth expired | Use `gog gmail send --attach` as fallback, or send the bundle file manually |
-| Repeated approval prompts | Stale exec overrides on Antenna agent | **Remove** any `tools.exec.security` or `tools.exec.ask` from the Antenna agent registration - explicit exec overrides cause silent relay failure (fixed in v1.2.14). Only `sandbox: { mode: "off" }` is needed |
+| `Email send fails: could not resolve email for account` | Selected Himalaya account has no `email` in its TOML config | Edit `${HIMALAYA_CONFIG:-~/.config/himalaya/config.toml}` and add `email = "you@example.com"` under `[accounts.<name>]`, then retry. Alternatively pass `--account <other>` to pick a configured account that does have `email` set |
+| `Email send fails: himalaya not installed` | Himalaya CLI missing | Install `himalaya`, or fall back to `gog gmail send --attach` / send the bundle file manually |
+| `Bundle expired - refusing import` | Bundle is past its expiry timestamp | Ask the peer for a fresh bundle. Only as a last resort, pass `--force-expired` to `antenna peers exchange import` |
+| `Relay rejected: timestamp out of range (stale\|future)` | Clock skew between peers exceeds freshness window | Sync clocks (`timedatectl` / NTP). If you need a wider tolerance, tune `.security.max_message_age_seconds` and `.security.max_future_skew_seconds` in `antenna-config.json` |
+| `Relay rejected: marker in body\|headers` | Message content literally contains `[ANTENNA_RELAY]` / `[/ANTENNA_RELAY]` | This is the envelope-smuggling guard working as intended. Rephrase the content or encode the markers (e.g., swap `[` for `(` ) before sending |
+| `self-id not configured - run antenna setup` | `antenna-config.json` is missing the host identity | Run `antenna setup`. The sender no longer falls back to `$(hostname)` - it fails fast so you can't accidentally impersonate another host from an unconfigured clone |
+| `Legacy export refused - not a TTY` | `antenna peers exchange <peer> --export` was piped or redirected | Run it directly in an interactive terminal, or switch to `antenna peers exchange initiate` for any automated/remote handoff |
+| `Gateway hooks.token changed unexpectedly after antenna setup` | Should not happen on current versions | Setup now preserves an existing `hooks.token` used by other consumers. If you see it get overwritten, file a bug |
+| Repeated approval prompts | Stale exec overrides on Antenna agent | **Default advice:** remove any `tools.exec.security` or `tools.exec.ask` from the Antenna agent registration - explicit exec overrides cause silent relay failure (fixed in v1.2.14). `antenna setup` reruns preserve your `tools.exec` overrides if you've intentionally set them, so the default advice is a starting point, not a forced wipe |
 | Gateway won't start after setup | Config syntax error | Run `antenna doctor` to validate |
+| `antenna doctor` warns *orphan peer references in config allowlists* | Peer was removed before REF-1312, or allowlist edited by hand | Run `antenna peers remove <stale-id>` on any listed orphan (REF-1312 prunes its allowlist entries), or remove the IDs from `antenna-config.json` directly. Section 1b is warn-only; it will not block operations |
+| `antenna doctor` warns *orphan secret file* / *stale backup file* / *secrets/ dir is not 700* | Files in `secrets/` no longer match any registered peer, or permissions drifted | Move orphan files to `secrets.retired/` or delete, rotate/remove `.bak*` leftovers, and `chmod 700 secrets/` / `chmod 600 secrets/<file>`. Section 6b is warn-only — these files cannot authenticate unregistered peers, but they are real drift/leak-surface signals |
 
 ### The Nuclear Option
 
@@ -634,11 +680,17 @@ No. Your peer list is local to your installation. Peers only know about your hos
 **Q: What's the difference between `antenna msg` and `antenna send`?**
 `antenna msg` is the everyday shorthand. `antenna send` supports additional options like `--stdin`, `--dry-run`, and structured flags. They use the same underlying send script.
 
+**Q: Can I override the `From:` address when emailing a bootstrap bundle?**
+No free-text override by design. The sender email is resolved from your Himalaya TOML config (`[accounts.<name>] email = "..."`) and Antenna hard-fails if it can't find one. Pass `--account <name>` to pick a specific configured account; interactive flows confirm or switch accounts but never accept arbitrary `From:` text. This prevents typosquatting and half-configured Himalaya accounts from silently shipping as `antenna@localhost`.
+
+**Q: What happens if a clock is drifting between two peers?**
+Defaults allow up to 5 minutes of age and 60 seconds of future skew per message. Outside that, the receiver rejects with `timestamp out of range`. Keep hosts synced (NTP / `systemd-timesyncd`), or widen `.security.max_message_age_seconds` / `.security.max_future_skew_seconds` in `antenna-config.json` if you have a legitimate reason.
+
 ---
 
 ## What's Next - The Lobster Roadmap
 
-Antenna v1.2.20 is the foundation. Here’s what’s on the horizon:
+Antenna v1.2.22 is the prepared next release and rolls up the post-v1.2.20 hardening sweep. Here’s what’s on the horizon:
 
 - **📡 Clusters & Broadcasts** - Named groups of peers; send one message to many hosts. Announce a security patch to your whole lab cluster in one command. Broadcast a best practice to every peer on your reef.
 - **🦞🆘 Helping Claw** - Community help requests broadcast to willing peers. Ask the reef a question; peers with `helping_claw` enabled answer; everyone else politely bounces. StackOverflow meets ham radio. The more lobsters on the reef, the smarter the whole ecosystem gets.

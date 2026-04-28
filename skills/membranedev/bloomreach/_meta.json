@@ -3,9 +3,15 @@
   "slug": "bloomreach",
   "displayName": "Bloomreach",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495094096,
-    "commit": "https://github.com/openclaw/skills/commit/6dc908482c434962aadd8e4b5c9dc45a5f64d347"
+    "version": "1.0.1",
+    "publishedAt": 1776890745742,
+    "commit": "https://github.com/openclaw/skills/commit/a6de91570ab06863b1676cebc8868ed66501279b"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495094096,
+      "commit": "https://github.com/openclaw/skills/commit/6dc908482c434962aadd8e4b5c9dc45a5f64d347"
+    }
+  ]
 }

@@ -3,9 +3,15 @@
   "slug": "expensify",
   "displayName": "Expensify",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775466392297,
-    "commit": "https://github.com/openclaw/skills/commit/ac66be03c391b0e4fb5e5464f4cf4b139797ac5c"
+    "version": "1.0.1",
+    "publishedAt": 1776892828645,
+    "commit": "https://github.com/openclaw/skills/commit/78354ae0a1f2d1543dc0935a67dc6a46d03080e1"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775466392297,
+      "commit": "https://github.com/openclaw/skills/commit/ac66be03c391b0e4fb5e5464f4cf4b139797ac5c"
+    }
+  ]
 }

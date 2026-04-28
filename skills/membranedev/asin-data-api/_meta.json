@@ -3,9 +3,15 @@
   "slug": "asin-data-api",
   "displayName": "Asin Data Api",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775487879152,
-    "commit": "https://github.com/openclaw/skills/commit/9fa36e3e4ecf8a7b9eb5fddbefadf9c3c1193b64"
+    "version": "1.0.1",
+    "publishedAt": 1776890491284,
+    "commit": "https://github.com/openclaw/skills/commit/10aedd2d2aae25994f224295e5dd08ee5e4e686c"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775487879152,
+      "commit": "https://github.com/openclaw/skills/commit/9fa36e3e4ecf8a7b9eb5fddbefadf9c3c1193b64"
+    }
+  ]
 }

@@ -3,9 +3,15 @@
   "slug": "stripe-payment-links",
   "displayName": "Stripe Payment Links",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495258532,
-    "commit": "https://github.com/openclaw/skills/commit/447b38f0080634ce327a25e85b4d745900a9e59e"
+    "version": "1.0.1",
+    "publishedAt": 1776893251319,
+    "commit": "https://github.com/openclaw/skills/commit/0a7efd2eff52df96fafbcf8c492d1afc84dd7bf9"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495258532,
+      "commit": "https://github.com/openclaw/skills/commit/447b38f0080634ce327a25e85b4d745900a9e59e"
+    }
+  ]
 }

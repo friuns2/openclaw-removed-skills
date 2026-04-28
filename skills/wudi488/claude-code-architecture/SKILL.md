@@ -1,194 +1,141 @@
-# Claude Code 架构设计模式
+---
+name: claude-code-architecture
+description: 基于 Claude Code 源码分析提炼的 AI Agent 架构设计模式。当你需要设计/重构 Agent 工具系统、安全门控、上下文压缩、任务编排时使用。
+version: 2.0.1
+author: di
+tags: [agent, architecture, harness, safety, tool-system]
+---
 
-> 从源码泄露事件（2026年3月31日，512,000行TypeScript）学到的设计思路
+# AI Agent 架构设计模式
 
-## 背景
-
-2026年3月31日，Anthropic 的 Claude Code 通过 npm 包的 source map 文件意外泄露了完整源码。这是第二次泄露（同年2月24日也曾发生）。
-
-源码揭示了 Anthropic 内部构建 AI 编程工具的核心架构，这些设计模式对构建类似系统有重要参考价值。
-
-## 核心发现
-
-**AI 编程工具的护城河不是模型，而是 harness（框架）**
-
-模型能力固然重要，但真正的竞争优势在于：
-- 任务编排能力
-- 工具系统设计
-- 上下文管理
-- 安全机制
+> 从 Claude Code 源码分析 + OpenAI Agents SDK 提炼的实战设计模式
+> 触发：设计Agent工具系统 / 实现安全门控 / 优化上下文管理 / 搭建多Agent编排
 
 ---
 
-## 架构设计原则
+## ⚡ 快速使用
 
-### 1. Initiative 与 Execution 分离
+当 agent 需要进行架构设计时，按场景选择模板：
 
-将"想做什么"（计划）与"怎么做"（执行）解耦。
+| 场景 | 对应模板 | 触发词 |
+|------|----------|--------|
+| 需要工具权限控制 | 模板 A：权限门控 | "生成权限门控代码" |
+| Token 消耗太大 | 模板 B：工具按需加载 | "实现工具按需加载" |
+| 上下文快满了 | 模板 C：上下文压缩 | "生成上下文压缩方案" |
+| 多工具并发 | 模板 D：读写分离 | "实现读写分离调度" |
 
-```
-┌─────────────────┐     ┌─────────────────┐
-│   Initiative    │────▶│   Execution     │
-│   (规划层)       │     │   (执行层)       │
-└─────────────────┘     └─────────────────┘
-```
-
-**好处：**
-- 一个 Master Agent 可以指挥多个 Worker Agent 并行执行
-- 任务规划与具体操作解耦，更灵活
-- 便于实现多Agent协作
+Agent 应按当前任务自动选择模板，生成定制代码并写入目标项目。
 
 ---
 
-### 2. 读写分离并发
+## 🏛️ 核心原则
 
-- **只读操作**：可以并发执行，互不阻塞
-- **写操作**：必须排队，确保数据一致性
+**护城河不是模型，是 harness（框架）** — 任务编排、工具系统、上下文管理、安全机制
 
-```typescript
-// 示例逻辑
-if (operation.isRead) {
-  await Promise.all(parallelOperations)
-} else {
-  await serializeOperations()  // 写操作排队
-}
-```
+### 七大设计模式
 
-**安全默认：**
-- 工具没有声明只读属性 = **默认危险**
-- 需要显式权限确认才能执行
+| # | 模式 | 一句话 |
+|---|------|--------|
+| 1 | Initiative/Execution 分离 | 规划层与执行层解耦 |
+| 2 | 读写分离并发 | 只读并行，写入排队 |
+| 3 | 工具按需加载 | 先给轻量索引，选中后再加载完整参数 |
+| 4 | 记忆不记代码 | 代码事实实时从源码读取 |
+| 5 | 五级上下文压缩 | 剪裁→精简→折叠→AI总结→强制保留 |
+| 6 | 插件式工具架构 | 每个工具独立权限+验证+格式化 |
+| 7 | Fail-closed 安全 | 默认拒绝，显式授权 |
 
 ---
 
-### 3. 工具按需加载
-
-**不是一次性加载所有工具**，而是：
-
-1. 先给模型简版工具描述（名称+用途）
-2. 模型选中某个工具后，再加载完整参数
-3. 按需获取详细信息，省 Token
-
-```
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│  工具列表    │───▶│  选中工具    │───▶│  完整参数    │
-│  (轻量)      │    │  (请求)      │    │  (按需)      │
-└──────────────┘    └──────────────┘    └──────────────┘
-```
-
----
-
-### 4. 记忆不记代码
-
-**代码事实实时从源码读取**，而不是依赖记忆。
-
-- 代码可能经常变化
-- 记忆会失效，但源码是最新的
-- 避免"我以为是这样但实际不是"的幻觉
+## 模板 A：权限门控
 
 ```python
-# 好的做法
-def get_function_signature(func):
-    return read_source_code(func)  # 实时读取
+class ToolPermissionGate:
+    """Fail-closed 权限门控。默认拒绝，显式授权。"""
+    def __init__(self):
+        self.permissions = {}
+        self.default = "none"
+    
+    def can_execute(self, tool_name: str, user: str) -> bool:
+        if not self._is_declared_readonly(tool_name):
+            return self.permissions.get(user, self.default) >= self._required_level(tool_name)
+        return True
+    
+    def request(self, tool_name: str) -> str:
+        return f"⚠️ 需要授权执行 {tool_name}。确认吗？"
 ```
 
----
-
-### 5. 五级上下文压缩
-
-当上下文快溢出时，自动压缩：
-
-| 级别 | 方法 | 压缩比 |
-|------|------|--------|
-| 1 | 剪裁 | 删除低价值消息 |
-| 2 | 微压缩 | 精简长消息 |
-| 3 | 折叠 | 摘要长对话 |
-| 4 | 自动压缩 | AI 总结 |
-| 5 | 硬压缩 | 强制保留关键信息 |
+参考具体实现：`references/permission_gate_full.py`
 
 ---
 
-### 6. 插件式工具架构
+## 模板 B：工具按需加载
 
-每个能力都是**独立、权限门控**的单元：
-
-```
-┌─────────────────────────────────────────────┐
-│                 Tool System                  │
-├─────────────┬─────────────┬─────────────────┤
-│  BashTool   │   GitTool   │   FileTool      │
-├─────────────┼─────────────┼─────────────────┤
-│ 权限模型     │  权限模型    │   权限模型      │
-│ 验证逻辑    │  验证逻辑    │   验证逻辑      │
-│ 输出格式    │  输出格式    │   输出格式      │
-└─────────────┴─────────────┴─────────────────┘
+```python
+class ToolRegistry:
+    """轻量索引 → 选中 → 加载完整参数"""
+    def __init__(self):
+        self.index = {}      # 轻量：名称+用途
+        self.loaders = {}    # 完整参数加载器
+    
+    def list_tools(self) -> list:
+        return [{"name": k, "purpose": v} for k, v in self.index.items()]
+    
+    def get_full(self, name: str) -> dict:
+        return self.loaders[name]() if name in self.loaders else None
 ```
 
-**每个工具都有：**
-- 独立的权限模型
-- 独立的验证逻辑
-- 独立的输出格式化
+参考具体实现：`references/tool_lazy_loading_full.py`
 
 ---
 
-### 7. Fail-closed 安全设计
+## 模板 C：五级上下文压缩
 
-**默认拒绝**未知操作：
+| 级别 | 方法 | 适用 |
+|------|------|------|
+| 1 Prune | 删除低价值消息 | 日常清理 |
+| 2 Micro | 精简长消息 | 接近限制 |
+| 3 Fold | 折叠摘要 | 上下文紧张 |
+| 4 Auto | AI 自动总结 | 严重溢出 |
+| 5 Hard | 强制保留关键信息 | 最后手段 |
 
-- 工具没有声明"只读" = 危险
-- 需要显式权限确认才能执行
-- 黑名单优先于白名单
-
-```typescript
-// 默认行为
-const isSafe = tool.declaredReadOnly && !tool.hasSideEffects
-if (!isSafe) {
-  requireExplicitPermission()
-}
+```python
+class ContextCompressor:
+    LEVELS = {1: "prune", 2: "micro", 3: "fold", 4: "auto", 5: "hard"}
+    
+    def compress(self, messages: list, level: int, max_tokens: int) -> list:
+        # 按级别执行对应压缩策略
+        ...
 ```
 
----
-
-## 隐藏功能（未发布）
-
-从源码发现 44 个隐藏功能开关，部分功能：
-
-| 功能 | 说明 |
-|------|------|
-| 后台 Agent 24/7 | 定时任务，每5分钟检查一次 |
-| 多 Agent 编排 | 1个Master指挥多个Worker |
-| 语音命令模式 | 语音输入控制 |
-| Playwright 浏览器控制 | 浏览器自动化 |
-| 自动睡眠和恢复 | Agent 定时休眠和唤醒 |
+参考具体实现：`references/context_compressor_full.py`
 
 ---
 
-## 代码安全实践
+## 模板 D：读写分离调度
 
-### Undercover Mode
-
-当 Anthropic 员工在内部仓库工作时，自动隐藏 AI 身份：
-
-```typescript
-// 检查是否在内部仓库
-if (isInternalRepo(repoUrl)) {
-  injectUndercoverPrompt()  // 隐藏模型代号
-}
+```python
+class ReadWriteScheduler:
+    """只读操作并发，写操作排队"""
+    async def execute(self, ops: list) -> list:
+        reads = [op for op in ops if op.is_readonly]
+        writes = [op for op in ops if not op.is_readonly]
+        
+        results = await asyncio.gather(*[self._read(op) for op in reads])
+        for op in writes:
+            results.append(await self._write(op))
+        return results
 ```
 
-**规则：**
-- 不在 commit message 里透露模型代号（如 Capybara、Tengu）
-- 不写 Unreleased 模型版本号
-- 不留 AI 身份痕迹
-- 默认开启，无法关闭
+参考具体实现：`references/rw_scheduler_full.py`
 
 ---
 
-## 参考资料
+## 📖 参考资料
 
-- 源码泄露事件：2026年3月31日
-- 泄露规模：1,906 个 TypeScript 文件，512,000 行代码
-- 来源：npm 包 source map 文件（59.8MB）
+- 完整代码实现 → `references/` 目录各模板完整版
+- 与其他框架对比 → `references/framework_comparison.md`
+- 源码分析原文 → 基于 Claude Code 2026.3.31 泄漏事件
 
 ---
 
-_本文档基于公开分析整理，学习自 Claude Code 源码泄露事件_
+_版本 2.0.1 | 重构为可调用的架构模板生成器_

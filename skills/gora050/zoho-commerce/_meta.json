@@ -3,9 +3,15 @@
   "slug": "zoho-commerce",
   "displayName": "Zoho Commerce",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775488081350,
-    "commit": "https://github.com/openclaw/skills/commit/a77444c0c08f5759ad36639d1de1a2fe8f92c4ec"
+    "version": "1.0.1",
+    "publishedAt": 1776893088589,
+    "commit": "https://github.com/openclaw/skills/commit/5cc165af461f021f59bbff24d1b80f924f4921dd"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775488081350,
+      "commit": "https://github.com/openclaw/skills/commit/a77444c0c08f5759ad36639d1de1a2fe8f92c4ec"
+    }
+  ]
 }

@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-writing-tests",
-  "displayName": "writing-tests",
+  "displayName": "ia-writing-tests",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519066091,
-    "commit": "https://github.com/openclaw/skills/commit/2b7d527d5238333bdf585793d23f1219ffe06a6b"
+    "version": "3.0.4",
+    "publishedAt": 1777300820495,
+    "commit": "https://github.com/openclaw/skills/commit/48b96c6ed2b57f053ac6c5aad5a8b16e09f9dcf7"
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519066091,
+      "commit": "https://github.com/openclaw/skills/commit/2b7d527d5238333bdf585793d23f1219ffe06a6b"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004282163,

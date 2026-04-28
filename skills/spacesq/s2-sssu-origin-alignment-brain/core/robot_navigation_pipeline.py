@@ -62,3 +62,40 @@ class S2RobotNavigationPipeline:
         logging.info(f"✅ 张量闭环验证通过。物理步进至 {target_hex} 确认。")
         self.lord_api.ledger.log_event(target_hex, self.robot_id, "PHYSICAL_STEP_COMPLETE", {"hex": target_hex, "momentum": kinematics.get("mass_kg", 0) * kinematics.get("velocity_m_s", 0)})
         return {"status": "STEP_SUCCESS"}
+
+        # 修改点：在执行完第4步的领主协商后，引入生成式物理场计算
+import logging
+from plugins.boundary_scanner import S2BoundaryScanner
+from plugins.multimodal_fusion import S2MultimodalPredictor
+from plugins.swarm_sync import S2SwarmSyncEngine
+
+class S2RobotNavigationPipeline:
+    def __init__(self, robot_id, visa_token, lord_api, generative_sandbox): # [新增入参]
+        self.robot_id = robot_id
+        self.visa_token = visa_token
+        self.lord_api = lord_api
+        self.sandbox = generative_sandbox # [注入 Flipbook/Prometheus 引擎]
+        
+        self.scanner = S2BoundaryScanner()
+        self.fusion = S2MultimodalPredictor()
+        self.swarm = S2SwarmSyncEngine()
+
+    def execute_step(self, target_hex: str, sensors: dict, kinematics: dict, peer_state: dict = None):
+        logging.info(f"\n🚀 [ROBOT {self.robot_id}] 发起向 SSSU 节点 {target_hex} 的张量级步进决策...")
+
+        # ... (前4步原有逻辑保持不变：边界扫描、多模态融合、路权博弈、领主协商) ...
+
+        # 5. 【新增】生成式物理场渲染 (The Flipbook Paradigm)
+        # 机器人成功步进，触发空间场重构
+        new_spatial_state = self.sandbox.generate_spatial_state(
+            sssu_id=target_hex, 
+            actor_id=self.robot_id, 
+            action="PHYSICAL_STEP_INTRUSION", 
+            kinematics=kinematics
+        )
+
+        logging.info(f"✅ 张量闭环验证通过。物理步进完成。")
+        logging.info(f"🌍 当前空间因你的介入，实时生成新物理状态: 声场 {new_spatial_state['acoustic_db']:.1f}dB")
+        
+        self.lord_api.ledger.log_event(target_hex, self.robot_id, "PHYSICAL_STEP_COMPLETE", {"hex": target_hex})
+        return {"status": "STEP_SUCCESS", "generated_state": new_spatial_state}

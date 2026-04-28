@@ -3,9 +3,15 @@
   "slug": "lemlist-integration",
   "displayName": "Lemlist",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775477060347,
-    "commit": "https://github.com/openclaw/skills/commit/ff88fdfafe50caf148880518a4f2a3d32c96f243"
+    "version": "1.0.1",
+    "publishedAt": 1776890382690,
+    "commit": "https://github.com/openclaw/skills/commit/b3d64bf339c6363f8f44f065601f86b2a2b2b4e2"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775477060347,
+      "commit": "https://github.com/openclaw/skills/commit/ff88fdfafe50caf148880518a4f2a3d32c96f243"
+    }
+  ]
 }

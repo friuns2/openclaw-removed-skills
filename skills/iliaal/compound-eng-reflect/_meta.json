@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-reflect",
-  "displayName": "reflect",
+  "displayName": "ia-reflect",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519036925,
-    "commit": "https://github.com/openclaw/skills/commit/dee238d609a7cc2e61aa2f68db59fa892ad04775"
+    "version": "3.0.4",
+    "publishedAt": 1777300785524,
+    "commit": "https://github.com/openclaw/skills/commit/b865fb02414ab8275eb5e33df115ced81678a12e"
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519036925,
+      "commit": "https://github.com/openclaw/skills/commit/dee238d609a7cc2e61aa2f68db59fa892ad04775"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004258288,

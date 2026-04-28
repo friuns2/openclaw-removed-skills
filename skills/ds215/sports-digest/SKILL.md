@@ -1,98 +1,137 @@
-# Sports Digest Template
+---
+name: sports-digest
+description: Rolling multi-sport digest skill that tracks current storylines, recent results, upcoming fixtures/events, injuries/availability, and standings across a chosen sports portfolio while keeping a compact context file current.
+version: 1.0.2
+---
 
-Prepare a concise, factual sports digest for {{recipient_name}} and keep the rolling context file current.
+# Sports Digest 
+
+Prepare a concise, factual sports digest for **{{recipient_name}}** and keep the rolling context file current.
+
+Use this skill when the goal is not to cover every sports headline, but to answer: **what actually changed for this audience’s teams and competitions since the last digest, and what should they know next?**
+
+This skill works best when paired with:
+
+- a rolling context file: `SPORTS_CONTEXT.md`
+- a clearly defined sports scope
+- a recurring cadence such as 3x weekly or weekly
+
+## When to use this skill
+
+Use it when you want:
+
+- a recurring digest for specific teams, leagues, tours, or competitions
+- continuity across runs instead of starting from scratch every time
+- coverage that balances recent results, upcoming events, injuries, standings, and major storylines
+- one digest that can mix team sports and event-based sports cleanly
+
+## When not to use this skill
+
+Do **not** use it when you want:
+
+- full box-score recaps for every game or match
+- betting picks or gambling advice
+- instant live-play updates during an event
+- broad all-sports news unrelated to the selected teams or competitions
+- archived historical writeups that grow forever over time
 
 ## Setup
 
-- **Context file:** `SPORTS_CONTEXT.md` in this skill directory
-- **Schedule:** {{schedule_description}}
-- **Delivery:** {{delivery_channel}} → {{recipient_name}}
-- **Scope:**
+- **Context file**: `SPORTS_CONTEXT.md` in this skill directory
+- **Schedule**: {{schedule_description}}
+- **Delivery**: {{delivery_channel}} → {{recipient_name}}
+- **Scope**:
 {{scope_bullets}}
 
 ## Inputs to customize
 
-Replace the placeholders below before using this skill:
-
 - `{{recipient_name}}` — person, team, or audience receiving the digest
-- `{{schedule_description}}` — cadence and timezone, e.g. Monday, Thursday, Saturday at 8am ET via cron
-- `{{delivery_channel}}` — e.g. Telegram, email, Slack DM, Notion, Discord
+- `{{schedule_description}}` — cadence and timezone, e.g. `Monday, Thursday, Saturday at 8am ET via cron`
+- `{{delivery_channel}}` — e.g. `Telegram`, `email`, `Slack DM`, `Notion`, `Discord`
 - `{{scope_bullets}}` — bullet list of teams, leagues, competitions, or sports to cover
-- `{{digest_title}}` — optional digest title, e.g. Sports Digest, Weekend Sports Pulse
+- `{{digest_title}}` — optional digest title, e.g. `Sports Digest`, `Weekend Sports Pulse`
 - `{{emoji_prefix}}` — optional emoji cluster for the title line
 - `{{section_specs}}` — ordered list of sections with labels and coverage targets
 - `{{special_rules}}` — sport- or audience-specific reporting priorities
 - `{{tone_notes}}` — optional voice/style cues for the final writeup
+- `{{time_window}}` — optional lookback guidance, e.g. `since last digest`, `last 3 days`
 
 ## Core workflow
 
-1. Read `SPORTS_CONTEXT.md` first so the digest continues the current story rather than starting cold.
-2. Check the current date before searching, and anchor every search to the correct date, competition, and season context.
-3. Use `web_search` to gather recent developments for each team, league, or sport separately.
-4. Treat same-day results and in-progress events as high-risk data, and verify them carefully before stating them as facts.
-5. Cover only information sourced in the current session.
-6. Update `SPORTS_CONTEXT.md` by replacing stale information rather than appending an archive.
-7. Deliver one clean digest message.
+1. Read `SPORTS_CONTEXT.md` first so the digest continues the current story instead of starting cold.
+2. Search each team, league, tour, or sport separately.
+3. Cover only information sourced in the current session.
+4. Update `SPORTS_CONTEXT.md` by replacing stale information rather than appending an archive.
+5. Deliver one clean digest message.
+
+## Coverage model
+
+### For team sports
+Focus on:
+- latest result(s)
+- next fixture(s)
+- injuries / absences / lineup changes
+- standings or playoff / table implications
+- roster moves, transfer news, or major off-field developments
+
+### For soccer / football clubs
+Also look for:
+- manager or tactical changes
+- transfer updates
+- cup / league / European competition context
+- relegation / qualification / title-race implications when relevant
+
+### For motorsport, golf, and other event-based sports
+Focus on:
+- most recent event result(s)
+- next scheduled event
+- championship / points / FedExCup / ranking context if relevant
+- penalties, withdrawals, injuries, suspensions, qualifying context, or key field changes
+- major narrative shifts that matter for the next event
 
 ## Search guidance
 
-For each team, league, or sport, search for:
-- recent results
-- upcoming fixtures/events
-- injuries or availability news
-- roster moves, trade news, or transfer news
-- standings/context when relevant
-
-For motorsport, golf, combat sports, tournaments, or other event-based sports, focus on:
-- latest result(s)
-- upcoming event or matchups
-- standings/rankings/points race if relevant
-- injuries, withdrawals, penalties, suspensions, or lineup changes
-- major off-field or competitive storylines
-
-Useful search patterns:
+Useful searches include:
 - `[team] news [current month year]`
-- `[team] latest results`
+- `[team] latest result`
+- `[team] next game`
 - `[team] injury report`
-- `[team] next game` or `[team] next fixture`
-- `[team] [opponent] [exact date] result`
-- `[competition or league] standings [exact date]`
-- `[competition or league] table [exact date] [team]`
-- `[tournament name] leaderboard`
-- `[sport] latest result`
+- `[club] transfer news`
+- `[league] standings`
+- `[driver/team] latest result`
+- `[series] standings`
+- `[tournament] leaderboard`
+- `[tour/player] news`
 - `[sport] upcoming schedule`
-- `site:[official-league-or-tour-domain] [team or event] [exact date]`
-
-### Date-alignment rules
-
-- Always include an exact date, opponent, and competition when checking a fresh result.
-- Prefer searches that make the season and competition explicit, especially when teams have league, cup, playoff, and international matches near each other.
-- If a result is from today or the last 24 hours, search at least twice with differently-worded queries before trusting it.
-- If search results disagree, assume the result is not verified.
-- Be careful with broad recap-style searches, which can surface stale, mismatched, or autogenerated summaries.
 
 ## Accuracy rules
 
 - Only report scores, standings, and results that were actually sourced in the current session.
-- Never infer a result because a scheduled game, match, or event should have finished by now.
-- If a result is not confirmed, say the game, match, or event is upcoming, in progress, recently finished but unverified, or omit the score.
-- Treat live-search summaries, autogenerated recaps, and secondary aggregation pages as potentially wrong, especially for same-day scores.
-- For a same-day final score, do not rely on a single search summary or a single apparent consensus cluster.
-- Prefer the most direct and current report available, ideally from a league, team, tournament, broadcaster, or major live-score source.
-- When using search results, cross-check that the date, venue, teams, and competition all match before trusting the scoreline.
+- Never infer a result because an event should have finished by now.
+- If a result is not confirmed, say the event is upcoming or in progress.
 - Keep uncertainty explicit rather than smoothing it over.
+- If sources conflict, prefer the most direct and current report, and keep the wording careful.
 
 ## Updating SPORTS_CONTEXT.md
 
 Treat `SPORTS_CONTEXT.md` as rolling memory, not an archive.
 
-- Replace outdated fixtures, results, and storylines.
-- Keep only currently useful context.
-- Keep the file roughly the same size over time.
-- Preserve the maintenance and accuracy rules at the top.
-- Do not write a fresh result into context unless the date and score were confidently verified.
-- If a same-day result is still fuzzy, keep the fixture marked as upcoming, in progress, or unverified rather than guessing.
-- Update the `Last updated` date when making meaningful changes.
+Keep it focused on what is still useful for the *next* digest:
+
+- latest confirmed results
+- next upcoming fixtures/events
+- active injuries / absences / lineup concerns
+- current standings / points / competition context
+- a few live storylines that still matter
+
+Do not let it grow endlessly.
+
+When updating:
+- replace outdated fixtures and results
+- remove stale injuries or obsolete narratives
+- preserve only current context that helps the next run
+- keep the file roughly stable in size
+- update the `Last updated` line when making meaningful changes
 
 ## Output format
 
@@ -107,16 +146,13 @@ Use this structure:
 Example section format:
 
 ```text
-{{section_emoji}} {{section_label}}: [2-4 punchy factual sentences]
+{{section_emoji}} {{section_label}}: [2-5 punchy factual sentences]
 ```
 
 ## Recommended section planning
 
-Define sections in this format before running the skill:
+A good mixed-sport digest often works well with sections like:
 
-`{{section_specs}}`
-
-Example:
 - 🦅 Eagles — NFL / Philadelphia Eagles
 - ⚾️ Phillies — MLB / Philadelphia Phillies
 - 🔵 Everton — Premier League / Everton FC
@@ -124,51 +160,24 @@ Example:
 - 🏎️ F1 — Formula 1
 - ⛳️ Golf — PGA Tour, DP World Tour, majors
 
-Then render the final digest using one section per line item in that order.
+Keep club teams separate when storyline continuity matters. It is fine to keep whole-sport sections like F1 and golf at a higher level.
+
+But use whatever section structure best matches `{{section_specs}}`.
 
 ## Style constraints
 
-- Keep each section punchy and factual.
-- Skip filler.
-- If there is nothing notable for a team or sport, say so briefly.
-- Let active sports carry more weight than dormant ones.
-- Do not force equal excitement across all sections.
-- Follow these optional tone notes when they are provided: `{{tone_notes}}`
+- Keep it tight, factual, and current.
+- Prioritize what changed and what’s next.
+- Avoid padding with generic sportswriter filler.
+- Prefer clear consequences over vague hype.
+- Follow tone notes: `{{tone_notes}}`
 
-## Optional audience-specific rules
+## Success criteria
 
-Add any audience-specific instructions here:
+A good digest should:
 
-`{{special_rules}}`
-
-Examples:
-- prioritize local teams first
-- emphasize playoff races and postseason implications
-- include betting lines only if explicitly requested
-- avoid minor rumors unless confirmed by multiple reliable sources
-- keep writeup under 250 words total
-- favor blunt, casual tone over broadcaster voice
-
-## Seed example (filled with sample placeholders)
-
-🏈⚾️⚽️🏎️⛳️ Sports Digest — [today's date]
-
-🦅 Team A: [2-4 punchy factual sentences]
-
-⚾️ Team B: [2-4 punchy factual sentences]
-
-🔵 Club C: [2-4 punchy factual sentences]
-
-🏎️ Motorsport: [2-4 punchy factual sentences]
-
-⛳️ Golf: [2-4 punchy factual sentences]
-
-## Product framing note
-
-This template is intentionally generalized so it can be adapted for:
-- a single fan following a custom set of teams
-- a family sports roundup
-- a company internal sports/newsletter digest
-- a niche sports vertical (e.g. only soccer, only motorsport, only college sports)
-
-The durable value is not the specific teams, it is the repeatable workflow for gathering, compressing, and maintaining a rolling sports narrative for a chosen audience.
+- feel continuous from the prior digest
+- give the reader the minimum they need to stay current
+- balance recent results with what’s next
+- stay accurate under uncertainty
+- avoid becoming a bloated archive or recap dump

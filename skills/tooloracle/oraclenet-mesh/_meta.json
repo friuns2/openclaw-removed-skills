@@ -1,11 +1,17 @@
 {
   "owner": "tooloracle",
   "slug": "oraclenet-mesh",
-  "displayName": "OracleNet Mesh — Trust Layer for AI Agents",
+  "displayName": "Oraclenet Mesh",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1775480927666,
-    "commit": "https://github.com/openclaw/skills/commit/c69550d3e526fd10d7cfbe0ba6c97d7a65ad8848"
+    "version": "2.0.1",
+    "publishedAt": 1777155675882,
+    "commit": "https://github.com/openclaw/skills/commit/1d618af54099cd8b9b605e40dbf50764f6811ace"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1775480927666,
+      "commit": "https://github.com/openclaw/skills/commit/c69550d3e526fd10d7cfbe0ba6c97d7a65ad8848"
+    }
+  ]
 }

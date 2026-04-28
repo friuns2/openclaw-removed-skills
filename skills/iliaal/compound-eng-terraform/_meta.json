@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-terraform",
-  "displayName": "terraform",
+  "displayName": "ia-terraform",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519056365,
-    "commit": "https://github.com/openclaw/skills/commit/b408be5be59e36a9f42d7a2971cab48fa8ff799c"
+    "version": "3.0.4",
+    "publishedAt": 1777300809177,
+    "commit": "https://github.com/openclaw/skills/commit/fef5c95519d4a440b1587ac08a15a58c3c264e65"
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519056365,
+      "commit": "https://github.com/openclaw/skills/commit/b408be5be59e36a9f42d7a2971cab48fa8ff799c"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004272726,

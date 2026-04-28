@@ -11,10 +11,13 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 PEERS_FILE="$SKILL_DIR/antenna-peers.json"
 
+# shellcheck source=../lib/peers.sh
+source "$SKILL_DIR/lib/peers.sh"
+
 PEER="${1:?Usage: antenna-health.sh <peer>}"
 
-PEER_URL=$(jq -r --arg p "$PEER" '.[$p].url // empty' "$PEERS_FILE")
-TOKEN_FILE=$(jq -r --arg p "$PEER" '.[$p].token_file // empty' "$PEERS_FILE")
+PEER_URL=$(peers_get "$PEER" url)
+TOKEN_FILE=$(peers_get "$PEER" token_file)
 
 if [[ -z "$PEER_URL" ]]; then
   echo "{\"error\":\"Unknown peer: $PEER\"}" >&2

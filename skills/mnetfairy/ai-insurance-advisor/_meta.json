@@ -3,11 +3,16 @@
   "slug": "ai-insurance-advisor",
   "displayName": "AI保险顾问",
   "latest": {
-    "version": "1.8.2",
-    "publishedAt": 1776621631686,
-    "commit": "https://github.com/openclaw/skills/commit/f3188355218bd59a0af364bdeece48f09e5b9b73"
+    "version": "1.8.121",
+    "publishedAt": 1777140098792,
+    "commit": "https://github.com/openclaw/skills/commit/0ae8d1bc94bc4c151e18980729abd62ac9c8ba60"
   },
   "history": [
+    {
+      "version": "1.8.2",
+      "publishedAt": 1776621631686,
+      "commit": "https://github.com/openclaw/skills/commit/f3188355218bd59a0af364bdeece48f09e5b9b73"
+    },
     {
       "version": "1.7.7",
       "publishedAt": 1776047482501,

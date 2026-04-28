@@ -3,9 +3,15 @@
   "slug": "schoology",
   "displayName": "Schoology",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775466221348,
-    "commit": "https://github.com/openclaw/skills/commit/aaf00f5c5cb7a552fa3162ba53d74a72d0b331c7"
+    "version": "1.0.1",
+    "publishedAt": 1776898209455,
+    "commit": "https://github.com/openclaw/skills/commit/274bfcc62818fd837b2a1d9a4991a56c419c440d"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775466221348,
+      "commit": "https://github.com/openclaw/skills/commit/aaf00f5c5cb7a552fa3162ba53d74a72d0b331c7"
+    }
+  ]
 }

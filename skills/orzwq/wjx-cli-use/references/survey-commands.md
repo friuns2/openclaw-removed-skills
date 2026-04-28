@@ -5,9 +5,68 @@
 > echo '{"vid":12345,"get_questions":true,"get_items":true,"format":"dsl"}' | wjx survey get --stdin
 > ```
 
-## wjx survey create
+## wjx survey create-by-json
 
-创建新问卷。
+用 JSONL 格式创建问卷（**唯一推荐方式**，覆盖 70+ 题型）。每行一道题，首行可选放元数据 `{"_meta":{...}}`。
+
+```bash
+wjx survey create-by-json --file survey.jsonl
+wjx survey create-by-json --file survey.jsonl --type 6 --publish
+wjx survey create-by-json --jsonl '{"_meta":{"title":"标题"}}
+{"q_index":1,"q_type":3,"q_subtype":3,"q_title":"性别","is_requir":true,"items":[{"q_index":1,"item_index":1,"item_title":"男"},{"q_index":1,"item_index":2,"item_title":"女"}]}'
+wjx survey create-by-json --file survey.jsonl --dry-run    # 预览解析结果
+cat survey.jsonl | wjx survey create-by-json --stdin
+```
+
+| Flag | 必填 | 说明 |
+|------|------|------|
+| `--jsonl <s>` | 三选一 | JSONL 字符串内容 |
+| `--file <path>` | 三选一 | 从文件读取 JSONL |
+| `--stdin` | 三选一 | 从 stdin 读取 |
+| `--title <s>` | 否 | 覆盖 JSONL 中的问卷标题 |
+| `--type <n>` | 否 | 1=调查, 2=测评, 3=投票, 6=考试, 7=表单（默认 1） |
+| `--publish` | 否 | 创建后立即发布 |
+| `--creater <s>` | 否 | 创建者子账号 |
+| `--dry-run` | 否 | 预览解析结果，不实际创建 |
+
+### JSONL 格式
+
+```jsonl
+{"_meta":{"title":"标题","description":"描述"}}
+{"q_index":1,"q_type":3,"q_subtype":3,"q_title":"单选题","is_requir":true,"items":[{"q_index":1,"item_index":1,"item_title":"A"},{"q_index":1,"item_index":2,"item_title":"B"}]}
+{"q_index":2,"q_type":7,"q_subtype":702,"q_title":"矩阵单选","is_requir":true,"items":[{"q_index":2,"item_index":1,"item_title":"行1"}],"exts":[{"q_index":2,"ext_index":1,"ext_title":"列1"},{"q_index":2,"ext_index":2,"ext_title":"列2"}]}
+```
+
+**何时用**：所有问卷创建一律首选本命令。覆盖 70+ 题型，包括矩阵（单选/多选/填空/量表）、比重、滑块、文件上传、排序、单选/多选/填空等全部场景。
+
+完整 q_type/q_subtype 编码见 [question-types.md](question-types.md)。
+
+## wjx survey create-by-text（已弃用）
+
+> **已弃用**：DSL 文本创建问卷。新项目请改用 `create-by-json`（覆盖更全、结构更清晰）。本命令仅为兼容保留。
+
+```bash
+wjx survey create-by-text --text "标题\n\n1. 题目[单选题]\n选项A\n选项B"
+wjx survey create-by-text --file survey.txt
+cat survey.txt | wjx survey create-by-text --stdin
+wjx survey create-by-text --text "..." --dry-run   # 预览解析结果
+```
+
+| Flag | 必填 | 说明 |
+|------|------|------|
+| `--text <s>` | 三选一 | DSL 文本内容 |
+| `--file <path>` | 三选一 | 从文件读取 DSL |
+| `--stdin` | 三选一 | 从 stdin 读取 |
+| `--type <n>` | 否 | 问卷类型（默认 1=调查，考试用 6） |
+| `--publish` | 否 | 创建后发布 |
+| `--creater <s>` | 否 | 创建者子账号 |
+| `--dry-run` | 否 | 预览解析结果，不实际创建 |
+
+DSL 语法详见 [dsl-syntax.md](dsl-syntax.md)。
+
+## wjx survey create（向后兼容，不再推荐）
+
+老的 JSON 数组创建命令。新项目请用 `create-by-json`（JSONL 更灵活）或 `create-by-text`（DSL 更直观）。
 
 ```bash
 wjx survey create --title "标题" --type 1 --description "描述" --questions '<JSON>'
@@ -48,29 +107,6 @@ wjx survey create --title "标题" --source_vid 12345   # 复制已有问卷
 - 多项填空（q_type=6）的 q_title 必须包含 `{_}` 占位符
 
 完整 q_type/q_subtype 编码见 [question-types.md](question-types.md)。
-
-## wjx survey create-by-text
-
-用 DSL 文本创建问卷（**推荐 AI Agent 使用**）。
-
-```bash
-wjx survey create-by-text --text "标题\n\n1. 题目[单选题]\n选项A\n选项B"
-wjx survey create-by-text --file survey.txt
-cat survey.txt | wjx survey create-by-text --stdin
-wjx survey create-by-text --text "..." --dry-run   # 预览解析结果
-```
-
-| Flag | 必填 | 说明 |
-|------|------|------|
-| `--text <s>` | 三选一 | DSL 文本内容 |
-| `--file <path>` | 三选一 | 从文件读取 DSL |
-| `--stdin` | 三选一 | 从 stdin 读取 |
-| `--type <n>` | 否 | 问卷类型（默认 1=调查，考试用 6） |
-| `--publish` | 否 | 创建后发布 |
-| `--creater <s>` | 否 | 创建者子账号 |
-| `--dry-run` | 否 | 预览解析结果，不实际创建 |
-
-DSL 语法详见 [dsl-syntax.md](dsl-syntax.md)。
 
 ## wjx survey list
 
@@ -153,6 +189,38 @@ wjx survey update-settings --vid 12345 --time_setting '{"exam_min_seconds":60,"e
 | `--msg_setting <json>` | 数据推送：`{"push_url":"https://...","quick_post":true,"retry":true}` |
 | `--sojumpparm_setting <json>` | 自定义参数：`{"params":[{"name":"source","type":0}]}` |
 | `--time_setting <json>` | 时间设置：`{"start_time":"2026-04-01 00:00","exam_min_seconds":60}` |
+
+### 候选字段速查（按业务模块猜值）
+
+OpenAPI 没有正式公开 settings 各 JSON 的全部字段。下表是从问卷星管理后台 / 公开抓包总结的常见字段，**不保证服务端一定接受**——遇到不生效时按"调试方法"自行确认：
+
+| 业务诉求 | 字段所在 setting | 候选字段（按推测可能性排序） |
+|----------|------------------|------------------------------|
+| 开启验证码（防机器答卷） | `api_setting` 或 `msg_setting` | `is_open_yzm` / `yzm_enable` / `open_captcha` / `captcha_enable` |
+| 开启智能验证（无感） | `api_setting` | `nv_enable` / `enable_nvc` / `smart_verify` |
+| 限制单 IP 答卷次数 | `api_setting` | `ip_limit` / `ip_max_times` / `ip_limit_count` |
+| 限制单微信号 | `api_setting` | `wx_limit` / `weixin_limit` |
+| 防多次提交 | `api_setting` | `cookie_limit` / `device_limit` |
+| 隐藏问卷星 logo | `api_setting` | `hide_logo` / `is_hide_logo` |
+| 强制必答 | `api_setting` | `must_answer` / `force_required` |
+| 答题进度条 | `api_setting` | `show_process` / `show_progress` |
+| 微信 OA 推送通知 | `msg_setting` | `oa_enable` / `wx_notify` |
+| 提交后发邮件 | `msg_setting` | `email_enable` / `notify_email` |
+
+**调试方法**：
+```bash
+# 1) 在问卷星网页端先把目标功能打开/调好；
+# 2) 用 settings 查当前值，找出与默认不同的字段：
+wjx survey settings --vid 12345
+
+# 3) 把那个字段对应的 JSON 整段塞回 update-settings：
+wjx survey update-settings --vid 12345 --api_setting '{"is_open_yzm":1,"nv_enable":1}'
+
+# 4) 再 settings 一次确认服务端是否落库；如果没生效，多半是字段名不对——
+#    再回到第 2 步对比，或换上表的候选名重试。
+```
+
+> 同一业务在不同问卷类型/账户版本下字段名可能不同；上表只是候选，真实接受的字段以服务端 settings 返回为准。如果有命中的字段值，欢迎提 PR 补到这里。
 
 ## wjx survey delete
 

@@ -3,9 +3,15 @@
   "slug": "pirate-weather",
   "displayName": "Pirate Weather",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775466210955,
-    "commit": "https://github.com/openclaw/skills/commit/43c2554c73c35532f418ba0e4615a289965a2263"
+    "version": "1.0.1",
+    "publishedAt": 1776898205489,
+    "commit": "https://github.com/openclaw/skills/commit/30067f2aa4e56ed3b5002eb3b2d65c0db8275b7e"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775466210955,
+      "commit": "https://github.com/openclaw/skills/commit/43c2554c73c35532f418ba0e4615a289965a2263"
+    }
+  ]
 }

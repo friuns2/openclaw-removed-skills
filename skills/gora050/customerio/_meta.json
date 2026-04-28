@@ -3,9 +3,15 @@
   "slug": "customerio",
   "displayName": "Customerio",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775513901109,
-    "commit": "https://github.com/openclaw/skills/commit/039e4b394853b2b6ad5ed95587db74ed7581fabe"
+    "version": "1.0.1",
+    "publishedAt": 1776899027779,
+    "commit": "https://github.com/openclaw/skills/commit/c750d38ec3ab7c57911d25898a83205b586277db"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775513901109,
+      "commit": "https://github.com/openclaw/skills/commit/039e4b394853b2b6ad5ed95587db74ed7581fabe"
+    }
+  ]
 }

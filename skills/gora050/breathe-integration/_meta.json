@@ -3,9 +3,15 @@
   "slug": "breathe-integration",
   "displayName": "Breathe",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775488065013,
-    "commit": "https://github.com/openclaw/skills/commit/8606ef5a9d0148dc89363cfc698446c9323c79fd"
+    "version": "1.0.1",
+    "publishedAt": 1776893083778,
+    "commit": "https://github.com/openclaw/skills/commit/e97facfabe62969af889bb8822c29a87e19a08df"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775488065013,
+      "commit": "https://github.com/openclaw/skills/commit/8606ef5a9d0148dc89363cfc698446c9323c79fd"
+    }
+  ]
 }

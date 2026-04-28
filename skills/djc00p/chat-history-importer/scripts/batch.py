@@ -59,6 +59,44 @@ def parse_export(file_path: Path, fmt: str = "auto"):
         if line:
             yield json.loads(line)
 
+def load_identity_names(workspace: Path) -> tuple[str, str]:
+    """
+    Read agent name from IDENTITY.md and user name from USER.md.
+    Returns (agent_name, user_name) — falls back to 'Assistant' / 'User' if not found.
+    """
+    agent_name = "Assistant"
+    user_name = "User"
+
+    identity_file = workspace / "IDENTITY.md"
+    if identity_file.exists():
+        for line in identity_file.read_text().splitlines():
+            if line.strip().startswith("- **Name:**"):
+                name = line.split("**Name:**", 1)[-1].strip()
+                if name:
+                    agent_name = name
+                break
+
+    user_file = workspace / "USER.md"
+    if user_file.exists():
+        for line in user_file.read_text().splitlines():
+            if line.strip().startswith("- **Name:**"):
+                name = line.split("**Name:**", 1)[-1].strip()
+                if name:
+                    user_name = name
+                break
+
+    return agent_name, user_name
+
+
+def humanize_role(role: str, agent_name: str, user_name: str) -> str:
+    """Map raw role strings to human-readable speaker names."""
+    if role in ("assistant",):
+        return agent_name
+    if role in ("user", "human"):
+        return user_name
+    return role.capitalize()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", required=True, help="Directory containing export JSON files")
@@ -67,11 +105,21 @@ def main():
     parser.add_argument("--verbose", action="store_true", help="Show message count and snippet per chat")
     parser.add_argument("--format", choices=["openai", "anthropic", "auto"], default="auto",
                         help="Export format (default: auto-detect)")
+    parser.add_argument("--agent-name", help="Override agent name (default: read from IDENTITY.md)")
+    parser.add_argument("--user-name", help="Override user name (default: read from USER.md)")
     args = parser.parse_args()
 
     # Use environment variable to point to the right agent workspace
     workspace = Path(os.environ.get("OPENCLAW_WORKSPACE", Path.home() / ".openclaw/workspace"))
     episodic_dir = workspace / "memory/episodic"
+
+    # Resolve speaker names (from IDENTITY.md / USER.md, or CLI overrides)
+    agent_name, user_name = load_identity_names(workspace)
+    if args.agent_name:
+        agent_name = args.agent_name
+    if args.user_name:
+        user_name = args.user_name
+    print(f"Speaker mapping: 'assistant' → '{agent_name}' | 'user' → '{user_name}'")
 
     base_dir = Path(args.dir).expanduser()
     if not base_dir.is_dir():
@@ -119,9 +167,9 @@ def main():
                     entry = f"\n## Chat: {chat['title']}\n- Chat ID: {chat['id']}\n- Messages: {len(chat['messages'])}\n"
                     summary = []
                     for msg in chat['messages']:
-                        role = msg['role']
+                        speaker = humanize_role(msg['role'], agent_name, user_name)
                         content = msg['content'][:200].replace("\n", " ")
-                        summary.append(f"- {role}: {content}...")
+                        summary.append(f"- {speaker}: {content}...")
                     entry += "\n".join(summary) + "\n"
                     with open(mem_file, 'a') as f:
                         f.write(entry)

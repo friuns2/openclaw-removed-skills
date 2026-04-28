@@ -29,14 +29,33 @@ SKILL_DIR="$(dirname "$SCRIPT_DIR")"
 PEERS_FILE="$SKILL_DIR/antenna-peers.json"
 CONFIG_FILE="$SKILL_DIR/antenna-config.json"
 
+# shellcheck source=../lib/peers.sh
+source "$SKILL_DIR/lib/peers.sh"
+# shellcheck source=../lib/config.sh
+source "$SKILL_DIR/lib/config.sh"
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 die() { echo "{\"error\":\"$1\"}" >&2; exit "${2:-1}"; }
 
+# ── REF-400: envelope-marker collision guard ────────────────────────────────
+# The [ANTENNA_RELAY] / [/ANTENNA_RELAY] markers frame the wire envelope.
+# Any user-controlled value that contains one of those literal strings would
+# let an attacker inject a fake close (truncating the real body) and forge a
+# second envelope with attacker-chosen headers. There is no legitimate reason
+# for a user-supplied field to contain the marker, so we hard-reject.
+assert_no_envelope_markers() {
+  local field_name="$1"
+  local value="$2"
+  if [[ "$value" == *"[ANTENNA_RELAY]"* ]] || [[ "$value" == *"[/ANTENNA_RELAY]"* ]]; then
+    die "$field_name contains reserved envelope marker ([ANTENNA_RELAY] or [/ANTENNA_RELAY]); refuse to send" 2
+  fi
+}
+
 log_entry() {
   local log_enabled log_path
-  log_enabled=$(jq -r '.log_enabled // true' "$CONFIG_FILE" 2>/dev/null || echo "true")
-  log_path=$(jq -r '.log_path // "antenna.log"' "$CONFIG_FILE" 2>/dev/null || echo "antenna.log")
+  log_enabled=$(config_log_enabled)
+  log_path=$(config_log_path)
 
   if [[ "$log_enabled" != "true" ]]; then return 0; fi
 
@@ -105,9 +124,10 @@ fi
 
 # ── Load peer config ────────────────────────────────────────────────────────
 
-PEER_URL=$(jq -r --arg p "$PEER" '.[$p].url // empty' "$PEERS_FILE")
-PEER_AGENT=$(jq -r --arg p "$PEER" '.[$p].agentId // "antenna"' "$PEERS_FILE")
-TOKEN_FILE=$(jq -r --arg p "$PEER" '.[$p].token_file // empty' "$PEERS_FILE")
+PEER_URL=$(peers_get "$PEER" url)
+PEER_AGENT=$(peers_get "$PEER" agentId)
+[[ -n "$PEER_AGENT" ]] || PEER_AGENT="antenna"
+TOKEN_FILE=$(peers_get "$PEER" token_file)
 
 if [[ -z "$PEER_URL" ]]; then
   die "Unknown peer: $PEER" 1
@@ -124,7 +144,7 @@ TOKEN=$(cat "$TOKEN_FILE")
 
 # ── Load config defaults ────────────────────────────────────────────────────
 
-MAX_LEN=$(jq -r '.max_message_length // 10000' "$CONFIG_FILE" 2>/dev/null || echo "10000")
+MAX_LEN=$(config_max_message_length)
 
 # Session resolution:
 # - If --session was explicitly provided, include target_session in envelope.
@@ -151,14 +171,20 @@ if [[ "$MSG_LEN" -gt "$MAX_LEN" ]]; then
   die "Message exceeds max length ($MSG_LEN > $MAX_LEN chars)" 2
 fi
 
+# ── REF-400: reject envelope markers in user-controlled fields ──────────────
+assert_no_envelope_markers "message body" "$MESSAGE"
+assert_no_envelope_markers "--subject" "$SUBJECT"
+assert_no_envelope_markers "--user" "$USER_NAME"
+assert_no_envelope_markers "--reply-to" "$REPLY_TO_OVERRIDE"
+
 # ── Build sender identity ───────────────────────────────────────────────────
 
 # Find the local peer entry (self: true)
-SELF_ID=$(jq -r 'to_entries[] | select((.value | type) == "object" and (.value.url? | type) == "string" and .value.self == true) | .key' "$PEERS_FILE" 2>/dev/null || echo "")
-SELF_URL=$(jq -r 'to_entries[] | select((.value | type) == "object" and (.value.url? | type) == "string" and .value.self == true) | .value.url // empty' "$PEERS_FILE" 2>/dev/null || echo "")
+SELF_ID=$(peers_self_id)
+SELF_URL=$(peers_self_url)
 
 if [[ -z "$SELF_ID" ]]; then
-  SELF_ID=$(hostname | tr '[:upper:]' '[:lower:]')
+  die "No self peer configured in antenna-peers.json (.self == true). Refusing to guess sender identity from hostname; run 'antenna setup' or repair the self peer entry." 1
 fi
 
 REPLY_TO="${REPLY_TO_OVERRIDE:-${SELF_URL:+${SELF_URL}/hooks/agent}}"
@@ -168,7 +194,7 @@ TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # The SELF peer's secret is what we include in outbound messages so the
 # recipient can verify our identity.
 SELF_SECRET=""
-SELF_SECRET_FILE=$(jq -r --arg id "$SELF_ID" '.[$id].peer_secret_file // empty' "$PEERS_FILE" 2>/dev/null || echo "")
+SELF_SECRET_FILE=$(peers_get "$SELF_ID" peer_secret_file)
 if [[ -n "$SELF_SECRET_FILE" ]]; then
   # Resolve relative paths against skill dir
   if [[ "$SELF_SECRET_FILE" != /* ]]; then

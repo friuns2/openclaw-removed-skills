@@ -3,9 +3,15 @@
   "slug": "transistorfm-integration",
   "displayName": "Transistorfm",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775488047247,
-    "commit": "https://github.com/openclaw/skills/commit/1fce7d0893e53d20e40f179d08e1040d1ec6adc4"
+    "version": "1.0.1",
+    "publishedAt": 1776893074193,
+    "commit": "https://github.com/openclaw/skills/commit/2ba61af8fe227b49fbef728a4d6d2cac7e1cdda5"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775488047247,
+      "commit": "https://github.com/openclaw/skills/commit/1fce7d0893e53d20e40f179d08e1040d1ec6adc4"
+    }
+  ]
 }

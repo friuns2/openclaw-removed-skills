@@ -3,9 +3,15 @@
   "slug": "ramco-systems",
   "displayName": "Ramco Systems",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775470100762,
-    "commit": "https://github.com/openclaw/skills/commit/ffdfb0c4e5b4a27f5813f0fbc325ccff7fbf6da5"
+    "version": "1.0.1",
+    "publishedAt": 1776892927481,
+    "commit": "https://github.com/openclaw/skills/commit/015a48634712ef06bec6b4ba1aa6ab7853654f96"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775470100762,
+      "commit": "https://github.com/openclaw/skills/commit/ffdfb0c4e5b4a27f5813f0fbc325ccff7fbf6da5"
+    }
+  ]
 }

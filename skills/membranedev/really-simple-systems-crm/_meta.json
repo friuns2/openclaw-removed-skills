@@ -3,9 +3,15 @@
   "slug": "really-simple-systems-crm",
   "displayName": "Really Simple Systems Crm",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775469943448,
-    "commit": "https://github.com/openclaw/skills/commit/0ede7244d4b765fa5fefb7160e9450b028f82513"
+    "version": "1.0.1",
+    "publishedAt": 1776890366439,
+    "commit": "https://github.com/openclaw/skills/commit/f81e96c69ff6e0288db3402b38512916555e41bf"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775469943448,
+      "commit": "https://github.com/openclaw/skills/commit/0ede7244d4b765fa5fefb7160e9450b028f82513"
+    }
+  ]
 }

@@ -23,6 +23,12 @@ CONFIG_FILE="$SKILL_DIR/antenna-config.json"
 PEERS_FILE="$SKILL_DIR/antenna-peers.json"
 SECRETS_DIR="$SKILL_DIR/secrets"
 
+# REF-1313: shared URL validator lives in lib/peers.sh. Sourcing here is safe
+# during first-run setup because lib/peers.sh only defines functions (no side
+# effects) and has a double-source guard.
+# shellcheck source=../lib/peers.sh
+source "$SKILL_DIR/lib/peers.sh"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -62,7 +68,7 @@ prompt_yn() {
 # ── Parse non-interactive flags ──────────────────────────────────────────────
 
 NI_HOST_ID="" NI_DISPLAY="" NI_URL="" NI_AGENT="" NI_MODEL="" NI_TOKEN="" NI_FORCE=false
-NI_INBOX="" NI_INBOX_AUTO=""
+NI_INBOX="" NI_INBOX_AUTO="" NI_ALLOW_INSECURE=false
 INTERACTIVE=true
 
 while [[ $# -gt 0 ]]; do
@@ -76,6 +82,7 @@ while [[ $# -gt 0 ]]; do
     --inbox)         NI_INBOX="$2"; shift 2 ;;
     --inbox-auto-approve) NI_INBOX_AUTO="$2"; shift 2 ;;
     --force)         NI_FORCE=true; shift ;;
+    --allow-insecure) NI_ALLOW_INSECURE=true; shift ;;
     -h|--help)
       cat <<'EOF'
 antenna setup — First-run setup wizard for Antenna
@@ -179,9 +186,21 @@ if [[ "$INTERACTIVE" == "true" ]]; then
   header "Step 2/7 — Reachable Endpoint — Where Do Peers Find You?"
   info "This is the URL other peers use to reach your /hooks/agent endpoint."
   info "Examples: https://myhost.tailXXXXX.ts.net  or  https://your-host.example.com"
-  prompt HOST_URL "Your hook URL" ""
-  # Strip trailing slash
-  HOST_URL="${HOST_URL%/}"
+  # REF-1313: loop until the operator gives us something that looks like a
+  # reachable HTTPS URL. This prevents the 'url: "main"' class of typo from
+  # silently landing in the self-peer record and then propagating to every
+  # peer via bootstrap bundles.
+  while :; do
+    prompt HOST_URL "Your hook URL" ""
+    HOST_URL="${HOST_URL%/}"
+    if validate_peer_url "$HOST_URL" "${NI_ALLOW_INSECURE:-false}" 2>/tmp/antenna-urlcheck.$$; then
+      rm -f /tmp/antenna-urlcheck.$$
+      break
+    fi
+    err "$(cat /tmp/antenna-urlcheck.$$ 2>/dev/null || echo 'invalid URL')"
+    rm -f /tmp/antenna-urlcheck.$$
+    info "Please enter a real https:// URL peers can reach (examples above)."
+  done
 
   # Agent ID — try to auto-detect from gateway config
   header "Step 3/7 — Agent Identity — Who's Running the Show?"
@@ -378,6 +397,14 @@ else
   DISPLAY_NAME="${NI_DISPLAY:-${HOST_ID^}}"
   HOST_URL="${NI_URL:?--url is required}"
   HOST_URL="${HOST_URL%/}"
+  # REF-1313: non-interactive setup must hard-fail on a malformed URL too.
+  # Scripts that feed --url from gateway config or environment should not be
+  # able to smuggle garbage past setup. Honor NI_ALLOW_INSECURE for parity
+  # with the interactive path.
+  if ! _reason="$(validate_peer_url "$HOST_URL" "${NI_ALLOW_INSECURE:-false}" 2>&1 >/dev/null)"; then
+    err "--url is not valid: ${_reason:-invalid URL}"
+    exit 1
+  fi
   # Auto-detect primary agent from gateway config if --agent-id not given
   if [[ -z "$NI_AGENT" ]]; then
     for _cand in "$HOME/.openclaw/openclaw.json" "/etc/openclaw/openclaw.json"; do
@@ -556,7 +583,7 @@ jq -n \
     inbox_enabled: $inbox_enabled,
     inbox_auto_approve_peers: $inbox_auto,
     inbox_queue_path: "antenna-inbox.json",
-    allowed_inbound_sessions: [("agent:" + $agent + ":main"), ("agent:" + $agent + ":antenna")],
+    allowed_inbound_sessions: [("agent:" + $agent + ":main"), ("agent:" + $agent + ":antenna"), "agent:antenna:modeltest"],
     allowed_inbound_peers: [$host],
     allowed_outbound_peers: [$host]
   }' > "$CONFIG_FILE"
@@ -709,8 +736,22 @@ if [[ -n "$GATEWAY_CFG" ]]; then
       tmp_gw=$(mktemp)
       # Read the hooks token from the token file to register it in gateway config
       file_token=""
+      existing_hooks_token=""
+      hooks_token_action="preserved"
       if [[ -n "$TOKEN_FILE" && -f "$TOKEN_FILE" ]]; then
         file_token="$(tr -d '[:space:]' < "$TOKEN_FILE")"
+      fi
+      existing_hooks_token="$(jq -r '.hooks.token // empty' "$GATEWAY_CFG" 2>/dev/null || true)"
+
+      if [[ -n "$file_token" ]]; then
+        if [[ -z "$existing_hooks_token" ]]; then
+          hooks_token_action="registered"
+        elif [[ "$existing_hooks_token" == "$file_token" ]]; then
+          hooks_token_action="unchanged"
+        else
+          hooks_token_action="preserved"
+          warn "Gateway already has hooks.token set to a different value. Preserving the existing gateway token and leaving Antenna's token only in $TOKEN_FILE"
+        fi
       fi
 
       jq --arg aid "antenna" --arg prefix "hook:" --arg agent_prefix "agent:${AGENT_ID}:" --arg file_token "$file_token" '
@@ -722,9 +763,18 @@ if [[ -n "$GATEWAY_CFG" ]]; then
           | if (index($prefix) | not) then . + [$prefix] else . end
           | if (index($agent_prefix) | not) then . + [$agent_prefix] else . end
         ) |
-        (if $file_token != "" then .hooks.token = $file_token else . end)
+        (if $file_token != "" and ((.hooks.token // "") == "" or (.hooks.token == $file_token)) then .hooks.token = $file_token else . end)
       ' "$GATEWAY_CFG" > "$tmp_gw" && mv "$tmp_gw" "$GATEWAY_CFG"
-      ok "Hooks enabled, token registered, and allowlists updated"
+      ok "Hooks enabled and allowlists updated"
+      case "$hooks_token_action" in
+        registered) ok "Hooks token registered in gateway config" ;;
+        unchanged) info "Gateway hooks.token already matched Antenna token" ;;
+        preserved)
+          if [[ -n "$file_token" && -n "$existing_hooks_token" && "$existing_hooks_token" != "$file_token" ]]; then
+            info "Kept existing gateway hooks.token to avoid breaking other hook consumers"
+          fi
+          ;;
+      esac
 
       # 2) Ensure a default agent exists before adding antenna
       #    If agents.list is empty/absent, the default main agent is implicit.
@@ -778,16 +828,16 @@ if [[ -n "$GATEWAY_CFG" ]]; then
         ok "Registered Antenna agent in gateway config (sandbox off, least-privilege tools)"
       else
         info "Antenna agent already registered in gateway config"
-        # Ensure sandbox.mode=off on existing antenna entry
-        _has_sandbox=$(jq '[.agents.list // [] | .[] | select(.id == "antenna") | .sandbox.mode // empty] | length' "$GATEWAY_CFG" 2>/dev/null || echo "0")
-        if [[ "$_has_sandbox" -eq 0 ]]; then
+        # Ensure sandbox.mode=off on existing antenna entry without stripping any
+        # operator-managed tools.exec or tools.deny customization.
+        _needs_antenna_repair=$(jq '[.agents.list // [] | .[] | select(.id == "antenna" and ((.sandbox.mode // "") != "off" or (.tools | type) != "object"))] | length' "$GATEWAY_CFG" 2>/dev/null || echo "0")
+        if [[ "$_needs_antenna_repair" -gt 0 ]]; then
           tmp_gw=$(mktemp)
           jq '
             .agents.list = [.agents.list[] |
               if .id == "antenna" then
                 .sandbox = { mode: "off" } |
-                .tools = (.tools // {}) |
-                .tools |= del(.exec) |
+                .tools = (if (.tools | type) == "object" then .tools else {} end) |
                 .tools.deny = (.tools.deny // [
                   "group:web", "browser", "image", "image_generate",
                   "cron", "memory_search", "memory_get",
@@ -796,7 +846,7 @@ if [[ -n "$GATEWAY_CFG" ]]; then
               else . end
             ]
           ' "$GATEWAY_CFG" > "$tmp_gw" && mv "$tmp_gw" "$GATEWAY_CFG"
-          ok "Updated existing Antenna agent: sandbox off, least-privilege tools"
+          ok "Updated existing Antenna agent: sandbox off without removing operator tool overrides"
         fi
       fi
 

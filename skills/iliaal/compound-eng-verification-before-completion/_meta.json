@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-verification-before-completion",
-  "displayName": "verification-before-completion",
+  "displayName": "ia-verification-before-completion",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519061503,
-    "commit": "https://github.com/openclaw/skills/commit/303207fa009323930d92c9cbb8b6054b328a16da"
+    "version": "3.0.4",
+    "publishedAt": 1777300814838,
+    "commit": "https://github.com/openclaw/skills/commit/512ac3c268af9e4c78544c27c3165e08605dcd77"
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519061503,
+      "commit": "https://github.com/openclaw/skills/commit/303207fa009323930d92c9cbb8b6054b328a16da"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004277613,

@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-refine-prompt",
-  "displayName": "refine-prompt",
+  "displayName": "ia-refine-prompt",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519032276,
-    "commit": "https://github.com/openclaw/skills/commit/c0db67bab58ea6eed55c83b66631b7e2a2026408"
+    "version": "3.0.4",
+    "publishedAt": 1777300779992,
+    "commit": "https://github.com/openclaw/skills/commit/1e069ad8045970292b6fcb56ada0ea97c365558b"
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519032276,
+      "commit": "https://github.com/openclaw/skills/commit/c0db67bab58ea6eed55c83b66631b7e2a2026408"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004253801,
