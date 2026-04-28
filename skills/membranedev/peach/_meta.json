@@ -3,9 +3,15 @@
   "slug": "peach",
   "displayName": "Peach",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775545439877,
-    "commit": "https://github.com/openclaw/skills/commit/286ece82e4c60136971169b5e8271190222a41a2"
+    "version": "1.0.1",
+    "publishedAt": 1776898505761,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775545439877,
+      "commit": "https://github.com/openclaw/skills/commit/286ece82e4c60136971169b5e8271190222a41a2"
+    }
+  ]
 }
