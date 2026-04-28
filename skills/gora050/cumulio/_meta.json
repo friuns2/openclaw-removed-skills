@@ -3,9 +3,15 @@
   "slug": "cumulio",
   "displayName": "Cumulio",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775372871968,
-    "commit": "https://github.com/openclaw/skills/commit/ce7ecf1a577d87cb28b3c9bb79b70850b00174aa"
+    "version": "1.0.1",
+    "publishedAt": 1776892200567,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775372871968,
+      "commit": "https://github.com/openclaw/skills/commit/ce7ecf1a577d87cb28b3c9bb79b70850b00174aa"
+    }
+  ]
 }
