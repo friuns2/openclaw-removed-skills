@@ -3,9 +3,15 @@
   "slug": "accountscore",
   "displayName": "Accountscore",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775459017298,
-    "commit": "https://github.com/openclaw/skills/commit/686b557c0d0f1267bd2d359801350c6b7a850343"
+    "version": "1.0.1",
+    "publishedAt": 1776897446591,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775459017298,
+      "commit": "https://github.com/openclaw/skills/commit/686b557c0d0f1267bd2d359801350c6b7a850343"
+    }
+  ]
 }
