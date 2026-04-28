@@ -3,9 +3,15 @@
   "slug": "seam",
   "displayName": "Seam",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297078628,
-    "commit": "https://github.com/openclaw/skills/commit/b048af9d433d1b220a9377fdf18885764028274f"
+    "version": "1.0.1",
+    "publishedAt": 1776883414574,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297078628,
+      "commit": "https://github.com/openclaw/skills/commit/b048af9d433d1b220a9377fdf18885764028274f"
+    }
+  ]
 }
