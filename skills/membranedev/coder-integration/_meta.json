@@ -3,9 +3,15 @@
   "slug": "coder-integration",
   "displayName": "Coder",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775639018871,
-    "commit": "https://github.com/openclaw/skills/commit/5c388ac81efa253601d61ae233484b89793eb0f9"
+    "version": "1.0.1",
+    "publishedAt": 1776896603426,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775639018871,
+      "commit": "https://github.com/openclaw/skills/commit/5c388ac81efa253601d61ae233484b89793eb0f9"
+    }
+  ]
 }
