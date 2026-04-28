@@ -3,11 +3,16 @@
   "slug": "justoneapi-youtube",
   "displayName": "YouTube API",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776240046213,
-    "commit": "https://github.com/openclaw/skills/commit/d24b6fa009613a43dd6bad3add12554669a13bc6"
+    "version": "1.0.4",
+    "publishedAt": 1776924530562,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776240046213,
+      "commit": "https://github.com/openclaw/skills/commit/d24b6fa009613a43dd6bad3add12554669a13bc6"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775377606360,

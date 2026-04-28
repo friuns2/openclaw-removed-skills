@@ -24,9 +24,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getVideoDetailV1`
+## `getYoutubeVideoDetailV1`
 
 - Method: `GET`
 - Path: `/api/youtube/get-video-detail/v1`
@@ -47,4 +47,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

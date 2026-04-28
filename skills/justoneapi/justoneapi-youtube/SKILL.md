@@ -18,7 +18,7 @@ This skill wraps 2 YouTube operations exposed by JustOneAPI. It is strongest for
 
 ## Representative Operations
 
-- `getVideoDetailV1`: Video Details — Get YouTube video Details data, including its title, description, and view counts, for tracking video engagement and statistics, extracting video metadata for content analysis, and verifying video availability and status
+- `getYoutubeVideoDetailV1`: Video Details — Get YouTube video Details data, including its title, description, and view counts, for tracking video engagement and statistics, extracting video metadata for content analysis, and verifying video availability and status
 - `getChannelVideosV1`: Channel Videos — Retrieve a list of videos from a specific YouTube channel, providing detailed insights into content performance and upload history
 
 ## Request Pattern
@@ -31,7 +31,7 @@ This skill wraps 2 YouTube operations exposed by JustOneAPI. It is strongest for
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getVideoDetailV1`, `getChannelVideosV1`.
+2. Start with one of these operations when it matches the user's request: `getYoutubeVideoDetailV1`, `getChannelVideosV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:
@@ -52,6 +52,6 @@ node {baseDir}/bin/run.mjs --operation "<operation-id>" --token "$JUST_ONE_API_T
 
 - Start with a plain-language answer tied to the YouTube task the user asked for.
 - Include the most decision-relevant fields from the selected endpoint before dumping raw JSON.
-- When using `getVideoDetailV1`, explain why the returned fields answer the user's question.
+- When using `getYoutubeVideoDetailV1`, explain why the returned fields answer the user's question.
 - If the user gave filters such as `channelId`, `cursor`, `videoId`, echo those back so the scope is explicit.
 - If the backend errors, include the backend payload and the exact operation ID.
