@@ -3,9 +3,15 @@
   "slug": "folk",
   "displayName": "Folk",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495228621,
-    "commit": "https://github.com/openclaw/skills/commit/72c3298bf7784c2ec460bccade55ebc2f63072a4"
+    "version": "1.0.1",
+    "publishedAt": 1776893240517,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495228621,
+      "commit": "https://github.com/openclaw/skills/commit/72c3298bf7784c2ec460bccade55ebc2f63072a4"
+    }
+  ]
 }
