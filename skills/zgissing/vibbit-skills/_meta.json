@@ -3,9 +3,15 @@
   "slug": "vibbit-skills",
   "displayName": "Vibbit SKILL",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1775833815001,
-    "commit": "https://github.com/openclaw/skills/commit/703d4976099c1d3155a24e32cab794535ac7a808"
+    "version": "1.0.9",
+    "publishedAt": 1776754785636,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1775833815001,
+      "commit": "https://github.com/openclaw/skills/commit/703d4976099c1d3155a24e32cab794535ac7a808"
+    }
+  ]
 }
