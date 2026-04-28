@@ -3,9 +3,15 @@
   "slug": "ring-a-ding",
   "displayName": "Ring-a-Ding",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1776114721285,
-    "commit": "https://github.com/openclaw/skills/commit/52358d56434f9be6a6dc8551e007a4ce81a4c8ce"
+    "version": "0.2.1",
+    "publishedAt": 1776827813961,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1776114721285,
+      "commit": "https://github.com/openclaw/skills/commit/52358d56434f9be6a6dc8551e007a4ce81a4c8ce"
+    }
+  ]
 }
