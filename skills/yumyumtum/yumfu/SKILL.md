@@ -415,17 +415,22 @@ python3 ~/clawd/skills/yumfu/scripts/build_reentry_context.py \
   --universe {selected_world}
 ```
 
-Then render the actual continue-time hook:
+Then prepare the actual continue-time delivery bundle:
 ```bash
-python3 ~/clawd/skills/yumfu/scripts/render_continue_reentry.py \
+python3 ~/clawd/skills/yumfu/scripts/prepare_continue_reentry_delivery.py \
   --user-id {user_id} \
-  --universe {selected_world}
+  --universe {selected_world} \
+  --target {chat_id}
 ```
 
 If a sidecar exists:
 - Use the latest daily evolution summary as a **short re-entry scene hook**
 - Surface only the most relevant pending hook(s)
-- Respect the detected preferred language
+- Respect the save's canonical language first; do **not** let old sidecar English/Chinese drift override `save.language` unless the player explicitly switched play language
+- **Continue/reentry is image-first and mandatory image+text**
+- If a recent save-matched image exists, reuse it
+- If no recent save-matched image exists, **generate a fresh image before sending**
+- Do **not** send continue reminders as text-only unless image generation failed and there is absolutely no recovery path
 - Do **not** dump the whole evolution history
 - Make it easy for the player to continue with one short reply
 
@@ -967,6 +972,7 @@ Each daily evolution update should include:
 1. **1 short front-context recap** (1-3 sentences) reminding the player why they are here, what line/faction/quest they are already tied to, and why today's scene matters
 2. **1 short story update** (100-220 words)
 3. **1 generated image** showing the new situation, with prompt continuity from the current arc instead of a context-free fresh scene
+   - YumFu-generated images should include the **YumFu logo stamped in a corner** after generation (do not rely on the model to hallucinate the logo)
 4. **1 meaningful state change** (rumor, faction shift, patrol increase, resource loss, NPC movement, political signal, etc.)
 5. **1 hook** that invites the player back into active play
 6. **1 TTS voice-bubble delivery by default** unless that save has explicitly disabled TTS
@@ -1054,15 +1060,16 @@ Supporting scripts:
 - `scripts/generate_turn_tts.py` — generate one gameplay-turn TTS file using the save's stable current voice
 
 Use this priority order:
-1. **The player's recent actual conversation language** (highest priority)
-2. `save.language` if present
+1. `save.language` if present (**canonical per save**)
+2. **The player's recent actual conversation language** only as an advisory / explicit-switch signal
 3. the world's default language
 4. channel/system default only as a last fallback
 
 Examples:
-- If a player is in an English world but has been actively replying in Chinese recently, prefer Chinese unless the game flow clearly depends on staying in-world in English.
-- If the player has consistently been playing the world in English, keep daily evolution in English.
+- If a player created or has been preserving a save in Chinese, keep continue reminders / daily evolution in Chinese unless the player clearly asks or consistently switches active play into English.
+- If a player has consistently been playing the world in English, keep daily evolution in English.
 - Do not randomly alternate between Chinese and English from day to day.
+- Do not let old sidecar text silently drag the save into another language.
 
 The daily update should feel like a natural continuation of how the player has already been playing.
 ### Daily Evolution severity model
@@ -1109,6 +1116,7 @@ Supporting scripts:
 - `scripts/disable_daily_evolution_cron.py` — disable per-player daily cron
 - `scripts/build_reentry_context.py` — merge save + sidecar for continue flow
 - `scripts/render_continue_reentry.py` — render a concise continue-time re-entry prompt
+- `assets/yumfu-logo.png` — corner logo stamped onto YumFu-generated images
 - `scripts/init_sengoku_save.py` — initialize a 战国乱世 / Sengoku Chaos starting save
 - `scripts/start_sengoku_game.py` — initialize Sengoku save + daily evolution choice + opening scene payload
 
@@ -1747,7 +1755,7 @@ Logging is **NOT optional**. Every turn must be logged or storybook generation w
 
 **2. Generate Storybook:**
 ```bash
-# V3 - Full conversation flow (RECOMMENDED)
+# V3 - Full conversation flow (canonical)
 uv run ~/clawd/skills/yumfu/scripts/generate_storybook_v3.py \
   --user-id 1309815719 \
   --universe warrior-cats
@@ -1758,17 +1766,22 @@ uv run ~/clawd/skills/yumfu/scripts/generate_storybook_v3.py \
   --universe warrior-cats \
   --session-id 20260403-001349
 
-# V2 - Simple (from save notes only, no full dialogue)
-uv run ~/clawd/skills/yumfu/scripts/generate_storybook_v2.py \
+# Ending / retire / archive branch (preferred for final delivery)
+uv run ~/clawd/skills/yumfu/scripts/deliver_yumfu_turn.py \
   --user-id 1309815719 \
-  --universe warrior-cats
+  --universe warrior-cats \
+  --language en \
+  --turn-id warrior-cats-final-001 \
+  --story-text "<final in-world ending text>" \
+  --ending-storybook \
+  --session-id 20260403-001349
 ```
 
 **3. Output:**
 ```
 ~/clawd/memory/yumfu/storybooks/warrior-cats/user-1309815719-20260403-075523/
-├── storybook.html        # Open in browser, click "Print to PDF"
-└── images/               # All session images
+├── storybook.html        # canonical shareable artifact (HTML first)
+└── images/               # copied source images for local reference
     ├── tumpaw-ceremony-20260403.png
     ├── tumpaw-firestar-20260403.png
     └── tumpaw-fishing-20260403.png
@@ -1825,35 +1838,42 @@ You pad down to the river. The water flows swiftly, sunlight glinting off the su
 - Player hasn't played in 24+ hours (auto-archive)
 - **Player explicitly ends / retires / abandons / terminates a save or story run**
 
-### End-of-Journey Offer Rule (NEW)
+### End-of-Journey Storybook Rule (UPDATED)
 
 When a run reaches a meaningful ending **or** the player explicitly says they want to stop / end / archive / retire that game record:
 
-1. **Ask once** whether they want a storybook of the journey.
-2. Offer it as an **art-rich illustrated storybook** containing:
-   - their journey summary
+1. **If storybook tracking is enabled, auto-generate the final HTML storybook immediately.**
+2. The ending storybook must be an **art-rich illustrated HTML storybook** containing:
+   - the journey summary
    - key player choices
    - major AI responses / scene narration
    - generated images from the run
    - final stats / relationships / achievements when available
 3. Preferred formats:
-   - **HTML first** (canonical, richly styled, easy to preserve)
-   - **PDF if conversion succeeds and the layout is visually acceptable**
+   - **HTML first** (canonical, richly styled, easy to preserve, image-embedded single file)
+   - **PDF only as an optional secondary export** if conversion succeeds and layout is visually acceptable
 4. **Scene-binding rule (MANDATORY)**:
    - storybook pages must be organized as **scene blocks**
    - each scene block should contain: **one image + the exact matching scene/dialogue text directly below or beside it**
    - do **not** put images into a detached gallery while moving all text to separate long prose sections
    - do **not** separate a scene's picture from its corresponding dialogue/narration across distant sections unless the user explicitly asks for a gallery-style export
-   - for chat-delivered HTML storybooks, prefer a readable comic/illustrated-book flow over a print-first PDF layout
-5. Delivery rule:
+5. **Quality rule (MANDATORY)**:
+   - decode accidental unicode-escaped strings (for example `\u9aa8\u602a\u7cbe\u7075`) before rendering titles / prose
+   - final stats section must not be left empty when the save contains HP / stamina / level / inventory / relationships / attributes / skills / achievements
+   - image captions must be derived from scene meaning, not lazy filename fragments like `Watch` / `Thread`
+   - visual style should read like a **formal illustrated storybook**, not a raw terminal transcript dump
+6. Delivery rule:
    - If generated, **send it back into chat** as a file/message whenever possible
    - Also keep the generated file(s) on disk under the YumFu storybook output directory
-5. Do **not** silently generate a final exported storybook every time; ask the player first unless they already requested it.
-6. However, if storybook tracking is enabled, keep the **underlying rolling storybook source** updated by default throughout play.
+7. If the player has explicitly disabled storybook tracking for that save, skip the auto-generation.
+8. During normal play, keep the **underlying rolling storybook source** updated by default.
 
-Suggested prompt to player:
-- Chinese: `这段旅程要不要我给你做成一本带配图的 Storybook？我可以整理成艺术化图文版，发到聊天里给你，也会保存在本地。`
-- English: `Want me to turn this run into an illustrated storybook? I can make an art-rich HTML/PDF version, send it here in chat, and also save it locally.`
+Recommended helper:
+- `uv run ~/clawd/skills/yumfu/scripts/prepare_end_storybook.py --user-id <id> --universe <world> [--session-id ...]`
+- This refreshes/generates the latest HTML storybook and returns JSON for chat delivery.
+- The standard delivery helper now also supports this path directly:
+  - `uv run ~/clawd/skills/yumfu/scripts/deliver_yumfu_turn.py ... --ending-storybook [--session-id ...]`
+  - when enabled, it will prepare TTS and the end-storybook together in one structured payload.
 
 ### Daily Evolution + Storybook Entry Rule
 
@@ -1899,12 +1919,43 @@ pdf_path = browser({
 })
 ```
 
+### Agent Instructions for Ending / Retire / Archive Branches (DEFAULT)
+
+When the run has clearly reached an ending, death, finale, retirement, archive, or explicit stop:
+
+1. **Do not ask again whether to make a storybook** if storybook tracking is enabled.
+2. Treat the final storybook HTML as part of the default ending delivery.
+3. Use the standard delivery helper with `--ending-storybook` so the normal turn package and the ending storybook are prepared together.
+4. If `next_actions.send_end_storybook_html == true`, send the generated HTML file back into chat.
+5. After successful delivery, mark `storybook_sent` so the same ending storybook is not re-sent repeatedly.
+
+**Default ending-branch workflow:**
+
+```bash
+uv run ~/clawd/skills/yumfu/scripts/deliver_yumfu_turn.py \
+  --user-id <id> \
+  --universe <world> \
+  --language <zh|en> \
+  --turn-id <stable-ending-turn-id> \
+  --story-text "<final in-world ending text>" \
+  --ending-storybook \
+  [--session-id <session-id>]
+```
+
+Then, from the returned JSON:
+- send the normal text / image / TTS as usual
+- if present, send `end_storybook.html` back into chat as the canonical final storybook deliverable
+- keep PDF optional, never primary
+
 **Preferred OpenClaw workflow:**
 
 ```bash
-# Generate HTML first
+# For normal manual storybook export
 cd ~/clawd/skills/yumfu
 uv run scripts/generate_storybook_v3.py --user-id 1309815719 --universe warrior-cats
+
+# For ending / retire / archive branches, prefer the delivery helper
+uv run scripts/deliver_yumfu_turn.py ... --ending-storybook [--session-id ...]
 
 # Ship HTML first if it reads well in-chat
 # Only convert to PDF after verifying the HTML layout preserves scene binding

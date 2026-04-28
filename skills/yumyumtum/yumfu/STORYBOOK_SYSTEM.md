@@ -133,8 +133,9 @@ uv run scripts/generate_image.py \
 
 The AI will automatically:
 1. Generate HTML from your session logs
-2. Convert to PDF
-3. Send to you via Telegram/Discord
+2. Prefer HTML as the canonical shareable artifact
+3. Send the HTML back to you via Telegram/Discord
+4. Only produce PDF as an optional secondary export if the layout is visually confirmed good
 
 ### For Developers
 
@@ -197,6 +198,12 @@ if image_filename:
 - Character dies (permanent death)
 - Session ends naturally
 - Player inactive for 24+ hours (archive mode)
+- Player explicitly retires / archives / ends the run
+
+**Ending branch default:**
+- if storybook tracking is enabled, ending / retire / archive branches should auto-generate the final HTML storybook
+- preferred helper: `deliver_yumfu_turn.py --ending-storybook`
+- HTML is primary; PDF is optional
 
 ## 📊 File Structure
 

@@ -40,6 +40,7 @@ from turn_delivery_state import save as save_state
 SCRIPT_DIR = Path(__file__).resolve().parent
 GENERATE_IMAGE = SCRIPT_DIR / "generate_image.py"
 GENERATE_TTS = SCRIPT_DIR / "generate_turn_tts.py"
+PREPARE_END_STORYBOOK = SCRIPT_DIR / "prepare_end_storybook.py"
 OUTBOUND_YUMFU = Path.home() / ".openclaw" / "media" / "outbound" / "yumfu"
 
 
@@ -169,6 +170,33 @@ def prepare_tts(args: argparse.Namespace, state: dict[str, Any]) -> dict[str, An
     ])
 
 
+def prepare_end_storybook(args: argparse.Namespace, state: dict[str, Any]) -> dict[str, Any]:
+    if not args.ending_storybook:
+        return {
+            "generated": False,
+            "skipped": True,
+            "reason": "ending_storybook_not_requested",
+        }
+    if state.get("storybook_sent"):
+        return {
+            "generated": False,
+            "skipped": True,
+            "reason": "storybook_already_sent",
+        }
+    cmd = [
+        "uv",
+        "run",
+        str(PREPARE_END_STORYBOOK),
+        "--user-id",
+        args.user_id,
+        "--universe",
+        args.universe,
+    ]
+    if args.session_id:
+        cmd += ["--session-id", args.session_id]
+    return run_json(cmd)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare YumFu turn delivery assets")
     parser.add_argument("--user-id", required=True)
@@ -180,6 +208,8 @@ def main() -> None:
     parser.add_argument("--image-prompt")
     parser.add_argument("--image-resolution", choices=["1K", "2K", "4K"], default="1K")
     parser.add_argument("--aspect-ratio", default="4:5")
+    parser.add_argument("--ending-storybook", action="store_true", help="Also prepare final HTML storybook for end-of-journey delivery")
+    parser.add_argument("--session-id", help="Optional session id to pin end-storybook generation")
     args = parser.parse_args()
 
     state = load_state(args.user_id, args.universe, args.turn_id)
@@ -191,6 +221,7 @@ def main() -> None:
     caption, followup_text, text_mode = plan_caption(args.story_text)
     image = prepare_image(args, state)
     tts = prepare_tts(args, state)
+    end_storybook = prepare_end_storybook(args, state)
 
     payload = {
         "success": True,
@@ -207,14 +238,17 @@ def main() -> None:
         },
         "image": image,
         "tts": tts,
+        "end_storybook": end_storybook,
         "next_actions": {
             "send_image_with_caption": bool(image.get("generated")),
             "fallback_to_openclaw_image_generate": bool(image.get("needs_fallback")),
             "send_text_followup": bool(followup_text),
             "send_tts_voice": bool(tts.get("success") and tts.get("generated")),
+            "send_end_storybook_html": bool(end_storybook.get("success") and end_storybook.get("generated") and end_storybook.get("send_back_to_chat")),
             "mark_main_text_sent_after_success": True,
             "mark_image_sent_after_success": bool(image.get("generated")),
             "mark_tts_sent_after_success": bool(tts.get("success") and tts.get("generated")),
+            "mark_storybook_sent_after_success": bool(end_storybook.get("success") and end_storybook.get("generated") and end_storybook.get("send_back_to_chat")),
         },
     }
     print(json.dumps(payload, ensure_ascii=False))

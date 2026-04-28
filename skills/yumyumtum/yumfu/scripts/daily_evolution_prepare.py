@@ -75,6 +75,21 @@ def main():
             language_confidence = lang_payload.get('confidence') or 0.0
     except Exception:
         pass
+@@
+         'language_policy': {
+             'priority': [
+-                'recent actual player conversation language',
+-                'save.language',
++                'save.language (canonical per save)',
++                'recent actual player conversation language (advisory unless explicit switch)',
+                 'world default language',
+                 'system fallback'
+             ],
+             'preferred_language_hint': preferred_language,
+             'confidence': language_confidence,
+-            'instruction': 'Write the daily evolution in the same language the player has been naturally using most recently, unless there is a strong world-specific reason not to.'
++            'instruction': 'Write the daily evolution in the save\'s canonical language first. Do not drift languages just because old sidecar text or weak recent evidence points elsewhere. Only switch languages when the player clearly and explicitly changes play language.'
+         },
 
     prompt = {
         'goal': system_goal,

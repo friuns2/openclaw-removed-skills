@@ -56,6 +56,17 @@ def clean_name(text: str | None, fallback: str) -> str:
     return str(text).strip()
 
 
+def normalize_lang(value: str | None) -> str | None:
+    if not value:
+        return None
+    v = str(value).strip().lower()
+    if v in {'zh', 'zh-cn', 'zh-hans', 'zh-tw', 'zh-hant', 'cn', 'chinese', '中文'}:
+        return 'zh'
+    if v in {'en', 'en-us', 'en-gb', 'english'}:
+        return 'en'
+    return None
+
+
 def got_update(save: dict, world: dict, sidecar: dict) -> dict:
     character = save.get('character', {})
     name = clean_name(character.get('name'), 'the Dornish knight')
@@ -70,51 +81,98 @@ def got_update(save: dict, world: dict, sidecar: dict) -> dict:
     house = clean_name(character.get('house'), 'Martell')
     prince_name = 'Prince Doran'
     trust = relationships.get(prince_name, 0)
+    lang = normalize_lang(save.get('language')) or 'en'
 
-    seeds = [
-        {
-            'summary': 'A red-sealed message has moved again at the docks.',
-            'story_text': f"By the time dawn thins over the coast road, word reaches you that a flat-bottomed boat at {first_destination} unloaded nothing in public, yet three men argued over a deep-red sealed note beside the pier. The cargo ropes bit too deep for salt alone, and the dockhands went quiet the moment Martell colors came into view. Someone is moving goods under a false manifest, and someone else is more interested in the message than the cargo itself. If Doran’s hidden line truly runs through the southern coast, then this is not random dockside noise — it is the first place where the lie has touched wood, rope, and witnesses. You are close enough now to arrive before the morning ledgers settle. Do you shadow the note, the cargo, or the men holding it?",
-            'hooks': [
-                'Follow the red-sealed note before it changes hands again.',
-                'Watch the cargo before anyone opens the books for the day.'
-            ],
-            'meta': {
-                'rumor_threads': ['red-sealed note at the docks'],
-                'faction_movements': ['dockside handlers behaving under pressure'],
-                'npc_watchlist': ['unknown note recipient', 'boat captain with false manifest']
+    if lang == 'zh':
+        seeds = [
+            {
+                'summary': '码头上的红蜡信又动了一次。',
+                'story_text': f"天色刚薄下来，关于{first_destination}的风声已经先一步传到你耳里：一条平底船明明没有公开卸出什么像样货物，岸边却有三个人为了那封深红封蜡的短讯争得过分厉害。缆绳吃水太深，不像只装盐货；而一旦有人瞥见马泰尔的颜色，码头工的声音就立刻低了下去。真正被人护着的，也许不是货，而是那封决定货该往哪走的信。若多兰亲王要你查的暗线确实埋在南岸，这里就是它第一次露出木头、绳索和证人的地方。你现在赶过去，还来得及在账本开封前抓到最早一手。你先盯信，先盯货，还是先盯拿信的人？",
+                'hooks': [
+                    '先盯那封红蜡信下一次换手。',
+                    '先看货物在开账前会被挪去哪里。'
+                ],
+                'meta': {
+                    'rumor_threads': ['码头红蜡信再度出现'],
+                    'faction_movements': ['码头搬运线在高压下运作'],
+                    'npc_watchlist': ['接信的人', '用假账的船主']
+                },
+                'image_prompt': 'Pre-dawn Planky Town docks in Dorne, flat-bottomed boat, suspicious dockhands arguing over a deep-red sealed note, covert supply-line tension, Game of Thrones dark fantasy oil painting style'
             },
-            'image_prompt': 'Pre-dawn Planky Town docks in Dorne, flat-bottomed boat, suspicious dockhands arguing over a deep-red sealed note, covert supply-line tension, Game of Thrones dark fantasy oil painting style'
-        },
-        {
-            'summary': 'A courier failed to arrive, but the watchers did.',
-            'story_text': f"Before full sunrise, a small knot of traders in {first_destination} begins whispering about a courier who never arrived, though two separate watchers appeared at the pier asking after the same shipment. That is the kind of absence Doran warned you about: the visible messenger matters less than the unseen hand expecting him. The route is still alive, which means whoever touched it did not shut it down — they bent it. The timing is wrong, the faces are wrong, and the silence around the missing courier is wrongest of all. If you move now, you may catch the people watching the line before they realize the line is watching them back. Do you press into the crowd as another traveler, or hold off until one of them breaks pattern?",
-            'hooks': [
-                'Blend into the morning crowd and identify who came to watch the missing courier.',
-                'Wait for the first watcher to peel away from the pier.'
-            ],
-            'meta': {
-                'rumor_threads': ['missing courier on southern line'],
-                'faction_movements': ['unknown observers appear before cargo is logged'],
-                'npc_watchlist': ['silent watcher at the pier', 'missing courier']
+            {
+                'summary': '信使没到，但盯梢的人先到了。',
+                'story_text': f"天还没彻底亮，{first_destination}的商贩之间已经开始低声谈论一个没到场的信使；可更要命的是，在同一批货登记之前，已有两拨生面孔先后在码头边打听它。多兰亲王提醒过你的那类事，往往不是看见了谁，而是谁明明该出现却没有出现。这条线没断，只是被人悄悄掰弯了。时机不对，面孔不对，大家对这个空缺的沉默更不对。若你现在下场，也许能在对方反应过来前，看清到底是谁在盯这条线。你是先混进人群里摸过去，还是先按住不动，等其中一个人自己露破绽？",
+                'hooks': [
+                    '先混进晨市里，把盯梢的人认出来。',
+                    '先等第一个离开码头的人露出去向。'
+                ],
+                'meta': {
+                    'rumor_threads': ['南线失踪信使'],
+                    'faction_movements': ['货还没记账，观察者先到了'],
+                    'npc_watchlist': ['码头盯梢人', '失踪信使']
+                },
+                'image_prompt': 'Morning crowd gathering at Planky Town docks, absent courier, two covert watchers scanning the shipment line, Dorne intrigue, Game of Thrones oil painting style'
             },
-            'image_prompt': 'Morning crowd gathering at Planky Town docks, absent courier, two covert watchers scanning the shipment line, Dorne intrigue, Game of Thrones oil painting style'
-        },
-        {
-            'summary': 'The supply line still moves, but under the wrong kind of caution.',
-            'story_text': f"The southern line has not stopped. That is what makes it dangerous. By first light, the wagons still roll toward {first_destination}, the boatmen still curse, and the tally-men still scratch marks into wet ledgers — but everything carries the wrong kind of caution. Men who should be impatient are careful. Men who should be loud are quiet. And a wax fragment the color of dried blood has already reached the dockside boards ahead of the morning trade. That means the line is compromised, but not openly broken. Someone wants Doran’s supplies to keep moving just enough that nobody panics until the knife is already in too deep. If you step in now, you step into a flow that expects not a rider in Martell colors, but a fool who never learned to read silence. Which current do you test first: the manifests, the handlers, or the boat itself?",
-            'hooks': [
-                'Check the manifests before the ink dries.',
-                'Watch which handler acts too carefully for an honest morning.'
-            ],
-            'meta': {
-                'rumor_threads': ['moving line, compromised books'],
-                'faction_movements': ['supply route operating under covert pressure'],
-                'npc_watchlist': ['ledger keeper', 'overcareful handler', 'boatmaster']
+            {
+                'summary': '补给线还在走，但谨慎得不对劲。',
+                'story_text': f"南边那条线并没有停，这才是最危险的地方。天刚亮，车还是往{first_destination}去，船夫还是在骂，记账的人还是在湿木板上划着数字，可所有动作都带着一种不该有的谨慎。原本该急的人忽然不急了，原本该吵的人忽然安静了，甚至一小片干血色的红蜡痕都比早市更早出现在了码头木板上。这说明线已经被碰过，却还没被公开掐断。有人想让多兰的货继续走，只走到没人来得及惊慌、刀子却已经伸进去的位置。你若现在插手，面对的不是一条正常流动的货线，而是一条等着看谁先露头的暗流。你先试账本，先试搬运的人，还是先试那条船？",
+                'hooks': [
+                    '先查账本在墨迹未干前改过哪里。',
+                    '先盯那个小心得过头的搬运人。'
+                ],
+                'meta': {
+                    'rumor_threads': ['货线继续运行但账目受压'],
+                    'faction_movements': ['补给路线在暗中受控'],
+                    'npc_watchlist': ['账房', '过分谨慎的搬运人', '船主']
+                },
+                'image_prompt': 'Early morning Dorne supply wagons and dock ledgers at Planky Town, tense cautious workers, red wax fragment on wooden boards, covert sabotage mood, Game of Thrones oil painting style'
+            }
+        ]
+    else:
+        seeds = [
+            {
+                'summary': 'A red-sealed message has moved again at the docks.',
+                'story_text': f"By the time dawn thins over the coast road, word reaches you that a flat-bottomed boat at {first_destination} unloaded nothing in public, yet three men argued over a deep-red sealed note beside the pier. The cargo ropes bit too deep for salt alone, and the dockhands went quiet the moment Martell colors came into view. Someone is moving goods under a false manifest, and someone else is more interested in the message than the cargo itself. If Doran’s hidden line truly runs through the southern coast, then this is not random dockside noise — it is the first place where the lie has touched wood, rope, and witnesses. You are close enough now to arrive before the morning ledgers settle. Do you shadow the note, the cargo, or the men holding it?",
+                'hooks': [
+                    'Follow the red-sealed note before it changes hands again.',
+                    'Watch the cargo before anyone opens the books for the day.'
+                ],
+                'meta': {
+                    'rumor_threads': ['red-sealed note at the docks'],
+                    'faction_movements': ['dockside handlers behaving under pressure'],
+                    'npc_watchlist': ['unknown note recipient', 'boat captain with false manifest']
+                },
+                'image_prompt': 'Pre-dawn Planky Town docks in Dorne, flat-bottomed boat, suspicious dockhands arguing over a deep-red sealed note, covert supply-line tension, Game of Thrones dark fantasy oil painting style'
             },
-            'image_prompt': 'Early morning Dorne supply wagons and dock ledgers at Planky Town, tense cautious workers, red wax fragment on wooden boards, covert sabotage mood, Game of Thrones oil painting style'
-        }
-    ]
+            {
+                'summary': 'A courier failed to arrive, but the watchers did.',
+                'story_text': f"Before full sunrise, a small knot of traders in {first_destination} begins whispering about a courier who never arrived, though two separate watchers appeared at the pier asking after the same shipment. That is the kind of absence Doran warned you about: the visible messenger matters less than the unseen hand expecting him. The route is still alive, which means whoever touched it did not shut it down — they bent it. The timing is wrong, the faces are wrong, and the silence around the missing courier is wrongest of all. If you move now, you may catch the people watching the line before they realize the line is watching them back. Do you press into the crowd as another traveler, or hold off until one of them breaks pattern?",
+                'hooks': [
+                    'Blend into the morning crowd and identify who came to watch the missing courier.',
+                    'Wait for the first watcher to peel away from the pier.'
+                ],
+                'meta': {
+                    'rumor_threads': ['missing courier on southern line'],
+                    'faction_movements': ['unknown observers appear before cargo is logged'],
+                    'npc_watchlist': ['silent watcher at the pier', 'missing courier']
+                },
+                'image_prompt': 'Morning crowd gathering at Planky Town docks, absent courier, two covert watchers scanning the shipment line, Dorne intrigue, Game of Thrones oil painting style'
+            },
+            {
+                'summary': 'The supply line still moves, but under the wrong kind of caution.',
+                'story_text': f"The southern line has not stopped. That is what makes it dangerous. By first light, the wagons still roll toward {first_destination}, the boatmen still curse, and the tally-men still scratch marks into wet ledgers — but everything carries the wrong kind of caution. Men who should be impatient are careful. Men who should be loud are quiet. And a wax fragment the color of dried blood has already reached the dockside boards ahead of the morning trade. That means the line is compromised, but not openly broken. Someone wants Doran’s supplies to keep moving just enough that nobody panics until the knife is already in too deep. If you step in now, you step into a flow that expects not a rider in Martell colors, but a fool who never learned to read silence. Which current do you test first: the manifests, the handlers, or the boat itself?",
+                'hooks': [
+                    'Check the manifests before the ink dries.',
+                    'Watch which handler acts too carefully for an honest morning.'
+                ],
+                'meta': {
+                    'rumor_threads': ['moving line, compromised books'],
+                    'faction_movements': ['supply route operating under covert pressure'],
+                    'npc_watchlist': ['ledger keeper', 'overcareful handler', 'boatmaster']
+                },
+                'image_prompt': 'Early morning Dorne supply wagons and dock ledgers at Planky Town, tense cautious workers, red wax fragment on wooden boards, covert sabotage mood, Game of Thrones oil painting style'
+            }
+        ]
 
     idx = int(hashlib.md5(f"{name}:{location}:{len(history)}:{trust}:{house}".encode()).hexdigest(), 16) % len(seeds)
     chosen = seeds[idx]
@@ -197,7 +255,17 @@ def build_recap(save: dict, world: dict, sidecar: dict) -> str:
     quest_name = clean_name(first_quest.get('name'), '')
 
     if world_id == 'game-of-thrones':
-        first_destination = clean_name((first_quest.get('intel') or {}).get('first_destination'), 'the southern coast')
+        lang = normalize_lang(save.get('language')) or 'en'
+        first_destination = clean_name((first_quest.get('intel') or {}).get('first_destination'), '南岸') if lang == 'zh' else clean_name((first_quest.get('intel') or {}).get('first_destination'), 'the southern coast')
+        if lang == 'zh':
+            parts = [
+                f"你现在仍是{name}，而且已经深陷豪斯{house or 'Martell'}背后的那条南方暗线。",
+                f"你一路走到这里，不是为了听流言，而是为了确认穿过{first_destination}的那条隐秘路线到底是真的，还是有人故意放出来的影子。",
+            ]
+            if last_summary and any('\u4e00' <= ch <= '\u9fff' for ch in last_summary):
+                parts.append(f"上一次，局势是这样拧紧的：{last_summary}")
+            return ''.join(p.strip() for p in parts if p.strip())
+
         parts = [
             f"You are {name}, already deep in a covert southern line tied to House {house or 'Martell'}.",
             f"You came this far to verify whether the hidden route through {first_destination} was real, not just whispered intrigue.",

@@ -36,6 +36,9 @@ Come play, test new worlds, share screenshots, and hang out with other players:
 - 🎨 **Automatic AI scene art** — major moments can arrive with matching world-specific illustrations
 - 🎧 **Audio story delivery** — turns can be turned into voice bubbles / narrated story audio
 - 📚 **Art storybooks** — your sessions can become shareable illustrated storybooks and PDFs
+- 🌐 **Storybook demos** — publishable HTML demos can live under `docs/storybooks/` for GitHub Pages showcase
+  - Live index: <https://yumyumtum.github.io/yumfu/storybooks/>
+  - Featured demo: <https://yumyumtum.github.io/yumfu/storybooks/journey-to-west-white-bone/>
 - 👥 **Multiplayer-first** — play inside group chats with PvP, teams, and shared world state
 - 🌍 **Multi-world, multi-language** — wuxia, magic school, epic fantasy, modern war, myth, comedy
 - 💬 **Natural language play** — just talk instead of memorizing commands
@@ -173,6 +176,13 @@ YumFu stores all game data **locally** on your machine:
 </table>
 
 *All showcase images are generated from real YumFu gameplay with world-specific art direction.*
+
+### 📖 Live Storybook Demo
+
+- **Journey to the West — White Bone**
+  - <https://yumyumtum.github.io/yumfu/storybooks/journey-to-west-white-bone/>
+- **All storybook demos**
+  - <https://yumyumtum.github.io/yumfu/storybooks/>
 
 ---
 

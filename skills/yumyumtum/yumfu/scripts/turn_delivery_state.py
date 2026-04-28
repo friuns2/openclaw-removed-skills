@@ -32,6 +32,7 @@ def load(user_id: str, universe: str, turn_id: str) -> dict:
             'main_text_sent': False,
             'image_sent': False,
             'tts_sent': False,
+            'storybook_sent': False,
             'image_mode': None,
         }
     return json.loads(p.read_text(encoding='utf-8'))
@@ -49,7 +50,7 @@ def main() -> None:
     parser.add_argument('--user-id', required=True)
     parser.add_argument('--universe', required=True)
     parser.add_argument('--turn-id', required=True)
-    parser.add_argument('--mark', choices=['main_text_sent', 'image_sent', 'tts_sent'])
+    parser.add_argument('--mark', choices=['main_text_sent', 'image_sent', 'tts_sent', 'storybook_sent'])
     parser.add_argument('--image-mode', choices=['caption', 'fallback-image-only'])
     args = parser.parse_args()
 

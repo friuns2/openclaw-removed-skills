@@ -58,9 +58,10 @@
 ~/clawd/skills/yumfu/
 ├── scripts/
 │   ├── session_logger.py (新 - 5.7KB)
-│   ├── generate_storybook_v2.py (新 - 14.5KB, notes-based fallback)
-│   ├── generate_storybook_v3.py (新 - 17.5KB, session-based主力)
-│   └── test_storybook_integration.py (新 - 5.2KB)
+│   ├── generate_storybook_v3.py (session-based canonical generator)
+│   ├── prepare_end_storybook.py (ending/retire/archive storybook helper)
+│   ├── deliver_yumfu_turn.py (supports `--ending-storybook`)
+│   └── test_storybook_integration.py (quality-focused integration test)
 ├── STORYBOOK_SYSTEM.md (新 - 7.8KB完整文档)
 └── SKILL.md (已更新 - 新增logging规范)
 ```
@@ -69,21 +70,20 @@
 
 **Mock session test:**
 ```
-✅ Created mock session: 8 events
 ✅ HTML generated: storybook.html
-✅ PDF generated: 450KB
 ✅ Content validation:
-   ✅ Title present
-   ✅ Player input present
-   ✅ AI response present
-   ✅ Achievement present
+   ✅ Player storybook prose preserved
+   ✅ AI prose preserved
    ✅ Print button present
+   ✅ Stats section present
+   ✅ Raw dict dump avoided
+   ✅ Event banner preserved
 ```
 
 **Real save test (user-YOUR_USER_ID):**
 ```
-✅ V2 generator (notes-based): 315KB PDF
-✅ V3 generator (session-based): 450KB PDF with full dialogue
+✅ V3 generator refreshes storybook.html from real session logs
+✅ Ending helper prepares final HTML storybook for chat delivery
 ```
 
 ---
@@ -110,13 +110,22 @@ log_turn(
 ### 生成Storybook（手动或自动触发）
 
 ```bash
-# 1. 生成HTML
+# 1. 生成HTML（canonical）
 uv run scripts/generate_storybook_v3.py \
   --user-id YOUR_USER_ID \
   --universe warrior-cats
 
-# 2. 转PDF（browser tool）
-# 3. 发送给用户（message tool）
+# 2. 或在 ending / retire / archive 分支直接走交付 helper
+uv run scripts/deliver_yumfu_turn.py \
+  --user-id YOUR_USER_ID \
+  --universe warrior-cats \
+  --language en \
+  --turn-id final-001 \
+  --story-text "<final in-world ending text>" \
+  --ending-storybook
+
+# 3. 发送 HTML 给用户（message tool）
+# 4. PDF only if explicitly desired and visually confirmed good
 ```
 
 ---
@@ -142,6 +151,8 @@ uv run scripts/generate_storybook_v3.py \
 **All scripts use inline dependencies or stdlib:**
 - ✅ `session_logger.py` - Pure Python stdlib (json, pathlib, datetime)
 - ✅ `generate_storybook_v3.py` - Pure Python stdlib (json, pathlib, shutil)
+- ✅ `prepare_end_storybook.py` - ending storybook refresh helper
+- ✅ `deliver_yumfu_turn.py` - now supports end-storybook planning
 - ✅ `generate_image.py` - Inline uv dependencies (已有)
 
 **No new pip/uv installations needed!**

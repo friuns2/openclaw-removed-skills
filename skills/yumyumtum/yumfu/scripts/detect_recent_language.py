@@ -69,18 +69,22 @@ def main():
         except Exception:
             pass
 
+    recent_votes = {'zh': 0.0, 'en': 0.0}
     for text in recent_texts:
         lang, conf = classify_text(text)
         if lang:
-            score[lang] += 5.0 * conf
+            weight = 5.0 * conf
+            score[lang] += weight
+            recent_votes[lang] += weight
             evidences.append({'source': 'recent_text', 'lang': lang, 'confidence': round(conf, 3), 'sample': text[:120]})
 
     save_lang = normalize_lang(save.get('language'))
-    if save_lang:
-        score[save_lang] += 4.5
-        evidences.append({'source': 'save.language', 'lang': save_lang, 'confidence': 0.86})
-
     world_lang = normalize_lang((save.get('world') or {}).get('language'))
+
+    if save_lang:
+        score[save_lang] += 7.5
+        evidences.append({'source': 'save.language', 'lang': save_lang, 'confidence': 0.99, 'note': 'canonical_per_save'})
+
     if world_lang:
         score[world_lang] += 1.0
         evidences.append({'source': 'world.language', 'lang': world_lang, 'confidence': 0.55})
@@ -99,11 +103,26 @@ def main():
             score[lang] += 0.18 * conf
             evidences.append({'source': 'sidecar.history', 'lang': lang, 'confidence': round(conf, 3)})
 
+    locked_to_save = bool(save_lang)
+    override_candidate = None
+    if save_lang:
+        opposite = 'en' if save_lang == 'zh' else 'zh'
+        if recent_votes[opposite] >= 8.5 and recent_votes[opposite] > recent_votes[save_lang] * 1.6:
+            override_candidate = opposite
+            evidences.append({
+                'source': 'recent_text_override_candidate',
+                'lang': opposite,
+                'confidence': 0.82,
+                'note': 'strong recent evidence exists, but save.language remains canonical until explicitly changed'
+            })
+
     preferred = 'en'
-    if score['zh'] > score['en']:
+    if save_lang:
+        preferred = save_lang
+    elif score['zh'] > score['en']:
         preferred = 'zh'
     elif score['en'] == score['zh'] == 0:
-        preferred = save_lang or world_lang or 'en'
+        preferred = world_lang or 'en'
 
     total = max(0.001, score['zh'] + score['en'])
     confidence = max(score.values()) / total
@@ -115,10 +134,13 @@ def main():
         'preferred_language': preferred,
         'confidence': round(confidence, 3),
         'scores': {k: round(v, 3) for k, v in score.items()},
+        'locked_to_save_language': locked_to_save,
+        'save_language': save_lang,
+        'override_candidate': override_candidate,
         'evidence': evidences[:12],
         'fallback_order': [
-            'recent actual player text',
-            'save.language',
+            'save.language (canonical per save)',
+            'recent actual player text as advisory / explicit-switch signal',
             'world language',
             'old sidecar text (weak only)',
             'system fallback'

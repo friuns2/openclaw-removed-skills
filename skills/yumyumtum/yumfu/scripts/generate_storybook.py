@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-YumFu Storybook Generator - Simple HTML version
-Converts gameplay session into a beautiful HTML storybook (can be printed to PDF from browser)
+DEPRECATED: legacy YumFu storybook generator.
 
-Usage:
-    uv run generate_storybook.py --user-id <id> --universe <world>
+Do not use this for new flows.
+Use `generate_storybook_v3.py` for canonical HTML storybooks,
+and use `deliver_yumfu_turn.py --ending-storybook` for ending / retire / archive delivery.
 """
 
 import argparse

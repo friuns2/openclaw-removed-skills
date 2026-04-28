@@ -29,6 +29,8 @@ import os
 import sys
 from pathlib import Path
 
+LOGO_PATH = Path.home() / 'clawd' / 'skills' / 'yumfu' / 'assets' / 'yumfu-logo.png'
+
 SUPPORTED_ASPECT_RATIOS = [
     "1:1",
     "2:3",
@@ -90,6 +92,30 @@ def normalize_prompt(prompt: str) -> str:
     if "no text" in lower or "no words" in lower or "no letters" in lower:
         return prompt
     return prompt + TEXT_AVOIDANCE_SUFFIX
+
+
+def overlay_yumfu_logo(image, output_path, pil_image_module):
+    if not LOGO_PATH.exists():
+        image.save(str(output_path), 'PNG')
+        return False
+
+    base = image.convert('RGBA')
+    logo = pil_image_module.open(LOGO_PATH).convert('RGBA')
+
+    max_logo_w = max(120, base.width // 5)
+    scale = min(1.0, max_logo_w / max(1, logo.width))
+    new_size = (max(1, int(logo.width * scale)), max(1, int(logo.height * scale)))
+    logo = logo.resize(new_size)
+
+    margin = max(18, base.width // 40)
+    x = max(0, base.width - logo.width - margin)
+    y = max(0, base.height - logo.height - margin)
+
+    composed = pil_image_module.new('RGBA', base.size, (255, 255, 255, 0))
+    composed.alpha_composite(base)
+    composed.alpha_composite(logo, (x, y))
+    composed.convert('RGB').save(str(output_path), 'PNG')
+    return True
 
 
 def main():
@@ -238,15 +264,14 @@ def main():
 
                 image = PILImage.open(BytesIO(image_data))
 
-                # Ensure RGB mode for PNG (convert RGBA to RGB with white background if needed)
-                if image.mode == 'RGBA':
-                    rgb_image = PILImage.new('RGB', image.size, (255, 255, 255))
-                    rgb_image.paste(image, mask=image.split()[3])
-                    rgb_image.save(str(output_path), 'PNG')
-                elif image.mode == 'RGB':
-                    image.save(str(output_path), 'PNG')
+                # Ensure PNG output and apply YumFu logo overlay in the final image corner
+                if image.mode not in ('RGBA', 'RGB'):
+                    image = image.convert('RGBA')
+                logo_applied = overlay_yumfu_logo(image, output_path, PILImage)
+                if logo_applied:
+                    print(f"Applied YumFu logo overlay: {LOGO_PATH}")
                 else:
-                    image.convert('RGB').save(str(output_path), 'PNG')
+                    print("YumFu logo overlay skipped: logo asset missing")
                 image_saved = True
 
         if image_saved:

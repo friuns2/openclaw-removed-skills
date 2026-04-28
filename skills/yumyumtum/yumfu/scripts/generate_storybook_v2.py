@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-YumFu Storybook Generator V2 - Full Conversation Flow
-Converts gameplay session into a PDF-ready HTML storybook with COMPLETE dialogue
+DEPRECATED: legacy YumFu storybook generator V2.
 
-Features:
+Kept only for historical reference.
+Do not route new storybook generation through V2.
+Use `generate_storybook_v3.py` for canonical HTML storybooks,
+and use `deliver_yumfu_turn.py --ending-storybook` for ending / retire / archive delivery.
+
+Original V2 notes:
 - Full conversation flow (player input + AI responses)
 - Images embedded at correct positions
 - Beautiful HTML/PDF layout
 - Auto-detection of session from save file
-
-Usage:
-    uv run generate_storybook_v2.py --user-id <id> --universe <world>
 """
 
 import argparse

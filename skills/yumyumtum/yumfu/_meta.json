@@ -3,11 +3,16 @@
   "slug": "yumfu",
   "displayName": "YumFu",
   "latest": {
-    "version": "1.7.7",
-    "publishedAt": 1776491701205,
-    "commit": "https://github.com/openclaw/skills/commit/74eae85b6dd22fd829485b71c0a442e38546c261"
+    "version": "1.7.9",
+    "publishedAt": 1776924575114,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.7.7",
+      "publishedAt": 1776491701205,
+      "commit": "https://github.com/openclaw/skills/commit/74eae85b6dd22fd829485b71c0a442e38546c261"
+    },
     {
       "version": "1.7.5",
       "publishedAt": 1776065286008,

@@ -9,6 +9,9 @@
 - 🎨 **自动生图** - 关键场景可自动生成符合世界风格的配图
 - 🎧 **音频 Story** - 游戏回合可转成语音气泡 / 旁白式故事音频
 - 📚 **艺术 Storybook** - 冒险过程可导出为带插图的 HTML / PDF 故事书
+- 🌐 **Storybook Demo 页面** - 可发布到 GitHub Pages 的 HTML 故事书展示页
+  - 在线入口：<https://yumyumtum.github.io/yumfu/storybooks/>
+  - 精选示例（西游·白骨线）：<https://yumyumtum.github.io/yumfu/storybooks/journey-to-west-white-bone/>
 - 🤝 **多人游玩** - 支持群聊 PvP、组队、共享世界状态
 - 🌍 **多世界多语言** - 武侠、魔法、史诗奇幻、现代战争、神话、搞笑世界一起玩
 - 💬 **自然语言输入** - 不必死记命令，直接说你想做什么
@@ -72,6 +75,13 @@
 </table>
 
 *这些展示图来自 YumFu 实际游玩中的世界风格生图。*
+
+### 📖 在线 Storybook 示例
+
+- **西游记 · 白骨线故事书**
+  - <https://yumyumtum.github.io/yumfu/storybooks/journey-to-west-white-bone/>
+- **全部 Storybook 示例入口**
+  - <https://yumyumtum.github.io/yumfu/storybooks/>
 
 ---
 
