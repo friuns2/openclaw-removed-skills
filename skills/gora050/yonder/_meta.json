@@ -3,9 +3,15 @@
   "slug": "yonder",
   "displayName": "Yonder",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775597850847,
-    "commit": "https://github.com/openclaw/skills/commit/f630b897c5e45c267f5e3f8c449e8a7d22dcbdfa"
+    "version": "1.0.1",
+    "publishedAt": 1776899102256,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775597850847,
+      "commit": "https://github.com/openclaw/skills/commit/f630b897c5e45c267f5e3f8c449e8a7d22dcbdfa"
+    }
+  ]
 }
