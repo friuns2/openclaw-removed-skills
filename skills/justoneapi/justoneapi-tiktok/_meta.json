@@ -3,11 +3,16 @@
   "slug": "justoneapi-tiktok",
   "displayName": "TikTok API",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1776239998644,
-    "commit": "https://github.com/openclaw/skills/commit/a5956c5f2e9f3655a8a614fea4b82ee1d969bcf2"
+    "version": "1.0.8",
+    "publishedAt": 1776924482669,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1776239998644,
+      "commit": "https://github.com/openclaw/skills/commit/a5956c5f2e9f3655a8a614fea4b82ee1d969bcf2"
+    },
     {
       "version": "1.0.5",
       "publishedAt": 1775375349726,

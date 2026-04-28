@@ -20,8 +20,8 @@ This skill wraps 7 TikTok operations exposed by JustOneAPI. It is strongest for 
 ## Representative Operations
 
 - `getUserPostV1`: User Published Posts — Get TikTok user Published Posts data, including video ID, description, and publish time, for user activity analysis and posting frequency tracking, influencer performance evaluation, and content trend monitoring for specific creators
-- `getPostDetailV1`: Post Details — Get TikTok post Details data, including video ID, author information, and description text, for content performance analysis and metadata extraction and influencer evaluation via specific post metrics
-- `getUserDetailV1`: User Profile — Get TikTok user Profile data, including nickname, unique ID, and avatar, for influencer profiling and audience analysis, account performance tracking and growth monitoring, and identifying verified status and official accounts
+- `getTiktokPostDetailV1`: Post Details — Get TikTok post Details data, including video ID, author information, and description text, for content performance analysis and metadata extraction and influencer evaluation via specific post metrics
+- `getTiktokUserDetailV1`: User Profile — Get TikTok user Profile data, including nickname, unique ID, and avatar, for influencer profiling and audience analysis, account performance tracking and growth monitoring, and identifying verified status and official accounts
 - `getPostCommentV1`: Post Comments — Get TikTok post Comments data, including comment ID, user information, and text content, for sentiment analysis of the audience's reaction to specific content and engagement measurement via comment volume and quality
 
 ## Request Pattern
@@ -34,7 +34,7 @@ This skill wraps 7 TikTok operations exposed by JustOneAPI. It is strongest for 
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getUserPostV1`, `getPostDetailV1`, `getUserDetailV1`, `getPostCommentV1`.
+2. Start with one of these operations when it matches the user's request: `getUserPostV1`, `getTiktokPostDetailV1`, `getTiktokUserDetailV1`, `getPostCommentV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:

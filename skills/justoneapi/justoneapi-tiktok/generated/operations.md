@@ -24,9 +24,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getPostDetailV1`
+## `getTiktokPostDetailV1`
 
 - Method: `GET`
 - Path: `/api/tiktok/get-post-detail/v1`
@@ -47,7 +47,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getPostSubCommentV1`
 
@@ -72,9 +72,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserDetailV1`
+## `getTiktokUserDetailV1`
 
 - Method: `GET`
 - Path: `/api/tiktok/get-user-detail/v1`
@@ -96,7 +96,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserPostV1`
 
@@ -127,7 +127,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchPostV1`
 
@@ -168,7 +168,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchUserV1`
 
@@ -193,4 +193,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
