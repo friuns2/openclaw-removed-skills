@@ -3,9 +3,15 @@
   "slug": "cirrus-labs",
   "displayName": "Cirrus Labs",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775614053260,
-    "commit": "https://github.com/openclaw/skills/commit/1bf237f0770488e78ab4510ef8de49768fde0447"
+    "version": "1.0.1",
+    "publishedAt": 1776899805921,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775614053260,
+      "commit": "https://github.com/openclaw/skills/commit/1bf237f0770488e78ab4510ef8de49768fde0447"
+    }
+  ]
 }
