@@ -3,9 +3,15 @@
   "slug": "caseblocks",
   "displayName": "Caseblocks",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574320545,
-    "commit": "https://github.com/openclaw/skills/commit/d881cefbc40c32294feb0a366fb8f341d4a2a0ee"
+    "version": "1.0.1",
+    "publishedAt": 1776895992044,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574320545,
+      "commit": "https://github.com/openclaw/skills/commit/d881cefbc40c32294feb0a366fb8f341d4a2a0ee"
+    }
+  ]
 }
