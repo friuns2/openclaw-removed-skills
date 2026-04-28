@@ -3,9 +3,15 @@
   "slug": "upstash-redis",
   "displayName": "Upstash Redis",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775621077522,
-    "commit": "https://github.com/openclaw/skills/commit/bf6f5a43f199f5d15d78feac8cc21f8d5fc436eb"
+    "version": "1.0.1",
+    "publishedAt": 1776896351870,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775621077522,
+      "commit": "https://github.com/openclaw/skills/commit/bf6f5a43f199f5d15d78feac8cc21f8d5fc436eb"
+    }
+  ]
 }
