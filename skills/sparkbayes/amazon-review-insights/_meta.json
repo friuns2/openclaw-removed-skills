@@ -1,13 +1,18 @@
 {
   "owner": "sparkbayes",
   "slug": "amazon-review-insights",
-  "displayName": "亚马逊评论分析（amazon-review-insights）",
+  "displayName": "amazon-review-insights",
   "latest": {
-    "version": "0.9.3",
-    "publishedAt": 1775744537240,
-    "commit": "https://github.com/openclaw/skills/commit/031a78bc08ac16ff19e664b3e99237d760c66c55"
+    "version": "1.2.1",
+    "publishedAt": 1777299367543,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.9.3",
+      "publishedAt": 1775744537240,
+      "commit": "https://github.com/openclaw/skills/commit/031a78bc08ac16ff19e664b3e99237d760c66c55"
+    },
     {
       "version": "0.9.0",
       "publishedAt": 1775567278567,
