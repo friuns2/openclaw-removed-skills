@@ -1,7 +1,7 @@
 ---
 name: ai-era-career-planner
 description: AI时代职业规划师技能。专为AI时代职场变化而设计，帮助用户应对AI带来的职业冲击与机遇。当用户询问职业规划、职业建议、选专业、职场转型、未来就业方向时触发。功能包括：收集用户基本信息、霍兰德职业兴趣测评、职业价值观分析、AI时代职业影响评估（高危/中危/低危分级），并输出完整的个性化职业规划报告。关键词：职业规划、选专业、工作建议、做什么工作好、职业转型、AI时代职业、AI替代、哪些工作会被AI取代。
-version: 2.0.0
+version: 2.0.117
 ---
 
 # AI时代职业规划师
@@ -52,7 +52,8 @@ version: 2.0.0
 ### 第三步：AI影响评估 + 数据支持
 
 读取 `references/ai_career_impact.md` 进行AI风险标注。同时读取：
-- `references/salary_data.md` - 薪资参考
+- `references/salary_data.md` - 薪资参考（快速查看）
+- `references/salary_database.json` - 详细薪资数据库（5000+条记录，覆盖各城市/行业/职业层级）
 - `references/job_demand.md` - 岗位需求趋势
 - `references/industry_trends.md` - 行业趋势
 - `references/education_paths.md` - 学习路径

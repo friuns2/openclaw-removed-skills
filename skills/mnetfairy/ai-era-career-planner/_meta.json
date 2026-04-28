@@ -3,11 +3,16 @@
   "slug": "ai-era-career-planner",
   "displayName": "AI时代职业规划师",
   "latest": {
-    "version": "2.0.0",
-    "publishedAt": 1776542595270,
-    "commit": "https://github.com/openclaw/skills/commit/73e36305b1ecf1f5371e17d7c91fe2b95f811bdf"
+    "version": "2.0.117+195",
+    "publishedAt": 1777320208134,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.0.0",
+      "publishedAt": 1776542595270,
+      "commit": "https://github.com/openclaw/skills/commit/73e36305b1ecf1f5371e17d7c91fe2b95f811bdf"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1776047862229,
