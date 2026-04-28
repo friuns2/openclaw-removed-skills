@@ -3,9 +3,15 @@
   "slug": "vosfactures",
   "displayName": "Vosfactures",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775437413414,
-    "commit": "https://github.com/openclaw/skills/commit/a63cde0013276c81b74f3b8be3d268671c8a95f2"
+    "version": "1.0.1",
+    "publishedAt": 1776897122589,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775437413414,
+      "commit": "https://github.com/openclaw/skills/commit/a63cde0013276c81b74f3b8be3d268671c8a95f2"
+    }
+  ]
 }
