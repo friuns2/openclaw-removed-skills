@@ -3,11 +3,16 @@
   "slug": "x-topic-tweet",
   "displayName": "X Topic Tweet",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1776316139660,
-    "commit": "https://github.com/openclaw/skills/commit/f15c65dcb59db92e4c308dbf6f2cb31c7fe4d515"
+    "version": "1.1.2",
+    "publishedAt": 1776882002422,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1776316139660,
+      "commit": "https://github.com/openclaw/skills/commit/f15c65dcb59db92e4c308dbf6f2cb31c7fe4d515"
+    },
     {
       "version": "1.0.9",
       "publishedAt": 1776026181400,
