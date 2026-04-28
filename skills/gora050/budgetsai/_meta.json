@@ -3,9 +3,15 @@
   "slug": "budgetsai",
   "displayName": "Budgetsai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775459188598,
-    "commit": "https://github.com/openclaw/skills/commit/716c316d01808336fe746ae1f855219a2dec774c"
+    "version": "1.0.1",
+    "publishedAt": 1776892795602,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775459188598,
+      "commit": "https://github.com/openclaw/skills/commit/716c316d01808336fe746ae1f855219a2dec774c"
+    }
+  ]
 }
