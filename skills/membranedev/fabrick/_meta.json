@@ -3,9 +3,15 @@
   "slug": "fabrick",
   "displayName": "Fabrick",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775405053292,
-    "commit": "https://github.com/openclaw/skills/commit/80f7e383c4f531e70575d870ccfbdd72157da704"
+    "version": "1.0.1",
+    "publishedAt": 1776889310143,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775405053292,
+      "commit": "https://github.com/openclaw/skills/commit/80f7e383c4f531e70575d870ccfbdd72157da704"
+    }
+  ]
 }
