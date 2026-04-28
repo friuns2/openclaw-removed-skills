@@ -3,9 +3,15 @@
   "slug": "editor1",
   "displayName": "testskill-0410zip1",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775791536949,
-    "commit": "https://github.com/openclaw/skills/commit/7ead6585d8f90989e1617306f5431b3fa74df39f"
+    "version": "1.0.2",
+    "publishedAt": 1777278934659,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775791536949,
+      "commit": "https://github.com/openclaw/skills/commit/7ead6585d8f90989e1617306f5431b3fa74df39f"
+    }
+  ]
 }
