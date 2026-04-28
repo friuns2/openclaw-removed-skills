@@ -3,9 +3,15 @@
   "slug": "elastic-path",
   "displayName": "Elastic Path",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775628255461,
-    "commit": "https://github.com/openclaw/skills/commit/b40dff718b3ecb35286337719a1069458728fd81"
+    "version": "1.0.1",
+    "publishedAt": 1776896459703,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775628255461,
+      "commit": "https://github.com/openclaw/skills/commit/b40dff718b3ecb35286337719a1069458728fd81"
+    }
+  ]
 }
