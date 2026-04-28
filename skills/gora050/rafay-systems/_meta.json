@@ -3,9 +3,15 @@
   "slug": "rafay-systems",
   "displayName": "Rafay Systems",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775351215525,
-    "commit": "https://github.com/openclaw/skills/commit/859cc6be55e9b00352059c1cf66f039074e44478"
+    "version": "1.0.1",
+    "publishedAt": 1776885997424,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775351215525,
+      "commit": "https://github.com/openclaw/skills/commit/859cc6be55e9b00352059c1cf66f039074e44478"
+    }
+  ]
 }
