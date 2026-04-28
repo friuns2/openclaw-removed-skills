@@ -3,9 +3,15 @@
   "slug": "ordoro",
   "displayName": "Ordoro",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775560039832,
-    "commit": "https://github.com/openclaw/skills/commit/be324b6c5dfa587a534356d6208a297bceb0de2b"
+    "version": "1.0.1",
+    "publishedAt": 1776898975213,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775560039832,
+      "commit": "https://github.com/openclaw/skills/commit/be324b6c5dfa587a534356d6208a297bceb0de2b"
+    }
+  ]
 }
