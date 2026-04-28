@@ -1,13 +1,18 @@
 {
   "owner": "eve-builds",
   "slug": "heygen-skills",
-  "displayName": "HeyGen Skills",
+  "displayName": "Hg Skills Republish 221",
   "latest": {
-    "version": "2.1.2",
-    "publishedAt": 1776438131097,
-    "commit": "https://github.com/openclaw/skills/commit/e46e612d6a3bd5569afa68e02902c8e9731c6d5b"
+    "version": "2.2.1",
+    "publishedAt": 1777314271609,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.1.2",
+      "publishedAt": 1776438131097,
+      "commit": "https://github.com/openclaw/skills/commit/e46e612d6a3bd5569afa68e02902c8e9731c6d5b"
+    },
     {
       "version": "2.0.3",
       "publishedAt": 1776131640136,
