@@ -1,9 +1,8 @@
 ---
 name: morzai
 description: >-
-  Unified entry point for the Morzai AI ecommerce content production suite.
-  Routes requests through api/commands.json into either single-function editing
-  tools or the composite ecommerce listing workflow.
+  Unified entry point for Morzai workflows. Routes requests through
+  api/commands.json into the matching child skill.
 metadata:
   openclaw:
     emoji: "🛍️"
@@ -25,12 +24,12 @@ This is the master gateway for the Morzai AI suite. It identifies user needs and
 ## Capability Layers
 
 ### Layer 1: Single-Function Editing Tools
-- `apparel-recolor`: garment recolor, sample-based color matching, and pattern handling.
-- `garment-retouch`: ghost mannequin cleanup, hanger cleanup, and white-background oriented retouching.
-- `clothing-adjustment`: preset-driven whole-garment cleanup for wrinkles, lint, and surface cleanup.
+- `apparel-recolor`
+- `garment-retouch`
+- `clothing-adjustment`
 
 ### Layer 2: Composite Listing Workflow
-- `morzai-ecommerce-product-kit`: end-to-end ecommerce image generation for hero images, detail images, listing sets, lifestyle visuals, and marketing posters.
+- `morzai-ecommerce-product-kit`
 
 ## Source Of Truth
 
@@ -39,7 +38,7 @@ This is the master gateway for the Morzai AI suite. It identifies user needs and
   - [skills/apparel-recolor/SKILL.md](skills/apparel-recolor/SKILL.md)
   - [skills/garment-retouch/SKILL.md](skills/garment-retouch/SKILL.md)
   - [skills/clothing-adjustment/SKILL.md](skills/clothing-adjustment/SKILL.md)
-  - [skills/morzai-ecommerce-product-kit/SKILL.md](skills/morzai-ecommerce-product-kit/SKILL.md)
+  - [skills/ecommerce-product-kit/SKILL.md](skills/ecommerce-product-kit/SKILL.md)
 
 ## Flow
 
@@ -60,8 +59,8 @@ This is the master gateway for the Morzai AI suite. It identifies user needs and
 
 ### Step 4: Execute
 - Use the command's `execution` mapping from `api/commands.json`.
-- Public execution surface is the `morzai` CLI.
-- `morzai-ecommerce-product-kit` must call `morzai ecommerce-product-kit ...`, which then goes through `morzai-cli-server` to the nano backend.
+- Layer 1 workflows use the routed child skill's remote MCP metadata.
+- `morzai-ecommerce-product-kit` uses the public `morzai` CLI path.
 - Return a clean result summary to the user.
 
 ## Command Map
@@ -72,7 +71,7 @@ This is the master gateway for the Morzai AI suite. It identifies user needs and
 - `clothing-adjustment` -> [skills/clothing-adjustment/SKILL.md](skills/clothing-adjustment/SKILL.md)
 
 ### Layer 2
-- `morzai-ecommerce-product-kit` -> [skills/morzai-ecommerce-product-kit/SKILL.md](skills/morzai-ecommerce-product-kit/SKILL.md)
+- `morzai-ecommerce-product-kit` -> [skills/ecommerce-product-kit/SKILL.md](skills/ecommerce-product-kit/SKILL.md)
 
 ## Guardrails
 

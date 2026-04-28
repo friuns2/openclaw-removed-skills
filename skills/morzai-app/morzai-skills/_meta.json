@@ -3,9 +3,15 @@
   "slug": "morzai-skills",
   "displayName": "Morzai Skills",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776223220379,
-    "commit": "https://github.com/openclaw/skills/commit/e9c17dd71fbcc4da0bcbd04c9558793aa9464aaa"
+    "version": "1.0.1",
+    "publishedAt": 1777001921700,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776223220379,
+      "commit": "https://github.com/openclaw/skills/commit/e9c17dd71fbcc4da0bcbd04c9558793aa9464aaa"
+    }
+  ]
 }
