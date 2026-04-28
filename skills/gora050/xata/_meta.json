@@ -3,9 +3,15 @@
   "slug": "xata",
   "displayName": "Xata",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775560000408,
-    "commit": "https://github.com/openclaw/skills/commit/72c14c2f49d671f9fc1a15f9d9925a48cd6a9968"
+    "version": "1.0.1",
+    "publishedAt": 1776898957747,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775560000408,
+      "commit": "https://github.com/openclaw/skills/commit/72c14c2f49d671f9fc1a15f9d9925a48cd6a9968"
+    }
+  ]
 }
