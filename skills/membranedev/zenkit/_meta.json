@@ -3,9 +3,15 @@
   "slug": "zenkit",
   "displayName": "Zenkit",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775549044917,
-    "commit": "https://github.com/openclaw/skills/commit/4881cef07f5d9357813e4eb0c830b3802c027d32"
+    "version": "1.0.1",
+    "publishedAt": 1776891874659,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775549044917,
+      "commit": "https://github.com/openclaw/skills/commit/4881cef07f5d9357813e4eb0c830b3802c027d32"
+    }
+  ]
 }
