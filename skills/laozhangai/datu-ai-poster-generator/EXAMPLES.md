@@ -1,159 +1,115 @@
 # 使用示例
 
-## 场景1：活动宣传海报
+## 示例 1：设计化大图生成
 
-**输入：**
-```
-产品发布会信息
-时间：2026年4月20日 下午2点
-地点：北京国家会议中心
-主题：AI大图生成器2.0发布
-亮点：
-- 支持8K超高清生成
-- 新增AI修图功能
-- 支持20+种文档格式
-- 生成速度提升50%
+```json
+{
+  "text": "请将以下内容整理成一张适合发布会传播的高质量海报：2026 春季产品发布会，主题为“智能协作新范式”，包含时间、地点、亮点和报名方式。",
+  "aspect_ratio": "16:9",
+  "resolution": "4k",
+  "magic_wand": true
+}
 ```
 
-**输出：** 4K高清宣传海报，可直接用于微博、微信、抖音等平台
+适合：
 
----
+- 发布会
+- 活动宣传
+- 长内容整理成结构化海报
 
-## 场景2：政策解读大图
+## 示例 2：竖版 9:16 大图生成
 
-**输入：** 上传政策文件（PDF）
-
-**输出：** 8K信息海报，将复杂政策转换为易读的可视化内容
-
----
-
-## 场景3：长文转海报
-
-**输入：**
-```
-《如何高效使用AI工具》
-
-第一章：AI工具的分类
-- 文本生成：ChatGPT、Claude
-- 图像生成：Midjourney、DALL-E
-- 视频生成：Runway、Synthesia
-
-第二章：选择合适的工具
-- 根据任务类型选择
-- 考虑成本效益
-- 评估输出质量
-
-第三章：最佳实践
-- 编写清晰的提示词
-- 迭代优化结果
-- 保护隐私数据
+```json
+{
+  "text": "把以下政策解读生成一张适合手机端传播的竖版海报，顶部标题要强，内容分成四个纵向模块，底部保留总结区。",
+  "aspect_ratio": "9:16",
+  "resolution": "4k",
+  "magic_wand": true
+}
 ```
 
-**输出：** 21:9超宽海报，适合长文内容展示
+适合：
 
----
+- 朋友圈传播
+- 公众号配图
+- 小红书 / 短视频封面式信息图
 
-## 场景4：社交媒体内容
+## 示例 3：关闭魔法棒，直接用原始 Prompt
 
-**输入：**
-```
-🎉 新功能上线！
-
-Digilifeform AI大图生成器现已支持：
-✨ 实时预览
-✨ 批量生成
-✨ 自定义模板
-✨ 团队协作
-
-立即体验 → https://datu.digilifeform.com
+```json
+{
+  "text": "A premium fintech infographic poster about AI wealth management in China, deep navy and gold palette, elegant typography, bold title, readable Chinese labels",
+  "aspect_ratio": "16:9",
+  "resolution": "4k",
+  "magic_wand": false
+}
 ```
 
-**输出：** 4K海报，可直接分享到微博、小红书、抖音
+适合：
 
----
+- 已经写好 Prompt
+- 只想让系统直接生成
+- 快速实验多个视觉方向
 
-## 场景5：内容优化
+## 示例 4：文件上传生成
 
-**输入：** 上传已生成的海报 + 修改要求
+请求：`multipart/form-data`
 
-**修改要求：**
-```
-- 将标题字体改大30%
-- 改变配色方案为深蓝+金色
-- 添加公司logo
-- 调整文字排版
-```
+字段：
 
-**输出：** 优化后的高清海报
-
----
-
-## 快速命令
-
-### 基础生成
-```
-用大图技能生成海报
-
-文案：我们的新产品即将发布
-比例：16:9
-清晰度：4K
+```text
+file=marketing-plan.pdf
+aspect_ratio=21:9
+resolution=8k
+magic_wand=true
 ```
 
-### 文件上传
+说明：
+
+- 系统会先解析文件
+- 开启 `magic_wand` 时会做设计化 Prompt 生成
+- 关闭 `magic_wand` 时会把解析文本直接作为 Prompt
+
+## 示例 5：基础修图
+
+```json
+{
+  "image": "https://cdn.example.com/poster.png",
+  "prompt": "把整体配色改成深蓝金，强化标题区层次，并让模块分隔更清晰",
+  "magic_think": true,
+  "aspect_ratio": "16:9",
+  "resolution": "4k"
+}
 ```
-生成大图
 
-上传文件：marketing_plan.pdf
-比例：21:9
-清晰度：8K
+## 示例 6：继续修图 + 标注图 + 参考图
+
+```json
+{
+  "image": "https://cdn.example.com/poster-v1.png",
+  "annotated_image": "https://cdn.example.com/poster-annotated.png",
+  "ref_images": [
+    "https://cdn.example.com/ref-a.png",
+    "https://cdn.example.com/ref-b.png"
+  ],
+  "prompt": "按标注区域强化顶部标题区，参考图的高级金属质感可以借鉴到主视觉卡片上",
+  "magic_think": true,
+  "aspect_ratio": "9:16",
+  "resolution": "4k",
+  "parent_task_id": "DT1234567890"
+}
 ```
 
-### 修图
-```
-帮我修改这张海报
+## 示例 7：查询大图状态
 
-修改内容：
-- 改变背景颜色为渐变蓝
-- 增加透明度效果
-- 调整文字大小
+```bash
+curl https://datu.digilifeform.com/api/datu/status/DT1234567890 \
+  -H "X-API-Key: YOUR_API_KEY"
 ```
 
----
+## 示例 8：查询修图状态
 
-## 效果对比
-
-| 功能 | 传统方式 | 大图生成器 |
-|------|--------|---------|
-| 生成时间 | 30分钟+ | 2-5分钟 |
-| 设计成本 | 需要设计师 | 自动生成 |
-| 修改次数 | 受限 | 无限制 |
-| 输出质量 | 取决于设计师 | 专业级 |
-| 学习成本 | 高 | 低 |
-
----
-
-## 常见问题
-
-**Q: 生成的海报可以商用吗？**
-A: 可以。生成的内容完全属于你，可自由使用。
-
-**Q: 支持哪些语言？**
-A: 目前支持中文、英文、日文、韩文等多种语言。
-
-**Q: 生成失败了怎么办？**
-A: 检查文案长度（建议500-2000字）和文件格式，或联系客服。
-
-**Q: 可以批量生成吗？**
-A: 支持。上传CSV文件，一次生成多张海报。
-
-**Q: 生成的图片分辨率是多少？**
-A: 4K为3840×2160，8K为7680×4320。
-
----
-
-## 获取帮助
-
-- 📖 完整文档：https://datu.digilifeform.com/docs
-- 💬 在线客服：https://datu.digilifeform.com/support
-- 📧 邮件支持：support@digilifeform.com
-- 🐛 报告问题：https://github.com/digilifeform/datu-skill/issues
+```bash
+curl https://datu.digilifeform.com/api/edit/status/ED1234567890 \
+  -H "X-API-Key: YOUR_API_KEY"
+```

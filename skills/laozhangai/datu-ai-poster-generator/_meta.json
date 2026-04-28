@@ -3,9 +3,15 @@
   "slug": "datu-ai-poster-generator",
   "displayName": "AI大图生成器-by Digilifeform",
   "latest": {
-    "version": "1.0.4",
-    "publishedAt": 1776100633551,
-    "commit": "https://github.com/openclaw/skills/commit/ffc571d247559972010743dd0a777e8a6b9a6adc"
+    "version": "1.1.5",
+    "publishedAt": 1777285614506,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.4",
+      "publishedAt": 1776100633551,
+      "commit": "https://github.com/openclaw/skills/commit/ffc571d247559972010743dd0a777e8a6b9a6adc"
+    }
+  ]
 }
