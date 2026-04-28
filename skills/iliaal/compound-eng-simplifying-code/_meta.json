@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-simplifying-code",
-  "displayName": "simplifying-code",
+  "displayName": "ia-simplifying-code",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519046747,
-    "commit": "https://github.com/openclaw/skills/commit/0b5686e86a8b36dc0b945122e8a1a87225c9bc4b"
+    "version": "3.0.4",
+    "publishedAt": 1777300798111,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519046747,
+      "commit": "https://github.com/openclaw/skills/commit/0b5686e86a8b36dc0b945122e8a1a87225c9bc4b"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004262848,
