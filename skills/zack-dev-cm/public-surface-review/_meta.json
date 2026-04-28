@@ -3,11 +3,16 @@
   "slug": "public-surface-review",
   "displayName": "Publish Guard",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776224688492,
-    "commit": "https://github.com/openclaw/skills/commit/a4c8f82029b81a091ca16b3f665322299774becf"
+    "version": "1.0.4",
+    "publishedAt": 1777139173601,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776224688492,
+      "commit": "https://github.com/openclaw/skills/commit/a4c8f82029b81a091ca16b3f665322299774becf"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775820737760,

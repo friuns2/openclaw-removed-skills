@@ -13,6 +13,13 @@ REFERENCE_NAMES = re.compile(r"\b(optillm|openevolve|autoresearch|symphony|paper
 INTERNAL_TERMS = re.compile(r"\b(oauth|subagent|workflow contract|benchmark contract|operator|control plane|paid api key)\b", re.IGNORECASE)
 
 
+def display_input_label(raw_arg: str, resolved: Path) -> str:
+    raw_path = Path(raw_arg).expanduser()
+    if not raw_path.is_absolute():
+        return raw_path.as_posix() or "."
+    return resolved.name or "."
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--readme", required=True, help="Path to the README to score.")
@@ -32,13 +39,18 @@ def main() -> int:
 
     top_lines = lines[:60]
     top_text = "\n".join(top_lines)
+    has_pitch = any(line.startswith("**") for line in lines[:15])
+    quick_start_line = next((idx for idx, line in enumerate(lines, start=1) if "quick start" in line.lower()), None)
+    first_code_block = next((idx for idx, line in enumerate(lines, start=1) if line.strip().startswith("```")), None)
+    has_use_case_language = any("use this" in line.lower() or "when to use" in line.lower() for line in lines[:140])
+    has_concrete_value = any("output" in line.lower() or "what it catches" in line.lower() or "what it checks" in line.lower() for line in lines[:140])
 
-    if not any(line.startswith("**") for line in lines[:15]):
-        adjust("missing-one-line-pitch", -20, "No clear one-line pitch near the top.")
+    if not has_pitch:
+        adjust("missing-one-line-pitch", -35, "No clear one-line pitch near the top.")
     else:
         adjust("one-line-pitch", 5, "One-line pitch is present near the top.")
 
-    quick_start_line = next((idx for idx, line in enumerate(lines, start=1) if "quick start" in line.lower()), None)
+    has_early_quick_start = quick_start_line is not None and quick_start_line <= 80
     if quick_start_line is None:
         adjust("missing-quick-start", -20, "Quick Start section is missing.")
     elif quick_start_line > 80:
@@ -46,7 +58,7 @@ def main() -> int:
     else:
         adjust("early-quick-start", 5, "Quick Start appears early.")
 
-    first_code_block = next((idx for idx, line in enumerate(lines, start=1) if line.strip().startswith("```")), None)
+    has_early_code_example = first_code_block is not None and first_code_block <= 100
     if first_code_block is None or first_code_block > 100:
         adjust("late-code-example", -10, "No early code example near the top.")
     else:
@@ -65,14 +77,22 @@ def main() -> int:
     if internal_hits >= 4:
         adjust("internal-language", -15, "Top of README uses too much internal workflow language.")
 
-    if any("use this" in line.lower() or "when to use" in line.lower() for line in lines[:140]):
+    if has_use_case_language:
         adjust("use-case-language", 5, "README explains when to use the project.")
+    else:
+        adjust("missing-use-case-language", -10, "README does not explain when to use the project.")
 
-    if any("output" in line.lower() or "what it catches" in line.lower() or "what it checks" in line.lower() for line in lines[:140]):
+    if has_concrete_value:
         adjust("concrete-value", 5, "README explains the concrete output or catches.")
+    else:
+        adjust("missing-concrete-value", -25, "README does not explain the concrete output or what it catches.")
 
     score = max(0, min(100, score))
-    if score >= 80:
+    if not has_pitch or not has_concrete_value:
+        verdict = "not-ready"
+    elif not has_early_quick_start or not has_early_code_example:
+        verdict = "revise-before-publish"
+    elif score >= 80:
         verdict = "publish-ready"
     elif score >= 60:
         verdict = "revise-before-publish"
@@ -80,7 +100,7 @@ def main() -> int:
         verdict = "not-ready"
 
     payload = {
-        "readme": str(readme),
+        "readme": display_input_label(args.readme, readme),
         "score": score,
         "verdict": verdict,
         "line_count": len(lines),
@@ -95,4 +115,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

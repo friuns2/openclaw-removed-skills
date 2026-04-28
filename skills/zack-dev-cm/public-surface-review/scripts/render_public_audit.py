@@ -12,6 +12,11 @@ def load_json(path: str) -> dict[str, object]:
     return json.loads(Path(path).expanduser().read_text(encoding="utf-8"))
 
 
+def repo_label(repo: str) -> str:
+    resolved = Path(repo).expanduser().resolve()
+    return resolved.name or resolved.as_posix()
+
+
 def top_findings(payload: dict[str, object], limit: int = 5) -> list[dict[str, object]]:
     findings = payload.get("findings") or []
     findings = sorted(
@@ -37,18 +42,21 @@ def main() -> int:
     error_count = int(leaks.get("error_count", 0)) + int(surface.get("error_count", 0))
     warning_count = int(leaks.get("warning_count", 0)) + int(surface.get("warning_count", 0))
     copy_score = int(copy.get("score", 0))
+    copy_verdict = str(copy.get("verdict", "unknown"))
 
-    if error_count == 0 and copy_score >= 80:
-        recommendation = "Publish"
-    elif error_count == 0 and copy_score >= 60:
-        recommendation = "Fix copy first"
-    else:
+    if error_count > 0 or copy_score < 60 or copy_verdict == "not-ready":
         recommendation = "Do not publish yet"
+    elif warning_count > 0:
+        recommendation = "Fix findings before publish"
+    elif copy_verdict != "publish-ready":
+        recommendation = "Fix copy first"
+    elif copy_score >= 80:
+        recommendation = "Publish"
 
     lines = [
         "# Publish Guard Audit",
         "",
-        f"- Repo: `{Path(args.repo).expanduser().resolve()}`",
+        f"- Repo: `{repo_label(args.repo)}`",
         f"- Recommendation: **{recommendation}**",
         f"- Launch copy score: **{copy_score}/100** ({copy.get('verdict', 'unknown')})",
         f"- Leak scan: **{leaks.get('finding_count', 0)}** findings",
@@ -63,7 +71,7 @@ def main() -> int:
     if leak_findings:
         for item in leak_findings:
             location = f"{item.get('file')}:{item.get('line')}" if item.get("line") else str(item.get("file"))
-            lines.append(f"- `{item.get('severity')}` `{item.get('code')}` {location}: {item.get('snippet', '')}")
+            lines.append(f"- `{item.get('severity')}` `{item.get('code')}` {location}: line redacted")
     else:
         lines.append("- No obvious leak patterns detected.")
     lines.append("")
