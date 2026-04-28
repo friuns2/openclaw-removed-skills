@@ -12,7 +12,7 @@
 
 ### 请求
 - **方法**: POST
-- **URL**: `https://datahub.seekin.chat/api/datahub/execute/v0`
+- **URL**: `https://seekin.chat/api/datahub/execute/v0`
 - **Content-Type**: `application/json`
 - **认证**: 通过请求体或Header传递API Key
 

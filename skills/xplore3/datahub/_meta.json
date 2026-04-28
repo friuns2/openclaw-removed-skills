@@ -3,9 +3,15 @@
   "slug": "datahub",
   "displayName": "DataHub for Any Data",
   "latest": {
-    "version": "0.1.1",
-    "publishedAt": 1775969908189,
-    "commit": "https://github.com/openclaw/skills/commit/30caf46c5ec3d403768180ed820bce42cbdcb146"
+    "version": "0.2.0",
+    "publishedAt": 1777087196489,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.1",
+      "publishedAt": 1775969908189,
+      "commit": "https://github.com/openclaw/skills/commit/30caf46c5ec3d403768180ed820bce42cbdcb146"
+    }
+  ]
 }
