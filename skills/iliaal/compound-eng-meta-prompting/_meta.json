@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-meta-prompting",
-  "displayName": "meta-prompting",
+  "displayName": "ia-meta-prompting",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518977488,
-    "commit": "https://github.com/openclaw/skills/commit/10ea1a8511dca513737a08b484124d07fc9f0788"
+    "version": "3.0.4",
+    "publishedAt": 1777300714668,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518977488,
+      "commit": "https://github.com/openclaw/skills/commit/10ea1a8511dca513737a08b484124d07fc9f0788"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004199254,
