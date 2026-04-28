@@ -3,9 +3,15 @@
   "slug": "nuapay",
   "displayName": "Nuapay",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574460233,
-    "commit": "https://github.com/openclaw/skills/commit/46f4a038165cd4ccae4c85da164c083cf0dabbf1"
+    "version": "1.0.1",
+    "publishedAt": 1776899049136,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574460233,
+      "commit": "https://github.com/openclaw/skills/commit/46f4a038165cd4ccae4c85da164c083cf0dabbf1"
+    }
+  ]
 }
