@@ -3,9 +3,15 @@
   "slug": "wrk",
   "displayName": "Wrk",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775703904579,
-    "commit": "https://github.com/openclaw/skills/commit/2f398d55937ed4d94d1fc90dd34f90dd58a6426e"
+    "version": "1.0.1",
+    "publishedAt": 1776898062711,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775703904579,
+      "commit": "https://github.com/openclaw/skills/commit/2f398d55937ed4d94d1fc90dd34f90dd58a6426e"
+    }
+  ]
 }
