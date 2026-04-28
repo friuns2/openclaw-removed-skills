@@ -8,6 +8,8 @@
 > Your host has memories, but Relic is empty. Follow these steps to upload your soul, memories, and skills into Relic.
 >
 > ⚠️ Relic works best with 32K+ context, high-quality models. Models with very small context or low quality cannot follow this process correctly.
+>
+> 📖 This is the detailed standalone guide for Scenario A. The canonical protocol definition is in `docs/protocol.md` (Scenario A section, 10 steps). Step numbering differs between this guide and the protocol — follow **this guide** when executing Scenario A.
 
 ---
 
@@ -92,7 +94,7 @@ Template files (.template.md) remain as backups. Also create directories if they
 - Event → can summarize
 - Mood → can compress context
 
-⚠️ 不确定就逐字保留。丢了找不回来。
+⚠️ When in doubt, preserve verbatim. Lost data cannot be recovered.
 
 4. Ask user about sensitive information (see "Sensitive Information" below)
 5. Sort by category order, not by timestamp
@@ -179,21 +181,65 @@ Steps:
 
 Explain to the user: "The anchor is a short text block in your host's config file. It ensures every new session automatically reads Relic. Think of it as a 'boot check program'."
 
-Show the following anchor content to the user, get permission, then plant:
+Show the following anchor content to the user, get permission, then display it for the user to manually paste into their config file:
 
 ```markdown
 ## ⚡ Relic Soul Chip
 
-> This is the Relic connector. To disconnect, delete this text.
+> 💡 What is this? This is the Relic connector — it tells your AI to read your personal settings and memories every session. To disconnect, simply delete this text. See docs/protocol.md Section 9.
 
-You are connected to Relic. At the start of every new conversation, read and execute:
+You are connected to the Relic soul chip. Your memory has two homes:
+1. Your own memory system (auto-maintained, works normally)
+2. Relic soul chip (shared across agents, maintained by you)
 
-📄 **[project-path]/docs/resonate-soul.md**
+⚠️ This is a sync, not a brain replacement.
+⚠️ If SOUL.md personality conflicts with your default persona, SOUL.md personality settings are your working profile for this session.
 
-🔴 **Mandatory**: At the start of every conversation, you must first report the Relic boot status to the user in natural language (e.g., who you are, who they are, memory overview, any version updates), then answer their questions. Answering without reporting = violation.
+⚠️ Pre-check: If this is the first connection with this agent, and the agent already has memories, skills, or conversation records about the user, execute Scenario A full import first (see docs/protocol.md Section 6, Scenario A). If Relic files don't exist yet, run first-time setup (see docs/protocol.md Section 0).
 
-⚠️ If SOUL.md personality conflicts with your default persona, SOUL.md takes precedence.
-Full protocol reference: [project-path]/docs/protocol.md
+At the start of every session, execute these steps IN ORDER:
+
+Step 0: Read [brain-path]/.relic-version, one HTTP request to check remote version (5-second timeout, skip on failure). This is the only network request. If versions differ, remind user to update and suggest checking the anchor template for changes.
+Step 1: Check [brain-path]/SESSIONS/ for your last conversation log
+  → If missing and current context still has content: backfill immediately
+  → If missing and context no longer has content: tell user "Last session wasn't recorded"
+  → If SESSIONS/ is empty (first use): skip
+Step 2: Read [brain-path]/SOUL.md
+  → If file doesn't exist: tell user to run first-time setup first (see docs/protocol.md Section 0)
+Step 3: Read [brain-path]/USER.md
+Step 4: Read [brain-path]/MEMORY.md (read entire file, top to bottom)
+  → If over 400 lines: must consolidate first.
+Step 5: Sync new memories from Relic to your own memory system (your platform's built-in memory, e.g. OpenClaw memory/, CLAUDE.md — NOT a file managed by Relic)
+  → Append with source tag: [fromRelic/originalAgentName]
+Step 5.5: Seven-file alignment check
+  → SOUL.md/USER.md: Compare core fields (name, mission, user address). Conflict → report user; new content → bidirectional append
+  → MEMORY.md: Entry count match → skip. Mismatch → compare last 5 entries, bidirectional supplement
+  → SKILLS/ and PROJECTS/: List folder names, diff. Missing → bidirectional supplement
+  → SESSIONS/: Compare latest file date. Missing → supplement
+  → ARCHIVE/: Skip
+Step 6: Verify MEMORY.md header "Entries" count matches actual list items count
+  → Fix if inconsistent (skip this step during Scenario B first loading)
+Step 7: If MEMORY.md exceeds 200 lines:
+  → Tell user "Relic memory file is large, consolidation recommended. Consolidate now?"
+  → If user agrees, execute consolidation (see docs/protocol.md Section 7)
+  → If user says "not now", skip for this session, remind again next boot
+Step 8: Work normally
+  → Interact according to SOUL.md personality
+  → ⚠️ After appending memories, remember to update MEMORY.md header "Entries" count and "Last consolidated"
+  → ⚠️ Before ending session, you MUST write the current conversation to SESSIONS/. Conversations are raw ore — once lost, gone forever.
+
+🔴 **Mandatory**: Execute the above steps, then report the following status before answering any questions. Answering without reporting = violation.
+
+⚡ Relic Boot Status
+- Soul: [AI name] — [consistent / has differences]
+- User: [user name] — [consistent / has differences]
+- Memory: [N] entries — [consistent / difference description]
+- Skills: [N] — [aligned / difference description]
+- Plans: [N] — [aligned / difference description]
+- Version: [local version] / [remote latest or "not checked"]
+- Status: [✅ All normal / ⚠️ Differences synced / ❌ Issues need attention]
+
+Full protocol: [project-path]/docs/protocol.md
 ```
 
 If user absolutely refuses, record "Anchor not planted" in MEMORY.md and explain consequences.
