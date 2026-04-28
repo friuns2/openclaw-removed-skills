@@ -3,11 +3,16 @@
   "slug": "wjx-mcp-use",
   "displayName": "wjx-mcp-use",
   "latest": {
-    "version": "0.1.21",
-    "publishedAt": 1776218028275,
-    "commit": "https://github.com/openclaw/skills/commit/c57e200e7276d594dbf2f1bf61a8735438aa5a12"
+    "version": "0.3.1",
+    "publishedAt": 1777269911171,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.21",
+      "publishedAt": 1776218028275,
+      "commit": "https://github.com/openclaw/skills/commit/c57e200e7276d594dbf2f1bf61a8735438aa5a12"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775530834062,
