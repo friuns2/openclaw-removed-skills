@@ -3,9 +3,15 @@
   "slug": "bundleiq",
   "displayName": "Bundleiq",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775541840320,
-    "commit": "https://github.com/openclaw/skills/commit/0b39909449987ccf34a3b3568d7424043026485a"
+    "version": "1.0.1",
+    "publishedAt": 1776891696824,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775541840320,
+      "commit": "https://github.com/openclaw/skills/commit/0b39909449987ccf34a3b3568d7424043026485a"
+    }
+  ]
 }
