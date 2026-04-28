@@ -3,9 +3,15 @@
   "slug": "pymetrics",
   "displayName": "Pymetrics",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379848324,
-    "commit": "https://github.com/openclaw/skills/commit/98da8e96aaac4a33b19dc17fa913c89898ae984b"
+    "version": "1.0.1",
+    "publishedAt": 1776897115727,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379848324,
+      "commit": "https://github.com/openclaw/skills/commit/98da8e96aaac4a33b19dc17fa913c89898ae984b"
+    }
+  ]
 }
