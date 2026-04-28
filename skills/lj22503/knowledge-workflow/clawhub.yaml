@@ -1,47 +1,23 @@
 name: knowledge-workflow
 version: 2.0.0
-description: ［何时使用］当用户需要沉淀知识、分类知识、让知识产生新内容时；当用户说"处理这个知识""知识管理工作流""整理这篇笔记""生成文章"时；当检测到"飞书文档""微信读书""知识整理""打标""知识发芽"等关键词时；基于 Karpathy LLM Wiki 思路，打造会"生长"的知识库
+description: 知识管理工作流 - 完整的知识管理工作流：收集→打标→存储→发芽→产出。支持飞书/微信读书/URL，5 种发芽类型（灵光/心智模型/跨界/微习惯/潜意识）。
 author: 燃冰 & ant
-tags: [知识管理，工作流，AI, 知识沉淀，自进化，Karpathy]
-
+license: MIT
+repository: https://github.com/lj22503/knowledge-workflow
+tags:
+  - knowledge-workflow
+  - knowledge-management
+  - sprout
+  - spark
+  - mind-model
+  - cross-domain
+  - habit
+  - subconscious
 features:
-  - 完整工作流（collect→tag→store→evolve→output→learn）
-  - 交叉引用（自动 [[wikilinks]]）
-  - 规则提炼（observation→RULE）
-  - 信念更新（数据驱动认知升级）
-  - 自我修复（lint 检查 + 自动修复）
-  - 知识产出（文章/周报/月报）
-
-entry_point: main.py
-dependencies:
-  - python>=3.6
-  - pyyaml
-
-triggers:
-  - "处理这个知识"
-  - "知识管理工作流"
-  - "沉淀这个知识"
-  - "knowledge-workflow"
-
-subfunctions:
-  - collect: 收集知识（飞书/微信读书/URL/文本）
-  - tag: 自动打标（主题 + 场景 + 行动）
-  - store: 存储到知识库 + 双链建议
-  - evolve: 知识发芽（5 种产出）
-  - output: 内容产出（文章/周报/月报）
-
-examples:
-  - name: 一键处理飞书文档
-    command: "knowledge-workflow run feishu PFAvdKEILouK29xCgNuc5b1bnnK"
-  
-  - name: 分步处理 - 收集
-    command: "knowledge-workflow collect feishu PFAvdKEILouK29xCgNuc5b1bnnK"
-  
-  - name: 分步处理 - 打标
-    command: "knowledge-workflow tag note-20260414160000"
-  
-  - name: 知识发芽
-    command: "knowledge-workflow evolve note-20260414160000 spark"
-  
-  - name: 生成文章
-    command: "knowledge-workflow output spark-20260414160000 article"
+  - 5 步工作流（collect→tag→store→evolve→output）
+  - 5 种发芽类型（spark/model/cross/habit/subconscious）
+  - 用户选择触发发芽（不是自动）
+  - 发芽质量标注（高/中/低）
+  - 多来源支持（飞书/微信读书/URL/文本）
+requirements:
+  - Python 3.8+
