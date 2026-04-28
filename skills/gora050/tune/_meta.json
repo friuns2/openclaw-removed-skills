@@ -3,9 +3,15 @@
   "slug": "tune",
   "displayName": "Tune",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775470082026,
-    "commit": "https://github.com/openclaw/skills/commit/5216fe9c85338eedf411c05825784f646ce43aab"
+    "version": "1.0.1",
+    "publishedAt": 1776892920377,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775470082026,
+      "commit": "https://github.com/openclaw/skills/commit/5216fe9c85338eedf411c05825784f646ce43aab"
+    }
+  ]
 }
