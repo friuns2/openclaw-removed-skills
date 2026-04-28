@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-linux-bash-scripting",
-  "displayName": "linux-bash-scripting",
+  "displayName": "ia-linux-bash-scripting",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518967753,
-    "commit": "https://github.com/openclaw/skills/commit/46eaee5258ad5e5c8f525c44d07b1746d86acda7"
+    "version": "3.0.4",
+    "publishedAt": 1777300703305,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518967753,
+      "commit": "https://github.com/openclaw/skills/commit/46eaee5258ad5e5c8f525c44d07b1746d86acda7"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004188776,
