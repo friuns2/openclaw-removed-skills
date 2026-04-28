@@ -1,11 +1,17 @@
 {
   "owner": "wudi488",
   "slug": "claude-code-architecture",
-  "displayName": "Claude Code 架构设计模式",
+  "displayName": "Claude Code Architecture",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775489748460,
-    "commit": "https://github.com/openclaw/skills/commit/ccee29177f850b6ac5390e408544ac196fcb2db3"
+    "version": "2.0.1",
+    "publishedAt": 1777048816093,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775489748460,
+      "commit": "https://github.com/openclaw/skills/commit/ccee29177f850b6ac5390e408544ac196fcb2db3"
+    }
+  ]
 }
