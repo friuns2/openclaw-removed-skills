@@ -3,9 +3,15 @@
   "slug": "sonarqube",
   "displayName": "Sonarqube",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775646226956,
-    "commit": "https://github.com/openclaw/skills/commit/f484a8edced0169c7484aae832045bbf25ec35ea"
+    "version": "1.0.1",
+    "publishedAt": 1776896727731,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775646226956,
+      "commit": "https://github.com/openclaw/skills/commit/f484a8edced0169c7484aae832045bbf25ec35ea"
+    }
+  ]
 }
