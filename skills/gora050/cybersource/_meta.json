@@ -3,9 +3,15 @@
   "slug": "cybersource",
   "displayName": "Cybersource",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775466406070,
-    "commit": "https://github.com/openclaw/skills/commit/ec72cd8747430a25bf5a186bdf6523fe4f46d29c"
+    "version": "1.0.1",
+    "publishedAt": 1776892835756,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775466406070,
+      "commit": "https://github.com/openclaw/skills/commit/ec72cd8747430a25bf5a186bdf6523fe4f46d29c"
+    }
+  ]
 }
