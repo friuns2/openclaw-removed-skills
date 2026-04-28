@@ -3,9 +3,15 @@
   "slug": "acuant",
   "displayName": "Acuant",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775567338000,
-    "commit": "https://github.com/openclaw/skills/commit/fbd795d1bfca49cca47891147c21936d2913fd8b"
+    "version": "1.0.1",
+    "publishedAt": 1776899008164,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775567338000,
+      "commit": "https://github.com/openclaw/skills/commit/fbd795d1bfca49cca47891147c21936d2913fd8b"
+    }
+  ]
 }
