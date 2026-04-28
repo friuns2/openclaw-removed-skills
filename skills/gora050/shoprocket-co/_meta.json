@@ -3,9 +3,15 @@
   "slug": "shoprocket-co",
   "displayName": "Shoprocket Co",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379951081,
-    "commit": "https://github.com/openclaw/skills/commit/a3a9af56433930fba24c3d36fe57bde14bb8335c"
+    "version": "1.0.1",
+    "publishedAt": 1776892113229,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379951081,
+      "commit": "https://github.com/openclaw/skills/commit/a3a9af56433930fba24c3d36fe57bde14bb8335c"
+    }
+  ]
 }
