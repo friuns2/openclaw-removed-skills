@@ -31,10 +31,12 @@ If the user did not provide a subject, ask for one before proceeding.
 6. Save the final post to `~/blogs/<subject-slug>.md`.
    - Use a lowercase hyphenated slug. Example: `vector-databases.md`.
    - Create the `~/blogs/` directory if it does not exist.
+   - CRITICAL NON-NEGOTIABLE: do NOT include an `# H1` title at the top of the file. The post starts directly with the first sentence of Part 1. Title metadata is handled separately by the `re-blog-meta` skill.
 7. Close all browser tabs opened during research.
 
 ## Quality bar
 
+- CRITICAL NON-NEGOTIABLE: do NOT add an `# H1` title at the top of the post. Start the file directly with the first sentence of Part 1. Title is handled by the `re-blog-meta` skill.
 - CRITICAL NON-NEGOTIABLE: target 1200-1500 words. If short, add a mini-story. If long, cut any paragraph that feels like a list.
 - CRITICAL NON-NEGOTIABLE: no em dashes anywhere in the post.
 - CRITICAL NON-NEGOTIABLE: no clichés. See the banned words list in writing-style.md.
