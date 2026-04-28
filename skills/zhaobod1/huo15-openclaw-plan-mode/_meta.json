@@ -3,9 +3,15 @@
   "slug": "huo15-openclaw-plan-mode",
   "displayName": "Huo15 Openclaw Plan Mode",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1775979505533,
-    "commit": "https://github.com/openclaw/skills/commit/27a131eaef66c06667404c5ff3935d26c319e2b3"
+    "version": "1.0.3",
+    "publishedAt": 1777004153741,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1775979505533,
+      "commit": "https://github.com/openclaw/skills/commit/27a131eaef66c06667404c5ff3935d26c319e2b3"
+    }
+  ]
 }
