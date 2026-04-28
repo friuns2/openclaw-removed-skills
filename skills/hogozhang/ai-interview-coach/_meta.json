@@ -3,11 +3,16 @@
   "slug": "ai-interview-coach",
   "displayName": "AI-Interview-Coach",
   "latest": {
-    "version": "4.0.0",
-    "publishedAt": 1776593725688,
-    "commit": "https://github.com/openclaw/skills/commit/1cf593925c99f60343b27890d854e3856de22685"
+    "version": "5.0.0",
+    "publishedAt": 1776790823815,
+    "commit": null
   },
   "history": [
+    {
+      "version": "4.0.0",
+      "publishedAt": 1776593725688,
+      "commit": "https://github.com/openclaw/skills/commit/1cf593925c99f60343b27890d854e3856de22685"
+    },
     {
       "version": "2.0.0",
       "publishedAt": 1776181334204,
