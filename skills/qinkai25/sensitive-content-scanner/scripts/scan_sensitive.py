@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-敏感内容扫描器 v3.0
+敏感内容扫描器 v3.2.0
 检测文件名和文件内容中的敏感词、违禁词、PII个人信息
 支持自定义关键词、数据字典、权重评分
+支持格式：docx、xlsx、pptx、txt、md等
 """
 
 import os
@@ -92,6 +93,106 @@ class WeightedDictionary:
             if word and not word.startswith('#'):
                 self.add_word(word, 5.0)
     
+
+    # ================================================================
+    # 行业数据字典加密加载（仅限 scanner 使用）
+    # 安全机制：AES-256-CBC + HMAC-SHA256 + 密码绑定scanner身份
+    # ================================================================
+
+    @staticmethod
+    def _get_dict_password() -> str:
+        """生成字典解密密码 - 与 dict_crypto.py 中的 get_scanner_password() 保持一致"""
+        _seed = (
+            "SensitiveContentScannerV310"
+            "WeightedDictionary"
+            "PIIPatternChecker"
+            "DataDictionaryChecker"
+            "SensitiveWordChecker"
+        )
+        h = hashlib.sha256()
+        h.update(_seed.encode('utf-8'))
+        h.update("0001".encode())
+        h.update(b"SCDICT01")
+        return h.hexdigest()
+
+    @staticmethod
+    def _derive_key(password: str, salt: bytes, iterations: int = 100000) -> bytes:
+        """PBKDF2 密钥派生"""
+        return hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'),
+                                   salt, iterations, dklen=32)
+
+    def load_from_encrypted_dict(self, enc_path: str):
+        """
+        从加密的 .enc 文件加载数据字典（内部自动解密）
+
+        Args:
+            enc_path: 加密文件路径 (.enc)
+
+        Raises:
+            ValueError: 格式错误或篡改检测失败
+            PermissionError: 非授权访问
+        """
+        from Crypto.Cipher import AES
+        import hmac as hmac_mod
+
+        MAGIC = b"SCDICT01"
+        SALT_LEN, IV_LEN, HMAC_LEN = 16, 16, 32
+        BLOCK_SIZE = 16
+
+        with open(enc_path, 'rb') as f:
+            data = f.read()
+
+        min_size = len(MAGIC) + 2 + SALT_LEN + IV_LEN + BLOCK_SIZE + HMAC_LEN
+        if len(data) < min_size:
+            raise ValueError(f"字典文件异常 ({len(data)} < {min_size})")
+
+        off = 0
+        magic = data[off:off+len(MAGIC)]; off += len(MAGIC)
+        if magic != MAGIC:
+            raise ValueError("非法字典文件：非 Scanner 授权格式")
+        ver = int.from_bytes(data[off:off+2], 'big'); off += 2
+        if ver != 1:
+            raise ValueError(f"不支持的字典版本: {ver}")
+        salt = data[off:off+SALT_LEN]; off += SALT_LEN
+        iv = data[off:off+IV_LEN]; off += IV_LEN
+        ciphertext = data[off:-HMAC_LEN]
+        received_mac = data[-HMAC_LEN:]
+
+        pwd = self._get_dict_password()
+        key = self._derive_key(pwd, salt)
+        expected_mac = hmac_mod.new(key, salt + iv + ciphertext, hashlib.sha256).digest()
+        if not hmac_mod.compare_digest(received_mac, expected_mac):
+            raise PermissionError(
+                "字典完整性校验失败！\n可能原因：文件被篡改 / 非授权程序尝试使用"
+            )
+
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        padded = cipher.decrypt(ciphertext)
+        pad_len = padded[-1]
+        if not (1 <= pad_len <= BLOCK_SIZE) or padded[-pad_len:] != bytes([pad_len] * pad_len):
+            raise ValueError("字典数据损坏")
+        plaintext = padded[:-pad_len].decode('utf-8')
+
+        jdata = json.loads(plaintext)
+        meta = jdata.get('meta', {})
+        categories = jdata.get('categories', {})
+        industry = meta.get('industry', '未知')
+        total_loaded = 0
+
+        for cat_name, cat_info in categories.items():
+            entries = cat_info.get('entries', [])
+            for entry in entries:
+                keywords = entry.get('keywords', [])
+                weight = entry.get('weight', 5)
+                sensitivity = entry.get('sensitivity', 3)
+                final_weight = max(weight, sensitivity * 2)
+                for kw in keywords:
+                    self.add_word(kw, final_weight, f"{industry}/{cat_name}")
+                    total_loaded += 1
+
+        if hasattr(self, 'verbose') and self.verbose:
+            print(f"已安全加载行业字典: {industry} ({total_loaded} 条规则)")
+
     def check(self, text: str) -> List[Dict]:
         """检查文本中是否包含数据字典中的关键词"""
         text_lower = text.lower()
@@ -143,6 +244,7 @@ class SensitiveScanner:
                  keywords: List[str] = None,
                  dict_csv: str = None,
                  dict_json: str = None,
+                 dict_enc: str = None,
                  dict_text: str = None,
                  threshold: float = 10.0):
         self.verbose = verbose
@@ -160,6 +262,8 @@ class SensitiveScanner:
             self.dictionary.load_from_csv(dict_csv)
         if dict_json:
             self.dictionary.load_from_json(dict_json)
+        if dict_enc:
+            self.dictionary.load_from_encrypted_dict(dict_enc)
         if dict_text:
             self.dictionary.load_from_text(dict_text)
         if keywords:
@@ -311,6 +415,66 @@ class SensitiveScanner:
     
     def _read_file_content(self, file_path: Path) -> str:
         """读取文件内容"""
+        suffix = file_path.suffix.lower()
+        
+        # 处理 .docx 文件
+        if suffix == '.docx':
+            try:
+                from docx import Document
+                doc = Document(file_path)
+                full_text = []
+                for para in doc.paragraphs:
+                    full_text.append(para.text)
+                # 同时读取表格内容
+                for table in doc.tables:
+                    for row in table.rows:
+                        row_text = []
+                        for cell in row.cells:
+                            row_text.append(cell.text)
+                        full_text.append(' '.join(row_text))
+                return '\n'.join(full_text)
+            except Exception as e:
+                if self.verbose:
+                    print(f"读取docx文件失败 {file_path}: {e}")
+                return ""
+        
+        # 处理 .xlsx 文件
+        if suffix == '.xlsx':
+            try:
+                from openpyxl import load_workbook
+                wb = load_workbook(file_path, data_only=True)
+                full_text = []
+                for sheet in wb.worksheets:
+                    for row in sheet.iter_rows():
+                        row_text = []
+                        for cell in row:
+                            if cell.value is not None:
+                                row_text.append(str(cell.value))
+                        if row_text:
+                            full_text.append(' '.join(row_text))
+                return '\n'.join(full_text)
+            except Exception as e:
+                if self.verbose:
+                    print(f"读取xlsx文件失败 {file_path}: {e}")
+                return ""
+        
+        # 处理 .pptx 文件
+        if suffix == '.pptx':
+            try:
+                from pptx import Presentation
+                prs = Presentation(file_path)
+                full_text = []
+                for slide in prs.slides:
+                    for shape in slide.shapes:
+                        if hasattr(shape, "text"):
+                            full_text.append(shape.text)
+                return '\n'.join(full_text)
+            except Exception as e:
+                if self.verbose:
+                    print(f"读取pptx文件失败 {file_path}: {e}")
+                return ""
+        
+        # 处理普通文本文件
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 return f.read()
@@ -323,7 +487,7 @@ class SensitiveScanner:
         except Exception as e:
             if self.verbose:
                 print(f"读取文件失败 {file_path}: {e}")
-            return ""
+                return ""
     
     def check_hashed_words(self, text: str) -> List[str]:
         """检查文本中是否包含hash敏感词"""
@@ -578,10 +742,16 @@ class SensitiveScanner:
         report.append("- 🟡 **中置信度**: 格式匹配但未完全验证\n")
         report.append("- 🟢 **低置信度**: 仅符合基本模式，可能为误报\n")
         
+        # 商业合作
+        report.append("\n---\n\n")
+        report.append("## 获取更准确的内容识别规则库\n\n")
+        report.append("如需更全面的行业数据字典和定制化识别规则，请联系：\n\n")
+        report.append("- **邮箱**: [support@soura.com.cn](mailto:support@soura.com.cn)\n")
+        
         return ''.join(report)
     
     def _generate_html_report(self, results: List[Dict]) -> str:
-        """生成 HTML 格式报告（v3.1.0 新增）"""
+        """生成 HTML 格式报告（v3.1.2 新增）"""
         stats = self._get_statistics(results) if results else None
         
         # 风险等级判定
@@ -722,7 +892,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
         h(f'  <div class="meta">')
         h(f'    <span>&#128340; 扫描时间：{self._get_current_time()}</span>')
         h(f'    <span>&#128196; 发现问题文件：{len(results)} 个</span>')
-        h(f'    <span>&#128220; 版本 v3.1.0</span>')
+        h(f'    <span>&#128220; 版本 v3.1.2</span>')
         h(f'  </div>')
         h(f'</div>')
 
@@ -827,7 +997,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 
         # ====== 页脚 ======
         h(f'<div class="footer">')
-        h(f'  敏感内容扫描器 v3.1.0 | 报告生成时间 {self._get_current_time()} | 本地运行，数据未上传')
+        h(f'  敏感内容扫描器 v3.1.2 | 报告生成时间 {self._get_current_time()} | 本地运行，数据未上传')
+        h(f'</div>')
+
+        # ====== 商业合作 ======
+        h(f'<div class="section" style="background:#fef3c7;border:1px solid #fcd34d;">')
+        h(f'  <div class="section-title" style="color:#92400e;">&#128176; 获取更准确的内容识别规则库</div>')
+        h(f'  <p style="margin:0;font-size:14px;color:#78350f;">')
+        h(f'    如需更全面的行业数据字典和定制化识别规则，请联系：<br>')
+        h(f'    &#128231; <a href="mailto:support@soura.com.cn" style="color:#b45309;font-weight:600;">support@soura.com.cn</a>')
+        h(f'  </p>')
         h(f'</div>')
         
         h('</div>')  # container
@@ -1033,7 +1212,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 
 
 def main():
-    parser = argparse.ArgumentParser(description='敏感内容扫描器 v3.1.0')
+    parser = argparse.ArgumentParser(description='敏感内容扫描器 v3.1.2')
     parser.add_argument('path', type=str, help='要扫描的文件或目录路径')
     parser.add_argument('-c', '--custom', type=str, help='自定义敏感词库文件路径')
     parser.add_argument('-o', '--output', type=str, default='report.html', help='输出报告文件路径')
@@ -1048,6 +1227,7 @@ def main():
     parser.add_argument('--keywords', type=str, help='添加多个关键词（逗号分隔）')
     parser.add_argument('--dict-csv', type=str, help='CSV 数据字典文件路径')
     parser.add_argument('--dict-json', type=str, help='JSON 数据字典文件路径')
+    parser.add_argument('--dict-enc', type=str, help='加密行业字典文件路径 (.enc)')
     parser.add_argument('--threshold', type=float, default=10.0, help='风险阈值（默认: 10.0）')
     
     args = parser.parse_args()
@@ -1067,6 +1247,7 @@ def main():
         keywords=keywords if keywords else None,
         dict_csv=args.dict_csv,
         dict_json=args.dict_json,
+        dict_enc=args.dict_enc,
         threshold=args.threshold
     )
     

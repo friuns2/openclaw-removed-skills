@@ -3,11 +3,16 @@
   "slug": "sensitive-content-scanner",
   "displayName": "敏感内容扫描器",
   "latest": {
-    "version": "3.1.0",
-    "publishedAt": 1776673992044,
-    "commit": "https://github.com/openclaw/skills/commit/78713a59504f9b8da0f36b9fb974354b03777186"
+    "version": "3.2.0",
+    "publishedAt": 1776847739452,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.1.0",
+      "publishedAt": 1776673992044,
+      "commit": "https://github.com/openclaw/skills/commit/78713a59504f9b8da0f36b9fb974354b03777186"
+    },
     {
       "version": "2.0.0",
       "publishedAt": 1776156293357,
