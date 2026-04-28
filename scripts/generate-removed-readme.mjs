@@ -25,7 +25,7 @@ const deleteLog = git([
   "--all",
   "--grep=^delete: skills/",
   "--regexp-ignore-case",
-  "--format=%H%x09%ad%x09%s%x09%b%x1e",
+  "--format=%H%x09%P%x09%ad%x09%s%x1e",
   "--date=short",
 ]);
 
@@ -36,7 +36,7 @@ for (const record of deleteLog.split("\x1e")) {
   const trimmed = record.trim();
   if (!trimmed) continue;
 
-  const [hash, deletedDate, subject, ...bodyParts] = trimmed.split("\t");
+  const [hash, parentHashes, deletedDate, subject] = trimmed.split("\t");
   const match = subject.match(/^delete:\s+(skills\/[^/]+\/[^/]+)\s*(.*)$/i);
   if (!match) continue;
 
@@ -45,18 +45,17 @@ for (const record of deleteLog.split("\x1e")) {
   if (currentSkillPaths.has(skillMd) || seen.has(skillDir)) continue;
   seen.add(skillDir);
 
-  const body = bodyParts.join("\t").trim();
-  const explicitReason = match[2].trim();
-  const reason = explicitReason || body || subject;
   const [, owner, skill] = skillDir.split("/");
+  const parentHash = parentHashes.split(" ")[0];
 
   rows.push({
     owner,
     skill,
     skillDir,
     deletedDate,
+    deleteFullHash: hash,
     deleteHash: hash.slice(0, 10),
-    reason,
+    parentHash,
   });
 }
 
@@ -68,11 +67,37 @@ rows.sort(
 
 const zvecRows = rows.filter((row) => /zvec/i.test(row.skillDir));
 
+function skillLink(row) {
+  return `[${row.skillDir}](https://github.com/openclaw/skills/tree/${row.parentHash}/${row.skillDir})`;
+}
+
+function commitLink(row) {
+  return `[\`${row.deleteHash}\`](https://github.com/openclaw/skills/commit/${row.deleteFullHash})`;
+}
+
+function groupByDay(items) {
+  const groups = new Map();
+  for (const row of items) {
+    if (!groups.has(row.deletedDate)) groups.set(row.deletedDate, []);
+    groups.get(row.deletedDate).push(row);
+  }
+  return [...groups.entries()];
+}
+
+function tableForRows(items) {
+  let table = "| Owner | Skill | Path | Delete commit |\n";
+  table += "| --- | --- | --- | --- |\n";
+  for (const row of items) {
+    table += `| ${escapeTable(row.owner)} | ${escapeTable(row.skill)} | ${skillLink(row)} | ${commitLink(row)} |\n`;
+  }
+  return table;
+}
+
 let output = "";
 output += "# Removed OpenClaw Skills\n\n";
 output += "Generated from `https://github.com/openclaw/skills` git history.\n\n";
 output +=
-  "This file lists root skill directories that have a `delete: skills/<owner>/<skill>` commit in history and whose root `SKILL.md` is not present in `HEAD`. It is sorted by removed date, newest first.\n\n";
+  "This file lists root skill directories that have a `delete: skills/<owner>/<skill>` commit in history and whose root `SKILL.md` is not present in `HEAD`. It is grouped by removed date, newest first. Skill links point to the last tree before deletion.\n\n";
 output += `Total removed root skills found: ${rows.length}.\n\n`;
 output += "## Recovery\n\n";
 output += "For any row below, recover the last version before deletion with:\n\n";
@@ -85,22 +110,23 @@ output +=
   "git -C skills checkout f36973c80e^ -- skills/emre-koc/zvec-local-rag-service\n";
 output += "```\n\n";
 output += "## zvec\n\n";
-output += "| Skill | Removed | Delete commit | Removal reason |\n";
-output += "| --- | --- | --- | --- |\n";
+output += "| Skill | Removed | Delete commit |\n";
+output += "| --- | --- | --- |\n";
 for (const row of zvecRows) {
-  output += `| \`${row.skillDir}\` | ${row.deletedDate} | \`${row.deleteHash}\` | ${escapeTable(row.reason)} |\n`;
+  output += `| ${skillLink(row)} | ${row.deletedDate} | ${commitLink(row)} |\n`;
 }
 output += "\n";
 output += "## Removed Skills\n\n";
-output += "| Owner | Skill | Path | Removed | Delete commit | Removal reason |\n";
-output += "| --- | --- | --- | --- | --- | --- |\n";
-for (const row of rows) {
-  output += `| ${escapeTable(row.owner)} | ${escapeTable(row.skill)} | \`${row.skillDir}\` | ${row.deletedDate} | \`${row.deleteHash}\` | ${escapeTable(row.reason)} |\n`;
+for (const [date, dateRows] of groupByDay(rows)) {
+  output += `<details>\n`;
+  output += `<summary>${date} (${dateRows.length})</summary>\n\n`;
+  output += tableForRows(dateRows);
+  output += "\n</details>\n\n";
 }
 
-writeFileSync(new URL("../readme-removed.md", import.meta.url), output);
+writeFileSync(new URL("../README.md", import.meta.url), output);
 
-console.log(`Wrote readme-removed.md with ${rows.length} removed skills.`);
+console.log(`Wrote README.md with ${rows.length} removed skills.`);
 if (zvecRows.length) {
   console.log(
     `zvec: ${zvecRows
