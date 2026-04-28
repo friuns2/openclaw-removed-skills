@@ -3,9 +3,15 @@
   "slug": "inworld-ai",
   "displayName": "Inworld Ai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775397868247,
-    "commit": "https://github.com/openclaw/skills/commit/8b1484e462fd9dc3169ae33e401479def6706cc1"
+    "version": "1.0.1",
+    "publishedAt": 1776889070142,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775397868247,
+      "commit": "https://github.com/openclaw/skills/commit/8b1484e462fd9dc3169ae33e401479def6706cc1"
+    }
+  ]
 }
