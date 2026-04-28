@@ -3,9 +3,15 @@
   "slug": "preflyte",
   "displayName": "Preflyte",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776077337867,
-    "commit": "https://github.com/openclaw/skills/commit/a1c736a74b73cfac42ce3bf1f459b3c45ad9690b"
+    "version": "1.1.0",
+    "publishedAt": 1776875665284,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776077337867,
+      "commit": "https://github.com/openclaw/skills/commit/a1c736a74b73cfac42ce3bf1f459b3c45ad9690b"
+    }
+  ]
 }
