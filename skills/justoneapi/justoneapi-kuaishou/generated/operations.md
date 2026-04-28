@@ -23,9 +23,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserVideoListV2`
+## `getKuaishouUserVideoListV2`
 
 - Method: `GET`
 - Path: `/api/kuaishou/get-user-video-list/v2`
@@ -47,7 +47,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getVideoCommentsV1`
 
@@ -76,7 +76,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getVideoDetailsV2`
 
@@ -99,9 +99,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchUserV2`
+## `searchKuaishouUserV2`
 
 - Method: `GET`
 - Path: `/api/kuaishou/search-user/v2`
@@ -123,9 +123,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchVideoV2`
+## `searchKuaishouVideoV2`
 
 - Method: `GET`
 - Path: `/api/kuaishou/search-video/v2`
@@ -147,7 +147,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `shareLinkResolutionV1`
 
@@ -170,4 +170,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

@@ -38,8 +38,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -50,7 +50,7 @@ const manifest = {
     {
       "description": "Get Kuaishou user Published Videos data, including covers, publish times, and engagement metrics, for creator monitoring and content performance analysis.",
       "method": "GET",
-      "operationId": "getUserVideoListV2",
+      "operationId": "getKuaishouUserVideoListV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -84,8 +84,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Videos",
@@ -130,8 +130,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Comments",
@@ -167,8 +167,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Details",
@@ -179,7 +179,7 @@ const manifest = {
     {
       "description": "Get Kuaishou user Search data, including profile names, avatars, and follower counts, for creator discovery and account research.",
       "method": "GET",
-      "operationId": "searchUserV2",
+      "operationId": "searchKuaishouUserV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -213,8 +213,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Search",
@@ -225,7 +225,7 @@ const manifest = {
     {
       "description": "Get Kuaishou video Search data, including video ID, cover image, and description, for competitive analysis and market trends and keywords monitoring and brand tracking.",
       "method": "GET",
-      "operationId": "searchVideoV2",
+      "operationId": "searchKuaishouVideoV2",
       "parameters": [
         {
           "defaultValue": null,
@@ -259,8 +259,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Search",
@@ -296,8 +296,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Share Link Resolution",
