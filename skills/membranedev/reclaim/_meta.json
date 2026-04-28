@@ -3,9 +3,15 @@
   "slug": "reclaim",
   "displayName": "Reclaim",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775444731555,
-    "commit": "https://github.com/openclaw/skills/commit/98e47dbc0c65a0dde1add881a26e5c2075ae76f6"
+    "version": "1.0.1",
+    "publishedAt": 1776897848282,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775444731555,
+      "commit": "https://github.com/openclaw/skills/commit/98e47dbc0c65a0dde1add881a26e5c2075ae76f6"
+    }
+  ]
 }
