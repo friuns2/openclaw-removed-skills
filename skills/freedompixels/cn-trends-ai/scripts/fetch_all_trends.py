@@ -15,29 +15,20 @@ import sys
 import ssl
 import argparse
 import time
+import certifi
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # SSL 配置：优先标准验证，失败才降级
-_SAFE_SSL_CTX = ssl.create_default_context()  # 标准验证
+# macOS Python 需要显式加载 certifi 根证书
+_SAFE_SSL_CTX = ssl.create_default_context()
+_SAFE_SSL_CTX.load_verify_locations(certifi.where())
 
 def _urlopen(req, timeout=10):
-    """优先标准SSL，失败自动降级"""
-    try:
-        return urlopen(req, timeout=timeout, context=_SAFE_SSL_CTX)
-    except URLError as e:
-        # SSL证书验证失败时降级
-        reason = getattr(e, 'reason', None)
-        if isinstance(reason, (ssl.SSLError, ssl.SSLCertVerificationError)):
-            return urlopen(req, timeout=timeout, context=ssl.create_default_context())
-        raise
-    except Exception as e:
-        # 其他SSL错误也尝试降级
-        if 'SSL' in str(type(e).__name__) or 'SSL' in str(e):
-            return urlopen(req, timeout=timeout, context=ssl.create_default_context())
-        raise
+    """标准SSL验证（certifi根证书）"""
+    return urlopen(req, timeout=timeout, context=_SAFE_SSL_CTX)
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
