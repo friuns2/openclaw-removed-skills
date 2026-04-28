@@ -3,9 +3,15 @@
   "slug": "livekit-integration",
   "displayName": "Livekit",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775545588074,
-    "commit": "https://github.com/openclaw/skills/commit/9228641d86270685b710444cd666ca07f83dc449"
+    "version": "1.0.1",
+    "publishedAt": 1776893501840,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775545588074,
+      "commit": "https://github.com/openclaw/skills/commit/9228641d86270685b710444cd666ca07f83dc449"
+    }
+  ]
 }
