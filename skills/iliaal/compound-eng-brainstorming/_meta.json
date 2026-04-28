@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-brainstorming",
-  "displayName": "brainstorming",
+  "displayName": "ia-brainstorming",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518923900,
-    "commit": "https://github.com/openclaw/skills/commit/de5dfb36d59732497ec08cad1b2c4679ddd9512f"
+    "version": "3.0.4",
+    "publishedAt": 1777300650227,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518923900,
+      "commit": "https://github.com/openclaw/skills/commit/de5dfb36d59732497ec08cad1b2c4679ddd9512f"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004142887,
