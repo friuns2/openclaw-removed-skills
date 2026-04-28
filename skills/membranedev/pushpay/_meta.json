@@ -3,9 +3,15 @@
   "slug": "pushpay",
   "displayName": "Pushpay",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775718282009,
-    "commit": "https://github.com/openclaw/skills/commit/70e4134dfc4e9d3a7814d8d4f23b0b89cb37ed74"
+    "version": "1.0.1",
+    "publishedAt": 1776898275579,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775718282009,
+      "commit": "https://github.com/openclaw/skills/commit/70e4134dfc4e9d3a7814d8d4f23b0b89cb37ed74"
+    }
+  ]
 }
