@@ -3,9 +3,15 @@
   "slug": "upserve",
   "displayName": "Upserve",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775527635468,
-    "commit": "https://github.com/openclaw/skills/commit/eb73c64bb9ef838571798f342e0cde7223ce3e27"
+    "version": "1.0.1",
+    "publishedAt": 1776893411789,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775527635468,
+      "commit": "https://github.com/openclaw/skills/commit/eb73c64bb9ef838571798f342e0cde7223ce3e27"
+    }
+  ]
 }
