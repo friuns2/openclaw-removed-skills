@@ -1,13 +1,18 @@
 {
   "owner": "jayshna",
   "slug": "sms-rpg",
-  "displayName": "Sms Rpg",
+  "displayName": "Skill Sms Rpg Instruction",
   "latest": {
-    "version": "2.0.0",
-    "publishedAt": 1776670129302,
-    "commit": "https://github.com/openclaw/skills/commit/7f642e00665d0d036d15da849d371321cd7a7e33"
+    "version": "3.0.1",
+    "publishedAt": 1776842938683,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.0.0",
+      "publishedAt": 1776670129302,
+      "commit": "https://github.com/openclaw/skills/commit/7f642e00665d0d036d15da849d371321cd7a7e33"
+    },
     {
       "version": "1.2.2",
       "publishedAt": 1776179786157,
