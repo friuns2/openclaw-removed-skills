@@ -1,11 +1,17 @@
 {
   "owner": "phuongsky",
   "slug": "facebookadvanced",
-  "displayName": "facebook-advanced",
+  "displayName": "Facebookadvanced",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776500259775,
-    "commit": "https://github.com/openclaw/skills/commit/bbd2d754563fc760e81235b3e2bac614896edc4b"
+    "version": "1.0.4",
+    "publishedAt": 1777109577296,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776500259775,
+      "commit": "https://github.com/openclaw/skills/commit/bbd2d754563fc760e81235b3e2bac614896edc4b"
+    }
+  ]
 }
