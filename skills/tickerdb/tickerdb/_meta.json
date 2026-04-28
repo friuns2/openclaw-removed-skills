@@ -3,11 +3,16 @@
   "slug": "tickerdb",
   "displayName": "Tickerdb",
   "latest": {
-    "version": "0.1.95",
-    "publishedAt": 1776640021507,
-    "commit": "https://github.com/openclaw/skills/commit/105bd99503a212c27ee32557550dc03811906d78"
+    "version": "0.1.97",
+    "publishedAt": 1777001570824,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.1.95",
+      "publishedAt": 1776640021507,
+      "commit": "https://github.com/openclaw/skills/commit/105bd99503a212c27ee32557550dc03811906d78"
+    },
     {
       "version": "0.1.8",
       "publishedAt": 1776050422618,

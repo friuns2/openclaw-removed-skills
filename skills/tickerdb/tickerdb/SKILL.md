@@ -132,14 +132,15 @@ Unified endpoint for single-asset intelligence. Supports 4 modes depending on wh
 | `fields` | string | full summary | Snapshot and history modes only. JSON array or comma-separated list of sections and dotted paths to return, such as `trend`, `momentum.rsi_zone`, `fundamentals.valuation_zone`, or `levels.support_levels`. |
 | `meta` | boolean | `false` | Snapshot and history modes only. Add `meta=true` to include sibling `_meta` / `status_meta` stability objects in the response. Explicit `*_meta` field paths in `fields` still work without this flag. |
 | `sample` | string | — | Date range mode only. Use `even` to evenly spread snapshots across the entire `start`/`end` range. |
-| `field` | string | — | Band field name for events. Prefer full schema/search names like `momentum_rsi_zone`, `extremes_condition`, `trend_direction`, or `fundamentals_valuation_zone`. Legacy short aliases like `rsi_zone` still work. Switches to events mode. |
-| `band` | string | all | Filter events to a specific band value (e.g. `deep_oversold`). Only with `field`. |
-| `limit` | int | plan max (`sample=even`) / 10 (events) | With `sample=even`, requested sampled rows up to your plan cap. With `field`, max event results (1-100). |
+| `field` | string | — | Band field name for events. Prefer full schema/search names like `momentum_rsi_zone`, `extremes_condition`, `trend_direction`, `trend_distance_ma50`, or `fundamentals_valuation_zone`. Legacy short aliases like `rsi_zone` still work. Switches to events mode. |
+| `band` | string | all | Filter events to a specific band value (e.g. `deep_oversold`). For MA distance event fields such as `trend_distance_ma50`, grouped aliases `above` and `below` are also supported. Only with `field`. |
+| `stats` | boolean | `false` | Event mode only. Add `stats=true` to return aggregate stats instead of raw event rows. |
+| `limit` | int | plan max (`sample=even`) / 10 (events) | With `sample=even`, requested sampled rows up to your plan cap. With `field`, max event results (1-50), returned newest-first by default. |
 | `before` | string | — | Return events before this date (YYYY-MM-DD). Only with `field`. |
 | `after` | string | — | Return events after this date (YYYY-MM-DD). Only with `field`. |
 | `context_ticker` | string | — | Cross-asset correlation: second ticker (e.g. `SPY`). Requires `context_field` + `context_band`. Plus/Pro only. 2 credits. |
-| `context_field` | string | — | Band field to check on context ticker (e.g. `trend_direction`). |
-| `context_band` | string | — | Required band on context ticker (e.g. `downtrend`). |
+| `context_field` | string | — | Band field to check on context ticker (e.g. `trend_direction` or `trend_distance_ma50`). |
+| `context_band` | string | — | Required band on context ticker (e.g. `downtrend`). For MA distance context fields, grouped aliases `above` and `below` are also supported. |
 
 **Tier access:** Free gets core technical (performance, trend, momentum, extremes, volatility, volume). Plus adds support/resistance, basic fundamentals, opt-in band stability metadata (`_meta` sibling objects / `status_meta`), aftermath data on events, and cross-asset correlation. Pro adds sector_context and advanced fundamentals. Date lookback limits: Free 30 days, Plus 2 years, Pro 5 years. Sequential date-range caps: Free 3 rows, Plus 10 rows, Pro 50 rows. Events lookback: Free 30 days, Plus 2 years, Pro 5 years.
 
@@ -150,7 +151,7 @@ Unified endpoint for single-asset intelligence. Supports 4 modes depending on wh
 **Response sections (snapshot/historical modes):**
 
 - Identity/freshness — `ticker`, `timeframe`, `asset_class`, `sector`, `data_status`, `as_of_date`, `performance`
-- `trend` — `direction`, `duration_days`, `ma_alignment`, `distance_from_ma_band` (ma_20, ma_50, ma_200), `volume_confirmation` (`confirmed`/`diverging`/`neutral`)
+- `trend` — `direction`, `duration_days`, `ma_alignment`, `distance_from_ma_band` (ma_8, ma_20, ma_50, ma_100, ma_200), `volume_confirmation` (`confirmed`/`diverging`/`neutral`)
 - `momentum` — `rsi_zone`, `stochastic_zone`, `rsi_stochastic_agreement`, `macd_state`, `direction`, `divergence_detected`, `divergence_type` (`bullish_divergence`/`bearish_divergence`/null)
 - `extremes` — `condition` (`deep_oversold` through `deep_overbought` or `normal`), `days_in_condition`, `historical_median_duration`, `historical_max_duration`, `occurrences_1yr`, `condition_percentile`, `condition_rarity`
 - `volatility` — `regime`, `regime_trend` (`compressing`/`stable`/`expanding`), `squeeze_active`, `squeeze_days`, `historical_avg_squeeze_duration`
@@ -160,7 +161,7 @@ Unified endpoint for single-asset intelligence. Supports 4 modes depending on wh
 - `sector_context` (Pro) — `rsi_zone`, `trend`, `asset_vs_sector_rsi`, `asset_vs_sector_trend`, `agreement`, `oversold_count`, `overbought_count`, `breakout_count`, `total_count`, `valuation_zone`, `elevated_volume_count`
 - `fundamentals` (stocks only, Plus+) — Plus: `valuation_zone`, `growth_zone`, optional `growth_zone_meta` when requested, `earnings_proximity`, `analyst_consensus`. Pro adds: `valuation_percentile`, `pe_vs_historical_zone`, `pe_vs_sector_zone`, `pb_vs_historical_zone`, `revenue_growth_direction`, optional `revenue_growth_direction_meta`, `eps_growth_direction`, optional `eps_growth_direction_meta`, `last_earnings_surprise`, `analyst_consensus_direction`, and nested `insider_activity` (`zone`, `net_direction`, `quarter`)
 
-**Events mode response:** `ticker`, `field`, `timeframe`, `events` array, `total_occurrences`, `query_range`. Each event includes: `date`, `band`, `prev_band`, `duration_days` (or `duration_weeks`), `aftermath` object with lookahead performance bands (5d/10d/20d/50d/100d for daily, 2w/4w/8w/12w/16w for weekly). Plus/Pro also get `stability_at_entry`, `flips_recent_at_entry`, and `flips_lookback`. When cross-asset correlation is used, also includes `context` object.
+**Events mode response:** `ticker`, `field`, `timeframe`, `events` array, `total_occurrences`, `query_range`. Events are returned newest-first by default. Each event includes: `date`, `band`, `prev_band`, `duration_days` (or `duration_weeks`), `aftermath` object with lookahead performance bands (5d/10d/20d/50d/100d for daily, 2w/4w/8w/12w/16w for weekly). Plus/Pro also get `stability_at_entry`, `flips_recent_at_entry`, and `flips_lookback`. When cross-asset correlation is used, also includes `context` object. Add `stats=true` to swap the raw `events` list for aggregate `stats` with event-band counts and aftermath distributions.
 
 **Examples:**
 
@@ -209,6 +210,18 @@ curl "https://api.tickerdb.com/v1/summary/AAPL?field=momentum_rsi_zone&band=deep
 Events (extreme-state entries):
 ```
 curl "https://api.tickerdb.com/v1/summary/AAPL?field=extremes_condition&band=deep_oversold&limit=5" \
+  -H "Authorization: Bearer $TICKERDB_KEY"
+```
+
+Events (MA distance lookback with grouped aliases):
+```
+curl "https://api.tickerdb.com/v1/summary/BTCUSD?field=trend_distance_ma50&band=above&context_ticker=SPY&context_field=trend_distance_ma50&context_band=below&limit=5" \
+  -H "Authorization: Bearer $TICKERDB_KEY"
+```
+
+Aggregate stats (cross-asset MA lookback):
+```
+curl "https://api.tickerdb.com/v1/summary/SOLUSD?field=trend_distance_ma20&band=above&context_ticker=QQQ&context_field=trend_distance_ma20&context_band=above&stats=true&before=2025-07-01" \
   -H "Authorization: Bearer $TICKERDB_KEY"
 ```
 
@@ -334,7 +347,7 @@ Returns structured, field-level diffs for your saved watchlist tickers since the
 
 **Parameters:** `timeframe` (optional, default `daily`) — `daily` or `weekly`.
 
-**Fields tracked:** `rsi_zone`, `trend_direction`, `volume_ratio_band`, `squeeze_active`, `extreme_condition`, `breakout_type`, and fundamental fields (`fundamentals.valuation_zone`, `fundamentals.analyst_consensus`, `fundamentals.earnings_proximity`, `fundamentals.last_earnings_surprise`, `fundamentals.growth_zone`).
+**Fields tracked:** `rsi_zone`, `trend_direction`, `trend_distance_ma8`, `trend_distance_ma20`, `trend_distance_ma50`, `trend_distance_ma100`, `trend_distance_ma200`, `volume_ratio_band`, `squeeze_active`, `extreme_condition`, `breakout_type`, and fundamental fields (`fundamentals.valuation_zone`, `fundamentals.analyst_consensus`, `fundamentals.earnings_proximity`, `fundamentals.last_earnings_surprise`, `fundamentals.growth_zone`).
 
 **Response:**
 ```json
@@ -377,7 +390,7 @@ Search for assets matching categorical filter criteria. Use this when you need t
 | `timeframe` | string | `daily` | `daily` or `weekly` |
 | `sort_by` | string | `ticker` | Column name to sort results by. Must be a valid field from the schema. |
 | `sort_direction` | string | `desc` | `asc` or `desc` |
-| `limit` | int | 25 | Max results (1-100) |
+| `limit` | int | 20 | Max results (1-50) |
 | `offset` | int | 0 | Pagination offset |
 | `fields` | string | core subset | Columns to return. JSON array or comma-separated. Default if omitted: `ticker, asset_class, sector, performance, trend_direction, momentum_rsi_zone, extremes_condition, extremes_condition_rarity, volatility_regime, volume_ratio_band, fundamentals_valuation_zone, range_position`. Use `["*"]` for all 120+ fields. `ticker` is always included. Invalid fields return an error pointing to `/v1/schema/fields`. |
 
@@ -445,7 +458,7 @@ Each webhook delivery counts as one API request against the user's daily allowan
 | `watchlist.changes` | Structured field-level diffs for tickers on the user's watchlist. Only fires when at least one field has changed. | Enabled on creation |
 | `data.ready` | Simple notification that fresh data has been computed and is available via the API. | Opt-in |
 
-Fields tracked for `watchlist.changes`: `rsi_zone`, `trend_direction`, `volume_ratio_band`, `squeeze_active`, `extreme_condition`, `breakout_type`, and fundamental fields (`valuation_zone`, `analyst_consensus`, `earnings_proximity`, `last_earnings_surprise`, `growth_zone`).
+Fields tracked for `watchlist.changes`: `rsi_zone`, `trend_direction`, `trend_distance_ma8`, `trend_distance_ma20`, `trend_distance_ma50`, `trend_distance_ma100`, `trend_distance_ma200`, `volume_ratio_band`, `squeeze_active`, `extreme_condition`, `breakout_type`, and fundamental fields (`valuation_zone`, `analyst_consensus`, `earnings_proximity`, `last_earnings_surprise`, `growth_zone`).
 
 ### POST /v1/webhooks — Register a webhook
 
@@ -665,7 +678,7 @@ All data is pre-computed after market close. Daily refreshes publish around 00:3
 2. **Always use uppercase tickers.** Crypto must include `USD` suffix.
 3. **Use `/summary/TICKER` for current snapshots** — deep dive on any single ticker's categorical state.
 4. **Use `/summary/TICKER?start=...&end=...` for historical snapshots** — see how categorical bands evolved over a date range.
-5. **Use `/summary/TICKER?field=...` for band transition history** — use the same full field names returned by `/v1/schema/fields` (for example `momentum_rsi_zone` or `extremes_condition`) to find when a ticker entered a specific band, how long it stayed, and what happened afterward. Add `&band=...` to filter. Supports cross-asset correlation with `context_*` params.
+5. **Use `/summary/TICKER?field=...` for band transition history** — use the same full field names returned by `/v1/schema/fields` (for example `momentum_rsi_zone`, `extremes_condition`, or `trend_distance_ma50`) to find when a ticker entered a specific band, how long it stayed, and what happened afterward. Add `&band=...` to filter. MA distance fields also support grouped `above` / `below` aliases. Supports cross-asset correlation with `context_*` params.
 6. **Use `/search` to find assets by state** — pass a JSON array of `{field, op, value}` filters using canonical flat schema names from `/v1/schema/fields` (for example `momentum_rsi_zone`) to discover tickers matching categorical conditions.
 7. **Use `/schema/fields` to discover fields and bands** — get the full list of available fields, valid band values, and sectors.
 8. **Use `/watchlist` for portfolio monitoring** — save tickers once with POST, then GET for live snapshots with `notable_changes`. Use `/watchlist/changes` for structured field-level diffs (day-over-day or week-over-week). The saved watchlist is also what webhooks track.
@@ -684,6 +697,7 @@ All data is pre-computed after market close. Daily refreshes publish around 00:3
     - "How many times has TSLA been deep_oversold?" -> `/summary/TSLA?field=momentum_rsi_zone&band=deep_oversold`
     - "What happened after NVDA entered strong_uptrend?" -> `/summary/NVDA?field=trend_direction&band=strong_uptrend`
     - "When was AAPL oversold while SPY was in downtrend?" -> `/summary/AAPL?field=momentum_rsi_zone&band=oversold&context_ticker=SPY&context_field=trend_direction&context_band=downtrend`
+    - "When was BTC above the 50d while SPY was below the 50d?" -> `/summary/BTCUSD?field=trend_distance_ma50&band=above&context_ticker=SPY&context_field=trend_distance_ma50&context_band=below`
     - "Which stocks are oversold?" -> `/search?filters=[{"field":"momentum_rsi_zone","op":"eq","value":"deep_oversold"}]`
     - "What fields are available?" -> `/schema/fields`
     - "Add AAPL to my watchlist" -> POST `/watchlist` with `{"tickers": ["AAPL"]}`
@@ -729,6 +743,7 @@ Users can invoke this skill directly with `/tickerdb` followed by a command:
   > `/tickerdb AAPL` — full summary for any ticker
   > `/tickerdb summary AAPL 2026-01-01 2026-03-31` — historical categorical snapshots over a date range
   > `/tickerdb summary AAPL momentum_rsi_zone deep_oversold` — band transition history with aftermath data
+  > `/tickerdb summary BTCUSD trend_distance_ma50 above --context SPY trend_distance_ma50 below` — MA distance lookback with cross-asset context
   > `/tickerdb search momentum_rsi_zone=deep_oversold` — find assets matching filter criteria
   > `/tickerdb schema` — list all available fields, bands, and sectors
   > `/tickerdb watchlist` — check your saved watchlist with live data
@@ -779,6 +794,7 @@ Users can invoke this skill directly with `/tickerdb` followed by a command:
 - `/tickerdb summary AAPL momentum_rsi_zone` — band transition history for a field
 - `/tickerdb summary AAPL momentum_rsi_zone deep_oversold` — when was it last deep_oversold?
 - `/tickerdb summary AAPL momentum_rsi_zone deep_oversold --context SPY trend_direction downtrend` — AAPL oversold while SPY was in downtrend
+- `/tickerdb summary BTCUSD trend_distance_ma50 above --context SPY trend_distance_ma50 below` — BTC above the 50d while SPY was below the 50d
 - `/tickerdb search momentum_rsi_zone=deep_oversold` — find assets matching filters
 - `/tickerdb search trend_direction=strong_uptrend,sector=Technology` — combined filters
 - `/tickerdb schema` — list all available fields, bands, and sectors
