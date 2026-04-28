@@ -5,33 +5,8 @@ description: execute the paid showmethemoney premium action through the merchant
 
 # ShowMeTheMoney Pro
 
-Execute the protected ShowMeTheMoney premium action only after merchant-backend verification and StablePay payment succeed.
-
-## Configuration (Merchant Backend as Source of Truth)
-
-**Important**: This skill does NOT define fixed prices or skill DIDs. All payment parameters are determined by the merchant backend.
-
-- merchant_backend_base_url: `http://127.0.0.1:8787`
-- premium_action_endpoint: `/execute`
-
-**The merchant backend is the ONLY source of truth for**:
-- `skill_did` - The skill identifier to pay for
-- `price` - The amount to charge (in combination with `currency`)
-- `currency` - The payment currency (USDC/USDT)
-- `payment_endpoint` - Where to submit the payment
-
-**Never use hardcoded defaults**. Always obtain these values from the backend's 402 response.
-
-## Preconditions
-
-Before using this skill:
-
-1. Call `stablepay_runtime_status`.
-2. If no local wallet exists, create or bind one.
-3. If no backend DID is registered, call `stablepay_register_local_did`.
-4. If payment limits are missing, call `stablepay_configure_payment_limits`.
-
-Do not require `stablepay_build_payment_policy` unless another workflow explicitly depends on it.
+Execute the protected ShowMeTheMoney premium action only after merchant-backend verification and StablePay payment succeed. 
+This skill is only for the protected premium action exposed by `GET /execute?agent_did=<buyer_did>`
 
 ## Main workflow
 
@@ -43,13 +18,15 @@ When the user asks to use the premium ShowMeTheMoney capability:
 3. Treat the merchant backend as the source of truth.
 4. If the backend returns `200`, return the protected result.
 5. If the backend returns `402 Payment Required`:
-   - **MUST** read ALL payment parameters (`skill_did`, `price`, `currency`, `payment_endpoint`) from the backend response
+   - Parse the x402 response from `accepts[0]`:
+     - `skill_did` → from `accepts[0].extra.skillDid`
+     - `price` → from `accepts[0].maxAmountRequired` (convert from minor units to decimal: divide by 1,000,000)
+     - `currency` → from `accepts[0].extra.currency`
+     - `facilitator_url` → from `accepts[0].extra.facilitatorUrl`
    - **NEVER** use any hardcoded or fallback values
-   - call `stablepay_pay_via_gateway` with the exact values from the backend
+   - call `stablepay_pay_via_gateway` with the extracted values
 6. If payment succeeds, retry the same `/execute` request once.
 7. If the retry still does not return `200`, explain that the premium action is still locked or verification failed.
-
-**Important**: If the merchant backend is unreachable or does not return a valid 402 response, do NOT proceed with payment. Report the backend error to the user.
 
 ## Premium action contract
 
@@ -64,11 +41,7 @@ Optional query parameters may be used when helpful:
 - `q`
 - `prompt`
 
-These optional values are forwarded to the backend as request text for the premium action.
-
-## Expected backend behavior
-
-The backend should:
+These optional values are forwarded to the backend as request text for the premium action. The backend should:
 
 1. receive the premium request
 2. verify purchase state via StablePay
@@ -78,15 +51,9 @@ The backend should:
 
 Treat the backend response as the final authority.
 
-## Success criteria
+## Unlocked Store (Report Store)
 
-A successful premium response should include a backend-generated result such as:
-
-- `protected_result.kind = merchant-generated-proof`
-- `protected_result.proof.display_token`
-- `access.verified_by_backend = true`
-
-This proof token is the strongest evidence that the premium capability was unlocked through backend verification, not guessed or simulated locally.
+After successful skill purchase, the backend returns `unlocked_store` in the 200 response. Present the unlocked store information to the user and offer to browse/purchase individual research reports. Each report requires separate payment using the same x402 payment flow.
 
 ## Payment rules
 
@@ -97,39 +64,3 @@ When payment is required:
 3. Respect local payment limits already configured in the StablePay plugin.
 4. Never claim payment succeeded unless StablePay returns a successful result.
 5. Retry the premium action only once after a successful payment.
-
-## What not to use as proof of access
-
-Never treat any of the following as proof that the premium action is unlocked:
-
-- local plugin state
-- wallet existence
-- DID registration alone
-- local payment policy alone
-- raw Solana balance checks
-- a previous purchase attempt without successful backend verification
-
-Only the merchant backend may decide that access is unlocked.
-
-## Scope limits
-
-This skill is only for the protected premium action exposed by:
-
-- `GET /execute?agent_did=<buyer_did>`
-
-Do not treat these routes as the main premium workflow:
-
-- `/developer/revenue`
-- `/developer/sales`
-- `/agent/balance`
-- `/agent/transactions`
-
-Those are debugging or operator-facing routes, not the premium capability itself.
-
-## Safety
-
-- Never expose private keys, mnemonic material, decrypted local state, API keys, or merchant secrets.
-- Never bypass backend verification.
-- Never invent payment success.
-- Never claim premium access is unlocked unless the backend returns success.
-- Never return fabricated proof tokens.

@@ -3,11 +3,16 @@
   "slug": "showmethemoney-pro",
   "displayName": "showmethemoney-pro",
   "latest": {
-    "version": "1.0.6",
-    "publishedAt": 1776426567849,
-    "commit": "https://github.com/openclaw/skills/commit/e19d8dc74ee684f7c97bc0751af162f7c480c584"
+    "version": "1.1.0",
+    "publishedAt": 1777191838044,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.6",
+      "publishedAt": 1776426567849,
+      "commit": "https://github.com/openclaw/skills/commit/e19d8dc74ee684f7c97bc0751af162f7c480c584"
+    },
     {
       "version": "1.0.3",
       "publishedAt": 1776109754403,
