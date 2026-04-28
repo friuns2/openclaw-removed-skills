@@ -3,11 +3,16 @@
   "slug": "koubei-circle-operator",
   "displayName": "社区运营小助手",
   "latest": {
-    "version": "1.3.1",
-    "publishedAt": 1776743320499,
-    "commit": "https://github.com/openclaw/skills/commit/258341a49cdac0b7b71b44083173ef7aae7cabca"
+    "version": "1.3.2",
+    "publishedAt": 1776764433810,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.3.1",
+      "publishedAt": 1776743320499,
+      "commit": "https://github.com/openclaw/skills/commit/258341a49cdac0b7b71b44083173ef7aae7cabca"
+    },
     {
       "version": "1.2.15",
       "publishedAt": 1776161000221,
