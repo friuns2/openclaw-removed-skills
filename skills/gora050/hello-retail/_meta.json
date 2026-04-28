@@ -3,9 +3,15 @@
   "slug": "hello-retail",
   "displayName": "Hello Retail",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775444872272,
-    "commit": "https://github.com/openclaw/skills/commit/53eb18df42867ddeab3b9de81f769902498934bb"
+    "version": "1.0.1",
+    "publishedAt": 1776892716314,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775444872272,
+      "commit": "https://github.com/openclaw/skills/commit/53eb18df42867ddeab3b9de81f769902498934bb"
+    }
+  ]
 }
