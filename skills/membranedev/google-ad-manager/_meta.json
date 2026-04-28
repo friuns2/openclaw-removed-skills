@@ -3,9 +3,15 @@
   "slug": "google-ad-manager",
   "displayName": "Google Ad Manager",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775350999947,
-    "commit": "https://github.com/openclaw/skills/commit/b1e2f299e506a454f1462e197fb924ec812e71d3"
+    "version": "1.0.1",
+    "publishedAt": 1776884185771,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775350999947,
+      "commit": "https://github.com/openclaw/skills/commit/b1e2f299e506a454f1462e197fb924ec812e71d3"
+    }
+  ]
 }
