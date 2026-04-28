@@ -3,11 +3,16 @@
   "slug": "urlgo",
   "displayName": "urlgo",
   "latest": {
-    "version": "6.2.0",
-    "publishedAt": 1776748296199,
-    "commit": "https://github.com/openclaw/skills/commit/490625343717ac6460c3fe325ad2314d576323d9"
+    "version": "6.4.0",
+    "publishedAt": 1776788118363,
+    "commit": null
   },
   "history": [
+    {
+      "version": "6.2.0",
+      "publishedAt": 1776748296199,
+      "commit": "https://github.com/openclaw/skills/commit/490625343717ac6460c3fe325ad2314d576323d9"
+    },
     {
       "version": "3.0.0",
       "publishedAt": 1776248802741,
