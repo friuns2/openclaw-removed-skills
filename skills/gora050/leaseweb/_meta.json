@@ -3,9 +3,15 @@
   "slug": "leaseweb",
   "displayName": "Leaseweb",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775671530262,
-    "commit": "https://github.com/openclaw/skills/commit/5c62a26e77a59a55918d182ceda537d7b440de3b"
+    "version": "1.0.1",
+    "publishedAt": 1776899466548,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775671530262,
+      "commit": "https://github.com/openclaw/skills/commit/5c62a26e77a59a55918d182ceda537d7b440de3b"
+    }
+  ]
 }
