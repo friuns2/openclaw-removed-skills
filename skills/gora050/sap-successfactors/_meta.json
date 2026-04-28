@@ -3,9 +3,15 @@
   "slug": "sap-successfactors",
   "displayName": "Sap Successfactors",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775718522567,
-    "commit": "https://github.com/openclaw/skills/commit/e406e218f2c08f573ce62d571eba37a39a6d6e13"
+    "version": "1.0.1",
+    "publishedAt": 1776899753962,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775718522567,
+      "commit": "https://github.com/openclaw/skills/commit/e406e218f2c08f573ce62d571eba37a39a6d6e13"
+    }
+  ]
 }
