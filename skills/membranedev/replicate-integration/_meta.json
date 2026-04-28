@@ -3,9 +3,15 @@
   "slug": "replicate-integration",
   "displayName": "Replicate",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775541913222,
-    "commit": "https://github.com/openclaw/skills/commit/e76723911d11e7a88c32239aa88904730f0e55fc"
+    "version": "1.0.1",
+    "publishedAt": 1776891769244,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775541913222,
+      "commit": "https://github.com/openclaw/skills/commit/e76723911d11e7a88c32239aa88904730f0e55fc"
+    }
+  ]
 }
