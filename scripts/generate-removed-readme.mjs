@@ -1,7 +1,9 @@
-import { execFileSync } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
+import { promisify } from "node:util";
 import { writeFileSync } from "node:fs";
 
 const repoRoot = new URL("..", import.meta.url).pathname;
+const execFileAsync = promisify(execFile);
 
 function git(args) {
   return execFileSync("git", ["-C", repoRoot, ...args], {
@@ -10,9 +12,14 @@ function git(args) {
   });
 }
 
-function gitOrEmpty(args) {
+async function gitOrEmpty(args) {
   try {
-    return git(args);
+    const { stdout } = await execFileAsync("git", ["-C", repoRoot, ...args], {
+      encoding: "utf8",
+      maxBuffer: 16 * 1024 * 1024,
+      timeout: 30_000,
+    });
+    return stdout;
   } catch {
     return "";
   }
@@ -68,19 +75,31 @@ function extractJsonDescription(metaJson) {
   }
 }
 
-function extractDescription(row) {
-  const skillMd = gitOrEmpty([
+async function extractDescription(row) {
+  const skillMd = await gitOrEmpty([
     "show",
     `${row.parentHash}:${row.skillDir}/SKILL.md`,
   ]);
   const fromSkill = extractYamlDescription(skillMd);
   if (fromSkill) return fromSkill;
 
-  const metaJson = gitOrEmpty([
+  const metaJson = await gitOrEmpty([
     "show",
     `${row.parentHash}:${row.skillDir}/_meta.json`,
   ]);
   return extractJsonDescription(metaJson);
+}
+
+async function runPool(items, limit, worker) {
+  let index = 0;
+  const workers = Array.from({ length: limit }, async () => {
+    while (index < items.length) {
+      const current = items[index];
+      index += 1;
+      await worker(current);
+    }
+  });
+  await Promise.all(workers);
 }
 
 const currentSkillPaths = new Set(
@@ -134,9 +153,9 @@ rows.sort(
     a.skillDir.localeCompare(b.skillDir),
 );
 
-for (const row of rows) {
-  row.description = extractDescription(row);
-}
+await runPool(rows, Number(process.env.DESCRIPTION_WORKERS || 16), async (row) => {
+  row.description = await extractDescription(row);
+});
 
 const zvecRows = rows.filter((row) => /zvec/i.test(row.skillDir));
 
