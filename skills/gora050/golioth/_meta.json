@@ -3,9 +3,15 @@
   "slug": "golioth",
   "displayName": "Golioth",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775545611277,
-    "commit": "https://github.com/openclaw/skills/commit/f0158e7fc211ae678d4621d691f7febcc4186090"
+    "version": "1.0.1",
+    "publishedAt": 1776893511298,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775545611277,
+      "commit": "https://github.com/openclaw/skills/commit/f0158e7fc211ae678d4621d691f7febcc4186090"
+    }
+  ]
 }
