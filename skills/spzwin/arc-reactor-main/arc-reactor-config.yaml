@@ -1,0 +1,59 @@
+# ARC Reactor Routing Configuration (V4.0)
+# 此文件用于映射不同编译任务所属的 LLM Model，以兼顾智商与成本。
+# Orchestrator (指挥官) 应在 Spawn Worker 时参考此表。
+
+version: "4.0"
+
+models:
+  # 顶级推理模型 (不计成本，最高智商)
+  # 用于：解析生肉、生成 Source、提取 Entity、处理高度矛盾的重度任务。
+  ingest_heavy: "openai-gpt-4o"
+
+  # 次级高速模型 (较便宜，速度极快)
+  # 用于：日常 Query 读取 Wiki 合成报告，或者生成单维度的分析。
+  query_medium: "claude-3-5-sonnet-20240620"
+
+  # 轻量级流水线模型 (最便宜，最高速)
+  # 用于：Lint 整理，跑批扫描孤立的 index.md 和断链，处理日常语法修正。
+  lint_light: "gemini-1.5-flash"
+
+workflows:
+  ingest:
+    required_combo: [source, entity, index, log]
+    preferred_model: "ingest_heavy"
+    
+  query:
+    required_combo: [output]
+    preferred_model: "query_medium"
+    
+  lint:
+    required_combo: [index, log, metadata_fix]
+    preferred_model: "lint_light"
+
+knowledge_bases:
+  - name: personal-learning
+    root: arc-reactor-doc
+    description: "External research, papers, open-source analysis"
+    auto_route:
+      sources: ["web_fetch", "web_search", "youtube", "manual"]
+      tags: ["research", "paper", "open-source", "tutorial", "agent", "ai"]
+  
+  - name: work-collaboration
+    root: cwork-kb
+    description: "CWork inbox/outbox, contracts, HR decisions, project progress"
+    auto_route:
+      sources: ["cwork-api", "cwork-query-report", "cwork-send-report"]
+      tags: ["合同", "汇报", "人事", "审批", "待办", "任务"]
+
+# 潜意识注入 (RT-007) 配置
+injection:
+  enabled: true
+  max_entities: 3        # 单次命中最大调取的实体数量
+  max_chars: 10000       # 注入上下文的最大字符长度限制
+  match_index: "index.md"
+
+# 周报系统 (RT-008) 配置
+weekly_brief:
+  default_days: 7
+  summarizer_model: "claude-3-haiku" # 高性价比摘要模型
+
