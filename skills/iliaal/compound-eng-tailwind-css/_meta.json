@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-tailwind-css",
-  "displayName": "tailwind-css",
+  "displayName": "ia-tailwind-css",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519051786,
-    "commit": "https://github.com/openclaw/skills/commit/ac35a1767ac1b2c1e78258bab9ff03dd91253862"
+    "version": "3.0.4",
+    "publishedAt": 1777300803983,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519051786,
+      "commit": "https://github.com/openclaw/skills/commit/ac35a1767ac1b2c1e78258bab9ff03dd91253862"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004268124,
