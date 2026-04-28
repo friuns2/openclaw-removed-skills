@@ -3,9 +3,15 @@
   "slug": "soveren",
   "displayName": "Soveren",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775556339444,
-    "commit": "https://github.com/openclaw/skills/commit/0d06b660b33e1cacf48c28b38ed2f4acb7e30ee1"
+    "version": "1.0.1",
+    "publishedAt": 1776898892837,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775556339444,
+      "commit": "https://github.com/openclaw/skills/commit/0d06b660b33e1cacf48c28b38ed2f4acb7e30ee1"
+    }
+  ]
 }
