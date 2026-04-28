@@ -3,9 +3,15 @@
   "slug": "pandadoc-integration",
   "displayName": "Pandadoc",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534854086,
-    "commit": "https://github.com/openclaw/skills/commit/c8f72ca7c619e1878d01027591974d68a095ff3d"
+    "version": "1.0.1",
+    "publishedAt": 1776893455072,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534854086,
+      "commit": "https://github.com/openclaw/skills/commit/c8f72ca7c619e1878d01027591974d68a095ff3d"
+    }
+  ]
 }
