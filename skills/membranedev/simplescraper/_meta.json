@@ -3,9 +3,15 @@
   "slug": "simplescraper",
   "displayName": "Simplescraper",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653536711,
-    "commit": "https://github.com/openclaw/skills/commit/0ef7d22d978c4096dda945b31967eb1a38aed433"
+    "version": "1.0.1",
+    "publishedAt": 1776896984865,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653536711,
+      "commit": "https://github.com/openclaw/skills/commit/0ef7d22d978c4096dda945b31967eb1a38aed433"
+    }
+  ]
 }
