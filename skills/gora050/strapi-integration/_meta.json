@@ -3,9 +3,15 @@
   "slug": "strapi-integration",
   "displayName": "Strapi",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775671578748,
-    "commit": "https://github.com/openclaw/skills/commit/8757bc885e026ae30d2b6c6f4309674a46920c76"
+    "version": "1.0.1",
+    "publishedAt": 1776899485515,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775671578748,
+      "commit": "https://github.com/openclaw/skills/commit/8757bc885e026ae30d2b6c6f4309674a46920c76"
+    }
+  ]
 }
