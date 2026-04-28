@@ -3,9 +3,15 @@
   "slug": "graphcms",
   "displayName": "Graphcms",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775477206716,
-    "commit": "https://github.com/openclaw/skills/commit/ed9b3551ed64e48ee502bafd14f2cb2dde99d517"
+    "version": "1.0.1",
+    "publishedAt": 1776893025392,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775477206716,
+      "commit": "https://github.com/openclaw/skills/commit/ed9b3551ed64e48ee502bafd14f2cb2dde99d517"
+    }
+  ]
 }
