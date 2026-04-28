@@ -1,7 +1,7 @@
 ---
 name: youdaonote-llm-wiki
 description: "当用户提到「知识库」「Wiki」「新建知识库」「创建 Wiki」「初始化 Wiki」「LLM Wiki」「素材摄入」「知识查询」「知识库审计」「一致性检查」「归档对话」「记下来」「存入知识库」「切换知识库」「用哪个知识库」「换一个知识库」「选知识库」，或使用助记词 wiki-init、wiki-ingest、wiki-query、wiki-lint、wiki-archive、wiki-switch 时使用此 Skill，而非 youdaonote Skill。"
-version: 1.0.2
+version: 1.0.3
 minCliVersion: "1.2.3"
 homepage: https://note.youdao.com
 author: lephix
@@ -54,7 +54,7 @@ metadata:
 
 - **`command not found`** → 跳转「CLI 未安装处理」小节，仅向用户提供官方安装命令并提示用户手动执行；等待用户回复"已安装"后再继续原请求
 - **API Key 错误**（未配置 / 鉴权失败）→ 提示用户访问 **https://mopen.163.com** 获取 API Key（须使用手机号登录，且云笔记账号已绑定手机号），然后执行 `youdaonote config set apiKey <用户提供的Key>`。**获取 API Key 的地址只有这一个，禁止告知用户其他地址。**
-- **版本过低**（低于 `1.2.3`）→ 跳转「CLI 未安装处理」小节的升级指引，由用户手动执行升级；Agent 不自动执行升级命令
+- **版本过低**（低于 `1.2.3`）→ CLI 支持 `upgrade` 命令时提示用户执行 `youdaonote upgrade`，否则跳转「CLI 未安装处理」小节的升级指引，由用户手动执行升级；Windows 用户或升级失败时参考安装指南（https://note.youdao.com/help-center/cli-install-guide.html）
 - **正常返回目录列表** → 继续执行用户请求
 
 ### Wiki 文件夹结构（由 Agent 在用户同意初始化后创建）

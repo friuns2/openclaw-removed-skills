@@ -3,9 +3,15 @@
   "slug": "youdaonote-llm-wiki",
   "displayName": "YoudaoNote LLM Wiki",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776907481555,
-    "commit": "https://github.com/openclaw/skills/commit/bbee812db9e309cded8fe23e5303acd58095e7e9"
+    "version": "1.0.3",
+    "publishedAt": 1777199459073,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776907481555,
+      "commit": "https://github.com/openclaw/skills/commit/bbee812db9e309cded8fe23e5303acd58095e7e9"
+    }
+  ]
 }
