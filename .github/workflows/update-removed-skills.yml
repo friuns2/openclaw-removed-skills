@@ -13,32 +13,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout fork
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          filter: blob:none
-          sparse-checkout: |
-            .github
-            scripts
-            README.md
-          sparse-checkout-cone-mode: true
-
-      - name: Add upstream remote
         run: |
+          git clone --filter=blob:none --no-checkout "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" repo
+          cd repo
+          git sparse-checkout init --cone
+          git sparse-checkout set .github scripts README.md
+          git checkout main
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/openclaw/skills.git || true
           git fetch upstream main --prune
 
       - name: Update from upstream
+        working-directory: repo
         run: |
           git checkout main
           git merge --no-edit upstream/main
 
       - name: Generate removed skills README
+        working-directory: repo
         run: node scripts/generate-removed-readme.mjs
 
       - name: Commit changes
+        working-directory: repo
         run: |
           if git diff --quiet -- README.md; then
             echo "No removed skills changes."
