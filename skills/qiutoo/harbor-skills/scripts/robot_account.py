@@ -124,7 +124,8 @@ def get_auth_header(auth: str) -> Dict[str, str]:
     if ":" in auth:
         encoded = base64.b64encode(auth.encode()).decode()
         return {"Authorization": f"Basic {encoded}", "Content-Type": "application/json"}
-    encoded = base64.b64encode(f"admin:{auth}".encode()).decode()
+    # 示例: admin:password -> base64 编码
+    encoded = base64.b64encode(f"{username}:{password}".encode()).decode()
     return {"Authorization": f"Basic {encoded}", "Content-Type": "application/json"}
 
 

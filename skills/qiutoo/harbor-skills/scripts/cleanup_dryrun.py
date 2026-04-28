@@ -4,7 +4,7 @@ Harbor 镜像清理演练脚本
 
 用法:
   python3 cleanup_dryrun.py --project my-app --repo my-app--api --url https://harbor.mycompany.com
-  python3 cleanup_dryrun.py --project my-app --repo my-app--api --dry-run false --auth admin:Harbor12345
+  python3 cleanup_dryrun.py --project my-app --repo my-app--api --dry-run true --auth username:password
 
 策略:
   --policy latest_n      保留最近 N 个标签

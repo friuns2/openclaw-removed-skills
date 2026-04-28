@@ -1,37 +1,69 @@
 ---
 name: harbor-skills
 description: Harbor 镜像仓库综合管理技能。用于 Harbor 日常运维、项目与镜像管理、安全扫描、清理策略、CI/CD 集成、GitOps、复制规则、存储管理、备份恢复、webhook 联动等所有 Harbor 相关操作。当用户提到 Harbor、镜像仓库管理、Docker 镜像、镜像安全扫描、CI/CD 镜像推送/拉取、GitOps 镜像策略、Harbor Webhook 时触发此技能。
+user-invocable: true
+auth-method: env
+version: 1.1.1
+env:
+  HARBOR_URL:
+    description: Harbor 地址（不含 /）
+    example: https://harbor.mycompany.com
+  HARBOR_TOKEN:
+    description: Harbor API Token（Basic Auth 凭证，Base64 编码 user:pass）
+    example: Basic YWRtaW46cGFzc3dvcmQ=
+    required: true
+  HARBOR_BACKUP_DIR:
+    description: 备份目录（可选，默认 /data/harbor-backup）
+    example: /data/harbor-backup
 ---
 
 # Harbor Manager
 
 Harbor 是企业级容器镜像仓库（CNCF 毕业项目）。
 
-## 环境准备
+## 前置要求
 
-首次使用需要配置连接信息，优先使用环境变量（可在 TOOLS.md 中预填）：
+### 必需环境变量
 
 | 变量 | 说明 | 示例 |
 |------|------|------|
 | `HARBOR_URL` | Harbor 地址（不含 /） | `https://harbor.mycompany.com` |
-| `HARBOR_USERNAME` | 管理员账号 | `admin` |
-| `HARBOR_PASSWORD` | 密码或 API Token | `Harbor12345` |
+| `HARBOR_TOKEN` | Harbor API Token（推荐）或 Basic Auth 凭证 | `Basic base64(user:pass)` |
 
-或通过对话传入。Token 优先（比密码更安全）。
+### 认证方式
+
+**方式一：API Token（推荐）**
+```bash
+# 在 Harbor UI 创建 Robot Account 获取 token
+export HARBOR_TOKEN="Basic $(echo -n 'robot$project$account:token' | base64)"
+```
+
+**方式二：用户密码**
+```bash
+export HARBOR_TOKEN="Basic $(echo -n 'username:password' | base64)"
+```
+
+### 必需系统工具
+
+| 工具 | 用途 | 说明 |
+|------|------|------|
+| `curl` | 调用 Harbor API | 必需 |
+| `python3` | 运行辅助脚本 | 可选，有脚本时需要 |
+| `jq` | JSON 处理 | 建议安装 |
+
+**Docker 相关操作**（备份恢复场景）需要：
+- `docker` + `docker-compose`
+- `pg_dump`（如安装 PostgreSQL 客户端）
+- `rclone`（如需上传至对象存储）
 
 ## 快速诊断
 
 ```bash
 # 检查 Harbor 健康状态
-curl -s -u "$HARBOR_USER:$HARBOR_PASS" "$HARBOR_URL/api/v2.0/health" | jq .
+curl -s -H "Authorization: $HARBOR_TOKEN" "$HARBOR_URL/api/v2.0/health" | jq .
 
-# 列出所有项目（Python）
-python3 -c "
-import requests, os
-r = requests.get(f'{os.environ[\"HARBOR_URL\"]}/api/v2.0/projects',
-    headers={'Authorization': f'Basic {os.environ[\"HARBOR_AUTH\"]}'})
-print(r.json())
-"
+# 列出所有项目
+curl -s -H "Authorization: $HARBOR_TOKEN" "$HARBOR_URL/api/v2.0/projects" | jq '.[].name'
 ```
 
 ## 项目管理
@@ -40,7 +72,7 @@ print(r.json())
 
 ```bash
 curl -X POST "$HARBOR_URL/api/v2.0/projects" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "project_name": "my-app",
@@ -53,18 +85,19 @@ curl -X POST "$HARBOR_URL/api/v2.0/projects" \
 
 ```python
 # refs: references/harbor-api.md
-import requests, base64, os
+import requests, os, base64
 
-auth = base64.b64encode(f"{u}:{p}".encode()).decode()
-headers = {"Authorization": f"Basic {auth}", "Content-Type": "application/json"}
+url = os.environ['HARBOR_URL']
+token = os.environ['HARBOR_TOKEN']
+auth = {'Authorization': token}
 
 # 查找项目ID
-proj = requests.get(f"{url}/api/v2.0/projects", params={"name": "my-app"}, headers=headers).json()[0]
+proj = requests.get(f"{url}/api/v2.0/projects", params={"name": "my-app"}, headers=auth).json()[0]
 pid = proj["project_id"]
 
 # 更新配额（单位：bytes，500G = 500*1024^3）
 requests.put(f"{url}/api/v2.0/projects/{pid}",
-    headers=headers, json={"metadata": {"storage_quota": str(500*1024**3)}})
+    headers=auth, json={"metadata": {"storage_quota": str(500*1024**3)}})
 print(f"项目 {pid} 配额已更新为 500G")
 ```
 
@@ -74,16 +107,17 @@ print(f"项目 {pid} 配额已更新为 500G")
 
 ```bash
 # 按项目列出所有镜像
-curl "$HARBOR_URL/api/v2.0/projects/my-app/repositories" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '.[].name'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories" | jq '.[].name'
 
 # 查看某镜像的所有标签
-curl "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '.[].name'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags" | jq '.[].name'
 
 # 镜像详情（含大小、扫描状态）
-curl "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts?with_tag=true&with_scan_overview=true" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '.[].{tags: .tag, size: .size, scan: .scan_summary}'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts?with_tag=true&with_scan_overview=true" \
+  | jq '.[].{tags: .tag, size: .size, scan: .scan_summary}'
 ```
 
 ### 删除镜像（按标签）
@@ -91,16 +125,17 @@ curl "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts?wi
 ```bash
 # 删除指定标签（保留其他标签）
 curl -X DELETE \
-  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags/v1.2.3" \
-  -u "$HARBOR_USER:$HARBOR_PASS"
+  -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags/v1.2.3"
 
 # 批量删除（用 jq 生成）
-TAGS=$(curl -s "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq -r '.[].name | select(startswith("v0"))')
+TAGS=$(curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags" \
+  | jq -r '.[].name | select(startswith("v0"))')
 for tag in $TAGS; do
   echo "删除: $tag"
-  curl -X DELETE "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags/$tag" \
-    -u "$HARBOR_USER:$HARBOR_PASS"
+  curl -X DELETE -H "Authorization: $HARBOR_TOKEN" \
+    "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/tags/$tag"
 done
 ```
 
@@ -108,14 +143,15 @@ done
 
 ```python
 # refs: references/cleanup-policy.md
-import requests, base64, os, datetime
+import requests, os
 
 def delete_artifact(project, repo, reference, dry_run=True):
     url = f"{os.environ['HARBOR_URL']}/api/v2.0/projects/{project}/repositories/{repo}/artifacts/{reference}"
+    auth = {'Authorization': os.environ['HARBOR_TOKEN']}
     if dry_run:
         print(f"[演练] 应删除: {url}")
     else:
-        r = requests.delete(url, headers=auth_header)
+        r = requests.delete(url, headers=auth)
         print(f"[已删除] {reference}" if r.status_code == 200 else f"[失败] {r.status_code}")
 ```
 
@@ -139,7 +175,7 @@ def delete_artifact(project, repo, reference, dry_run=True):
 ### 演练模式（评估影响）
 
 ```bash
-python3 /root/.openclaw/workspace/skills/harbor-manager/scripts/cleanup_dryrun.py \
+python3 /root/.openclaw/workspace/skills/harbor-skills/scripts/cleanup_dryrun.py \
   --project my-app --repo my-app--api --policy "保留最近5个" --url "$HARBOR_URL"
 ```
 
@@ -163,19 +199,19 @@ rules:
 ## 垃圾回收（GC）
 
 ```bash
-# 1. 触发 GC（拉取管理员 credentials）
+# 1. 触发 GC
 curl -X POST "$HARBOR_URL/api/v2.0/system/gc/schedule" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"schedule":{"type":"manual"}}'
 
 # 2. 查看 GC 状态
-curl "$HARBOR_URL/api/v2.0/system/gc" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '.[] | {id: .id, status: .job_status, start: .start_time}'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/system/gc" | jq '.[] | {id: .id, status: .job_status, start: .start_time}'
 
-# 3. GC 完成后清理孤儿 Blob（自动执行，也可手动触发）
+# 3. GC 完成后清理孤儿 Blob
 curl -X POST "$HARBOR_URL/api/v2.0/system/gc/schedule" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"schedule":{"type":"none"}, "dry_run": false}'
 ```
@@ -186,12 +222,12 @@ curl -X POST "$HARBOR_URL/api/v2.0/system/gc/schedule" \
 
 ```bash
 # 查看项目存储使用
-curl "$HARBOR_URL/api/v2.0/projects/my-app" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '{name: .name, storage: .metadata.storage_quota, used: .metadata.storage_quota_used}'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app" | jq '{name: .name, storage: .metadata.storage_quota, used: .metadata.storage_quota_used}'
 
 # 查看系统总体存储
-curl "$HARBOR_URL/api/v2.0/statistics" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '{total: .total_storage, used: .used_storage, free: .free_storage}'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/statistics" | jq '{total: .total_storage, used: .used_storage, free: .free_storage}'
 ```
 
 ## 复制管理
@@ -200,7 +236,7 @@ curl "$HARBOR_URL/api/v2.0/statistics" \
 
 ```bash
 curl -X POST "$HARBOR_URL/api/v2.0/replication/policies" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "backup-to-dr-site",
@@ -220,13 +256,14 @@ curl -X POST "$HARBOR_URL/api/v2.0/replication/policies" \
 
 ```bash
 curl -X POST "$HARBOR_URL/api/v2.0/replication/executions" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"policy_id": 3}'
 
 # 查看执行状态
-curl "$HARBOR_URL/api/v2.0/replication/executions?policy_id=3" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '.[] | {id: .id, status: .status, summary: .status_ext}'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/replication/executions?policy_id=3" \
+  | jq '.[] | {id: .id, status: .status, summary: .status_ext}'
 ```
 
 ## 代理缓存（Proxy Cache）
@@ -235,7 +272,7 @@ curl "$HARBOR_URL/api/v2.0/replication/executions?policy_id=3" \
 
 ```bash
 curl -X POST "$HARBOR_URL/api/v2.0/projects" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "project_name": "proxy-cache-dockerhub",
@@ -266,14 +303,14 @@ docker pull proxy-cache-dockerhub.library/nginx:latest
 ```bash
 # 扫描单个镜像
 curl -X POST \
-  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts/sha256:abc123.../scan" \
-  -u "$HARBOR_USER:$HARBOR_PASS"
+  -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts/sha256:abc123.../scan"
 
 # 扫描整个项目所有镜像
 curl -X POST \
-  "$HARBOR_URL/api/v2.0/projects/my-app/scanAll" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/scanAll" \
   -d '{"selector":"all"}'
 ```
 
@@ -281,12 +318,13 @@ curl -X POST \
 
 ```bash
 # 获取镜像扫描摘要
-curl "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts/v1.2.3?with_scan_summary=true" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '{scan: .scan_summary}'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts/v1.2.3?with_scan_summary=true" \
+  | jq '{scan: .scan_summary}'
 
 # 导出详细扫描报告（CSV格式）
-curl "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts/v1.2.3/scan_report?accept=text/csv" \
-  -u "$HARBOR_USER:$HARBOR_PASS"
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts/v1.2.3/scan_report?accept=text/csv"
 ```
 
 ### 自动扫描策略
@@ -294,7 +332,7 @@ curl "$HARBOR_URL/api/v2.0/projects/my-app/repositories/my-app--api/artifacts/v1
 ```bash
 # 设置自动化扫描：镜像推送后自动触发扫描
 curl -X PUT "$HARBOR_URL/api/v2.0/projects/my-app" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"auto_scan": true}'
 ```
@@ -321,7 +359,7 @@ docker pull harbor.mycompany.com/my-app/my-app--api:v1.2.3
 
 ```bash
 curl -X POST "$HARBOR_URL/api/v2.0/projects/my-app/robots" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "ci-pipeline",
@@ -339,14 +377,6 @@ curl -X POST "$HARBOR_URL/api/v2.0/projects/my-app/robots" \
 ```bash
 # 获取机器人 token（创建时返回的 credentials.secret）
 docker login "$HARBOR_URL" -u "robot$my-app$ci-pipeline" -p "$ROBOT_TOKEN"
-
-# Jenkinsfile / GitLab CI 示例
-environment:
-  DOCKER_AUTH:
-    script: |
-      TOKEN=$(curl -s -u "robot\$my-app\$ci-pipeline:$ROBOT_SECRET" \
-        "$HARBOR_URL/api/v2.0/robots/1/token" | jq -r '.token')
-      echo $TOKEN | docker login -u "robot\$my-app\$ci-pipeline" --password-stdin "$HARBOR_URL"
 ```
 
 ## RBAC 权限管理
@@ -354,7 +384,7 @@ environment:
 ```bash
 # 添加项目成员
 curl -X POST "$HARBOR_URL/api/v2.0/projects/my-app/members" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"member_user": {"username": "dev-user"}, "role_id": 2}'  # 2=开发者
 
@@ -367,7 +397,7 @@ curl -X POST "$HARBOR_URL/api/v2.0/projects/my-app/members" \
 
 ```bash
 curl -X POST "$HARBOR_URL/api/v2.0/projects/my-app/webhook" \
-  -u "$HARBOR_USER:$HARBOR_PASS" \
+  -H "Authorization: $HARBOR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "ci-trigger",
@@ -400,32 +430,34 @@ Webhook payload 示例：
 
 ```bash
 # 查看项目审计日志
-curl "$HARBOR_URL/api/v2.0/projects/my-app/logs?page=1&page_size=20" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq '.'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/logs?page=1&page_size=20" | jq '.'
 
 # 导出为 CSV
-curl "$HARBOR_URL/api/v2.0/projects/my-app/logs?page=1&page_size=100&sort=op_time_desc" \
-  -u "$HARBOR_USER:$HARBOR_PASS" | jq -r '.[] | [.op_time, .username, .resource, .operation] | @csv'
+curl -s -H "Authorization: $HARBOR_TOKEN" \
+  "$HARBOR_URL/api/v2.0/projects/my-app/logs?page=1&page_size=100&sort=op_time_desc" \
+  | jq -r '.[] | [.op_time, .username, .resource, .operation] | @csv'
 ```
 
 ## 备份与恢复
+
+> ⚠️ 备份恢复需要 Docker 和相关工具，请在有权限的环境中使用。
 
 ### 备份（Harbor 数据）
 
 ```bash
 # 备份清单（推荐 cron 定期执行）
 # refs: references/backup-recovery.md
-BACKUP_DIR="/data/harbor-backup"
+BACKUP_DIR="${HARBOR_BACKUP_DIR:-/data/harbor-backup}"
 DATE=$(date +%Y%m%d_%H%M%S)
 
-# 1. 备份数据库
-docker exec -t harbor-db pg_dump -U postgres registry > "$BACKUP_DIR/harbor-db-$DATE.sql"
+# 1. 备份数据库（如有 docker 环境）
+# docker exec -t harbor-db pg_dump -U postgres registry > "$BACKUP_DIR/harbor-db-$DATE.sql"
 
-# 2. 备份核心配置（shared volume）
-tar czf "$BACKUP_DIR/harbor-config-$DATE.tar.gz" \
-  /data/harbor/redis /data/harbor/registry /data/harbor/trivy-adapter
+# 2. 备份核心配置
+# tar czf "$BACKUP_DIR/harbor-config-$DATE.tar.gz" /data/harbor/redis /data/harbor/registry
 
-# 3. 上传至对象存储
+# 3. 上传至对象存储（如有 rclone）
 # rclone sync "$BACKUP_DIR/" "s3:my-bucket/harbor-backups/"
 
 echo "备份完成: $DATE"
@@ -438,10 +470,10 @@ echo "备份完成: $DATE"
 cd /opt/harbor && docker-compose down
 
 # 2. 恢复数据库
-docker exec -i harbor-db psql -U postgres registry < "$BACKUP_DIR/harbor-db-$DATE.sql"
+# docker exec -i harbor-db psql -U postgres registry < "$BACKUP_DIR/harbor-db-$DATE.sql"
 
 # 3. 恢复配置文件
-tar xzf "$BACKUP_DIR/harbor-config-$DATE.tar.gz" -C /
+# tar xzf "$BACKUP_DIR/harbor-config-$DATE.tar.gz" -C /
 
 # 4. 重启 Harbor
 docker-compose up -d
@@ -451,10 +483,9 @@ docker-compose up -d
 
 ```bash
 # 等保 2.0 / GDPR 检查项（详见 references/compliance.md）
-# 自动化检查脚本：
-python3 /root/.openclaw/workspace/skills/harbor-manager/scripts/compliance_check.py \
-  --harbor-url "$HARBOR_URL" --auth "$HARBOR_USER:$HARBOR_PASS" \
-  --standard " 等保2级" --output /tmp/harbor-compliance-report.html
+python3 /root/.openclaw/workspace/skills/harbor-skills/scripts/compliance_check.py \
+  --harbor-url "$HARBOR_URL" --auth "$HARBOR_TOKEN" \
+  --standard "等保2级" --output /tmp/harbor-compliance-report.html
 ```
 
 检查项包括：
