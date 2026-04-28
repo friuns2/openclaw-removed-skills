@@ -16,8 +16,9 @@
 
 当 Agent 或用户触发该 Skill 时才会联网：
 
-- `recall` / `search` 会发送查询词、`user_id`、`agent_id`
-- `save` / `save-batch` 会发送你明确传入的消息内容
+- `recall` / `search` 会发送查询词、`user_id`、`agent_id`、`scenario`
+- `save` / `save-batch` 会发送你明确传入的消息内容，并优先使用 procedural memory 的 `v2/add/context`，必要时回退到 `v1/add/message`
+- 如果输入里包含 assistant tool call / tool result，且未禁用捕获，写入时会一并带上结构化 `context_blocks`
 - 运行时只会读取文档列出的 `HUMAN_LIKE_MEM_*` 白名单环境变量，不会扫描其它环境变量
 
 默认服务地址是 `https://plugin.human-like.me`，也可以改成你自己的地址。
@@ -53,8 +54,11 @@ openclaw config set skills.entries.human-like-memory.apiKey "mp_your_key_here"
 openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_BASE_URL "https://plugin.human-like.me"
 openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_USER_ID "openclaw-user"
 openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_AGENT_ID "main"
+openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_SCENARIO "openclaw-plugin"
 openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_RECALL_ENABLED "true"
 openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_AUTO_SAVE_ENABLED "true"
+openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_USE_V2_PROTOCOL "true"
+openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_CAPTURE_TOOL_CALLS "true"
 openclaw config set skills.entries.human-like-memory.env.HUMAN_LIKE_MEM_SAVE_TRIGGER_TURNS "5"
 ```
 
@@ -105,6 +109,16 @@ node ~/.openclaw/workspace/skills/human-like-memory/scripts/memory.mjs config
 - 多轮讨论后值得长期保留的摘要
 
 如果一次对话已经形成了可复用流程或 checklist，也可以把它作为程序化记忆保存下来。
+
+## Shared Namespace
+
+如果你希望继续写入或检索和 plugin 相同的记忆池，请确保以下三项一致：
+
+- `user_id`
+- `agent_id`
+- `scenario`
+
+其中 `scenario` 现在会显式出现在检索和写入请求里，不再只依赖 workflow metadata 传递。
 
 ## 错误处理
 

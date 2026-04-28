@@ -2,7 +2,7 @@
   "name": "human-like-memory",
   "displayName": "Human-Like Memory",
   "description": "HumanLike Memory / Human-Like Memory is a persistent AI agent memory system for long-term memory search, recall, and save. It helps agents store facts, preferences, and decisions and keep context across sessions for conversation continuity.",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "homepage": "https://plugin.human-like.me",
   "author": {
     "name": "hanlaomo",

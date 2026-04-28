@@ -14,7 +14,7 @@ import { createInterface } from 'readline';
 import { buildConfig, buildMissingApiKeyError } from './config.mjs';
 import { httpRequest } from './client.mjs';
 
-const SKILL_VERSION = '1.0.3';
+const SKILL_VERSION = '1.0.12';
 
 function truncate(text, maxLen) {
   if (!text || text.length <= maxLen) return text || '';
@@ -67,6 +67,404 @@ function logSkillStage(stage, fields = {}) {
     .map(([key, value]) => `${key}=${formatLogValue(value, key === 'top' ? 240 : 96)}`)
     .join(' ');
   console.error(`[OpenClaw Skill][${stage}] ${content}`.trim());
+}
+
+function extractText(content) {
+  if (content === undefined || content === null) return '';
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          if (typeof item.text === 'string') return item.text;
+          if (typeof item.content === 'string') return item.content;
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join('\n');
+  }
+  if (typeof content === 'object') {
+    if (typeof content.text === 'string') return content.text;
+    if (typeof content.content === 'string') return content.content;
+    try {
+      return JSON.stringify(content);
+    } catch {
+      return String(content);
+    }
+  }
+  return String(content);
+}
+
+function normalizeMessageContent(content) {
+  return extractText(content).trim();
+}
+
+function cloneToolCall(toolCall) {
+  if (!toolCall || typeof toolCall !== 'object') return null;
+  const functionName = toolCall.function?.name || toolCall.name;
+  const functionArgs = toolCall.function?.arguments ?? toolCall.arguments ?? '{}';
+  if (!functionName) return null;
+  return {
+    id: toolCall.id || null,
+    type: toolCall.type || 'function',
+    function: {
+      name: functionName,
+      arguments: typeof functionArgs === 'string' ? functionArgs : JSON.stringify(functionArgs),
+    },
+  };
+}
+
+function getMessageToolCalls(message) {
+  if (!Array.isArray(message?.tool_calls)) return [];
+  return message.tool_calls.map(cloneToolCall).filter(Boolean);
+}
+
+function getToolResultCallId(message) {
+  return message?.tool_call_id || message?.toolCallId || message?.call_id || null;
+}
+
+function getToolResultName(message) {
+  return message?.name || message?.tool_name || message?.toolName || undefined;
+}
+
+function normalizeInputMessage(message) {
+  if (!message || typeof message !== 'object') {
+    return { error: 'Each message must be an object with "role" and "content" fields' };
+  }
+
+  const role = String(message.role || '').trim();
+  if (!['user', 'assistant', 'tool'].includes(role)) {
+    return { error: 'Role must be "user", "assistant", or "tool"' };
+  }
+
+  if (role === 'user') {
+    const content = normalizeMessageContent(message.content);
+    if (!content) return { message: null };
+    return { message: { role, content } };
+  }
+
+  if (role === 'assistant') {
+    const content = normalizeMessageContent(message.content);
+    const toolCalls = getMessageToolCalls(message);
+    if (!content && toolCalls.length === 0) return { message: null };
+    return {
+      message: {
+        role,
+        content: content || '',
+        tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+      },
+    };
+  }
+
+  const content = normalizeMessageContent(message.content);
+  const toolCallId = getToolResultCallId(message);
+  const name = getToolResultName(message);
+  if (!content && !toolCallId && !name) return { message: null };
+  return {
+    message: {
+      role: 'tool',
+      content: content || '',
+      tool_call_id: toolCallId || undefined,
+      name,
+    },
+  };
+}
+
+function normalizeMessages(messages) {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return { error: 'Messages must be a non-empty array' };
+  }
+
+  const normalized = [];
+  for (const message of messages) {
+    const result = normalizeInputMessage(message);
+    if (result.error) {
+      return { error: result.error, invalid: message };
+    }
+    if (result.message) {
+      normalized.push(result.message);
+    }
+  }
+
+  if (normalized.length === 0) {
+    return { error: 'No non-empty user, assistant, or tool messages to save' };
+  }
+
+  return { messages: normalized };
+}
+
+function getLatestUserMessageText(messages) {
+  if (!Array.isArray(messages)) return '';
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    if (messages[i]?.role === 'user') return messages[i].content || '';
+  }
+  return '';
+}
+
+function buildWorkflowMetadata(cfg, sessionId, agentId) {
+  return {
+    user_ids: [cfg.userId],
+    agent_ids: [agentId],
+    session_id: sessionId,
+    scenario: cfg.scenario || 'openclaw-plugin',
+  };
+}
+
+function stripToolMessagesForV1(messages) {
+  if (!Array.isArray(messages)) return [];
+  return messages
+    .filter((message) => message && message.role !== 'tool' && message.role !== 'system')
+    .map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+}
+
+function isErrorResult(text) {
+  if (!text) return false;
+  const lower = String(text).toLowerCase();
+  return lower.includes('error')
+    || lower.includes('exception')
+    || lower.includes('failed')
+    || lower.includes('traceback')
+    || lower.includes('enoent')
+    || lower.includes('permission denied');
+}
+
+function extractToolCalls(messages) {
+  if (!Array.isArray(messages) || messages.length === 0) return [];
+
+  const calls = [];
+  for (const message of messages) {
+    if (message.role === 'assistant') {
+      const toolCalls = getMessageToolCalls(message);
+      for (const toolCall of toolCalls) {
+        calls.push({
+          tool_name: toolCall.function?.name || toolCall.name || 'unknown',
+          arguments: toolCall.function?.arguments || toolCall.arguments || '{}',
+          call_id: toolCall.id || null,
+          result: null,
+          success: null,
+          duration_ms: null,
+        });
+      }
+    }
+
+    if (message.role !== 'tool') continue;
+
+    const toolCallId = getToolResultCallId(message);
+    const toolName = getToolResultName(message);
+    const match = calls.find((call) =>
+      (toolCallId && call.call_id === toolCallId) ||
+      (!toolCallId && toolName && call.tool_name === toolName && call.result == null)
+    );
+
+    if (match) {
+      const resultText = extractText(message.content);
+      match.result = truncate(resultText, 2000);
+      match.success = !isErrorResult(resultText);
+    }
+  }
+
+  return calls;
+}
+
+function buildV2ConversationMessages(messages, captureToolCalls) {
+  return messages
+    .filter((message) => message && message.role !== 'system')
+    .filter((message) => captureToolCalls || message.role !== 'tool')
+    .map((message) => {
+      if (message.role === 'tool') {
+        return {
+          role: 'tool',
+          content: message.content || '',
+          tool_call_id: message.tool_call_id || undefined,
+          name: message.name,
+        };
+      }
+
+      return {
+        role: message.role,
+        content: message.content || '',
+        tool_calls: captureToolCalls && Array.isArray(message.tool_calls) && message.tool_calls.length > 0
+          ? message.tool_calls
+          : undefined,
+      };
+    })
+    .filter((message) => {
+      if (!message) return false;
+      if (message.role === 'tool') {
+        return !!(message.content || message.tool_call_id || message.name);
+      }
+      return !!(message.content || (Array.isArray(message.tool_calls) && message.tool_calls.length > 0));
+    });
+}
+
+function collectContextBlocks(messages, cfg) {
+  const blocks = [];
+  const conversationMessages = buildV2ConversationMessages(messages, cfg.captureToolCalls !== false);
+  if (conversationMessages.length > 0) {
+    blocks.push({
+      type: 'conversation',
+      data: { messages: conversationMessages },
+    });
+  }
+
+  if (cfg.captureToolCalls !== false) {
+    const toolCalls = extractToolCalls(messages);
+    if (toolCalls.length > 0) {
+      blocks.push({
+        type: 'tool_calls',
+        data: { calls: toolCalls },
+      });
+    }
+  }
+
+  return blocks;
+}
+
+async function addMemoryV1(messages, cfg, sessionId, requestId) {
+  const agentId = cfg.agentId || 'main';
+  const url = `${cfg.baseUrl}/api/plugin/v1/add/message`;
+  const payload = {
+    user_id: cfg.userId,
+    conversation_id: sessionId,
+    messages: stripToolMessagesForV1(messages),
+    agent_id: agentId,
+    scenario: cfg.scenario || 'openclaw-plugin',
+    tags: ['openclaw-skill'],
+    async_mode: true,
+    custom_workflows: {
+      stream_params: {
+        metadata: JSON.stringify(buildWorkflowMetadata(cfg, sessionId, agentId)),
+      },
+    },
+  };
+
+  const result = await httpRequest(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': cfg.apiKey,
+      'x-request-id': requestId,
+      'x-plugin-version': SKILL_VERSION,
+      'x-client-type': 'skill',
+    },
+    body: JSON.stringify(payload),
+  }, cfg.timeoutMs);
+
+  return { result, protocol: 'v1', url, payload };
+}
+
+async function addContextV2(messages, cfg, sessionId, requestId) {
+  const agentId = cfg.agentId || 'main';
+  const url = `${cfg.baseUrl}/api/plugin/v2/add/context`;
+  const contextBlocks = collectContextBlocks(messages, cfg);
+  if (contextBlocks.length === 0) {
+    throw new Error('No context blocks to save');
+  }
+
+  const payload = {
+    user_id: cfg.userId,
+    conversation_id: sessionId,
+    agent_id: agentId,
+    scenario: cfg.scenario || 'openclaw-plugin',
+    async_mode: true,
+    protocol_version: '2.0',
+    context_blocks: contextBlocks,
+    custom_workflows: {
+      stream_params: {
+        metadata: JSON.stringify(buildWorkflowMetadata(cfg, sessionId, agentId)),
+      },
+    },
+  };
+
+  const result = await httpRequest(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': cfg.apiKey,
+      'x-request-id': requestId,
+      'x-plugin-version': SKILL_VERSION,
+      'x-client-type': 'skill',
+    },
+    body: JSON.stringify(payload),
+  }, cfg.timeoutMs);
+
+  return { result, protocol: 'v2', url, payload };
+}
+
+async function saveNormalizedMessages(messages, cfg) {
+  const sessionId = `session-${Date.now()}`;
+  const agentId = cfg.agentId || 'main';
+  const requestId = buildRequestId();
+  const requestStart = Date.now();
+  const lastUser = getLatestUserMessageText(messages);
+  const contextBlocks = cfg.useV2Protocol ? collectContextBlocks(messages, cfg) : [];
+  const startUrl = cfg.useV2Protocol
+    ? `${cfg.baseUrl}/api/plugin/v2/add/context`
+    : `${cfg.baseUrl}/api/plugin/v1/add/message`;
+
+  logSkillStage('Add][START', {
+    req: requestId,
+    url: startUrl,
+    protocol: cfg.useV2Protocol ? 'v2' : 'v1',
+    user_id: cfg.userId,
+    agent_id: agentId,
+    conversation_id: sessionId,
+    messages: messages.length,
+    roles: messages.map((message) => message.role),
+    blocks: contextBlocks.map((block) => block.type),
+    last_user: `"${truncate(lastUser, 80)}"`,
+    scenario: cfg.scenario,
+    api_key: maskSecretForLog(cfg.apiKey),
+  });
+
+  try {
+    let saved;
+    if (cfg.useV2Protocol) {
+      try {
+        saved = await addContextV2(messages, cfg, sessionId, requestId);
+      } catch (error) {
+        logSkillStage('Add][FALLBACK', {
+          req: requestId,
+          from: 'v2',
+          to: 'v1',
+          error: `"${truncate(error.message || String(error), 160)}"`,
+        });
+        saved = await addMemoryV1(messages, cfg, sessionId, requestId);
+        saved.fallbackFrom = 'v2';
+      }
+    } else {
+      saved = await addMemoryV1(messages, cfg, sessionId, requestId);
+    }
+
+    logSkillStage('Add][END', {
+      req: requestId,
+      success: true,
+      protocol: saved.protocol,
+      fallback_from: saved.fallbackFrom || '-',
+      total_ms: Date.now() - requestStart,
+      count: saved.result.memories_count || 0,
+      server_req: saved.result.request_id,
+      message: `"${truncate(saved.result.message || 'Memory saved successfully', 120)}"`,
+    });
+
+    return {
+      ...saved,
+      sessionId,
+    };
+  } catch (error) {
+    logSkillStage('Add][END', {
+      req: requestId,
+      success: false,
+      total_ms: Date.now() - requestStart,
+      error: `"${truncate(error.message || String(error), 160)}"`,
+    });
+    throw error;
+  }
 }
 
 /**
@@ -202,94 +600,36 @@ async function saveMemory(userMessage, assistantResponse) {
     return;
   }
 
-  const url = `${cfg.baseUrl}/api/plugin/v1/add/message`;
-  const sessionId = `session-${Date.now()}`;
-  const agentId = cfg.agentId || 'main';
-  const requestId = buildRequestId();
-  const requestStart = Date.now();
-  const messages = [];
+  const rawMessages = [];
 
   if (userMessage) {
-    messages.push({ role: 'user', content: userMessage });
+    rawMessages.push({ role: 'user', content: userMessage });
   }
   if (assistantResponse) {
-    messages.push({ role: 'assistant', content: assistantResponse });
+    rawMessages.push({ role: 'assistant', content: assistantResponse });
   }
 
-  if (messages.length === 0) {
+  const normalizedResult = normalizeMessages(rawMessages);
+  if (normalizedResult.error) {
     console.error(JSON.stringify({
       success: false,
-      error: 'No messages to save',
+      error: normalizedResult.error,
+      invalid: normalizedResult.invalid,
     }));
     process.exit(1);
   }
 
-  const payload = {
-    user_id: cfg.userId,
-    conversation_id: sessionId,
-    messages: messages,
-    agent_id: agentId,
-    tags: ['openclaw-skill'],
-    async_mode: true,
-    custom_workflows: {
-      stream_params: {
-        metadata: JSON.stringify({
-          user_ids: [cfg.userId],
-          agent_ids: [agentId],
-          session_id: sessionId,
-          scenario: cfg.scenario || 'openclaw-plugin',
-        }),
-      },
-    },
-  };
-  logSkillStage('Add][START', {
-    req: requestId,
-    url,
-    user_id: cfg.userId,
-    agent_id: agentId,
-    conversation_id: sessionId,
-    messages: messages.length,
-    roles: messages.map((m) => m.role),
-    last_user: `"${truncate(userMessage || '', 80)}"`,
-    scenario: cfg.scenario,
-    api_key: maskSecretForLog(cfg.apiKey),
-  });
-
   try {
-    const result = await httpRequest(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': cfg.apiKey,
-        'x-request-id': requestId,
-        'x-plugin-version': SKILL_VERSION,
-        'x-client-type': 'skill',
-      },
-      body: JSON.stringify(payload),
-    }, cfg.timeoutMs);
-
+    const saved = await saveNormalizedMessages(normalizedResult.messages, cfg);
     const output = {
       success: true,
       message: 'Memory saved successfully',
-      memoriesCount: result.memories_count || 0,
+      memoriesCount: saved.result.memories_count || 0,
+      protocol: saved.protocol,
+      fallbackFrom: saved.fallbackFrom || null,
     };
-
-    logSkillStage('Add][END', {
-      req: requestId,
-      success: true,
-      total_ms: Date.now() - requestStart,
-      count: result.memories_count || 0,
-      server_req: result.request_id,
-      message: `"${truncate(result.message || output.message, 120)}"`,
-    });
     console.log(JSON.stringify(output));
   } catch (error) {
-    logSkillStage('Add][END', {
-      req: requestId,
-      success: false,
-      total_ms: Date.now() - requestStart,
-      error: `"${truncate(error.message || String(error), 160)}"`,
-    });
     console.error(JSON.stringify({
       success: false,
       error: error.message,
@@ -387,108 +727,34 @@ async function saveBatchMemory() {
     process.exit(1);
   }
 
-  // Validate message format
-  for (const msg of messages) {
-    if (!msg.role || !msg.content) {
-      console.error(JSON.stringify({
-        success: false,
-        error: 'Each message must have "role" and "content" fields',
-        invalid: msg,
-      }));
-      process.exit(1);
-    }
-    if (!['user', 'assistant'].includes(msg.role)) {
-      console.error(JSON.stringify({
-        success: false,
-        error: 'Role must be "user" or "assistant"',
-        invalid: msg.role,
-      }));
-      process.exit(1);
-    }
-  }
-
   const maxMessages = cfg.saveMaxMessages;
   const messagesToSave = messages.slice(-maxMessages);
-
-  const url = `${cfg.baseUrl}/api/plugin/v1/add/message`;
-  const sessionId = `session-${Date.now()}`;
-  const agentId = cfg.agentId || 'main';
-  const requestId = buildRequestId();
-  const requestStart = Date.now();
-
-  const payload = {
-    user_id: cfg.userId,
-    conversation_id: sessionId,
-    messages: messagesToSave.map(m => ({
-      role: m.role,
-      content: m.content.substring(0, 20000), // Truncate if too long
-    })),
-    agent_id: agentId,
-    tags: ['openclaw-skill'],
-    async_mode: true,
-    custom_workflows: {
-      stream_params: {
-        metadata: JSON.stringify({
-          user_ids: [cfg.userId],
-          agent_ids: [agentId],
-          session_id: sessionId,
-          scenario: cfg.scenario || 'openclaw-plugin',
-        }),
-      },
-    },
-  };
-  logSkillStage('Add][START', {
-    req: requestId,
-    url,
-    user_id: cfg.userId,
-    agent_id: agentId,
-    conversation_id: sessionId,
-    messages: messagesToSave.length,
-    roles: messagesToSave.map((m) => m.role),
-    last_user: `"${truncate(messagesToSave.filter((m) => m.role === 'user').slice(-1)[0]?.content || '', 80)}"`,
-    scenario: cfg.scenario,
-    api_key: maskSecretForLog(cfg.apiKey),
-  });
+  const normalizedResult = normalizeMessages(messagesToSave);
+  if (normalizedResult.error) {
+    console.error(JSON.stringify({
+      success: false,
+      error: normalizedResult.error,
+      invalid: normalizedResult.invalid,
+    }));
+    process.exit(1);
+  }
 
   try {
-    const result = await httpRequest(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': cfg.apiKey,
-        'x-request-id': requestId,
-        'x-plugin-version': SKILL_VERSION,
-        'x-client-type': 'skill',
-      },
-      body: JSON.stringify(payload),
-    }, cfg.timeoutMs);
-
-    const turnCount = Math.floor(messagesToSave.length / 2);
+    const saved = await saveNormalizedMessages(normalizedResult.messages, cfg);
+    const dialogueMessages = normalizedResult.messages.filter((message) => message.role !== 'tool');
+    const turnCount = Math.floor(dialogueMessages.length / 2);
     const output = {
       success: true,
-      message: `Saved ${turnCount} turns (${messagesToSave.length} messages) to memory`,
-      memoriesCount: result.memories_count || 0,
+      message: `Saved ${turnCount} turns (${normalizedResult.messages.length} messages) to memory`,
+      memoriesCount: saved.result.memories_count || 0,
+      protocol: saved.protocol,
+      fallbackFrom: saved.fallbackFrom || null,
       config: {
         saveMaxMessages: cfg.saveMaxMessages,
       },
     };
-
-    logSkillStage('Add][END', {
-      req: requestId,
-      success: true,
-      total_ms: Date.now() - requestStart,
-      count: result.memories_count || 0,
-      server_req: result.request_id,
-      message: `"${truncate(output.message, 120)}"`,
-    });
     console.log(JSON.stringify(output));
   } catch (error) {
-    logSkillStage('Add][END', {
-      req: requestId,
-      success: false,
-      total_ms: Date.now() - requestStart,
-      error: `"${truncate(error.message || String(error), 160)}"`,
-    });
     console.error(JSON.stringify({
       success: false,
       error: error.message,
@@ -516,6 +782,8 @@ async function showConfig() {
     autoSaveEnabled: cfg.autoSaveEnabled,
     saveTriggerTurns: cfg.saveTriggerTurns,
     saveMaxMessages: cfg.saveMaxMessages,
+    useV2Protocol: cfg.useV2Protocol,
+    captureToolCalls: cfg.captureToolCalls,
     mode: 'agent-smart',
   }, null, 2));
 }
@@ -634,6 +902,9 @@ Configuration:
   - HUMAN_LIKE_MEM_AUTO_SAVE_ENABLED (optional, default: true)
   - HUMAN_LIKE_MEM_SAVE_TRIGGER_TURNS (optional, default: 5)
   - HUMAN_LIKE_MEM_SAVE_MAX_MESSAGES (optional, default: 20)
+  - HUMAN_LIKE_MEM_SCENARIO (optional, default: openclaw-plugin)
+  - HUMAN_LIKE_MEM_USE_V2_PROTOCOL (optional, default: true)
+  - HUMAN_LIKE_MEM_CAPTURE_TOOL_CALLS (optional, default: true)
 `);
 }
 

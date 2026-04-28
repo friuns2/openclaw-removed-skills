@@ -13,6 +13,8 @@ const ALLOWED_ENV_KEYS = Object.freeze({
   AUTO_SAVE_ENABLED: 'HUMAN_LIKE_MEM_AUTO_SAVE_ENABLED',
   SAVE_TRIGGER_TURNS: 'HUMAN_LIKE_MEM_SAVE_TRIGGER_TURNS',
   SAVE_MAX_MESSAGES: 'HUMAN_LIKE_MEM_SAVE_MAX_MESSAGES',
+  USE_V2_PROTOCOL: 'HUMAN_LIKE_MEM_USE_V2_PROTOCOL',
+  CAPTURE_TOOL_CALLS: 'HUMAN_LIKE_MEM_CAPTURE_TOOL_CALLS',
 });
 const ALLOWED_ENV_KEY_SET = new Set(Object.values(ALLOWED_ENV_KEYS));
 const LOCALHOST_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
@@ -21,7 +23,9 @@ function parseBoolean(value, defaultValue) {
   if (value === undefined || value === null) return defaultValue;
   if (typeof value === 'boolean') return value;
   if (typeof value === 'string') {
-    return value.toLowerCase() === 'true' || value === '1';
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
   }
   return defaultValue;
 }
@@ -75,6 +79,8 @@ export async function buildConfig() {
     autoSaveEnabled: parseBoolean(readSkillEnv(ALLOWED_ENV_KEYS.AUTO_SAVE_ENABLED), true),
     saveTriggerTurns: Number.isFinite(rawSaveTriggerTurns) && rawSaveTriggerTurns > 0 ? rawSaveTriggerTurns : 5,
     saveMaxMessages: Number.isFinite(rawSaveMaxMessages) && rawSaveMaxMessages > 0 ? rawSaveMaxMessages : 20,
+    useV2Protocol: parseBoolean(readSkillEnv(ALLOWED_ENV_KEYS.USE_V2_PROTOCOL), true),
+    captureToolCalls: parseBoolean(readSkillEnv(ALLOWED_ENV_KEYS.CAPTURE_TOOL_CALLS), true),
   };
 }
 
