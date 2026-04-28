@@ -3,9 +3,15 @@
   "slug": "connectwise-psa",
   "displayName": "Connectwise Psa",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775660824498,
-    "commit": "https://github.com/openclaw/skills/commit/d7f21b84eda71aebf705eaf977e2c3ab6ae6a70b"
+    "version": "1.0.1",
+    "publishedAt": 1776899373683,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775660824498,
+      "commit": "https://github.com/openclaw/skills/commit/d7f21b84eda71aebf705eaf977e2c3ab6ae6a70b"
+    }
+  ]
 }
