@@ -3,9 +3,15 @@
   "slug": "cnvrgio",
   "displayName": "Cnvrgio",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775405008553,
-    "commit": "https://github.com/openclaw/skills/commit/aa8e78d6b2b099900ebbac519a7da6b80b3e0bae"
+    "version": "1.0.1",
+    "publishedAt": 1776889291623,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775405008553,
+      "commit": "https://github.com/openclaw/skills/commit/aa8e78d6b2b099900ebbac519a7da6b80b3e0bae"
+    }
+  ]
 }
