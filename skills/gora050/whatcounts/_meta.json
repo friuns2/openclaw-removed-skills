@@ -3,9 +3,15 @@
   "slug": "whatcounts",
   "displayName": "Whatcounts",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775383661256,
-    "commit": "https://github.com/openclaw/skills/commit/6fd9a4525be4c5449c118ba95481acd74b8ea1dc"
+    "version": "1.0.1",
+    "publishedAt": 1776892245066,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775383661256,
+      "commit": "https://github.com/openclaw/skills/commit/6fd9a4525be4c5449c118ba95481acd74b8ea1dc"
+    }
+  ]
 }
