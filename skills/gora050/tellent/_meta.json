@@ -3,9 +3,15 @@
   "slug": "tellent",
   "displayName": "Tellent",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574490934,
-    "commit": "https://github.com/openclaw/skills/commit/14473c1702e531b8a6c8d978162b23dd7227eebd"
+    "version": "1.0.1",
+    "publishedAt": 1776899062858,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574490934,
+      "commit": "https://github.com/openclaw/skills/commit/14473c1702e531b8a6c8d978162b23dd7227eebd"
+    }
+  ]
 }
