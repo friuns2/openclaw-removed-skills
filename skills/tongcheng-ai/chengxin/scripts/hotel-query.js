@@ -7,10 +7,12 @@
  *   node hotel-query.js --destination "上海"
  *   node hotel-query.js --destination "上海" --extra "明天入住"
  *   node hotel-query.js --destination "上海" --extra "外滩附近 明天入住"
+ *   node hotel-query.js --destination "上海" --extra "最便宜"
+ *   node hotel-query.js --destination "上海" --extra "五星级 含早餐"
  * 
  * 参数说明：
  *   --destination <城市>      目的地城市
- *   --extra <补充信息>        额外信息（日期、位置偏好等）
+ *   --extra <补充信息>        额外信息（日期、位置偏好、价格偏好、星级/设施偏好等）
  *   --channel <渠道>          通信渠道（webchat/wechat 等）
  *   --surface <界面>          交互界面（mobile/desktop/table/card）
  * 
@@ -111,7 +113,7 @@ const runner = create_query_runner({
   },
   validate: validate_params,
   handle_result: handle_result,
-  no_match_detail: NO_MATCH_DETAIL.hotel,
+  no_match_detail: NO_MATCH_DETAIL.HOTEL,
   usage_example: `  node hotel-query.js --destination "上海"
   node hotel-query.js --destination "上海" --extra "明天入住"
   node hotel-query.js --destination "上海" --extra "外滩附近 明天入住"`

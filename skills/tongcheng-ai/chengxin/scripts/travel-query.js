@@ -171,6 +171,23 @@ function has_valid_trip_plan(response_data) {
 }
 
 /**
+ * 将 UGC 数据列表扁平化为单层 ugc 条目数组
+ * @param {Array} ugc_data_list - UGC 数据列表
+ * @returns {Array} 扁平化后的 ugc 条目数组
+ */
+function flatten_ugc_list(ugc_data_list) {
+  const all_ugcs = [];
+  ugc_data_list.forEach((item) => {
+    if (item.ugcList && item.ugcList.length > 0) {
+      item.ugcList.forEach((ugc) => {
+        all_ugcs.push(ugc);
+      });
+    }
+  });
+  return all_ugcs;
+}
+
+/**
  * 格式化 UGC 攻略详细内容（无行程规划时使用）
  * 输出 name、cityName、sceneryNameList、topic、ugcContent（摘要）等详细字段
  * @param {Array} ugc_data_list - UGC 数据列表
@@ -181,15 +198,7 @@ function format_ugc_guide_detail(ugc_data_list) {
     return '';
   }
 
-  // 收集所有 ugc 条目
-  const all_ugcs = [];
-  ugc_data_list.forEach((item) => {
-    if (item.ugcList && item.ugcList.length > 0) {
-      item.ugcList.forEach((ugc) => {
-        all_ugcs.push(ugc);
-      });
-    }
-  });
+  const all_ugcs = flatten_ugc_list(ugc_data_list);
 
   if (all_ugcs.length === 0) {
     return '';
@@ -241,15 +250,7 @@ function format_ugc_guide(ugc_data_list) {
     return '';
   }
 
-  // 收集所有 ugc 条目
-  const all_ugcs = [];
-  ugc_data_list.forEach((item) => {
-    if (item.ugcList && item.ugcList.length > 0) {
-      item.ugcList.forEach((ugc) => {
-        all_ugcs.push(ugc);
-      });
-    }
-  });
+  const all_ugcs = flatten_ugc_list(ugc_data_list);
 
   if (all_ugcs.length === 0) {
     return '';
@@ -446,7 +447,7 @@ const runner = create_query_runner({
   },
   validate: validate_params,
   handle_result: handle_result,
-  no_match_detail: NO_MATCH_DETAIL.travel,
+  no_match_detail: NO_MATCH_DETAIL.TRAVEL,
   usage_example: `  node travel-query.js --destination "三亚"
   node travel-query.js --departure "北京" --destination "三亚"
   node travel-query.js --departure "北京" --destination "三亚" --extra "五一假期"`
