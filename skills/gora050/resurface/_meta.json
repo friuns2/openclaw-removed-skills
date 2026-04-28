@@ -3,9 +3,15 @@
   "slug": "resurface",
   "displayName": "Resurface",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775365610485,
-    "commit": "https://github.com/openclaw/skills/commit/79fddbb430df97561a9c60fd5cb2086a1fdd7009"
+    "version": "1.0.1",
+    "publishedAt": 1776892072926,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775365610485,
+      "commit": "https://github.com/openclaw/skills/commit/79fddbb430df97561a9c60fd5cb2086a1fdd7009"
+    }
+  ]
 }
