@@ -23,9 +23,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getArticleDetailV1`
+## `getWeixinArticleDetailV1`
 
 - Method: `GET`
 - Path: `/api/weixin/get-article-detail/v1`
@@ -46,7 +46,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getArticleFeedback`
 
@@ -69,7 +69,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserPost`
 
@@ -92,9 +92,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `searchV1`
+## `searchWeixinV1`
 
 - Method: `GET`
 - Path: `/api/weixin/search/v1`
@@ -140,4 +140,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

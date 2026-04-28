@@ -22,7 +22,7 @@ This skill wraps 5 WeChat Official Accounts operations exposed by JustOneAPI. It
 - `getUserPost`: User Published Posts — Get WeChat Official Accounts user Published Posts data, including titles, publish times, and summaries, for account monitoring
 - `getArticleFeedback`: Article Engagement Metrics — Get WeChat Official Accounts article Engagement Metrics data, including like, share, and comment metrics, for article performance tracking and benchmarking
 - `getArticleComment`: Article Comments — Get WeChat Official Accounts article Comments data, including commenter details, comment text, and timestamps, for feedback analysis
-- `searchV1`: Keyword Search — Get WeChat Official Accounts keyword Search data, including account names, titles, and publish times, for content discovery
+- `searchWeixinV1`: Keyword Search — Get WeChat Official Accounts keyword Search data, including account names, titles, and publish times, for content discovery
 
 ## Request Pattern
 
@@ -34,7 +34,7 @@ This skill wraps 5 WeChat Official Accounts operations exposed by JustOneAPI. It
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `getUserPost`, `getArticleFeedback`, `getArticleComment`, `searchV1`.
+2. Start with one of these operations when it matches the user's request: `getUserPost`, `getArticleFeedback`, `getArticleComment`, `searchWeixinV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:

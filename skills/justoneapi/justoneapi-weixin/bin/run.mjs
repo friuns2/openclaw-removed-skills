@@ -38,8 +38,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Article Comments",
@@ -50,7 +50,7 @@ const manifest = {
     {
       "description": "Get WeChat Official Accounts article Details data, including body content, for article archiving, research, and content analysis.",
       "method": "GET",
-      "operationId": "getArticleDetailV1",
+      "operationId": "getWeixinArticleDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -75,8 +75,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Article Details",
@@ -112,8 +112,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Article Engagement Metrics",
@@ -149,8 +149,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Posts",
@@ -161,7 +161,7 @@ const manifest = {
     {
       "description": "Get WeChat Official Accounts keyword Search data, including account names, titles, and publish times, for content discovery.",
       "method": "GET",
-      "operationId": "searchV1",
+      "operationId": "searchWeixinV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -231,8 +231,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Search",

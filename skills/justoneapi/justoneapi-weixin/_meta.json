@@ -3,11 +3,16 @@
   "slug": "justoneapi-weixin",
   "displayName": "WeChat Official Accounts API",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776240024244,
-    "commit": "https://github.com/openclaw/skills/commit/0ae53532fde8e34c58a8fded26bb164460d13734"
+    "version": "1.0.4",
+    "publishedAt": 1776924510963,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776240024244,
+      "commit": "https://github.com/openclaw/skills/commit/0ae53532fde8e34c58a8fded26bb164460d13734"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775377595070,
