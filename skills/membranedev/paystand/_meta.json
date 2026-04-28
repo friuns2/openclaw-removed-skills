@@ -3,9 +3,15 @@
   "slug": "paystand",
   "displayName": "Paystand",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775459026280,
-    "commit": "https://github.com/openclaw/skills/commit/b0cbbf6eddf046837c03b39c9b1ecec80a1c58ba"
+    "version": "1.0.1",
+    "publishedAt": 1776897451866,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775459026280,
+      "commit": "https://github.com/openclaw/skills/commit/b0cbbf6eddf046837c03b39c9b1ecec80a1c58ba"
+    }
+  ]
 }
