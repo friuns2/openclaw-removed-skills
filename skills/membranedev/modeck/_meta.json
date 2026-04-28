@@ -3,9 +3,15 @@
   "slug": "modeck",
   "displayName": "Modeck",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775358291247,
-    "commit": "https://github.com/openclaw/skills/commit/62125b7194d20b9beede8b4b10877ca8bde3ebf4"
+    "version": "1.0.1",
+    "publishedAt": 1776884374146,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775358291247,
+      "commit": "https://github.com/openclaw/skills/commit/62125b7194d20b9beede8b4b10877ca8bde3ebf4"
+    }
+  ]
 }
