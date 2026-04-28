@@ -3,9 +3,15 @@
   "slug": "worldline",
   "displayName": "Worldline",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574434081,
-    "commit": "https://github.com/openclaw/skills/commit/48fe68dd6e7080e44a3da334099b70ef49a4bcbc"
+    "version": "1.0.1",
+    "publishedAt": 1776899020176,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574434081,
+      "commit": "https://github.com/openclaw/skills/commit/48fe68dd6e7080e44a3da334099b70ef49a4bcbc"
+    }
+  ]
 }
