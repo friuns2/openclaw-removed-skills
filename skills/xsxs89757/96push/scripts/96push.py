@@ -12,6 +12,86 @@ import urllib.parse
 
 BASE_URL = "https://api.96.cn/api/push/proxy"
 
+VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v", ".flv", ".wmv"}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+
+
+def media_extension(value: str) -> str:
+    parsed = urllib.parse.urlparse((value or "").strip())
+    path = parsed.path or value
+    _, ext = os.path.splitext(path)
+    return ext.lower()
+
+
+def media_kind(value: str) -> str:
+    raw = (value or "").strip()
+    if raw.startswith("data:video/"):
+        return "video"
+    if raw.startswith("data:image/"):
+        return "image"
+    ext = media_extension(raw)
+    if ext in VIDEO_EXTENSIONS:
+        return "video"
+    if ext in IMAGE_EXTENSIONS:
+        return "image"
+    return ""
+
+
+def content_type_from_publish_type(value) -> str:
+    try:
+        publish_type = int(value)
+    except (TypeError, ValueError):
+        return ""
+    return {1: "article", 2: "graph_text", 3: "video"}.get(publish_type, "")
+
+
+def infer_type_from_files(files: list[str]) -> str:
+    kinds = [media_kind(item) for item in files]
+    if any(kind == "video" for kind in kinds):
+        return "video"
+    if any(kind == "image" for kind in kinds):
+        return "graph_text"
+    return ""
+
+
+def infer_type_from_content_detail(content_id: int) -> str:
+    detail = request("GET", f"article/get/{content_id}")
+    if not isinstance(detail, dict) or "error" in detail:
+        return ""
+
+    data = detail.get("data", detail)
+    if not isinstance(data, dict):
+        return ""
+
+    content_type = content_type_from_publish_type(data.get("publish_type"))
+    publish_data = data.get("publish_data") or {}
+    if isinstance(publish_data, dict):
+        inferred = infer_type_from_files(publish_data.get("files") or [])
+        if inferred:
+            return inferred
+    return content_type
+
+
+def resolve_content_type(explicit_type: str | None, files: list[str] | None = None, content_id: int | None = None) -> str:
+    if explicit_type:
+        if explicit_type == "article":
+            inferred = infer_type_from_files(files or [])
+            if inferred:
+                return inferred
+            if content_id is not None:
+                inferred = infer_type_from_content_detail(content_id)
+                if inferred in {"graph_text", "video"}:
+                    return inferred
+        return explicit_type
+    inferred = infer_type_from_files(files or [])
+    if inferred:
+        return inferred
+    if content_id is not None:
+        inferred = infer_type_from_content_detail(content_id)
+        if inferred:
+            return inferred
+    return "article"
+
 
 def get_api_key() -> str:
     key = os.environ.get("PUSH_API_KEY", "").strip()
@@ -138,6 +218,7 @@ def cmd_plat_sets(args):
 def cmd_create(args):
     thumb = json.loads(args.thumb) if args.thumb else []
     files = json.loads(args.files) if args.files else []
+    content_type = resolve_content_type(args.type, files=files)
 
     body = {
         "title": args.title,
@@ -146,7 +227,7 @@ def cmd_create(args):
         "markdown": args.markdown or "",
         "autoThumb": not args.no_auto_thumb,
         "thumb": thumb,
-        "files": files if args.type != "article" else [],
+        "files": files if content_type != "article" else [],
     }
 
     endpoints = {
@@ -154,13 +235,13 @@ def cmd_create(args):
         "graph_text": "article/graphText",
         "video": "article/video",
     }
-    return request("POST", endpoints.get(args.type, "article/create"), body=body)
+    return request("POST", endpoints.get(content_type, "article/create"), body=body)
 
 
 def cmd_update(args):
     thumb = json.loads(args.thumb) if args.thumb else []
     files = json.loads(args.files) if args.files else []
-    content_type = getattr(args, "type", "article")
+    content_type = resolve_content_type(args.type, files=files, content_id=args.id)
 
     body = {
         "title": args.title,
@@ -206,12 +287,13 @@ def cmd_publish(args):
         "syncDraft": args.draft,
         "postAccounts": accounts,
     }
+    content_type = resolve_content_type(args.type, content_id=args.id)
     endpoints = {
         "article": f"publish/article/{args.id}",
         "graph_text": f"publish/graphText/{args.id}",
         "video": f"publish/video/{args.id}",
     }
-    result = request("POST", endpoints.get(args.type, f"publish/article/{args.id}"), body=body, timeout=60)
+    result = request("POST", endpoints.get(content_type, f"publish/article/{args.id}"), body=body, timeout=60)
 
     # 自动 poll 等待结果（除非 --no-wait）
     if getattr(args, "no_wait", False):
@@ -385,7 +467,7 @@ def main():
 
     # Content creation
     p = sub.add_parser("create", help="Create content")
-    p.add_argument("--type", choices=["article", "graph_text", "video"], default="article")
+    p.add_argument("--type", choices=["article", "graph_text", "video"], default=None, help="Content type. If omitted, inferred from --files")
     p.add_argument("--title", required=True)
     p.add_argument("--desc", default="", help="Description/summary")
     p.add_argument("--content", default="", help="HTML content (for article)")
@@ -396,6 +478,7 @@ def main():
 
     p = sub.add_parser("update", help="Update existing content")
     p.add_argument("--id", type=int, required=True)
+    p.add_argument("--type", choices=["article", "graph_text", "video"], default=None, help="Content type. If omitted, inferred from existing content/files")
     p.add_argument("--title", required=True)
     p.add_argument("--desc", default="")
     p.add_argument("--content", default="")
@@ -409,7 +492,7 @@ def main():
 
     # Publish
     p = sub.add_parser("publish", help="Submit async publish task")
-    p.add_argument("--type", choices=["article", "graph_text", "video"], default="article")
+    p.add_argument("--type", choices=["article", "graph_text", "video"], default=None, help="Content type. If omitted, inferred from content detail")
     p.add_argument("--id", type=int, required=True, help="Content ID to publish")
     p.add_argument("--accounts", default="", help="Simple mode: comma-separated account IDs (no settings)")
     p.add_argument("--accounts-json", default="", help='Advanced: JSON array of {"id":N,"platName":"...","settings":{...}}')
