@@ -3,9 +3,15 @@
   "slug": "medius",
   "displayName": "Medius",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775714662619,
-    "commit": "https://github.com/openclaw/skills/commit/7729985e57ffd1b333ef9ba8d284909bbf18ac21"
+    "version": "1.0.2",
+    "publishedAt": 1776898087410,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775714662619,
+      "commit": "https://github.com/openclaw/skills/commit/7729985e57ffd1b333ef9ba8d284909bbf18ac21"
+    }
+  ]
 }
