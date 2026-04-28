@@ -3,9 +3,15 @@
   "slug": "review-go",
   "displayName": "Review Go",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775852574365,
-    "commit": "https://github.com/openclaw/skills/commit/7cde796c0509da95a869549edeea4f72590181f3"
+    "version": "1.0.1",
+    "publishedAt": 1776831164304,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775852574365,
+      "commit": "https://github.com/openclaw/skills/commit/7cde796c0509da95a869549edeea4f72590181f3"
+    }
+  ]
 }
