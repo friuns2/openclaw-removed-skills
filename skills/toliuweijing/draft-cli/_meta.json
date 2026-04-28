@@ -3,11 +3,16 @@
   "slug": "draft-cli",
   "displayName": "Draft Cli",
   "latest": {
-    "version": "1.5.10",
-    "publishedAt": 1776745520463,
-    "commit": "https://github.com/openclaw/skills/commit/eb536340b8fe46fbf148727aea3c3c4ef24331b5"
+    "version": "1.6.0",
+    "publishedAt": 1776754665658,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.10",
+      "publishedAt": 1776745520463,
+      "commit": "https://github.com/openclaw/skills/commit/eb536340b8fe46fbf148727aea3c3c4ef24331b5"
+    },
     {
       "version": "1.5.4",
       "publishedAt": 1776239470999,
