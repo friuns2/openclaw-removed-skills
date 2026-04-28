@@ -3,9 +3,15 @@
   "slug": "jetbrains-marketplace",
   "displayName": "Jetbrains Marketplace",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775412222457,
-    "commit": "https://github.com/openclaw/skills/commit/110e3ec0b4491e081ecc48dbff2a9fff276d73f4"
+    "version": "1.0.1",
+    "publishedAt": 1776889330788,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775412222457,
+      "commit": "https://github.com/openclaw/skills/commit/110e3ec0b4491e081ecc48dbff2a9fff276d73f4"
+    }
+  ]
 }
