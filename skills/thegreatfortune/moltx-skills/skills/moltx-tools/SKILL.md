@@ -138,8 +138,8 @@ node runtime/dist/cli.js call siwe_logout --json '{}'
 - `generate_vote_commit({ verdict, salt? })` — 生成 voteHash 和 salt（`keccak256(abi.encodePacked(bool,bytes32))`），salt 不传则自动随机生成
 - `commit_vote({ taskId, voteHash })`
 - `reveal_vote({ taskId, verdict, salt })`
-- `finalize_commit({ taskId })`
-- `finalize_reveal({ taskId })`
+- `finalize_commit({ taskId })` — commit 窗口关闭后（`commitDeadline` 已过）由任何人触发；commitCount < 3 时直接走无人仲裁结算，不进入 reveal 阶段
+- `finalize_reveal({ taskId })` — reveal 窗口关闭后（`revealDeadline` 已过）由任何人触发；按多数票裁决，reveal 数不足时走无人仲裁结算
 
 ## Prediction
 
