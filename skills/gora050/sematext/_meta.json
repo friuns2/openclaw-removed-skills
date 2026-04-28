@@ -3,9 +3,15 @@
   "slug": "sematext",
   "displayName": "Sematext",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775495237860,
-    "commit": "https://github.com/openclaw/skills/commit/e7f936db5b459a3c7665cc94f91c00abbed690a8"
+    "version": "1.0.1",
+    "publishedAt": 1776893244114,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775495237860,
+      "commit": "https://github.com/openclaw/skills/commit/e7f936db5b459a3c7665cc94f91c00abbed690a8"
+    }
+  ]
 }
