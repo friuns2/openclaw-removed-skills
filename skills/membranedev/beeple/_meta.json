@@ -3,9 +3,15 @@
   "slug": "beeple",
   "displayName": "Beeple",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775390659374,
-    "commit": "https://github.com/openclaw/skills/commit/4aa0add5c3af2ba47f4d7d46d7253645f7cbc87b"
+    "version": "1.0.1",
+    "publishedAt": 1776888834547,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775390659374,
+      "commit": "https://github.com/openclaw/skills/commit/4aa0add5c3af2ba47f4d7d46d7253645f7cbc87b"
+    }
+  ]
 }
