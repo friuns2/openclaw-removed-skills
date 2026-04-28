@@ -3,9 +3,15 @@
   "slug": "wire2air",
   "displayName": "Wire2Air",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775628247380,
-    "commit": "https://github.com/openclaw/skills/commit/8eaf0d79c75bd130c34e5adf7c35c64c6a0a91f8"
+    "version": "1.0.1",
+    "publishedAt": 1776896456287,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775628247380,
+      "commit": "https://github.com/openclaw/skills/commit/8eaf0d79c75bd130c34e5adf7c35c64c6a0a91f8"
+    }
+  ]
 }
