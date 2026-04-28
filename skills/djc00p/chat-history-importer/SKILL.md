@@ -6,7 +6,7 @@ metadata: {"clawdbot":{"emoji":"📥","requires":{"bins":["python3"]},"env":[],"
 
 # Chat History Importer
 
-Import years of AI conversations into searchable episodic memory. Parse ChatGPT and Claude exports and create dated daily memory files your agent can search and reference.
+Import years of AI conversations into searchable episodic memory. Parse ChatGPT and Claude exports and create dated daily memory files your agent can search and reference. Perfect for onboarding new agents with rich historical context or preserving important conversations for future recall. Pairs well with the [chat-learnings-extractor](https://clawhub.ai/djc00p/chat-learnings-extractor) skill for a complete conversation analysis workflow.
 
 ## Quick Start
 
@@ -21,6 +21,7 @@ Import years of AI conversations into searchable episodic memory. Parse ChatGPT 
 - **Episodic memory:** Writes daily summaries to `memory/episodic/YYYY-MM-DD.md`
 - **Deduplication:** Chat IDs tracked — re-running the same export never creates duplicates
 - **OPENCLAW_WORKSPACE:** Set this env var to point imports to the right agent workspace
+- **Human speaker names:** Memories are written as `Kael:` / `Deonte:` instead of `assistant:` / `user:` — auto-read from `IDENTITY.md` and `USER.md` in the workspace, making imported history feel like recalled conversations rather than raw log files
 
 ## Common Usage
 
@@ -36,6 +37,9 @@ python3 scripts/batch.py --dir ~/Downloads/chat_exports --since 2025-01-01
 
 # Force a specific format (auto-detects by default)
 python3 scripts/batch.py --dir ~/Downloads/chat_exports --format anthropic
+
+# Override speaker names if IDENTITY.md / USER.md aren’t set up yet
+python3 scripts/batch.py --dir ~/Downloads/chat_exports --agent-name "Ayo" --user-name "Deonte"
 
 # Verbose — show message count + first user message per chat
 python3 scripts/batch.py --dir ~/Downloads/chat_exports --dry-run --verbose
