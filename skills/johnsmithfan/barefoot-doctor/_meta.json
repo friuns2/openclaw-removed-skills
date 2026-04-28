@@ -3,11 +3,16 @@
   "slug": "barefoot-doctor",
   "displayName": "Barefoot Doctor (EN)",
   "latest": {
-    "version": "1.0.0-en2",
-    "publishedAt": 1776678585463,
-    "commit": "https://github.com/openclaw/skills/commit/b42f77d60b2123a405af3665878670e8c41600b0"
+    "version": "2.0.0",
+    "publishedAt": 1777201550022,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.0-en2",
+      "publishedAt": 1776678585463,
+      "commit": "https://github.com/openclaw/skills/commit/b42f77d60b2123a405af3665878670e8c41600b0"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776178931846,
