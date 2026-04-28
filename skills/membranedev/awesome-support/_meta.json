@@ -3,9 +3,15 @@
   "slug": "awesome-support",
   "displayName": "Awesome Support",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775617491813,
-    "commit": "https://github.com/openclaw/skills/commit/2f30037fca456277632f71d3e8019b05b97ab392"
+    "version": "1.0.1",
+    "publishedAt": 1776896320918,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775617491813,
+      "commit": "https://github.com/openclaw/skills/commit/2f30037fca456277632f71d3e8019b05b97ab392"
+    }
+  ]
 }
