@@ -3,9 +3,15 @@
   "slug": "adobe-commerce",
   "displayName": "Adobe Commerce",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775390810594,
-    "commit": "https://github.com/openclaw/skills/commit/d6cdc798bcb0f81ba784bca8382784d8f5bf87a7"
+    "version": "1.0.1",
+    "publishedAt": 1776892357520,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775390810594,
+      "commit": "https://github.com/openclaw/skills/commit/d6cdc798bcb0f81ba784bca8382784d8f5bf87a7"
+    }
+  ]
 }
