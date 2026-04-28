@@ -1,5 +1,6 @@
 ---
-name: verification-before-completion
+name: ia-verification-before-completion
+class: discipline
 description: >-
   Enforces fresh verification evidence before any completion claim. Use when
   about to claim "tests pass", "bug fixed", "done", "ready to merge", or
@@ -51,6 +52,34 @@ Before any success claim, run through these five steps:
 | **3. Read** | Read the complete output, check exit code | Don't scan for "passed" -- read failure counts, warnings, errors |
 | **4. Verify** | Does the output actually confirm the claim? | "42 passed, 0 failed" confirms "tests pass". "41 passed, 1 failed" does not. |
 | **5. Claim** | Only now make the statement | "All 42 tests pass" with the evidence visible |
+
+## Verification Strategies by Change Type
+
+Type-check and unit tests are the universal baseline — they are not sufficient proof on their own. Match the strategy to the change:
+
+| Change type | Required verification |
+|-------------|----------------------|
+| Frontend (component, page, form) | Start dev server, exercise the feature in a browser, check console for errors, test the happy path AND one failure path |
+| Backend handler / endpoint | `curl` the endpoint, verify response shape and status code, hit at least one error path (invalid input, missing auth) |
+| CLI tool | Run the binary with real inputs, check stdout, stderr, and exit code. Run from `/tmp` (not the source folder) to catch "only works from source" bugs |
+| Infra / IaC (Terraform, Dockerfile, k8s) | `terraform plan` / `docker build` / `kubectl apply --dry-run=server`; review the diff before applying |
+| Database migration | Run migration up, run migration down, run migration up again against a copy of production-shape data. State what was tested |
+| Refactoring (no behavior change) | Full test suite passes unchanged. Public API surface diff shows no breakage (`grep` exported identifiers) |
+| Library / package update | Run the consumer's test suite against the new version. Check for deprecation warnings |
+| Schema change | Old consumers still parse the new shape (forward compat); new consumers handle old shape if the old data still exists (backward compat) |
+
+Reading code is not a strategy. If the table above doesn't have a row for your change, state explicitly: "No runtime verification available — verified by reading the diff."
+
+## Adversarial Probes
+
+For any change that touches production logic, include at least one adversarial probe in the verification — not a happy-path confirmation dressed up as verification. Pick the most relevant from:
+
+- **Boundary value**: 0, -1, empty string, empty array, `null`, `undefined`, `MAX_INT`, 1-char unicode combining mark
+- **Concurrency**: two parallel requests with the same identifier (for state changes, races, double-spend classes)
+- **Idempotency**: run the same mutation twice; the second should either no-op or error cleanly, not corrupt state
+- **Orphan op**: delete/update/get a nonexistent ID — does it 404/return-null as expected, or throw an internal error?
+
+Docs changes, trivial typo fixes, and pure rename refactors are exempt. Everything else: one probe minimum. A report with zero adversarial probes is a happy-path confirmation, not verification.
 
 ## Review Staleness
 
@@ -172,10 +201,10 @@ The `Things I didn't touch` section is not optional — if nothing was noticed, 
 ## Integration
 
 This skill is referenced by:
-- `workflows:work` -- before marking tasks complete, before shipping, and before merge/PR creation (Phase 4)
-- `receiving-code-review` -- verify each fix before marking resolved
-- `debugging` -- before claiming a bug is fixed
-- `writing-tests` -- tests as primary verification evidence
-- `design-iterator` agent -- verify design changes render correctly
-- `figma-design-sync` agent -- verify implementation matches Figma
-- `/verify` command -- runs the full pre-PR verification pipeline
+- `/ia-work` -- before marking tasks complete, before shipping, and before merge/PR creation (Phase 4)
+- `ia-receiving-code-review` -- verify each fix before marking resolved
+- `ia-debugging` -- before claiming a bug is fixed
+- `ia-writing-tests` -- tests as primary verification evidence
+- `ia-design-iterator` agent -- verify design changes render correctly
+- `ia-figma-design-sync` agent -- verify implementation matches Figma
+- `/ia-verify` command -- runs the full pre-PR verification pipeline
