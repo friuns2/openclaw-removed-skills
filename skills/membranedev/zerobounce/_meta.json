@@ -3,9 +3,15 @@
   "slug": "zerobounce",
   "displayName": "Zerobounce",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379831681,
-    "commit": "https://github.com/openclaw/skills/commit/a5a43315594a245a259b3a513b17fbcf4d421d72"
+    "version": "1.0.1",
+    "publishedAt": 1776897102384,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379831681,
+      "commit": "https://github.com/openclaw/skills/commit/a5a43315594a245a259b3a513b17fbcf4d421d72"
+    }
+  ]
 }
