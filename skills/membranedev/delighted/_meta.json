@@ -3,9 +3,15 @@
   "slug": "delighted",
   "displayName": "Delighted",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775379803978,
-    "commit": "https://github.com/openclaw/skills/commit/6734c073c628e2d1dcab5b8f59aecc01ea685ef8"
+    "version": "1.0.1",
+    "publishedAt": 1776897089939,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775379803978,
+      "commit": "https://github.com/openclaw/skills/commit/6734c073c628e2d1dcab5b8f59aecc01ea685ef8"
+    }
+  ]
 }
