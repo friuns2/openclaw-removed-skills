@@ -3,9 +3,15 @@
   "slug": "tolgee",
   "displayName": "Tolgee",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775444706859,
-    "commit": "https://github.com/openclaw/skills/commit/431cf8230253dee2529945d3a068df3532063c23"
+    "version": "1.0.1",
+    "publishedAt": 1776897824138,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775444706859,
+      "commit": "https://github.com/openclaw/skills/commit/431cf8230253dee2529945d3a068df3532063c23"
+    }
+  ]
 }
