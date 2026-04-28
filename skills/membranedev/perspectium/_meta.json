@@ -3,9 +3,15 @@
   "slug": "perspectium",
   "displayName": "Perspectium",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775675096583,
-    "commit": "https://github.com/openclaw/skills/commit/ddd3bf887e9a2c95fff35d5961a170379d16aba6"
+    "version": "1.0.1",
+    "publishedAt": 1776897883895,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775675096583,
+      "commit": "https://github.com/openclaw/skills/commit/ddd3bf887e9a2c95fff35d5961a170379d16aba6"
+    }
+  ]
 }
