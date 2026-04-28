@@ -3,9 +3,15 @@
   "slug": "zoho-sheet",
   "displayName": "Zoho Sheet",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775383479650,
-    "commit": "https://github.com/openclaw/skills/commit/82c02aeb5789df6b2731e6877c682b8be31066dc"
+    "version": "1.0.1",
+    "publishedAt": 1776888685856,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775383479650,
+      "commit": "https://github.com/openclaw/skills/commit/82c02aeb5789df6b2731e6877c682b8be31066dc"
+    }
+  ]
 }
