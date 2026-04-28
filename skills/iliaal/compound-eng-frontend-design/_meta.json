@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-frontend-design",
-  "displayName": "frontend-design",
+  "displayName": "ia-frontend-design",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518958234,
-    "commit": "https://github.com/openclaw/skills/commit/ba4ac02dcb198a1cb80e68737c6af26a202d9b58"
+    "version": "3.0.4",
+    "publishedAt": 1777300691975,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518958234,
+      "commit": "https://github.com/openclaw/skills/commit/ba4ac02dcb198a1cb80e68737c6af26a202d9b58"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004178735,
