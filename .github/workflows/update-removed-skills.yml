@@ -25,6 +25,8 @@ jobs:
 
       - name: Add upstream remote
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/openclaw/skills.git || true
           git fetch upstream main --prune
 
@@ -42,8 +44,6 @@ jobs:
             echo "No removed skills changes."
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md
           git commit -m "Update removed skills index"
           git push
