@@ -3,9 +3,15 @@
   "slug": "planetscale",
   "displayName": "Planetscale",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775297252869,
-    "commit": "https://github.com/openclaw/skills/commit/cd09627a9af603c92c61178bad8d6c5f5c2fcab7"
+    "version": "1.0.1",
+    "publishedAt": 1776885870096,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775297252869,
+      "commit": "https://github.com/openclaw/skills/commit/cd09627a9af603c92c61178bad8d6c5f5c2fcab7"
+    }
+  ]
 }
