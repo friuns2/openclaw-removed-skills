@@ -3,9 +3,15 @@
   "slug": "moesif",
   "displayName": "Moesif",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775729300251,
-    "commit": "https://github.com/openclaw/skills/commit/096fb67d3b4195329e99a074e7b33944374a22d5"
+    "version": "1.0.1",
+    "publishedAt": 1776899822258,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775729300251,
+      "commit": "https://github.com/openclaw/skills/commit/096fb67d3b4195329e99a074e7b33944374a22d5"
+    }
+  ]
 }
