@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-python-services",
-  "displayName": "python-services",
+  "displayName": "ia-python-services",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519017564,
-    "commit": "https://github.com/openclaw/skills/commit/d576f27df47438379f24754c9a6687c33659d3d4"
+    "version": "3.0.4",
+    "publishedAt": 1777300762924,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519017564,
+      "commit": "https://github.com/openclaw/skills/commit/d576f27df47438379f24754c9a6687c33659d3d4"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004239059,
