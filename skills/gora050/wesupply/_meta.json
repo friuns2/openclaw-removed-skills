@@ -3,9 +3,15 @@
   "slug": "wesupply",
   "displayName": "Wesupply",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775701066728,
-    "commit": "https://github.com/openclaw/skills/commit/d4dc1704a1c77f48c1a807d337dbeff44240c753"
+    "version": "1.0.1",
+    "publishedAt": 1776899674960,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775701066728,
+      "commit": "https://github.com/openclaw/skills/commit/d4dc1704a1c77f48c1a807d337dbeff44240c753"
+    }
+  ]
 }
