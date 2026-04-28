@@ -3,9 +3,15 @@
   "slug": "flare",
   "displayName": "Flare",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775701082511,
-    "commit": "https://github.com/openclaw/skills/commit/7f48a736e6acb4cd951beb9e5aa08d48d62257c8"
+    "version": "1.0.1",
+    "publishedAt": 1776899684865,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775701082511,
+      "commit": "https://github.com/openclaw/skills/commit/7f48a736e6acb4cd951beb9e5aa08d48d62257c8"
+    }
+  ]
 }
