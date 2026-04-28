@@ -3,11 +3,16 @@
   "slug": "qwen-orchestrator",
   "displayName": "Qwen Orchestrator",
   "latest": {
-    "version": "1.5.6",
-    "publishedAt": 1776686816388,
-    "commit": "https://github.com/openclaw/skills/commit/5b7b1eb3dd2298f78cb6bb8f5f693ef438e9497b"
+    "version": "1.5.8",
+    "publishedAt": 1777124448956,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.5.6",
+      "publishedAt": 1776686816388,
+      "commit": "https://github.com/openclaw/skills/commit/5b7b1eb3dd2298f78cb6bb8f5f693ef438e9497b"
+    },
     {
       "version": "1.5.5",
       "publishedAt": 1775824064898,
