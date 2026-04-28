@@ -3,9 +3,15 @@
   "slug": "perplexity-integration",
   "displayName": "Perplexity",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775398020604,
-    "commit": "https://github.com/openclaw/skills/commit/eb8686a36c37439f5f3e16190da2eb658fc862c4"
+    "version": "1.0.1",
+    "publishedAt": 1776892594177,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775398020604,
+      "commit": "https://github.com/openclaw/skills/commit/eb8686a36c37439f5f3e16190da2eb658fc862c4"
+    }
+  ]
 }
