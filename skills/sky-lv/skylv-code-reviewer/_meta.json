@@ -3,11 +3,16 @@
   "slug": "skylv-code-reviewer",
   "displayName": "Skylv Code Reviewer",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776648321933,
-    "commit": "https://github.com/openclaw/skills/commit/a301b551f5780dd679857dc245807fe0b866d545"
+    "version": "1.0.4",
+    "publishedAt": 1776772976001,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776648321933,
+      "commit": "https://github.com/openclaw/skills/commit/a301b551f5780dd679857dc245807fe0b866d545"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775873362977,
