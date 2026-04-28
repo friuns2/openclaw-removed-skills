@@ -3,11 +3,16 @@
   "slug": "militia-training",
   "displayName": "Militia Training (EN)",
   "latest": {
-    "version": "1.0.0-en2",
-    "publishedAt": 1776678591189,
-    "commit": "https://github.com/openclaw/skills/commit/f29bad00934672369a52d05dc79eda823e2cbc64"
+    "version": "2.0.0",
+    "publishedAt": 1777201610688,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.0-en2",
+      "publishedAt": 1776678591189,
+      "commit": "https://github.com/openclaw/skills/commit/f29bad00934672369a52d05dc79eda823e2cbc64"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776180621489,

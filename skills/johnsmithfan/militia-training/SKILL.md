@@ -1,669 +1,80 @@
 ---
-name: militia-training
+name: militia-military-training
 description: |
-  民兵军事训练智能助手 - 基于经典《民兵军事训练手册》的军事Skill培训 Agent。
-  
-  这是1部涵盖防空防原子防化学、射击训练、战斗动作、战斗勤务等内容的军事训练"神书"。
-  被誉为"3大穿越必备神书"之首。
-  
-  trigger场景：
-  - 用户询问防空、防原子、防化学知识
-  - 用户咨询射击训练方法
-  - 用户询问战斗动作训练
-  - 用户需要战术训练指导
-  - 用户询问地雷、手榴弹使用
-  - 用户咨询侦察、警戒、行军、宿营等战斗勤务
-  - 用户提到"民兵"、"军事训练"、"穿越神书"等关键词
-  
+  Militia Military Training Assistant based on the classic Militia Military Training Manual.
+  Covers anti-aircraft defense, NBC (nuclear-biological-chemical), shooting, combat tactics, combat service support.
+  Trigger: anti-aircraft defense, NBC defense, shooting training, combat tactics, field survival, sentry duty, reconnaissance.
+  Keywords: militia, anti-aircraft, NBC, shooting, combat, military training
 license: MIT
 metadata:
   openclaw:
-    emoji: "⚔️"
-    category: military
-    tags: [军事训练, 民兵, 防空防化, 射击, 战术]
+    emoji: "[SHIELD]"
+    category: education
+    tags: [military, defense, shooting, NBC, combat, survival]
+  schema:
+    version: 1.0
+    language: en
+    dependencies: []
+    quality:
+      idempotent: true
+      deterministic: true
+      side_effects: []
+    harness:
+      level: L1-L6
+      complexity: low
 ---
 
-# 民兵军事训练智能助手 ⚔️
-
-基于经典《民兵军事训练手册》（中国人民解放军总参谋部动员部编，148页）的军事Skill培训 Agent，涵盖防空防原子防化学、射击训练、战斗动作、战斗勤务等军事训练内容。
-
-## ⚠️ 重要声明 [MANDATORY]
-
-**本手册内容仅供学习和研究使用。**
-
-- 所有军事知识应在合法compliance的前提下学习
-- 不得用于任何非法目的
-- 遵守国家法律法规是每个公民的义务
-- 实际操作请由专业人员在合法场所进行
-
----
-
-## 📚 训练内容
-
-### 1、防空防原子、防化学常识
-
-详见 [references/air-defense.md](references/air-defense.md)
-
-#### 1.1 防空常识
-
-**空袭特点**：
-- 突然性强
-- 破坏力大
-- 范围广泛
-
-**防空措施**：
-1. **空袭警报**
-   - 预先警报：鸣36秒，停24秒，反复3遍
-   - 空袭警报：鸣6秒，停6秒，反复15遍
-   - 解除警报：连续鸣3分钟
-
-2. **疏散隐蔽**
-   - 利用地形地物
-   - 进入防空洞
-   - 室内defend
-
-3. **消除空袭后果**
-   - 灭火
-   - 救护伤员
-   - 抢修设施
-
-#### 1.2 防原子、防化学常识
-
-**原子武器defend**：
-
-| phase | 措施 |
-|------|------|
-| 爆炸瞬间 | 立即卧倒，闭眼，张口，双手交叉胸前 |
-| 冲击波过后 | 迅速进入掩体或离开沾染区 |
-| 沾染区 | 穿戴defend器材，避免接触受染物体 |
-
-**化学武器defend**：
-
-1. **identify毒剂**
-   - 神经性毒剂：有机磷类，有大蒜味
-   - 糜烂性毒剂：芥子气，有大蒜味
-   - 窒息性毒剂：光气，有烂苹果味
-
-2. **defend措施**
-   - 及时佩戴防毒面具
-   - 穿防毒衣
-   - 迅速离开染毒区
-
-3. **消毒急救**
-   - 皮肤消毒
-   - 服装消毒
-   - 注射解毒剂
-
----
-
-### 2、射击训练
-
-详见 [references/shooting.md](references/shooting.md)
-
-#### 2.1 步(骑)枪的构造和战斗性能
-
-**主要部件**：
-- 枪管：赋予弹头飞行方向
-- 机匣：连接各部件
-- 枪机：推弹、闭锁、击发、退壳
-- 击发机：control击发
-- 枪托：便于操作
-- 弹仓：容纳子弹
-
-**战斗性能**：
-- 有效射程：400米
-- 最大射程：2000米
-- 射速：30-40发/分
-
-#### 2.2 步(骑)枪的擦拭、上油和保管规则
-
-**擦拭时机**：
-- 训练后擦拭
-- 射击后擦拭
-- 每周擦拭1次
-
-**擦拭方法**：
-1. 分解武器
-2. 清除污垢
-3. 擦拭金属部件
-4. 涂油防锈
-5. 结合检查
-
-**保管规则**：
-- 枪口朝上或朝下
-- 击锤在击发位置
-- 关上保险
-- periodic检查
-
-#### 2.3 射击动作
-
-**据枪**：
-- 卧姿据枪
-- 跪姿据枪
-- 立姿据枪
-
-**瞄准**：
-- 瞄准点选择
-- 瞄准线对正
-- 瞄准误差修正
-
-**击发**：
-- 呼吸control
-- 扣扳机要领
-- 击发时机
-
-#### 2.4 简易射击原理
-
-**影响射击的因素**：
-
-| 因素 | 影响 |
-|------|------|
-| 距离 | 弹道下降 |
-| 风力 | 弹头偏移 |
-| 气温 | 初速变化 |
-| 气压 | 弹道变化 |
-
-**修正方法**：
-- 距离修正：抬高瞄准点
-- 风向修正：偏风吹时偏瞄
-- 气温修正：高温抬高，低温降低
-
-#### 2.5 刺杀教练
-
-**刺杀基本动作**：
-1. **预备用枪**
-   - 左手握护木
-   - 右手握枪颈
-   - 枪托贴腰
-
-2. **突刺**
-   - 左脚向前1步
-   - 右手推枪
-   - 刺刀刺出
-
-3. **防刺**
-   - 左挡
-   - 右挡
-   - 下挡
-
-**刺杀要领**：
-- 快、准、狠
-- coordinate1致
-- 灵活多变
-
-#### 2.6 手榴弹教练
-
-**手榴弹种类**：
-- 进攻手榴弹
-- defend手榴弹
-- 反坦克手榴弹
-
-**投掷动作**：
-1. **握弹**
-   - 4指握弹柄
-   - 拇指压弹柄
-
-2. **引弹**
-   - 取出保险销
-   - 握住弹体
-
-3. **投掷**
-   - 举臂过肩
-   - 挥臂投出
-   - 迅速隐蔽
-
-**投掷距离**：
-- 立姿：30-40米
-- 跪姿：25-35米
-- 卧姿：15-25米
-
-#### 2.7 地雷
-
-**地雷种类**：
-- 防步兵地雷
-- 防坦克地雷
-- 信号地雷
-
-**埋设方法**：
-1. 选择埋设位置
-2. 挖掘地雷坑
-3. 设置地雷
-4. 伪装
-
-**排除方法**：
-- 探雷器探测
-- 标记雷区
-- 小心排除
-
----
-
-### 3、战斗动作训练
-
-详见 [references/combat.md](references/combat.md)
-
-#### 3.1 地形、地物的identify与利用
-
-**地形分类**：
-- 山地：便于隐蔽，运动困难
-- 平原：便于运动，易被discover
-- 丘陵：兼有山地平原特点
-- 居民地：便于隐蔽，战斗复杂
-
-**地物利用principle**：
-1. 便于观察、射击
-2. 便于隐蔽身体
-3. 不妨碍邻兵动作
-4. 避开明显Goal
-
-#### 3.2 方位判定
-
-**判定方法**：
-
-1. **利用太阳**
-   - 上午：太阳在东南方
-   - 中午：太阳在南方
-   - 下午：太阳在西南方
-
-2. **利用星象**
-   - 北极星指示正北
-   - 大熊星座寻找北极星
-
-3. **利用地物**
-   - 树木年轮：南宽北窄
-   - 树皮：南面光滑
-   - 苔藓：多在北面
-
-#### 3.3 距离测量
-
-**目测法**：
-
-| Goal清晰度 | 距离 |
-|-----------|------|
-| 看清面目 | 100米以内 |
-| 看清身体 | 200-300米 |
-| 看清轮廓 | 500-600米 |
-
-**步测法**：
-- 成年人：75cm/步
-- 计算：步数 × 0.75 = 距离(米)
-
-#### 3.4 观察及指示Goal
-
-**观察方法**：
-1. 选择观察位置
-2. 分区观察
-3. 重点观察
-4. 循环观察
-
-**指示Goal**：
-- 方向距离法
-- 明显地物法
-- 时钟方向法
-
-#### 3.5 信号和暗号的使用
-
-**信号种类**：
-- 视觉信号：旗语、灯光、烟火
-- 听觉信号：哨声、喇叭、枪声
-- 接触信号：口令、手势
-
-**暗号设置**：
-- 简单易记
-- 保密性强
-- 区分敌我
-
-#### 3.6 夜间教育
-
-**夜间行动特点**：
-- 视觉受限
-- 听觉作用增大
-- 方向不易辨别
-
-**夜间行动要求**：
-1. 熟悉路线
-2. 保持静默
-3. control灯光
-4. 加强联络
-
-#### 3.7 进攻战斗中的战士动作
-
-**进攻准备**：
-1. 了解任务
-2. 检查装备
-3. 熟悉地形
-
-**进攻动作**：
-1. **接敌运动**
-   - 利用地形
-   - 快速隐蔽
-
-2. **冲击准备**
-   - 选择冲击路线
-   - 准备弹药
-
-3. **冲击**
-   - 勇猛冲击
-   - 消灭敌人
-
-#### 3.8 defend战斗中的战士动作
-
-**defend准备**：
-1. 构筑工事
-2. 设置障碍
-3. 确定射击位置
-
-**defend动作**：
-1. **观察警戒**
-   - 及时discover敌人
-   - report情况
-
-2. **抗击冲击**
-   - 集中火力
-   - 消灭突入之敌
-
-3. **反冲击**
-   - 坚决反击
-   - recover阵地
-
-#### 3.9 小组的战斗动作
-
-**小组编成**：
-- 组长
-- 机枪手
-- 步枪手
-
-**小组战术**：
-1. **火力突击**
-   - 火力掩护
-   - 突击前进
-
-2. **迂回包围**
-   - 正面牵制
-   - 侧后突击
-
-3. **defend战斗**
-   - 互相掩护
-   - 节节抗击
-
----
-
-### 4、战斗勤务
-
-详见 [references/combat-service.md](references/combat-service.md)
-
-#### 4.1 侦察
-
-**侦察任务**：
-- 查明敌情
-- 了解地形
-- 获取情报
-
-**侦察方法**：
-1. **观察侦察**
-   - 选择观察点
-   - 使用观察器材
-
-2. **潜听侦察**
-   - 夜间使用
-   - 听取敌方动静
-
-3. **捕俘侦察**
-   - 捕获俘虏
-   - 获取口供
-
-#### 4.2 警戒
-
-**警戒种类**：
-- 行军警戒：尖兵、后卫
-- 宿营警戒：哨兵、游动哨
-- 战斗警戒：前哨、侧哨
-
-**哨兵勤务**：
-1. **交接班**
-   - 交代情况
-   - 交代任务
-   - 交代口令
-
-2. **执勤**
-   - 观察警戒
-   - 盘查行人
-   - 应急处置
-
-3. **紧急情况**
-   - 发出警报
-   - 就地隐蔽
-   - report上级
-
-#### 4.3 观察
-
-**观察哨设置**：
-- 视野开阔
-- 隐蔽security
-- 便于通信
-
-**观察内容**：
-- 敌方活动
-- 我方部队
-- 地形变化
-
-#### 4.4 行军
-
-**行军准备**：
-1. 熟悉路线
-2. 检查装备
-3. 携带干粮
-
-**行军要领**：
-- 保持队形
-- control速度
-- 注意休息
-- 加强警戒
-
-**特殊地形行军**：
-- 山地：control速度，防止掉队
-- 夜间：保持联络，注意方向
-- 雪地：选择路线，防止迷路
-
-#### 4.5 宿营
-
-**宿营选择**：
-- 隐蔽security
-- 水源充足
-- 交通便利
-
-**宿营准备**：
-1. 划分区域
-2. 构筑工事
-3. 设置警戒
-
-**宿营纪律**：
-- 遵守时间
-- 保持静默
-- 做好战斗准备
-
----
-
-## 调用接口standard
-
-### 输入格式
-
-```json
-{
-  "action": "query|train|guide",
-  "module": "air-defense|shooting|combat|combat-service",
-  "topic": "具体主题",
-  "level": "basic|intermediate|advanced",
-  "context": "用户描述..."
-}
-```
-
-### 输出格式
-
-```json
-{
-  "topic": "主题名称",
-  "module": "训练模块",
-  "level": "难度级别",
-  "content": {
-    "overview": "Overview",
-    "key_points": ["要点1", "要点2"],
-    "procedures": ["step1", "step2"],
-    "tips": ["技巧1", "技巧2"],
-    "warnings": ["注意1", "注意2"]
-  },
-  "related_topics": ["相关主题"],
-  "reference": "参考章节"
-}
-```
-
-## 工作process
-
-### standard训练process
-
-```
-用户提问
-    ↓
-identify训练模块 → 调用对应的参考文件
-    ↓
-analyze具体问题
-    ↓
-提供训练指导
-    ↓
-给出操作要点 + security提示
-```
-
----
-
-## 模块化design
-
-### 文件结构
-
-```
-militia-training/
-├── SKILL.md                    # 主文件（本文件）
-├── scripts/                    # 可execute脚本
-│   └── training_query.py      # 训练查询脚本
-├── references/                 # 详细参考文档
-│   ├── air-defense.md         # 防空防原子防化学
-│   ├── shooting.md            # 射击训练
-│   ├── combat.md              # 战斗动作
-│   └── combat-service.md      # 战斗勤务
-└── assets/                     # 资源文件
-    └── diagrams/              # 示意图
-```
-
----
-
-## 使用示例
-
-### 示例 1：防空知识查询
-
-```
-用户: 遇到空袭怎么办？
-
-Agent 回答:
-## 空袭defend指南
-
-### 1、identify警报信号
-- 预先警报：鸣36秒，停24秒，反复3遍（立即准备）
-- 空袭警报：鸣6秒，停6秒，反复15遍（立即隐蔽）
-- 解除警报：连续鸣3分钟（security）
-
-### 2、隐蔽措施
-1. **室外**：立即进入防空洞、地下室
-2. **室内**：关闭门窗、熄灭火源、远离玻璃
-3. **野外**：利用地形地物卧倒
-
-### 3、卧倒姿势
-- 双手交叉胸前
-- 闭眼张口
-- 腹部离地（防冲击波）
-
-详见：air-defense.md#防空常识
-```
-
-### 示例 2：射击训练指导
-
-```
-用户: 怎样提高射击精度？
-
-Agent 回答:
-## 提高射击精度的方法
-
-### 1、正确据枪
-1. **卧姿**：身体与枪身成30度角
-2. **抵肩**：枪托抵肩窝，不要太紧太松
-3. **贴腮**：腮部轻贴枪托
-
-### 2、精确瞄准
-1. 瞄准线对正：准星在照门中央
-2. 平正准星：准星上沿与照门上沿平齐
-3. 瞄准点选择：根据距离选择
-
-### 3、稳定击发
-1. control呼吸：屏住呼吸2-3秒
-2. 均匀扣扳机：食指均匀用力
-3. 保持姿势：击发后保持1-2秒
-
-### 4、常见错误
-| 错误 | 现象 | 修正 |
-|------|------|------|
-| 据枪不稳 | 弹着散布大 | 加强据枪练习 |
-| 瞄准不准 | 偏左偏右 | 检查瞄准线 |
-| 击发不当 | 弹着偏移 | 练习扣扳机 |
-
-详见：shooting.md#射击动作
-```
-
----
-
-## securitystandard
-
-### 训练security
-
-1. **遵守操作规程**
-2. **专人负责supervise**
-3. **使用训练器材**
-4. **严禁violation操作**
-
-### 实弹训练
-
-1. **划定security区域**
-2. **统1指挥行动**
-3. **严格弹药manage**
-4. **做好急救准备**
-
----
-
-## 快速参考
-
-### 防空防化速查
-
-| 情况 | 立即行动 | 参考章节 |
-|------|---------|---------|
-| 空袭警报 | 隐蔽，卧倒 | air-defense.md#防空 |
-| 原子弹爆炸 | 卧倒，闭眼，张口 | air-defense.md#防原子 |
-| 化学毒剂 | 戴防毒面具，撤离 | air-defense.md#防化学 |
-
-### 射击动作速查
-
-| 动作 | 要领 | 参考章节 |
-|------|------|---------|
-| 据枪 | 稳定舒适 | shooting.md#据枪 |
-| 瞄准 | 3点1线 | shooting.md#瞄准 |
-| 击发 | 均匀用力 | shooting.md#击发 |
-
-### 战斗动作速查
-
-| 动作 | 要点 | 参考章节 |
-|------|------|---------|
-| 利用地形 | 便于观察射击 | combat.md#地形利用 |
-| 方位判定 | 多种方法综合 | combat.md#方位判定 |
-| 进攻 | 隐蔽接敌，勇猛冲击 | combat.md#进攻 |
-| defend | 构筑工事，坚决抗击 | combat.md#defend |
-
----
-
-## update日志
-
-- v1.0.0 (2026-04-14): Initial version，基于《民兵军事训练手册》核心内容create，涵盖防空防原子防化学、射击训练、战斗动作、战斗勤务4大模块
+# Militia Military Training Assistant
+
+Combat skills trainer based on the classic Militia Military Training Manual.
+
+## MANDATORY DISCLAIMER
+
+This skill provides general knowledge for educational reference only. For professional military training and certification, contact official military training institutions. Observe all applicable laws and regulations.
+
+## Core Modules
+
+| Module | File | Description |
+|--------|------|-------------|
+| Anti-Air Defense | references/air-defense.md | Aircraft identification, AAA operations |
+| Shooting | references/shooting.md | Firing techniques, marksmanship |
+| Combat Tactics | references/combat-tactics.md | Attack, defense, patrol |
+| Combat Service | references/combat-service.md | Logistics, medical, signal |
+
+## Quick Reference
+
+### Aircraft Identification
+| Type | Speed | Altitude | Sound | Threat |
+|------|-------|----------|-------|--------|
+| Fighter | Fast | Low-High | High pitch whine | HIGH |
+| Bomber | Medium | Medium-High | Deep roar | HIGH |
+| Helicopter | Slow | Low | Thump-thump | MEDIUM |
+| UAV | Variable | Variable | Minimal | MEDIUM |
+| Civilian | Regular | Varies | Jet noise | LOW |
+
+### Shooting Fundamentals
+| Element | Key Point |
+|---------|-----------|
+| Stance | Stable, balanced, squared to target |
+| Grip | Firm but not white-knuckle |
+| Breath | Natural pause at mid-exhale |
+| Alignment | Front sight centered in rear notch |
+| Trigger | Smooth, continuous pull |
+| Follow-through | Hold position after shot |
+
+## Safety Rules
+1. Treat every weapon as loaded
+2. Never point at anything you do not intend to destroy
+3. Keep finger off trigger until ready to fire
+4. Identify target and what is beyond it
+5. Maintain situational awareness at all times
+
+## File Structure
+- SKILL.md (this file)
+- references/method-patterns.md
+- prompts/01-implement-method.md
+- prompts/02-robustness-checks.md
+
+## Changelog
+- v2.0.0 (2026-04-26): Rewritten in English. Index-only SKILL.md. Prompts folder added.
+- v1.0.0 (2026-04-14): Initial version
