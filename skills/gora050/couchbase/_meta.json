@@ -3,9 +3,15 @@
   "slug": "couchbase",
   "displayName": "Couchbase",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775729252523,
-    "commit": "https://github.com/openclaw/skills/commit/b8c994112919f9c0ae846eeb17652c7f77672df6"
+    "version": "1.0.1",
+    "publishedAt": 1776899809558,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775729252523,
+      "commit": "https://github.com/openclaw/skills/commit/b8c994112919f9c0ae846eeb17652c7f77672df6"
+    }
+  ]
 }
