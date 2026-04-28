@@ -3,9 +3,15 @@
   "slug": "cj-affiliate",
   "displayName": "Cj Affiliate",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775729320093,
-    "commit": "https://github.com/openclaw/skills/commit/25516bdbb1c5987b7a075859e00957d5662ef15b"
+    "version": "1.0.1",
+    "publishedAt": 1776899824279,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775729320093,
+      "commit": "https://github.com/openclaw/skills/commit/25516bdbb1c5987b7a075859e00957d5662ef15b"
+    }
+  ]
 }
