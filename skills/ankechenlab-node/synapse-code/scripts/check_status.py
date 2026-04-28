@@ -13,6 +13,7 @@ check_status.py — 检查项目 Synapse + Pipeline 状态
 """
 
 import sys
+import argparse
 import subprocess
 from pathlib import Path
 from datetime import datetime
@@ -276,33 +277,26 @@ def print_recommendations(project: Path, knowledge: dict, gitnexus: dict, pipeli
 
 
 def main():
-    if len(sys.argv) < 2:
-        print()
-        print(f"{'=' * 60}")
-        print(f"  Synapse Code 状态检查")
-        print(f"{'=' * 60}")
-        print()
-        print(f"  用法：python3 check_status.py /path/to/project")
-        print()
-        print(f"  检查内容:")
-        print(f"    - Wiki Layer (.knowledge/)")
-        print(f"    - Synapse Memory (.synapse/memory/)")
-        print(f"    - Code Layer (.gitnexus/)")
-        print(f"    - Pipeline 状态")
-        print()
-        print(f"  示例:")
-        print(f"    python3 check_status.py ~/my-project")
-        print()
-        print(f"{'=' * 60}")
-        print()
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="检查项目 Synapse + Pipeline 状态",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+示例:
+  python3 check_status.py ~/my-project
+  python3 check_status.py /path/to/project --verbose
+        """
+    )
+    parser.add_argument("project", help="项目根目录路径")
+    parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
+    args = parser.parse_args()
 
-    project = Path(sys.argv[1]).resolve()
-    pipeline_workspace = Path.home() / "pipeline-workspace"
+    project = Path(args.project).resolve()
 
     if not project.exists():
         log_error(f"项目目录不存在：{project}")
         sys.exit(1)
+
+    pipeline_workspace = Path.home() / "pipeline-workspace"
 
     log_info(f"检查项目：{project}")
     print()

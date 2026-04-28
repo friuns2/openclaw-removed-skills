@@ -114,6 +114,70 @@ def test_check_status():
         log(f'  ✗ FAIL: {stderr or stdout}', Colors.RED)
         return False
 
+
+def test_run_pipeline_modes():
+    """Test 4: Run Pipeline mode detection."""
+    log('\n[Test 4] run_pipeline - Mode detection', Colors.BLUE)
+
+    # Test detect_environment function by checking script syntax and structure
+    run_pipeline_script = SCRIPT_DIR / 'run_pipeline.py'
+
+    if not run_pipeline_script.exists():
+        log('  ✗ FAIL: run_pipeline.py not found', Colors.RED)
+        return False
+
+    try:
+        import ast
+        source = run_pipeline_script.read_text(encoding='utf-8')
+        ast.parse(source)
+
+        # Check for required modes
+        required_modes = ['auto', 'standalone', 'lite', 'full']
+        modes_found = sum(1 for mode in required_modes if f'"{mode}"' in source or f"'{mode}'" in source)
+
+        if modes_found == len(required_modes):
+            log(f'  ✓ PASS: All {len(required_modes)} modes defined', Colors.GREEN)
+            return True
+        else:
+            log(f'  ✗ FAIL: Only {modes_found}/{len(required_modes)} modes found', Colors.RED)
+            return False
+
+    except SyntaxError as e:
+        log(f'  ✗ FAIL: Syntax error: {e}', Colors.RED)
+        return False
+
+
+def test_im_friendly_output():
+    """Test 5: IM-friendly output (no ANSI codes)."""
+    log('\n[Test 5] IM-friendly output - No ANSI codes', Colors.BLUE)
+
+    # Check auto_log_trigger.py for ANSI codes
+    script = SCRIPT_DIR / 'auto_log_trigger.py'
+
+    if not script.exists():
+        log('  ✗ FAIL: auto_log_trigger.py not found', Colors.RED)
+        return False
+
+    source = script.read_text(encoding='utf-8')
+
+    # Check for ANSI escape sequences
+    ansi_patterns = ['\\033[', '\\x1b[', 'Colors.']
+    has_ansi = any(pattern in source for pattern in ansi_patterns)
+
+    # Check for IM-friendly patterns
+    im_friendly_patterns = ['[INFO]', '[✓]', '[⚠]', '[✗]', '[⟳]']
+    has_im_friendly = any(pattern in source for pattern in im_friendly_patterns)
+
+    if not has_ansi and has_im_friendly:
+        log('  ✓ PASS: IM-friendly output (no ANSI codes)', Colors.GREEN)
+        return True
+    elif has_ansi:
+        log('  ✗ FAIL: Found ANSI codes in output', Colors.RED)
+        return False
+    else:
+        log('  ⚠ WARNING: Output format unclear', Colors.YELLOW)
+        return True  # Still pass if no ANSI codes
+
 def main():
     log('\n' + '=' * 60, Colors.BLUE)
     log('Synapse Code Baseline Tests', Colors.BLUE)
@@ -123,6 +187,8 @@ def main():
     results.append(test_init_project())
     results.append(test_infer_task_type())
     results.append(test_check_status())
+    results.append(test_run_pipeline_modes())
+    results.append(test_im_friendly_output())
 
     cleanup()
 

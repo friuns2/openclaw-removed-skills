@@ -116,6 +116,21 @@ def run_gitnexus_analyze(project: Path) -> bool:
         return False
 
 
+def get_pipeline_workspace() -> Path:
+    """Get pipeline workspace path from config or default."""
+    config_file = Path(__file__).parent / "config.json"
+    if config_file.exists():
+        try:
+            import json
+            with open(config_file) as f:
+                config = json.load(f)
+            workspace = config.get("pipeline", {}).get("workspace", "~/pipeline-workspace")
+            return Path(workspace).expanduser()
+        except (json.JSONDecodeError, IOError):
+            pass
+    return Path.home() / "pipeline-workspace"
+
+
 def create_pipeline_project(project: Path, pipeline_workspace: Path) -> bool:
     """Create pipeline project if not exists."""
     project_name = project.name
@@ -150,7 +165,7 @@ def main():
         sys.exit(1)
 
     project = Path(sys.argv[1]).resolve()
-    pipeline_workspace = Path.home() / "pipeline-workspace"
+    pipeline_workspace = get_pipeline_workspace()
 
     if not project.exists():
         print(f"Error: Project directory {project} does not exist")
@@ -202,7 +217,7 @@ def main():
     print("Initialization complete!")
     print()
     print("Next steps:")
-    print("  cd /Users/leo/pipeline-workspace")
+    print("  cd ~/pipeline-workspace")
     print(f"  python3 pipeline.py run-pipeline {project.name} --input 'Your requirement'")
 
 
