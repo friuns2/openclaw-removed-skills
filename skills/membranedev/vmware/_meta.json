@@ -3,9 +3,15 @@
   "slug": "vmware",
   "displayName": "Vmware",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775736261004,
-    "commit": "https://github.com/openclaw/skills/commit/cfa86ff719cc90707f9be75f00b7801b52c68c1f"
+    "version": "1.0.1",
+    "publishedAt": 1776898682353,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775736261004,
+      "commit": "https://github.com/openclaw/skills/commit/cfa86ff719cc90707f9be75f00b7801b52c68c1f"
+    }
+  ]
 }
