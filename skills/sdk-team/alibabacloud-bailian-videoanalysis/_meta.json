@@ -3,9 +3,15 @@
   "slug": "alibabacloud-bailian-videoanalysis",
   "displayName": "Alibabacloud Bailian Videoanalysis",
   "latest": {
-    "version": "0.0.1",
-    "publishedAt": 1776322060223,
-    "commit": "https://github.com/openclaw/skills/commit/931e61411e795a4d758fb4589829ccb637b8d32c"
+    "version": "0.0.2",
+    "publishedAt": 1776855787119,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1",
+      "publishedAt": 1776322060223,
+      "commit": "https://github.com/openclaw/skills/commit/931e61411e795a4d758fb4589829ccb637b8d32c"
+    }
+  ]
 }
