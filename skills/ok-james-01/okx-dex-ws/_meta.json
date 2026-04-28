@@ -3,11 +3,16 @@
   "slug": "okx-dex-ws",
   "displayName": "Okx Dex Ws",
   "latest": {
-    "version": "2.2.10",
-    "publishedAt": 1776333473405,
-    "commit": "https://github.com/openclaw/skills/commit/ae0628986c8026b761dcc683d71a4ad4f071f2f5"
+    "version": "2.4.0",
+    "publishedAt": 1776778928011,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.10",
+      "publishedAt": 1776333473405,
+      "commit": "https://github.com/openclaw/skills/commit/ae0628986c8026b761dcc683d71a4ad4f071f2f5"
+    },
     {
       "version": "2.2.7",
       "publishedAt": 1775723015942,
