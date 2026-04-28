@@ -3,9 +3,15 @@
   "slug": "huo15-openclaw-memory-curator",
   "displayName": "Huo15 Openclaw Memory Curator",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1775972333691,
-    "commit": "https://github.com/openclaw/skills/commit/1f9d1b039eeeee68dcdd5e34fb7c155d75142735"
+    "version": "1.1.1",
+    "publishedAt": 1777004152368,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1775972333691,
+      "commit": "https://github.com/openclaw/skills/commit/1f9d1b039eeeee68dcdd5e34fb7c155d75142735"
+    }
+  ]
 }
