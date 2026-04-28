@@ -3,9 +3,15 @@
   "slug": "review-ai-writing",
   "displayName": "Review Ai Writing",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1775940706043,
-    "commit": "https://github.com/openclaw/skills/commit/9993c412e3a79089a495f6dcdc4f088a0c1bff71"
+    "version": "1.0.2",
+    "publishedAt": 1776831071582,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1775940706043,
+      "commit": "https://github.com/openclaw/skills/commit/9993c412e3a79089a495f6dcdc4f088a0c1bff71"
+    }
+  ]
 }
