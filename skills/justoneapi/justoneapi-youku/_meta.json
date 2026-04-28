@@ -3,11 +3,16 @@
   "slug": "justoneapi-youku",
   "displayName": "YOUKU API",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776240042113,
-    "commit": "https://github.com/openclaw/skills/commit/25c09fa8f19cd02cf39ae649963ad1ec546cd795"
+    "version": "1.0.4",
+    "publishedAt": 1776924526176,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776240042113,
+      "commit": "https://github.com/openclaw/skills/commit/25c09fa8f19cd02cf39ae649963ad1ec546cd795"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1775377602564,

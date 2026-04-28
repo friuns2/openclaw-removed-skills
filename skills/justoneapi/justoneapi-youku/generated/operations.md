@@ -2,7 +2,7 @@
 
 Generated from JustOneAPI OpenAPI for platform key `youku`.
 
-## `getUserDetailV1`
+## `getYoukuUserDetailV1`
 
 - Method: `GET`
 - Path: `/api/youku/get-user-detail/v1`
@@ -23,9 +23,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getVideoDetailV1`
+## `getYoukuVideoDetailV1`
 
 - Method: `GET`
 - Path: `/api/youku/get-video-detail/v1`
@@ -46,7 +46,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchVideoV1`
 
@@ -70,4 +70,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK

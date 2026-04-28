@@ -20,8 +20,8 @@ This skill wraps 3 YOUKU operations exposed by JustOneAPI. It is strongest for v
 ## Representative Operations
 
 - `searchVideoV1`: Video Search — Get YOUKU video Search data, including video ID, title, and cover image, for keyword-based video discovery, monitoring specific topics or trends on youku, and analyzing search results for market research
-- `getVideoDetailV1`: Video Details — Get YOUKU video Details data, including video ID, title, and description, for fetching comprehensive metadata for a single video, tracking engagement metrics like play counts and likes, and integrating detailed video info into third-party dashboards
-- `getUserDetailV1`: User Profile — Get YOUKU user Profile data, including user ID, username, and avatar, for analyzing creator influence and audience size, monitoring account growth and verification status, and fetching basic user info for social crm
+- `getYoukuVideoDetailV1`: Video Details — Get YOUKU video Details data, including video ID, title, and description, for fetching comprehensive metadata for a single video, tracking engagement metrics like play counts and likes, and integrating detailed video info into third-party dashboards
+- `getYoukuUserDetailV1`: User Profile — Get YOUKU user Profile data, including user ID, username, and avatar, for analyzing creator influence and audience size, monitoring account growth and verification status, and fetching basic user info for social crm
 
 ## Request Pattern
 
@@ -33,7 +33,7 @@ This skill wraps 3 YOUKU operations exposed by JustOneAPI. It is strongest for v
 ## How To Work
 
 1. Read `generated/operations.md` before choosing an endpoint.
-2. Start with one of these operations when it matches the user's request: `searchVideoV1`, `getVideoDetailV1`, `getUserDetailV1`.
+2. Start with one of these operations when it matches the user's request: `searchVideoV1`, `getYoukuVideoDetailV1`, `getYoukuUserDetailV1`.
 3. Pick the smallest matching operation instead of guessing.
 4. Ask the user for any missing required parameter. Do not invent values.
 5. Call the helper with:

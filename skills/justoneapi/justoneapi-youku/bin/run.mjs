@@ -13,7 +13,7 @@ const manifest = {
     {
       "description": "Get YOUKU user Profile data, including user ID, username, and avatar, for analyzing creator influence and audience size, monitoring account growth and verification status, and fetching basic user info for social crm.",
       "method": "GET",
-      "operationId": "getUserDetailV1",
+      "operationId": "getYoukuUserDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -38,8 +38,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -50,7 +50,7 @@ const manifest = {
     {
       "description": "Get YOUKU video Details data, including video ID, title, and description, for fetching comprehensive metadata for a single video, tracking engagement metrics like play counts and likes, and integrating detailed video info into third-party dashboards.",
       "method": "GET",
-      "operationId": "getVideoDetailV1",
+      "operationId": "getYoukuVideoDetailV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -75,8 +75,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Details",
@@ -121,8 +121,8 @@ const manifest = {
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Video Search",
