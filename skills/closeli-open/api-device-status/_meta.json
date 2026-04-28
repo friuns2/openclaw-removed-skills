@@ -3,11 +3,16 @@
   "slug": "api-device-status",
   "displayName": "Closeli Open Device status Query",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776352223263,
-    "commit": "https://github.com/openclaw/skills/commit/2c0f48b89791d335e48b7bafa4dbda271ed37dec"
+    "version": "1.0.2",
+    "publishedAt": 1776822051255,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776352223263,
+      "commit": "https://github.com/openclaw/skills/commit/2c0f48b89791d335e48b7bafa4dbda271ed37dec"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775636171877,
