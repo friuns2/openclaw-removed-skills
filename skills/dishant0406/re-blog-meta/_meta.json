@@ -3,11 +3,16 @@
   "slug": "re-blog-meta",
   "displayName": "Re Blog Meta",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1776316148553,
-    "commit": "https://github.com/openclaw/skills/commit/89da6f09df9d8960fed2f277befb1bab3af30e2b"
+    "version": "1.1.2",
+    "publishedAt": 1776882011132,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1776316148553,
+      "commit": "https://github.com/openclaw/skills/commit/89da6f09df9d8960fed2f277befb1bab3af30e2b"
+    },
     {
       "version": "1.0.9",
       "publishedAt": 1776026189260,
