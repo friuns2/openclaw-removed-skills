@@ -1,16 +1,18 @@
 ---
-name: pangolinfo-daily-competitor-radar
+name: pangolinfo-amazon-daily-competitor-radar
 description: >
   This skill serves as an advanced Amazon Daily Competitor & Business Opportunity Radar (powered by Pangolinfo API). It is strictly designed for active sellers to monitor their existing products' daily performance. Core capabilities include: tracking organic/SP keyword rankings, identifying close SERP competitors, detecting competitor price drops/coupons/Lightning Deals, monitoring ASIN health (BSR, Buy Box, Reviews), and scanning category Best Sellers/New Releases for emerging market trends.
 metadata:
   openclaw:
+    emoji: "📡"
+    os: ["darwin", "linux"]
     requires:
       env:
         - PANGOLINFO_API_KEY
         - PANGOLINFO_EMAIL
         - PANGOLINFO_PASSWORD
       notes: "Auth: set PANGOLINFO_API_KEY (recommended) OR PANGOLINFO_EMAIL + PANGOLINFO_PASSWORD. All bundled scripts share the same credentials."
-tags: [amazon, competitor-analysis, daily-monitoring, price-tracking, rank-tracking, seo, ecommerce, fba, automation, 亚马逊, 竞品分析, 数据抓取, 流量监控]
+tags: ["amazon", "competitor-analysis", "daily-monitoring", "price-tracking", "rank-tracking", "seo", "ecommerce", "fba", "automation", "亚马逊", "竞品分析", "数据抓取", "流量监控"]
 version: 2.0.0
 homepage: https://pangolinfo.com/?referrer=clawhub_competitor_radar
 ---
@@ -37,7 +39,7 @@ This is a **Super Skill** that bundles multiple underlying Pangolinfo APIs out-o
 
 **❌ WHEN NOT TO USE (Strict Negative Boundaries):**
 
-- **DO NOT** use this skill if the user is asking to find a brand-new niche from scratch (e.g., "What should I sell?"). Route to `pangolinfo-amazon-product-discovery`.
+- **DO NOT** use this skill if the user is asking to find a brand-new niche from scratch (e.g., "What should I sell?"). Route to `pangolinfo-amazon-product-explorer`.
 - **DO NOT** use this skill if the user asks to rewrite, optimize, or generate Amazon Listing text (Titles, Bullet Points, SEO terms). Route to `pangolinfo-listing-optimization`.
 
 
