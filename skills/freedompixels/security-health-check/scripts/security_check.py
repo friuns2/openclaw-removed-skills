@@ -11,6 +11,7 @@ import math
 import re
 import ssl
 import sys
+import certifi
 import urllib.request
 import urllib.error
 from datetime import datetime
@@ -19,6 +20,7 @@ from datetime import datetime
 def _get_ssl_context():
     """创建SSL上下文，兼容证书不完整的环境"""
     ctx = ssl.create_default_context()
+    ctx.load_verify_locations(certifi.where())
     return ctx
 
 
@@ -46,6 +48,7 @@ def check_email_breach(email):
             return {"breached": None, "error": f"API错误: {e.code}", "breaches": [], "count": 0}
     except Exception as e:
         return {"breached": None, "error": f"网络错误: {str(e)}", "breaches": [], "count": 0}
+    return {"breached": False, "breaches": [], "count": 0}
     
     return {"breached": False, "breaches": [], "count": 0}
 
@@ -64,15 +67,8 @@ def check_password_pwned(password):
     
     try:
         req = urllib.request.Request(url, headers=headers)
-        try:
-            opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=_get_ssl_context()))
-            resp = opener.open(req, timeout=15)
-        except (ssl.SSLError, urllib.error.URLError) as ssl_err:
-            if "CERTIFICATE" in str(ssl_err) or "SSL" in str(ssl_err):
-                opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ssl.create_default_context()))
-                resp = opener.open(req, timeout=15)
-            else:
-                raise
+        opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=_get_ssl_context()))
+        resp = opener.open(req, timeout=15)
         text = resp.read().decode("utf-8")
         for line in text.splitlines():
             parts = line.strip().split(":")
