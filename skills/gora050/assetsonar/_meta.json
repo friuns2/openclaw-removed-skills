@@ -3,9 +3,15 @@
   "slug": "assetsonar",
   "displayName": "Assetsonar",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775398036636,
-    "commit": "https://github.com/openclaw/skills/commit/afbc3b4d6eed68ae843f9a7face05b278dc3eb94"
+    "version": "1.0.1",
+    "publishedAt": 1776892602322,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775398036636,
+      "commit": "https://github.com/openclaw/skills/commit/afbc3b4d6eed68ae843f9a7face05b278dc3eb94"
+    }
+  ]
 }
