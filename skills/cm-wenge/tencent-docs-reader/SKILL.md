@@ -1,6 +1,6 @@
 ---
 name: tencent-docs-reader
-version: 1.0.0
+version: 1.0.2
 author: Cm-wenge
 description: "Read Tencent Docs spreadsheet via agent-browser copy-paste method. Supports reading any sheet tab and returns tab-separated text. 腾讯文档在线表格读取工具，支持指定子表，返回制表符分隔的文本内容。"
 license: MIT
@@ -41,6 +41,7 @@ This tool solves the problem by:
 
 - **让 AI Agent 能读取腾讯文档表格数据** — 自动打开链接、提取内容、返回结构化文本
 - **绕过 Canvas 渲染** — 腾讯文档用 Canvas 画表格，传统网页抓取方式（DOM解析、accessibility tree）全部失效，本工具通过浏览器复制粘贴法成功提取
+- **无需授权登录** — 不需要腾讯账号登录，只需文档设置为"所有人可读"即可读取，适合自动化场景
 - **适用于自动化场景** — 定时读取周报表格、数据汇总、内容监控等
 
 典型场景 / Typical use cases:
@@ -108,7 +109,7 @@ python {baseDir}/scripts/read_sheet.py --url "https://docs.qq.com/sheet/YOUR_SHE
 ## 限制 / Limitations
 
 - 仅支持**在线表格**（spreadsheets），不支持在线文档（docs）和幻灯片（slides）
-- 仅支持**所有人可读**的共享文档，需要登录或权限受限的文档无法读取 / Only works with **publicly shared** docs readable by anyone
+- **需要文档设置为"所有人可读"** — 本技能无需登录，但要求文档共享权限为"所有人可读"，需要登录或权限受限的文档无法读取
 - 超大表格可能较慢（一次性复制全部内容）
 - 腾讯文档前端改版可能导致失效，需适时更新
 
