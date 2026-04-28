@@ -55,10 +55,10 @@ def _run_aliyun_json(
     """
     env = os.environ.copy()
     if not env.get("ALIBABA_CLOUD_USER_AGENT"):
-        env["ALIBABA_CLOUD_USER_AGENT"] = "AlibabaCloud-Agent-Skills"
+        env["ALIBABA_CLOUD_USER_AGENT"] = "AlibabaCloud-Agent-Skills/alibabacloud-elasticsearch-instance-diagnose"
 
     _DANGEROUS_CHARS = set('`$()|;&<>\n\r')
-    _JSON_LITERAL_PARAM_KEYS = frozenset({"Dimensions"})
+    _JSON_LITERAL_PARAM_KEYS = frozenset({"dimensions", "labels"})
 
     def _is_safe(val: str) -> bool:
         return not any(c in _DANGEROUS_CHARS for c in str(val))
@@ -131,8 +131,8 @@ def fetch_instance_status_info(instance_id: str, region_id: str, profile: Option
     try:
         data = _run_aliyun_json(
             "elasticsearch",
-            "DescribeInstance",
-            {"InstanceId": instance_id},
+            "describe-instance",
+            {"instance-id": instance_id},
             region_id=region_id,
             profile=profile,
             timeout_sec=30,
@@ -152,11 +152,11 @@ def fetch_instance_status_info(instance_id: str, region_id: str, profile: Option
 
 
 def fetch_instance_detail(instance_id: str, region_id: str, profile: Optional[str] = None) -> Dict[str, Any]:
-    """Full DescribeInstance payload (clusterTasks, etc.) — replaces get_es_instance_detail.py."""
+    """Full describe-instance payload (clusterTasks, etc.) — replaces get_es_instance_detail.py."""
     return _run_aliyun_json(
         "elasticsearch",
-        "DescribeInstance",
-        {"InstanceId": instance_id},
+        "describe-instance",
+        {"instance-id": instance_id},
         region_id=region_id,
         profile=profile,
         timeout_sec=30,
@@ -172,27 +172,27 @@ def _fetch_metric_points(
     period: str,
     profile: Optional[str] = None,
 ) -> List[Dict]:
-    """Fetch one metric with DescribeMetricList pagination (NextToken)."""
+    """Fetch one metric with describe-metric-list pagination (next-token)."""
     points: List[Dict] = []
     next_token: Optional[str] = None
     max_pages = 20
 
-    # CMS DescribeMetricList expects millisecond timestamps
+    # CMS describe-metric-list supports millisecond timestamps.
     start_ms = str(int(begin_ms))
     end_ms_str = str(int(end_ms))
 
     for _ in range(max_pages):
         params = {
-            "Namespace": NAMESPACE,
-            "MetricName": metric_name,
-            "Dimensions": json.dumps([{"clusterId": instance_id}], ensure_ascii=False),
-            "StartTime": start_ms,
-            "EndTime": end_ms_str,
-            "Period": period,
-            "Length": 1440,
-            "NextToken": next_token,
+            "namespace": NAMESPACE,
+            "metric-name": metric_name,
+            "dimensions": json.dumps([{"clusterId": instance_id}], ensure_ascii=False),
+            "start-time": start_ms,
+            "end-time": end_ms_str,
+            "period": period,
+            "length": 1440,
+            "next-token": next_token,
         }
-        resp = _run_aliyun_json("cms", "DescribeMetricList", params, region_id=region_id, profile=profile)
+        resp = _run_aliyun_json("cms", "describe-metric-list", params, region_id=region_id, profile=profile)
         raw = resp.get("Datapoints", "[]")
         batch = json.loads(raw) if isinstance(raw, str) else (raw or [])
         if isinstance(batch, list):
@@ -248,20 +248,21 @@ def fetch_events(
     events: List[Dict] = []
     page = 1
     page_size = 100
-    start_ms = str(int(begin_ms))
-    end_ms_str = str(int(end_ms))
+    # DescribeSystemEventAttribute StartTime/EndTime: Unix timestamp in milliseconds since 1970-01-01 (OpenAPI).
+    start_time_ms = str(int(begin_ms))
+    end_time_ms = str(int(end_ms))
 
     while True:
         resp = _run_aliyun_json(
             "cms",
-            "DescribeSystemEventAttribute",
+            "describe-system-event-attribute",
             {
-                "Product": "elasticsearch",
-                "SearchKeywords": instance_id,
-                "StartTime": start_ms,
-                "EndTime": end_ms_str,
-                "PageNumber": page,
-                "PageSize": page_size,
+                "product": "elasticsearch",
+                "search-keywords": instance_id,
+                "start-time": start_time_ms,
+                "end-time": end_time_ms,
+                "page-number": page,
+                "page-size": page_size,
             },
             region_id=region_id,
             profile=profile,
@@ -317,13 +318,13 @@ def fetch_log_items(
 
     resp = _run_aliyun_json(
         "elasticsearch",
-        "ListSearchLog",
+        "list-search-log",
         {
-            "InstanceId": instance_id,
+            "instance-id": instance_id,
             "type": log_type,
             "query": query or "*",
-            "beginTime": int(begin_ms),
-            "endTime": int(end_ms),
+            "begin-time": int(begin_ms),
+            "end-time": int(end_ms),
             "page": 1,
             "size": max(1, min(int(size), 50)),
         },

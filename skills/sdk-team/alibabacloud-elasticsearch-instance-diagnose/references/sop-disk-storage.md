@@ -235,7 +235,7 @@ Compare `disk.avail` to the effective watermark / flood thresholds.
 
 #### CMS metric catalog (namespace `acs_elasticsearch`)
 
-> Discover fields with `DescribeMetricMetaList --Namespace acs_elasticsearch` (Alibaba Cloud Monitor).
+> Discover fields with `aliyun cms describe-metric-meta-list --namespace acs_elasticsearch` (Alibaba Cloud Monitor).
 
 | Category | Metric | Unit | Notes |
 |----------|--------|------|-------|

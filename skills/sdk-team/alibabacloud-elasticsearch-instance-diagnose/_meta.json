@@ -3,9 +3,15 @@
   "slug": "alibabacloud-elasticsearch-instance-diagnose",
   "displayName": "Alibabacloud Elasticsearch Instance Diagnose",
   "latest": {
-    "version": "0.0.1-beta.1",
-    "publishedAt": 1776314650506,
-    "commit": "https://github.com/openclaw/skills/commit/07968a011ccee76436d034c2851db712710e4b0c"
+    "version": "0.0.1",
+    "publishedAt": 1777341099753,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.1-beta.1",
+      "publishedAt": 1776314650506,
+      "commit": "https://github.com/openclaw/skills/commit/07968a011ccee76436d034c2851db712710e4b0c"
+    }
+  ]
 }

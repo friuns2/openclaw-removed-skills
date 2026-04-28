@@ -121,7 +121,7 @@ Then read `allocate_explanation`, `unassigned_info`, and `node_allocation_decisi
 
 Suggested order:
 
-1. **Allowlist:** `DescribeInstance` `publicIpWhitelist` / `networkConfig.whiteIpGroupList` (`whiteIpType=PUBLIC_ES`) vs client egress IP.  
+1. **Allowlist:** `DescribeInstance` `publicIpWhitelist` / `networkConfig.whiteIpGroupList` (`whiteIpType=PUBLIC_ES`) vs client egress IP.
 2. **If allowlist looks OK but still timing out:**
 
 | If… | Lean toward… | Action |
