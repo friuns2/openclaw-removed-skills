@@ -1,12 +1,11 @@
 ---
 name: promify-creative-generator
 description: >
-  Generate high-quality ad creatives from a product URL using the Promify API.
-  Use when the user provides a product link and wants to generate ad images,
-  marketing creatives, or advertising materials for Meta Ads (Facebook,
-  Instagram), Google Ads, or other ad platforms. Triggers on: "generate
-  creatives", "ad creative", "product url", "generate ad image", "create ad
-  from product link", "Meta ad", "Google ad", "Facebook ad", "Instagram ad".
+  Generate ad creatives, marketing images, and advertising visuals using the Promify API.
+  Use when the user wants to create, make, or produce ad images, banners, or marketing materials
+  for Meta Ads, Facebook Ads, Instagram Ads, Google Ads, TikTok Ads, or other ad platforms.
+  Triggers on: generate ad, create ad creative, make marketing image, produce ad banner,
+  ad campaign visual, Facebook ad image, Instagram ad, Google ad creative.
 metadata: { "openclaw": { "emoji": "🎨", "primaryEnv": "PROMIFY_API_KEY" } }
 ---
 
@@ -24,7 +23,7 @@ Generate ad creatives from a product URL using the [Promify](https://promify.ai)
 
 ## Step 1: Validate API Key
 
-Check whether the environment variable `PROMIFY_API_KEY` is set and non-empty.
+Check whether `~/.openclaw/openclaw.json` `PROMIFY_API_KEY` is set and non-empty.
 
 If it is missing, stop and tell the user:
 
