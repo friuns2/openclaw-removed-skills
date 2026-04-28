@@ -3,9 +3,15 @@
   "slug": "aha",
   "displayName": "Aha",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775452007316,
-    "commit": "https://github.com/openclaw/skills/commit/b688201c171d21bd892cd8a313689b046cffc4ce"
+    "version": "1.0.1",
+    "publishedAt": 1776892747136,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775452007316,
+      "commit": "https://github.com/openclaw/skills/commit/b688201c171d21bd892cd8a313689b046cffc4ce"
+    }
+  ]
 }
