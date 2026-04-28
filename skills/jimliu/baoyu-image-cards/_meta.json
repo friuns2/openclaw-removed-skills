@@ -3,9 +3,15 @@
   "slug": "baoyu-image-cards",
   "displayName": "Baoyu Image Cards",
   "latest": {
-    "version": "1.103.1",
-    "publishedAt": 1776097106177,
-    "commit": "https://github.com/openclaw/skills/commit/5fb933c680f59a2eb102d835a8451d8022f2ad1b"
+    "version": "1.103.2",
+    "publishedAt": 1776808933977,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.103.1",
+      "publishedAt": 1776097106177,
+      "commit": "https://github.com/openclaw/skills/commit/5fb933c680f59a2eb102d835a8451d8022f2ad1b"
+    }
+  ]
 }
