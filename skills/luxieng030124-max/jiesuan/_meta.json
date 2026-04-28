@@ -1,11 +1,17 @@
 {
   "owner": "luxieng030124-max",
   "slug": "jiesuan",
-  "displayName": "jiesuan",
+  "displayName": "evens-结算",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775905949719,
-    "commit": "https://github.com/openclaw/skills/commit/1dd31e63fd32f7905b4cf8257394332c2c563e41"
+    "version": "2.0.1",
+    "publishedAt": 1776771827248,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775905949719,
+      "commit": "https://github.com/openclaw/skills/commit/1dd31e63fd32f7905b4cf8257394332c2c563e41"
+    }
+  ]
 }

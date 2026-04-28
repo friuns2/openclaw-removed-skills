@@ -23,6 +23,34 @@ class SettlementMode(Enum):
 
 
 @dataclass
+class TopicRule:
+    """话题词规则"""
+    topics: List[str]              # 要求的话题词列表
+    logic: str = "AND"             # 逻辑关系：AND(且) 或 OR(或)
+    
+    def check(self, title: str) -> bool:
+        """检查标题是否符合话题词要求（精准匹配）"""
+        if not self.topics:
+            return True
+        
+        matches = []
+        for topic in self.topics:
+            # 精准匹配：使用词边界确保完整匹配
+            # 方法1：使用正则表达式词边界
+            # 方法2：简单字符串匹配 + 边界检查
+            import re
+            # 转义特殊字符，添加词边界
+            pattern = r'(?:^|[\s,，。！!？?；;：:、])'  + re.escape(topic) + r'(?:$|[\s,，。！!？?；;：:、])'
+            matches.append(bool(re.search(pattern, title)))
+        
+        if self.logic == "AND":
+            return all(matches)
+        elif self.logic == "OR":
+            return any(matches)
+        return False
+
+
+@dataclass
 class AwardPool:
     """奖池配置"""
     name: str                      # 奖池名称
@@ -31,6 +59,7 @@ class AwardPool:
     condition: Optional[Dict] = None   # 达标条件
     ranking_rules: Optional[List[Dict]] = None  # 排名规则
     weight_field: Optional[str] = None  # 权重字段
+    topic_rule: Optional[TopicRule] = None  # 话题词规则
 
 
 @dataclass
@@ -54,7 +83,8 @@ class SettlementEngine:
             'name': '',
             'videos': 0,
             'total_plays': 0,
-            'total_likes': 0
+            'total_likes': 0,
+            'video_titles': []  # 存储视频标题用于话题词检查
         })
     
     def load_data(self, file_path: str) -> None:
@@ -71,6 +101,7 @@ class SettlementEngine:
             for row in reader:
                 author_id = row.get('作者ID', row.get('用户ID', ''))
                 author_name = row.get('作者名称（最新）', row.get('作者名称', ''))
+                title = row.get('视频标题', row.get('标题', ''))
                 
                 plays = self._parse_number(row.get('视频累计外显播放次数', '0'))
                 likes = self._parse_number(row.get('视频累计外显点赞次数', '0'))
@@ -79,6 +110,8 @@ class SettlementEngine:
                 self.authors[author_id]['videos'] += 1
                 self.authors[author_id]['total_plays'] += plays
                 self.authors[author_id]['total_likes'] += likes
+                if title:
+                    self.authors[author_id]['video_titles'].append(title)
     
     def _parse_number(self, value: str) -> int:
         """解析数字"""
@@ -106,6 +139,11 @@ class SettlementEngine:
             
             # 遍历所有奖池计算奖金
             for pool in self.pools:
+                # 先检查话题词规则
+                if pool.topic_rule:
+                    if not self._check_topic_rule(data['video_titles'], pool.topic_rule):
+                        continue  # 不符合话题词要求，跳过此奖池
+                
                 award = self._calculate_award(pool, result)
                 if award > 0:
                     result.awards[pool.name] = award
@@ -117,6 +155,18 @@ class SettlementEngine:
         # 按总奖金降序排列
         results.sort(key=lambda x: x.total_amount, reverse=True)
         return results
+    
+    def _check_topic_rule(self, titles: List[str], topic_rule: TopicRule) -> bool:
+        """检查视频标题是否符合话题词规则"""
+        if not topic_rule or not topic_rule.topics:
+            return True
+        
+        # 检查是否有任意一个视频标题满足话题词要求
+        for title in titles:
+            if topic_rule.check(title):
+                return True
+        
+        return False
     
     def _calculate_award(self, pool: AwardPool, author: SettlementResult) -> float:
         """计算单个奖池的奖金"""
@@ -174,6 +224,30 @@ class RuleParser:
     """规则解析器（简化版，实际可由AI完成）"""
     
     @staticmethod
+    def parse_topic_rule(rule_text: str) -> Optional[TopicRule]:
+        """
+        解析话题词规则
+        示例：
+        - "必须携带话题 #金铲铲" → TopicRule(["#金铲铲"], "OR")
+        - "携带话题 #金铲铲 或 #英雄联盟" → TopicRule(["#金铲铲", "#英雄联盟"], "OR")
+        - "同时携带 #金铲铲 和 #攻略" → TopicRule(["#金铲铲", "#攻略"], "AND")
+        """
+        if not any(keyword in rule_text for keyword in ['话题', '#', '携带']):
+            return None
+        
+        # 提取所有话题词（以#开头的词）
+        topics = re.findall(r'#[^#\s,，和或]+', rule_text)
+        if not topics:
+            return None
+        
+        # 判断逻辑关系
+        logic = "OR"  # 默认为或
+        if any(keyword in rule_text for keyword in ['且', '和', '同时', 'AND', '都']):
+            logic = "AND"
+        
+        return TopicRule(topics=topics, logic=logic)
+    
+    @staticmethod
     def parse(rule_text: str) -> List[AwardPool]:
         """
         解析自然语言规则
@@ -202,6 +276,9 @@ class RuleParser:
                 plays_match = re.search(r'播放[量]?[≥>=](\d+)', rule_text)
                 plays_condition = int(plays_match.group(1)) if plays_match else 30000
             
+            # 解析话题词规则
+            topic_rule = RuleParser.parse_topic_rule(rule_text)
+            
             # 创建奖池
             pool = AwardPool(
                 name="达标瓜分奖池",
@@ -211,11 +288,61 @@ class RuleParser:
                     'field': '播放量',
                     'op': '>=',
                     'value': plays_condition
-                }
+                },
+                topic_rule=topic_rule
             )
             pools.append(pool)
         
         return pools
+
+
+def format_rule_understanding(pools: List[AwardPool]) -> str:
+    """
+    格式化输出规则理解，供用户确认
+    
+    Returns:
+        格式化的规则描述文本
+    """
+    lines = []
+    lines.append("=" * 80)
+    lines.append("📋 规则理解确认")
+    lines.append("=" * 80)
+    lines.append("")
+    
+    for idx, pool in enumerate(pools, 1):
+        lines.append(f"【奖池 {idx}】{pool.name}")
+        lines.append(f"  💰 奖池金额: {pool.amount:,.0f} 元")
+        lines.append(f"  📊 结算模式: {pool.mode.value}")
+        
+        # 达标条件
+        if pool.condition:
+            field = pool.condition.get('field', '')
+            op = pool.condition.get('op', '')
+            value = pool.condition.get('value', 0)
+            lines.append(f"  ✅ 达标条件: {field} {op} {value:,}")
+        
+        # 话题词规则
+        if pool.topic_rule:
+            logic_text = "且" if pool.topic_rule.logic == "AND" else "或"
+            topics_text = f" {logic_text} ".join(pool.topic_rule.topics)
+            lines.append(f"  🏷️  话题词要求: {topics_text}")
+            lines.append(f"     (逻辑关系: {pool.topic_rule.logic} - {'所有话题词都要出现' if pool.topic_rule.logic == 'AND' else '至少一个话题词出现'})")
+        
+        # 排名规则
+        if pool.ranking_rules:
+            lines.append(f"  🏆 排名规则:")
+            for rule in pool.ranking_rules:
+                lines.append(f"     - {rule}")
+        
+        lines.append("")
+    
+    lines.append("=" * 80)
+    lines.append("❓ 请确认以上规则理解是否正确？")
+    lines.append("   ✅ 回复「确认」或「正确」开始结算")
+    lines.append("   ✏️  提出修改意见，我会更新规则理解")
+    lines.append("=" * 80)
+    
+    return "\n".join(lines)
 
 
 def process_settlement(file_path: str, rule_text: str) -> Tuple[List[SettlementResult], Dict]:
