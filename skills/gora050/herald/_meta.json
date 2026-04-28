@@ -3,9 +3,15 @@
   "slug": "herald",
   "displayName": "Herald",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775639209904,
-    "commit": "https://github.com/openclaw/skills/commit/46161a15d9e9b2acce5e0308d4c31bf095ccccb6"
+    "version": "1.0.1",
+    "publishedAt": 1776899200753,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775639209904,
+      "commit": "https://github.com/openclaw/skills/commit/46161a15d9e9b2acce5e0308d4c31bf095ccccb6"
+    }
+  ]
 }
