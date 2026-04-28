@@ -3,9 +3,15 @@
   "slug": "coveralls",
   "displayName": "Coveralls",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775358481070,
-    "commit": "https://github.com/openclaw/skills/commit/9d8619a0c7c0f6816ba43f2c439af636964d9cd7"
+    "version": "1.0.1",
+    "publishedAt": 1776886116491,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775358481070,
+      "commit": "https://github.com/openclaw/skills/commit/9d8619a0c7c0f6816ba43f2c439af636964d9cd7"
+    }
+  ]
 }
