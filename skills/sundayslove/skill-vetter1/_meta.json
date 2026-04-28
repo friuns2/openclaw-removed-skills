@@ -3,9 +3,15 @@
   "slug": "skill-vetter1",
   "displayName": "fff",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776100949591,
-    "commit": "https://github.com/openclaw/skills/commit/b7c463d7f05c3a05bc24f91caadeab3422c901c3"
+    "version": "1.0.4",
+    "publishedAt": 1776748138249,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776100949591,
+      "commit": "https://github.com/openclaw/skills/commit/b7c463d7f05c3a05bc24f91caadeab3422c901c3"
+    }
+  ]
 }
