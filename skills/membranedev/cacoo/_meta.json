@@ -3,9 +3,15 @@
   "slug": "cacoo",
   "displayName": "Cacoo",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581439010,
-    "commit": "https://github.com/openclaw/skills/commit/0ef8116d3ffcba57202a40caf46de4a573b6fe7e"
+    "version": "1.0.1",
+    "publishedAt": 1776896045151,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581439010,
+      "commit": "https://github.com/openclaw/skills/commit/0ef8116d3ffcba57202a40caf46de4a573b6fe7e"
+    }
+  ]
 }
