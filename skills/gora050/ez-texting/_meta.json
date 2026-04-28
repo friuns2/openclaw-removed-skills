@@ -3,9 +3,15 @@
   "slug": "ez-texting",
   "displayName": "Ez Texting",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775665396169,
-    "commit": "https://github.com/openclaw/skills/commit/0563a971c8812242187e49648803124d66395e6d"
+    "version": "1.0.1",
+    "publishedAt": 1776899439170,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775665396169,
+      "commit": "https://github.com/openclaw/skills/commit/0563a971c8812242187e49648803124d66395e6d"
+    }
+  ]
 }
