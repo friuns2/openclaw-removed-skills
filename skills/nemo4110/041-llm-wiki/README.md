@@ -1,195 +1,197 @@
 # LLM-Wiki Skill
 
-[Karpathy 的 llm-wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) 的 Claude Code SKILL 实现。
+[简体中文](docs/README.cn.md) | English
 
-> **核心理念**：LLM 是程序员，Wiki 是代码库，用户是产品经理。
+Claude Code SKILL implementation of [Karpathy's llm-wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
 
-## 为什么选择 SKILL 形式？
+> **Core Philosophy**: LLM as programmer, Wiki as codebase, User as product manager.
 
-| 维度 | 独立应用 (如 [Sage-Wiki](https://github.com/xoai/sage-wiki)) | 本 SKILL 实现 |
-|------|----------------------|--------------|
-| 架构 | Go + SQLite + 嵌入式前端 | 纯 Markdown |
-| 部署 | 需要运行服务 | 零部署 |
-| 集成 | 通过 MCP 间接 | 原生命令 |
-| 代码量 | ~10k 行 | ~500 行 |
-| 数据格式 | 专有格式 | 纯文本 Markdown |
-| 编辑器 | 锁定在应用内 | Obsidian/VSCode/任意 |
+## Why SKILL Form?
 
-## 快速开始
+| Dimension | Standalone App (e.g. [Sage-Wiki](https://github.com/xoai/sage-wiki)) | This SKILL Implementation |
+|-----------|----------------------------------|---------------------------|
+| **Architecture** | Go + SQLite + Embedded Frontend | Pure Markdown |
+| **Deployment** | Requires running service | Zero deployment |
+| **Integration** | Indirect via MCP | Native commands |
+| **Code Size** | ~10k lines | ~500 lines |
+| **Data Format** | Proprietary | Plain text Markdown |
+| **Editor** | Locked in app | Obsidian/VSCode/Any |
 
-### 1. 克隆/复制此项目
+## Quick Start
+
+### 1. Clone/Copy This Project
 
 ```bash
 git clone https://github.com/Nemo4110/llm-wiki.git
 cd llm-wiki
 ```
 
-### 2. 安装依赖（可选）
+### 2. Install Dependencies (Optional)
 
-CLI 工具需要 Python 3.8+。根据你的工具选择安装方式：
+The CLI tool requires Python 3.8+. Choose your preferred installation method:
 
-#### 使用 uv（推荐，如果你有 uv）
+#### Using uv (Recommended if you have uv)
 
 ```bash
-# 创建虚拟环境并安装依赖
+# Create virtual environment and install dependencies
 uv venv
 uv pip install -r src/requirements.txt --python .venv/Scripts/python.exe
 
-# 激活环境（Windows）
+# Activate (Windows)
 .venv\Scripts\activate
-# 或 Linux/macOS
+# Or Linux/macOS
 source .venv/bin/activate
 ```
 
-#### 使用 conda
+#### Using conda
 
 ```bash
-# 创建环境
+# Create environment
 conda create -n llm-wiki python=3.11
 
-# 激活环境
+# Activate
 conda activate llm-wiki
 
-# 安装依赖
+# Install dependencies
 pip install -r src/requirements.txt
 ```
 
-#### 使用 pip
+#### Using pip
 
 ```bash
-# 创建虚拟环境
+# Create virtual environment
 python -m venv .venv
 
-# 激活环境
+# Activate
 source .venv/bin/activate  # Linux/macOS
 .venv\Scripts\activate     # Windows
 
-# 安装依赖
+# Install dependencies
 pip install -r src/requirements.txt
 ```
 
-#### 验证安装
+#### Verify Installation
 
 ```bash
-python -c "from src.llm_wiki.core import WikiManager; print('✓ 安装成功')"
+python -c "from src.llm_wiki.core import WikiManager; print('✓ Installation successful')"
 ```
 
-**重要依赖说明**：
+**Important Dependency Notes**:
 
-项目包含以下核心依赖（定义在 `src/requirements.txt`）：
+The project includes the following core dependencies (defined in `src/requirements.txt`):
 
-| 依赖 | 版本要求 | 用途 | 备注 |
-|-----|---------|------|------|
-| `click` | >=8.0.0 | CLI 框架 | - |
-| `pyyaml` | >=6.0 | YAML 解析 | - |
-| `pymupdf` | >=1.25.0 | PDF 处理 | PyMuPDF，对 CJK 和复杂排版更友好 |
-| `numpy` | >=1.24.0 | 向量运算 | embedding 检索必需 |
-| `httpx` | >=0.27.0 | HTTP 客户端 | Ollama 本地服务通信 |
-| `mcp` | >=1.0.0 | MCP SDK | 通过 MCP 调用远程 embedding |
+| Dependency | Version | Purpose | Notes |
+|------------|---------|---------|-------|
+| `click` | >=8.0.0 | CLI framework | - |
+| `pyyaml` | >=6.0 | YAML parsing | - |
+| `pymupdf` | >=1.25.0 | PDF processing | PyMuPDF, more friendly to CJK and complex layouts |
+| `numpy` | >=1.24.0 | Vector operations | Required for embedding retrieval |
+| `httpx` | >=0.27.0 | HTTP client | For Ollama local service communication |
+| `mcp` | >=1.0.0 | MCP SDK | Invoke remote embedding via MCP |
 | `openai` | >=1.0.0 | OpenAI SDK | OpenAI embedding API |
 
-**回退依赖**（仅在 PyMuPDF 表格提取效果不佳时使用）：
-- `pdfplumber >= 0.11.8` — 表格提取（需安全版本修复 CVE-2025-64512）
-- `pdfminer.six >= 20251107` — PDF 底层库
+**Fallback dependencies** (only used when PyMuPDF table extraction is poor):
+- `pdfplumber >= 0.11.8` — Table extraction (requires secure version to fix CVE-2025-64512)
+- `pdfminer.six >= 20251107` — PDF underlying library
 
-**纯协议模式**：如果你只想用 Claude Code 的自然语言指令（如"请摄入资料"）处理纯文本文件，**无需安装任何依赖**。仅当需要读取 PDF 时才需要安装 PyMuPDF。
+**Pure Protocol Mode**: If you only want to use Claude Code's natural language commands (e.g. "please ingest this material") for plain text files, **no installation is required**. PyMuPDF is only needed when reading PDFs.
 
-### 3. 放入你的第一个资料
+### 3. Add Your First Material
 
 ```bash
-# 复制任何文件到 sources/
+# Copy any file into sources/
 cp ~/Downloads/interesting-paper.pdf sources/
 cp ~/Notes/ideas.md sources/
 ```
 
-### 3. 让 Claude 开始工作
+### 4. Let Claude Work
 
-在 Claude Code 中：
-
-```bash
-请摄入 sources/interesting-paper.pdf 到 wiki
-```
-
-Claude 会：
-
-1. 读取资料
-2. 提取关键洞察
-3. 创建/更新 wiki 页面
-4. 建立交叉引用
-5. 记录到 log.md
-
-## 核心命令
-
-### 协议模式（推荐）
-
-使用自然语言与 Agent 交互：
-
-```
-"请摄入 sources/paper.pdf 到 wiki"
-"查询 wiki: Transformer 和 RNN 有什么区别？"
-"检查 wiki 健康状况"
-```
-
-### CLI 模式（可选）
-
-安装依赖后，可使用命令行工具：
+In Claude Code:
 
 ```bash
-# 查看 wiki 状态
+Please ingest sources/interesting-paper.pdf into wiki
+```
+
+Claude will:
+
+1. Read the material
+2. Extract key insights
+3. Create/update wiki pages
+4. Establish cross-references
+5. Record in log.md
+
+## Core Commands
+
+### Protocol Mode (Recommended)
+
+Use natural language to interact with the Agent:
+
+```
+"Please ingest sources/paper.pdf into wiki"
+"Query wiki: What is the difference between Transformer and RNN?"
+"Check wiki health"
+```
+
+### CLI Mode (Optional)
+
+After installing dependencies, you can use the command line tool:
+
+```bash
+# View wiki status
 python -m src.llm_wiki status
 
-# 健康检查
+# Health check
 python -m src.llm_wiki lint
 
-# 建立 embedding 索引（需先在 config.yaml 中启用 embedding）
+# Build embedding index (requires enabling embedding in config.yaml first)
 python -m src.llm_wiki index
 
-# 语义搜索
-python -m src.llm_wiki query "优化方法" --semantic
+# Semantic search
+python -m src.llm_wiki query "optimization methods" --semantic
 
-# 查看帮助
+# View help
 python -m src.llm_wiki --help
 ```
 
-**注意**：`ingest` 和 `query` 命令在 CLI 中仅提供辅助功能（如列出页面、语义检索），实际的内容处理需要通过自然语言与 Agent 交互完成。
+**Note**: The `ingest` and `query` commands in CLI only provide auxiliary functions (such as listing pages, semantic retrieval). Actual content processing requires interacting with the Agent via natural language.
 
-检查并报告：
+Check and report:
 
-- 孤儿页面（未被引用的页面）
-- 死链（指向不存在的页面）
-- 陈旧页面（90天未更新）
-- 草稿页面
+- Orphan pages (pages not referenced by any other page)
+- Dead links (links pointing to non-existent pages)
+- Stale pages (not updated in 90 days)
+- Draft pages
 
-## 目录结构
+## Directory Structure
 
 ```text
 llm-wiki/
-├── CLAUDE.md           # ⭐ 核心协议：Agent 的行为准则
-├── AGENTS.md           # Agent 实现指南（CLI 使用说明）
-├── README.md           # 本文件
-├── log.md              # 时间线日志（追加式）
-├── sources/            # 原始资料（用户管理，Agent 只读，默认不进 git）
+├── CLAUDE.md           # ⭐ Core protocol: Agent behavior guidelines
+├── AGENTS.md           # Agent implementation guide (CLI usage instructions)
+├── README.md           # This file
+├── log.md              # Timeline log (append-only)
+├── sources/            # Raw materials (user-managed, Agent read-only, not tracked by git by default)
 │   └── README.md
-├── wiki/               # 生成的知识页面（Agent 管理）
-│   ├── index.md        # 入口索引
-│   └── *.md            # 主题页面
-├── assets/             # 模板和配置
+├── wiki/               # Generated knowledge pages (Agent-managed)
+│   ├── index.md        # Entry index
+│   └── *.md            # Topic pages
+├── assets/             # Templates and configuration
 │   ├── page_template.md
 │   └── ingest_rules.md
-├── src/                # SKILL 实现（可选，用于 CLI）
+├── src/                # SKILL implementation (optional, for CLI)
 │   ├── llm_wiki/
 │   └── requirements.txt
-├── scripts/            # 辅助脚本
-├── hooks/              # 平台钩子（可选）
-├── SKILL.md            # 规范格式的技能描述
-└── examples/           # 示例 wiki
+├── scripts/            # Auxiliary scripts
+├── hooks/              # Platform hooks (optional)
+├── SKILL.md            # Standard-format skill description
+└── examples/           # Example wiki
 ```
 
-**关于 `sources/`**：默认被 `.gitignore` 排除，避免仓库臃肿。wiki 只保留提取的知识，原始文件由你另行管理（网盘、Zotero 等）。如需追踪特定文件，见 `sources/README.md`。
+**About `sources/`**: Excluded from `.gitignore` by default to avoid repository bloat. Wiki only retains extracted knowledge; original files are managed separately (cloud storage, Zotero, etc.). See `sources/README.md` for tracking specific files.
 
-## 工作原理
+## How It Works
 
-### 数据流
+### Data Flow
 
 ```text
 +----------+     +--------------------+     +--------------+
@@ -204,18 +206,18 @@ llm-wiki/
                     +----------+
 ```
 
-### 关键设计
+### Key Design
 
-1. **CLAUDE.md 作为协议**：定义了 Agent 的行为规范，任何人/任何 Agent 都可以遵循
-2. **纯 Markdown**：无数据库，无锁定，git 原生支持版本控制
-3. **双向链接**：`[[PageName]]` 格式，与 Obsidian 兼容
-4. **累积式学习**：每次查询可以产生新的 wiki 页面，知识不断积累
+1. **CLAUDE.md as Protocol**: Defines Agent behavior standards; anyone/any Agent can follow
+2. **Pure Markdown**: No database, no lock-in, native git version control
+3. **Bidirectional Links**: `[[PageName]]` format, compatible with Obsidian
+4. **Cumulative Learning**: Each query can generate new wiki pages, knowledge continuously accumulates
 
-## 查询机制详解
+## Query Mechanism
 
-### 当前实现：符号导航 + LLM 综合（默认）
+### Current Implementation: Symbolic Navigation + LLM Synthesis (Default)
 
-本 SKILL **默认不依赖 Embedding/向量检索**，查询通过以下步骤完成：
+By default, this SKILL **does not require Embedding/vector retrieval**. Queries are completed through:
 
 ```text
 User asks question
@@ -239,107 +241,107 @@ User asks question
 +-------------------------------+
 ```
 
-**可选增强**：通过 `config.yaml` 启用 embedding 后，CLI 的 `wiki query --semantic` 将使用 **混合检索**（Keyword Match + Vector Search + Link Traversal）快速定位相关页面，为 Agent 提供更精准的上下文。
+**Optional Enhancement**: After enabling embedding via `config.yaml`, CLI's `wiki query --semantic` will use **hybrid retrieval** (Keyword Match + Vector Search + Link Traversal) to quickly locate relevant pages, providing the Agent with more precise context.
 
-**示例流程**：
+**Example Flow**:
 
-用户问："LoRA 是什么？"
+User asks: "What is LoRA?"
 
-1. **Agent 读取** `wiki/index.md`，在「AI/ML」主题下找到 `[[LoRA]]`
-2. **Agent 读取** `wiki/LoRA.md`，发现链接到 `[[Fine-tuning]]`、`[[Adapter]]`
-3. **Agent 综合** 回答：
-   > LoRA（Low-Rank Adaptation）是一种参数高效微调方法——详见 [[LoRA]]。
-   > 与传统的 [[Fine-tuning]] 相比，它只训练低秩矩阵...
+1. **Agent reads** `wiki/index.md`, finds `[[LoRA]]` under the "AI/ML" topic
+2. **Agent reads** `wiki/LoRA.md`, discovers links to `[[Fine-tuning]]`, `[[Adapter]]`
+3. **Agent synthesizes** answer:
+   > LoRA (Low-Rank Adaptation) is a parameter-efficient fine-tuning method — see [[LoRA]].
+   > Compared to traditional [[Fine-tuning]], it only trains low-rank matrices...
 
-### 为什么不用 Embedding？
+### Why No Embedding?
 
-| 考量 | 当前方案 | Embedding 方案 |
-|-----|---------|---------------|
-| **依赖** | 零外部依赖 | 需要 Embedding API 或本地模型 |
-| **成本** | 无额外费用 | 按 token/请求计费 |
-| **隐私** | 数据不上传 | 需发送内容到外部服务 |
-| **精度** | 精确链接，可解释 | 近似相似，可能召回无关内容 |
-| **规模** | 适合 0-500 页 | 大规模（1000+ 页）必需 |
+| Consideration | Current Solution | Embedding Solution |
+|---------------|------------------|-------------------|
+| **Dependencies** | Zero external dependencies | Requires Embedding API or local model |
+| **Cost** | No additional fees | Charged per token/request |
+| **Privacy** | Data not uploaded | Must send content to external service |
+| **Accuracy** | Precise links, explainable | Approximate similarity, may retrieve irrelevant content |
+| **Scale** | Suitable for 0-500 pages | Essential for large scale (1000+ pages) |
 
-**结论**：对于个人/小团队知识库，维护好 `index.md` 和页面链接，比引入 Embedding 更简单有效。
+**Conclusion**: For personal/small team knowledge bases, maintaining `index.md` and page links is simpler and more effective than introducing Embedding. Embedding is available as an opt-in CLI enhancement when scale demands it.
 
-### 何时需要 Embedding？
+### When to Use Embedding?
 
-当你的 wiki 出现以下情况时，考虑升级：
+Consider upgrading when your wiki shows:
 
-- [ ] 页面数量 > 500，人工索引难以维护
-- [ ] 查询多为模糊语义（"那个关于优化的论文..."）
-- [ ] 需要跨主题联想（用户没提关键词，但语义相关）
+- [ ] Page count > 500, manual indexing hard to maintain
+- [ ] Queries are mostly fuzzy semantic ("that paper about optimization...")
+- [ ] Need cross-topic associations (user didn't mention keywords, but semantically related)
 
-见 [ROADMAP.md](ROADMAP.md) 了解升级计划。
+See [ROADMAP.md](ROADMAP.md) for upgrade plans.
 
-## 示例工作流
+## Example Workflows
 
-### 场景 1：研究新领域
+### Scenario 1: Researching a New Domain
 
 ```bash
-# 第 1 天：放入资料
+# Day 1: Add materials
 sources/
 ├── 2026-04-10-transformer-paper.pdf
 └── 2026-04-10-lora-blog.md
 ```
 
 ```bash
-用户：请摄入新资料
-Claude：已处理 2 个资料
-  - 创建 [[Transformer]] — 注意力机制架构
-  - 创建 [[LoRA]] — 低秩适配
-  - 创建 [[Self-Attention]] — 自注意力详解
-  - 更新 wiki/index.md
+User: Please ingest new materials
+Claude: Processed 2 materials
+  - Created [[Transformer]] — Attention mechanism architecture
+  - Created [[LoRA]] — Low-rank adaptation
+  - Created [[Self-Attention]] — Self-attention details
+  - Updated wiki/index.md
 ```
 
-### 场景 2：深入探索
+### Scenario 2: Deep Exploration
 
 ```bash
-用户：LoRA 和全量微调有什么区别？
+User: What is the difference between LoRA and full fine-tuning?
 
-Claude（读取 wiki/index.md → 找到 [[LoRA]] → 综合回答）：
+Claude (reads wiki/index.md → finds [[LoRA]] → synthesizes answer):
 
-根据我们的 wiki：
+Based on our wiki:
 
-**LoRA** —— [[LoRA]]
-- 冻结预训练权重，只训练低秩矩阵
-- 参数量减少 ~10000 倍
+**LoRA** — [[LoRA]]
+- Freezes pre-trained weights, only trains low-rank matrices
+- Parameter count reduced ~10,000x
 
-**全量微调**
-- 更新所有参数
-- 计算成本高
+**Full Fine-tuning**
+- Updates all parameters
+- High computational cost
 
-关键区别：
-1. 参数量：LoRA 只训练 0.1%~1% 的参数 [[参数效率]]
-2. 存储：LoRA 只保存适配器，不保存完整模型
-3. 组合：多个 LoRA 可以叠加 [[LoRA 组合]]
+Key differences:
+1. Parameters: LoRA only trains 0.1%~1% of parameters [[Parameter Efficiency]]
+2. Storage: LoRA only saves adapters, not full model
+3. Composition: Multiple LoRAs can be stacked [[LoRA Composition]]
 
-这个回答有帮助吗？需要我把它存档到 wiki 吗？
+Was this helpful? Should I archive this answer to wiki?
 ```
 
-### 场景 3：知识积累
+### Scenario 3: Knowledge Accumulation
 
 ```bash
-用户：是的，存档这个回答
+User: Yes, archive this answer
 
-Claude：已创建 [[LoRA vs Full Fine-tuning]]
-- 从对话中提取了对比要点
-- 链接到 [[LoRA]] 和 [[Fine-tuning]]
-- 添加到 wiki/index.md 的「常见问题」
+Claude: Created [[LoRA vs Full Fine-tuning]]
+- Extracted comparison points from conversation
+- Linked to [[LoRA]] and [[Fine-tuning]]
+- Added to FAQ section in wiki/index.md
 ```
 
-## 与 Obsidian 配合使用
+## Using with Obsidian
 
-1. 用 Obsidian 打开 `wiki/` 目录
-2. 享受图谱视图、快速导航、美观渲染
-3. Claude Code 负责维护，Obsidian 负责阅读和思考
+1. Open the `wiki/` directory in Obsidian
+2. Enjoy graph view, quick navigation, beautiful rendering
+3. Claude Code handles maintenance, Obsidian handles reading and thinking
 
-## 进阶配置
+## Advanced Configuration
 
-### 自定义页面模板
+### Custom Page Template
 
-编辑 `assets/page_template.md`：
+Edit `assets/page_template.md`:
 
 ```markdown
 ---
@@ -355,50 +357,50 @@ tags:
 
 ## TL;DR
 
-一句话总结。
+One-sentence summary.
 
-## 核心要点
+## Key Insights
 
 {{insights}}
 
-## 我的思考
+## My Thoughts
 
-（这里写你的原创思考）
+(Write your original thoughts here)
 
-## 相关
+## Related
 
 {{links}}
 ```
 
-### 自定义 Ingest 规则
+### Custom Ingest Rules
 
-编辑 `assets/ingest_rules.md`，添加特定领域的处理逻辑。
+Edit `assets/ingest_rules.md` to add domain-specific processing logic.
 
-## 对比其他方案
+## Comparison with Alternatives
 
-| 方案 | 特点 | 适用场景 |
-|-----|------|---------|
-| **本 SKILL** | 零依赖，纯文本，Claude Code 原生 | 个人知识管理，研究笔记 |
-| Sage-Wiki | 功能完整，多模态，独立应用 | 团队知识库，企业部署 |
-| Obsidian + 插件 | 可视化强，社区丰富 | 已有 Obsidian 工作流 |
-| Notion/Logseq | 协作友好，实时同步 | 多人协作，移动访问 |
+| Solution | Characteristics | Best For |
+|----------|----------------|----------|
+| **This SKILL** | Zero dependencies, pure text, Claude Code native | Personal knowledge management, research notes |
+| Sage-Wiki | Full-featured, multimodal, standalone app | Team knowledge base, enterprise deployment |
+| Obsidian + Plugins | Strong visualization, rich community | Existing Obsidian workflow |
+| Notion/Logseq | Collaborative, real-time sync | Multi-user collaboration, mobile access |
 
-## 贡献
+## Contributing
 
-欢迎提交 Issue 和 PR！
+Issues and PRs welcome!
 
-详细路线图见 [ROADMAP.md](ROADMAP.md)。
+Detailed roadmap at [ROADMAP.md](ROADMAP.md).
 
-### 当前 TODO
+### Current TODO
 
-- [ ] MCP 服务器封装（让其他 Agent 也能用）
-- [ ] Obsidian 插件（一键同步状态）
-- [x] 增量 embedding 加速检索
-- [ ] 多语言支持
+- [ ] MCP server wrapper (so other Agents can use it)
+- [ ] Obsidian plugin (one-click sync)
+- [x] Incremental embedding for faster retrieval
+- [ ] Multi-language support
 
-## 许可
+## License
 
-MIT License — 自由使用，尽情改造。
+MIT License — free to use, modify, and distribute.
 
 ---
 

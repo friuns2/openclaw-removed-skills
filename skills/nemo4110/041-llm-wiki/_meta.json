@@ -3,11 +3,16 @@
   "slug": "041-llm-wiki",
   "displayName": "llm-wiki SKILL inspired by Karpathy",
   "latest": {
-    "version": "1.1.2",
-    "publishedAt": 1776357328067,
-    "commit": "https://github.com/openclaw/skills/commit/8f27c18b06750e959c3f8b7c2b1a79a868a3e553"
+    "version": "1.3.0",
+    "publishedAt": 1776838640443,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.2",
+      "publishedAt": 1776357328067,
+      "commit": "https://github.com/openclaw/skills/commit/8f27c18b06750e959c3f8b7c2b1a79a868a3e553"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1776140081697,
