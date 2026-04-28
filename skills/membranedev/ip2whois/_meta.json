@@ -3,9 +3,15 @@
   "slug": "ip2whois",
   "displayName": "Ip2Whois",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581506804,
-    "commit": "https://github.com/openclaw/skills/commit/8854913b9c12f18eabd672017c3adfbd39892877"
+    "version": "1.0.1",
+    "publishedAt": 1776896064335,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581506804,
+      "commit": "https://github.com/openclaw/skills/commit/8854913b9c12f18eabd672017c3adfbd39892877"
+    }
+  ]
 }
