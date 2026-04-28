@@ -3,9 +3,15 @@
   "slug": "vryno",
   "displayName": "Vryno",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775714640332,
-    "commit": "https://github.com/openclaw/skills/commit/bffee8feb9bd20f3f63f7aa96ce73bd021420fe5"
+    "version": "1.0.1",
+    "publishedAt": 1776898083035,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775714640332,
+      "commit": "https://github.com/openclaw/skills/commit/bffee8feb9bd20f3f63f7aa96ce73bd021420fe5"
+    }
+  ]
 }
