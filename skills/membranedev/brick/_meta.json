@@ -3,9 +3,15 @@
   "slug": "brick",
   "displayName": "Brick",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775487829652,
-    "commit": "https://github.com/openclaw/skills/commit/ab28422d51fde97b5eea5790ff0271bf943b1696"
+    "version": "1.0.1",
+    "publishedAt": 1776890475697,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775487829652,
+      "commit": "https://github.com/openclaw/skills/commit/ab28422d51fde97b5eea5790ff0271bf943b1696"
+    }
+  ]
 }
