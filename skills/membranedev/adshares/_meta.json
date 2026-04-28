@@ -3,9 +3,15 @@
   "slug": "adshares",
   "displayName": "Adshares",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775729112209,
-    "commit": "https://github.com/openclaw/skills/commit/ee9bc20934ebfe90b8a2f969a0ef0b01b75c009f"
+    "version": "1.0.1",
+    "publishedAt": 1776898437521,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775729112209,
+      "commit": "https://github.com/openclaw/skills/commit/ee9bc20934ebfe90b8a2f969a0ef0b01b75c009f"
+    }
+  ]
 }
