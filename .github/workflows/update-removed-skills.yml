@@ -17,6 +17,11 @@ jobs:
         with:
           fetch-depth: 0
           filter: blob:none
+          sparse-checkout: |
+            .github
+            scripts
+            README.md
+          sparse-checkout-cone-mode: true
 
       - name: Add upstream remote
         run: |
