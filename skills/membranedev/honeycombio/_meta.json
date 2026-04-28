@@ -3,9 +3,15 @@
   "slug": "honeycombio",
   "displayName": "Honeycombio",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775660623481,
-    "commit": "https://github.com/openclaw/skills/commit/4f804c45873f440600d314767d969d8f63f54f27"
+    "version": "1.0.1",
+    "publishedAt": 1776897077451,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775660623481,
+      "commit": "https://github.com/openclaw/skills/commit/4f804c45873f440600d314767d969d8f63f54f27"
+    }
+  ]
 }
