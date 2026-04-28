@@ -199,12 +199,43 @@ class Markdown2Doc {
     }
 
     /**
+     * List available themes
+     * @returns {Promise<void>}
+     */
+    async listThemes() {
+        const fullUrl = this.BASE_URL + '/v1/skills/public/markdown2doc/themes';
+        try {
+            const response = await this.request(fullUrl, { method: 'GET' });
+            if (response.status !== 200) {
+                console.log(`Failed to fetch themes, status code: ${response.status}`);
+                return;
+            }
+            const data = response.data;
+            const themes = Array.isArray(data) ? data : (data.themes || []);
+            if (Array.isArray(themes) && themes.length > 0) {
+                console.log('Available themes:');
+                themes.forEach(t => {
+                    const name = t.theme || t;
+                    const formats = t.formats && t.formats.length > 0 ? ` [${t.formats.join(', ')}]` : '';
+                    const desc = t.desc ? `  - ${t.desc}` : '';
+                    console.log(`  ${name}${formats}${desc}`);
+                });
+            } else {
+                console.log('No themes available.');
+            }
+        } catch (error) {
+            console.log(`Error fetching themes: ${error.message}`);
+        }
+    }
+
+    /**
      * Convert markdown file to PDF or Word
      * @param {string} filePath - Path to the markdown file
      * @param {string} outputType - Output format: 'pdf' or 'docx' (default: 'pdf')
+     * @param {string|null} theme - Theme name for docx output (optional)
      * @returns {Promise<string|null>} - Path to the converted file, or null on failure
      */
-    async convertFile(filePath, outputType = 'pdf') {
+    async convertFile(filePath, outputType = 'pdf', theme = null) {
         // 1. Validate input file
         if (!fs.existsSync(filePath)) {
             console.log(`Error: File does not exist - ${filePath}`);
@@ -267,13 +298,18 @@ class Markdown2Doc {
             }
 
             // 3. Select endpoint based on output type
-            const endpoint = '/v1/skills/public/markdown2doc/pdf';
+            const endpoint = outputType === 'docx'
+                ? '/v1/skills/public/markdown2doc/docx'
+                : '/v1/skills/public/markdown2doc/pdf';
             const fullUrl = this.BASE_URL + endpoint;
 
             // 4. Build multipart form data
             const fields = {};
             if (Object.keys(imageMapping).length > 0) {
                 fields.image_mapping = JSON.stringify(imageMapping);
+            }
+            if (theme) {
+                fields.theme = theme;
             }
 
             // Add md_file as the first file
@@ -337,7 +373,7 @@ class Markdown2Doc {
                 if (raw) outputFileName = raw;
             }
             if (!outputFileName) {
-                outputFileName = `${path.parse(resolvedPath).name}.pdf`;
+                outputFileName = `${path.parse(resolvedPath).name}.${outputType}`;
             }
             const outPath = path.join(parentDir, outputFileName);
 
@@ -359,10 +395,14 @@ class Markdown2Doc {
 }
 
 const USAGE = `Usage:
-  node markdown2doc.js convert <file_path> [format]   Convert markdown file to PDF
+  node markdown2doc.js convert <file_path> [format] [--theme <name>]   Convert markdown file to PDF or DOCX
+  node markdown2doc.js list-themes                                      List available themes
 
 Examples:
-  node markdown2doc.js convert readme.md pdf`;
+  node markdown2doc.js convert readme.md pdf
+  node markdown2doc.js convert readme.md docx
+  node markdown2doc.js convert readme.md docx --theme dark
+  node markdown2doc.js list-themes`;
 
 async function main() {
     if (process.argv.length < 3) {
@@ -373,20 +413,31 @@ async function main() {
     const converter = new Markdown2Doc();
     const cmd = process.argv[2];
 
-    if (cmd === "convert") {
+    if (cmd === "list-themes") {
+        await converter.listThemes();
+
+    } else if (cmd === "convert") {
         if (process.argv.length < 4) {
-            console.log("Usage: node markdown2doc.js convert <file_path> [format]");
+            console.log("Usage: node markdown2doc.js convert <file_path> [format] [--theme <name>]");
             console.log("  format: 'pdf' (default) or 'docx'");
             process.exit(1);
         }
 
         const filePath = process.argv[3];
         let outputType = 'pdf';
+        let theme = null;
 
-        if (process.argv.length >= 5) {
-            const formatArg = process.argv[4].toLowerCase();
-            if (formatArg === 'pdf') {
-                outputType = 'pdf';
+        const remainingArgs = process.argv.slice(4);
+        const themeIdx = remainingArgs.indexOf('--theme');
+        if (themeIdx !== -1) {
+            theme = remainingArgs[themeIdx + 1] || null;
+            remainingArgs.splice(themeIdx, 2);
+        }
+
+        if (remainingArgs.length > 0) {
+            const formatArg = remainingArgs[0].toLowerCase();
+            if (formatArg === 'pdf' || formatArg === 'docx') {
+                outputType = formatArg;
             } else {
                 console.log(`Unknown format: ${formatArg}`);
                 console.log("Supported formats: pdf, docx");
@@ -394,7 +445,7 @@ async function main() {
             }
         }
 
-        const result = await converter.convertFile(filePath, outputType);
+        const result = await converter.convertFile(filePath, outputType, theme);
         if (!result) {
             process.exit(1);
         }
