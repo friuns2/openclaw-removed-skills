@@ -3,11 +3,16 @@
   "slug": "vip-skills",
   "displayName": "唯品会技能集",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776682163629,
-    "commit": "https://github.com/openclaw/skills/commit/0867c728c7c8cf38a7b39884773019a1648db561"
+    "version": "1.0.3",
+    "publishedAt": 1777002050981,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776682163629,
+      "commit": "https://github.com/openclaw/skills/commit/0867c728c7c8cf38a7b39884773019a1648db561"
+    },
     {
       "version": "1.0.1",
       "publishedAt": 1776149391202,
