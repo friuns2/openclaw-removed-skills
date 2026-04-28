@@ -3,11 +3,16 @@
   "slug": "agentoctopus-openclaw",
   "displayName": "Agentoctopus Openclaw",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1776486950608,
-    "commit": "https://github.com/openclaw/skills/commit/6e7d2bc44f760cd9b808bd0e492e9a8a31f81d5d"
+    "version": "1.3.0",
+    "publishedAt": 1776753017795,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1776486950608,
+      "commit": "https://github.com/openclaw/skills/commit/6e7d2bc44f760cd9b808bd0e492e9a8a31f81d5d"
+    },
     {
       "version": "1.0.4",
       "publishedAt": 1776050532280,
