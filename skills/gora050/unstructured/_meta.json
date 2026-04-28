@@ -3,9 +3,15 @@
   "slug": "unstructured",
   "displayName": "Unstructured",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581705539,
-    "commit": "https://github.com/openclaw/skills/commit/3b4aaf2306bebd1f062c8cfe9324345331d326b7"
+    "version": "1.0.1",
+    "publishedAt": 1776899094747,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581705539,
+      "commit": "https://github.com/openclaw/skills/commit/3b4aaf2306bebd1f062c8cfe9324345331d326b7"
+    }
+  ]
 }
