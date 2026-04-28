@@ -18,6 +18,8 @@ Claude.ai supports MCP connectors natively via OAuth. Add Xquik as a connector f
 
 Claude Desktop only supports stdio transport. Use `mcp-remote` as a bridge (requires [Node.js](https://nodejs.org)).
 
+> **About `mcp-remote`:** [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) is an open-source stdio-to-HTTP bridge maintained by the MCP ecosystem (MIT license, [source on GitHub](https://github.com/geelen/mcp-remote)). It translates Claude Desktop's stdio transport to StreamableHTTP — it does not execute arbitrary code, access your filesystem, or modify your system. The version is pinned (`@0.1.38`) to prevent supply-chain drift. If you prefer not to use `npx`, install it globally first: `npm install -g mcp-remote@0.1.38`, then replace `"command": "npx"` with `"command": "mcp-remote"` and remove the version from args.
+
 Add to `claude_desktop_config.json`:
 
 ```json
@@ -29,12 +31,14 @@ Add to `claude_desktop_config.json`:
         "mcp-remote@0.1.38",
         "https://xquik.com/mcp",
         "--header",
-        "x-api-key:xq_YOUR_KEY_HERE"
+        "x-api-key:${XQUIK_API_KEY}"
       ]
     }
   }
 }
 ```
+
+> Replace `${XQUIK_API_KEY}` with your actual API key, or set the environment variable before launching Claude Desktop.
 
 ## Claude Code
 
@@ -171,7 +175,7 @@ The MCP server (v2) at `https://xquik.com/mcp` provides 2 structured API tools:
 | `explore` | Search the API endpoint catalog (read-only, no network calls) | Free |
 | `xquik` | Execute API calls against your account | Varies by endpoint |
 
-The agent sends structured API requests through the MCP server, which handles authentication and execution within the same first-party infrastructure as the REST API. All 122 REST API endpoints across 12 categories are accessible: account, automations, bot, composition, extraction, integrations, media, monitoring, support, twitter, x-accounts, and x-write.
+The agent sends structured API requests through the MCP server, which handles authentication and execution within the same first-party infrastructure as the REST API. All 111 REST API endpoints across 10 categories are accessible: account, composition, credits, extraction, media, monitoring, support, twitter, x-accounts, and x-write.
 
 ## After Setup
 
