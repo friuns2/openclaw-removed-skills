@@ -1,11 +1,17 @@
 {
   "owner": "freepengyang",
   "slug": "ops-code-review",
-  "displayName": "OPS Code Review",
+  "displayName": "Ops Code Review",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776742989092,
-    "commit": "https://github.com/openclaw/skills/commit/57b43ca95f2e36b10b82e9a24e6cb22cd62a2be1"
+    "version": "1.0.5",
+    "publishedAt": 1776843020851,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776742989092,
+      "commit": "https://github.com/openclaw/skills/commit/57b43ca95f2e36b10b82e9a24e6cb22cd62a2be1"
+    }
+  ]
 }
