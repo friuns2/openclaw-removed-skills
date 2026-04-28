@@ -3,9 +3,15 @@
   "slug": "iris-cascade",
   "displayName": "Iris Cascade",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653728405,
-    "commit": "https://github.com/openclaw/skills/commit/11284a8f4ecc30673c4d536c05ca71452b787c88"
+    "version": "1.0.1",
+    "publishedAt": 1776899335535,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653728405,
+      "commit": "https://github.com/openclaw/skills/commit/11284a8f4ecc30673c4d536c05ca71452b787c88"
+    }
+  ]
 }
