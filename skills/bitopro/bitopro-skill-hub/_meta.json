@@ -3,11 +3,16 @@
   "slug": "bitopro-skill-hub",
   "displayName": "bitopro-market-intel",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776243993302,
-    "commit": "https://github.com/openclaw/skills/commit/e504676688725ef7f993562bae0d45557dd4b9f8"
+    "version": "1.0.2",
+    "publishedAt": 1777365218943,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776243993302,
+      "commit": "https://github.com/openclaw/skills/commit/e504676688725ef7f993562bae0d45557dd4b9f8"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776132788203,

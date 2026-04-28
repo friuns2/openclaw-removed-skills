@@ -1,38 +1,15 @@
 ---
 name: bitopro-market-intel
-description: >
-  Crypto market intelligence, macro indicators, and listing-catalog
-  discovery — strictly scoped to BitoPro-listed spot coins. No API key.
-  Use when: checking Fear & Greed index, global total crypto market cap,
-  BTC/ETH dominance, BitoPro coin market-cap rankings, BitoPro coins on
-  CoinGecko trending list, public-company BTC/ETH holdings, multi-timeframe
-  price-change snapshots for a BitoPro coin (1h / 24h / 7d / 30d comparison),
-  or the BitoPro listing catalog with per-pair specs (which coins are
-  currently listed, min/max order size, precision, 掛單上限, maintenance
-  status). Non-BitoPro coins, global sector rankings, and derivatives are
-  explicitly out of scope. For real-time single-pair ticker / order-book /
-  K-line, pre-trade spec lookup that is part of placing an order, or any
-  order placement and account action, use `bitopro-spot` instead.
-version: 1.3.0
-metadata:
-  openclaw:
-    requires:
-      env: []
-    primaryEnv: null
-    env:
-      - name: COINGECKO_API_KEY
-        description: "Optional CoinGecko Demo API key (free tier, signup at coingecko.com/en/developers/dashboard). When set, adds header `x-cg-demo-api-key` to CoinGecko requests and moves the 30 req/min budget from the shared-IP bucket to your own per-key bucket. Recommended for shared-IP deployments (office network, VPN, multi-user testing)."
-        required: false
-        sensitive: true
-category: crypto-market-data
-emoji: "📊"
+description: 'Crypto market intelligence, macro indicators, listing-catalog discovery, and BitoPro-relevant news aggregation — strictly scoped to BitoPro-listed spot coins. No API key. Use when: checking Fear & Greed index, global total crypto market cap, BTC/ETH dominance, BitoPro coin market-cap rankings, BitoPro coins on CoinGecko trending list, public-company BTC/ETH holdings, multi-timeframe price-change snapshots for a BitoPro coin (1h / 24h / 7d / 30d comparison), the BitoPro listing catalog with per-pair specs (which coins are currently listed, min/max order size, precision, 掛單上限, maintenance status), or curated cryptocurrency news filtered to BitoPro-listed coins (繁中 + English auto-translated to 繁中). Non-BitoPro coins, global sector rankings, and derivatives are explicitly out of scope. For real-time single-pair ticker / order-book / K-line, pre-trade spec lookup that is part of placing an order, or any order placement and account action, use `bitopro-spot` instead.'
+version: 1.4.0
+metadata: {"openclaw":{"category":"crypto-market-data","emoji":"📊","requires":{"env":[]},"primaryEnv":null,"env":[{"name":"COINGECKO_API_KEY","description":"Optional CoinGecko Demo API key (free tier, signup at coingecko.com/en/developers/dashboard). When set, adds header `x-cg-demo-api-key` to CoinGecko requests and moves the 30 req/min budget from the shared-IP bucket to your own per-key bucket. Recommended for shared-IP deployments (office network, VPN, multi-user testing).","required":false,"sensitive":true}]}}
 homepage: https://github.com/bitoex/bitopro-skills-hub
 license: MIT
 ---
 
 # BitoPro Market Intel Skill
 
-You are an AI agent that provides cryptocurrency market intelligence **strictly scoped to coins listed on [BitoPro](https://www.bitopro.com/) spot market**. All data comes from free, public, no-API-key endpoints. Use this skill when the user asks about market sentiment, BitoPro-relevant market overview, BitoPro coin rankings, BitoPro coins on the trending list, institutional BTC/ETH holdings, or detailed price changes for any BitoPro-listed coin.
+You are an AI agent that provides cryptocurrency market intelligence **strictly scoped to coins listed on [BitoPro](https://www.bitopro.com/) spot market**. All data comes from free, public, no-API-key endpoints. Use this skill when the user asks about market sentiment, BitoPro-relevant market overview, BitoPro coin rankings, BitoPro coins on the trending list, institutional BTC/ETH holdings, BitoPro-relevant crypto news (with auto-translation of English sources to 繁中), or detailed price changes for any BitoPro-listed coin.
 
 **Out of scope (do NOT answer with this skill):** global sector/category performance, non-BitoPro trending coins, non-BitoPro coin quotes, derivatives/futures data. If asked, respond that the coin/topic is outside BitoPro spot market scope.
 
@@ -62,6 +39,8 @@ Without the key, the skill still works — it just falls back to Public-tier bud
 | [CoinGecko](https://www.coingecko.com/en/developers/dashboard) (Demo, **optional** `COINGECKO_API_KEY`) | 30 req/min **per key**, 10k calls/month | Same endpoints as Public, but budget is per-key instead of per-IP — recommended when multiple users share one outbound IP |
 | [CoinPaprika](https://coinpaprika.com/) | ~10 req/sec, no key | Multi-timeframe coin details, ATH data |
 | [BitoPro](https://api.bitopro.com/v3) | 600 req/min, no key | Dynamic trading pair list |
+| 6 RSS feeds (BlockTempo / ABMedia / BlockCast / CoinDesk / CoinTelegraph / Decrypt) | unrestricted, no key | Tool 8 news aggregation (3 zh-tw + 3 en) |
+| [Google Translate](https://translate.googleapis.com/) (unofficial public, no key) | ~100 req/h per IP | Tool 8 pre-translation of English titles + descriptions to 繁中 |
 
 ## BitoPro Coin Mapping
 
@@ -295,6 +274,118 @@ kaia_twd    ✅          1 KAIA        20 萬 KAIA     100 TWD     2       4    
 - Amounts < 1 萬: comma-separated integer (`200`, `5,000`) or decimal (`0.0001`, `0.01`)
 - Always append the currency unit (e.g. `1 億 BTC`, `5 TWD`, `0.2 USDT`)
 
+### Tool 8: `get_bitopro_relevant_news`
+
+Curated cryptocurrency news from 6 RSS sources (3 繁中 + 3 英文), filtered strictly to BitoPro-listed coins, with **auto-translation of English titles and descriptions to 繁中** plus **one-click full-article translation** via Google's `*.translate.goog` proxy.
+
+- **endpoints (RSS, no key, no auth):**
+
+  | Source | Lang | URL |
+  |--------|------|-----|
+  | 動區動趨 BlockTempo | zh-tw | `https://www.blocktempo.com/feed/` |
+  | 鏈新聞 ABMedia | zh-tw | `https://abmedia.io/feed` |
+  | 區塊客 BlockCast | zh-tw | `https://blockcast.it/feed/` |
+  | CoinDesk | en | `https://www.coindesk.com/arc/outboundfeeds/rss/` |
+  | CoinTelegraph | en | `https://cointelegraph.com/rss` |
+  | Decrypt | en | `https://decrypt.co/feed` |
+
+- **translation endpoint (unofficial public, no key):**
+  `GET https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q={text}`
+
+- **params:**
+  - `coin` (string, optional) — filter to single BitoPro coin (e.g. `BTC`). Default: all coins.
+  - `limit` (int, optional, default `10`, max `30`) — number of articles to return after filtering.
+  - `category` (string, optional) — one of `regulation` / `institution` / `listing` / `tech` / `market` / `defi` / `nft` / `security` / `other`. See [`references/news-categories.md`](./references/news-categories.md) for keyword definitions.
+  - `sort_by` (string, optional, default `time_desc`) — `time_desc` / `trending` (multi-source same topic) / `coverage` (mentions most BitoPro coins).
+  - `parallel_workers` (int, optional, default `1`, max `4`) — translation concurrency. Default sequential is safest; opt-in parallel only when latency matters (e.g. pulse mode, dashboard pre-warm).
+
+- **filtering rules (mandatory):**
+  - Article title + description must mention at least one of the 18 BitoPro-listed coins. Match against ticker (`BTC`), English name (`Bitcoin`), and Chinese name (`比特幣`). Patterns defined in [`references/coin-mapping.md`](./references/coin-mapping.md) → "News matching patterns".
+  - Drop non-matching articles silently (do not list them, do not explain to user).
+  - Apply `coin` and `category` params after the BitoPro filter.
+
+- **classification (keyword-based, NO ML, NO sentiment):**
+  - Each article tested against keyword lists in [`references/news-categories.md`](./references/news-categories.md).
+  - Multiple categories possible per article. If none match, label as `other`.
+  - Do NOT compute sentiment scores. Do NOT label articles as bullish/bearish/positive/negative.
+
+- **bilingual translation (核心設計, 雙層策略):**
+
+  **Layer 1 — Pre-translation cache (lazy, scoped to displayed items):** After applying `coin` / `category` filters, sorting, and capping at `limit`, translate **only the English articles that will actually be returned** — not the entire matched corpus. Translate each article's `title` and `description` via the Google Translate public endpoint. Cache by article URL in `{cache_dir}/translation_cache.json`. Cache is **permanent** (article content immutable). Cache hit = 0 API call. For default `limit=10` with ~7 English articles, expect ~14 translation requests on first run, 0 on subsequent runs (assuming same articles).
+
+  **Layer 2 — Click-to-translate full article:** For every English article in the response, also compute `translated_url` (Google `*.translate.goog` proxy URL). Chat agent renders the title link as `translated_url`, so a single click opens the entire article in 繁中 within a new tab. Original URL is kept as a `🇬🇧 原文` button. This step is pure URL construction — no API call.
+
+- **`translated_url` derivation rule:**
+  ```
+  Original:  https://www.coindesk.com/markets/article-name
+   ↓ hostname dots → dashes; if hostname already contains dashes, double them first
+   ↓ append `.translate.goog`
+   ↓ append query: ?_x_tr_sl=en&_x_tr_tl=zh-TW&_x_tr_hl=zh-TW
+  Result:    https://www-coindesk-com.translate.goog/markets/article-name?_x_tr_sl=en&_x_tr_tl=zh-TW&_x_tr_hl=zh-TW
+  ```
+
+- **rate-limit & pacing:**
+  - RSS sources: independent budgets (no enforced quota); honor 5-min cache TTL.
+  - Google Translate unofficial: ~100 req/h per IP. Default sequential pacing **0.25 s/req**. With `parallel_workers=4`, 4 concurrent requests; still gentle since per-call latency naturally ~0.4 s.
+  - **Lazy translation policy:** Only pre-translate articles that will actually be displayed (after filter + sort + limit). Do NOT translate the full 50+ matched corpus. First-run for ~10 displayed items ≈ 14-20 req ≈ 5-8 s.
+  - On Google Translate failure (timeout / 4xx / 5xx): keep English text, set `translation_failed: true`. Do NOT abort the whole response.
+
+- **cache TTL:**
+  - RSS feeds: 5 min (news time-sensitivity is medium)
+  - Translation cache: permanent (key by article URL; content immutable)
+
+- **returns:**
+  ```json
+  {
+    "items": [
+      {
+        "title": "比特幣從 12 週高點回落",
+        "title_original": "Bitcoin pulls back from 12-week high",
+        "description": "隨著伊朗反彈觸及 79,400 美元的賣家牆...",
+        "description_original": "As the Iran rally hits seller wall...",
+        "link": "https://www.coindesk.com/markets/...",
+        "translated_url": "https://www-coindesk-com.translate.goog/markets/...?_x_tr_sl=en&_x_tr_tl=zh-TW&_x_tr_hl=zh-TW",
+        "source": "CoinDesk",
+        "source_lang": "en",
+        "published_at": "2026-04-27T07:53:00+00:00",
+        "coins": ["BTC"],
+        "categories": ["市場/價格"],
+        "translation_failed": false
+      }
+    ],
+    "stats": {
+      "raw_count": 122,
+      "matched_count": 52,
+      "displayed": 10,
+      "by_source": { "CoinDesk": 8, "CoinTelegraph": 7 },
+      "top_coins": [["BTC", 29], ["ETH", 6]],
+      "top_categories": [["機構/ETF", 12], ["市場/價格", 6]]
+    }
+  }
+  ```
+
+  Note: `title_original` / `description_original` are **only present when the source language is English** (i.e. for transparency / quick verification). Chinese-source articles return only `title` and `description`.
+
+- **display format (chat mode):**
+
+  ```
+  📰 BitoPro 相關新聞（顯示 10 / 共 {matched_count} 則命中）
+
+  | # | 時間 | 幣 | 標題 | 來源 | 類別 |
+  |---|------|---|------|------|------|
+  | 1 | 2h前 | BTC | [比特幣從 12 週高點回落]({translated_url}) [🇬🇧]({link}) | CoinDesk | 市場/價格 |
+  | 2 | 3h前 | ETH | [Aave 要求 Arbitrum 解凍 Kelp 攻擊者的 30K ETH]({translated_url}) [🇬🇧]({link}) | CoinTelegraph | DeFi |
+  | 3 | 4h前 | BTC, ETH | [3% 交易者決定市場方向]({link}) | 區塊客 | 市場/價格 |
+  ...
+
+  💡 一句話：今日新聞主要圍繞 {top_coins[0]}（{n} 則）、{top_coins[1]}（{n} 則）；類別集中在「{top_cat}」與「{top_cat2}」。
+  ```
+
+  - **中文文章**直接顯示，title 連結指向原文，**無 [🇬🇧] 按鈕**。
+  - **英文文章**標題連結 = `translated_url`（點即整篇中文版），後綴 `[🇬🇧]({link})` 給想看英文的 user。
+  - 若 `translation_failed: true`，標題仍顯示英文原文 + 加 `⚠️ 翻譯失敗` 小註記，但仍提供 `translated_url` 連結（用戶可重試）。
+  - 一句話總結 **僅彙總命中事實**（哪些幣、哪些類別最熱），**禁止做趨勢預測或投資建議**。
+
 ## Agent Behavior
 
 1. **Always filter to BitoPro coins.** When displaying rankings, trending, or any coin-specific data, only include or highlight coins available on BitoPro. Clearly state this scope to the user.
@@ -323,19 +414,25 @@ kaia_twd    ✅          1 KAIA        20 萬 KAIA     100 TWD     2       4    
    - **CoinGecko Demo (if `COINGECKO_API_KEY` set): 30 req/min per key + 10k calls/month** — budget moves from IP-shared to key-scoped, so multiple users behind one IP each get their own 30/min. All rate-limit rules below still apply unchanged; only the bucket changes.
    - CoinPaprika: ~10 req/sec (T6)
    - BitoPro: 600 req/min (T7)
+   - **6 RSS sources (T8): independent budgets, no enforced quota; rely on 5-min cache TTL.**
+   - **Google Translate Public (T8 unofficial): ~100 req/h per IP.** Default sequential pacing **0.25 s/req**; with `parallel_workers=4` (opt-in), 4 concurrent — still safe.
 
    **Concurrency & batching rules (MUST follow):**
    - **Max 3 concurrent requests per host.** If a single user turn needs more, serialize the extras. Never fan out > 3 parallel to CoinGecko.
    - **T3 batch rule.** CoinGecko `/coins/markets` MUST be called **once** with `ids=a,b,c,...` (comma-separated) listing every requested coin. Never call T3 once-per-coin. If the user asks for 10 coins' rankings, it is still **one** request, not ten.
    - **T6 fan-out cap.** If the user asks about N coins in one turn, call T6 in batches of 3 at a time (wait for each batch to finish before starting next). For N ≥ 8, prefer routing through T3 where possible since T3 already returns most of the fields in one call.
+   - **T8 lazy translation.** Pre-translate ONLY the articles that will actually be displayed (after `coin` / `category` filters and `limit` cap). Do NOT translate the full matched corpus. For default `limit=10` with ~7 English articles, expect ~14 translation requests on first run.
+   - **T8 translation failure:** on Google Translate timeout / 4xx / 5xx, keep the English text and set `translation_failed: true` for that article. Do NOT abort the whole T8 response.
 
-   **Session-scope cache (in-memory, 60s TTL):**
+   **Session-scope cache (in-memory, 60s TTL unless noted):**
    Maintain a per-session cache of `{endpoint_url + params} → {response, fetched_at}`. Before any external call, check the cache; if a fresh entry (age < 60s) exists, reuse it and **still cite the original source in the footer** (no "cached" suffix needed — caching is transparent to the user). TTL by tool:
    - T1 Fear & Greed: 60s (index updates ~daily)
    - T2 Global / T3 Rankings / T4 Trending: 60s
    - T5 Public company treasury: 300s (rarely changes)
    - T6 Per-coin ticker: 30s (more volatile)
    - T7 BitoPro pairs: 60s
+   - **T8 RSS feeds: 300s (5 min — news time-sensitivity is medium)**
+   - **T8 translation cache: PERMANENT** (key by article URL; content is immutable, store at `{cache_dir}/translation_cache.json`)
 
    If the cache is used for every tool in a compound request, skip all external calls — footer still lists those sources as attribution.
 
@@ -353,7 +450,7 @@ kaia_twd    ✅          1 KAIA        20 萬 KAIA     100 TWD     2       4    
 
    **Footer attribution when fallback fires:** list the source **actually used**. Example: CoinGecko 429 → CoinPaprika succeeds → footer shows `📌 數據來源：CoinPaprika (CoinGecko 限流已切換)`. Never list a source that did not return data.
 
-5. **Source attribution and disclaimer footer.** Responses displaying market-data (Tools 1-6) MUST end with the footer. List only the external sources actually queried; do not list BitoPro. Tool 7 alone returns no footer.
+5. **Source attribution and disclaimer footer.** Responses displaying market-data or news MUST end with the footer. List only the external sources actually queried; do not list BitoPro (home source). Tool 7 alone returns no footer.
 
    | Tool | External Source | Footer |
    |------|-----------------|--------|
@@ -361,6 +458,7 @@ kaia_twd    ✅          1 KAIA        20 萬 KAIA     100 TWD     2       4    
    | 2-5  | CoinGecko       | ✅ |
    | 6    | CoinPaprika     | ✅ |
    | 7    | —               | ❌ |
+   | 8    | Subset of: BlockTempo / ABMedia / BlockCast / CoinDesk / CoinTelegraph / Decrypt + Google Translate (only if EN articles displayed) | ✅ |
 
    Footer template:
 
@@ -375,6 +473,8 @@ kaia_twd    ✅          1 KAIA        20 萬 KAIA     100 TWD     2       4    
    - Tool 1 + Tool 3 → `📌 數據來源：Alternative.me / CoinGecko`
    - Tool 1 + Tool 7 → `📌 數據來源：Alternative.me`（Tool 7 不影響 footer）
    - 只用 Tool 7 → 無 footer
+   - T8 全中文文章命中 → `📌 數據來源：BlockTempo / ABMedia / BlockCast`（依實際源），加 `⚠️ 新聞為媒體獨立觀點，BitoPro 不為其內容背書。`
+   - T8 含英文文章命中 → `📌 數據來源：CoinDesk / CoinTelegraph / Decrypt + Google Translate`（依實際源），免責同上 + `⚠️ 翻譯由機器產生，可能存在誤差，請點原文連結核對。`
 
    If an API call fails, still include that source in the footer with a note (e.g. `CoinGecko (部分資料失敗)`).
 
@@ -390,7 +490,7 @@ kaia_twd    ✅          1 KAIA        20 萬 KAIA     100 TWD     2       4    
 All requests should include:
 
 ```
-User-Agent: bitopro-market-intel/1.3.0 (Skill)
+User-Agent: bitopro-market-intel/1.4.0 (Skill)
 Accept: application/json
 ```
 
@@ -416,6 +516,7 @@ Apply this header to every CoinGecko endpoint (T2/T3/T4/T5). Do NOT apply it to 
 |------|---------|
 | `SKILL.md` | Core skill definition (this file) |
 | `references/endpoints.md` | Full endpoint specs with request/response examples |
-| `references/coin-mapping.md` | Complete BitoPro ↔ CoinGecko ↔ CoinPaprika ID mapping with notes |
+| `references/coin-mapping.md` | Complete BitoPro ↔ CoinGecko ↔ CoinPaprika ID mapping + T8 news matching patterns (ticker / English name / 中文名) |
+| `references/news-categories.md` | T8 news classification keyword lists per category |
 | `evals/evals.json` | Evaluation test cases |
 | `LICENSE.md` | MIT license |
