@@ -1,0 +1,11 @@
+{
+  "owner": "sdk-team",
+  "slug": "alibabacloud-opensearch-app-manage",
+  "displayName": "Alibabacloud Opensearch App Manage",
+  "latest": {
+    "version": "0.0.2",
+    "publishedAt": 1777007912111,
+    "commit": null
+  },
+  "history": []
+}
