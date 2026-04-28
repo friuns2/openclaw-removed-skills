@@ -1,0 +1,11 @@
+{
+  "owner": "cn-big-cabbage",
+  "slug": "kubeasz-deploy",
+  "displayName": "kubeasz-deploy",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775623702323,
+    "commit": null
+  },
+  "history": []
+}
