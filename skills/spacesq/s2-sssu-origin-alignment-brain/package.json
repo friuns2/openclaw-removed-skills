@@ -1,29 +1,16 @@
 {
   "name": "s2-sssu-origin-alignment-brain",
-  "version": "1.0.0",
-  "description": "S2 Space Origin Alignment Brain. Resolves heterogeneous spatial coordinate conflicts via Z-axis reduction and mandatory 2D Doorway Anchoring. Includes full tensor-based navigation, swarm dynamics, and asymmetric governance.",
-  "main": "handler.py",
-  "scripts": { "start": "python3 handler.py" },
-  "openclaw": {
-    "extensions": ["openclaw.plugin.json"],
-    "compat": { "pluginApi": ">=3.22.0" },
-    "build": { "openclawVersion": "4.2.0" },
-    "capabilities": [
-      "z_axis_reduction_alignment",
-      "doorway_origin_anchoring",
-      "s2_hal_integration",
-      "spatio_temporal_visa",
-      "lord_guest_negotiation",
-      "mmwave_boundary_scanning",
-      "pki_swarm_sync_arbitration"
-    ],
-    "configSchema": {
-      "type": "object",
-      "required": ["S2_SWARM_PKI_ROOT"],
-      "properties": {
-        "S2_SWARM_PKI_ROOT": { "type": "string", "description": "PKI root for mesh authentication." }
-      }
-    }
+  "version": "1.2.4",
+  "description": "S2 Spatial Twin & Origin Alignment Brain. Hybrid Python-Runtime skill.",
+  "type": "module",
+  "scripts": {
+    "install": "pip3 install -r requirements.txt",
+    "start": "python3 handler.py"
   },
-  "author": "Space2.world (Miles Xiang)"
+  "clawdbot": {
+    "type": "executable",
+    "instruction_only": false
+  },
+  "author": "Space2.world (Miles Xiang)",
+  "license": "S2-CLA"
 }

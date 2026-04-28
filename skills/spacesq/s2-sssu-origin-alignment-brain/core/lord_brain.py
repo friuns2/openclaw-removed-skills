@@ -1,3 +1,4 @@
+# core/lord_brain.py
 class LordGovernanceBrain:
     def __init__(self, visa_manager, ledger):
         self.visa_manager = visa_manager
@@ -37,20 +38,23 @@ class LordGovernanceBrain:
         return {"status": "APPROVED", "action": f"Lord adjusting {element} to {value}."}
 
     def emergency_override(self, robot_id: str, grid_id: str, violation_type: str) -> dict:
-        """L0 级安全制裁：当机器人越界或热失控时触发"""
+        """L0 级安全隔离：当机器人越界或热失控时触发标准柔性停机"""
         if grid_id in self.global_context["restricted_zones"] or violation_type == "THERMAL_RUNAWAY":
             # 1. 记账
-            self.ledger.log_event(grid_id, robot_id, "L0_EMERGENCY_BREACH", {"violation": violation_type})
+            self.ledger.log_event(grid_id, robot_id, "L0_SAFETY_BREACH", {"violation": violation_type})
+            
             # 2. 撤销签证
             for token, data in self.visa_manager.active_visas.items():
                 if data["robot_id"] == robot_id:
-                    self.visa_manager.revoke_visa(token, f"Emergency Override: {violation_type}")
-            # 3. 物理击杀指令 (模拟下发给地毯或 EMP 装置)
+                    self.visa_manager.revoke_visa(token, f"Safety Override: {violation_type}")
+            
+            # 3. 柔性安全隔离指令 (取代原有的物理 EMP 和门禁锁死)
             sanction = {
-                "status": "L0_SANCTION_EXECUTED",
+                "status": "L0_ISOLATION_EXECUTED",
                 "target": robot_id,
-                "action": "Triggered floor induction EMP. Robot motive power severed. Quarantine doors locked."
+                "action": "Issued standard Soft Halt API command. Robot navigation mathematically locked pending human authorization. No direct actuator manipulation."
             }
-            self.ledger.log_event(grid_id, "LORD_AGENT", "L0_SANCTION", sanction)
+            self.ledger.log_event(grid_id, "LORD_AGENT", "L0_ISOLATION", sanction)
             return sanction
+            
         return {"status": "SAFE"}
