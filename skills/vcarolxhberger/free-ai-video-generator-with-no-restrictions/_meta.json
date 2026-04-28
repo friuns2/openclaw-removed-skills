@@ -3,9 +3,15 @@
   "slug": "free-ai-video-generator-with-no-restrictions",
   "displayName": "Free Ai Video Generator With No Restrictions",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775627595122,
-    "commit": "https://github.com/openclaw/skills/commit/fb9990968425ba4f0c637257c04aacd1f63cb9b2"
+    "version": "1.0.1",
+    "publishedAt": 1775677974759,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775627595122,
+      "commit": "https://github.com/openclaw/skills/commit/fb9990968425ba4f0c637257c04aacd1f63cb9b2"
+    }
+  ]
 }
