@@ -3,11 +3,16 @@
   "slug": "re-blog-image",
   "displayName": "Re Blog Image",
   "latest": {
-    "version": "1.1.1",
-    "publishedAt": 1776316151739,
-    "commit": "https://github.com/openclaw/skills/commit/c3b6a4196db94fad824650944c750a6d9cc252b1"
+    "version": "1.1.2",
+    "publishedAt": 1776882014940,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.1",
+      "publishedAt": 1776316151739,
+      "commit": "https://github.com/openclaw/skills/commit/c3b6a4196db94fad824650944c750a6d9cc252b1"
+    },
     {
       "version": "1.0.9",
       "publishedAt": 1776026192472,
