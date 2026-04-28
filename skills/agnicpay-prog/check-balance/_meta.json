@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "check-balance",
-  "displayName": "Check Balance",
+  "displayName": "Agnic Check Balance",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775592097490,
-    "commit": "https://github.com/openclaw/skills/commit/357569da9c030c97f4dd1b05ab0db1cae5bbc28d"
+    "version": "2.0.2",
+    "publishedAt": 1776953831644,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775592097490,
+      "commit": "https://github.com/openclaw/skills/commit/357569da9c030c97f4dd1b05ab0db1cae5bbc28d"
+    }
+  ]
 }
