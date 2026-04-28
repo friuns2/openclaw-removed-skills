@@ -4,7 +4,8 @@
 便于交底书交付代理人或所内流程。
 
 支持：ATX 标题 (#–######)、段落、**粗体**、行内 `代码`、无序/有序列表、
-围栏代码块、简单 GFM 表格、引用块（>）、水平线（---）、行内图片 ``![](path.png)``。
+围栏代码块、简单 GFM 表格、引用块（>）、水平线（---）、行内图片 ``![](path.png)``
+（在最大宽、最大高约束下**等比缩放**，竖图自动缩小宽度以整图落入版面）。
 
 **连续多行正文**（中间无空行、且非列表/标题等）时，**每一行**输出为 Word 中**独立一段**，
 以便「（1）…（2）…」等分条换行；若须在同一段内接排，请写**同一行**内或用 Markdown 空行分隔逻辑段。
@@ -28,6 +29,79 @@ from pathlib import Path
 from docx import Document
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
+
+# 插图最大尺寸（英寸）：在常见 A4、默认边距下保证整图可见、按比例缩放（不过宽也不过高）。
+_DEFAULT_IMAGE_MAX_W_IN = 5.5
+_DEFAULT_IMAGE_MAX_H_IN = 8.2
+
+
+def _image_pixel_size(path: Path) -> tuple[int, int] | None:
+    """读取常见位图宽高（像素），失败返回 None。不依赖 Pillow。"""
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return None
+    if len(raw) >= 24 and raw.startswith(b"\x89PNG\r\n\x1a\n") and raw[12:16] == b"IHDR":
+        w = int.from_bytes(raw[16:20], "big")
+        h = int.from_bytes(raw[20:24], "big")
+        if w > 0 and h > 0:
+            return w, h
+    if len(raw) >= 10 and raw[:3] == b"GIF" and raw[3:6] in (b"87a", b"89a"):
+        w = int.from_bytes(raw[6:8], "little")
+        h = int.from_bytes(raw[8:10], "little")
+        if w > 0 and h > 0:
+            return w, h
+    if len(raw) >= 4 and raw.startswith(b"\xff\xd8"):
+        i = 2
+        n = len(raw)
+        while i < n:
+            if raw[i] != 0xFF:
+                i += 1
+                continue
+            i += 1
+            while i < n and raw[i] == 0xFF:
+                i += 1
+            if i >= n:
+                break
+            marker = raw[i]
+            i += 1
+            if marker in (0xD8, 0xD9):
+                continue
+            if marker == 0xDA:
+                break
+            if 0xD0 <= marker <= 0xD7:
+                continue
+            if i + 2 > n:
+                break
+            seg_len = int.from_bytes(raw[i : i + 2], "big")
+            if seg_len < 2:
+                break
+            i += 2
+            if marker in (0xC0, 0xC1, 0xC2) and i + 5 <= n:
+                h = int.from_bytes(raw[i + 1 : i + 3], "big")
+                w = int.from_bytes(raw[i + 3 : i + 5], "big")
+                if w > 0 and h > 0:
+                    return w, h
+            i += seg_len - 2
+    return None
+
+
+def _fit_image_display_inches(
+    px_w: int,
+    px_h: int,
+    *,
+    max_w_in: float,
+    max_h_in: float,
+) -> tuple[Inches, Inches]:
+    """在不超过 max_w / max_h 的前提下等比缩放，使整图落入版面。"""
+    if px_w <= 0 or px_h <= 0:
+        return Inches(max_w_in), Inches(max_h_in * 0.5)
+    aw = max_w_in
+    ah = aw * px_h / px_w
+    if ah > max_h_in:
+        ah = max_h_in
+        aw = ah * px_w / px_h
+    return Inches(aw), Inches(ah)
 
 
 def _set_run_font(run, name: str = "宋体", size_pt: float | None = None, bold: bool | None = None):
@@ -153,7 +227,14 @@ def _add_horizontal_rule(doc: Document):
     run.font.color.rgb = RGBColor(0xAA, 0xAA, 0xAA)
 
 
-def _try_add_image(doc: Document, line: str, base_dir: Path | None) -> bool:
+def _try_add_image(
+    doc: Document,
+    line: str,
+    base_dir: Path | None,
+    *,
+    max_w_in: float = _DEFAULT_IMAGE_MAX_W_IN,
+    max_h_in: float = _DEFAULT_IMAGE_MAX_H_IN,
+) -> bool:
     m = re.match(r"!\[([^\]]*)\]\(([^)]+)\)", line.strip())
     if not m or not base_dir:
         return False
@@ -164,14 +245,27 @@ def _try_add_image(doc: Document, line: str, base_dir: Path | None) -> bool:
         p.add_run(f"[图片缺失: {alt or src} — {path}]")
         return True
     try:
-        doc.add_picture(str(path), width=Inches(5.5))
+        dims = _image_pixel_size(path)
+        if dims:
+            w_in, h_in = _fit_image_display_inches(
+                *dims, max_w_in=max_w_in, max_h_in=max_h_in
+            )
+            doc.add_picture(str(path), width=w_in, height=h_in)
+        else:
+            doc.add_picture(str(path), width=Inches(max_w_in))
     except Exception:
         p = doc.add_paragraph()
         p.add_run(f"[图片无法嵌入: {path}]")
     return True
 
 
-def convert_md_to_docx(md_text: str, base_dir: Path | None) -> Document:
+def convert_md_to_docx(
+    md_text: str,
+    base_dir: Path | None,
+    *,
+    image_max_w_in: float = _DEFAULT_IMAGE_MAX_W_IN,
+    image_max_h_in: float = _DEFAULT_IMAGE_MAX_H_IN,
+) -> Document:
     doc = Document()
     # 默认正文样式
     try:
@@ -224,7 +318,13 @@ def convert_md_to_docx(md_text: str, base_dir: Path | None) -> Document:
         # 图片独占一行
         if line.strip().startswith("![") and "](" in line:
             flush_paragraph()
-            _try_add_image(doc, line, base_dir)
+            _try_add_image(
+                doc,
+                line,
+                base_dir,
+                max_w_in=image_max_w_in,
+                max_h_in=image_max_h_in,
+            )
             i += 1
             continue
 
@@ -303,6 +403,20 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="解析 ![](/相对路径) 图片时的根目录（默认使用 .md 所在目录）",
     )
+    p.add_argument(
+        "--image-max-width-inches",
+        type=float,
+        default=_DEFAULT_IMAGE_MAX_W_IN,
+        metavar="IN",
+        help=f"插图最大宽度（英寸，默认 {_DEFAULT_IMAGE_MAX_W_IN}），与高度共同约束等比缩放",
+    )
+    p.add_argument(
+        "--image-max-height-inches",
+        type=float,
+        default=_DEFAULT_IMAGE_MAX_H_IN,
+        metavar="IN",
+        help=f"插图最大高度（英寸，默认 {_DEFAULT_IMAGE_MAX_H_IN}），避免竖图仅按宽度缩放后超出单页可视区域",
+    )
     args = p.parse_args(argv)
 
     in_path = Path(args.input).resolve()
@@ -317,7 +431,12 @@ def main(argv: list[str] | None = None) -> int:
         md_text = in_path.read_text(encoding="utf-8", errors="replace")
         print("警告：输入文件含非 UTF-8 字节，已使用替换字符解码后继续转换。", file=sys.stderr)
 
-    doc = convert_md_to_docx(md_text, base_dir=base)
+    doc = convert_md_to_docx(
+        md_text,
+        base_dir=base,
+        image_max_w_in=args.image_max_width_inches,
+        image_max_h_in=args.image_max_height_inches,
+    )
     out_path = Path(args.output).resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(out_path))

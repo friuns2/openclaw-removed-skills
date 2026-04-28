@@ -6,7 +6,7 @@
 
 | 脚本 | 作用 |
 |------|------|
-| **`cnipa_epub_search.py`** | **（Step 5 优先）** 一步：拉取 + 解析，**不写结果页 HTML 落盘**；**stdout 仅一行** `EPUB_HITS_JSON:`；说明性输出在 stderr；已做 UTF-8 适配（Windows 见 **INSTALL.md**）。 |
+| **`cnipa_epub_search.py`** | **（Step 5 优先）** 一步：拉取 + 解析，**不写结果页 HTML 落盘**；**Agent 须按 `prior_art_search.md` 分多次调用、每轮一词并自行合并 JSON**；脚本在**单次命令多词**时也会进程内循环检索并合并（人工/本地便利）；**stdout 仅一行** `EPUB_HITS_JSON:`；stderr 上 `EPUB_*` 为 **ASCII**；UTF-8 / PowerShell 见 **INSTALL.md**。 |
 | **`cnipa_epub_crawler.py`** | 仅 Playwright 拉取并**默认保存**结果页 HTML；stdout 亦含 **`EPUB_HITS_JSON:`**。 |
 | **`cnipa_epub_parse.py`** | 仅解析已保存的 HTML：`python tools/cnipa_epub_parse.py path/to/_last_result_xxx.html`；字段含标题、公开号、链接、**`abstract`**（若有）。 |
 
@@ -55,7 +55,7 @@ npx puppeteer browsers install chrome-headless-shell
 
 ### mermaid CLI 与手动试转
 
-**`mermaid_render.py` 与 11.x 一致**：调用的是官方 **`mmdc -i <.mmd> -o <.png> -b white`**（本地则用 `tools/node_modules/.bin/mmdc`）。  
+**`mermaid_render.py` 与 11.x 一致**：在 **`mmdc -i <.mmd> -o <.png> -b white`** 基础上默认追加 **`-s 2 -w 1400 -H 1050`**（更高像素密度与视口，系统框图在 Word 中更清晰）。需要再锐化可 **`--mmdc-scale 3`**（PNG 更大）；恢复接近旧版可 **`--mmdc-scale 1 --mmdc-width 800 --mmdc-height 600`**。  
 若某处写的是 `npx -y @mermaid-js/mermaid-cli -i …`，**少了子命令 `mmdc`**，参数会错位；正确示例：
 
 ```bash
@@ -75,6 +75,9 @@ python3 tools/mermaid_render.py -i draft.md -o out/一种XXX方法及系统_2026
 
 # 仅 Markdown，不要 Word
 python3 tools/mermaid_render.py -i draft.md -o "一种XXX方法及系统_20260408143025.md" --no-docx
+
+# 更高清晰度（可选）
+python3 tools/mermaid_render.py -i draft.md -o "…定稿.md" --mmdc-scale 3 --mmdc-width 1600 --mmdc-height 1200
 
 # 指定 mermaid 图片子目录（相对输出 .md）
 python3 tools/mermaid_render.py -i draft.md -o out/一种XXX方法及系统_20260408143025.md --assets-dir figures/mermaid
@@ -117,6 +120,12 @@ python3 tools/md_to_docx.py --input path/to/交底书.md --output path/to/交底
 python3 tools/md_to_docx.py -i ./outputs/case/disclosure.md -o ./outputs/case/disclosure.docx --base-dir ./outputs/case
 ```
 
+**插图**：对 PNG/GIF/JPEG 会读取像素尺寸，在默认 **最大宽 5.5" × 最大高 8.2"** 内**等比缩放**并同时指定 `width`/`height`，避免竖长流程图仅按宽度放大后**高度超出版心**、打印或阅读时像被裁切。可按纸张边距调整，例如：
+
+```bash
+python3 tools/md_to_docx.py -i a.md -o a.docx --image-max-width-inches 6 --image-max-height-inches 9
+```
+
 在 Claude Code 中可将 `tools` 换为 `${CLAUDE_SKILL_DIR}/tools`。
 
 ### 支持的 Markdown 子集
@@ -131,7 +140,7 @@ python3 tools/md_to_docx.py -i ./outputs/case/disclosure.md -o ./outputs/case/di
 | `\| 表格 \|` | 简单表格（Table Grid） |
 | `> ` | 左缩进引用 |
 | `---` 等 | 浅色分隔线 |
-| `![](path)` | 嵌入图片（路径需存在） |
+| `![](path)` | 嵌入图片（路径需存在；默认宽/高上限内等比缩放） |
 
 **未完整支持**：复杂嵌套列表、HTML 块、**未预渲染的** mermaid 围栏（仍为代码块）、脚注、任务列表等。定稿前请运行 **`mermaid_render.py`**；若仅用外部工具导出 PNG，可直接写 `![](...)`。
 

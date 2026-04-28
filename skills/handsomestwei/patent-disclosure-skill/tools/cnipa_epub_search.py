@@ -8,12 +8,14 @@
 **输出约定**（便于 Agent 抓取且不触发误判降级）：
 
 - **stdout**：**仅一行** ``EPUB_HITS_JSON:`` + JSON 数组（UTF-8，含中文标题与 ``abstract``）。
-- **stderr**：``EPUB_MERGE:`` / ``EPUB_NOTE:`` / ``EPUB_HINT:`` 等说明性文字；启动时尽量将标准流
-  设为 **UTF-8**（``reconfigure``），减轻 Windows 终端默认编码导致的乱码。
+- **stderr**：``EPUB_MERGE:`` / ``EPUB_NOTE:`` / ``EPUB_HINT:`` 等为 **ASCII**，减轻 PowerShell 把
+  含中文的 stderr 当成 ``NativeCommandError``，以及 ``2>&1`` 合并流时的乱码。stdout 上 JSON 仍为 UTF-8
+  中文。启动时 ``reconfigure`` UTF-8。
 
-**检索词拆分**：命令行中所有参数会按 **Python 空白规则**（`str.split()`，连续空格等与一次空格相同）
-拆成多个词；**一词一查**，结果按公开号去重合并。若只需要**单次**向公布站提交整句（站内 AND），请
-写成**不含空白的一个参数**（例如无空格的连续关键词），或改用 ``cnipa_epub_crawler.py`` 单传一句。
+**检索词拆分（仅按空白）**：命令行中所有参数会按 **Python 空白规则**（`str.split()`）拆成多段；
+**一段一查**，结果按公开号去重合并。**不在本脚本内**对长中文做自动分词或拆字——**相关度高的语义化
+检索单位须在 Agent 生成 Bash 前完成**（见 ``prompts/prior_art_search.md``「国知局检索词（生成阶段必做）」）。
+若需**整句一次**向公布站提交（站内 AND），请改用 ``cnipa_epub_crawler.py`` 单传一句。
 
 需已安装：pip install -r tools/requirements-cnipa.txt && python -m playwright install chromium
 
@@ -76,10 +78,12 @@ def _dedupe_hits(hits_lists: list) -> list:
 
 
 def _usage() -> None:
-    print("用法: python tools/cnipa_epub_search.py <检索词> [更多词…]", file=sys.stderr)
-    print("说明: 参数中凡遇空白（含连续空格）即拆成多个词；一词一查，结果按公开号去重合并。", file=sys.stderr)
-    print('示例: python tools/cnipa_epub_search.py "批任务 调度 异构"', file=sys.stderr)
-    print("  或: python tools/cnipa_epub_search.py 批任务 调度 异构", file=sys.stderr)
+    print("usage: python tools/cnipa_epub_search.py <term> [more terms...]", file=sys.stderr)
+    print(
+        "whitespace splits to multiple terms; one Playwright run per term; merge by pub_number.",
+        file=sys.stderr,
+    )
+    print('example: python tools/cnipa_epub_search.py "batch 调度 异构"', file=sys.stderr)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -91,7 +95,8 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     if len(terms) > _MAX_TERMS:
         print(
-            "错误: 拆分后检索词超过 %d 个，请缩短或合并检索式。" % _MAX_TERMS,
+            "ERROR: too many terms after split (%d > %d); shorten or run in batches."
+            % (len(terms), _MAX_TERMS),
             file=sys.stderr,
         )
         return 2
@@ -101,7 +106,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         import playwright  # noqa: F401
     except ImportError:
-        print("请先安装: pip install -r tools/requirements-cnipa.txt", file=sys.stderr)
+        print(
+            "ERROR: pip install -r tools/requirements-cnipa.txt && python -m playwright install chromium",
+            file=sys.stderr,
+        )
         return 1
 
     from cnipa_epub_crawler import search_epub_keyword
@@ -123,8 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     if multi:
         hits = _dedupe_hits(all_batches)
         print(
-            "EPUB_MERGE: 按空白拆成 %d 个词分别检索，合并去重后 %d 条"
-            % (len(terms), len(hits)),
+            "EPUB_MERGE: terms=%d merged_hits=%d" % (len(terms), len(hits)),
             file=sys.stderr,
             flush=True,
         )
@@ -134,19 +141,19 @@ def main(argv: list[str] | None = None) -> int:
     if not hits and last_html and len(last_html) < 20_000:
         if multi:
             print(
-                "EPUB_HINT: 拆分多词检索后仍 0 条。可换更通用词，或按 prior_art_search 使用 WebSearch。",
+                "EPUB_HINT: 0 hits after multi-term run; try broader terms or WebSearch (prior_art_search.md)",
                 file=sys.stderr,
                 flush=True,
             )
         else:
             print(
-                "EPUB_HINT: 本次解析为 0 条。若检索式较长，可在命令行中增加空格拆成多词以扩大召回。",
+                "EPUB_HINT: 0 hits; try more terms (space-separated) or WebSearch",
                 file=sys.stderr,
                 flush=True,
             )
 
     print(
-        "EPUB_NOTE: 结果页 HTML 未写入磁盘（仅内存）；末次子页字节数 %d" % len(last_html),
+        "EPUB_NOTE: html_bytes=%d disk=0" % len(last_html),
         file=sys.stderr,
         flush=True,
     )
