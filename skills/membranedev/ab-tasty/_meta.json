@@ -3,9 +3,15 @@
   "slug": "ab-tasty",
   "displayName": "Ab Tasty",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581431046,
-    "commit": "https://github.com/openclaw/skills/commit/445922082300dfaad43abe60785294cad80bf54e"
+    "version": "1.0.1",
+    "publishedAt": 1776896041563,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581431046,
+      "commit": "https://github.com/openclaw/skills/commit/445922082300dfaad43abe60785294cad80bf54e"
+    }
+  ]
 }
