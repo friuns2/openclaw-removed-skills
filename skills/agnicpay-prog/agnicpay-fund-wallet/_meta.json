@@ -1,11 +1,17 @@
 {
   "owner": "agnicpay-prog",
   "slug": "agnicpay-fund-wallet",
-  "displayName": "Fund Wallet",
+  "displayName": "Agnic Fund Wallet",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775599246362,
-    "commit": "https://github.com/openclaw/skills/commit/c9a6ef74dbec41d309af9dfe36a3e0e89a21fb6b"
+    "version": "2.0.2",
+    "publishedAt": 1776953073934,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775599246362,
+      "commit": "https://github.com/openclaw/skills/commit/c9a6ef74dbec41d309af9dfe36a3e0e89a21fb6b"
+    }
+  ]
 }
