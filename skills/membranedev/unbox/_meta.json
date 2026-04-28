@@ -3,9 +3,15 @@
   "slug": "unbox",
   "displayName": "Unbox",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775718306422,
-    "commit": "https://github.com/openclaw/skills/commit/56566c218501572108c77ea247a6c844160a5247"
+    "version": "1.0.1",
+    "publishedAt": 1776898287623,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775718306422,
+      "commit": "https://github.com/openclaw/skills/commit/56566c218501572108c77ea247a6c844160a5247"
+    }
+  ]
 }
