@@ -3,9 +3,15 @@
   "slug": "turbot-pipes",
   "displayName": "Turbot Pipes",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775311612850,
-    "commit": "https://github.com/openclaw/skills/commit/efb49716d9cdda242788f96725dfef60fc5fc88b"
+    "version": "1.0.1",
+    "publishedAt": 1776885937356,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775311612850,
+      "commit": "https://github.com/openclaw/skills/commit/efb49716d9cdda242788f96725dfef60fc5fc88b"
+    }
+  ]
 }
