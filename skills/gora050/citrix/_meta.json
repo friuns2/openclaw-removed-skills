@@ -3,9 +3,15 @@
   "slug": "citrix",
   "displayName": "Citrix",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775718540586,
-    "commit": "https://github.com/openclaw/skills/commit/00996a0e453c773a2da3a75de484b02498ebe897"
+    "version": "1.0.1",
+    "publishedAt": 1776899761453,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775718540586,
+      "commit": "https://github.com/openclaw/skills/commit/00996a0e453c773a2da3a75de484b02498ebe897"
+    }
+  ]
 }
