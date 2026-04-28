@@ -1,0 +1,11 @@
+{
+  "owner": "membranedev",
+  "slug": "microsoft-outlook-integration",
+  "displayName": "Microsoft Outlook",
+  "latest": {
+    "version": "1.0.4",
+    "publishedAt": 1777364367319,
+    "commit": null
+  },
+  "history": []
+}
