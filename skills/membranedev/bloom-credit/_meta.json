@@ -3,9 +3,15 @@
   "slug": "bloom-credit",
   "displayName": "Bloom Credit",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775703871245,
-    "commit": "https://github.com/openclaw/skills/commit/bab1ddc64e3de7bd1eab05f6b4fa28d39dd5e26f"
+    "version": "1.0.1",
+    "publishedAt": 1776898048605,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775703871245,
+      "commit": "https://github.com/openclaw/skills/commit/bab1ddc64e3de7bd1eab05f6b4fa28d39dd5e26f"
+    }
+  ]
 }
