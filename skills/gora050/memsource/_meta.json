@@ -3,9 +3,15 @@
   "slug": "memsource",
   "displayName": "Memsource",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775556306778,
-    "commit": "https://github.com/openclaw/skills/commit/10be1d92d9ed81a97f8e442f8c958e4dd62a0e27"
+    "version": "1.0.1",
+    "publishedAt": 1776898825392,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775556306778,
+      "commit": "https://github.com/openclaw/skills/commit/10be1d92d9ed81a97f8e442f8c958e4dd62a0e27"
+    }
+  ]
 }
