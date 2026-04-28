@@ -3,9 +3,15 @@
   "slug": "advanced-web-ranking",
   "displayName": "Advanced Web Ranking",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775725155234,
-    "commit": "https://github.com/openclaw/skills/commit/e6ba78edff3de2c3c75c98e3c9dab24de9a45939"
+    "version": "1.0.1",
+    "publishedAt": 1776898391369,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775725155234,
+      "commit": "https://github.com/openclaw/skills/commit/e6ba78edff3de2c3c75c98e3c9dab24de9a45939"
+    }
+  ]
 }
