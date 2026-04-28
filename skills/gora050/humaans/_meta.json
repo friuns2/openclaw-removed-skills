@@ -3,9 +3,15 @@
   "slug": "humaans",
   "displayName": "Humaans",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775556314579,
-    "commit": "https://github.com/openclaw/skills/commit/82d5950e97f7e31aea0e36c2fb227aee404339c2"
+    "version": "1.0.1",
+    "publishedAt": 1776898829158,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775556314579,
+      "commit": "https://github.com/openclaw/skills/commit/82d5950e97f7e31aea0e36c2fb227aee404339c2"
+    }
+  ]
 }
