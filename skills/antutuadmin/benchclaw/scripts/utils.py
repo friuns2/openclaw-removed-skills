@@ -12,36 +12,36 @@ import uuid
 logger = logging.getLogger("benchclaw")
 
 
-def get_fingerprint() -> str:
+def get_bench_session_id() -> str:
     """
-    从本地 cache.json 读取设备指纹；若不存在则生成随机 UUID 并写回文件后返回。
+    从本地 cache.json 读取 Bench 会话标识；若不存在则生成随机 UUID 并写回文件后返回。
     """
     cache_path = os.path.join(os.path.dirname(__file__), "../data/cache.json")
-    fingerprint: str | None = None
+    bench_session_id: str | None = None
 
     try:
         with open(cache_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if isinstance(data, dict):
-            value = data.get("fingerprint")
+            value = data.get("bench_session_id")
             if isinstance(value, str) and value.strip():
-                fingerprint = value.strip()
+                bench_session_id = value.strip()
     except FileNotFoundError:
         pass
     except (OSError, json.JSONDecodeError):
         pass
 
-    if not fingerprint:
-        fingerprint = str(uuid.uuid4())
+    if not bench_session_id:
+        bench_session_id = str(uuid.uuid4())
         try:
             os.makedirs(os.path.dirname(cache_path), exist_ok=True)
             with open(cache_path, "w", encoding="utf-8") as f:
-                json.dump({"fingerprint": fingerprint}, f, ensure_ascii=False, indent=2)
+                json.dump({"bench_session_id": bench_session_id}, f, ensure_ascii=False, indent=2)
         except OSError:
-            # 即使写入失败，也仍然返回本次生成的指纹
+            # 即使写入失败，也仍然返回本次生成的 id
             pass
 
-    return fingerprint
+    return bench_session_id
 
 def get_temp_file(filename: str) -> str:
     """返回 temp 目录下指定文件的绝对路径，目录不存在时自动创建。"""

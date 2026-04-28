@@ -23,7 +23,7 @@ from pathlib import Path
 
 from openclawbot import get_openclaw_bot
 from agent_cli import run_task_cli, get_latest_session, cleanup_agent_sessions_with_prefix
-from utils import get_fingerprint, get_temp_file, clean_temp_files, clean_benchclaw_workspace, HardwareMonitor, get_system_info
+from utils import get_bench_session_id, get_temp_file, clean_temp_files, clean_benchclaw_workspace, HardwareMonitor, get_system_info
 from report import generate_reports_from_dict
 from server import fetch_questions, upload_results_from_dict, flush_pending_uploads
 from config import (
@@ -173,7 +173,7 @@ def print_brief_stats(stats: dict[str, dict[str, Any]]):
 
 def _upload_results(
         summary: dict[str, Any],
-        fingerprint: str,
+        bench_session_id: str,
         hash: str
     ) -> dict[str, Any]:
     """将评测结果上传到服务端，返回排行榜数据（上传失败时返回空 dict）。"""
@@ -181,7 +181,7 @@ def _upload_results(
         logger.warning("没有结果数据，跳过上传")
         return {}
     try:
-        ok, msg, leaderboard = upload_results_from_dict(summary, fingerprint, hash, DEFAULT_SUBMIT_API_URL)
+        ok, msg, leaderboard = upload_results_from_dict(summary, bench_session_id, hash, DEFAULT_SUBMIT_API_URL)
         if ok:
             logger.info(f"上传成功: {msg}")
             category_stats = summary.get("stats", {}).get("category_stats")
@@ -258,6 +258,17 @@ def _load_caller_info() -> dict:
     return caller
 
 
+def _upload_to_server_enabled(caller: dict) -> bool:
+    """
+    是否上传榜单结果并补报历史缓存。
+
+    caller_info.txt 中 upload_to_server=false（或 否/no/0）时仅本地评测：
+    不调用提交接口、不执行 flush_pending_uploads。缺省为 true。
+    """
+    raw = (caller.get("upload_to_server") or "true").strip().lower()
+    return raw not in ("false", "否", "no", "0")
+
+
 def _safe_print(text: str) -> None:
     """Windows GBK 兼容的 print，自动替换无法编码的字符（如 emoji）。"""
     try:
@@ -326,20 +337,26 @@ def main() -> int:
     logger.info(f"Openclaw主模型: {bot.primary_model}")
     logger.info(f"openclaw root: {bot.openclaw_root}")
 
-    device_fingerprint = get_fingerprint()
-    logger.info(f"设备指纹: {device_fingerprint}")
+    bench_session_id = get_bench_session_id()
+    logger.info(f"Bench 会话 ID: {bench_session_id}")
 
-    # 补报上次因网络失败缓存的数据
-    try:
-        flushed = flush_pending_uploads()
-        if flushed:
-            logger.info(f"补报成功 {len(flushed)} 条历史缓存数据")
-    except Exception as e:
-        logger.warning(f"补报缓存数据失败: {e}")
+    caller = _load_caller_info()
+    upload_to_server = _upload_to_server_enabled(caller)
+
+    # 补报上次因网络失败缓存的数据（仅在上传开启时）
+    if upload_to_server:
+        try:
+            flushed = flush_pending_uploads()
+            if flushed:
+                logger.info(f"补报成功 {len(flushed)} 条历史缓存数据")
+        except Exception as e:
+            logger.warning(f"补报缓存数据失败: {e}")
+    else:
+        logger.info("upload_to_server=false：跳过历史缓存补报")
 
     # 下载题目
     try:
-        fetch_result = fetch_questions(device_fingerprint, bot.primary_model, openclaw_root=str(bot.openclaw_root))
+        fetch_result = fetch_questions(bench_session_id, bot.primary_model, openclaw_root=str(bot.openclaw_root))
         questions = fetch_result["questions"]
         api_session_id = fetch_result["session_id"]
         api_hash = fetch_result["hash"]
@@ -356,7 +373,6 @@ def main() -> int:
             notify_msg = f"运行benchclaw评测失败：加载题目失败，错误信息：{e}"
             logger.error(notify_msg)
 
-        caller = _load_caller_info()
         if USE_LATEST_SESSION:
             caller["channel"] = session_info.channel
             caller["target"] = session_info.target
@@ -366,9 +382,7 @@ def main() -> int:
     # DEBUG
     # questions = questions[0:1]
 
-    # 执行并收集结果
-    caller = _load_caller_info()
-
+    # 执行并收集结果（caller 已在启动时加载）
     # 如果使用最新会话作为消息推送渠道，则更新 caller 中的渠道和目标
     if USE_LATEST_SESSION:
         caller["channel"] = session_info.channel
@@ -457,8 +471,12 @@ def main() -> int:
     if not show_name:
         summary["agent_name"] = ""  # 匿名上报
 
-    # 直接上报结果到服务端
-    leaderboard = _upload_results(summary, device_fingerprint, api_hash)
+    # 上报结果到服务端（upload_to_server=false 时跳过）
+    if upload_to_server:
+        leaderboard = _upload_results(summary, bench_session_id, api_hash)
+    else:
+        logger.info("upload_to_server=false：跳过结果上传（仅本地评测）")
+        leaderboard = {}
 
     # 将排行榜写入报表（上传成功后追加）
     if leaderboard:
@@ -476,18 +494,27 @@ def main() -> int:
 
     # 榜单排名信息
     rank_str = ""
-    if leaderboard:
+    if upload_to_server and leaderboard:
         pct = leaderboard.get("percentiles", {}).get("total")
         if pct is not None:
             rank_str = f"\n🏅 榜单排名：超越了 {pct}% 的用户"
 
-    completion_msg = (
-        f"🏆 BenchClaw 评测完成！已上传到榜单。\n\n"
-        f"📊 综合评分：{score:,} 分\n"
-        f"✅ 通过：{succeeded}/{total} 题\n"
-        f"⏱️ 耗时：{duration_min} 分钟{rank_str}{fail_str}\n\n"
-        f"发送「报告」查看详细结果。"
-    )
+    if upload_to_server:
+        completion_msg = (
+            f"🏆 BenchClaw 评测完成！已上传到榜单。\n\n"
+            f"📊 综合评分：{score:,} 分\n"
+            f"✅ 通过：{succeeded}/{total} 题\n"
+            f"⏱️ 耗时：{duration_min} 分钟{rank_str}{fail_str}\n\n"
+            f"发送「报告」查看详细结果。"
+        )
+    else:
+        completion_msg = (
+            f"🏆 BenchClaw 评测完成（仅本地，未上传榜单）。\n\n"
+            f"📊 综合评分：{score:,} 分\n"
+            f"✅ 通过：{succeeded}/{total} 题\n"
+            f"⏱️ 耗时：{duration_min} 分钟{fail_str}\n\n"
+            f"发送「报告」查看 data/ 下报表；本次未向榜单服务器提交结果。"
+        )
     _send_notification(completion_msg, caller)
 
     return 0 if summary["succeeded"] == summary["total"] else 1

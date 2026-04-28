@@ -324,7 +324,7 @@ def _render_summary(data: dict[str, Any], totals: dict[str, Any]) -> str:
         tps_label = "🔴 过慢"
     diag_lines.append(f"🤖 **模型速度**：{avg_tps} TPS {tps_label}")
 
-    # 硬件
+    # 硬件信息分析
     if hw:
         cpu_peak = hw.get("cpu_peak_percent", 0)
         cpu_avg = hw.get("cpu_avg_percent", 0)

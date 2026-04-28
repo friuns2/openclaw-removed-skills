@@ -3,11 +3,16 @@
   "slug": "benchclaw",
   "displayName": "Benchclaw Openclaw Benchmark",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776424192075,
-    "commit": "https://github.com/openclaw/skills/commit/2ca5fb7422d48ae25c516c26ef928e647d6033d1"
+    "version": "1.1.1",
+    "publishedAt": 1777345215282,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776424192075,
+      "commit": "https://github.com/openclaw/skills/commit/2ca5fb7422d48ae25c516c26ef928e647d6033d1"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1776066296624,
