@@ -3,11 +3,16 @@
   "slug": "justoneapi-weibo",
   "displayName": "Weibo API",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776240020220,
-    "commit": "https://github.com/openclaw/skills/commit/80d59e24e165aceac5dc2c32b6a1c3caf84764c2"
+    "version": "1.0.4",
+    "publishedAt": 1776924505563,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776240020220,
+      "commit": "https://github.com/openclaw/skills/commit/80d59e24e165aceac5dc2c32b6a1c3caf84764c2"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1775378336217,

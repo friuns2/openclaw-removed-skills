@@ -41,8 +41,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Fans",
@@ -87,8 +87,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Followers",
@@ -99,7 +99,7 @@
     {
       "description": "Get Weibo post Comments data, including text, authors, and timestamps, for feedback analysis.",
       "method": "GET",
-      "operationId": "getPostCommentsV1",
+      "operationId": "getWeiboPostCommentsV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -145,8 +145,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Post Comments",
@@ -182,8 +182,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Profile",
@@ -237,8 +237,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Published Posts",
@@ -249,7 +249,7 @@
     {
       "description": "Get Weibo user Video list data (waterfall), including pagination cursor for next page.",
       "method": "GET",
-      "operationId": "getUserVideoListV1",
+      "operationId": "getWeiboUserVideoListV1",
       "parameters": [
         {
           "defaultValue": null,
@@ -283,8 +283,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "User Video List",
@@ -320,8 +320,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Post Details",
@@ -348,8 +348,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Hot Search",
@@ -454,8 +454,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Keyword Search",
@@ -527,8 +527,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "Search User Published Posts",
@@ -564,8 +564,8 @@
       "requestBody": null,
       "responses": [
         {
-          "description": "default response",
-          "statusCode": "default"
+          "description": "OK",
+          "statusCode": "200"
         }
       ],
       "summary": "TV Video Details",

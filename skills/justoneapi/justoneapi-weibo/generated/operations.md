@@ -24,7 +24,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getFollowersV1`
 
@@ -48,9 +48,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getPostCommentsV1`
+## `getWeiboPostCommentsV1`
 
 - Method: `GET`
 - Path: `/api/weibo/get-post-comments/v1`
@@ -78,7 +78,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserProfileV3`
 
@@ -101,7 +101,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getUserPublishedPostsV1`
 
@@ -126,9 +126,9 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
-## `getUserVideoListV1`
+## `getWeiboUserVideoListV1`
 
 - Method: `GET`
 - Path: `/api/weibo/get-user-video-list/v1`
@@ -150,7 +150,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `getWeiboDetailsV1`
 
@@ -173,7 +173,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `hotSearchV1`
 
@@ -195,7 +195,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchAllV2`
 
@@ -233,7 +233,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `searchProfileV1`
 
@@ -260,7 +260,7 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
 
 ## `tvComponentV1`
 
@@ -283,4 +283,4 @@ No request body.
 
 ### Responses
 
-- `default`: default response
+- `200`: OK
