@@ -3,9 +3,15 @@
   "slug": "softledger",
   "displayName": "Softledger",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775437437725,
-    "commit": "https://github.com/openclaw/skills/commit/e46b9e4a1a9173e1bd9fa3af87c06234f416805f"
+    "version": "1.0.1",
+    "publishedAt": 1776897134284,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775437437725,
+      "commit": "https://github.com/openclaw/skills/commit/e46b9e4a1a9173e1bd9fa3af87c06234f416805f"
+    }
+  ]
 }
