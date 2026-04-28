@@ -3,9 +3,15 @@
   "slug": "social-media-scholar",
   "displayName": "social media scholar (zotero)",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776241363307,
-    "commit": "https://github.com/openclaw/skills/commit/cfb1e15264e7b416d9a695a3d9d3134528d83b55"
+    "version": "1.0.3",
+    "publishedAt": 1776915463904,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776241363307,
+      "commit": "https://github.com/openclaw/skills/commit/cfb1e15264e7b416d9a695a3d9d3134528d83b55"
+    }
+  ]
 }

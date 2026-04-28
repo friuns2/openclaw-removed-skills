@@ -1,6 +1,6 @@
 ---
 name: social-media-scholar
-description: 从公众号/小红书/X等社交媒体文章链接提取论文信息，将论文保存到 Zotero 文库。(When you share a link of social media article that contains citation a paper, this skill can extract the paper information and save it to Zotero library.)
+description: 把论文帖分享给我，我帮你加进zotero：从公众号/小红书/X等社交媒体文章链接提取论文信息，将论文保存到 Zotero 文库。(When you share a link of social media article that contains citation a paper, this skill can extract the paper information and save it to Zotero library.)
 homepage: https://www.zotero.org
 metadata:
   {
