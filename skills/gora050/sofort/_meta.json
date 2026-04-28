@@ -3,9 +3,15 @@
   "slug": "sofort",
   "displayName": "Sofort",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775304438316,
-    "commit": "https://github.com/openclaw/skills/commit/c391d4ac5b8280bd3611f49f3a68640909194a37"
+    "version": "1.0.1",
+    "publishedAt": 1776885901275,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775304438316,
+      "commit": "https://github.com/openclaw/skills/commit/c391d4ac5b8280bd3611f49f3a68640909194a37"
+    }
+  ]
 }
