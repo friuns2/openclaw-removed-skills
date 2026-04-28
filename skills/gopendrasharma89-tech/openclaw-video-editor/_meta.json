@@ -1,13 +1,18 @@
 {
   "owner": "gopendrasharma89-tech",
   "slug": "openclaw-video-editor",
-  "displayName": "Openclaw Video Editor Pkg",
+  "displayName": "Openclaw Video Editor",
   "latest": {
-    "version": "2.2.1",
-    "publishedAt": 1776486780567,
-    "commit": "https://github.com/openclaw/skills/commit/e494c31a6554d144f491cfd3d1c23bb6baa47b4a"
+    "version": "4.1.0",
+    "publishedAt": 1777289365887,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.2.1",
+      "publishedAt": 1776486780567,
+      "commit": "https://github.com/openclaw/skills/commit/e494c31a6554d144f491cfd3d1c23bb6baa47b4a"
+    },
     {
       "version": "2.1.0",
       "publishedAt": 1775816478480,
