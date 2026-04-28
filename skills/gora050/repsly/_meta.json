@@ -3,9 +3,15 @@
   "slug": "repsly",
   "displayName": "Repsly",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775653756369,
-    "commit": "https://github.com/openclaw/skills/commit/105abeba9c4bee7a1b710e733f66607f75ce5eb1"
+    "version": "1.0.1",
+    "publishedAt": 1776899351386,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775653756369,
+      "commit": "https://github.com/openclaw/skills/commit/105abeba9c4bee7a1b710e733f66607f75ce5eb1"
+    }
+  ]
 }
