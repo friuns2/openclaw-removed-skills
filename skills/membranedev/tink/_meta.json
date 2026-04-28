@@ -3,9 +3,15 @@
   "slug": "tink",
   "displayName": "Tink",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775412213951,
-    "commit": "https://github.com/openclaw/skills/commit/ebf7aa747d9accd3c50a1380d33590662646f379"
+    "version": "1.0.1",
+    "publishedAt": 1776889326359,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775412213951,
+      "commit": "https://github.com/openclaw/skills/commit/ebf7aa747d9accd3c50a1380d33590662646f379"
+    }
+  ]
 }
