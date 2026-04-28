@@ -3,9 +3,15 @@
   "slug": "zoho-survey",
   "displayName": "Zoho Survey",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581482845,
-    "commit": "https://github.com/openclaw/skills/commit/8224d865a39748d3334b6a6fb2dc3901ff63f17e"
+    "version": "1.0.1",
+    "publishedAt": 1776896056644,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581482845,
+      "commit": "https://github.com/openclaw/skills/commit/8224d865a39748d3334b6a6fb2dc3901ff63f17e"
+    }
+  ]
 }
