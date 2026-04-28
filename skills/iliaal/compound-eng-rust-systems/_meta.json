@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-rust-systems",
-  "displayName": "rust-systems",
+  "displayName": "ia-rust-systems",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776519041927,
-    "commit": "https://github.com/openclaw/skills/commit/a471119350ad0a4f1cc57f3db20f8ff06deb8137"
+    "version": "3.0.4",
+    "publishedAt": 1777300792719,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776519041927,
+      "commit": "https://github.com/openclaw/skills/commit/a471119350ad0a4f1cc57f3db20f8ff06deb8137"
+    },
     {
       "version": "2.56.0",
       "publishedAt": 1776170450532,
