@@ -3,9 +3,15 @@
   "slug": "tito",
   "displayName": "Tito",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581696237,
-    "commit": "https://github.com/openclaw/skills/commit/f7af9fd10834b5efe8d79e1961eaab8fd9cacb4c"
+    "version": "1.0.1",
+    "publishedAt": 1776899091291,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581696237,
+      "commit": "https://github.com/openclaw/skills/commit/f7af9fd10834b5efe8d79e1961eaab8fd9cacb4c"
+    }
+  ]
 }
