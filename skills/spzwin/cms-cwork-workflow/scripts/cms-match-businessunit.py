@@ -280,6 +280,14 @@ def main() -> None:
                 {
                     "success": True,
                     "action": "match_and_submit",
+                    "identityContext": {
+                        "virtualEmpIdProvided": bool(args.virtual_emp_id),
+                        "senderAuthMode": "default_app_key",
+                        "note": (
+                            "当前脚本仅使用用户 AppKey 鉴权；virtualEmpId 作为业务字段透传。"
+                            "是否以虚拟员工展示由服务端规则决定。"
+                        ),
+                    },
                     "matchedBusinessUnit": best,
                     "topCandidates": top_ranking,
                     "matchContext": debug_context,

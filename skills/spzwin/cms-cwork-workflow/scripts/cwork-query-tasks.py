@@ -53,11 +53,50 @@ def parse_args(argv=None):
     parser.add_argument("--subordinate-ids", help="下属empId列表（逗号分隔，manager模式用）")
     parser.add_argument("--days-threshold", type=int, default=7,
                         help="未闭环天数阈值（默认7）")
+    parser.add_argument("--with-share-link", dest="with_share_link", action="store_true", default=True,
+                        help="在返回结果中补充任务分享链接（默认开启）")
+    parser.add_argument("--no-share-link", dest="with_share_link", action="store_false",
+                        help="关闭任务分享链接补充")
+    parser.add_argument("--share-top-n", type=int, default=20,
+                        help="列表场景最多补充前 N 条任务分享链接（默认 20，0=当前页全部）")
     parser.add_argument("--interactive", action="store_true", help="交互模式")
     parser.add_argument("--dry-run", action="store_true", help="干跑模式")
     parser.add_argument("--params-file", dest="params_file", default=None,
                         help="UTF-8 JSON 文件路径，从文件读取参数")
     return parser.parse_args(argv)
+
+
+def _extract_first_id(item, candidates):
+    if not isinstance(item, dict):
+        return None
+    for key in candidates:
+        value = item.get(key)
+        if value is not None and str(value).strip():
+            return value
+    return None
+
+
+def _safe_attach_task_share_link(client, item):
+    if not isinstance(item, dict):
+        return
+    task_id = _extract_first_id(item, ("planId", "id", "taskId"))
+    if task_id is None:
+        return
+    try:
+        item["shareLink"] = client.create_share_link(task_id, 2)
+    except Exception:
+        # 分享链接失败不阻断主查询结果
+        return
+
+
+def _attach_share_links_to_list(client, rows, top_n: int):
+    if not isinstance(rows, list):
+        return
+    limit = len(rows) if top_n <= 0 else top_n
+    for idx, row in enumerate(rows):
+        if idx >= limit:
+            break
+        _safe_attach_task_share_link(client, row)
 
 
 def main():
@@ -101,6 +140,8 @@ def main():
             if not args.task_id:
                 output_error("--task-id is required for detail/chain mode")
             result = client.get_simple_plan_and_report_info(args.task_id)
+            if args.with_share_link:
+                _safe_attach_task_share_link(client, result)
             output_json({"success": True, "data": result})
 
         elif args.mode == "blocked":
@@ -117,6 +158,8 @@ def main():
                 item for item in items
                 if item.get("endTime") and (now_ms - item.get("endTime", 0)) > threshold_ms
             ]
+            if args.with_share_link:
+                _attach_share_links_to_list(client, blocked, args.share_top_n)
             output_json({"success": True, "data": blocked, "total": len(blocked)})
 
         elif args.mode == "unclosed":
@@ -126,6 +169,8 @@ def main():
                 report_status=1,
                 key_word=args.key_word,
             )
+            if args.with_share_link and isinstance(result, dict):
+                _attach_share_links_to_list(client, result.get("list"), args.share_top_n)
             output_json({"success": True, "data": result})
 
         elif args.mode == "manager":
@@ -139,6 +184,8 @@ def main():
                 status=args.status,
                 key_word=args.key_word,
             )
+            if args.with_share_link and isinstance(result, dict):
+                _attach_share_links_to_list(client, result.get("list"), args.share_top_n)
             output_json({"success": True, "data": result})
 
         elif args.mode in ("my", "assigned"):
@@ -154,6 +201,8 @@ def main():
                 emp_id_list=emp_ids,
                 key_word=args.key_word,
             )
+            if args.with_share_link and isinstance(result, dict):
+                _attach_share_links_to_list(client, result.get("list"), args.share_top_n)
             output_json({"success": True, "data": result})
 
         elif args.mode == "created":
@@ -164,6 +213,8 @@ def main():
                 status=status,
                 key_word=args.key_word,
             )
+            if args.with_share_link and isinstance(result, dict):
+                _attach_share_links_to_list(client, result.get("list"), args.share_top_n)
             output_json({"success": True, "data": result})
 
         elif args.mode == "team":
@@ -174,6 +225,8 @@ def main():
                 status=status,
                 key_word=args.key_word,
             )
+            if args.with_share_link and isinstance(result, dict):
+                _attach_share_links_to_list(client, result.get("list"), args.share_top_n)
             output_json({"success": True, "data": result})
 
         elif args.mode == "nudge":
@@ -183,6 +236,8 @@ def main():
                 report_status=3,
                 key_word=args.key_word,
             )
+            if args.with_share_link and isinstance(result, dict):
+                _attach_share_links_to_list(client, result.get("list"), args.share_top_n)
             output_json({"success": True, "data": result, "message": "Use --emp-id with cwork-nudge-report.py to send nudge"})
 
     except CWorkError as e:

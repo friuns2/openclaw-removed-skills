@@ -38,6 +38,12 @@ def parse_args(argv=None):
     parser.add_argument("--keyword-filter", help="Legacy: Keyword filter")
     parser.add_argument("--start-date", help="Start date YYYY-MM-DD")
     parser.add_argument("--end-date", help="End date YYYY-MM-DD")
+    parser.add_argument("--with-share-link", dest="with_share_link", action="store_true", default=True,
+                        help="在返回结果中补充分享链接（默认开启）")
+    parser.add_argument("--no-share-link", dest="with_share_link", action="store_false",
+                        help="关闭分享链接补充")
+    parser.add_argument("--share-top-n", type=int, default=20,
+                        help="列表场景最多补充前 N 条分享链接（默认 20，0=当前页全部）")
     parser.add_argument("--params-file", dest="params_file", default=None,
                         help="UTF-8 JSON 文件路径，从文件读取参数")
     return parser.parse_args(argv)
@@ -70,6 +76,39 @@ def _die(msg):
     sys.exit(1)
 
 
+def _extract_first_id(item, candidates):
+    if not isinstance(item, dict):
+        return None
+    for key in candidates:
+        value = item.get(key)
+        if value is not None and str(value).strip():
+            return value
+    return None
+
+
+def _safe_attach_share_link(client, item, biz_type: int, id_candidates: tuple[str, ...]):
+    if not isinstance(item, dict):
+        return
+    biz_id = _extract_first_id(item, id_candidates)
+    if biz_id is None:
+        return
+    try:
+        item["shareLink"] = client.create_share_link(biz_id, biz_type)
+    except Exception:
+        # 分享链接失败不阻断主查询结果
+        return
+
+
+def _attach_share_links_to_list(client, rows, biz_type: int, id_candidates: tuple[str, ...], top_n: int):
+    if not isinstance(rows, list):
+        return
+    limit = len(rows) if top_n <= 0 else top_n
+    for idx, row in enumerate(rows):
+        if idx >= limit:
+            break
+        _safe_attach_share_link(client, row, biz_type, id_candidates)
+
+
 def main():
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -88,6 +127,8 @@ def main():
             if not args.report_id:
                 _die("--report-id is required for detail mode")
             data = client.get_report_info(args.report_id)
+            if args.with_share_link:
+                _safe_attach_share_link(client, data, 1, ("reportId", "id"))
             print(json.dumps({"success": True, "data": data}, ensure_ascii=False, indent=2))
             return
 
@@ -95,6 +136,8 @@ def main():
             if not args.report_id:
                 _die("--report-id is required for node-detail mode")
             data = client.get_report_node_detail(args.report_id)
+            if args.with_share_link:
+                _safe_attach_share_link(client, data, 1, ("reportId", "id"))
             print(json.dumps({"success": True, "data": data}, ensure_ascii=False, indent=2))
             return
 
@@ -106,6 +149,8 @@ def main():
                 days=args.days,
                 max_count=args.page_size
             )
+            if args.with_share_link:
+                _attach_share_links_to_list(client, data.get("recentReports"), 1, ("reportId", "id"), args.share_top_n)
             print(json.dumps({"success": True, "data": data}, ensure_ascii=False, indent=2))
             return
 
@@ -117,11 +162,15 @@ def main():
                 days=args.days,
                 max_count=args.page_size
             )
+            if args.with_share_link:
+                _attach_share_links_to_list(client, data.get("reports"), 1, ("reportId", "id"), args.share_top_n)
             print(json.dumps({"success": True, "data": data}, ensure_ascii=False, indent=2))
             return
 
         if args.mode == "unread":
             data = client.get_unread_list(args.page_index, args.page_size)
+            if args.with_share_link:
+                _attach_share_links_to_list(client, data.get("list"), 1, ("reportId", "id"), args.share_top_n)
             print(json.dumps({"success": True, "data": data}, ensure_ascii=False, indent=2))
             return
 
@@ -139,6 +188,9 @@ def main():
                 page_size=args.page_size, page_index=args.page_index,
                 report_record_type=args.report_type,
                 begin_time=_parse_date(args.start_date), end_time=_parse_date(args.end_date, end_of_day=True))
+
+        if args.with_share_link:
+            _attach_share_links_to_list(client, data.get("list"), 1, ("reportId", "id"), args.share_top_n)
 
         print(json.dumps({"success": True, "data": data}, ensure_ascii=False, indent=2))
 
