@@ -3,9 +3,15 @@
   "slug": "lakefs",
   "displayName": "Lakefs",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775581643997,
-    "commit": "https://github.com/openclaw/skills/commit/3672c3ddd1fc00fb6827e0db6c9000fa2f91ce60"
+    "version": "1.0.1",
+    "publishedAt": 1776899075787,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775581643997,
+      "commit": "https://github.com/openclaw/skills/commit/3672c3ddd1fc00fb6827e0db6c9000fa2f91ce60"
+    }
+  ]
 }
