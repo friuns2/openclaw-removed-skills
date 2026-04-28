@@ -3,11 +3,16 @@
   "slug": "youtube-creator-ops",
   "displayName": "OpenClaw YouTube Publisher",
   "latest": {
-    "version": "1.1.3",
-    "publishedAt": 1776224710899,
-    "commit": "https://github.com/openclaw/skills/commit/4d448f4d72ce37e3c2fd51bccd526b8d83070de7"
+    "version": "1.1.4",
+    "publishedAt": 1777036058270,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.1.3",
+      "publishedAt": 1776224710899,
+      "commit": "https://github.com/openclaw/skills/commit/4d448f4d72ce37e3c2fd51bccd526b8d83070de7"
+    },
     {
       "version": "1.1.1",
       "publishedAt": 1776052366416,
