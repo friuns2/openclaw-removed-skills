@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-orchestrating-swarms",
-  "displayName": "orchestrating-swarms",
+  "displayName": "ia-orchestrating-swarms",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518990537,
-    "commit": "https://github.com/openclaw/skills/commit/42b740b06c92442894e5d9d9e041b8d1568794a1"
+    "version": "3.0.4",
+    "publishedAt": 1777300732091,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518990537,
+      "commit": "https://github.com/openclaw/skills/commit/42b740b06c92442894e5d9d9e041b8d1568794a1"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004212774,
