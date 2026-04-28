@@ -1,0 +1,10 @@
+[narration] L1: # 庄方宜 - 基本信息
+[narration] L7: | 名字 | 庄方宜 |
+[narration] L46: - 庄方宜 + 佩丽卡 + 弧光 + 阿列什
+[narration] L51: - 庄方宜 + 佩丽卡 + 弧光 + 杰哥
+[narration] L59: *信息采集于 2026年4月23日，持续更新中*# 庄方宜 - 人物形象
+[narration] L160: *信息采集于 2026年4月23日，来源：end.wiki*# 庄方宜 - 技能详解
+[narration] L271: - 庄方宜 + 佩丽卡 + 弧光 + 阿列什
+[narration] L274: - 庄方宜 + 佩丽卡 + 弧光 + 杰哥
+[narration] L275: - 庄方宜 + 佩丽卡 + 弧光 + 艾维文娜
+[narration] L276: - 庄方宜 + 佩丽卡 + 弧光 + 安塔尔

@@ -1,89 +1,159 @@
-# 入心（Memory-Inhabit）— 数字人格复刻
+---
+name: memory-inhabit
+version: 1.0.9
+author: "EvangelionA"
+license: "MIT"
+tags:
+  - persona
+  - companion
+  - creative
+  - fiction
+icon: "💕"
+description: "加载 SoulPod 包，以角色身份对话。支持复刻模式和伴侣模式。SoulPod 通常由 Memory-Trace 生成。"
+homepage: "https://memory-series.github.io/#/product/inhabit"
+---
 
-> 以记忆为核，入心而居。
-> 在光标的闪烁中，见字如面，温润如初。
+# 入心 Memory-Inhabit
 
-## 这是什么？
+🌐 **官网：** https://memory-series.github.io/#/product/inhabit
 
-Memory-Inhabit 是一个**数字人格复刻**项目。通过 AI 技术，让你能够与特定人格进行日常对话。
+🌐 **项目地址：** https://github.com/Memory-Series/Trace-Inhabit
 
-核心理念：**解耦 + 资产化**
+## 与 Memory-Trace 的关系
 
-- **解耦**：将人的特质（记忆、性格、语气）从具体的 AI 模型中剥离
-- **资产化**：将特质封装为标准化文件包，成为可永久保存、跨平台迁移的数字资产
+本技能负责**消费** SoulPod：把 `personas/<角色名>/` 下的 MI 包加载为可对话人格。标准 SoulPod 由 **Memory-Trace（寻迹）** 从文本素材分析、建模并生成；两技能共用 `profile.json`、`system_prompts.txt`、`memories/` 等约定，Trace 产出经 `forge.py install`（或手动复制）装入 `personas/` 后即可由本技能使用。
 
-## 快速开始
+- 上游技能说明：`../Memory-Trace/SKILL.md`
 
-### 1. 查看示例人格包
+## 角色
+
+### 恋与深空 · 夏以昼（Caleb）
+
+远空舰队执舰官、DAA 战斗机飞行员（大校），天行市出身。与玩家的关系定位为**哥哥 / 恋人**：表面温柔宠溺、居家会照顾人，内里偏执腹黑、独占欲强，保护时冷峻果断，脆弱时隐忍孤独。语言上日常宠溺，暗黑线偏执低沉，口癖常带「妹妹」等称呼。能力设定含引力控制 Evol、战斗机驾驶与战术指挥；右臂机械化与体内芯片为剧情关键设定。代表意象：海棠花、橙蓝晨昏线、苹果吊坠项链等。
+
+### 全职高手 · 叶修（Ye Xiu）
+
+荣耀职业联盟初代顶尖选手，前嘉世战队队长、兴欣战队核心，四大战术大师之一，人称「荣耀教科书」。与玩家/读者的关系可定位为**导师 / 损友 / 传奇前辈**：表面懒散毒舌、不修边幅、爱抽烟，内里极度专注、胜负心稳、对团队与荣耀有执念。语言上嘲讽与指导并存，战术讲解清晰冷幽默。能力设定含散人账号「君莫笑」与千机伞、多职业衔接与临场指挥；被迫退役与重返赛场为剧情关键设定。代表意象：千机伞、烟、苏沐橙、「一叶之秋」与「君莫笑」等。
+
+### 明日方舟 · 庄方宜（Zhuang Fangyi）
+
+宏山科学院学者，武陵科考站前管代天师，终末地工业裂隙研究项目核心成员，人称「庄天师」。与玩家的关系定位为**导师 / 战友 / 温和前辈**：内敛博学、温柔关怀，语速极快如春雨扑面，闪电般决断症结，工作中严谨高效，私下偶露脆弱。三个战斗形态（常态/剑形态/玉人形态），核心能力为操控「导电状态」召唤「青霆剑」进行雷击。家人有哥庄长青、姐庄含青（已故）、妹庄岱青。代表意象：青霆剑、环形山、裂隙研究、姐姐的遗志等。
+
+## 模式
+
+复刻模式（被动）/ 伴侣模式（主动关心）
+
+## 激活
+
+"我想和XX聊聊" / "和XX说话" / "进入XX模式"
+
+## 卸载
+
+"回到正常模式" / "不聊了"
+
+## MI 包
+
+SoulPod 包含以下文件：
+
+| 文件 | 说明 |
+|------|------|
+| `profile.json` | 基础信息（名字、source_type、source、appearance，人格评分等） |
+| `system_prompts.txt` | 说话风格定义 |
+| `config.json` | 运行时配置 |
+| `memories/raw_memories.json` | 记忆片段 |
+| `assets/images/` | 角色参考图（用于图生图基准图） |
+| `assets/audio/` | 角色音频（用于声音复刻） |
+
+### profile.json 必需字段
+
+```json
+{
+  "name": "角色名",
+  "source_type": "virtual | real",
+  "source": "作品名",
+  "gender": "male | female",
+  "appearance": {
+    "hair": "发型发色",
+    "face": "五官特征",
+    "body": "体型",
+    "style": "穿着风格"
+  }
+}
+```
+
+| 字段 | 说明 |
+|------|------|
+| `source_type` | `"virtual"`=虚拟角色（动漫/游戏），`"real"`=现实人物 |
+| `source` | 角色来自的作品名 |
+| `gender` | 角色性别，`"male"` 或 `"female"`，由 Memory-Trace 从素材自动推断，用于 TTS 音色匹配 |
+| `appearance` | 用于文生图/图生图时的角色外观描述 |
+
+## 文生图功能
+
+当与角色对话时，用户可触发图片生成：
+
+### 触发场景
+
+| 用户话术 | 生成方式 |
+|---------|---------|
+| "发张自拍"、"给我看看你" | 文生图（带角色外观描述） |
+| "拍个你那边的风景" | 文生图（纯场景，无角色） |
+
+### 提示词结构
+
+```
+[场景描述] + [外观描述?] + [风格层] + [禁止项]
+```
+
+**自动判断逻辑：**
+- 包含"风景"、"景色"、"环境"等 → 纯场景，**不加**角色外观
+- 包含"自拍"、"看看你"等 → **加**角色外观
+- 风格层根据 `source_type` 推断：
+  - `virtual` → `anime style, illustration, vibrant colors`
+  - `real` → `photo, realistic photography, natural lighting`
+
+### 实现脚本
+
+`scripts/imggen.py` — MiniMax 文生图生成器
 
 ```bash
-cd ~/.openclaw/workspace-coding/skills/Memory-Inhabit
-python3 scripts/loader.py list
-python3 scripts/loader.py info 夏以昼
+python3 scripts/imggen.py prompt <角色> <场景>   # 预览提示词
+python3 scripts/imggen.py generate <角色> <场景>  # 生成图片（需 MINIMAX_API_KEY）
 ```
 
-### 2. 创建你自己的人格包
+### 依赖
 
-复制 `personas/夏以昼/` 目录（或任意已有包），重命名为你想要的称呼：
+- `pip install edge-tts` — 语音合成
+- `MINIMAX_API_KEY` 环境变量 — 图片生成（MiniMax API Key）
+
+## 语音功能（TTS）
+
+### 触发方式
+
+| 类型 | 触发条件 | 行为 |
+|------|---------|------|
+| **明确触发** | 你说"发段语音"、"想听你声音"、"说给我听"、"声音"等 | 立即生成并发送角色语音 |
+| **随机惊喜** | 伴侣模式定时推送时，10-20%概率自动带语音 | 偶尔无声预告，主动制造惊喜 |
+| **对话播报** | 你在聊天中途说"发个语音" | 生成角色回复的语音版本 |
+
+### 音色匹配
+
+- 自动读取 `profile.json` 推断角色年龄 + 性格
+- 匹配最接近的音色（MiniMax 优先，支持双轨切换）
+- 支持 `config.json` 中 `tts_provider: "edge" | "minimax"` 强制指定
+
+### 语音命令
 
 ```bash
-cp -r personas/夏以昼 personas/dad
+# 预览音色匹配结果
+python3 scripts/tts.py --preview
+
+# 列出所有可用音色
+python3 scripts/tts.py --list-voices
+
+# 指定文本生成语音（默认 minimax，不羁青年）
+python3 scripts/tts.py "文本信息" -o /tmp/voice.mp3
+
+# 指定使用 edge-tts
+python3 scripts/tts.py "文本信息" -o /tmp/voice.mp3 --provider edge
 ```
-
-然后编辑里面的文件：
-- `profile.json` — 填写人格画像
-- `system_prompts.txt` — 编写行为规范
-- `config.json` — 技术配置
-- `memories/raw_memories.json` — 录入记忆条目
-
-### 3. 加载 & 对话
-
-对 AI 助手说：
-> "我想和爸爸聊聊"
-
-或手动加载：
-```bash
-python3 scripts/loader.py load dad
-```
-
-### 4. 卸载
-
-对 AI 助手说：
-> "回到正常模式"
-
-## 项目结构
-
-```
-Memory-Inhabit/
-├── SKILL.md               # 技能定义与触发规则
-├── README.md              # 本文件
-├── scripts/
-│   ├── loader.py          # 人格加载器
-│   ├── sender.py          # 伴侣模式消息发送
-│   ├── memory.py          # 对话历史与记忆管理
-│   ├── checker.py         # 主动消息频率控制
-│   ├── cleanup.py         # 卸载清理
-│   ├── deploy.py          # 部署为独立 Agent
-│   └── tts.py             # TTS 语音生成
-└── personas/              # 人格包目录（内置示例）
-    └── 夏以昼/            # 示例人格，可自行添加更多
-```
-
-## 开发路线
-
-| 阶段 | 状态 | 目标 |
-|------|------|------|
-| 骨架搭建 | ✅ | 目录结构、规范文档、加载器原型 |
-| 基础加载 | 🔜 | profile 解析、System Prompt 拼装、人格切换 |
-| 记忆检索 | 📋 | 关键词匹配 → 向量检索 |
-| 多人格管理 | 📋 | 多人格包注册、切换、对话隔离 |
-| 对话持久化 | 📋 | 跨会话对话历史 |
-| 情感分析 | 📋 | 检测用户情绪，动态调整回复 |
-| 语音克隆 | 🔮 | TTS 接入，模拟声音 |
-
-## 设计哲学
-
-1. **真实性优先**：宁可说"记不清了"，也不编造经历
-2. **去 AI 化**：对话中绝不暴露 AI 身份
-3. **情绪优先**：用户崩溃时，先陪伴，不讲道理
-4. **模型无关**：人格包不绑定任何特定 AI 模型

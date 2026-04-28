@@ -1,6 +1,6 @@
 ---
 name: memory-inhabit
-version: 1.0.5
+version: 1.0.9
 author: "EvangelionA"
 license: "MIT"
 tags:
@@ -10,9 +10,14 @@ tags:
   - fiction
 icon: "💕"
 description: "加载 SoulPod 包，以角色身份对话。支持复刻模式和伴侣模式。SoulPod 通常由 Memory-Trace 生成。"
+homepage: "https://memory-series.github.io/#/product/inhabit"
 ---
 
 # 入心 Memory-Inhabit
+
+🌐 **官网：** https://memory-series.github.io/#/product/inhabit
+
+🌐 **项目地址：** https://github.com/Memory-Series/Trace-Inhabit
 
 ## 与 Memory-Trace 的关系
 
@@ -29,6 +34,10 @@ description: "加载 SoulPod 包，以角色身份对话。支持复刻模式和
 ### 全职高手 · 叶修（Ye Xiu）
 
 荣耀职业联盟初代顶尖选手，前嘉世战队队长、兴欣战队核心，四大战术大师之一，人称「荣耀教科书」。与玩家/读者的关系可定位为**导师 / 损友 / 传奇前辈**：表面懒散毒舌、不修边幅、爱抽烟，内里极度专注、胜负心稳、对团队与荣耀有执念。语言上嘲讽与指导并存，战术讲解清晰冷幽默。能力设定含散人账号「君莫笑」与千机伞、多职业衔接与临场指挥；被迫退役与重返赛场为剧情关键设定。代表意象：千机伞、烟、苏沐橙、「一叶之秋」与「君莫笑」等。
+
+### 明日方舟 · 庄方宜（Zhuang Fangyi）
+
+宏山科学院学者，武陵科考站前管代天师，终末地工业裂隙研究项目核心成员，人称「庄天师」。与玩家的关系定位为**导师 / 战友 / 温和前辈**：内敛博学、温柔关怀，语速极快如春雨扑面，闪电般决断症结，工作中严谨高效，私下偶露脆弱。三个战斗形态（常态/剑形态/玉人形态），核心能力为操控「导电状态」召唤「青霆剑」进行雷击。家人有哥庄长青、姐庄含青（已故）、妹庄岱青。代表意象：青霆剑、环形山、裂隙研究、姐姐的遗志等。
 
 ## 模式
 
@@ -62,6 +71,7 @@ SoulPod 包含以下文件：
   "name": "角色名",
   "source_type": "virtual | real",
   "source": "作品名",
+  "gender": "male | female",
   "appearance": {
     "hair": "发型发色",
     "face": "五官特征",
@@ -75,6 +85,7 @@ SoulPod 包含以下文件：
 |------|------|
 | `source_type` | `"virtual"`=虚拟角色（动漫/游戏），`"real"`=现实人物 |
 | `source` | 角色来自的作品名 |
+| `gender` | 角色性别，`"male"` 或 `"female"`，由 Memory-Trace 从素材自动推断，用于 TTS 音色匹配 |
 | `appearance` | 用于文生图/图生图时的角色外观描述 |
 
 ## 文生图功能
@@ -115,18 +126,34 @@ python3 scripts/imggen.py generate <角色> <场景>  # 生成图片（需 MINIM
 - `pip install edge-tts` — 语音合成
 - `MINIMAX_API_KEY` 环境变量 — 图片生成（MiniMax API Key）
 
-## 同步规则
+## 语音功能（TTS）
 
-SoulPod 调整时，需同步更新以下所有位置的文件（system_prompts.txt、profile.json）：
+### 触发方式
 
-- `/data/media/MemoryPersonCard/SoulPod/<角色名>/` — 备份存储
-- `~/.openclaw/workspace-coding/skills/Memory-Inhabit/personas/<角色名>/` — 主使用
-- `~/.openclaw/workspace-coding/skills/Memory-Trace/output/<角色名>/` — trace 输出
-- `~/.openclaw/workspace-roleplay/skills/memory-inhabit/personas/<角色名>/` — roleplay 副本
+| 类型 | 触发条件 | 行为 |
+|------|---------|------|
+| **明确触发** | 你说"发段语音"、"想听你声音"、"说给我听"、"声音"等 | 立即生成并发送角色语音 |
+| **随机惊喜** | 伴侣模式定时推送时，10-20%概率自动带语音 | 偶尔无声预告，主动制造惊喜 |
+| **对话播报** | 你在聊天中途说"发个语音" | 生成角色回复的语音版本 |
 
-## 待接入功能
+### 音色匹配
 
-| 功能 | 状态 |
-|------|------|
-| 图生图（基准图） | 等用户提供基准图在线 URL |
-| 声音复刻 | 等 MiniMax 音频上传接口确认 |
+- 自动读取 `profile.json` 推断角色年龄 + 性格
+- 匹配最接近的音色（MiniMax 优先，支持双轨切换）
+- 支持 `config.json` 中 `tts_provider: "edge" | "minimax"` 强制指定
+
+### 语音命令
+
+```bash
+# 预览音色匹配结果
+python3 scripts/tts.py --preview
+
+# 列出所有可用音色
+python3 scripts/tts.py --list-voices
+
+# 指定文本生成语音（默认 minimax，不羁青年）
+python3 scripts/tts.py "文本信息" -o /tmp/voice.mp3
+
+# 指定使用 edge-tts
+python3 scripts/tts.py "文本信息" -o /tmp/voice.mp3 --provider edge
+```
