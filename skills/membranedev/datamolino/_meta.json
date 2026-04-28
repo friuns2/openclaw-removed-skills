@@ -3,9 +3,15 @@
   "slug": "datamolino",
   "displayName": "Datamolino",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574311062,
-    "commit": "https://github.com/openclaw/skills/commit/217a60aa594ca1df3bbfd68102509906d9e25ad0"
+    "version": "1.0.1",
+    "publishedAt": 1776895988593,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574311062,
+      "commit": "https://github.com/openclaw/skills/commit/217a60aa594ca1df3bbfd68102509906d9e25ad0"
+    }
+  ]
 }
