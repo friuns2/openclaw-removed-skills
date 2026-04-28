@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-document-review",
-  "displayName": "document-review",
+  "displayName": "ia-document-review",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518946432,
-    "commit": "https://github.com/openclaw/skills/commit/f6bba628da27fa650ce43e8a4dd584f8776e3ffc"
+    "version": "3.0.4",
+    "publishedAt": 1777300677928,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518946432,
+      "commit": "https://github.com/openclaw/skills/commit/f6bba628da27fa650ce43e8a4dd584f8776e3ffc"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004166581,
