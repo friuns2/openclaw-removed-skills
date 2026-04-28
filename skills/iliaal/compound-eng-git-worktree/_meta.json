@@ -1,13 +1,18 @@
 {
   "owner": "iliaal",
   "slug": "compound-eng-git-worktree",
-  "displayName": "git-worktree",
+  "displayName": "ia-git-worktree",
   "latest": {
-    "version": "2.56.1",
-    "publishedAt": 1776518963503,
-    "commit": "https://github.com/openclaw/skills/commit/c59c575162a5bd340f0dc9e2b20689bd580987cf"
+    "version": "3.0.4",
+    "publishedAt": 1777300698139,
+    "commit": null
   },
   "history": [
+    {
+      "version": "2.56.1",
+      "publishedAt": 1776518963503,
+      "commit": "https://github.com/openclaw/skills/commit/c59c575162a5bd340f0dc9e2b20689bd580987cf"
+    },
     {
       "version": "2.55.1",
       "publishedAt": 1776004184292,
