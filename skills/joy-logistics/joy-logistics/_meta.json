@@ -3,11 +3,16 @@
   "slug": "joy-logistics",
   "displayName": "Joy Logistics",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776416687486,
-    "commit": "https://github.com/openclaw/skills/commit/12e489d0600ef36e1a0d9d0bf91db0c07866db46"
+    "version": "1.0.3",
+    "publishedAt": 1777024194912,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776416687486,
+      "commit": "https://github.com/openclaw/skills/commit/12e489d0600ef36e1a0d9d0bf91db0c07866db46"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776153984124,
