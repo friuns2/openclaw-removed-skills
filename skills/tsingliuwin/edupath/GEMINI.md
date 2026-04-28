@@ -12,9 +12,9 @@ The core logic of this skill is built upon a "Policy-Academic-Employment" (政�
 
 ## Directory Structure
 
-- `SKILL.md`: The primary instruction file defining the agent's role, tasks, constraints, workflow, and output format.
-- `references/`: Contains supporting datasets used for industry mapping and company identification.
-    - `15th-five-year-industries.md`: A detailed directory of strategic industries (Advanced Manufacturing, Emerging Industries, Modern Services, etc.) and their mapping to academic disciplines.
+- `SKILL.md`: The primary instruction file defining the agent's role, tasks, constraints, workflow, output format, and inline industry-to-major mapping table.
+
+> **Note:** The "15th Five-Year Plan" industry mapping table is embedded directly in `SKILL.md` (Workflow Step 2) to minimize token usage. Representative enterprises are identified via real-time search rather than pre-defined lists.
 
 ## Core Execution Guidelines (Mandatory Protocols)
 
@@ -31,8 +31,8 @@ To ensure the high-quality and veracity of the "EduPath" reports, the following 
 - **Strategy:** Group searches or use sequential execution (e.g., `wait_for_previous: true`) to prevent API throttling or failures.
 
 ### 3. Authority-First Data Source
-- **Protocol:** Before conducting any external searches for industry mapping or enterprise identification, the agent **MUST** read and cite `references/15th-five-year-industries.md`.
-- **Consistency:** Ensure all "15th Five-Year" industry classifications and representative enterprises align with this local reference file.
+- **Protocol:** Industry mapping uses the inline mapping table in `SKILL.md` (Workflow Step 2). Representative enterprises are identified via real-time search.
+- **Consistency:** Ensure all "15th Five-Year" industry classifications align with the inline mapping table.
 
 ### 4. Content Integrity & Operation Safety (Mandatory Protocol)
 - **Surgical Edits First:** Use `replace` instead of `write_file` for existing documents to avoid accidental truncation or logical over-simplification.
@@ -40,25 +40,13 @@ To ensure the high-quality and veracity of the "EduPath" reports, the following 
 - **Integrity Check:** Before executing a write or replace, verify that the proposed new content retains all mandatory structural elements and templates (e.g., 6-Dimensional search templates).
 
 ### 5. Atomic Search Templates
-- **Universities:**
-  1. `[University] [Major] 2024-2025 Admission Ratio (Applicants vs Admitted)`
-  2. `[University] [Major] 2025 Score Line (Subject Lines) & Min/Avg/Max Score`
-  3. `[University] [Major] 2025 Unified Enrollment Quota (Exclude Push-Free)`
-  4. `[University] [Major] Interview Ratio/Weights & Process/Subjects`
-  5. `[University] [Major] Student Profile (Origins) & Cross-Major Friendliness`
-  6. `[University] [Major] 2024 Graduate Employment Report (Key Employers/Median Salary)`
-  7. **Academic Check:** Discipline Evaluation & Lab Resources.
-- **Enterprises:**
-  1. `[Company] 2025 Campus Recruitment Master's [Role] Requirements/Salary/Base/Bonus`
-  2. `[Company] Competition Preferences (Electronics/ACM/RoboMaster) & Award Requirements`
-  3. `[Company] Resume Screening Logic (Target Schools/White Lists) & Major Matches`
-  4. `[Company] [Role] Written Test Content & High-frequency Interview Points 2024-2025`
-  5. `[Company] 2025 [Major] Recruitment Numbers & Trend (Expand/Shrink)`
-  6. `[Company] [Role] Master's Growth Path & 5-Year Salary Potential`
-  7. **Authority Check:** Citations MUST come from official sites, verified summaries (Zhihu/Liepin), or real job descriptions.
+
+The agent uses **6-dimensional search templates** with dynamic year placeholders (`[current_year]`, `[last_year]`, `[year_before]`) for both universities and enterprises. Each search includes a fallback query strategy.
+
+> **Full template definitions are maintained exclusively in `SKILL.md`** (Section: Workflow §三 and §四) to avoid dual-source maintenance. Refer to `SKILL.md` for the authoritative, up-to-date search query specifications.
 
 
-### 4. "Value Proposition" Logic (Comparison)
+### 6. "Value Proposition" Logic (Comparison)
 - **Workflow:** Undergraduate Outlook -> Postgraduate Selection -> Postgraduate Enterprise Choice -> **Value Comparison**.
 - **The Core:** Explicitly compare career outcomes (enterprise tiers, position roles, salary curves) between undergraduate-level employment and postgraduate-level employment to demonstrate the value provided by Yantu Education.
 

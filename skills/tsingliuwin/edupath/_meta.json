@@ -3,9 +3,15 @@
   "slug": "edupath",
   "displayName": "Edupath",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776056889227,
-    "commit": "https://github.com/openclaw/skills/commit/5e49f931b564bae7cbf807735750f6aca233432b"
+    "version": "1.1.4",
+    "publishedAt": 1777020055951,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776056889227,
+      "commit": "https://github.com/openclaw/skills/commit/5e49f931b564bae7cbf807735750f6aca233432b"
+    }
+  ]
 }
