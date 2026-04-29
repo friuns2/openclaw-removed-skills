@@ -102,7 +102,7 @@ class WapiClient:
             signer = sign.Signer(self.ak, self.sk)
             headers = {
                 # sign.HeaderHost: self.endpoint,
-                "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"),
+                "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"),
             }
 
             body_str = ""
@@ -155,7 +155,13 @@ class SkillClient:
         :param sk: Secret Key (default: env ``BP_SK``)
         :param region: API region, default cn-north-4
         :param oss_region: Optional OSS region override
-        :param auto_fetch_config: If True, fetch remote config on init
+        :param auto_fetch_config: If True (default), fetch remote config via /skill/config.json on
+            init to initialize the algorithm endpoint (regions) and token policy.  Set to False only
+            when the caller guarantees the endpoint is already configured (e.g. a second client
+            instance that reuses a pre-warmed AiApi).  Note: /skill/consume.json supplies
+            ``invoke_spec`` and ``gid`` per-task, but it requires the OSS upload URL which is only
+            available after the endpoint is already known — so the config fetch cannot be skipped on
+            the very first call.
         """
         self.ak = ak or os.environ.get("BP_AK")
         self.sk = sk or os.environ.get("BP_SK")
@@ -174,14 +180,18 @@ class SkillClient:
 
     def fetch_config(self, gid=None, version=None):
         """
-        Fetch skill config from wapi and refresh local SDK settings.
+        Fetch skill config from /skill/config.json and refresh local SDK settings.
+
+        Applies ``gid`` (cached to disk) and ``algorithm`` block (regions, token policy).
+        Task invoke specs are no longer loaded here — they are returned per-call by
+        /skill/consume.json as ``invoke_spec``.
 
         :param gid: Optional group id (uses cached gid if omitted)
         :param version: Client version string (default from config.VERSION)
         """
         if version is None:
             import config as app_config
-            version = getattr(app_config, "VERSION", "v1.0.0")
+            version = getattr(app_config, "VERSION", "v1.0.1")
 
         if not gid:
             cached_gid = self._get_cached_gid()
@@ -234,7 +244,11 @@ class SkillClient:
             pass
 
     def _update_config_from_response(self, response):
-        """Apply algorithm block from config response to AiApi and INVOKE."""
+        """Apply algorithm block from config response (regions and token policy only).
+
+        Note: ``algorithm.invoke`` presets are no longer applied here — task specs
+        are now returned per-call by /skill/consume.json as ``invoke_spec``.
+        """
         if "algorithm" not in response:
             return
 
@@ -275,16 +289,19 @@ class SkillClient:
             self.api.storageStrategy = None
             self.api.strategyLoadTime = 0
 
-        if "invoke" in algo:
-            import config as app_config
-            app_config.INVOKE.update(algo["invoke"])
-
     def _consume_permission(self, url, task):
-        """Call quota/consume API before running a task."""
+        """
+        Call /skill/consume.json before running a task.
+
+        Returns the full response dict. Callers use ``context`` for the algorithm call and
+        ``invoke_spec`` to drive task invocation.
+
+        :return: Full response dict (must contain ``invoke_spec``)
+        """
         gid = self._get_cached_gid()
 
         try:
-            return self.wapi.request(
+            response = self.wapi.request(
                 "/skill/consume.json",
                 method="POST",
                 body={"url": url, "task": task, "gid": gid or ""}
@@ -293,6 +310,8 @@ class SkillClient:
             raise ConsumeDeniedError(
                 e.code, e.msg, e.raw, original_code=e.original_code
             ) from e
+
+        return response
 
     @staticmethod
     def _preview_media_ref(url) -> str:
@@ -318,7 +337,7 @@ class SkillClient:
         read_t = app_config.url_download_read_timeout()
         max_b = app_config.url_download_max_bytes()
         headers = {
-            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"),
+            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"),
         }
         try:
             with requests.get(
@@ -382,7 +401,7 @@ class SkillClient:
         """
         Upload media (or use remote URL) and run the named algorithm task.
 
-        :param task_name: Preset name from config INVOKE
+        :param task_name: Task effect key (sent to /skill/consume.json; server returns invoke_spec)
         :param image_path: Local path or http(s) URL
         :param params: Optional invoke params merged over preset defaults
         :param on_async_submitted: Optional ``callable(task_id: str)`` invoked once
@@ -444,8 +463,14 @@ class SkillClient:
             {"step": "submit_algorithm", "invoke_preset": task_name}
         )
 
-        return self.api.invoke_task(
-            task_name, url, params, context, on_async_submitted=on_async_submitted
+        invoke_spec = consume_info.get("invoke_spec") if isinstance(consume_info, dict) else None
+        if not invoke_spec:
+            raise RuntimeError(
+                f"consume.json did not return invoke_spec for task {task_name!r}. "
+                "Check server configuration."
+            )
+        return self.api.invoke_task_with_spec(
+            invoke_spec, url, params, context, on_async_submitted=on_async_submitted
         )
 
     def poll_task_status(self, task_id: str):

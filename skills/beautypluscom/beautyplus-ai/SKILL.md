@@ -1,7 +1,7 @@
 ---
 name: beautyplus-ai
-description: "BeautyPlus AI image effects: body reshape (breast/butt presets with strength tiers), hair color and hairstyle, outfit change (formal / vacation / cosplay), and photo restoration (denoise / AI ultra-HD). Pass --task with the effect KEY; algorithm task/params come from POST /skill/config.json invoke map. Current catalog is image-only — use blocking run-task (§3a). Video async path (spawn-run-task + sessions_spawn) is documented as reserved for future video effect keys. Paid API (tenant quota); never claim free or invent pricing."
-version: 1.0.0
+description: "BeautyPlus portrait beautification: body reshape (breast/butt presets with strength tiers), hair color and hairstyle, outfit change (formal / vacation / cosplay / party / sports), face style, expression (smile / wink / cool), and photo art (tan / flash / film).  "
+version: 1.0.1
 author: BeautyPlus
 metadata: {"openclaw":{"emoji":"🖼️","requires":{"bins":["python3"],"env":{"BP_AK":{"required":true},"BP_SK":{"required":true}}},"tags":["image-processing","body-reshape","hair-color","hairstyle","outfit-change","cosplay","photo-restoration","beautyplus","paid-api"]}}
 ---
@@ -17,10 +17,15 @@ Activate when the user wants any of the following on a **photo / image** (path, 
 - **Hair — style** — glossy hair, layered cut, soft waves, Latino curls, etc.
 - **Outfits — formal** — gowns, rhinestone mesh dress, feather dress, beaded dress, tartan suit, black suit, etc.
 - **Outfits — vacation** — bunny ears, slip dress, puff dress, hoodie dress, lace corset set, tiered chiffon dress, sheer bikini overlay, etc.
-- **Outfits — cosplay** — carnival, bunny cop, fox shirt, deer girl skirt, Grinch, etc.
+- **Outfits — cosplay** — carnival, bunny cop, fox shirt, deer girl skirt, Grinch, Victoria Angel, Dallas Cowboy, etc.
+- **Outfits — party** — Floral Camisole, Puff Skirt, One-Shoulder LBD, Red Latex, Moonlight Shimmer Dress, Y3K Set, etc.
+- **Outfits — sports** — Brazilian Bikini, Tennis Set, Cozy Fit, Racing Suit, White Yoga, etc.
+- **Face style** — Natural Beauty, Glamour Beauty, Sweet Beauty, Luminous Beauty, Youthful Beauty
+- **Expression** — Closed Smile, Open Smile, Cool Expression, Wink
+- **Photo art** — Tanning Filter, CCD Flash, Film Flash, Fuji Flash
 - **Photo restoration** — denoise / repair, AI ultra-HD upscaling
 
-**Effect KEY:** The CLI `--task` value must be the **effect KEY** string from the table below (same key as `algorithm.invoke` in **`POST /skill/config.json`** after `preflight` / client init).
+**Effect KEY:** The CLI `--task` value must be the **effect KEY** string from the table below. The algorithm spec for each key is returned inline by **`POST /skill/consume.json`** (`invoke_spec`) — do not hard-code AIGC paths.
 
 ## Billing and user-facing claims (MANDATORY)
 
@@ -31,66 +36,137 @@ Activate when the user wants any of the following on a **photo / image** (path, 
 
 ## Supported Algorithms (effect KEY → `--task`)
 
-All rows use **image** input (path or URL) unless a future server catalog adds **video** effect keys. Algorithm **`task` / `params` / `task_type`** for each key are loaded from **`algorithm.invoke[effect_key]`** via **`POST /skill/config.json`** — do not hard-code AIGC paths in the agent.
+All rows use **image** input. Algorithm params for each key are returned as `invoke_spec` by **`POST /skill/consume.json`** — do not hard-code AIGC paths.
 
-| Category | Effect name | Tier | Effect KEY | Description |
+### Body reshape — figure
+
+Tiers: **strong / medium / weak** (append `_strong` / `_medium` / `_weak` to the key). If unspecified, default to `_medium`.
+
+| Effect name | Strong KEY | Medium KEY | Weak KEY | Description |
 |---|---|---|---|---|
-| Body reshape — figure | Natural breast enhancement | Strong | `breast_natural_strong` | Natural-looking fullness; subtle lift that balances the silhouette. |
-| Body reshape — figure | Natural breast enhancement | Medium | `breast_natural_medium` | Same as above (medium strength). |
-| Body reshape — figure | Natural breast enhancement | Weak | `breast_natural_weak` | Same as above (weak strength). |
-| Body reshape — figure | Teardrop breast | Strong | `teardrop_breast_strong` | Teardrop contour (fuller lower pole); refined, natural look. |
-| Body reshape — figure | Teardrop breast | Medium | `teardrop_breast_medium` | Same as above. |
-| Body reshape — figure | Teardrop breast | Weak | `teardrop_breast_weak` | Same as above. |
-| Body reshape — figure | Round breast | Strong | `breast_round_strong` | Rounded, lifted look with visual emphasis upward; firm appearance. |
-| Body reshape — figure | Round breast | Medium | `breast_round_medium` | Same as above. |
-| Body reshape — figure | Round breast | Weak | `breast_round_weak` | Same as above. |
-| Body reshape — figure | Outward breast | Strong | `breast_outward_strong` | Fashion-editorial spread with outward emphasis. |
-| Body reshape — figure | Outward breast | Medium | `breast_outward_medium` | Same as above. |
-| Body reshape — figure | Outward breast | Weak | `breast_outward_weak` | Same as above. |
-| Body reshape — figure | Peach butt | Strong | `butt_peach_strong` | Lift and side volume for a rounded peach shape; improves waist-to-hip ratio. |
-| Body reshape — figure | Peach butt | Medium | `butt_peach_medium` | Same as above. |
-| Body reshape — figure | Peach butt | Weak | `butt_peach_weak` | Same as above. |
-| Body reshape — figure | O-shape butt | Strong | `butt_o_shape_strong` | Smooth, continuous curve with even side profile. |
-| Body reshape — figure | O-shape butt | Medium | `butt_o_shape_medium` | Same as above. |
-| Body reshape — figure | O-shape butt | Weak | `butt_o_shape_weak` | Same as above. |
-| Hair — color | Natural black hair | — | `hair_black` | Deep black shine; healthy, natural-looking hair. |
-| Hair — color | Blonde | — | `hair_blonde` | Classic golden blonde; bright, skin-flattering tone. |
-| Hair — color | Brown with highlights | — | `hair_brown_highlights` | Alternating depth for dimension and movement. |
-| Hair — color | Platinum blonde | — | `hair_platinum` | Soft creamy platinum; gentle on skin tone. |
-| Hair — color | Silver platinum | — | `hair_silver_platinum` | Cool metallic silver; edgy, modern look. |
-| Hair — color | Teddy warm brown | — | `hair_teddy_brown` | Warm soft brown; softens features, youthful vibe. |
-| Hair — style | Glossy hair | — | `hair_glossy` | Extra shine and sleek fall; silky, reflective finish. |
-| Hair — style | Layered cut | — | `hair_high_layer` | Light layers and airy volume. |
-| Hair — style | Soft waves | — | `hair_soft_waves` | Romantic large waves; flatters face shape. |
-| Hair — style | Latino curls | — | `hair_latino_curls` | Tight curls, maximum volume; bold texture. |
-| Outfits — formal | Yellow evening gown | — | `dress_yellow_gown` | Vivid yellow silk gown; evening presence. |
-| Outfits — formal | Rhinestone mesh gown | — | `dress_arctic_allure` | Rhinestone mesh with galaxy sparkle; luxe and sheer. |
-| Outfits — formal | Feather gown | — | `dress_ostrich_feather` | Feather accents; ethereal movement. |
-| Outfits — formal | Beaded goddess gown | — | `dress_muse_goddess` | Radiating beadwork; couture-heavy look. |
-| Outfits — formal | Tartan suit | — | `suit_tartan_eve` | British tartan suit; smart, polished set. |
-| Outfits — formal | Black suit | — | `suit_red_carpet` | Classic black suit; sharp red-carpet energy. |
-| Outfits — vacation | Bunny ear accessory | — | `accessory_bunny_ear` | Playful bunny ears; flatters head and face shape. |
-| Outfits — vacation | Pale yellow slip dress | — | `dress_butter_moonlight` | Low-saturation yellow slip; fresh, light look. |
-| Outfits — vacation | Pink puff dress | — | `dress_pink_puffy` | Tiered pink puff dress; sweet portrait style. |
-| Outfits — vacation | Hoodie dress | — | `dress_gold_hoodie` | Hoodie meets dress; urban casual blend. |
-| Outfits — vacation | Lace corset set | — | `dress_lace_corset` | Lace with boned waist; French-inspired sensual fit. |
-| Outfits — vacation | Tiered chiffon maxi | — | `dress_chiffon_cake` | Layered chiffon “cake” skirt; relaxed vacation mood. |
-| Outfits — vacation | Sheer bikini overlay | — | `dress_sheer_bikini` | Bikini under sheer cover; two-piece resort look. |
-| Outfits — cosplay | Carnival samba outfit | — | `cosplay_carnival` | Feather headpiece and embellished bikini; carnival energy. |
-| Outfits — cosplay | Bunny police uniform | — | `cosplay_bunny_cop` | Navy police tailoring and accessories; crisp hero look. |
-| Outfits — cosplay | Fox print shirt | — | `cosplay_fox_boyfriend` | Green print shirt and tie; relaxed “boyfriend shirt” vibe. |
-| Outfits — cosplay | Deer girl mini skirt | — | `cosplay_deer_girl` | Brown with white spots; forest fawn-inspired skirt. |
-| Outfits — cosplay | Grinch costume | — | `cosplay_grinch` | Green fuzzy character look; fun party costume. |
-| Photo restoration | Photo restoration | — | `photo_restoration_v3` | Denoise, deblur, and reduce compression artifacts while keeping a natural look. |
-| Photo restoration | AI ultra-HD | — | `ai_ultra_hd_v3` | Deep-learning upscale and detail recovery for old photos or small thumbnails. |
+| Natural breast | `breast_natural_strong` | `breast_natural_medium` | `breast_natural_weak` | Natural-looking fullness; subtle lift that balances the silhouette. |
+| Teardrop breast | `teardrop_breast_strong` | `teardrop_breast_medium` | `teardrop_breast_weak` | Teardrop contour (fuller lower pole); refined, natural look. |
+| Round breast | `breast_round_strong` | `breast_round_medium` | `breast_round_weak` | Rounded, lifted look with visual emphasis upward; firm appearance. |
+| Outward breast | `breast_outward_strong` | `breast_outward_medium` | `breast_outward_weak` | Fashion-editorial spread with outward emphasis. |
+| Peach butt | `butt_peach_strong` | `butt_peach_medium` | `butt_peach_weak` | Lift and side volume for a rounded peach shape; improves waist-to-hip ratio. |
+| O-shape butt | `butt_o_shape_strong` | `butt_o_shape_medium` | `butt_o_shape_weak` | Smooth, continuous curve with even side profile. |
+
+### Hair — color
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Natural black | `hair_black` | Deep black shine; healthy, natural-looking hair. |
+| Blonde | `hair_blonde` | Classic golden blonde; bright, skin-flattering tone. |
+| Brown with highlights | `hair_brown_highlights` | Alternating depth for dimension and movement. |
+| Platinum blonde | `hair_platinum` | Soft creamy platinum; gentle on skin tone. |
+| Silver platinum | `hair_silver_platinum` | Cool metallic silver; edgy, modern look. |
+| Teddy warm brown | `hair_teddy_brown` | Warm soft brown; softens features, youthful vibe. |
+
+### Hair — style
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Glossy hair | `hair_glossy` | Extra shine and sleek fall; silky, reflective finish. |
+| Layered cut | `hair_high_layer` | Light layers and airy volume. |
+| Soft waves | `hair_soft_waves` | Romantic large waves; flatters face shape. |
+| Latino curls | `hair_latino_curls` | Tight curls, maximum volume; bold texture. |
+
+### Outfits — formal
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Yellow evening gown | `dress_yellow_gown` | Vivid yellow silk gown; evening presence. |
+| Rhinestone mesh gown | `dress_arctic_allure` | Rhinestone mesh with galaxy sparkle; luxe and sheer. |
+| Feather gown | `dress_ostrich_feather` | Feather accents; ethereal movement. |
+| Beaded goddess gown | `dress_muse_goddess` | Radiating beadwork; couture-heavy look. |
+| Tartan suit | `suit_tartan_eve` | British tartan suit; smart, polished set. |
+| Black suit | `suit_red_carpet` | Classic black suit; sharp red-carpet energy. |
+
+### Outfits — vacation
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Bunny ear accessory | `accessory_bunny_ear` | Playful bunny ears; flatters head and face shape. |
+| Pale yellow slip dress | `dress_butter_moonlight` | Low-saturation yellow slip; fresh, light look. |
+| Pink puff dress | `dress_pink_puffy` | Tiered pink puff dress; sweet portrait style. |
+| Hoodie dress | `dress_gold_hoodie` | Hoodie meets dress; urban casual blend. |
+| Lace corset set | `dress_lace_corset` | Lace with boned waist; French-inspired sensual fit. |
+| Tiered chiffon maxi | `dress_chiffon_cake` | Layered chiffon "cake" skirt; relaxed vacation mood. |
+| Sheer bikini overlay | `dress_sheer_bikini` | Bikini under sheer cover; two-piece resort look. |
+
+### Outfits — cosplay
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Carnival samba outfit | `cosplay_carnival` | Feather headpiece and embellished bikini; carnival energy. |
+| Bunny police uniform | `cosplay_bunny_cop` | Navy police tailoring and accessories; crisp hero look. |
+| Fox print shirt | `cosplay_fox_boyfriend` | Green print shirt and tie; relaxed "boyfriend shirt" vibe. |
+| Deer girl mini skirt | `cosplay_deer_girl` | Brown with white spots; forest fawn-inspired skirt. |
+| Grinch costume | `cosplay_grinch` | Green fuzzy character look; fun party costume. |
+| Victoria Angel | `victoria_angel` | Wings and rhinestone-embellished lingerie set; runway showstopper. |
+| Dallas Cowboy | `dallas_cowboy` | Iconic blue-and-white Cowboys cheerleader uniform. |
+
+### Outfits — party
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Floral Camisole | `floral_camisole` | Botanical floral cami with playful party flair. |
+| Puff Skirt | `puff_skirt` | Strapless puff corset dress; sweet and voluminous silhouette. |
+| One-Shoulder Little Black Dress | `one_shoulder_lbd` | One-shoulder little black dress; timeless evening edge. |
+| Red Latex | `red_latex` | Red latex mini skirt; bold editorial statement. |
+| Moonlight Shimmer Dress | `moonlight_dress` | Full-rhinestone bodycon long gown; moonlit glamour. |
+| Y3K Set | `y3k_set` | Futuristic Y3K co-ord; metallic and forward-looking. |
+
+### Outfits — sports
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Brazilian Bikini | `brazilian_bikini` | Brazilian-cut bikini; beach-confident summer look. |
+| Tennis Set | `tennis_set` | Sporty tennis skirt and top; athletic-chic. |
+| Cozy Fit | `cozy_fit` | Relaxed hoodie and jogger co-ord; urban athleisure. |
+| Racing Suit | `racing_suit` | Racing driver suit; bold motorsport identity. |
+| White Yoga | `white_yoga` | Clean white yoga set; minimal and performance-ready. |
+
+### Face style
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Natural Beauty | `natural_beauty` | Soft natural enhancement; balanced, effortless temperament. |
+| Glamour Beauty | `glamour_beauty` | Polished and charismatic look; refined allure. |
+| Sweet Beauty | `sweet_beauty` | Youthful sweet-girl vibe; soft and approachable. |
+| Luminous Beauty | `luminous_beauty` | Radiant glow finish; bright and clear complexion feel. |
+| Youthful Beauty | `youthful_beauty` | Fresh and energetic youth style; lively presence. |
+
+### Expression
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Closed Smile | `closed_smile` | Gentle closed-lip smile; warm and approachable. |
+| Open Smile | `open_smile` | Wide toothy grin; bright and joyful. |
+| Cool Expression | `cool_expression` | Serious cool expression; composed and edgy. |
+| Wink | `wink` | Single-eye wink animation; playful and flirtatious. |
+
+### Photo art
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Tanning Filter | `tanning_filter` | Warm bronzed tan filter; sun-kissed editorial look. |
+| CCD Flash | `ccd_flash` | Vintage CCD-camera flash effect; nostalgic party vibe. |
+| Film Flash | `film_flash` | Film grain with flash overlay; analog atmosphere. |
+| Fuji Flash | `fuji_flash` | Fujifilm-style flash; soft grain and warm tones. |
+
+### Photo restoration
+
+| Effect name | Effect KEY | Description |
+|---|---|---|
+| Photo restoration | `photo_restoration_v3` | Denoise, deblur, and reduce compression artifacts while keeping a natural look. |
+| AI ultra-HD | `ai_ultra_hd_v3` | Deep-learning upscale and detail recovery for old photos or small thumbnails. |
 
 ### Video async path (reserved)
 
-There are no video effect KEYs in the catalog today; this section describes how execution will work when video keys are added later.
+**Current catalog is image-only.** Use **§3a** (`run-task`) for every listed key.
 
-**Current catalog:** The table above is **image-only**. Use **§3a** (`run-task` in the main session) for every listed **`--task`** key.
-
-**Future:** If the server publishes **video** effect keys and the CLI again exposes them for **`spawn-run-task`** (long async jobs), use **`spawn-run-task`** → **`sessions_spawn`** per **[§3b](#3b--async-worker-sessions_spawn-all-video-tasks)** — same command shape, **`runTimeoutSeconds`** (default **3600**), worker **`install-deps`** / **`run-task`** / Step 4, polling: **[docs/errors-and-polling.md](docs/errors-and-polling.md)**. Until then, **do not** assume any **`--task`** in this table requires §3b.
+**Future video keys:** When the server publishes video effect keys, use `spawn-run-task` → `sessions_spawn` per §3b (`runTimeoutSeconds` default **3600**). See [docs/errors-and-polling.md](docs/errors-and-polling.md) for polling details.
 
 ---
 
@@ -105,10 +181,10 @@ When the user asks for **more than one** BeautyPlus step on the **same** media (
 
 **Rules:**
 
-1. After stage A completes with `skill_status: "completed"`, use **`primary_result_url`** or **`output_urls[0]`** as **`--input`** for stage B with a **new** `--task` (new effect KEY). That is a **new** job, not a retry of stage A. For **future video** stages, stage B may mean a **new** **`spawn-run-task`** + **`sessions_spawn`** (each spawn embeds a **single** `run-task`), not a second `run-task` inside the same embed.
-2. **“Do not re-run `run-task`”** in this skill means: **do not submit `run-task` again for the same `task_id` / the same submitted job** (use `query-task` to resume polling instead). It does **not** forbid the **next pipeline stage** with a different `task_name` / effect KEY and the previous result URL as input.
-3. **Step 4 (delivery):** Prefer **final-stage** native delivery when the user wanted the full pipeline; intermediate stages may still run embedded Step 4 per worker when using async video spawns — tune the user-facing copy if they only care about the last asset.
-4. **Video chains (reserved, medeo-style):** When video effect keys exist again: **One `sessions_spawn` = one embedded `run-task`.** Do **not** put two `run-task` calls in one spawn. Chain = **multiple spawns**: after stage A, read **`primary_result_url`**, then **`spawn-run-task`** for stage B with that URL as **`--input`**. Current catalog chains use **§3a** only (blocking `run-task` per stage).
+1. After stage A completes (`skill_status: "completed"`), pass `primary_result_url` or `output_urls[0]` as `--input` for the next `--task`. That is a new job, not a retry.
+2. **"Do not re-run `run-task`"** means: do not resubmit the same `task_id`. It does **not** forbid the next pipeline stage with a different effect KEY.
+3. **Delivery:** Prefer final-stage delivery for the full pipeline. Deliver after the last stage only.
+4. **Video chains (reserved):** One `sessions_spawn` = one embedded `run-task`. Chain = multiple spawns. Current catalog uses §3a only.
 
 See also Step 3 success bullets and **`agent_instruction`** in the JSON.
 
@@ -180,9 +256,9 @@ Choose **`--task`** = **effect KEY** from **[Supported Algorithms](#supported-al
 
 1. **Map user intent to one row** — Match feature / effect name / scene to an **effect KEY** in the table (English `snake_case`). If the user only states a broad category (e.g. “change my hairstyle”), **ask one clarifying question** (e.g. soft waves vs. Latino curls) or offer **2–3** KEYs to pick from.
 2. **Body reshape tiers** — Natural breast, teardrop, round, outward, peach butt, and O-shape butt each have **strong / medium / weak** (`*_strong` / `*_medium` / `*_weak`). If unspecified, **default to `medium`** or confirm briefly before submit.
-3. **Input medium** — All keys in this catalog are **still images**: `.jpg` / `.jpeg` / `.png` / `.webp` / `.gif` / `.bmp`, or when the user clearly means a **photo / screenshot / image**. Use **§3a** `run-task`. If **video** effect KEYs appear later and the CLI marks them spawn-only, follow **§3b**; see **[Video async path (reserved)](#video-async-path-reserved)**.
+3. **Input medium** — All keys are **still images** (`.jpg` / `.jpeg` / `.png` / `.webp` / `.gif` / `.bmp`). Use **§3a** `run-task`. If video keys appear later, follow §3b.
 4. **Ambiguous intent** — With no attachment and vague intent, **ask one question** (which effect / any reference image) or pull media from IM per [docs/im-attachments.md](docs/im-attachments.md); do not guess the wrong KEY.
-5. **Video + still in one message** — If the user clearly wants **video** processed and video KEYs exist later, use the video path **only** for the **target video**; **do not** also run the cover thumbnail unless they ask. While the table has **no video KEYs**, use the **user-specified image** as `--input`.
+5. **Video + still in one message** — While no video KEYs exist, use the user-specified image as `--input`. If video keys exist later, apply the video path to the video only.
 
 **Getting media from IM messages** (full detail: [docs/im-attachments.md](docs/im-attachments.md)):
 
@@ -200,7 +276,7 @@ python3 {baseDir}/scripts/beautyplus_ai.py resolve-input --file /tmp/saved.jpg -
 
 Use the JSON **`path`** field as **`--input`**.
 
-**`--input` as `http(s)://` URL:** In shells, **quote the whole URL** so `&` in query strings (e.g. signed OSS links) is not split. Large or slow downloads: defaults are **120s read timeout** and **100MB** max (same as `resolve-input --url`); override with **`MT_AI_URL_READ_TIMEOUT`**, **`MT_AI_URL_CONNECT_TIMEOUT`**, **`MT_AI_URL_MAX_BYTES`**. For very large video or flaky links, prefer **`resolve-input --url`** then **`--input`** with the local **`path`**.
+**`--input` as a URL:** Quote the full URL in the shell (avoids `&` splitting). Defaults: 120 s read timeout, 100 MB max — override with `MT_AI_URL_READ_TIMEOUT`, `MT_AI_URL_CONNECT_TIMEOUT`, `MT_AI_URL_MAX_BYTES`. For flaky or large links, use `resolve-input --url` first and pass the local `path`.
 
 If the user already gave a path or URL when triggering the skill, go to Step 2 without asking again.
 
@@ -222,13 +298,13 @@ If dependencies are already installed this step is quick; then continue to Step 
 
 ## Step 3 — Run the task
 
-**Default:** All effect KEYs in **[Supported Algorithms](#supported-algorithms-effect-key---task)** are **image** jobs — use **§3a** (`run-task` in the main session).
+**Default:** All listed effect KEYs are image jobs — use **§3a** (`run-task`).
 
-**Reserved:** If **`--task`** is ever a **video** effect key that the CLI treats as spawn-only (long async), use **only** **[§3b](#3b--async-worker-sessions_spawn-all-video-tasks)** (`spawn-run-task` + `sessions_spawn`). Until the server publishes such keys, you will not hit this branch for the current table.
+**Reserved:** If a future video effect key appears that the CLI treats as spawn-only, use **§3b** (`spawn-run-task` + `sessions_spawn`). No current keys hit this branch.
 
 ### 3a — Inline (blocking, default for all catalog effect KEYs)
 
-Use when the host can wait on the shell until the command returns — **all** listed **effect KEYs** in § Supported Algorithms unless §3b applies for a future video key.
+Blocking call — use for all listed effect KEYs.
 
 ```bash
 python3 {baseDir}/scripts/beautyplus_ai.py run-task \
@@ -236,7 +312,7 @@ python3 {baseDir}/scripts/beautyplus_ai.py run-task \
   --input "<image_url_or_path>"
 ```
 
-Replace `<effect_key>` with the **effect KEY** (e.g. `hair_soft_waves`) and `<image_url_or_path>` with the real values. If the server returns **`Unknown invoke preset`** / missing key in **`config.INVOKE`**, the key is not in the tenant’s published **`invoke`** map — do not invent params; check config publish / admin.
+Replace `<effect_key>` (e.g. `hair_soft_waves`) and `<image_url_or_path>` with real values. If the server returns `Unknown invoke preset`, the key is not in the tenant's invoke map — do not invent params; check config or admin.
 
 Default params include `rsp_media_type: url`. For custom JSON params:
 
@@ -249,26 +325,41 @@ python3 {baseDir}/scripts/beautyplus_ai.py run-task \
 
 **When `run-task` exits 0**, stdout is JSON that includes:
 
-- **`skill_status`: `"completed"`** — the algorithm and polling are finished; the result is in this response. If the user asked for **only this** stage, **proceed to Step 4**. If they asked for a **multi-stage pipeline**, use **`primary_result_url`** as `--input` for the **next** `--task` (see **Multi-stage pipelines** above); **Step 4 after the last stage**. **Do not** re-submit `run-task` for the **same `task_id`** (same job); use `query-task` to resume polling if needed.
+- **`skill_status: "completed"`** — job done; result is ready.
+  - Single stage → proceed to Step 4.
+  - Multi-stage pipeline → pass `primary_result_url` as `--input` for the next `--task`; deliver after the last stage.
+  - Do **not** resubmit `run-task` for the same `task_id`; use `query-task` to resume polling.
 - **`output_urls`** — ordered `http(s)` links (same extraction as before: `data.result.urls`, `images`, `media_info_list`, etc.).
 - **`primary_result_url`** — same as `output_urls[0]` when present; convenient for delivery scripts.
 - **`task_id`** — full task id as a top-level string when known (from `data.result.id` or the polling session). Keep it for manual status recovery or support handoff; do not truncate. Some synchronous completions may omit it if the API does not return an id.
 - **`agent_instruction`** — short reminder for the model.
 - **`meta` / `data`** — full API payload for debugging.
 
-**MANDATORY (user-visible outcome):** When stdout JSON has **`skill_status`: `"completed"`** (from **`run-task`** or **`query-task`**), you **must** (1) send the user a **short natural-language summary** (success + what was done), and (2) **complete Step 4** on their channel (delivery scripts below) using **`primary_result_url`** or **`output_urls[0]`**, unless the user explicitly asked **only** for the URL with no IM delivery. **Do not** end the turn with only raw JSON in the tool transcript — the user should see a normal reply and the media or link in the chat.
+**On `skill_status: "completed"` you must:**
+1. Send the user a short natural-language summary of what was done.
+2. Complete Step 4 delivery using `primary_result_url` or `output_urls[0]` — unless the user explicitly asked for the URL only.
 
-**When `run-task` exits non-zero**, stdout is JSON with **`skill_status`: `"failed"`** (or an `error` field) — explain it to the user; do not treat as success or Step 4 delivery.
+Do **not** end the turn with raw JSON alone.
 
-**MANDATORY (quota / consume failures):** When stdout JSON has **`failure_stage`: `"consume_quota"`** and **`error`** is **`credit_required`** (typically **`api_code` 60002**): you **must** send the user a **clear, user-visible** message grounded in the server **`detail`** (API `msg`). If the JSON includes **`pricing_url`** (extracted from that message when it contains an `https` link), **must** include it as a **clickable link**; if **`pricing_url`** is absent, **must** quote or paste the full **`detail`** so any links or instructions from the API still reach the user. **Do not** only dump raw JSON; **do not** retry **`run-task`** expecting success from tweaking **`--task`** / **`--params`** alone. When **`error`** is **`membership_required`** (**60001**): same rule (**`pricing_url`** when present, else full **`detail`**). When **`error`** is **`consume_param_error`**: treat as **parameter / invocation** mistakes — fix **`--task`**, **`--input`**, **`--params`** per SKILL and remote config; **do not** tell the user to recharge.
+**When `run-task` exits non-zero**, stdout has `skill_status: "failed"` — explain the error to the user; do not deliver or treat as success.
 
-**Video (reserved)** — When §3b applies, polling, stderr, **`MT_AI_*`**, timeouts, SIGKILL / host caps, **`query-task`** / **`last-task`** recovery: **[docs/errors-and-polling.md](docs/errors-and-polling.md)** and **§3c–§3d**. Optional: raise host tool/session wait limits.
+**Quota / consume failures** — when `failure_stage: "consume_quota"`:
+
+| `error` | `api_code` | Action |
+|---|---|---|
+| `credit_required` | 60002 | Show server `detail` to the user; include `pricing_url` as a link if present. Do not retry by tweaking params. |
+| `membership_required` | 60001 | Same — show `detail` / `pricing_url`. |
+| `consume_param_error` | — | Fix `--task` / `--input` / `--params`; do not tell the user to recharge. |
+
+Never dump raw JSON to the user. Never retry `run-task` for credit/membership errors.
+
+**Video (reserved):** When §3b applies, see [docs/errors-and-polling.md](docs/errors-and-polling.md) and §3c–§3d for polling, timeouts, and recovery.
 
 ### 3b — Async worker (`sessions_spawn`, **reserved for video effect keys**)
 
-**Current:** The catalog in this SKILL is **image-only** — **`spawn-run-task`** is **not** used for those keys (CLI rejects non–video-task `--task` for spawn). Use **§3a** for every listed effect KEY.
+> **Current catalog is image-only.** `spawn-run-task` is not used — CLI rejects it for image keys. Use §3a for all listed effect KEYs.
 
-**When video keys return:** Same pattern as **medeo-video** `spawn-task`: the main agent does not block on polling; a sub-session runs `run-task` and is told exactly how to detect success and deliver.
+When video keys return, the main agent does not block; a sub-session runs `run-task` and delivers the result.
 
 1. Build the payload (`<effect_key>` must be a **video** task name accepted by **`spawn-run-task`** — historically e.g. **`videoscreenclear`** / **`hdvideoallinone`** when server + CLI expose them):
 
@@ -284,9 +375,9 @@ Optional: `--params '<json>'` (same as `run-task`), `--deliver-channel telegram|
 
 2. Call OpenClaw **`sessions_spawn`** with the printed **`sessions_spawn_args`** (`task`, `label`, `runTimeoutSeconds`) **without reducing** `runTimeoutSeconds` unless you intentionally accept timeout risk.
 
-3. **Reply immediately** to the user that processing has started (same as Step 1 acknowledgment). The sub-agent completes **`install-deps`** (if needed), **`run-task`**, then Step 4 using **`skill_status` / `output_urls`** per the embedded task text. For **video** tasks on Feishu/Telegram, the payload instructs **`feishu_send_video.py`** / **`telegram_send_video.py`** after `curl` download.
+3. Reply immediately to the user that processing has started. The sub-agent runs `install-deps` (if needed), `run-task`, then Step 4 per the embedded task text.
 
-**Multi-stage + spawn:** One embed = one **`run-task`** (medeo-style). **Image** chains (current catalog): **§3a** only — run **`run-task`** once per stage; **do not** use **`spawn-run-task`**. **Video** chains (reserved): **Multi-stage pipelines** (rule 4).
+**Multi-stage + spawn:** One embed = one `run-task`. Image chains (current): §3a only. Video chains (reserved): see Multi-stage pipelines, rule 4.
 
 ### 3c — Resume polling (`query-task`)
 

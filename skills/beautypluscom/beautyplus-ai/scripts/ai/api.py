@@ -118,7 +118,7 @@ def _replace_user_origin_image_url(obj, user_image_url: str):
 
 def _init_images_from_media_profiles(media_profiles, user_image_url: str):
     """
-    Parse INVOKE ``media_profiles`` JSON string. If the object contains
+    Parse ``media_profiles`` from invoke_spec. If the object contains
     ``media_info_list`` and it is a list, return that list (deep-copied) with
     ``{userOriginImageUrl}`` replaced for use as algorithm ``init_images``;
     otherwise return None (caller uses default ``[{"url": url}]``).
@@ -130,7 +130,7 @@ def _init_images_from_media_profiles(media_profiles, user_image_url: str):
         parsed = json.loads(media_profiles.strip())
     except json.JSONDecodeError as e:
         raise ValueError(
-            f"config INVOKE media_profiles is not valid JSON: {e}"
+            f"invoke_spec media_profiles is not valid JSON: {e}"
         ) from e
     if not isinstance(parsed, dict):
         return None
@@ -560,7 +560,7 @@ class AiApi:
         :param region: api access region . default "cn-north-4"
         :param oss_region: optional OSS bucket region when token_policy url cannot be parsed (e.g. custom domain)
         :param config: optional dict overriding config.py connection fields (regions,
-            token_policy_type, token_policy_types). Invoke task names live in config.INVOKE.
+            token_policy_type, token_policy_types).
         """
         self.Key = key
         self.Secret = secret
@@ -678,7 +678,7 @@ class AiApi:
         signer = sign.Signer(self.Key, self.Secret)
         headers = {
             sign.HeaderHost: self.EndPoint,
-            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"),
+            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"),
         }
         query = {"type": typ}
         if name == "upload":
@@ -757,7 +757,7 @@ class AiApi:
 
         headers = {
             sign.HeaderHost: host,
-            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"),
+            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"),
         }
 
         data = {
@@ -784,7 +784,7 @@ class AiApi:
             host = host[7:]
         headers = {
             sign.HeaderHost: host,
-            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"),
+            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"),
         }
         return signer.sign(uri, "GET", headers, "")
 
@@ -802,7 +802,7 @@ class AiApi:
         :params imageUrl  the image url array [{"url":"url"}]
         :params parmas api params object
         :params task  task name to be apply ,
-        :params taskType from INVOKE preset or token_policy; empty or missing → mtlab
+        :params taskType from token_policy; empty or missing → mtlab
         :params context context string
         :return: The handled result data in json.
         """
@@ -923,7 +923,7 @@ class AiApi:
             host =host[7:]
         headers = {
             sign.HeaderHost: host,
-            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"),
+            "User-Agent": getattr(app_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"),
         }
         sign_request = signer.sign(uri, "GET", headers, "")
         read_timeout = min(int(policy.get("sync_timeout", 60)) + 10, 120)
@@ -975,31 +975,28 @@ class AiApi:
             return {"is_finished": False, "result": taskResult}
         return {"is_finished": False, "result": " task query failure: " + uri}
 
-    def invoke_task(self, name, url, params=None, context="", on_async_submitted=None):
+    def invoke_task_with_spec(self, spec, url, params=None, context="", on_async_submitted=None):
         """
-        Run invoke with merged params: preset from config.INVOKE[name], overridden by ``params``.
-        Optional ``task_type`` on the preset (server-driven); if absent or empty, uses mtlab.
+        Run invoke using a server-supplied spec dict from /skill/consume.json.
 
-        Optional ``media_profiles`` on the preset: JSON string. After decode, if the object
-        contains ``media_info_list`` (list), that list is sent as algorithm ``init_images``,
-        with ``{userOriginImageUrl}`` replaced by the user's image URL. Invalid JSON raises
-        ValueError. If absent, empty, or without a list ``media_info_list``,
-        ``init_images`` defaults to ``[{"url": url}]``.
+        ``spec`` must contain ``task`` and optionally ``params``, ``task_type``, and
+        ``media_profiles``.
+
+        :param spec: Dict with at minimum ``{"task": "<algo_task_name>"}``
+        :param url: Uploaded media URL
+        :param params: Optional caller params merged over spec defaults
+        :param context: Context token from /skill/consume.json
+        :param on_async_submitted: Optional callable(task_id) for async jobs
         """
-        import config as app_config
-
-        table = getattr(app_config, "INVOKE", None) or {}
-        if name not in table:
-            raise KeyError(f"Unknown invoke preset {name!r}; add it to config.INVOKE")
-        spec = table[name]
+        label = spec.get("task", "<unknown>") if isinstance(spec, dict) else "<unknown>"
         if not isinstance(spec, dict) or "task" not in spec:
             raise ValueError(
-                f"config.INVOKE[{name!r}] must include 'task'; optional 'params' (default {{}}), "
-                f"optional 'task_type' (default mtlab)"
+                f"invoke_spec must include 'task'; optional 'params' (default {{}}), "
+                f"optional 'task_type' (default mtlab). Got: {spec!r}"
             )
         cfg_params = spec.get("params")
         if cfg_params is not None and not isinstance(cfg_params, dict):
-            raise TypeError(f"config.INVOKE[{name!r}]['params'] must be a dict or omit")
+            raise TypeError(f"invoke_spec['params'] must be a dict or omit (preset={label!r})")
         merged = _deep_merge_params(cfg_params or {}, params or {})
         task_type = _default_task_type(spec.get("task_type"))
         init_images = _init_images_from_media_profiles(
@@ -1045,7 +1042,7 @@ class AiApi:
         :params url  the task id
         :params params task params
         :params task ai task name ,such as v1/sod ,v1/znxc_async
-        :params task_type keyword-only; from INVOKE or caller; empty or missing → mtlab
+        :params task_type keyword-only; from invoke_spec or caller; empty or missing → mtlab
         :params init_images keyword-only; if set and url is not None, used as algorithm
             init_images instead of [{"url": url}]. Ignored when url is None.
         :return: The handled result data in json.
