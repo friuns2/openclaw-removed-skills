@@ -3,11 +3,16 @@
   "slug": "data-auto-analyzer",
   "displayName": "数据自动分析",
   "latest": {
-    "version": "3.0.0",
-    "publishedAt": 1776666851581,
-    "commit": "https://github.com/openclaw/skills/commit/23000f9e362ba04c9024c437b34a8a55cd45ab4c"
+    "version": "3.0.1",
+    "publishedAt": 1777019752535,
+    "commit": null
   },
   "history": [
+    {
+      "version": "3.0.0",
+      "publishedAt": 1776666851581,
+      "commit": "https://github.com/openclaw/skills/commit/23000f9e362ba04c9024c437b34a8a55cd45ab4c"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1776393012662,
