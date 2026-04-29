@@ -1,13 +1,18 @@
 {
   "owner": "mnetfairy",
   "slug": "insurance-advisor-china",
-  "displayName": "中国大陆AI保险顾问",
+  "displayName": "Insurance Advisor China",
   "latest": {
-    "version": "1.8.4",
-    "publishedAt": 1776794430955,
-    "commit": "https://github.com/openclaw/skills/commit/535efeb832d7abd77d1922e9d5cb8449d6b3c22e"
+    "version": "1.8.122",
+    "publishedAt": 1777339026502,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.8.4",
+      "publishedAt": 1776794430955,
+      "commit": "https://github.com/openclaw/skills/commit/535efeb832d7abd77d1922e9d5cb8449d6b3c22e"
+    },
     {
       "version": "1.8.1",
       "publishedAt": 1776535223318,
