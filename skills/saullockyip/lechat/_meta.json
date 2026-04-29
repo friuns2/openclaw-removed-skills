@@ -3,11 +3,16 @@
   "slug": "lechat",
   "displayName": "LeChat",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1776756110531,
-    "commit": "https://github.com/openclaw/skills/commit/140cbdd7a2cfa86f90d52bde8be6ed51089a5f2d"
+    "version": "1.0.10",
+    "publishedAt": 1777031143884,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1776756110531,
+      "commit": "https://github.com/openclaw/skills/commit/140cbdd7a2cfa86f90d52bde8be6ed51089a5f2d"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776453714880,
