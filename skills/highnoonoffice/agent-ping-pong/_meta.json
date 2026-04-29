@@ -3,9 +3,15 @@
   "slug": "agent-ping-pong",
   "displayName": "Agent Ping Pong",
   "latest": {
-    "version": "2.5.3",
-    "publishedAt": 1776636000211,
-    "commit": "https://github.com/openclaw/skills/commit/b47957b187867768f2b1c9c10ffc9ec6ffa0b78d"
+    "version": "2.7.1",
+    "publishedAt": 1776888717013,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.5.3",
+      "publishedAt": 1776636000211,
+      "commit": "https://github.com/openclaw/skills/commit/b47957b187867768f2b1c9c10ffc9ec6ffa0b78d"
+    }
+  ]
 }

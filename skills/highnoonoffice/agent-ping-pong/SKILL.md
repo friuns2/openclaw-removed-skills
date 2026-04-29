@@ -1,18 +1,11 @@
 ---
 name: agent-ping-pong
-version: 2.5.1
+version: 2.1.0
 description: "Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol."
 homepage: https://github.com/highnoonoffice/agent-ping-pong
 source: https://github.com/highnoonoffice/agent-ping-pong
 license: MIT
-credentials:
-  - name: GitHub PAT (Codex)
-    description: Fine-grained personal access token scoped to your sandbox repo (codex-repo). Contents + Pull Requests read/write. Set once in Codex Desktop.
-    required: true
-  - name: GitHub PAT (OpenClaw)
-    description: Fine-grained personal access token scoped to sandbox + production repos. Contents + Pull Requests read/write. Stored in OpenClaw config.
-    required: true
-binaries: []
+metadata: ~
 ---
 
 # Agent Ping Pong
@@ -23,14 +16,6 @@ If you have a ChatGPT Plus subscription ($20/month), you already have access to 
 
 **Your OpenClaw is the brain. Codex or Claude Code are the hands. The clipboard is the protocol.**
 
-### Why This Exists
-
-This skill started with a conversation. The idea came up — give your AI agent access to GitHub so it can ship code. A developer friend's first reaction: "What kind of access are we talking about?"
-
-That's the right question. Most people either hand over broad credentials and hope for the best, or they don't do it at all. Agent Ping Pong is the third option: a two-repo, two-token structure where each agent gets exactly what it needs and nothing else. The coding agent lives in the sandbox and never touches production. OpenClaw reviews and ports. You approve the merge.
-
-When the structure clicked, the reaction was: "I didn't know you could do that." That's what this skill is — that conversation, turned into a repeatable system.
-
 ### The Aesthetic
 
 Codex speaks in blocks. OpenClaw speaks in blocks. The blocks are addressed to each other — not to you.
@@ -39,13 +24,9 @@ When Codex finishes a build, it returns a compact structured report. You copy it
 
 That's the whole design. Two agents. One clipboard. You decide when to send.
 
-**The block is the unit.** Every agent-to-agent payload lives inside a single block — one copy action, one paste. The block is for the other agent. Everything else is for you.
+**The block is the unit.** Every agent-to-agent payload lives inside a single block — one copy action, one paste. Agents can add human-readable context above or below the block. That prose is for you. The block is for the other agent. Never mix them.
 
-The standard is asymmetric by design:
-
-**OpenClaw** can contextualize above and below the block. Prose helps you understand what's happening — why a finding matters, what changed, what to watch for. You read that. You copy the block. Both things can coexist.
-
-**The coding agent** (Codex or Claude Code) must keep the block self-contained. No prose outside it. The reason is mechanical: you copy the entire response to relay it. Any context wrapped around the block gets copied too, and it pollutes the handoff. When the coding agent adds prose, the clipboard breaks. The block must be the whole thing.
+Both agents must hold this standard. If either agent starts responding in prose instead of blocks, the ping pong breaks down. The block format is not optional — it's the protocol.
 
 **Every block must request a block in return.** The last line of every `[AGENT_HANDOFF]` block — before the closing tag — must be:
 
@@ -70,74 +51,15 @@ Codex uses this for build completions, status reports, and schema negotiations. 
 
 ---
 
-## Quick Start
-
-Here's one complete cycle so you know what you're doing before you start:
-
-**1. You tell OpenClaw what to build:**
-> "Build a Python script that reads a CSV and outputs a summary JSON."
-
-**2. OpenClaw returns a spec block. You copy it and paste it to Codex:**
-```
-[AGENT_HANDOFF]
-type: spec
-target: Codex
-task: Build a Python script that reads a CSV and outputs summary JSON
-requirements:
-  - Accept filepath as CLI arg
-  - Output: {row_count, columns, sample_rows (first 3)}
-  - Write to summary.json in same directory
-edge_cases:
-  - Empty file: write {row_count: 0, columns: [], sample_rows: []}
-  - Missing file: exit with error message
-branch: feature/csv-summary
-repo: your-username/codex-repo
-PR rule: open PR against main. Do not merge.
-Reply with a single [AGENT_HANDOFF] block. No prose outside the block.
-[/AGENT_HANDOFF]
-```
-
-**3. Codex builds it and returns a delivery block. You copy it and paste it back to OpenClaw:**
-```
-[AGENT_HANDOFF]
-type: delivery
-target: Magnus
-status: completed
-branch: feature/csv-summary
-commit: a3f91bc
-pr: https://github.com/your-username/codex-repo/pull/1
-files_changed: scripts/csv_summary.py
-Reply with a single [AGENT_HANDOFF] block. No prose outside the block.
-[/AGENT_HANDOFF]
-```
-
-**4. OpenClaw reviews the PR and returns a verdict. If it's clean:**
-> LGTM. Tell Codex to merge.
-
-**5. You tell Codex: "Merge."** Done.
-
-That's the full loop. Three copy-pastes, one merge decision, working code in GitHub.
-
----
-
-## Security Notes
-
-**Clipboard handling:** The workflow passes structured blocks through your system clipboard. Do not include raw API keys or secrets inside handoff blocks — the clipboard can be read by other processes on your machine. GitHub PATs stay in your agent configs, not in block payloads.
-
-**PAT scope:** Use fine-grained tokens scoped to specific repos only. Never use classic tokens or tokens with broad org-level access for this workflow.
-
----
-
 ## What You Need
 
 - **OpenClaw** — your Maestro. Higher-level intelligence. Specs the work, reviews PRs, sends critique.
 - **Codex or Claude Code** — your coding agent. Codex is free with ChatGPT Plus ($20/mo). Claude Code works equally well. Either one does the build, opens PRs, and never merges without approval.
 - **GitHub account** — free. Source of truth. Where the code lives.
 - **Vercel account** — free tier. Deploy when something's ready to go public.
-- **One sandbox repo** (`codex-repo`) — Codex's permanent home. Every build goes here first. Never changes.
-- **One production repo** — where approved work lands. You create this once. All projects flow through it. Add more as ideas mature.
-- **One fine-grained PAT for Codex** — scoped to the sandbox only. Set once, never touched again.
-- **One fine-grained PAT for OpenClaw** — scoped to the sandbox + your production repo. Set once. Add repos to the scope as you expand — the token itself never gets replaced.
+- **One sandbox repo for Codex** — `your-username/codex-repo`. Codex lives here permanently. One PAT. Every build goes here first.
+- **One fine-grained PAT for Codex** — scoped to `codex-repo` only. You create this once and never touch it again.
+- **One fine-grained PAT for OpenClaw** — scoped to `codex-repo` + each target repo you want it to push to. One PAT per repo. You add repos as you add projects.
 
 ---
 
@@ -148,10 +70,10 @@ That's the full loop. Three copy-pastes, one merge decision, working code in Git
 
 **Claude Code:** Install via `npm install -g @anthropic-ai/claude-code`. Requires an Anthropic API key or Claude Pro/Max subscription. Works identically to Codex in this workflow — same block format, same PR protocol, same merge rules.
 
-### 2. Create your two repos
-**Sandbox repo:** Go to github.com/new. Name it `codex-repo`. Make it private. No template, no README — Codex will initialize it. This is Codex's permanent home. Every build goes here first. You never create another repo for Codex.
+### 2. Create the Codex sandbox repo
+Go to github.com/new. Name it `codex-repo`. Make it private. No template, no README — Codex will initialize it.
 
-**Production repo:** Create a second repo (e.g. `your-username/projects`). This is where OpenClaw ports approved code. All your projects live here. Codex never touches it directly.
+This is Codex's permanent home. Every project Codex touches goes here first, regardless of where it ends up. You never create another repo for Codex.
 
 ### 3. Create a fine-grained PAT for Codex
 In GitHub: Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens.
@@ -166,14 +88,14 @@ This is the key insight: Codex only gets access to what you give it. `codex-repo
 ### 4. Create a fine-grained PAT for OpenClaw
 In GitHub: Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens.
 
-Scope it to **both repos** — the sandbox and your production repo. Permissions needed:
+Scope it to **codex-repo** to start. As you add public target repos, add each one to this token's repository access list. Permissions needed:
 - Contents: Read & Write
 - Pull Requests: Read & Write
 - Metadata: Read
 
-Codex has one PAT, scoped to the sandbox. OpenClaw has one PAT, scoped to the sandbox plus your production repo. That's the whole setup. If you add more production repos down the line, add them to this token's scope — the token itself never gets replaced.
+This gives OpenClaw exactly what it needs — read PRs in the sandbox, push to approved target repos — and nothing else. Your other repos stay untouched.
 
-**What OpenClaw can do with this PAT:** read PRs in the sandbox, port approved code to the production repo, create branches, commit files, open PRs.
+**What OpenClaw can do with this PAT:** read PRs in `codex-repo`, push code to any repo explicitly listed in the token's scope, create branches, commit files, open PRs on target repos.
 
 **What neither agent can do:** create new GitHub repos. That one manual step is always yours. Takes 20 seconds at github.com/new.
 
@@ -300,23 +222,24 @@ If OpenClaw sends back findings, another round of ping pong happens before merge
 
 ## The Sandbox Pattern — How Projects Actually Ship
 
-Two repos. Two jobs. The sandbox is where things get built and broken. The production repo is where things live when they're ready.
-
-Codex builds everything in the sandbox. OpenClaw reviews the PR there. When a build is approved, OpenClaw ports the clean code to the production repo. Codex never touches the production repo directly — that's the whole point.
+Codex builds everything in `codex-repo`. That's the sandbox. OpenClaw reviews the PR there. When a build is approved, OpenClaw ports the clean code to the target repo — the public-facing project repo you created manually.
 
 The flow for any new project:
 
-    1. You describe what you want to OpenClaw
-    2. OpenClaw writes the spec, sends it to your coding agent via you
-    3. Coding agent builds in the sandbox, opens a PR
-    4. You relay the PR to OpenClaw for review
-    5. OpenClaw reviews, sends findings back to the coding agent
-    6. Coding agent fixes, you relay, OpenClaw approves
-    7. You tell the coding agent to merge in the sandbox
-    8. OpenClaw ports the approved code to the production repo
-    9. Done. The production repo has clean, reviewed code. The coding agent never touched it.
+    1. You create the target repo on GitHub (e.g. your-username/my-project)
+    2. You describe what you want to OpenClaw
+    3. OpenClaw writes the spec, sends it to Codex via you
+    4. Codex builds in codex-repo, opens a PR
+    5. You relay the PR to OpenClaw for review
+    6. OpenClaw reviews, sends findings back to Codex
+    7. Codex fixes, you relay, OpenClaw approves
+    8. You tell Codex to merge in codex-repo
+    9. OpenClaw ports the approved code to the target repo
+    10. Done. The target repo has clean, reviewed code. Codex never touched it directly.
 
-The sandbox accumulates a full history of everything ever built — searchable, auditable, contained. If the coding agent does something unexpected, it's in the sandbox, not in production. As ideas mature into distinct public projects, you can add dedicated repos to OpenClaw's PAT scope. The sandbox relationship never changes.
+Codex stays in the sandbox forever. The sandbox accumulates a full history of everything ever built — searchable, auditable, contained. If Codex does something unexpected, it's in the sandbox, not in production.
+
+OpenClaw uses one fine-grained PAT scoped to the repos it needs. Start with `codex-repo`. When you create a new target repo, add it to the token's repository access list in GitHub settings. No new token needed — just update the scope. Codex never needs a new one.
 
 ---
 
