@@ -1,8 +1,8 @@
 {
   "name": "libu-premarket",
-  "version": "13.4.1",
+  "version": "1.3.45",
   "author": "ygbeyond",
-  "description": "礼部侍郎 - A 股盘前作战地图。主力资金流向 + 财务排雷，每天开盘前 3 分钟给你一份实战级选股报告。【v13.4.0 Lite 模式 + 安全重构】",
+  "description": "礼部侍郎 - A 股盘前作战地图。主力资金流向 + 财务排雷，每天开盘前 3 分钟给你一份实战级选股报告。【v1.3.45 数据更新至 2026-04-24】",
   "entry": "pre_market.py",
   "dependencies": {
     "python": ">=3.8",
@@ -130,5 +130,17 @@
     "description": "添加微信获取技术支持与数据更新提醒",
     "issue_tracker": "wechat:ygbeyond"
   },
-  "required_env_vars": []
+  "required_env_vars": [],
+  "optional_env_vars": [
+    {
+      "name": "CLAWTIP_SM4_KEY",
+      "description": "京东 ClawTip 支付 SM4 加密密钥（仅完整版支付功能需要，Lite 模式无需配置）",
+      "required_for": "payment"
+    },
+    {
+      "name": "TUSHARE_TOKEN",
+      "description": "Tushare Pro API Token（可选，配置后财务数据更精准）",
+      "required_for": "realtime-financial-data"
+    }
+  ]
 }
