@@ -66,7 +66,7 @@ def get_last_trading_day() -> str:
 def get_date_header() -> str:
     """
     Determine the Section 1 header based on last trading day.
-    Returns e.g. "昨日股巿回顧" or "週X股巿回顧"
+    Returns e.g. "昨日股市回顧" or "週X股市回顧"
     """
     today = date.today()
     weekday = today.weekday()  # 0=Mon
@@ -76,14 +76,14 @@ def get_date_header() -> str:
     today_weekday = today.weekday()
 
     if (today - last).days == 1:
-        return "昨日股巿回顧"
+        return "昨日股市回顧"
     elif (today - last).days <= 5 and last_weekday >= 0 and last_weekday <= 4:
         # Same week
         weekday_names = ["一", "二", "三", "四", "五"]
-        return f"週{weekday_names[last_weekday]}股巿回顧"
+        return f"週{weekday_names[last_weekday]}股市回顧"
     else:
         weekday_names = ["一", "二", "三", "四", "五"]
-        return f"上週{weekday_names[last_weekday]}股巿回顧"
+        return f"上週{weekday_names[last_weekday]}股市回顧"
 
 
 # ─── Report Generation ──────────────────────────────────────────
