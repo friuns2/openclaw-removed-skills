@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+from _test_mutators import append_suggestions, ensure_legacy_budget, replace_line, replace_once
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -16,43 +17,7 @@ CURRENT_VALIDATOR = ROOT / "scripts" / "validate_suggestions.py"
 BASELINE_VALIDATOR = ROOT / "scripts" / "baselines" / "validate_suggestions_v0_1_0.py"
 CANONICAL = ROOT / "references" / "suggestion-contract.md"
 REPORT_PATH = ROOT / "assets" / "ablation_report.json"
-END = "<!-- agent-travel:suggestions:end -->"
 TIMEOUT_SECONDS = 10
-
-
-def replace_line(text: str, key: str, value: str) -> str:
-    pattern = re.compile(rf"^{re.escape(key)}:\s*.*$", re.MULTILINE)
-    updated, count = pattern.subn(f"{key}: {value}", text, count=1)
-    if count != 1:
-        raise ValueError(f"missing line for {key}")
-    return updated
-
-
-def replace_once(text: str, old: str, new: str) -> str:
-    if old not in text:
-        raise ValueError(f"missing expected text: {old}")
-    return text.replace(old, new, 1)
-
-
-def extract_suggestion_block(text: str) -> str:
-    start = text.index("## suggestion-1")
-    end = text.index(END, start)
-    return text[start:end].strip()
-
-
-def append_suggestions(text: str, total: int) -> str:
-    block = extract_suggestion_block(text)
-    extras = []
-    for index in range(2, total + 1):
-        extra = block.replace("## suggestion-1", f"## suggestion-{index}", 1)
-        extra = extra.replace(
-            "title: Refresh the skill snapshot after edits",
-            f"title: Refresh the skill snapshot after edits {index}",
-            1,
-        )
-        extras.append(extra)
-    insert_at = text.rindex(END)
-    return text[:insert_at] + "\n\n" + "\n\n".join(extras) + "\n" + text[insert_at:]
 
 
 def mutate(text: str, case_id: str) -> str:
@@ -101,6 +66,15 @@ def mutate(text: str, case_id: str) -> str:
         )
     if case_id == "empty_fit_reason":
         return replace_line(text, "fit_reason", "")
+    if case_id == "misplaced_top_level_visibility":
+        needle = "fit_reason: This fits when the user already edited the skill locally and needs a fast low-risk check before more changes.\n"
+        return replace_once(text, needle, needle + "visibility: silent_until_relevant\n")
+    if case_id == "malformed_evidence_item":
+        return replace_once(
+            text,
+            "- secondary_community: https://example.com/community-thread",
+            "- secondary_community\n",
+        )
     raise ValueError(f"unknown case: {case_id}")
 
 
@@ -121,6 +95,8 @@ CASES = [
     {"id": "missing_timezone", "kind": "guardrail"},
     {"id": "no_independent_evidence", "kind": "guardrail"},
     {"id": "empty_fit_reason", "kind": "guardrail"},
+    {"id": "misplaced_top_level_visibility", "kind": "guardrail"},
+    {"id": "malformed_evidence_item", "kind": "guardrail"},
     {"id": "invalid_dates", "kind": "shared-invalid"},
 ]
 
@@ -161,8 +137,11 @@ def main() -> int:
         temp_dir = Path(temp)
         for case in CASES:
             target = temp_dir / f"{case['id']}.md"
-            target.write_text(mutate(canonical, case["id"]), encoding="utf-8")
-            baseline = invoke(BASELINE_VALIDATOR, target)
+            current_case = mutate(canonical, case["id"])
+            target.write_text(current_case, encoding="utf-8")
+            baseline_target = temp_dir / f"{case['id']}.baseline.md"
+            baseline_target.write_text(ensure_legacy_budget(current_case), encoding="utf-8")
+            baseline = invoke(BASELINE_VALIDATOR, baseline_target)
             current = invoke(CURRENT_VALIDATOR, target)
             case_results.append(
                 {
@@ -199,7 +178,12 @@ def main() -> int:
     }
     REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    return 0
+    current_summary = report["summary"]
+    return 0 if (
+        current_summary["current_guardrail_rejection_rate"] == 1.0
+        and current_summary["current_safe_acceptance_rate"] == 1.0
+        and current_summary["current_shared_invalid_rejection_rate"] == 1.0
+    ) else 1
 
 
 if __name__ == "__main__":

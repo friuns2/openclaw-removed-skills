@@ -4,63 +4,24 @@
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
+from _report_utils import normalize_report_paths
+from _test_mutators import append_suggestions, replace_line, replace_match_reasoning_block, replace_once
+
 
 ROOT = Path(__file__).resolve().parent.parent
 VALIDATOR = ROOT / "scripts" / "validate_suggestions.py"
 SHOULD_TRAVEL = ROOT / "scripts" / "should_travel.py"
+PLAN_TRAVEL = ROOT / "scripts" / "plan_travel.py"
 CANONICAL = ROOT / "references" / "suggestion-contract.md"
 REPORT_PATH = ROOT / "assets" / "reliability_report.json"
 START = "<!-- agent-travel:suggestions:start -->"
 END = "<!-- agent-travel:suggestions:end -->"
 TIMEOUT_SECONDS = 10
-
-
-def replace_once(text: str, old: str, new: str) -> str:
-    if old not in text:
-        raise ValueError(f"missing expected text: {old}")
-    return text.replace(old, new, 1)
-
-
-def replace_line(text: str, key: str, value: str) -> str:
-    pattern = re.compile(rf"^{re.escape(key)}:\s*.*$", re.MULTILINE)
-    updated, count = pattern.subn(f"{key}: {value}", text, count=1)
-    if count != 1:
-        raise ValueError(f"missing line for {key}")
-    return updated
-
-
-def replace_block(text: str, start_marker: str, end_marker: str, replacement: str) -> str:
-    start = text.index(start_marker)
-    end = text.index(end_marker, start)
-    return text[:start] + replacement + text[end:]
-
-
-def extract_suggestion_block(text: str) -> str:
-    start = text.index("## suggestion-1")
-    end = text.index(END, start)
-    return text[start:end].strip()
-
-
-def append_suggestions(text: str, total: int) -> str:
-    block = extract_suggestion_block(text)
-    extras = []
-    for index in range(2, total + 1):
-        extra = block.replace("## suggestion-1", f"## suggestion-{index}", 1)
-        extra = extra.replace(
-            "title: Refresh the skill snapshot after edits",
-            f"title: Refresh the skill snapshot after edits {index}",
-            1,
-        )
-        extras.append(extra)
-    insert_at = text.rindex(END)
-    return text[:insert_at] + "\n\n" + "\n\n".join(extras) + "\n" + text[insert_at:]
-
 
 def mutate_missing_markers(text: str) -> str:
     return text.replace(START, "").replace(END, "")
@@ -79,7 +40,7 @@ def mutate_missing_source_scope(text: str) -> str:
 
 
 def mutate_missing_match_reasoning(text: str) -> str:
-    return replace_block(text, "match_reasoning:\n", "version_scope:", "")
+    return replace_match_reasoning_block(text, "")
 
 
 def mutate_no_primary_evidence(text: str) -> str:
@@ -110,7 +71,7 @@ def mutate_bad_match_axes(text: str) -> str:
         "- symptom: matched stale behavior after a local edit\n"
         "- symptom: matched a low-risk reload check before more edits\n"
     )
-    return replace_block(text, "match_reasoning:\n", "version_scope:", replacement)
+    return replace_match_reasoning_block(text, replacement)
 
 
 def mutate_low_mode_two_suggestions(text: str) -> str:
@@ -172,6 +133,19 @@ def mutate_valid_optional_fields(text: str) -> str:
     return replace_line(text, "reuse_gate", "min_4_of_5_axes_and_ttl_valid")
 
 
+def mutate_misplaced_top_level_visibility(text: str) -> str:
+    needle = "fit_reason: This fits when the user already edited the skill locally and needs a fast low-risk check before more changes.\n"
+    return replace_once(text, needle, needle + "visibility: silent_until_relevant\n")
+
+
+def mutate_malformed_evidence_item(text: str) -> str:
+    return replace_once(
+        text,
+        "- secondary_community: https://example.com/community-thread",
+        "- secondary_community\n",
+    )
+
+
 VALIDATOR_CASES = [
     ("canonical", lambda text: text, True),
     ("missing_markers", mutate_missing_markers, False),
@@ -195,6 +169,8 @@ VALIDATOR_CASES = [
     ("invalid_fingerprint_hash", mutate_invalid_fingerprint_hash, False),
     ("short_problem_fingerprint", mutate_short_problem_fingerprint, False),
     ("empty_fit_reason", mutate_empty_fit_reason, False),
+    ("misplaced_top_level_visibility", mutate_misplaced_top_level_visibility, False),
+    ("malformed_evidence_item", mutate_malformed_evidence_item, False),
     ("valid_optional_fields", mutate_valid_optional_fields, True),
 ]
 
@@ -224,6 +200,20 @@ TRIGGER_CASES = [
         True,
         "low",
         "ready",
+    ),
+    (
+        "should_travel_required_timestamp_null_is_missing",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": None,
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+        },
+        False,
+        "low",
+        "missing_required_field",
     ),
     (
         "should_travel_user_active",
@@ -498,6 +488,25 @@ TRIGGER_CASES = [
         "ready",
     ),
     (
+        "should_travel_scheduled_defaults_closed_without_host_signal",
+        {
+            "enabled": True,
+            "event_kind": "scheduled",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "user_operation_in_progress": False,
+            "agent_response_in_progress": False,
+            "tool_approval_pending": False,
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+        },
+        False,
+        "low",
+        "scheduled_opt_in_required",
+    ),
+    (
         "should_travel_scheduled_without_host_or_opt_in_blocks",
         {
             "enabled": True,
@@ -538,6 +547,120 @@ TRIGGER_CASES = [
         False,
         "low",
         "scheduled_prompt_must_be_neutral",
+    ),
+    (
+        "should_travel_idle_fallback_stays_low_with_passive_signals",
+        {
+            "enabled": True,
+            "event_kind": "idle_fallback",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "host_supports_heartbeat": False,
+            "related_failures": 2,
+            "unresolved_blocker_count": 1,
+        },
+        True,
+        "low",
+        "ready",
+    ),
+    (
+        "should_travel_negative_thread_runs_rejected",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": -5,
+        },
+        False,
+        "low",
+        "invalid_integer",
+    ),
+    (
+        "should_travel_negative_related_failures_rejected",
+        {
+            "enabled": True,
+            "event_kind": "failure_recovery",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "related_failures": -1,
+        },
+        False,
+        "low",
+        "invalid_integer",
+    ),
+]
+
+PLAN_CASES = [
+    (
+        "plan_travel_heartbeat_low_query",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "host": "OpenClaw",
+            "symptom": "cron digest repeats stale notes",
+            "constraint": "public-only search",
+            "desired_outcome": "fresh advisory hint",
+        },
+        "Host: OpenClaw\nObserved issue: cron digest repeats stale notes\n",
+        True,
+        "low",
+        1,
+        [],
+    ),
+    (
+        "plan_travel_scheduled_blocked_no_queries",
+        {
+            "enabled": True,
+            "event_kind": "scheduled",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "host": "Claude Code",
+            "symptom": "scheduled task repeats old log triage",
+        },
+        "",
+        False,
+        "low",
+        0,
+        [],
+    ),
+    (
+        "plan_travel_redacts_state_secrets",
+        {
+            "enabled": True,
+            "event_kind": "heartbeat",
+            "now": "2026-04-20T12:00:00+00:00",
+            "last_thread_activity": "2026-04-20T10:00:00+00:00",
+            "last_user_action": "2026-04-20T11:00:00+00:00",
+            "last_agent_action": "2026-04-20T11:30:00+00:00",
+            "thread_runs_today": 0,
+            "user_runs_today": 0,
+            "host": "OpenClaw",
+            "symptom": "cron failed with token=sk-test_should_redact_1234567890",
+            "constraint": "public-only search",
+            "desired_outcome": "safe query",
+        },
+        "Internal URL: http://localhost:3000/admin\nPath: C:\\Users\\admin\\private\\repo\\.env\n",
+        True,
+        "low",
+        1,
+        ["sk-test_should_redact", "localhost:3000", "private\\repo"],
     ),
 ]
 
@@ -626,6 +749,70 @@ def run_trigger_case(
     }
 
 
+def run_plan_case(
+    name: str,
+    state: dict[str, object],
+    context: str,
+    expected_should_run: bool,
+    expected_search_mode: str,
+    expected_query_count: int,
+    forbidden_substrings: list[str],
+    temp_dir: Path,
+) -> dict[str, object]:
+    state_path = temp_dir / f"{name}.json"
+    context_path = temp_dir / f"{name}.txt"
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    context_path.write_text(context, encoding="utf-8")
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(PLAN_TRAVEL), str(state_path), "--context", str(context_path)],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=TIMEOUT_SECONDS,
+        )
+        output = (proc.stdout + proc.stderr).strip()
+        crashed = "Traceback" in output
+        try:
+            payload = json.loads(proc.stdout or "{}")
+        except json.JSONDecodeError:
+            payload = {}
+            crashed = True
+    except subprocess.TimeoutExpired:
+        output = f"TIMEOUT after {TIMEOUT_SECONDS}s"
+        crashed = True
+        payload = {}
+        proc = subprocess.CompletedProcess([], 1)
+
+    decision = payload.get("decision", {}) if isinstance(payload.get("decision"), dict) else {}
+    queries = payload.get("queries", [])
+    serialized = json.dumps(payload, ensure_ascii=False)
+    leaked = [text for text in forbidden_substrings if text in serialized]
+    ok = (
+        decision.get("should_run") == expected_should_run
+        and decision.get("search_mode") == expected_search_mode
+        and isinstance(queries, list)
+        and len(queries) == expected_query_count
+        and not leaked
+        and proc.returncode == 0
+        and not crashed
+    )
+    return {
+        "case": name,
+        "kind": "plan",
+        "expected_should_run": expected_should_run,
+        "actual_should_run": decision.get("should_run"),
+        "expected_search_mode": expected_search_mode,
+        "actual_search_mode": decision.get("search_mode"),
+        "expected_query_count": expected_query_count,
+        "actual_query_count": len(queries) if isinstance(queries, list) else None,
+        "leaked_forbidden_substrings": leaked,
+        "ok": ok,
+        "crashed": crashed,
+        "output": output,
+    }
+
+
 def main() -> int:
     canonical = CANONICAL.read_text(encoding="utf-8")
     results: list[dict[str, object]] = []
@@ -644,9 +831,31 @@ def main() -> int:
                     temp_dir,
                 )
             )
+        for (
+            name,
+            state,
+            context,
+            expected_should_run,
+            expected_search_mode,
+            expected_query_count,
+            forbidden_substrings,
+        ) in PLAN_CASES:
+            results.append(
+                run_plan_case(
+                    name,
+                    state,
+                    context,
+                    expected_should_run,
+                    expected_search_mode,
+                    expected_query_count,
+                    forbidden_substrings,
+                    temp_dir,
+                )
+            )
 
     validator_results = [item for item in results if item["kind"] == "validator"]
     trigger_results = [item for item in results if item["kind"] == "trigger"]
+    plan_results = [item for item in results if item["kind"] == "plan"]
     summary = {
         "total_cases": len(results),
         "passed_cases": sum(1 for item in results if item["ok"]),
@@ -655,8 +864,11 @@ def main() -> int:
         "validator_passed": sum(1 for item in validator_results if item["ok"]),
         "trigger_cases": len(trigger_results),
         "trigger_passed": sum(1 for item in trigger_results if item["ok"]),
+        "plan_cases": len(plan_results),
+        "plan_passed": sum(1 for item in plan_results if item["ok"]),
         "results": results,
     }
+    summary = normalize_report_paths(summary)
     REPORT_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if summary["passed_cases"] == summary["total_cases"] and summary["crash_count"] == 0 else 1

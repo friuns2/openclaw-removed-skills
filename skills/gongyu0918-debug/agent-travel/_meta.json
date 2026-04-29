@@ -1,13 +1,18 @@
 {
   "owner": "gongyu0918-debug",
   "slug": "agent-travel",
-  "displayName": "agent-travel",
+  "displayName": "Agent Travel",
   "latest": {
-    "version": "0.2.7",
-    "publishedAt": 1776783605951,
-    "commit": "https://github.com/openclaw/skills/commit/6c4d719632d6cbfa5be031db01d9f25a41fed534"
+    "version": "0.2.11",
+    "publishedAt": 1776996972642,
+    "commit": null
   },
   "history": [
+    {
+      "version": "0.2.7",
+      "publishedAt": 1776783605951,
+      "commit": "https://github.com/openclaw/skills/commit/6c4d719632d6cbfa5be031db01d9f25a41fed534"
+    },
     {
       "version": "0.1.0",
       "publishedAt": 1776541758069,

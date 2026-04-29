@@ -23,6 +23,13 @@ TOP_LEVEL_REQUIRED = {
     "problem_fingerprint",
     "advisory_only",
 }
+TOP_LEVEL_OPTIONAL = {
+    "trigger_reason",
+    "visibility",
+    "fingerprint_hash",
+    "reuse_gate",
+    "budget",
+}
 ITEM_REQUIRED = {
     "title",
     "applies_when",
@@ -102,11 +109,14 @@ def canonicalize_axis(axis: str) -> str:
 def parse_evidence_source(item: str) -> tuple[str, str]:
     label, separator, reference = str(item).partition(":")
     normalized_label = normalize_part(label)
-    normalized_reference = reference.strip().lower() if separator else ""
+    normalized_reference = reference.strip() if separator else ""
     if normalized_reference:
         parsed = urlparse(normalized_reference)
         if parsed.scheme and parsed.netloc:
-            normalized_reference = f"{parsed.netloc}{parsed.path}".rstrip("/")
+            host = parsed.netloc.lower()
+            path = parsed.path.rstrip("/")
+            query = f"?{parsed.query}" if parsed.query else ""
+            normalized_reference = f"{host}{path}{query}"
     return normalized_label, normalized_reference
 
 
@@ -174,8 +184,14 @@ def parse_block(path: Path) -> tuple[dict[str, str], list[dict[str, object]], li
         current_evidence = None
         current_match_reasoning = None
         if current is None:
+            if key in ITEM_REQUIRED:
+                errors.append(f"suggestion field {key} must appear under a suggestion heading")
+                continue
             top_level[key] = value
         else:
+            if key in TOP_LEVEL_REQUIRED or key in TOP_LEVEL_OPTIONAL:
+                errors.append(f"top-level field {key} must appear before the first suggestion heading")
+                continue
             current[key] = value
 
     return top_level, suggestions, errors
@@ -259,7 +275,7 @@ def validate_top_level(top_level: dict[str, str], suggestion_count: int) -> list
 
     limit = suggestion_limit(top_level)
     if limit is not None and suggestion_count > limit:
-        errors.append(f"{budget or search_mode} allows at most {limit} suggestion(s)")
+        errors.append(f"{search_mode} allows at most {limit} suggestion(s)")
 
     return errors
 
@@ -290,14 +306,17 @@ def validate_suggestion(
     else:
         evidence_tiers = set()
         evidence_sources = set()
+        evidence_format_error = False
         for item in evidence:
             if ":" not in str(item):
                 errors.append(f"suggestion-{index} evidence items must use source_label: reference format")
-                break
+                evidence_format_error = True
+                continue
             label, source_key = parse_evidence_source(str(item))
             if not label or not source_key:
                 errors.append(f"suggestion-{index} evidence items must include a non-empty source label and reference")
-                break
+                evidence_format_error = True
+                continue
             tier = label.split("_", 1)[0]
             evidence_tiers.add(tier)
             evidence_sources.add(source_key)
@@ -305,11 +324,14 @@ def validate_suggestion(
                 errors.append(
                     f"suggestion-{index} evidence tier {tier} must be declared in source_scope"
                 )
-        if "primary" not in evidence_tiers:
+        if evidence_format_error:
+            evidence_tiers.clear()
+            evidence_sources.clear()
+        if not evidence_format_error and "primary" not in evidence_tiers:
             errors.append(f"suggestion-{index} needs at least 1 primary evidence item")
-        if not any(tier != "primary" for tier in evidence_tiers):
+        if not evidence_format_error and not any(tier != "primary" for tier in evidence_tiers):
             errors.append(f"suggestion-{index} needs at least 1 non-primary cross-validation evidence item")
-        if len(evidence_sources) < 2:
+        if not evidence_format_error and len(evidence_sources) < 2:
             errors.append(f"suggestion-{index} needs at least 1 independent evidence source")
 
     match_reasoning = suggestion.get("match_reasoning", [])

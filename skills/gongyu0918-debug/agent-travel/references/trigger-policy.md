@@ -35,6 +35,7 @@ Run only when all of these are true:
 - `high`: explicit deep research request or repeated blocker after `medium`
 
 `task_end` defaults to `medium` once the host decides the task just finished and the quiet window is open.
+`idle_fallback` stays `low` by default, even when passive failure signals exist. Use `failure_recovery` or explicit search escalation when the thread needs a deeper pass.
 
 `idle_fallback` should run only when one of these is true:
 
@@ -57,6 +58,7 @@ If the host cannot observe live typing or direct user activity, approximate quie
 For `scheduled` triggers, distinguish manual prompts from host-generated prompts:
 
 - a host-managed scheduled run is a valid trigger even when the operator did not separately opt in to periodic travel
+- the host should state that scheduled ownership explicitly; the default gate stays closed until the host-managed signal or user opt-in is present
 - manual scheduled prompts may preserve the operator's original wording
 - host-generated scheduled prompts should stay neutral and workflow-derived
 - generated scheduled prompts should be built from repo state, logs, backlog items, docs drift, or other task facts

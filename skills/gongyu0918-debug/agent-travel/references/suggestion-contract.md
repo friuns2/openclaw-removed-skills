@@ -62,6 +62,8 @@ evidence:
 <!-- agent-travel:suggestions:end -->
 ```
 
+The fields above `## suggestion-1` belong to the top-level envelope. The fields under each `## suggestion-n` heading belong to that suggestion item only.
+
 Optional fields such as `trigger_reason`, `visibility`, `fingerprint_hash`, and `reuse_gate` should not break older hosts. Hosts that do not understand them should preserve them when possible and ignore them otherwise. Older hosts may still emit an earlier mode field that mirrors `search_mode`.
 
 Timestamps must include an explicit timezone offset. `problem_fingerprint` should contain at least 4 non-empty segments, and `fingerprint_hash` should be formatted as `h64:<64 lowercase hex chars>`. Each suggestion needs at least one `primary` evidence item, one additional non-`primary` cross-validation evidence item, and one additional independent evidence source. The current standardized `reuse_gate` value is `min_4_of_5_axes_and_ttl_valid`.
