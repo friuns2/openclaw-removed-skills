@@ -1,5 +1,5 @@
 ---
-name: sjtu-hpc
+name: sjtu-slurm-skill
 description: Log in to the SJTU HPC platform (also known as "交我算") as the user to perform job queries, submissions, cancellations, and data management. Use this skill when the user requests operations related to HPC or "交我算".
 metadata:
   {
@@ -11,7 +11,7 @@ metadata:
   }
 ---
 
-# sjtu-hpc
+# sjtu-slurm-skill
 
 ## Overview
 
