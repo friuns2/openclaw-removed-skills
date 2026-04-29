@@ -1,6 +1,7 @@
 const {
   AbiCoder,
   JsonRpcProvider,
+  Wallet,
   encodeBytes32String,
   decodeBytes32String,
   getAddress,
@@ -28,6 +29,7 @@ const MAINNET_SUBSCRIPTION_DURATION_DAYS = 90;
 const TESTNET_SUBSCRIPTION_DURATION_DAYS = 7;
 const SUPPORTED_DEVIATION_CHOICES_PERCENT = [5, 2.5, 1, 0.5, 0.25];
 const DEFAULT_DEVIATION_CHOICE_PERCENT = '0.5';
+const SEND_ACKNOWLEDGEMENT = 'I_UNDERSTAND_THIS_WILL_SEND_TRANSACTIONS';
 const CHAIN_ALIASES = {
   arbitrum: 42161,
   'arbitrum-one': 42161,
@@ -122,6 +124,21 @@ function printUsage() {
     --chain arbitrum \
     --deviation-choice 0.5 \
     --duration 7776000
+
+  node bin/api3-feed-manager.js execute-buy-subscription \
+    --dapi-name ETH/USD \
+    --rpc-url https://arb1.arbitrum.io/rpc \
+    --chain arbitrum \
+    --deviation-choice 0.5 \
+    --duration 7776000 \
+    --private-key 0xabc123...
+
+  node bin/api3-feed-manager.js execute-buy-subscription \
+    --dapi-name ETH/USD \
+    --rpc-url https://arb1.arbitrum.io/rpc \
+    --chain arbitrum \
+    --execution-mode wrapper \
+    --private-key 0xabc123...
 
   node bin/api3-feed-manager.js coverage-audit \
     --rpc-url https://arb1.arbitrum.io/rpc \
@@ -340,7 +357,7 @@ async function fetchJsonWithStatus(url) {
   if (text) {
     try {
       json = JSON.parse(text);
-    } catch (error) {
+    } catch {
       json = null;
     }
   }
@@ -946,6 +963,153 @@ function buildUnsupportedPurchaseDiagnostics({ dapiName, pricingResponse, pricin
   };
 }
 
+function classifyFundingExecution({ chainState, exactTransactionExecutionSupported, wrapperCallDiagnostics, unsupportedDiagnostics }) {
+  const availableExecutionModes = [];
+
+  if (exactTransactionExecutionSupported) {
+    availableExecutionModes.push('direct');
+  }
+
+  if (wrapperCallDiagnostics && wrapperCallDiagnostics.wrapperCallPreparationSupported) {
+    availableExecutionModes.push('wrapper');
+  }
+
+  if (chainState && chainState.isActiveOnChain) {
+    return {
+      state: 'not-needed',
+      reason: 'Feed is already active onchain, so no funding execution is required.',
+      availableExecutionModes,
+    };
+  }
+
+  if (availableExecutionModes.length > 0) {
+    return {
+      state: 'executable',
+      reason: 'The repo can already derive an exact executable funding call for this feed.',
+      availableExecutionModes,
+    };
+  }
+
+  if (unsupportedDiagnostics && unsupportedDiagnostics.marketActivationCoverage && unsupportedDiagnostics.marketActivationCoverage.activatableViaMarketContractPath) {
+    return {
+      state: 'browser-assisted',
+      reason: 'Funding appears possible through the Market activation path, but this repo cannot yet derive an exact executable call for it.',
+      availableExecutionModes,
+    };
+  }
+
+  return {
+    state: 'unsupported',
+    reason: 'No supported executable or browser-assisted funding path is currently available for this feed.',
+    availableExecutionModes,
+  };
+}
+
+function parseBooleanOption(value, defaultValue = false) {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'y', 'on'].includes(normalized)) {
+    return true;
+  }
+  if (['0', 'false', 'no', 'n', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  throw new Error(`Could not parse boolean option from: ${value}`);
+}
+
+function normalizeTransactionValue(value) {
+  if (typeof value === 'bigint') {
+    return value;
+  }
+
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 0) {
+    return BigInt(value);
+  }
+
+  if (typeof value === 'string' && /^0x[0-9a-fA-F]+$/.test(value)) {
+    return BigInt(value);
+  }
+
+  if (typeof value === 'string' && /^[0-9]+$/.test(value)) {
+    return BigInt(value);
+  }
+
+  throw new Error(`Unsupported transaction value: ${value}`);
+}
+
+async function executePreparedContractCall({ preparedContractCall, rpcUrl, privateKey, submit, acknowledgement }) {
+  const executionSummary = {
+    requested: true,
+    dryRun: !submit,
+    attempted: false,
+    simulated: false,
+    submitted: false,
+    completed: false,
+    signerAddress: null,
+    txHash: null,
+    failureReason: null,
+  };
+
+  if (!preparedContractCall || preparedContractCall.sendTransactionSupported === false) {
+    executionSummary.failureReason = 'Prepared contract call is unavailable or unsupported for sending.';
+    return { executionSummary, transactionRequest: null, callResult: null };
+  }
+
+  if (!rpcUrl || !privateKey) {
+    executionSummary.failureReason = 'Execution requires rpcUrl and privateKey.';
+    return { executionSummary, transactionRequest: null, callResult: null };
+  }
+
+  if (submit && acknowledgement !== SEND_ACKNOWLEDGEMENT) {
+    executionSummary.failureReason = `Submitting requires acknowledgement=${SEND_ACKNOWLEDGEMENT}.`;
+    return { executionSummary, transactionRequest: null, callResult: null };
+  }
+
+  const provider = new JsonRpcProvider(rpcUrl);
+  const wallet = new Wallet(privateKey, provider);
+  const signerAddress = await wallet.getAddress();
+  executionSummary.signerAddress = signerAddress;
+
+  const transactionRequest = {
+    to: preparedContractCall.targetContractAddress,
+    data: preparedContractCall.calldata,
+    value: normalizeTransactionValue(preparedContractCall.value || '0'),
+    from: signerAddress,
+  };
+
+  executionSummary.attempted = true;
+
+  try {
+    if (!submit) {
+      const callResult = await provider.call(transactionRequest);
+      executionSummary.simulated = true;
+      executionSummary.completed = true;
+      return { executionSummary, transactionRequest, callResult };
+    }
+
+    const response = await wallet.sendTransaction({
+      to: transactionRequest.to,
+      data: transactionRequest.data,
+      value: transactionRequest.value,
+    });
+    executionSummary.submitted = true;
+    executionSummary.completed = true;
+    executionSummary.txHash = response.hash;
+    return { executionSummary, transactionRequest, callResult: null };
+  } catch (error) {
+    executionSummary.failureReason = error && error.message ? error.message : String(error);
+    return { executionSummary, transactionRequest, callResult: null };
+  }
+}
+
 function buildPreparedBuySubscriptionCall({ api3MarketV2Address, partialArgumentBundle, wrapperCallDiagnostics }) {
   if (!api3MarketV2Address || !partialArgumentBundle?.dapiManagementAndDapiPricingMerkleData) {
     return null;
@@ -986,7 +1150,7 @@ function buildPreparedBuySubscriptionCall({ api3MarketV2Address, partialArgument
         dapiManagementAndDapiPricingMerkleData: partialArgumentBundle.dapiManagementAndDapiPricingMerkleData,
       },
     },
-    calldata: marketInterface.encodeFunctionData(functionFragment, orderedArguments),
+    calldata: marketInterface.encodeFunctionData('buySubscription', /** @type {any} */ (orderedArguments)),
     multicallPreparation: {
       functionName: wrapperFunctionFragment.name,
       functionSignature: wrapperFunctionFragment.format('sighash'),
@@ -1026,10 +1190,10 @@ function buildPreparedBuySubscriptionCall({ api3MarketV2Address, partialArgument
                   dapiManagementAndDapiPricingMerkleData: partialArgumentBundle.dapiManagementAndDapiPricingMerkleData,
                 },
               },
-              calldata: marketInterface.encodeFunctionData(wrapperFunctionFragment, [
+              calldata: marketInterface.encodeFunctionData('tryMulticallAndBuySubscription', /** @type {any} */ ([
                 wrapperCallDiagnostics.tryMulticallData,
                 ...orderedArguments,
-              ]),
+              ])),
             }
           : null,
     },
@@ -2087,6 +2251,18 @@ async function purchaseInputs(options) {
     chosenSubscriptionOption,
     sponsorWallet: dapiManagementEntry?.sponsorWallet || derivedSponsorWallet,
   });
+  const exactTransactionExecutionSupported =
+    Boolean(exactMerkleDataBundle)
+    && dapiManagementEntry?.proofMatchesMerkleRoot === true
+    && pricingProofBundle?.proofMatchesMerkleRoot === true
+    && (dapiManagementEntry?.merkleRoot === onChainRegisteredRoots?.dapiManagementMerkleRoot || !onChainRegisteredRoots?.dapiManagementMerkleRoot)
+    && (pricingProofBundle?.merkleRoot === onChainRegisteredRoots?.dapiPricingMerkleRoot || !onChainRegisteredRoots?.dapiPricingMerkleRoot);
+  const fundingExecutionClassification = classifyFundingExecution({
+    chainState: exactMatch?.chainState,
+    exactTransactionExecutionSupported,
+    wrapperCallDiagnostics,
+    unsupportedDiagnostics,
+  });
 
   return {
     command: 'purchase-inputs',
@@ -2167,12 +2343,8 @@ async function purchaseInputs(options) {
     exactMerkleDataBundle,
     wrapperCallDiagnostics,
     unsupportedDiagnostics,
-    exactTransactionExecutionSupported:
-      Boolean(exactMerkleDataBundle)
-      && dapiManagementEntry?.proofMatchesMerkleRoot === true
-      && pricingProofBundle?.proofMatchesMerkleRoot === true
-      && (dapiManagementEntry?.merkleRoot === onChainRegisteredRoots?.dapiManagementMerkleRoot || !onChainRegisteredRoots?.dapiManagementMerkleRoot)
-      && (pricingProofBundle?.merkleRoot === onChainRegisteredRoots?.dapiPricingMerkleRoot || !onChainRegisteredRoots?.dapiPricingMerkleRoot),
+    fundingExecutionClassification,
+    exactTransactionExecutionSupported,
     sendTransactionSupported: Boolean(preparedContractCall),
     preparedContractCall: preparedContractCall || {
       sendTransactionSupported: false,
@@ -2188,6 +2360,111 @@ async function purchaseInputs(options) {
     },
     partialArgumentBundle,
     blockers,
+  };
+}
+
+function selectPreparedExecution(prepared, requestedMode = 'auto') {
+  const normalizedMode = String(requestedMode || 'auto').trim().toLowerCase();
+  const directPreparedCall = prepared.preparedContractCall || null;
+  const wrapperPreparedCall = directPreparedCall?.multicallPreparation?.preparedWrapperCall || null;
+
+  const directSupported = Boolean(directPreparedCall?.sendTransactionSupported !== false && directPreparedCall?.targetContractAddress && directPreparedCall?.calldata);
+  const wrapperSupported = Boolean(wrapperPreparedCall?.sendTransactionSupported !== false && wrapperPreparedCall?.targetContractAddress && wrapperPreparedCall?.calldata);
+
+  if (normalizedMode === 'direct') {
+    return directSupported
+      ? { mode: 'direct', preparedCall: directPreparedCall, availableModes: [
+          ...(directSupported ? ['direct'] : []),
+          ...(wrapperSupported ? ['wrapper'] : []),
+        ] }
+      : { mode: 'direct', preparedCall: null, availableModes: [
+          ...(directSupported ? ['direct'] : []),
+          ...(wrapperSupported ? ['wrapper'] : []),
+        ], failureReason: 'Direct buySubscription execution is not supported for this feed.' };
+  }
+
+  if (normalizedMode === 'wrapper') {
+    return wrapperSupported
+      ? { mode: 'wrapper', preparedCall: wrapperPreparedCall, availableModes: [
+          ...(directSupported ? ['direct'] : []),
+          ...(wrapperSupported ? ['wrapper'] : []),
+        ] }
+      : { mode: 'wrapper', preparedCall: null, availableModes: [
+          ...(directSupported ? ['direct'] : []),
+          ...(wrapperSupported ? ['wrapper'] : []),
+        ], failureReason: 'Wrapper execution is not supported for this feed.' };
+  }
+
+  if (directSupported) {
+    return { mode: 'direct', preparedCall: directPreparedCall, availableModes: [
+      ...(directSupported ? ['direct'] : []),
+      ...(wrapperSupported ? ['wrapper'] : []),
+    ] };
+  }
+
+  if (wrapperSupported) {
+    return { mode: 'wrapper', preparedCall: wrapperPreparedCall, availableModes: [
+      ...(directSupported ? ['direct'] : []),
+      ...(wrapperSupported ? ['wrapper'] : []),
+    ] };
+  }
+
+  return {
+    mode: 'auto',
+    preparedCall: null,
+    availableModes: [],
+    failureReason: 'No executable direct or wrapper call is available for this feed.',
+  };
+}
+
+async function executeBuySubscription(options) {
+  const prepared = await prepareContractCall(options);
+  const submit = parseBooleanOption(options.submit, false);
+  const executionSelection = selectPreparedExecution(prepared, options.executionMode);
+  const executionTarget = executionSelection.preparedCall
+    ? executionSelection.preparedCall
+    : {
+        sendTransactionSupported: false,
+      };
+  const { executionSummary, transactionRequest, callResult } = await executePreparedContractCall({
+    preparedContractCall: executionTarget,
+    rpcUrl: options.rpcUrl,
+    privateKey: options.privateKey,
+    submit,
+    acknowledgement: options.acknowledgement,
+  });
+
+  if (executionSelection.failureReason && !executionSummary.failureReason) {
+    executionSummary.failureReason = executionSelection.failureReason;
+  }
+
+  return {
+    command: 'execute-buy-subscription',
+    chain: prepared.chain,
+    dapiName: prepared.dapiName,
+    dapiNameBytes32: prepared.dapiNameBytes32,
+    communalProxy: prepared.communalProxy,
+    targetContract: prepared.targetContract,
+    sendTransactionSupported: prepared.sendTransactionSupported,
+    exactTransactionExecutionSupported: prepared.exactTransactionExecutionSupported,
+    fundingExecutionClassification: prepared.fundingExecutionClassification,
+    preparedContractCall: prepared.preparedContractCall,
+    selectedExecutionMode: executionSelection.mode,
+    availableExecutionModes: executionSelection.availableModes,
+    executionSummary,
+    transactionRequest: transactionRequest
+      ? {
+          to: transactionRequest.to,
+          data: transactionRequest.data,
+          value: transactionRequest.value.toString(),
+          from: transactionRequest.from,
+        }
+      : null,
+    simulationCallResult: callResult,
+    wrapperCallDiagnostics: prepared.wrapperCallDiagnostics,
+    unsupportedDiagnostics: prepared.unsupportedDiagnostics,
+    blockers: prepared.blockers,
+    sourceCommand: 'prepare-contract-call',
   };
 }
 
@@ -2208,6 +2485,7 @@ async function prepareContractCall(options) {
     preparedContractCall: purchasePlan.preparedContractCall,
     wrapperCallDiagnostics: purchasePlan.wrapperCallDiagnostics,
     unsupportedDiagnostics: purchasePlan.unsupportedDiagnostics,
+    fundingExecutionClassification: purchasePlan.fundingExecutionClassification,
     exactTransactionExecutionSupported: purchasePlan.exactTransactionExecutionSupported,
     blockers: purchasePlan.blockers,
     sourceCommand: 'purchase-inputs',
@@ -2295,6 +2573,12 @@ async function runCli(argv = process.argv.slice(2)) {
     return;
   }
 
+  if (command === 'execute-buy-subscription') {
+    const result = await executeBuySubscription(args);
+    outputResult(command, result, args);
+    return;
+  }
+
   throw new Error(`Unsupported command: ${command}`);
 }
 
@@ -2325,6 +2609,10 @@ module.exports = {
   parseArgs,
   prepareActivation,
   prepareContractCall,
+  executePreparedContractCall,
+  executeBuySubscription,
+  classifyFundingExecution,
+  selectPreparedExecution,
   printUsage,
   resolveFeed,
   runCli,

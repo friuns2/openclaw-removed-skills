@@ -1,8 +1,8 @@
 {
   "name": "api3-feed-manager-skill",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "private": true,
-  "description": "OpenClaw skill and bundled CLI for Api3 feed discovery, coverage audits, and activation planning.",
+  "description": "OpenClaw skill and bundled CLI for Api3 feed discovery, funding-state classification, guarded activation execution, and browser-assisted fallback planning.",
   "type": "commonjs",
   "bin": {
     "api3-feed-manager": "scripts/bin/api3-feed-manager.js"
@@ -10,6 +10,7 @@
   "files": [
     "SKILL.md",
     "README.md",
+    "CHANGELOG.md",
     "references",
     "scripts"
   ],

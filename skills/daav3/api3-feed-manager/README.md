@@ -1,6 +1,6 @@
 # Api3 Feed Manager
 
-A small OpenClaw skill for figuring out what Api3 feeds exist, which chains support them, and whether a feed is actually activatable or already retired.
+An OpenClaw skill for discovering Api3 feeds, checking whether they are live, classifying the activation/funding path, and executing the currently supported funding flows when possible.
 
 ## What it helps with
 
@@ -8,11 +8,21 @@ A small OpenClaw skill for figuring out what Api3 feeds exist, which chains supp
 - audit feed coverage across chains
 - separate activatable feeds from retired or delisted ones
 - inspect queue tiers and default activation choices
-- prepare non-sending Market contract calls
+- prepare exact `buySubscription(...)` Market contract calls for the supported narrow family
+- execute guarded funding in the supported exact path
+  - `direct`
+  - `wrapper` when exact wrapper calldata is derivable safely
+  - `auto`
+- expose machine-usable funding states:
+  - `not-needed`
+  - `executable`
+  - `browser-assisted`
+  - `unsupported`
+- prepare browser-assisted funding plans when exact execution is not yet available
 
 ## What it does not do
 
-- broadcast transactions
+- provide universal pure-onchain automation for every funding case
 - pretend retired feeds are still available
 - replace `SKILL.md` as the agent-facing instruction file
 
