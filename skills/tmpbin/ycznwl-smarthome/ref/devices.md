@@ -95,9 +95,13 @@ The control endpoint accepts:
 
 | Action | Params | Description |
 |--------|--------|-------------|
-| `set_color_temperature` | `{ "color_temperature": <2700-6500> }` | Set color temp in Kelvin |
+| `set_color_temperature` | `{ "color_temperature": <K> }` | Set color temp in Kelvin |
 
-**Status property**: `color_temperature` (int, 2700–6500, unit: K)
+**Configurable per-device range**: any window within `1000–10000 K` (default `2700–6500 K`),
+with a configurable step (default `100`). Out-of-range values are clamped and step-aligned
+by the backend, but stay within the user's configured range when authoring scenes.
+
+**Status property**: `color_temperature` (int, unit: K)
 
 **Example**:
 ```json
@@ -110,9 +114,20 @@ The control endpoint accepts:
 
 | Action | Params | Description |
 |--------|--------|-------------|
-| `set_color` | `{ "hue": <0-360>, "saturation": <0-100> }` | Set HSV color |
+| `set_color` | `{ "color": "#RRGGBB" }` | Set color as a hex string (preferred) |
 
-**Status properties**: `color` (string), `hue` (int, 0–360), `saturation` (int, 0–100)
+**Examples**:
+```json
+{ "action": "set_color", "params": { "color": "#FF8800" } }
+```
+
+**Status properties**: `color` (string, e.g. `"#FF8800"`), `hue` (int, 0–360, read-only),
+`saturation` (int, 0–100, read-only)
+
+**Important — what `set_color` does NOT accept**:
+- `hue` / `saturation` are **status properties only**. There is no `set_hue` or
+  `set_saturation` action and they cannot be passed as params to `set_color`.
+- HSV input is not supported. Convert HSV → hex before sending.
 
 ### open_close — Open/close control
 
@@ -195,11 +210,19 @@ The control endpoint accepts:
 | Action | Params | Description |
 |--------|--------|-------------|
 | `set_fan_speed` | `{ "fan_speed": <0-100> }` | Set fan speed percentage |
-| `set_fan_speed_mode` | `{ "fan_speed_mode": "<mode>" }` | Set fan speed preset |
+| `set_fan_speed_mode` | `{ "fan_speed_mode": "<mode>" }` | Set fan speed preset (enum value depends on device type) |
 
-**Fan speed mode values**: `auto`, `low`, `medium`, `high`
+**`fan_speed_mode` enum values are NOT universal — they differ by device type:**
 
-**Status properties**: `fan_speed` (int, 0–100), `fan_speed_mode` (enum)
+| Device type | Default enum | Notes |
+|-------------|--------------|-------|
+| `ac` | `auto`, `low`, `medium`, `high` | Can be customized per device via `fan_speed_mapping` |
+| `fan` | depends on `speed_level_mapping` (typical defaults: `level1`, `level2`, `level3`) | Fans usually do NOT accept `auto`/`low`/`medium`/`high` directly |
+| `air_purifier` | depends on `speed_level_mapping` | Same as fan — read device capability before sending |
+
+> ⚠ Always read the target device's capability `fan_speed_mode` enum (via `GET /devices/:uuid` → `capabilities[].properties[name=fan_speed_mode].options`) before issuing `set_fan_speed_mode`. Sending an enum value that the device doesn't expose will be rejected by the backend (`unsupported fan_speed_mode: ...`).
+
+**Status properties**: `fan_speed` (int, 0–100), `fan_speed_mode` (enum, varies per device)
 
 ### swing_mode — Swing/oscillation
 
@@ -228,9 +251,7 @@ The control endpoint accepts:
 
 | Action | Params | Description |
 |--------|--------|-------------|
-| `activate_scene` | none | Activate the scene |
-
-**Status property**: `scene_number` (int, 0–63) — on KNX physical controllers, reflects the last activated scene number
+| `activate_scene` | none | Activate the scene (the scene number is fixed by device configuration; you don't pass it) |
 
 ### playback — Media playback
 

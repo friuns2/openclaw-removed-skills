@@ -4,7 +4,7 @@ Build production agent workflows with [Tensorlake's](https://tensorlake.ai).
 
 This skill helps coding agents use Tensorlake to build real agent systems with sandboxed execution and orchestration. It covers both the **Python** (`pip install tensorlake`) and **TypeScript** (`npm install tensorlake`) SDKs. It is designed for modern agent use cases like multi-agent applications, isolated code execution, long-running workflows, and tool-using agents that need a real workspace.
 
-Instead of treating Tensorlake as just another API, this skill teaches agents how to use Tensorlake as infrastructure: run tasks in isolated environments with the Sandbox SDK, coordinate durable workflows with the sandbox-native Orchestrate SDK, and compose reliable agent systems for production use.
+Instead of treating Tensorlake as just another API, this skill teaches agents how to use Tensorlake as infrastructure: run tasks in isolated environments with the Sandbox SDK, coordinate durable workflows with the sandbox-native Orchestration SDK, and compose reliable agent systems for production use.
 
 Use it when you want your coding agent to build:
 
@@ -19,7 +19,7 @@ Use it when you want your coding agent to build:
 It guides agents to:
 
 - use the **Sandbox SDK** for agent execution environments and isolated tool calls
-- use the **Orchestrate SDK** for sandbox-native durable workflow orchestration and multi-agent coordination
+- use the **Orchestration SDK** for sandbox-native durable workflow orchestration and multi-agent coordination
 - combine both SDKs to build production-style agent systems
 - choose Tensorlake patterns that are better than a single-agent or stateless approach
 
@@ -64,7 +64,7 @@ Works with Claude Code, Cursor, Cline, GitHub Copilot, Windsurf, and more via [s
 
 ## Setup
 
-Tensorlake requires a `TENSORLAKE_API_KEY` configured in the local environment. Get one at [cloud.tensorlake.ai](https://cloud.tensorlake.ai), then either run `tensorlake login` (Python) / `npx tl login` (TypeScript) or configure the variable through your shell profile, `.env` file, or secret manager. Do not paste API keys into chat, commit them to source control, or print them in terminal output.
+Tensorlake requires a `TENSORLAKE_API_KEY` configured in the local environment. Get one at [cloud.tensorlake.ai](https://cloud.tensorlake.ai), then either run `tl login` (or `tensorlake login`) / `npx tl login` (TypeScript) or configure the variable through your shell profile, `.env` file, or secret manager. Do not paste API keys into chat, commit them to source control, or print them in terminal output.
 
 ## Repository Structure
 
@@ -86,7 +86,7 @@ tensorlake-skills/
 │       ├── check_drift.py        # Compare fetched vs bundled
 │       └── sources.yaml          # Map: reference file → source URLs
 └── references/
-    ├── applications_sdk.md       # Orchestrate API reference
+    ├── applications_sdk.md       # Orchestration API reference
     ├── sandbox_sdk.md            # Sandbox API reference
     ├── sandbox_persistence.md    # Sandbox state: snapshots, suspend/resume, state machine
     ├── documentai_sdk.md         # DocumentAI API reference
@@ -152,8 +152,8 @@ Each reference file has a source header that tracks which doc pages it was built
 Source:
   - https://docs.tensorlake.ai/sandboxes/lifecycle.md
   - https://docs.tensorlake.ai/sandboxes/commands.md
-SDK version: tensorlake 0.4.42
-Last verified: 2026-04-08
+SDK version: tensorlake 0.5.0
+Last verified: 2026-04-24
 -->
 ```
 

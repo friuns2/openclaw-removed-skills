@@ -1,0 +1,11 @@
+{
+  "owner": "xuxuclassmate",
+  "slug": "test-master-fixed",
+  "displayName": "Test Master",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776836596763,
+    "commit": "https://github.com/openclaw/skills/commit/32e77db42d5d68709d1217caea996e8da4d28ffd"
+  },
+  "history": []
+}

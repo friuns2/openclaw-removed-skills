@@ -65,7 +65,9 @@ description: 当用户请求搜索唯品会商品时使用此 skill。执行 vip
 
 ### 步骤 1：检测登录状态（AI 必须执行）
 在执行搜索前，AI 必须先检测登录状态：
-- 检查 `~/.vipshop-user-login/tokens.json` 是否存在且有效
+- 执行 `vipshop status` 命令检查登录状态
+  - 解析返回的 JSON，检查 `success` 字段
+  - `success: true` 表示已登录，`success: false` 表示未登录或登录态已过期
 - **如果已登录**：直接执行步骤2
 - **如果未登录**：必须自动触发登录流程（见下文"未登录自动处理"）
 
@@ -244,7 +246,7 @@ description: 当用户请求搜索唯品会商品时使用此 skill。执行 vip
 **用户输入：** "搜索连衣裙"
 
 **AI 响应（必须执行）：**
-1. 检测未登录（`tokens.json` 不存在或无效）
+1. 检测未登录（`vipshop status` 返回 `success: false`）
 2. **立即自动执行**（不要等待用户请求）：
    ```
    检测到您尚未登录唯品会账户，准备为您启动登录流程。
@@ -325,7 +327,9 @@ description: 当用户请求搜索唯品会商品时使用此 skill。执行 vip
 
 ### 登录状态验证
 在执行脚本之前，务必验证用户登录状态：
-1. 检查 `~/.vipshop-user-login/tokens.json` 是否存在且包含带有 `cookies` 字段的有效数据
+1. 执行 `vipshop status` 命令并检查返回的 JSON 中的 `success` 字段
+   - `success: true` 表示已登录
+   - `success: false` 表示未登录或登录态已过期
 2. 如果用户未登录，自动处理登录流程：
    - 执行 `vipshop login` 生成二维码
    - 等待用户扫码确认并完成登录
@@ -433,7 +437,7 @@ vipshop product-detail --product-id 6921365548495978176
 8. **字段名称差异**：搜索接口和详情接口的字段名称不同（如 `pid` vs `productId`），但值相同
 9. **详情接口无销量**：详情接口的返回数据中没有销售数量字段
 10. **价格信息**：包含当前售价、市场价、折扣、销售提示等多个维度
-11. **登录态管理**：脚本会自动读取 `~/.vipshop-user-login/tokens.json` 文件
+11. **登录态管理**：通过 `vipshop status` 命令检查登录状态
 12. **分页功能**：支持"下一页"和"上一页"命令浏览更多商品
 13. **价格筛选**：支持按价格区间筛选商品，指定新价格区间时分页会重置到第一页
 14. **显示完整性**：始终显示全部20个商品，不省略任何商品信息
@@ -449,7 +453,7 @@ vipshop product-detail --product-id 6921365548495978176
 - **异常处理**：完整的网络异常和API错误处理
 - **降级策略**：详情接口失败时自动降级为仅显示商品ID
 - **脚本方式**：执行 `scripts/search.py` 脚本进行商品搜索
-- **登录态管理**：自动读取 `~/.vipshop-user-login/tokens.json`，支持与 `vipshop login` 集成
+- **登录态管理**：通过 `vipshop status` 命令检查登录状态，支持与 `vipshop login` 集成
 - **依赖库**：内部已绑定 Node.js Fetch 环境
 - **分页支持**：通过 pageOffset 参数实现分页，每页固定返回20个商品
 - **价格筛选**：通过 priceMin 和 priceMax 参数实现价格区间筛选

@@ -1,10 +1,10 @@
 # ERRORS.md — Command / Integration Errors
 
-> Managed by self-improvement-loop skill.
+> Managed by self-improvement-loop skill.When editing manually, keep the `## [ID] category` header format intact.
 
 ---
 
-## Template
+## Template (Do Not Delete)
 
 ```markdown
 ## [ERR-YYYYMMDD-NNN] error

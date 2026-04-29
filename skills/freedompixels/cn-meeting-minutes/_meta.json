@@ -1,11 +1,17 @@
 {
   "owner": "freedompixels",
   "slug": "cn-meeting-minutes",
-  "displayName": "会议纪要生成工具",
+  "displayName": "Cn Meeting Minutes",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776569920607,
-    "commit": "https://github.com/openclaw/skills/commit/579dc7d4c90b7398cad100fd369be5c719afb9e7"
+    "version": "1.2.0",
+    "publishedAt": 1777332744073,
+    "commit": "https://github.com/openclaw/skills/commit/ae7e809a070258223596fd50ce663de0f871243a"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776569920607,
+      "commit": "https://github.com/openclaw/skills/commit/579dc7d4c90b7398cad100fd369be5c719afb9e7"
+    }
+  ]
 }

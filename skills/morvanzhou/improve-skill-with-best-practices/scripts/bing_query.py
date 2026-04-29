@@ -19,33 +19,10 @@ import argparse
 import json
 import os
 import sys
-import warnings
 from datetime import datetime, timedelta
-from pathlib import Path
 
-# Suppress FutureWarning (Python 3.9 EOL notices from google libs)
-# and NotOpenSSLWarning (urllib3 v2 + LibreSSL) so they don't pollute output.
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", message=".*urllib3.*OpenSSL.*")
-
+import utils  # noqa: F401  — triggers .env loading & warning suppression
 import requests
-from dotenv import load_dotenv
-
-
-def _find_env():
-    """Walk up from script dir to find .skills-data/.../.env at project root."""
-    d = Path(__file__).resolve().parent
-    while d != d.parent:
-        candidate = d / ".skills-data" / "google-analytics-and-search-improve" / ".env"
-        if candidate.exists():
-            return candidate
-        d = d.parent
-    return None
-
-
-_env_path = _find_env()
-if _env_path:
-    load_dotenv(_env_path)
 
 
 BASE_URL = "https://ssl.bing.com/webmaster/api.svc/json"

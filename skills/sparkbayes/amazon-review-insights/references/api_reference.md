@@ -1,36 +1,36 @@
-# CustomerInsights API 参考文档
+# AstrMap API Reference
 
-## 概述
+## Overview
 
-本文档详细介绍 CustomerInsights 开放 API 的所有端点、请求格式、响应格式和错误码。
+This document provides detailed documentation for all AstrMap API endpoints, request formats, response formats, and error codes.
 
-## 认证方式
+## Authentication
 
-所有 API 请求需要在 HTTP 头中携带认证信息：
+All API requests require authentication in the HTTP header:
 
 ```
 Authorization: Bearer {api_key}
 Content-Type: application/json
 ```
 
-> 注意：API Key 格式为 `sk_live_xxxxxxxxxxxxxxxx`
+> Note: API Key format is `sk_live_xxxxxxxxxxxxxxxx`
 
 ---
 
-## 端点清单
+## Endpoint List
 
-### 1. 设备在线查询
+### 1. Device Status Check
 
-**端点**: `POST /api/v1/external/device/status`
+**Endpoint**: `POST /api/v1/external/device/status`
 
-查询当前 API Key 绑定的用户设备是否在线。
+Check if the device bound to the current API Key is online.
 
-**请求体**:
+**Request Body**:
 ```json
 {}
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -43,50 +43,52 @@ Content-Type: application/json
 }
 ```
 
-**字段说明**:
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| online | bool | 设备是否在线 |
-| device_id | string | 设备ID |
-| status | string | 设备状态 (idle/busy) |
+**Field Description**:
+| Field | Type | Description |
+|-------|------|-------------|
+| online | bool | Whether device is online |
+| device_id | string | Device ID |
+| status | string | Device status (idle/busy) |
 
 ---
 
-### 2. 创建任务
+### 2. Create Task
 
-**端点**: `POST /api/v1/external/task/create`
+**Endpoint**: `POST /api/v1/external/task/create`
 
-创建任务，下发到当前账号绑定的设备。
+Create a task and dispatch it to the device bound to the current account.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "platform": "amazon",
   "site": "US",
-  "submit_content": "B09V3KXJPB"
+  "submit_content": "B09V3KXJPB",
+  "is_auto": true
 }
 ```
 
-**参数说明**:
-| 参数 | 必填 | 默认值 | 说明 |
-|------|------|--------|------|
-| platform | 否 | amazon | 平台名称 |
-| site | 否 | US | 站点 |
-| submit_content | 是 | - | 输入内容，支持 URL 或 ASIN |
+**Parameter Description**:
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| platform | No | amazon | Platform name |
+| site | No | US | Site |
+| submit_content | Yes | - | Input content, supports URL or ASIN |
+| is_auto | No | true | Auto mode flag: true=auto analysis, false=collection only |
 
-**站点说明**:
-| site | 语言 |
-|------|------|
-| US | 英语 |
-| CA | 英语 |
-| UK | 英语 |
-| DE | 德语 |
-| FR | 法语 |
-| IT | 意大利语 |
-| ES | 西班牙语 |
-| JP | 日语 |
+**Site Description**:
+| site | Language |
+|------|----------|
+| US | English |
+| CA | English |
+| UK | English |
+| DE | German |
+| FR | French |
+| IT | Italian |
+| ES | Spanish |
+| JP | Japanese |
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -101,20 +103,20 @@ Content-Type: application/json
 
 ---
 
-### 3. 任务状态查询
+### 3. Task Detail Query
 
-**端点**: `POST /api/v1/external/task/detail`
+**Endpoint**: `POST /api/v1/external/task/detail`
 
-查询任务详情和状态。
+Query task details and status.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -122,7 +124,7 @@ Content-Type: application/json
   "data": {
     "id": "TSK_xxx",
     "user_id": "user_xxx",
-    "name": "任务名称",
+    "name": "Task name",
     "status": "SUCCESS",
     "platform": "amazon",
     "site": "US",
@@ -135,27 +137,27 @@ Content-Type: application/json
 }
 ```
 
-**任务状态说明**:
-| 状态 | 说明 |
-|------|------|
-| PENDING | 待处理 |
-| DISPATCHING | 分发中 |
-| COLLECTING | 获取中 |
-| PROCESSING | 处理中 |
-| ANALYZING | 分析中 |
-| SUCCESS | 完成 |
-| FAILED | 失败 |
-| CANCELLED | 已取消 |
+**Task Status Description**:
+| Status | Description |
+|--------|-------------|
+| PENDING | Pending |
+| DISPATCHING | Dispatching |
+| COLLECTING | Collecting |
+| PROCESSING | Processing |
+| ANALYZING | Analyzing |
+| SUCCESS | Completed |
+| FAILED | Failed |
+| CANCELLED | Cancelled |
 
 ---
 
-### 4. 任务列表查询
+### 4. Task List Query
 
-**端点**: `POST /api/v1/external/task/list`
+**Endpoint**: `POST /api/v1/external/task/list`
 
-查询任务列表。
+Query task list.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "page": 1,
@@ -165,15 +167,15 @@ Content-Type: application/json
 }
 ```
 
-**参数说明**:
-| 参数 | 必填 | 默认值 | 说明 |
-|------|------|--------|------|
-| page | 否 | 1 | 页码 |
-| page_size | 否 | 10 | 每页数量 |
-| search_keyword | 否 | - | 搜索关键词 |
-| filter_monitoring | 否 | false | 是否过滤监控任务 |
+**Parameter Description**:
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| page | No | 1 | Page number |
+| page_size | No | 10 | Items per page |
+| search_keyword | No | - | Search keyword |
+| filter_monitoring | No | false | Filter monitoring tasks |
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -189,25 +191,25 @@ Content-Type: application/json
 
 ---
 
-### 4.1 增量获取
+### 4.1 Incremental Fetch
 
-**端点**: `POST /api/v1/external/task/incremental`
+**Endpoint**: `POST /api/v1/external/task/incremental`
 
-为终态任务（SUCCESS/FAILED/CANCELLED）创建增量获取，获取自上次获取后的新增评论。
+Create incremental fetch for completed tasks (SUCCESS/FAILED/CANCELLED), fetching new reviews since last fetch.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**参数说明**:
-| 参数 | 必填 | 默认值 | 说明 |
-|------|------|--------|------|
-| task_id | 是 | - | 任务ID，必须是终态任务 |
+**Parameter Description**:
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| task_id | Yes | - | Task ID, must be a completed task |
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -219,32 +221,103 @@ Content-Type: application/json
 }
 ```
 
-**错误码**:
-| 错误码 | 说明 |
-|--------|------|
-| -1 | 任务状态非终态，只有终态任务才能进行增量获取 |
+**Error Codes**:
+| Error Code | Description |
+|------------|-------------|
+| -1 | Task status is not completed. Only completed tasks can do incremental fetch |
 
-**适用场景**：
-- 已完成的任务需要更新最新评论数据
-- 与创建新任务的区别：输入是已有的 ASIN（无需重复输入），自动获取增量数据
-- 增量获取会触发完整的获取+分析流程，数据分析会扣除积分
+**Use Cases**:
+- Task completed some time ago, need to update with latest review data
+- Difference from creating a new task: input is the existing ASIN (no need to re-enter), automatically fetches incremental data
+- Incremental fetch triggers full fetch + analysis process, analysis deducts points
 
 ---
 
-### 5. AI 洞察查询
+### 4.2 Manual Trigger Analysis
 
-**端点**: `POST /api/v1/external/analysis/insights`
+**Endpoint**: `POST /api/v1/external/task/{task_id}/trigger-analysis`
 
-获取 AI 洞察摘要。
+Manually trigger AI analysis for collection-only tasks. Applicable for tasks with `is_auto=false` that stopped at COLLECTED status after collection.
 
-**请求体**:
+**Parameter Description**:
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| task_id | Yes | Task ID, task status must be COLLECTED |
+
+**Response**:
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {}
+}
+```
+
+**Status Flow After Trigger**: `COLLECTED` → `PROCESSING` → `ANALYZING` → `SUCCESS`
+
+**Error Codes**:
+| Error Code | Description |
+|------------|-------------|
+| InvalidTaskStatus | Task status is not COLLECTED, cannot trigger analysis |
+
+---
+
+### 4.3 Desktop Client Download Config
+
+**Endpoint**: `GET /download-config.json`
+
+This is a public config file for getting desktop client download links.
+
+**Response**:
+```json
+{
+  "version": "1.0.0",
+  "last_updated": "2026-04-27T14:31:08.795719Z",
+  "downloads": {
+    "macos": {
+      "name_zh": "macOS Version",
+      "name_en": "macOS Version",
+      "url": "<actual download URL>",
+      "version": "1.0.0",
+      "size": "156MB",
+      "requirements": {
+        "min_version": "10.15",
+        "recommended_memory": "8GB",
+        "disk_space": "500MB"
+      }
+    },
+    "windows": {
+      "name_zh": "Windows Version",
+      "name_en": "Windows Version",
+      "url": "<actual download URL>",
+      "version": "1.0.0",
+      "size": "142MB",
+      "requirements": {
+        "min_version": "10",
+        "recommended_memory": "8GB",
+        "disk_space": "500MB"
+      }
+    }
+  }
+}
+```
+
+---
+
+### 5. AI Insights Query
+
+**Endpoint**: `POST /api/v1/external/analysis/insights`
+
+Get AI insights summary.
+
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -262,20 +335,20 @@ Content-Type: application/json
 
 ---
 
-### 6. 标签分布查询
+### 6. Tag Distribution Query
 
-**端点**: `POST /api/v1/external/analysis/tags`
+**Endpoint**: `POST /api/v1/external/analysis/tags`
 
-获取标签分布统计。
+Get tag distribution statistics.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -284,9 +357,9 @@ Content-Type: application/json
     "tag_categories": [
       {
         "category": "product",
-        "category_name": "产品质量",
+        "category_name": "Product Quality",
         "tags": [
-          {"tag": "做工问题", "polarity": "negative", "count": 15}
+          {"tag": "Workmanship issue", "polarity": "negative", "count": 15}
         ],
         "total_count": 20
       }
@@ -297,20 +370,20 @@ Content-Type: application/json
 
 ---
 
-### 7. 问题维度统计查询
+### 7. Issue Dimension Statistics Query
 
-**端点**: `POST /api/v1/external/analysis/issue-statistics`
+**Endpoint**: `POST /api/v1/external/analysis/issue-statistics`
 
-获取问题维度统计（产品、服务、体验三维模型）。
+Get issue dimension statistics (product, service, experience three-dimensional model).
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -328,20 +401,20 @@ Content-Type: application/json
 
 ---
 
-### 8. 要点问题分布查询
+### 8. Top Issues Distribution Query
 
-**端点**: `POST /api/v1/external/analysis/top-issues`
+**Endpoint**: `POST /api/v1/external/analysis/top-issues`
 
-获取各维度的 TopN 问题分布。
+Get TopN issue distribution across dimensions.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -358,20 +431,20 @@ Content-Type: application/json
 
 ---
 
-### 9. 基础统计查询
+### 9. Basic Statistics Query
 
-**端点**: `POST /api/v1/external/analysis/statistics`
+**Endpoint**: `POST /api/v1/external/analysis/statistics`
 
-获取基础统计数据。
+Get basic statistics.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -393,13 +466,13 @@ Content-Type: application/json
 
 ---
 
-### 10. 差评列表查询
+### 10. Negative Reviews List Query
 
-**端点**: `POST /api/v1/external/analysis/negative-reviews`
+**Endpoint**: `POST /api/v1/external/analysis/negative-reviews`
 
-获取差评列表。
+Get negative reviews list.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx",
@@ -408,7 +481,7 @@ Content-Type: application/json
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -420,7 +493,7 @@ Content-Type: application/json
         "content": "Shipping took forever!",
         "rating": 1,
         "date": "2025-03-15",
-        "tags": ["物流问题", "时效差"]
+        "tags": ["Shipping issue", "Slow delivery"]
       }
     ],
     "total": 23,
@@ -432,13 +505,13 @@ Content-Type: application/json
 
 ---
 
-### 11. 评论趋势查询
+### 11. Review Trend Query
 
-**端点**: `POST /api/v1/external/analysis/trend`
+**Endpoint**: `POST /api/v1/external/analysis/trend`
 
-获取评论趋势数据。
+Get review trend data.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx",
@@ -447,21 +520,21 @@ Content-Type: application/json
 }
 ```
 
-**参数说明**:
-| 参数 | 必填 | 默认值 | 说明 |
-|------|------|--------|------|
-| task_id | 是 | - | 任务ID |
-| filter_data | 否 | 30 | 数据范围 (30/60/all) |
-| filter_product | 否 | all | 商品筛选 |
+**Parameter Description**:
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| task_id | Yes | - | Task ID |
+| filter_data | No | 30 | Data range (30/60/all) |
+| filter_product | No | all | Product filter |
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
   "msg": "success",
   "data": {
     "trend_reviews": {
-      "source": [["日期", "评论总数", "差评数量"], ["2025-03-01", 50, 8]]
+      "source": [["Date", "Total reviews", "Negative reviews"], ["2025-03-01", 50, 8]]
     }
   }
 }
@@ -469,20 +542,20 @@ Content-Type: application/json
 
 ---
 
-### 12. 原始评论统计查询
+### 12. Raw Comments Overview Query
 
-**端点**: `POST /api/v1/external/analysis/comments-overview`
+**Endpoint**: `POST /api/v1/external/analysis/comments-overview`
 
-获取原始评论概览/统计数据。
+Get raw comments overview/statistics.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx"
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -499,13 +572,13 @@ Content-Type: application/json
 
 ---
 
-### 13. 原始评论查询
+### 13. Raw Comments Query
 
-**端点**: `POST /api/v1/external/analysis/comments`
+**Endpoint**: `POST /api/v1/external/analysis/comments`
 
-获取原始评论列表。
+Get raw comments list.
 
-**请求体**:
+**Request Body**:
 ```json
 {
   "task_id": "TSK_xxx",
@@ -516,16 +589,16 @@ Content-Type: application/json
 }
 ```
 
-**参数说明**:
-| 参数 | 必填 | 默认值 | 说明 |
-|------|------|--------|------|
-| task_id | 是 | - | 任务ID |
-| page | 否 | 1 | 页码 |
-| page_size | 否 | 20 | 每页数量 |
-| filter_star | 否 | all | 评分筛选 (1-5/all) |
-| filter_verified | 否 | all | 筛选已认证评论 |
+**Parameter Description**:
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| task_id | Yes | - | Task ID |
+| page | No | 1 | Page number |
+| page_size | No | 20 | Items per page |
+| filter_star | No | all | Rating filter (1-5/all) |
+| filter_verified | No | all | Filter verified reviews |
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -541,18 +614,64 @@ Content-Type: application/json
 
 ---
 
-### 14. 积分余额查询
+### 14. Get Related Comments
 
-**端点**: `POST /api/v1/external/account/points`
+**Endpoint**: `POST /api/v1/external/analysis/related-comments`
 
-查询当前账号剩余积分。
+Get comments associated with specific tags or issues for drill-down analysis.
 
-**请求体**:
+**Request Body**:
+```json
+{
+  "task_id": "TSK_xxx",
+  "association_type": "tag",
+  "normalized_tag": "Shipping issue",
+  "category": "service",
+  "page": 1,
+  "page_size": 20
+}
+```
+
+**Parameter Description**:
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| task_id | Yes | - | Task ID |
+| association_type | Yes | - | Association type: `tag` or `issue` |
+| normalized_tag | No | - | Normalized tag name (when association_type=tag) |
+| category | No | - | Tag category (when association_type=tag) |
+| dimension | No | - | Issue dimension (when association_type=issue) |
+| issue_type | No | - | Issue type (when association_type=issue) |
+| page | No | 1 | Page number |
+| page_size | No | 20 | Items per page |
+
+**Response**:
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "items": [...],
+    "total": 50,
+    "association_type": "tag",
+    "task_id": "TSK_xxx"
+  }
+}
+```
+
+---
+
+### 15. Points Balance Query
+
+**Endpoint**: `POST /api/v1/external/account/points`
+
+Query current account remaining points.
+
+**Request Body**:
 ```json
 {}
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "code": 0,
@@ -565,45 +684,48 @@ Content-Type: application/json
 
 ---
 
-## 错误码
+## Error Codes
 
-| 错误码 | 说明 | 详细说明 |
-|--------|------|----------|
-| 0 | 成功 | - |
-| -1 | 服务器内部错误 | 服务器内部异常 |
-| 1001 | 设备不在线 | 桌面客户端未登录或设备离线 |
-| 1002 | 积分不足 | 账户积分不足以执行操作 |
-| 2001 | 无效的 API Key | Key 不存在或已失效 |
-| 2002 | API Key 已禁用 | 用户主动禁用 |
-| 2003 | API Key 已过期 | 超过 expires_at 设置的时间 |
-| 2004 | 权限不足 | 缺少对应操作的权限 |
-| 2005 | 请求频率超限 | 默认 100 次/分钟 |
-
----
-
-## 速率限制
-
-- 默认限制：100 次/分钟
-- 超出限制返回错误码 2005，并包含 `Retry-After` 头
+| Error Code | Description | Detailed Description |
+|-----------|-------------|---------------------|
+| 0 | Success | - |
+| -1 | Server internal error | Server internal exception |
+| 1001 | Device offline | Desktop client not logged in or device offline |
+| 1002 | Insufficient points | Account points insufficient for operation |
+| 2001 | Invalid API Key | Key does not exist or has expired |
+| 2002 | API Key disabled | User actively disabled |
+| 2003 | API Key expired | Time exceeds expires_at setting |
+| 2004 | Insufficient permissions | Missing corresponding operation permissions |
+| 2005 | Request rate exceeded | Default 100 times/minute |
+| InvalidTaskStatus | Task status does not allow this operation | Only collection-only tasks with COLLECTED status can trigger analysis |
 
 ---
 
-## 常见问题
+## Rate Limits
 
-### 积分规则
+- Default limit: 100 requests/minute
+- Exceeding limit returns error code 2005 with `Retry-After` header
 
-- **创建任务**：免费获取亚马逊评论，数据分析会扣除账户积分
-- **查询结果**：查看已完成任务的分析结果，不扣积分，也无前置条件限制
+---
 
-### 前置条件（仅创建任务时需要）
+## FAQ
 
-创建任务前，需确保满足以下条件：
+### Points System
 
-1. 星图 AI·跨境电商客户洞察 桌面客户端已登录
-2. 桌面客户端已登录亚马逊买家账号
-3. 确保亚马逊访问畅通
+- **Create task (auto mode)**: Free Amazon review collection, AI analysis deducts account points
+- **Create task (collection-only mode)**: Free Amazon review collection, no point deduction
+- **Incremental fetch**: Fetch latest reviews and re-analyze, deducts points
+- **Query results**: View completed task analysis results, no point deduction, no prerequisites
 
-### 错误处理
-1. 设备不在线 (1001)：检查桌面客户端是否登录
-2. 积分不足 (1002)：提示用户充值积分
-3. API Key 无效 (2001)：检查 API Key 是否正确
+### Prerequisites (only for creating tasks)
+
+Before creating a task, ensure the following conditions are met:
+
+1. AstrMap desktop client is logged in
+2. Desktop client is logged in to Amazon buyer account
+3. Ensure Amazon access is working
+
+### Error Handling
+1. Device offline (1001): Check if desktop client is logged in
+2. Insufficient points (1002): Prompt user to recharge points
+3. Invalid API Key (2001): Check if API Key is correct

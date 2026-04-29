@@ -3,9 +3,15 @@
   "slug": "lambdatest",
   "displayName": "Lambdatest",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775567122808,
-    "commit": "https://github.com/openclaw/skills/commit/eea1418554012a9b602b04110371a9a507f7fb87"
+    "version": "1.0.1",
+    "publishedAt": 1776895776788,
+    "commit": "https://github.com/openclaw/skills/commit/38a235248ea2dd3d65a70469b83edca47cc0c8ad"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775567122808,
+      "commit": "https://github.com/openclaw/skills/commit/eea1418554012a9b602b04110371a9a507f7fb87"
+    }
+  ]
 }

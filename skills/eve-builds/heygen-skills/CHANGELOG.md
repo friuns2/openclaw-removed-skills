@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.2.1](https://github.com/heygen-com/skills/compare/v2.2.0...v2.2.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **install:** make avatar creation a first-class install step ([#71](https://github.com/heygen-com/skills/issues/71)) ([64ab640](https://github.com/heygen-com/skills/commit/64ab6404a3c2d0c7f32b55e2decf5de511c75f9e))
+
+## [2.2.0](https://github.com/heygen-com/skills/compare/v2.1.2...v2.2.0) (2026-04-27)
+
+
+### Features
+
+* add Codex and Cursor plugin manifests ([#65](https://github.com/heygen-com/skills/issues/65)) ([df9458c](https://github.com/heygen-com/skills/commit/df9458cc3543eb0fbda4b32822886eaba6234380))
+* INSTALL_FOR_AGENTS.md + 2-line paste-prompt install ([#68](https://github.com/heygen-com/skills/issues/68)) ([d58fa24](https://github.com/heygen-com/skills/commit/d58fa2411601cd97385c04f3bae9c0f087cbcc4a))
+* route video generation through @heygen/openclaw-plugin-heygen when available ([#67](https://github.com/heygen-com/skills/issues/67)) ([a2526d0](https://github.com/heygen-com/skills/commit/a2526d0c5bdb91860882e0cbdadb326edfb41145))
+
 ## [2.1.2](https://github.com/heygen-com/skills/compare/v2.1.1...v2.1.2) (2026-04-17)
 
 

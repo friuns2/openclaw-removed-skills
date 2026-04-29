@@ -5,6 +5,7 @@ import pytest
 
 from business_blueprint.export_svg import (
     _layout_free_flow,
+    _layout_layered,
     _check_layout_quality,
     _render_free_flow_svg,
     _get_subtitle,
@@ -82,6 +83,75 @@ def _make_blueprint(**overrides):
         else:
             bp[key] = value
     return bp
+
+
+def _make_layered_label_overlap_blueprint():
+    """Create a layered blueprint that forces elbow-arrow labels to compete for space."""
+    return {
+        "version": "1.0",
+        "meta": {"title": "Layered Blueprint", "industry": "common"},
+        "library": {
+            "capabilities": [],
+            "actors": [
+                {"id": "actor-client", "name": "API Client"},
+            ],
+            "flowSteps": [],
+            "systems": [
+                {
+                    "id": "sys-entry-a",
+                    "name": "Entry A",
+                    "kind": "system",
+                    "description": "Entry system A",
+                    "capabilityIds": [],
+                    "layer": "Layer 1",
+                    "features": ["Feature A"],
+                },
+                {
+                    "id": "sys-entry-b",
+                    "name": "Entry B",
+                    "kind": "system",
+                    "description": "Entry system B",
+                    "capabilityIds": [],
+                    "layer": "Layer 1",
+                    "features": ["Feature B"],
+                },
+                {
+                    "id": "sys-core-a",
+                    "name": "Core A",
+                    "kind": "system",
+                    "description": "Core system A",
+                    "capabilityIds": [],
+                    "layer": "Layer 2",
+                    "features": ["Feature C"],
+                },
+                {
+                    "id": "sys-core-b",
+                    "name": "Core B",
+                    "kind": "system",
+                    "description": "Core system B",
+                    "capabilityIds": [],
+                    "layer": "Layer 2",
+                    "features": ["Feature D"],
+                },
+            ],
+        },
+        "relations": [
+            {
+                "id": "rel-entry-a-core-b",
+                "type": "flows-to",
+                "from": "sys-entry-a",
+                "to": "sys-core-b",
+                "label": "Tool Attach",
+            },
+            {
+                "id": "rel-entry-b-core-a",
+                "type": "depends-on",
+                "from": "sys-entry-b",
+                "to": "sys-core-a",
+                "label": "Runtime Host",
+            },
+        ],
+    }
 
 
 # ── Layout tests ──────────────────────────────────────────────────
@@ -230,6 +300,49 @@ class TestRenderFreeFlowSvg:
         layout = _layout_free_flow(bp)
         svg = _render_free_flow_svg(layout, "Test", "Test", theme="light")
         assert "#0B6E6E" in svg  # light theme arrow color
+
+    def test_dark_background_grows_with_extended_canvas(self):
+        bp = _make_layered_label_overlap_blueprint()
+        layout = _layout_layered(bp)
+        svg = _render_free_flow_svg(layout, "Test", "Test", theme="dark", blueprint=bp)
+
+        import re
+
+        svg_tag = re.search(r'<svg[^>]*height="(\d+)"', svg)
+        bg_rect = re.search(r'<rect width="(\d+)" height="(\d+)" fill="#020617"/>', svg)
+        grid_rect = re.search(r'<rect width="(\d+)" height="(\d+)" fill="url\(#grid\)"/>', svg)
+
+        assert svg_tag is not None
+        assert bg_rect is not None
+        assert grid_rect is not None
+
+        svg_h = int(svg_tag.group(1))
+        assert int(bg_rect.group(2)) == svg_h
+        assert int(grid_rect.group(2)) == svg_h
+
+    def test_elbow_arrow_labels_do_not_overlap(self):
+        bp = _make_layered_label_overlap_blueprint()
+        layout = _layout_layered(bp)
+        svg = _render_free_flow_svg(layout, "Test", "Test", theme="dark", blueprint=bp)
+
+        import re
+
+        def _rect_for(label: str) -> tuple[int, int, int, int]:
+            pattern = (
+                rf'<rect x="([0-9.]+)" y="([0-9.]+)" width="([0-9.]+)" height="18" '
+                rf'rx="3" fill="#1E293B" fill-opacity="0.9"/>'
+                rf'<text x="([0-9.]+)" y="([0-9.]+)"[^>]*>{label}</text>'
+            )
+            match = re.search(pattern, svg)
+            assert match is not None, f"Label '{label}' not found"
+            x, y, w = int(float(match.group(1))), int(float(match.group(2))), int(float(match.group(3)))
+            return x, y, x + w, y + 18
+
+        a = _rect_for("Tool Attach")
+        b = _rect_for("Runtime Host")
+
+        overlap = not (a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
+        assert not overlap, f"Arrow labels overlap: {a} vs {b}"
 
 
 # ── Subtitle truncation tests ─────────────────────────────────────

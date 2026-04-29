@@ -11,7 +11,13 @@ Recommended flow:
 2. Run:
 
 ```bash
-python skills/emotion-orchestrator/scripts/emotion_engine.py run --input turn.json --output emotion.json
+python skills/emotion-skill/scripts/emotion_engine.py host --input turn.json --output emotion.json
+```
+
+Use full diagnostics while tuning:
+
+```bash
+python skills/emotion-skill/scripts/emotion_engine.py run --input turn.json --output emotion.full.json
 ```
 
 3. Use `overlay_prompt` in:
@@ -59,22 +65,22 @@ The emotion engine returns a stable structure:
 
 ```json
 {
-  "confirmed_state": {},
-  "prediction": {},
+  "mode": "skeptical",
+  "labels": ["frustrated", "skeptical"],
+  "route_reasons": ["repeat_failure_pressure", "evidence_requested"],
+  "response_constraints": ["show_basis_first", "name_verification_steps"],
   "guidance": {},
   "routing": {
-    "thread_interface": {
-      "queue_mode": "steer",
-      "prefer_main_thread": true,
-      "defer_heartbeat": true,
-      "allow_parallel_subagents": false,
-      "progress_update_interval_sec": 15,
-      "openclaw": {},
-      "hermes": {}
-    }
+    "reply_style": "evidence_then_act",
+    "verification_level": "very_high",
+    "queue_mode": "steer",
+    "prefer_main_thread": true,
+    "defer_heartbeat": true,
+    "allow_parallel_subagents": false,
+    "progress_update_interval_sec": 15
   },
-  "overlay_prompt": "<emotion_context>...</emotion_context>"
+  "overlay_prompt": "<state mode=skeptical ...>"
 }
 ```
 
-Consume only what your runtime supports. Ignore the rest.
+The compact `host` output is the recommended runtime contract. The full `run` output keeps deeper fields such as `confirmed_state`, `prediction`, `routing.thread_interface.openclaw`, `routing.thread_interface.hermes`, and `debug_overlay_prompt`. Use `debug_overlay_prompt` for inspection logs.

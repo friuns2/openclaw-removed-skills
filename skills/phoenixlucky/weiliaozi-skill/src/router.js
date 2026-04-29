@@ -63,6 +63,18 @@ const HISTORICAL_EVENT_PATTERNS = [
   /contend/i
 ];
 
+const HISTORICAL_DIRECT_PATTERNS = [
+  /秦灭亡/u,
+  /秦为什么.*二世而亡/u,
+  /楚汉相争/u,
+  /张良.*韩信.*尉缭/u,
+  /韩信.*张良.*尉缭/u,
+  /\bwhy did qin (fall|collapse)\b/i,
+  /\bqin'?s? (fall|collapse)\b/i,
+  /\bfall of qin\b/i,
+  /\bchu[-\s]?han contention\b/i
+];
+
 const PERSONA_OPENING = "臣缭以为";
 
 function findMatches(text, patterns) {
@@ -89,6 +101,7 @@ function routeWeiliaoziMode(input) {
   const timeMatches = findMatches(text, HISTORICAL_TIME_PATTERNS);
   const actorMatches = findMatches(text, HISTORICAL_ACTOR_PATTERNS);
   const eventMatches = findMatches(text, HISTORICAL_EVENT_PATTERNS);
+  const directMatches = findMatches(text, HISTORICAL_DIRECT_PATTERNS);
 
   const hasTimeSignal = timeMatches.length > 0;
   const hasActorSignal = actorMatches.length > 0;
@@ -96,25 +109,33 @@ function routeWeiliaoziMode(input) {
   const matchedSignalCount = [hasTimeSignal, hasActorSignal, hasEventSignal].filter(Boolean).length;
 
   const historical =
+    directMatches.length > 0 ||
     matchedSignalCount >= 2 ||
     (hasTimeSignal && (hasActorSignal || hasEventSignal)) ||
     (hasActorSignal && hasEventSignal);
+  const confidence = historical && (directMatches.length > 0 || matchedSignalCount === 3) ? "high" : "medium";
 
   return {
     mode: historical ? "historical_persona" : "normal_analysis",
     language,
-    confidence: historical ? (matchedSignalCount === 3 ? "high" : "medium") : "high",
+    confidence: historical ? confidence : "high",
     personaOpening: historical ? PERSONA_OPENING : null,
     signals: {
+      direct: directMatches,
       time: timeMatches,
       actor: actorMatches,
       event: eventMatches
     },
     reasons: historical
-      ? [
-          "Matched historical routing signals for time/actor/event within late Warring States to pre-Han scope.",
-          "Historical persona mode should override normal voice but preserve the full five-lens analysis."
-        ]
+      ? directMatches.length > 0
+        ? [
+            "Matched an explicit historical route pattern for a documented short prompt.",
+            "Historical persona mode should override normal voice but preserve the full five-lens analysis."
+          ]
+        : [
+            "Matched historical routing signals for time/actor/event within late Warring States to pre-Han scope.",
+            "Historical persona mode should override normal voice but preserve the full five-lens analysis."
+          ]
       : [
           "Did not match enough historical routing signals.",
           "Use the default Wei Liaozi analytical mode without the first-person historical persona."

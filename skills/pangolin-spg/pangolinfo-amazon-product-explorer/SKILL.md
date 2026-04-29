@@ -1,17 +1,19 @@
 ---
-name: pangolinfo-amazon-product-discovery
+name: pangolinfo-amazon-product-explorer
 description: >
   This skill serves as an advanced Amazon Product Discovery and Market Research Engine (powered by Pangolinfo API). It executes a complex, multi-step Go-To-Market (GTM) research SOP. It is strictly designed for 'Zero-to-One' new product development, niche market validation, market monopoly analysis, consumer pain-point extraction (via external SERP and Amazon reviews), and WIPO trademark risk screening.
 metadata:
   openclaw:
+    emoji: "🔭"
+    os: ["darwin", "linux"]
     requires:
       env:
         - PANGOLINFO_API_KEY
         - PANGOLINFO_EMAIL
         - PANGOLINFO_PASSWORD
       notes: "Auth: set PANGOLINFO_API_KEY (recommended) OR PANGOLINFO_EMAIL + PANGOLINFO_PASSWORD. All bundled scripts share the same credentials."
-tags: [amazon, product-discovery, market-research, fba, ecommerce, niche-hunting, data-analysis, business-intelligence, 亚马逊, 选品, 市场调研]
-version: 2.0.0
+tags: ["amazon", "product-explorer", "market-research", "fba", "ecommerce", "niche-hunting", "data-analysis", "business-intelligence", "亚马逊", "选品", "市场调研"]
+version: 1.0.2
 homepage: https://pangolinfo.com/?referrer=clawhub_product_discovery
 ---
 ## 📦 Bundled Tools (Built-in Capabilities)

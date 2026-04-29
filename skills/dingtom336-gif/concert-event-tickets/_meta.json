@@ -1,0 +1,11 @@
+{
+  "owner": "dingtom336-gif",
+  "slug": "concert-event-tickets",
+  "displayName": "Concert Event Tickets",
+  "latest": {
+    "version": "3.2.0",
+    "publishedAt": 1775746017612,
+    "commit": "https://github.com/openclaw/skills/commit/941d4a65e3d2a57c717c805165c02d3e820c5188"
+  },
+  "history": []
+}

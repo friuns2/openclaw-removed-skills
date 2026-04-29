@@ -1,0 +1,11 @@
+{
+  "owner": "balukov",
+  "slug": "defragmenter",
+  "displayName": "Defragmenter",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775700484068,
+    "commit": "https://github.com/openclaw/skills/commit/57a5538f798465740b32ebad301eea34173eb466"
+  },
+  "history": []
+}

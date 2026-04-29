@@ -3,9 +3,15 @@
   "slug": "pangolinfo-amazon-product-explorer",
   "displayName": "pangolinfo-amazon-product-explorer",
   "latest": {
-    "version": "1.0.7",
-    "publishedAt": 1776433588538,
-    "commit": "https://github.com/openclaw/skills/commit/391a667d874bad8c045dc9c1f29943c2015abcbe"
+    "version": "2.0.0",
+    "publishedAt": 1776937298805,
+    "commit": "https://github.com/openclaw/skills/commit/6c8f6fa219ff155ba48c98f861add5c10688a296"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.7",
+      "publishedAt": 1776433588538,
+      "commit": "https://github.com/openclaw/skills/commit/391a667d874bad8c045dc9c1f29943c2015abcbe"
+    }
+  ]
 }

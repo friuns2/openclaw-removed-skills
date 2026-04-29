@@ -1,13 +1,16 @@
 ---
-name: publish-guard
-description: Review a repo, README, SKILL.md, release notes, and social copy before publishing. Catch leak risks, weak public-facing copy, broken first-run paths, and internal operator language before GitHub or ClawHub release.
+name: public-surface-review
+description: Publish Guard is a public ClawHub pre-release audit skill. Use it when the user says "publish guard", "release audit", "pre-release check", or wants to review a repo, README, SKILL.md, and public metadata before GitHub or ClawHub publish.
+version: 1.0.4
 homepage: https://zack-dev-cm.github.io/
 license: MIT-0
 user-invocable: true
-metadata: {"openclaw":{"homepage":"https://zack-dev-cm.github.io/","skillKey":"publish-guard","requires":{"anyBins":["python3","python"]}}}
+metadata: {"openclaw":{"homepage":"https://zack-dev-cm.github.io/","skillKey":"public-surface-review","requires":{"anyBins":["python3","python"]}}}
 ---
 
 # Publish Guard
+
+Search intent: `publish guard`, `public surface review`, `release audit`, `pre-release check`, `clawhub publish audit`
 
 ## Goal
 
@@ -16,8 +19,7 @@ Audit the public surface before release:
 - README
 - `SKILL.md`
 - agent metadata
-- release notes
-- social copy
+- launch docs in the working tree
 - obvious leak patterns
 
 The output should answer one question clearly: publish now, or fix specific items first.
@@ -43,7 +45,7 @@ The output should answer one question clearly: publish now, or fix specific item
 
 ## Operating Rules
 
-- Treat `README.md`, `SKILL.md`, `agents/openai.yaml`, release notes, and social-post files as public.
+- Treat `README.md`, `SKILL.md`, `agents/openai.yaml`, and launch docs in the working tree as public.
 - Public copy should describe the user job before it explains the internal theory.
 - A public quick start should appear near the top and should be runnable without hidden context.
 - Keep public default prompts short. Move deeper operating rules into the skill body or scripts.
@@ -65,7 +67,7 @@ The output should answer one question clearly: publish now, or fix specific item
 - `scripts/scan_leaks.py`
   - Search the repo for obvious leak patterns and secret-shaped strings.
 - `scripts/scan_public_surface.py`
-  - Inspect README, `SKILL.md`, release notes, and public metadata for audience-fit issues.
+  - Inspect README, `SKILL.md`, launch docs in the working tree, and public metadata for audience-fit issues.
 - `scripts/score_launch_copy.py`
   - Produce a simple launch-copy score for the primary README.
 - `scripts/render_public_audit.py`

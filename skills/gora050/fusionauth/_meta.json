@@ -3,9 +3,15 @@
   "slug": "fusionauth",
   "displayName": "Fusionauth",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775632049228,
-    "commit": "https://github.com/openclaw/skills/commit/d63083b5dffb0e633d4ab0c64737229804f66444"
+    "version": "1.0.1",
+    "publishedAt": 1776899161765,
+    "commit": "https://github.com/openclaw/skills/commit/1385096214c5ab289e4cc39c30c0cea36035b7c1"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775632049228,
+      "commit": "https://github.com/openclaw/skills/commit/d63083b5dffb0e633d4ab0c64737229804f66444"
+    }
+  ]
 }

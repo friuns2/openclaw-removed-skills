@@ -1,11 +1,17 @@
 {
   "owner": "bibaofeng",
   "slug": "aisa-multi-search-engine",
-  "displayName": "aisa-multi-search-engine",
+  "displayName": "AIsa Multi Search Engine",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776422703020,
-    "commit": "https://github.com/openclaw/skills/commit/99be2a6ce7cd336f50446508a19a869f986d177b"
+    "version": "1.0.2",
+    "publishedAt": 1777406896843,
+    "commit": "https://github.com/openclaw/skills/commit/eb44ccc1dc60d43bdd725ec1c8d2a3df9708ae1b"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776422703020,
+      "commit": "https://github.com/openclaw/skills/commit/99be2a6ce7cd336f50446508a19a869f986d177b"
+    }
+  ]
 }

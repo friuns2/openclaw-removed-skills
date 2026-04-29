@@ -4,6 +4,7 @@
 """
 
 import json
+import os
 import sys
 import re
 import urllib.request
@@ -14,7 +15,12 @@ CITIES_FILE = None  # 由调用方注入，或自动查找
 def load_cities():
     """加载城市编码表"""
     global CITIES_FILE
+    # 基于脚本所在目录推导 skill 根目录
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    skill_dir = os.path.dirname(script_dir)  # scripts/ -> skill root
     search_paths = [
+        os.path.join(skill_dir, 'references', 'cities.json'),
+        "/root/.openclaw/workspace/skills/china-weather-query/references/cities.json",
         "/root/.openclaw/workspace/skills/china-weather/references/cities.json",
         "/root/.openclaw/workspace/china_weather_cities.json",
     ]
@@ -123,25 +129,25 @@ def parse_weather(data):
         except:
             pass
 
-    # 生活指数 dataZS
+    # 生活指数 dataZS — 数据是扁平结构，key 格式为 {prefix}_name/{prefix}_hint/{prefix}_des_s
     m = re.search(r'var dataZS\s*=\s*(\{[^;]+)', data)
     if m:
         try:
-            zs = json.loads(m.group(1))
+            zs_outer = json.loads(m.group(1))
+            zs_data = zs_outer.get('zs', zs_outer)  # 数据在 .zs 子对象里
             indices = {}
-            zs_data = zs.get('zs', {})
-            # 提取关键生活指数
-            key_indices = ['ct', 'uv', 'ys', 'xc', 'gm', 'tr', 'yd', 'ac', 'co', 'ls']
             index_names = {
                 'ct': '穿衣', 'uv': '紫外线', 'ys': '雨伞', 'xc': '洗车',
                 'gm': '感冒', 'tr': '旅游', 'yd': '运动', 'ac': '空调',
                 'co': '舒适度', 'ls': '晾晒', 'xq': '心情', 'pj': '啤酒',
                 'jt': '交通', 'yh': '约会', 'gl': '太阳镜', 'ag': '过敏',
+                'lk': '路况', 'cl': '晨练', 'nl': '夜生活',
+                'gj': '逛街', 'pl': '空气污染扩散', 'fs': '防晒',
+                'pp': '化妆', 'gz': '干燥',
             }
-            for k in key_indices:
-                prefix = f'{k}_'
+            for k, name in index_names.items():
                 if f'{k}_name' in zs_data:
-                    indices[index_names.get(k, k)] = {
+                    indices[name] = {
                         'hint': zs_data.get(f'{k}_hint', ''),
                         'desc': zs_data.get(f'{k}_des_s', ''),
                     }

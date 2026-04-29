@@ -1,0 +1,11 @@
+{
+  "owner": "hanxueyuan",
+  "slug": "etihad",
+  "displayName": "Etihad",
+  "latest": {
+    "version": "1.0.5",
+    "publishedAt": 1776238611106,
+    "commit": "https://github.com/openclaw/skills/commit/45a88c780d6a129b45e269e10173d8d1ecd6a686"
+  },
+  "history": []
+}

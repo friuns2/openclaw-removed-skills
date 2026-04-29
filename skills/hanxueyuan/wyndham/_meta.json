@@ -1,0 +1,11 @@
+{
+  "owner": "hanxueyuan",
+  "slug": "wyndham",
+  "displayName": "Wyndham",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775746958320,
+    "commit": "https://github.com/openclaw/skills/commit/016afc8f7911ebc68bf70fa143da8e993d7547cd"
+  },
+  "history": []
+}

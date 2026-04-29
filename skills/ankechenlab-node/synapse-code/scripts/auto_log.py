@@ -140,10 +140,11 @@ def main():
 
         knowledge_dirs = [
             project / ".knowledge",
-            project / "wiki",
+            project / ".synapse",  # fallback: write to synapse memory log
         ]
         for kd in knowledge_dirs:
-            if kd.exists() and kd.is_dir():
+            log_path = kd / "log.md"
+            if log_path.exists():
                 append_log(kd, task)
                 print(f"  log: {kd.name}/log.md")
                 break

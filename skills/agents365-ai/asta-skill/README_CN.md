@@ -22,8 +22,9 @@
 | **Claude Code** | ✅ 完全支持 | 原生 SKILL.md + `claude mcp add` 注册 |
 | **Codex** | ✅ 完全支持 | 在 `~/.codex/config.toml` 中配置 MCP |
 | **Cursor / Windsurf / Hermes** | ✅ 完全支持 | 标准 `mcpServers` JSON 配置 |
-| **LM Studio** | ✅ 0.3.17+ | 通过 `~/.lmstudio/mcp.json` 远程 MCP(需模型支持 tool use) |
-| **OpenClaw** | ✅ 完全支持 | `metadata.openclaw` 命名空间 + MCP 配置 |
+| **opencode** | ✅ 完全支持 | 原生 skills + `~/.config/opencode/opencode.json` 配置 MCP |
+| **OpenClaw/ClawHub** | ✅ 完全支持 | `metadata.openclaw` 命名空间 + MCP 配置 |
+| **[pi-mono](https://github.com/badlogic/pi-mono)** | ✅ 完全支持 | `metadata.pimo` 命名空间 |
 | **SkillsMP** | ✅ 已收录 | GitHub topics 已配置 |
 
 ## 对比
@@ -50,7 +51,7 @@
 
 ## 前置条件
 
-- 任意支持 MCP 的 agent host(Claude Code、Codex、Cursor、Windsurf、OpenClaw 等)
+- 任意支持 MCP 的 agent host(Claude Code、Codex、Cursor、Windsurf、opencode、OpenClaw/ClawHub、pi-mono 等)
 - Asta API key —— [点此申请](https://share.hsforms.com/1L4hUh20oT3mu8iXJQMV77w3ioxm)
 
   ```bash
@@ -94,23 +95,6 @@ headers = { "x-api-key" = "${ASTA_API_KEY}" }
 }
 ```
 
-### LM Studio
-
-LM Studio 0.3.17+ 支持远程 MCP。编辑 `~/.lmstudio/mcp.json`(macOS/Linux)或 `%USERPROFILE%\.lmstudio\mcp.json`(Windows),也可以在应用内:**Program** 标签页 → **Install > Edit mcp.json**:
-
-```json
-{
-  "mcpServers": {
-    "asta": {
-      "url": "https://asta-tools.allen.ai/mcp/v1",
-      "headers": { "x-api-key": "<YOUR_API_KEY>" }
-    }
-  }
-}
-```
-
-只有在 LM Studio 模型加载界面显示 **Tool Use: Supported** 的模型才能调用 Asta 工具。推荐:Qwen 2.5 / 3 Instruct(7B+)、Llama 3.1 / 3.3 Instruct(8B+)、Mistral / Mixtral Instruct。
-
 ## 技能安装
 
 ### Claude Code
@@ -129,13 +113,19 @@ git clone https://github.com/Agents365-ai/asta-skill.git .claude/skills/asta-ski
 git clone https://github.com/Agents365-ai/asta-skill.git ~/.codex/skills/asta-skill
 ```
 
-### OpenClaw
+### OpenClaw/ClawHub
 
 ```bash
 git clone https://github.com/Agents365-ai/asta-skill.git ~/.openclaw/skills/asta-skill
 
 # 项目级
 git clone https://github.com/Agents365-ai/asta-skill.git skills/asta-skill
+```
+
+### pi-mono
+
+```bash
+git clone https://github.com/Agents365-ai/asta-skill.git ~/.pimo/skills/asta-skill
 ```
 
 ### SkillsMP
@@ -150,7 +140,8 @@ skills install asta-skill
 |------|---------|---------|
 | Claude Code | `~/.claude/skills/asta-skill/` | `.claude/skills/asta-skill/` |
 | Codex | `~/.codex/skills/asta-skill/` | 暂无 |
-| OpenClaw | `~/.openclaw/skills/asta-skill/` | `skills/asta-skill/` |
+| OpenClaw/ClawHub | `~/.openclaw/skills/asta-skill/` | `skills/asta-skill/` |
+| pi-mono | `~/.pimo/skills/asta-skill/` | — |
 | SkillsMP | 暂无(CLI 安装) | 暂无 |
 
 ## 使用方式
@@ -198,6 +189,28 @@ skills install asta-skill
 
 成功调用应返回 *Attention Is All You Need*,NeurIPS 2017,Vaswani 等人,含 TLDR。
 
+## 常见问题
+
+### Asta 本身就是 MCP server，为什么还需要这个 skill？
+
+MCP server 给 agent 提供的是原始**工具**（函数名 + 参数 schema）。Skill 给 agent 提供的是正确使用这些工具的**领域知识**。没有 skill，agent 每次会话都要从零开始摸索：
+
+| 层级 | 提供的内容 |
+|------|-----------|
+| **MCP server** | 8 个可调用的工具及其输入输出 schema |
+| **本技能** | 意图路由、安全默认值、工作流模板、陷阱警告 |
+
+具体来说，skill 额外提供了：
+
+1. **意图 → 工具映射** —— 用户说"搜某主题的论文"和"谁引用了这篇"该调哪个工具
+2. **上下文溢出保护** —— 警告 agent 永远不要请求 `fields=citations`（一篇高被引论文返回 20 万+字符）
+3. **多步工作流模板** —— 主题发现、种子论文扩展、作者深挖、证据检索
+4. **并行批处理指导** —— 优先用 `get_paper_batch` 而非 N 次串行 `get_paper`
+5. **安全的 `fields` 默认值** —— 精选字段列表，防止上下文爆炸
+6. **统一的输出格式** —— 表格、计数、后续操作菜单
+
+类比：API 文档 vs. API 本身 —— schema 告诉 agent **能做什么**，skill 告诉它**怎么做才聪明**。
+
 ## 已知限制
 
 - **`fields=citations` / `fields=references` 会炸上下文** —— 一篇高被引论文的返回可达 20 万字符。请改用 `get_citations` 工具(分页)。SKILL.md 中已明确警告
@@ -205,6 +218,12 @@ skills install asta-skill
 - **作者消歧** —— 常见姓名会重名,调用 `get_author_papers` 前务必先用 `search_authors_by_name` 核对单位
 - **MCP 在会话启动时加载** —— 会话中途注册 server 后必须重启 host 才能看到工具
 - **摘要不一定有** —— 并非所有论文都有完整摘要;可用 `snippet_search` 或 `tldr` 作为 fallback
+
+## 参与贡献
+
+欢迎提建议、报 bug、提 PR！无论是新的工作流模板、更好的默认配置、更多 MCP 主机的安装方法、文档修正，还是其他任何改进想法，都可以直接 [提 Issue](https://github.com/Agents365-ai/asta-skill/issues) 或提交 Pull Request。
+
+每一份贡献，不论大小，都能让这个技能变得更好。
 
 ## License
 

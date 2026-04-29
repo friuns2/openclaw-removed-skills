@@ -18,6 +18,18 @@ function is_valid_booking_url(url) {
 }
 
 /**
+ * 提取预订链接（PC 端 + 移动端）
+ * @param {object} item - 含 pcRedirectUrl / clawRedirectUrl / redirectUrl 的数据对象
+ * @returns {{ pc_link: string, mobile_link: string }}
+ */
+function extract_booking_links(item) {
+  return {
+    pc_link: item.pcRedirectUrl || '',
+    mobile_link: item.clawRedirectUrl || item.redirectUrl || '',
+  };
+}
+
+/**
  * 在机场名后追加航站楼（仅当航站楼非空时）
  * @param {string} airport_name - 机场名（如 "上海浦东国际机场"）
  * @param {string} [terminal] - 航站楼（如 "T2"，空串时不追加）
@@ -91,7 +103,7 @@ function render_booking_buttons(pc_link, mobile_link, use_plain_link = false) {
 function format_train_seat_prices(train) {
   if (Array.isArray(train.ticketList) && train.ticketList.length > 0) {
     const parts = train.ticketList
-      .filter(t => t.ticketType && t.ticketPrice)
+      .filter(t => t.ticketType && t.ticketPrice != null)
       .map(t => `${t.ticketType}¥${t.ticketPrice}`);
     if (parts.length > 0) return parts.join(', ');
   }
@@ -106,6 +118,13 @@ function format_train_seat_prices(train) {
  */
 function format_duration(minutes) {
   if (!minutes || minutes <= 0) return '-';
+  if (minutes >= 10080) {
+    // 超过 7 天才显示天数，显示到天时不再显示分钟
+    const days = Math.floor(minutes / 1440);
+    const remain_minutes = minutes % 1440;
+    const remain_hours = Math.floor(remain_minutes / 60);
+    return remain_hours > 0 ? `${days}天${remain_hours}时` : `${days}天`;
+  }
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   if (hours > 0) {
@@ -151,6 +170,8 @@ function format_transfer_segment(segment, index) {
   const run_time_minutes = segment.runTimeMinutes || 0;
   const run_time = format_duration(run_time_minutes);
   const seat_name = segment.seatName || '-';
+  // segment.price：中转段总价，由 API 在 segmentList 中直接返回；
+  // 与火车直达的 ticketList[].ticketPrice 不同（直达价格在 ticketList 中逐席别列出）
   const price = segment.price ? `¥${segment.price}` : '-';
   
   let output = `| 第${index}程 | ${type_icon}${type_name} | ${traffic_no} | ${dep_station} | ${arr_station} | ${dep_time} | ${arr_time} | ${run_time} | ${seat_name} | ${price} |`;
@@ -186,8 +207,7 @@ function format_flight_card(flight, use_plain_link = false) {
   const price = flight.price ? `¥${flight.price}` : '暂无价格';
   
   // 构建链接：仅使用航班独立的 pcRedirectUrl，无兜底
-  const pc_link = flight.pcRedirectUrl || '';
-  const mobile_link = flight.clawRedirectUrl || flight.redirectUrl || '#';
+  const { pc_link, mobile_link } = extract_booking_links(flight);
   
   let output = `### ✈️ ${flight_no} | ${dep_airport} → ${arr_airport}\n`;
   output += `**出发时间** ${dep_time} | **到达时间** ${arr_time} | **时长** ${run_time}\n`;
@@ -214,8 +234,7 @@ function format_hotel_card(hotel, use_plain_link = false) {
   const describe = hotel.describe || '无';
   const address = hotel.address || '';
   
-  const pc_link = hotel.pcRedirectUrl || '';
-  const mobile_link = hotel.clawRedirectUrl || hotel.redirectUrl || '#';
+  const { pc_link, mobile_link } = extract_booking_links(hotel);
   
   let output = `### 🏨 ${name}\n`;
   output += `**价格** ${price} | **星级** ${star} | **评分** ⭐${score}（${comment_num}条）\n`;
@@ -225,6 +244,17 @@ function format_hotel_card(hotel, use_plain_link = false) {
   output += '\n---\n\n';
   
   return output;
+}
+
+/**
+ * 站名标注城市：站名有效且不含城市前缀时追加 (城市)
+ * @param {string} station - 站名
+ * @param {string} [city] - 城市名
+ * @returns {string} - 如 "南门汽车站(苏州)" 或 "苏州北广场汽车客运站"
+ */
+function label_station_with_city(station, city) {
+  if (!city || station === '-') return station;
+  return station.startsWith(city) ? station : `${station}(${city})`;
 }
 
 /**
@@ -239,9 +269,6 @@ function format_bus_card(bus, use_plain_link = false) {
   // 车站：兼容新字段 depStationName/arrStationName 与旧字段 depName/arrName
   const dep_station = bus.depStationName || bus.depName || '-';
   const arr_station = bus.arrStationName || bus.arrName || '-';
-  // 城市（新字段）
-  const dep_city = bus.depCityName || '';
-  const arr_city = bus.arrCityName || '';
   const dep_time = bus.depTime || '-';
   // 时长：优先用 format_duration 转换 runTimeMinutes，其次用 runTimeDesc，最后用 runTime
   const run_time_minutes = bus.runTimeMinutes || 0;
@@ -252,16 +279,12 @@ function format_bus_card(bus, use_plain_link = false) {
   const price = bus.price ? `¥${bus.price}` : '暂无价格';
 
   // 链接：优先用 clawRedirectUrl，兼容 redirectUrl
-  const pc_link = bus.pcRedirectUrl || '';
-  const mobile_link = bus.clawRedirectUrl || bus.redirectUrl || '#';
-  
-  // 构建卡片头部：车次 + 城市 + 车站
-  let route_header = '';
-  if (dep_city && arr_city) {
-    route_header = `${dep_city}${dep_station !== dep_city ? dep_station : ''} → ${arr_city}${arr_station !== arr_city ? arr_station : ''}`;
-  } else {
-    route_header = `${dep_station} → ${arr_station}`;
-  }
+  const { pc_link, mobile_link } = extract_booking_links(bus);
+
+  // 站名标注城市
+  const dep_city = bus.depCityName || '';
+  const arr_city = bus.arrCityName || '';
+  const route_header = `${label_station_with_city(dep_station, dep_city)} → ${label_station_with_city(arr_station, arr_city)}`;
   
   let output = `### 🚌 ${bus_no} | ${route_header}\n`;
   output += `**出发** ${dep_time} | **时长** ${run_time}\n`;
@@ -290,8 +313,7 @@ function format_scenery_card(scenery, use_plain_link = false) {
   const open_time = scenery.openTime || '未公布';
   const describe = scenery.describe || '';
   
-  const pc_link = scenery.pcRedirectUrl || '';
-  const mobile_link = scenery.clawRedirectUrl || scenery.redirectUrl || '#';
+  const { pc_link, mobile_link } = extract_booking_links(scenery);
   
   let output = `### 🏞️ ${name}\n`;
   output += `**城市** ${city} | **星级** ${star} | **评分** ⭐${score}（${comment_num}条）\n`;
@@ -319,8 +341,7 @@ function format_traffic_card(traffic, use_plain_link = false) {
   const run_time = traffic.runTime || '-';
   const price = traffic.price ? `¥${traffic.price}` : '暂无价格';
   
-  const pc_link = traffic.pcRedirectUrl || '';
-  const mobile_link = traffic.clawRedirectUrl || traffic.redirectUrl || '#';
+  const { pc_link, mobile_link } = extract_booking_links(traffic);
   
   let output = `### ${type} ${name}\n`;
   output += `**出发** ${dep_station} ${dep_time} | **到达** ${arr_station} ${arr_time}\n`;
@@ -343,8 +364,7 @@ function format_trip_card(trip, use_plain_link = false) {
   const desc = trip.desc || trip.describe || '';
   const address = trip.address || '';
   
-  const pc_link = trip.pcRedirectUrl || '';
-  const mobile_link = trip.clawRedirectUrl || trip.redirectUrl || '#';
+  const { pc_link, mobile_link } = extract_booking_links(trip);
   
   let output = `### 🏖️ ${name}\n`;
   output += `**价格** ${price}\n`;
@@ -371,8 +391,7 @@ function format_train_card(train, use_plain_link = false) {
   const run_time = train.runTime || '-';
   const seat_prices = format_train_seat_prices(train);
 
-  const pc_link = train.pcRedirectUrl || '';
-  const mobile_link = train.clawRedirectUrl || train.redirectUrl || '#';
+  const { pc_link, mobile_link } = extract_booking_links(train);
   
   let output = `### ${train_no} | ${dep_station} → ${arr_station}\n`;
   output += `**出发时间** ${dep_time} | **到达时间** ${arr_time} | **时长** ${run_time}\n`;
@@ -404,9 +423,7 @@ function format_flight_table(flights, use_plain_link = false) {
     const arr_time = format_time_with_date(flight.arrTime, flight.arrDate, flight.daySpan);
     const run_time = flight.runTime || '-';
     const price = flight.price ? `¥${flight.price}` : '暂无价格';
-    // 仅使用航班独立的 pcRedirectUrl，无兜底
-    const pc_link = flight.pcRedirectUrl || '';
-    const mobile_link = flight.clawRedirectUrl || flight.redirectUrl || '#';
+    const { pc_link, mobile_link } = extract_booking_links(flight);
     
     output += `| ${flight_no} | ${dep_airport} | ${arr_airport} | ${dep_time} | ${arr_time} | ${run_time} | ${price} | ${airline} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
   });
@@ -433,9 +450,7 @@ function format_flight_table_special(flights, use_plain_link = false) {
     const week = flight.week || '-';
     const discount = flight.discount || '-';
     const origin_price = flight.originPrice ? `¥${flight.originPrice}` : '-';
-    // 使用统一规则：PC 用 pcRedirectUrl，移动端用 clawRedirectUrl || redirectUrl
-    const pc_link = flight.pcRedirectUrl || '';
-    const mobile_link = flight.clawRedirectUrl || flight.redirectUrl || '#';
+    const { pc_link, mobile_link } = extract_booking_links(flight);
     
     output += `| ${dep_name}→${arr_name} | ${price} | ${week} | ${discount} | ${origin_price} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
   });
@@ -462,9 +477,8 @@ function format_trip_table(trips, use_plain_link = false) {
     const score = trip.score && trip.score !== '0.0' ? `⭐${trip.score}` : '暂无';
     const label_list = (trip.labelList || []).join(', ');
     
-    // 跟团游只有 redirectUrl（手机端），没有 pcRedirectUrl
-    const mobile_link = trip.clawRedirectUrl || trip.redirectUrl || '#';
-    const pc_link = trip.pcRedirectUrl || '';  // 跟团游可能无独立 PC 链接
+    // 跟团游只有 redirectUrl（手机端），可能无 pcRedirectUrl
+    const { pc_link, mobile_link } = extract_booking_links(trip);
     
     output += `| ${name} | ${dest_list} | ${price} | ${score} | ${label_list} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
   });
@@ -492,8 +506,7 @@ function format_scenery_table(sceneries, use_plain_link = false) {
     const comment_num = scenery.commentNum || '0';
     const open_time = scenery.openTime || '未公布';
     
-    const pc_link = scenery.pcRedirectUrl || '';
-    const mobile_link = scenery.clawRedirectUrl || scenery.redirectUrl || '#';
+    const { pc_link, mobile_link } = extract_booking_links(scenery);
     
     output += `| ${name} | ${city} | ${price} | ⭐${score}（${comment_num}条） | ${open_time} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
   });
@@ -520,8 +533,7 @@ function format_hotel_table(hotels, use_plain_link = false) {
     const score = hotel.score || '暂无';
     const comment_num = hotel.commentNum || '0';
     const address = hotel.address || '';
-    const pc_link = hotel.pcRedirectUrl || '';
-    const mobile_link = hotel.clawRedirectUrl || hotel.redirectUrl || '#';
+    const { pc_link, mobile_link } = extract_booking_links(hotel);
     
     output += `| ${name} | ${price} | ${star} | ⭐${score}（${comment_num}条） | ${address} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
   });
@@ -546,14 +558,15 @@ function format_bus_table(buses, use_plain_link = false) {
     const coach_type = bus.coachType || '-';
     const dep_station = bus.depStationName || bus.depName || '-';
     const arr_station = bus.arrStationName || bus.arrName || '-';
+    const dep_city = bus.depCityName || '';
+    const arr_city = bus.arrCityName || '';
     const dep_time = bus.depTime || '-';
     const run_time_minutes = bus.runTimeMinutes || 0;
     const run_time = run_time_minutes > 0 ? format_duration(run_time_minutes) : (bus.runTimeDesc || bus.runTime || '-');
     const price = bus.price ? `¥${bus.price}` : '暂无价格';
-    const pc_link = bus.pcRedirectUrl || '';
-    const mobile_link = bus.clawRedirectUrl || bus.redirectUrl || '#';
+    const { pc_link, mobile_link } = extract_booking_links(bus);
 
-    output += `| ${bus_no} | ${coach_type} | ${dep_station} | ${arr_station} | ${dep_time} | ${run_time} | ${price} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
+    output += `| ${bus_no} | ${coach_type} | ${label_station_with_city(dep_station, dep_city)} | ${label_station_with_city(arr_station, arr_city)} | ${dep_time} | ${run_time} | ${price} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
   });
 
   return output;
@@ -580,8 +593,7 @@ function format_train_table(trains, use_plain_link = false) {
     const run_time = train.runTime || '-';
     const seat_prices = format_train_seat_prices(train);
     
-    const pc_link = train.pcRedirectUrl || '';
-    const mobile_link = train.clawRedirectUrl || train.redirectUrl || '#';
+    const { pc_link, mobile_link } = extract_booking_links(train);
     
     output += `| ${train_no} | ${dep_station} | ${arr_station} | ${dep_time} | ${arr_time} | ${run_time} | ${seat_prices} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
   });
@@ -598,7 +610,7 @@ function format_train_table(trains, use_plain_link = false) {
 function format_transfer_trip(trip, use_plain_link = false) {
   const dep_end = trip.depStationName || trip.depAirportName || '-';
   const arr_end = trip.arrStationName || trip.arrAirportName || '-';
-  let output = `🔄 **中转联程：${dep_end} → ${arr_end}**\n`;
+  let output = `\n🔄 **中转联程：${dep_end} → ${arr_end}**\n`;
   output += `💰 **总价：¥${trip.price}** | ⏱️ **总时长：${trip.runTime}**\n\n`;
   
   // 每段行程一个小表格（班次号列为 trafficNo，含火车车次与航班号）
@@ -620,8 +632,7 @@ function format_transfer_trip(trip, use_plain_link = false) {
   }
   
   // 预订链接
-  const pc_link = trip.pcRedirectUrl || '';
-  const mobile_link = trip.clawRedirectUrl || trip.redirectUrl || '#';
+  const { pc_link, mobile_link } = extract_booking_links(trip);
   
   output += `\n🔗 **立即预订**：${render_booking_buttons(pc_link, mobile_link, use_plain_link)}\n`;
   output += '\n---\n\n';
@@ -629,6 +640,84 @@ function format_transfer_trip(trip, use_plain_link = false) {
   return output;
 }
 
+
+/**
+ * 渲染单个补偿交通表格
+ * @param {Array} list - 交通段列表
+ * @param {boolean} use_plain_link - 是否使用纯文本链接
+ * @param {number} max_items - 最多展示条数
+ * @returns {string} - 表格输出
+ */
+function render_supplement_table(list, use_plain_link, max_items) {
+  const limited = list.slice(0, max_items);
+
+  let output = '| 班次 | 出发站 | 到达站 | 出发时间 | 时长 | 价格 | 席别 | 预订 |\n';
+  output += '|------|--------|--------|---------|------|------|------|------|\n';
+
+  limited.forEach((seg) => {
+    const segment_type = seg.segmentType || '';
+    const is_train = segment_type === 'TRAIN';
+    const is_bus = segment_type === 'BUS';
+    const type_icon = is_train ? '🚄' : (is_bus ? '🚌' : '🚄');
+    const traffic_no = seg.trafficNo || '-';
+    const dep_station = seg.depStationName || '-';
+    const arr_station = seg.arrStationName || '-';
+    // 优先使用分离的 depTime，其次从 depDateTime 提取
+    const dep_time = seg.depTime || (seg.depDateTime ? seg.depDateTime.slice(11, 16) : '-');
+    const run_time = seg.runTime || '-';
+    const price = seg.price ? `¥${seg.price}` : '-';
+
+    // 席别价格：取前 2 个席别简洁展示
+    let seat_info = '';
+    if (Array.isArray(seg.ticketList) && seg.ticketList.length > 0) {
+      seat_info = seg.ticketList.slice(0, 2)
+        .filter(t => t.ticketType && t.ticketPrice != null)
+        .map(t => `${t.ticketType}¥${t.ticketPrice}`)
+        .join(', ');
+    }
+    if (!seat_info && seg.seatName) {
+      seat_info = seg.seatName;
+    }
+
+    const { pc_link, mobile_link } = extract_booking_links(seg);
+
+    output += `| ${type_icon}${traffic_no} | ${dep_station} | ${arr_station} | ${dep_time} | ${run_time} | ${price} | ${seat_info || '-'} | ${render_booking_buttons(pc_link, mobile_link, use_plain_link)} |\n`;
+  });
+
+  if (list.length > max_items) {
+    output += `\n> 还有 ${list.length - max_items} 趟可选，可在同程旅行 APP 中查看更多\n`;
+  }
+
+  output += '\n';
+  return output;
+}
+
+/**
+ * 格式化补偿交通数据（航班附加的前往/离开机场的交通推荐）
+ * @param {object} item - flightDataList 中的单项（含 supplementDepartTrafficList + supplementDestTrafficList）
+ * @param {boolean} [use_plain_link=false] - 是否使用纯文本链接
+ * @param {number} [max_items=5] - 最多展示条数
+ * @returns {string} - 格式化输出
+ */
+function format_supplement_traffic(item, use_plain_link = false, max_items = 5) {
+  let output = '';
+
+  // 首程接驳：前往出发机场
+  const departList = item.supplementDepartTrafficList;
+  if (Array.isArray(departList) && departList.length > 0) {
+    output += '\n🚄 **前往出发机场的交通**\n\n';
+    output += render_supplement_table(departList, use_plain_link, max_items);
+  }
+
+  // 尾程接驳：到达后前往目的地
+  const destList = item.supplementDestTrafficList;
+  if (Array.isArray(destList) && destList.length > 0) {
+    output += '\n🚄 **到达后前往目的地的交通**\n\n';
+    output += render_supplement_table(destList, use_plain_link, max_items);
+  }
+
+  return output;
+}
 
 /**
  * 格式化行程规划方案（单日）
@@ -660,13 +749,13 @@ function format_trip_plan(plan, use_plain_link = false) {
       output += `📍 **城市**: ${cities}\n`;
     }
 
-    const activity_list = day.activityList || day.activitiyList || [];
+    // activitiyList：API 实际返回的字段名（缺 e）；activityList：兼容正确拼写
+    const activity_list = day.activitiyList || day.activityList || [];
     if (activity_list.length > 0) {
       activity_list.forEach((activity, idx) => {
         const name = activity.name || '未知景点';
         const intro = activity.introduction || activity.describe || '';
-        const pc_link = activity.pcRedirectUrl || '';
-        const mobile_link = activity.clawRedirectUrl || activity.redirectUrl || '#';
+        const { pc_link, mobile_link } = extract_booking_links(activity);
 
         output += `\n**${idx + 1}. ${name}**\n`;
         if (intro) {
@@ -741,6 +830,7 @@ function format_trip_plans(plans, use_plain_link = false) {
 
 module.exports = {
   // 共享
+  extract_booking_links,
   render_booking_buttons,
   format_duration,
   // 中转 / 联程
@@ -763,6 +853,8 @@ module.exports = {
   format_scenery_table,
   format_train_table,
   format_trip_table,
+  // 补偿交通
+  format_supplement_traffic,
   // 度假行程规划块
   format_trip_plan,
   format_trip_plans

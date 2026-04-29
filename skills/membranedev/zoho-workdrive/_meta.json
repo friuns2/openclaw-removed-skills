@@ -3,9 +3,15 @@
   "slug": "zoho-workdrive",
   "displayName": "Zoho Workdrive",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775567093439,
-    "commit": "https://github.com/openclaw/skills/commit/71385638e47fe6f6ef6ff09275b04e46ca5e83af"
+    "version": "1.0.1",
+    "publishedAt": 1776895765684,
+    "commit": "https://github.com/openclaw/skills/commit/8109d2d7291062f883b3db2d22d4d9bce12c8bfa"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775567093439,
+      "commit": "https://github.com/openclaw/skills/commit/71385638e47fe6f6ef6ff09275b04e46ca5e83af"
+    }
+  ]
 }

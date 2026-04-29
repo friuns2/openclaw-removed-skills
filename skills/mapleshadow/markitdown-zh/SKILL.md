@@ -1,102 +1,26 @@
 ---
 name: markitdown-zh
-description: OpenClaw 智能体文档转换技能，用于将各类文档转换为 Markdown 格式，又称为 md 格式。基于微软 MarkItDown 库，支持 PDF、Word、PowerPoint、Excel、图像 (OCR)、音频 (转录)、HTML 和 YouTube 链接。
-metadata:
-  openclaw:
-    emoji: "📄"
-    homepage: https://github.com/karmanverma/markitdown-skill
-    requires:
-      bins: ["python3", "pipx", "markitdown"]
-    install:
-      - id: "markitdown"
-        kind: "pipx"
-        package: "markitdown[all]"
-        bins: ["markitdown"]
-        label: "安装 MarkItDown CLI (pipx)"
+description: 使用微软 markitdown 库将多种文档格式（PDF、DOCX、PPTX、XLSX、XLS、CSV、JSON、TXT、EPUB、HTML等）转换为 Markdown。支持批量转换、保留格式、图片提取等功能。使用场景：(1) "把这个 PDF 转成 Markdown"，(2) "批量转换这个文件夹里的文档"，(3) "提取文档中的图片"。
 ---
 
-# MarkItDown 技能
+# MarkItDown 文档转换技能
 
-使用微软 [MarkItDown](https://github.com/microsoft/markitdown) 库将文档转换为 Markdown 的文档和工具。
-
-> **注意：** 此技能提供文档和批量脚本。实际的转换由通过 pip 安装的 `markitdown` CLI/库完成。
-
-## 何时使用
-
-**使用 markitdown 进行：**
-- 📄 获取文档（README、API 文档）
-- 🌐 将网页转换为 markdown
-- 📝 文档分析（PDF、Word、PowerPoint）
-- 🎬 YouTube 转录
-- 🖼️ 图像文本提取（OCR）
-- 🎤 音频转录
-
-## 快速开始
-
-```bash
-# 将文件转换为 markdown
-markitdown document.pdf -o output.md
-
-# 转换 URL
-markitdown https://example.com/docs -o docs.md
-```
+使用微软的 markitdown 库将各种文档格式转换为 Markdown。
 
 ## 支持的格式
 
-| 格式 | 功能 |
-|------|------|
-| PDF | 文本提取、结构保留 |
-| Word (.docx) | 标题、列表、表格 |
-| PowerPoint | 幻灯片、文本 |
-| Excel | 表格、工作表 |
-| 图像 | OCR + EXIF 元数据 |
-| 音频 | 语音转录 |
-| HTML | 结构保留 |
-| YouTube | 视频转录 |
+- PDF (.pdf)
+- Word 文档 (.docx)
+- PowerPoint 演示文稿 (.pptx)
+- Excel 电子表格 (.xlsx .xls)
+- HTML 文件 (.html, .htm)
+- 纯文本文件 (.txt, .rtf, .xml, .csv, .json)
+- 电子书 (.epub)
+- 等等...
 
-## 安装
+## 快速开始
 
-此技能需要微软的 `markitdown` CLI：
-
-```bash
-sudo apt-get install pipx
-# 使用pipx安装markitdown包 all表示支持所有格式
-pipx install 'markitdown[all]'
-# 将markitdown调用路径放入当前变量PATH内
-pipx ensurepath
-```
-
-或仅安装特定格式：
-```bash
-sudo apt-get install pipx
-pip install 'markitdown[pdf,docx,pptx]'
-pipx ensurepath
-```
-
-## 常用模式
-
-### 获取文档
-```bash
-markitdown https://github.com/user/repo/blob/main/README.md -o readme.md
-```
-
-### 转换 PDF
-```bash
-markitdown document.pdf -o document.md
-```
-
-### 批量转换
-```bash
-# 使用包含的脚本
-python ~/.openclaw/skills/markitdown-zh/scripts/batch_convert.py docs/*.pdf -o markdown/ -v
-
-# 或使用 shell 循环
-for file in docs/*.pdf; do
-  markitdown "$file" -o "${file%.pdf}.md"
-done
-```
-
-## Python API
+### 单个文件转换
 
 ```python
 from markitdown import MarkItDown
@@ -106,38 +30,111 @@ result = md.convert("document.pdf")
 print(result.text_content)
 ```
 
-## 故障排除
+### 使用提供的脚本
 
-### "markitdown 未找到"
 ```bash
+# 转换单个文件
+python3 scripts/convert.py input.pdf output.md
+
+# 批量转换文件夹
+python3 scripts/batch_convert.py input_folder/ output_folder/
+
+# 提取文档中的图片
+python3 scripts/extract_images.py document.pdf images_folder/
+```
+
+## 详细用法
+
+### 单个文件转换
+
+使用 `scripts/convert.py`：
+
+```bash
+python3 scripts/convert.py <input_file> [output_file]
+```
+
+如果不指定输出文件，会自动生成 `.md` 文件。
+
+### 批量转换
+
+使用 `scripts/batch_convert.py`：
+
+```bash
+python3 scripts/batch_convert.py <input_directory> <output_directory>
+```
+
+会递归处理目录中的所有支持的文件。
+
+### 图片提取
+
+使用 `scripts/extract_images.py`：
+
+```bash
+python3 scripts/extract_images.py <input_file> <output_directory>
+```
+
+从文档中提取所有图片并保存到指定目录。
+
+## 脚本说明
+
+- `scripts/convert.py` - 单个文件转换脚本
+- `scripts/batch_convert.py` - 批量转换脚本
+- `scripts/extract_images.py` - 图片提取脚本
+
+每个脚本都有 `--help` 选项查看详细参数。
+
+## 安装依赖
+
+### Python 版本要求
+
+markitdown 需要 Python 3.10 或更高版本。
+
+检查 Python 版本：
+```bash
+python3.12 --version  # 或 python3.11, python3.13
+```
+
+### 安装 markitdown
+
+使用 Python 3.10+ 安装：
+
+```bash
+# 使用 Python 3.12（推荐）
 # 安装pipx包管理应用，通过pipx安装包不需要（或者说是自动）新建虚拟环境
 sudo apt-get install pipx
 # 使用pipx安装markitdown包 all表示支持所有格式
 pipx install 'markitdown[all]'
-# 将markitdown调用路径放入当前变量PATH内
-pipx ensurepath
+
+# 或使用虚拟环境（适用于非root用户，如node用户）
+python3.12 -m venv markitdown-env
+source markitdown-env/bin/activate
+pip install "markitdown[all]"
 ```
 
-### OCR 无法工作
+### 可选：系统依赖
+
+某些格式转换可能需要额外的系统依赖：
+
+- **PDF 处理**: `brew install poppler` (macOS) 或 `sudo apt-get install poppler-utils` (Linux)
+- **OCR**: `brew install tesseract` (macOS) 或 `sudo apt-get install tesseract-ocr` (Linux)
+
+## 验证安装
+
 ```bash
-# Ubuntu/Debian
-sudo apt-get install tesseract-ocr
-
-# macOS
-brew install tesseract
+python3.12 -c "from markitdown import MarkItDown; print('安装成功!')"
 ```
 
-## 此技能提供的内容
+## 使用脚本
 
-| 组件 | 来源 |
-|------|------|
-| `markitdown` CLI | 微软的 pip 包 |
-| `markitdown` Python API | 微软的 pip 包 |
-| `scripts/batch_convert.py` | 此技能（工具脚本） |
-| 文档 | 此技能 |
+所有脚本都支持使用特定 Python 版本运行：
+
+```bash
+# 使用 Python 3.12 运行
+python3.12 scripts/convert.py input.pdf output.md
+python3.12 scripts/batch_convert.py input_folder/ output_folder/
+python3.12 scripts/extract_images.py document.pdf images_folder/
+```
 
 ## 另请参阅
 
-- [USAGE-GUIDE.md](USAGE-GUIDE.md) - 详细示例
-- [reference.md](reference.md) - 完整 API 参考
 - [Microsoft MarkItDown](https://github.com/microsoft/markitdown) - 上游库

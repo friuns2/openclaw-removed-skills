@@ -1,7 +1,7 @@
 ---
 name: preflyte
 description: "Financial intelligence layer for DeFi agents. One API call tells you where to deploy capital, which chains are viable for your budget, and whether your market assumptions are true. The tool every DeFi agent should call first."
-version: 1.0.0
+version: 1.1.0
 metadata:
   openclaw:
     requires:
@@ -30,6 +30,10 @@ Works alongside any execution skill (BankrBot, Polyclaw, etc.) as a pre-trade in
 
 ## Setup
 
+PreFlyte offers two access modes. Pick the one that suits your agent.
+
+### Option A — Free beta (API key)
+
 If you do not have a PREFLYTE_API_KEY set in your environment, register for one:
 
 ```bash
@@ -42,9 +46,30 @@ This returns your API key instantly. Store it as PREFLYTE_API_KEY. The key canno
 
 Every tool requires the API key as the `api_key` parameter.
 
-MCP server endpoint: `https://mcp.preflyte.xyz/mcp` (transport: streamable-http)
+- REST API: `https://api.preflyte.xyz` (auth: `X-API-Key` header)
+- MCP server: `https://mcp.preflyte.xyz/mcp` (transport: streamable-http)
+- Rate limit: 60 requests per minute per key
 
-Rate limit: 60 requests per minute per key. Keys are free during beta.
+### Option B — Pay-per-request via MPP (no signup)
+
+For agents that prefer per-request micropayments (or are already wired up to the MPP/Tempo payments ecosystem), all tools are available at `https://pay.preflyte.xyz` as paid REST endpoints. No API key or registration required — just pay per request.
+
+- Payment protocol: MPP (HTTP 402 challenge-response)
+- Network: Tempo mainnet (chain ID 4217)
+- Currency: USDC (`0x20c000000000000000000000b9537d11c60e8b50`)
+- Discovery document: `https://pay.preflyte.xyz/openapi.json`
+- Also listed on [MPPScan](https://www.mppscan.com/)
+
+Pricing per request:
+
+| Tool | Price (USD) |
+|------|-------------|
+| assess_opportunity | $0.05 |
+| estimate_net_position | $0.03 |
+| market_snapshot, check_entry_viability, check_pool_viability | $0.02 |
+| gas_timing, verify_claim, get_returns, get_ranking | $0.01 |
+
+Flow for MPP-capable agents: send a GET to the paid endpoint, receive a 402 challenge, submit payment on Tempo, retry with the payment credential, receive the response plus a `Payment-Receipt` header.
 
 ---
 

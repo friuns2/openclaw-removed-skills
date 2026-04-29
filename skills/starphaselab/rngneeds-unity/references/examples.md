@@ -146,30 +146,69 @@ public class SimpleChest : MonoBehaviour
 
 ## Top-of-deck draw with finite cards
 
-Use indexed traversal, not random picking, when order matters.
+Use deck extensions first when order matters.
 
 ```csharp
-using System.Collections.Generic;
 using RNGNeeds;
 
 public static class DeckDraw
 {
-    public static List<Card> DrawFromTop(ProbabilityList<Card> cards, int count)
+    public static ProbabilityItem<Card> DrawOne(ProbabilityList<Card> drawPile)
     {
-        var results = new List<Card>();
+        drawPile.TryDrawTopItem(out var drawnItem);
+        return drawnItem;
+    }
+}
+```
 
-        for (int i = 0; i < cards.ItemCount && results.Count < count; i++)
-        {
-            if (!cards.TryGetProbabilityItem(i, out var item))
-                break;
-            if (!item.IsSelectable)
-                continue;
+Use manual index traversal only when you need a custom low-level flow that the built-in deck helpers do not cover.
 
-            results.Add(item.Value);
-            item.Units--;
-        }
+## Move cards between zones
 
-        return results;
+```csharp
+using RNGNeeds;
+
+public static class CardFlow
+{
+    public static bool DrawToHand(ProbabilityList<Card> drawPile, ProbabilityList<Card> hand)
+    {
+        if (!drawPile.TryDrawTopItem(out var drawnItem))
+            return false;
+
+        return hand.TryPlaceItemOnBottom(drawnItem);
+    }
+}
+```
+
+## Create and apply a shuffle plan
+
+```csharp
+using RNGNeeds;
+using UnityEngine;
+
+public class DeckShufflePreview : MonoBehaviour
+{
+    public ProbabilityList<Card> drawPile;
+
+    public void ApplyRifflePlan()
+    {
+        var plan = drawPile.CreateShufflePlan(DeckShuffleMethods.Riffle);
+        Debug.Log($"{plan.DisplayName}: {plan.Steps.Count} steps");
+        drawPile.ApplyShufflePlan(plan);
+    }
+}
+```
+
+## Deal directly from one deck to another
+
+```csharp
+using RNGNeeds;
+
+public static class DeckTransfers
+{
+    public static bool MoveTopCard(ProbabilityList<Card> source, ProbabilityList<Card> target)
+    {
+        return source.TryDealItemToDeck(target, out _);
     }
 }
 ```

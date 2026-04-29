@@ -101,6 +101,8 @@ PDF: /path/to/workspace/topic_research_report/5f14e352-cd8e-4169-9d69-7399f1eb83
 | `--query` | 用户原始专题研究问句 | ✅（`--query` 或 stdin 二选一） |
 | `--no-save` | 保留参数（兼容旧调用，当前对本技能无影响） | 否 |
 
+注意：禁止调用 任何「后台执行、稍后汇报」的方式跑本脚本，只能在当前会话中同步等待到命令完成，拿到 stdout 的结果后再继续，否则会导致本 Skill 失败。
+
 ### 2. 代码调用
 
 ```python
@@ -181,6 +183,9 @@ asyncio.run(main())
 ```bash
 python3 -m scripts.get_data --query "东方财富专题研究" --no-save
 ```
+
+**注意：专题研究报告接口响应时间较久，请耐心等待~**  
+→ 在当前会话中同步等待到命令完成，拿到 stdout 的结果后再继续输出，否则会导致本 Skill 失败。
 
 **异常场景**
 

@@ -1,0 +1,11 @@
+{
+  "owner": "vynbosserman65",
+  "slug": "video-content",
+  "displayName": "Video Content",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776229483339,
+    "commit": "https://github.com/openclaw/skills/commit/f754a419ddf600ee22217eacb1bc5567763774b8"
+  },
+  "history": []
+}

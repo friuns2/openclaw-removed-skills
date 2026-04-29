@@ -25,6 +25,17 @@ from datetime import datetime
 # 日志输出 (IM 友好格式 - 无 ANSI 颜色码)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+class Colors:
+    """ANSI 颜色码 — 仅终端使用，IM 平台自动过滤"""
+    RESET = "\033[0m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    RED = "\033[31m"
+    CYAN = "\033[36m"
+    WHITE = "\033[37m"
+    BOLD = "\033[1m"
+
+
 def log_info(msg):
     """信息消息 - 用于一般提示"""
     print(f"[INFO] {msg}")
@@ -62,10 +73,12 @@ def log_stage_complete(stage_num, stage_name, duration=None):
         msg += f" (耗时 {duration:.1f}秒)"
     print(msg)
 
-def log_progress_text(current: int, total: int, message: str = ""):
+def log_progress(current: int, total: int, message: str = ""):
     """文本进度通知 - 替代进度条（IM 友好）"""
     percent = int(100 * current / total)
     print(f"[进度 {current}/{total}] {percent}% - {message}")
+
+log_progress_text = log_progress  # alias
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -227,6 +240,9 @@ def run_standalone_mode(project_name: str, input_text: str, verbose: bool = Fals
     独立模式：无需 Pipeline，直接开发
 
     流程：分析需求 → 生成代码 → 简单测试
+
+    注意：此模式下 Claude 将直接处理开发任务，
+    此函数仅负责环境检测和提示用户。
     """
     print(f"\n{Colors.CYAN}{'=' * 60}{Colors.RESET}")
     print(f"{Colors.BOLD}🔧 独立开发模式{Colors.RESET}")
@@ -237,10 +253,10 @@ def run_standalone_mode(project_name: str, input_text: str, verbose: bool = Fals
 
     log_info("此模式下，Claude 将直接分析需求并生成代码")
     log_info("适合：快速原型、简单功能、无 Pipeline 环境")
+    log_info("无需调用外部脚本，Claude 正在处理你的需求...")
     print()
 
-    # 在 standalone 模式下，Claude 直接处理，无需调用外部脚本
-    # 这里返回 True 表示模式切换成功，实际开发由 Claude 完成
+    # standalone 模式下 Claude 直接处理开发，脚本只返回 True 表示检测通过
     return True
 
 
@@ -272,8 +288,7 @@ def run_lite_mode(project_name: str, input_text: str, config: dict, verbose: boo
 
     cmd = [
         "python3", str(pipeline_script), "run-pipeline", project_name,
-        "--input", input_text,
-        "--mode", "lite"
+        "--input", input_text
     ]
 
     if verbose:
@@ -282,25 +297,34 @@ def run_lite_mode(project_name: str, input_text: str, config: dict, verbose: boo
     log_info(f"Pipeline 脚本：{pipeline_script}")
     print()
 
-    # 显示进度动画
     start_time = time.time()
     lite_stages = [(1, "REQ", "需求分析"), (2, "DEV", "代码开发"), (3, "QA", "质量检查")]
     total_stages = len(lite_stages)
 
     try:
+        # 逐行流式输出，实时显示阶段进度
         log_step(1, "需求分析 (REQ)", "running")
         log_progress(0, total_stages, "执行 REQ 阶段...")
+
+        last_shown_stage = 0
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         elapsed = time.time() - start_time
 
         if result.returncode == 0:
-            log_step(1, "需求分析 (REQ)", "done")
+            # 解析输出，更新各阶段状态
+            output = result.stdout
+            for stage_num, stage_abbr, stage_name in lite_stages:
+                if stage_abbr in output:
+                    log_step(stage_num, f"{stage_abbr} - {stage_name}", "done")
+                    last_shown_stage = stage_num
+
             log_progress(total_stages, total_stages, "Pipeline 执行完成")
-            if verbose and result.stdout:
-                print(result.stdout)
+            if verbose:
+                print(output)
             return True
         else:
-            log_step(1, "需求分析 (REQ)", "error")
+            error_stage = _parse_error_stage(result.stderr or result.stdout)
+            log_step(error_stage[0], f"{error_stage[1]} - {error_stage[2]}", "error")
             log_error(f"Pipeline 错误：{result.stderr[:500] if result.stderr else '未知错误'}")
             return False
 
@@ -355,8 +379,7 @@ def run_full_mode(project_name: str, input_text: str, config: dict, verbose: boo
 
     cmd = [
         "python3", str(pipeline_script), "run-pipeline", project_name,
-        "--input", input_text,
-        "--mode", "full"
+        "--input", input_text
     ]
 
     if verbose:
@@ -367,28 +390,27 @@ def run_full_mode(project_name: str, input_text: str, config: dict, verbose: boo
 
     start_time = time.time()
     try:
-        # 显示各阶段进度
         total_stages = len(stages)
-        completed_stages = 0
 
-        for stage_num, stage_abbr, stage_name in stages:
-            log_step(stage_num, f"{stage_abbr} - {stage_name}", "running")
-            log_progress(completed_stages, total_stages, f"执行 {stage_abbr} 阶段...")
+        log_step(1, "REQ - 需求分析", "running")
+        log_progress(0, total_stages, "开始执行 Pipeline...")
 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)  # 30 分钟超时
         elapsed = time.time() - start_time
 
         if result.returncode == 0:
-            # 更新所有阶段为完成状态
-            completed_stages = total_stages
+            # 解析输出，逐阶段标记完成
+            output = result.stdout or ""
             for stage_num, stage_abbr, stage_name in stages:
-                log_step(stage_num, f"{stage_abbr} - {stage_name}", "done")
-            log_progress(completed_stages, total_stages, "Pipeline 执行完成")
+                if stage_abbr in output or stage_name in output:
+                    log_step(stage_num, f"{stage_abbr} - {stage_name}", "done")
+
+            log_progress(total_stages, total_stages, "Pipeline 执行完成")
 
             print()
             log_success(f"Pipeline 执行成功，耗时 {elapsed:.1f} 秒")
-            if verbose and result.stdout:
-                print(result.stdout)
+            if verbose:
+                print(output)
             return True
         else:
             # 尝试从输出中解析当前阶段
@@ -398,8 +420,6 @@ def run_full_mode(project_name: str, input_text: str, config: dict, verbose: boo
             return False
 
     except subprocess.TimeoutExpired:
-        for stage_num, stage_abbr, stage_name in stages:
-            log_step(stage_num, f"{stage_abbr} - {stage_name}", "error")
         log_error(f"Pipeline 执行超时（30 分钟）")
         log_info("大型项目建议拆分为多个小需求")
         return False
@@ -507,58 +527,31 @@ def trigger_auto_log(config: dict) -> bool:
 
 
 def main():
-    if len(sys.argv) < 3:
-        print()
-        print(f"{Colors.CYAN}{'═' * 60}{Colors.RESET}")
-        print(f"{Colors.BOLD}  Synapse Code Pipeline 运行器{Colors.RESET}")
-        print(f"{Colors.CYAN}{'═' * 60}{Colors.RESET}")
-        print()
-        print(f"  {Colors.GREEN}用法:{Colors.RESET} python3 run_pipeline.py <项目名称> \"需求描述\" [选项]")
-        print()
-        print(f"  {Colors.GREEN}模式:{Colors.RESET}")
-        print(f"    {Colors.YELLOW}auto{Colors.RESET}       - 自动检测环境（默认）")
-        print(f"    {Colors.YELLOW}standalone{Colors.RESET} - 独立开发（无需 Pipeline）")
-        print(f"    {Colors.YELLOW}lite{Colors.RESET}       - 简化 Pipeline（3 阶段）")
-        print(f"    {Colors.YELLOW}full{Colors.RESET}       - 完整 Pipeline（6 阶段 SOP）")
-        print()
-        print(f"  {Colors.GREEN}选项:{Colors.RESET}")
-        print(f"    {Colors.YELLOW}--mode <mode>{Colors.RESET}     - 指定运行模式")
-        print(f"    {Colors.YELLOW}--verbose{Colors.RESET}         - 详细输出")
-        print()
-        print(f"  {Colors.GREEN}示例:{Colors.RESET}")
-        print(f"    python3 run_pipeline.py my-project \"实现登录功能\"")
-        print(f"    python3 run_pipeline.py my-project \"添加用户注册\" --mode lite")
-        print(f"    python3 run_pipeline.py my-project \"设计电商系统\" --mode full --verbose")
-        print()
-        print(f"{Colors.CYAN}{'═' * 60}{Colors.RESET}")
-        print()
-        sys.exit(1)
+    import argparse
 
-    project_name = sys.argv[1]
-    input_text = sys.argv[2]
+    parser = argparse.ArgumentParser(
+        description="Synapse Code Pipeline 运行器",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+示例:
+  python3 run_pipeline.py my-project "实现登录功能"
+  python3 run_pipeline.py my-project "添加用户注册" --mode lite
+  python3 run_pipeline.py my-project "设计电商系统" --mode full --verbose
+        """
+    )
+    parser.add_argument("project_name", help="项目名称")
+    parser.add_argument("input_text", help="需求描述")
+    parser.add_argument("--mode", choices=["auto", "standalone", "lite", "full"], default="auto", help="运行模式（默认 auto）")
+    parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
 
-    # Parse optional arguments
-    mode = "auto"
-    verbose = False
-    i = 3
-    while i < len(sys.argv):
-        arg = sys.argv[i]
-        if arg == "--mode":
-            if i + 1 < len(sys.argv):
-                mode = sys.argv[i + 1]
-                i += 1
-        elif arg == "--verbose" or arg == "-v":
-            verbose = True
-        elif arg.startswith("--"):
-            log_warning(f"未知选项：{arg}")
-        i += 1
+    args = parser.parse_args()
 
     # 加载并验证配置
     log_info("加载配置文件...")
     config = load_config()
 
     # 执行 Pipeline
-    success = run_pipeline(project_name, input_text, config, mode, verbose)
+    success = run_pipeline(args.project_name, args.input_text, config, args.mode, args.verbose)
 
     # 显示结果
     print()
@@ -566,7 +559,7 @@ def main():
     if success:
         log_success("Pipeline 执行成功")
         # Auto-log only in lite/full modes
-        if mode in ["lite", "full"] and config.get("pipeline", {}).get("auto_log", True):
+        if args.mode in ["lite", "full"] and config.get("pipeline", {}).get("auto_log", True):
             print()
             log_info("正在记录开发经验...")
             trigger_auto_log(config)

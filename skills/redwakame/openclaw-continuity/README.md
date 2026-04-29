@@ -1,112 +1,389 @@
 # OpenClaw Continuity
 
-`OpenClaw Continuity` is a portable continuity core for OpenClaw agents.
+Make OpenClaw remember the right thing, reconnect the right topic after `/new`,
+and follow up naturally without leaking internal state into chat.
 
-It is built for a simple outcome:
+`OpenClaw Continuity` is the public product name for the `personal-hooks` skill
+package. It is a **skill-layer continuity engine** for an existing OpenClaw
+agent: it does not replace the agent's persona, and it does not bundle a
+chat-platform adapter.
 
-- remember the right thing
+![OpenClaw Continuity product story](assets/publish/product-story-bilingual.svg)
+
+## Four Quick Comics
+
+These four panels show the parts that matter most after someone installs the
+skill: guided setup, later adjustment, natural-language setting changes, and
+precise command changes.
+
+![Install and setup wizard](assets/publish/comic-01-setup-wizard.svg)
+
+![Adjust settings anytime](assets/publish/comic-02-adjust-anytime.svg)
+
+![Natural-language setting changes](assets/publish/comic-03-natural-language-settings.svg)
+
+![Precise command setting changes](assets/publish/comic-04-command-settings.svg)
+
+## For Everyone
+
+Most agents can answer a message. The harder part is remembering what still
+matters after an interruption, a delayed reply, or a new conversation.
+
+OpenClaw Continuity helps an agent:
+
+- keep ordinary chat light
+- stage "let's talk about this later" without losing it
+- track important follow-up without chasing every casual sentence
 - reconnect the right topic after `/new`
-- follow up naturally without leaking internal continuity logic into frontstage chat
+- understand time with sleep/wake and routine context
+- let the user adjust behavior in natural language
 
-It adds a structured middle layer so an agent can:
+中文簡介：
 
-- keep `/new` carryover attached to the right pending topic
-- separate ordinary chat, staged memory, and tracked follow-up
-- express time using elapsed time, cross-midnight context, and routine phase
-- write concise daily-memory traces from explicit continuity state
-- let users adjust settings in ordinary language instead of editing config files
-- let users directly ask for quieter nights, slower follow-up, or different care behavior in chat
+OpenClaw Continuity 是替 OpenClaw 補上「延續感、時間感、關心與追蹤」的技能包。
+它不是單純排程發訊息，也不是把所有對話都硬塞進記憶。它會分辨哪些只是一般聊天，
+哪些要暫存，哪些真的需要追蹤，並在新開對話時接回使用者選定的承接方式。
 
-This ClawHub package is the **core-only** distribution. It keeps the shared continuity engine portable and leaves host-side delivery integrations outside the public skill bundle.
+## What It Feels Like
 
-## English
+Example:
 
-Use `OpenClaw Continuity` when an OpenClaw agent should remember the right thing, reconnect the right topic after `/new`, and follow up naturally without collapsing into generic small talk.
+```text
+User: I need to pause this repo release check. Let's continue later.
+Agent: Got it. I will keep the release check as the thread to continue.
 
-It is not just a cron-style message sender. The point is not “send something later.”
-The point is to reconnect the right topic, decide whether follow-up is actually
-appropriate, and respect routine, quiet hours, sleep/rest suppress, closure,
-cooldown, and dispatch caps before anything reaches frontstage chat.
+/new
 
-What users notice first:
+Agent: I still have the release check thread. Do you want to pick it up from
+the last user intent, the follow-up focus, or the recent conversation summary?
+```
 
-- `/new` reconnects the right pending topic instead of resetting the conversation
-- “let's talk about it later” can stay staged instead of being forgotten
-- follow-up stays explicit with closure, cooldown, dedupe, dispatch caps, and rest/sleep suppress
-- settings can be changed through ordinary language instead of config-only control
-- users can directly ask for quieter nights, slower follow-up, or different care behavior in chat
+中文例子：
 
-Different paths stay different on purpose:
+```text
+使用者：這個技能上架檢查先放著，晚點再接。
+Agent：好，我先把這段接住，不會當成一般閒聊丟掉。
 
-- ordinary chat stays ordinary chat
-- something to revisit later can stay staged
-- something that truly matters can become tracked follow-up
-- routine-aware care can be delayed or suppressed when the user is resting
-- quiet-hours and do-not-disturb style behavior are part of the feature set, not an afterthought
+/new
 
-Core capabilities included in this package:
+Agent：前面那段技能上架檢查我還接得住。現在要從最後意圖、追蹤焦點，
+還是最近 4 輪摘要開始？
+```
 
-- time-aware continuity
+The exact wording still belongs to the host agent's persona. This skill supplies
+the structured continuity state that makes the answer possible.
+
+## Minimal Telegram/TG Showcase
+
+Telegram/TG can be used as a small live showcase **when your OpenClaw host is
+already connected to Telegram**. The skill does not bundle a Telegram adapter or
+bot setup; it only supplies the continuity behavior that the host sends through
+its normal reply pipeline.
+
+Demo flow:
+
+```text
+TG user: 這個上架檢查先放著，晚點再接。
+Agent: 好，我先幫你接住這條線，不會當成普通閒聊丟掉。
+
+TG user: /new
+Agent: 前面那個上架檢查我還接得住。要從最近 4 輪、最後意圖，還是追蹤焦點接？
+
+TG user: 新對話改成看最後使用者意圖。
+Agent: 已更新。之後新對話會優先從最後使用者意圖承接。
+```
+
+What this demonstrates:
+
 - `/new` carryover
+- staged memory instead of forced tracking
+- natural-language settings update
+- frontstage text stays user-facing, not internal runtime text
+
+## Core Features
+
+- **New conversation carryover**
+  `/new` can reconnect the right previous thread instead of starting from a blank greeting.
+
+- **User-selectable `/new` continuity mode**
+  The user can choose which anchor should lead a new conversation:
+  `recent_4_turns_first`, `last_user_intent_first`, `followup_focus_first`,
+  `assistant_commitment_first`, or `balanced`.
+
+- **Ordinary chat / staged memory / tracked follow-up**
+  The runtime separates casual chat from staged memory and formally tracked events.
+
+- **Four tracked event types**
+  `parked_topic`, `watchful_state`, `delegated_task`, and `sensitive_event`.
+
+- **Structured event chain**
+  Keeps `context_before`, `event_core`, `immediate_result`, and
+  `followup_focus` inspectable.
+
+- **Assistant commitment tracking**
+  If the assistant promised to check, remember, or come back to something, that
+  commitment can become part of the continuity state.
+
+- **Time-aware wording**
+  Uses elapsed time, day boundary, sleep/wake boundary, and routine phase as
+  support. Time context does not replace the selected main thread.
+
+- **Care and follow-up controls**
+  Closure, cooldown, dedupe, dispatch cap, quiet hours, and sleep/rest suppress
+  are explicit settings instead of hidden model guesses.
+
+- **Daily-memory writeback**
+  Staged and tracked items write concise traces from structured continuity
+  state, not from improvised frontstage text.
+
+- **Guided setup**
+  First install can ask for timezone, sleep/wake time, relationship/use case,
+  `/new` continuity mode, and voice/image continuity preference.
+
+- **Natural-language settings**
+  Users can say things like "make follow-up quieter after midnight" or
+  "新對話改成看最後使用者意圖" and the skill maps that to settings.
+
+## What Is In Scope
+
+This package defines the skill behavior:
+
+- state-backed continuity
+- `/new` reattachment
+- staging and tracked follow-up
+- routine/time context
+- setup wizard and settings updates
+- frontstage safety guards at the skill/tool layer
+- release harness and acceptance checks
+
+## What Is Not In Scope
+
+This package does not claim a list of external chat platforms. Channel delivery
+belongs to the OpenClaw host and its adapter configuration.
+
+That boundary is intentional: the same skill can run through the ordinary
+OpenClaw reply pipeline without becoming tied to one chat surface.
+
+## Setup Wizard
+
+First install can enter guided setup when required fields or first-run preference
+fields are missing.
+
+![Install and setup wizard](assets/publish/comic-01-setup-wizard.svg)
+
+The setup flow covers:
+
+- `timezone`
+- `sleep_time`
+- `wake_time`
+- `relationship`
+- `use_case`
+- `new_session_continuity_mode`
+- `modality_continuity_mode`
+
+The two newest user-facing choices are:
+
+```json
+{
+  "new_session_continuity": {
+    "mode": "recent_4_turns_first"
+  },
+  "modality_continuity": {
+    "enabled": true,
+    "mode": "preserve_when_supported",
+    "voice_reply_on_voice_thread": true,
+    "image_context_carryover": true
+  }
+}
+```
+
+`modality_continuity` is host-neutral. It only expresses a preference. It does
+not add a voice engine, image model, or channel adapter to this skill package.
+
+## Change Settings Later
+
+![Adjust settings anytime](assets/publish/comic-02-adjust-anytime.svg)
+
+Natural language:
+
+![Natural-language setting changes](assets/publish/comic-03-natural-language-settings.svg)
+
+```text
+Help me adjust my follow-up settings.
+Make follow-up quieter after midnight.
+Use the last user intent when a new conversation starts.
+新對話承接改成最近 4 輪摘要。
+把主動關心改保守一點。
+半夜不要主動追蹤我。
+```
+
+Command-style:
+
+![Precise command setting changes](assets/publish/comic-04-command-settings.svg)
+
+```bash
+python3 scripts/personal_hooks.py setup-check
+python3 scripts/personal_hooks.py setup-apply --payload-json '{"new_session_continuity_mode":"last_user_intent_first"}'
+python3 scripts/personal_hooks.py setup-apply --payload-json '{"modality_continuity_mode":"preserve_when_supported"}'
+python3 scripts/personal_hooks.py setup-apply --payload-json '{"sleep_time":"23:00","wake_time":"07:00"}'
+```
+
+Supported `/new` continuity modes:
+
+| Mode | What leads the next conversation |
+| --- | --- |
+| `recent_4_turns_first` | Compact recent 4-turn summary |
+| `last_user_intent_first` | Last user-side intent from compact anchor turns |
+| `followup_focus_first` | `event_chain.followup_focus` |
+| `assistant_commitment_first` | Prior assistant promise/commitment |
+| `balanced` | Runtime chooses the best anchor for the user's opening message |
+
+## Install
+
+Copy or symlink this folder into an OpenClaw workspace:
+
+```text
+openclaw-workspace/
+  skills/
+    personal-hooks/
+      SKILL.md
+      scripts/
+      docs/
+      examples/
+```
+
+Install the Python dependency:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Initialize:
+
+```bash
+python3 /path/to/openclaw-workspace/skills/personal-hooks/scripts/personal_hooks.py init
+```
+
+Optional installer:
+
+```bash
+bash scripts/install_local.sh /path/to/openclaw-workspace/skills link
+```
+
+ClawHub-style install:
+
+```bash
+openclaw skills install openclaw-continuity
+```
+
+npm-style fetch from GitHub:
+
+```bash
+npm install github:redwakame/openclaw-continuity#v2.0.21
+```
+
+## Verify
+
+Run the regression harness:
+
+```bash
+python3 /path/to/openclaw-workspace/skills/personal-hooks/scripts/followup_skill_harness.py --absence-minutes 3
+```
+
+Expected result:
+
+```json
+{
+  "summary": {
+    "pass_count": 14,
+    "fail_count": 0
+  }
+}
+```
+
+Quick manual behavior check:
+
+1. Ask the agent to hold a topic for later.
+2. Start `/new`.
+3. Confirm it reconnects the selected continuity anchor instead of generic small talk.
+4. Ask to change setup, for example: `新對話改成看最後使用者意圖`.
+
+## Technical Map
+
+Important files:
+
+- `SKILL.md`: trigger rules and runtime boundary
+- `scripts/personal_hooks.py`: main runtime
+- `scripts/followup_skill_harness.py`: regression harness
+- `config.schema.json`: settings schema
+- `examples/settings.sample.json`: sample settings
+- `docs/install.md`: installation details
+- `docs/host-operator-settings.md`: operator settings
+- `docs/release-acceptance.md`: release gate
+- `docs/publish-copy.md`: GitHub / ClawHub copy source
+
+Main runtime surfaces:
+
+- `build_runtime_context()`: builds carryover, schedule, setup, and guard prompts
+- `intercept_message()`: routes the user turn into casual/staged/tracked state
+- `process_candidate_buffer()`: promotes candidate state to incidents/hooks
+- `setup-check` / `setup-apply`: guided configuration commands
+- `frontstage-guard`: skill/tool-layer output safety guard
+
+## Public V2 Includes
+
 - `casual_chat / staged_memory / tracked_followup` routing
-- tracked categories:
-  - `parked_topic`
-  - `watchful_state`
-  - `delegated_task`
-  - `sensitive_event`
+- `parked_topic`
+- `watchful_state`
+- `delegated_task`
+- `sensitive_event`
 - `candidate -> incident -> hook` promotion
 - structured `event_chain`
-- closure, cooldown, dedupe, dispatch cap, and rest/sleep suppress
+- structured `causal_memory`
+- `/new` carryover
+- user-selectable `/new` continuity mode
+- assistant commitment support
+- routine/time context as support-only signal
+- quiet hours
+- sleep/rest suppress
+- cooldown
+- closure
+- dedupe
+- dispatch cap
 - daily-memory writeback
-- deterministic onboarding and guided settings
+- deterministic onboarding
+- guided settings
 - natural-language settings changes
+- host-neutral modality preference
+- regression harness
 
-Questions, feedback, and implementation discussion:
+## 中文功能總覽
 
-- `adarobot666@gmail.com`
+- 一般聊天、暫存記憶、正式追蹤分流
+- `/new` 後接回正確主題
+- 可選新對話承接方式：最近 4 輪、最後使用者意圖、因果跟進焦點、助手承諾、綜合判斷
+- 作息與時間感只當輔助，不搶主線
+- 可用自然語言調整設定
+- 可用指令精準修改設定
+- 關心與追蹤有冷卻、退場、去重、上限與勿擾
+- 暫存/追蹤內容可寫回 daily memory trace
+- 技能層保持平台中立，不把通訊渠道寫死進技能定義
 
-If this skill helps and you want to keep updates and maintenance moving, please star the GitHub repository:
+## Contact
 
-- https://github.com/redwakame/openclaw-continuity
-
-## 中文
-
-`OpenClaw Continuity` 是一個給 OpenClaw agent 使用的可攜延續核心。
-
-它補上的不是人格，而是一層結構化 continuity engine，讓 agent 可以：
-
-- 在 `/new` 後接回正確待續主題
-- 把一般對話、暫存記憶、正式追蹤明確分開
-- 用經過多久、跨日與作息階段來表達時間感
-- 從明確 continuity state 寫回精簡 daily memory
-- 讓使用者用自然口語改設定，而不是只能改設定檔
-- 直接在對話裡要求「半夜少提醒一點」或「追蹤晚一點再問」
-
-使用者最直接感受到的是：
-
-- `/new` 之後能接回正確主題，而不是掉回空泛寒暄
-- 「晚點再聊」可以被穩定暫存，而不是直接遺失
-- 關心與追蹤有 closure、cooldown、dedupe、dispatch cap 與作息抑制，不會亂追
-- 設定可以用自然口語調整，不用翻 config
-
-它不是單純排一個 cron 然後晚點推一句訊息出去。重點不是「之後發一則」，而是：
-要不要追、該追哪個主題、現在是不是打擾、是否該進入勿擾/休息抑制、是否已經該退場或冷卻，
-都要先根據上下文與因果狀態判斷，再決定前台要不要出現內容。
-
-不同路徑會明確分開，而不是混成一種「晚點提醒」：
-
-- 一般聊天就是一般聊天
-- 晚點再聊的事可以先暫存
-- 真正重要的事才進正式追蹤
-- 作息、勿擾、睡眠/休息抑制本身就是功能，不是附帶條件
-- 關心不是亂發，而是根據上下文與因果記憶決定是否該出現
-
-這份 ClawHub 包只保留 **core-only** 的技能內容。shared core 保持平台中立，host 側的傳送或整合層不放進主技能包。
-
-聯絡與回饋：
+If you are interested in this package, run into a problem, or want to exchange
+ideas about OpenClaw continuity, feel free to contact me:
 
 - `adarobot666@gmail.com`
 
-如果這個技能對你有幫助，而且你也期待它持續優化與維護，歡迎在 GitHub 給一顆星：
+If you are satisfied with this skill package, please star the GitHub repository
+as encouragement. I will keep pushing improvements, maintenance, and new
+features.
 
-- https://github.com/redwakame/openclaw-continuity
+如果你對這個技能包有興趣、使用時遇到問題，或想交流 OpenClaw continuity
+相關想法，歡迎聯繫我：
+
+- `adarobot666@gmail.com`
+
+如果你滿意這個技能包，也歡迎在 GitHub 給一顆星作為鼓勵。我會持續推動
+優化、維護與新功能追加。

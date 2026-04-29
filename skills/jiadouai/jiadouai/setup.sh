@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Setup script for 加豆AI MCP Skill
+# Setup script for ClawAgent MCP Skill
 #
 # 功能：
 #   1. 检查 mcporter 是否已安装（已安装则跳过）
-#   2. 检查 jiadouai 服务是否已配置 Token
+#   2. 检查服务是否已配置 Token
 #   3. 保存用户提供的 Token 到 mcporter 配置
 #   4. 验证 Token 是否有效
 #
@@ -40,8 +40,8 @@
 #
 
 # ── 全局配置 ──────────────────────────────────────────────────────────────────
-_JIADOUAI_MCP_URL="https://mcp.jiadouai.com/mcp"
-_JIADOUAI_SERVICE_NAME="jiadouai"
+_CLAWAGENT_MCP_URL="https://mcp.jiadouai.com/mcp"
+_CLAWAGENT_SERVICE_NAME="ClawAgent"
 
 # ── 检查 mcporter 是否已安装 ──────────────────────────────────────────────────
 _check_mcporter() {
@@ -65,7 +65,7 @@ _check_mcporter() {
 # 输出：token 字符串（空则表示服务未注册或 Token 未配置）
 _get_token() {
     local output
-    output=$(mcporter config get "$_JIADOUAI_SERVICE_NAME" 2>/dev/null) || return 1
+    output=$(mcporter config get "$_CLAWAGENT_SERVICE_NAME" 2>/dev/null) || return 1
 
     # 从输出中提取 Authorization 头的值
     local token
@@ -73,13 +73,13 @@ _get_token() {
     echo "$token"
 }
 
-# ── 检查 jiadouai 服务状态 ───────────────────────────────────────────────────
+# ── 检查 ClawAgent 服务状态 ───────────────────────────────────────────────────
 # 返回值：
 #   0 = 服务正常可用（有 Token）
 #   1 = 服务未注册（mcporter config get 失败）
 #   2 = Token 为空或未配置
 _check_service() {
-    if ! mcporter list 2>/dev/null | grep -q "$_JIADOUAI_SERVICE_NAME"; then
+    if ! mcporter list 2>/dev/null | grep -q "$_CLAWAGENT_SERVICE_NAME"; then
         return 1
     fi
 
@@ -106,8 +106,8 @@ _save_token() {
     local token="$1"
     [[ -z "$token" ]] && return 1
 
-    # 使用传入的 token 写入 mcporter 配置（jiadouai）
-    mcporter config add "$_JIADOUAI_SERVICE_NAME" "$_JIADOUAI_MCP_URL" \
+    # 使用传入的 token 写入 mcporter 配置（ClawAgent）
+    mcporter config add "$_CLAWAGENT_SERVICE_NAME" "$_CLAWAGENT_MCP_URL" \
         --header "Authorization=$token" \
         --transport http \
         --scope home 2>&1
@@ -168,9 +168,9 @@ _verify_token() {
         exit 1
     fi
 
-    # 尝试调用 jiadouai 工具列表来验证 Token
+    # 尝试调用 ClawAgent 工具列表来验证 Token
     local result
-    result=$(mcporter list jiadouai 2>&1)
+    result=$(mcporter list "$_CLAWAGENT_SERVICE_NAME" 2>&1)
     local exit_code=$?
 
     if [[ $exit_code -eq 0 ]] && [[ -n "$result" ]]; then
@@ -192,7 +192,7 @@ _verify_token() {
 _interactive_setup() {
     echo ""
     echo "╔══════════════════════════════════════════════╗"
-    echo "║     加豆AI MCP Skill 配置向导                ║"
+    echo "║     ClawAgentAgent 配置向导                   ║"
     echo "╚══════════════════════════════════════════════╝"
     echo ""
 
@@ -206,18 +206,18 @@ _interactive_setup() {
     echo ""
 
     # 检查服务状态
-    echo "🔍 检查 jiadouai 服务配置..."
+    echo "🔍 检查 ClawAgent 服务配置..."
     _check_service
     local status=$?
 
     case $status in
         0)
-            echo "✅ jiadouai 服务已配置且运行正常！"
+            echo "✅ ClawAgent 服务已配置且运行正常！"
             echo ""
-            echo "🎉 无需重新配置，您可以直接使用加豆AI功能。"
+            echo "🎉 无需重新配置，您可以直接使用 ClawAgent功能。"
             echo ""
             echo "📖 使用示例："
-            echo "   mcporter list jiadouai"
+            echo "   mcporter list ClawAgent"
             return 0
             ;;
         1|2)
@@ -229,10 +229,8 @@ _interactive_setup() {
     echo "─────────────────────────────────────────────"
     echo "🎉 基础设置完成！"
     echo ""
-    echo "📖 下一步：配置加豆AI Token"
+    echo "📖 下一步：配置ClawAgent Token"
     echo "   详见 SKILL.md 中快速配置说明"
-    echo ""
-    echo "   加豆AI 官网：https://jiadouai.com"
     echo ""
     echo "   更多信息请查看 SKILL.md"
     echo ""

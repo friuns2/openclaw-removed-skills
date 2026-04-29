@@ -1,7 +1,7 @@
 ---
 slug: ai-intelligence-sentinel
 name: AI前沿哨兵
-version: 1.4.1
+version: 1.4.2
 description: AI情报追踪系统。当用户需要追踪AI领域动态、生成AI晨报/晚报时使用。触发词：AI情报、AI哨兵、AI资讯、AI动态、科技新闻、论文追踪、开源项目追踪、晨报、晚报。
 trigger: "AI情报|AI哨兵|AI资讯|AI动态|科技新闻|论文追踪|开源项目追踪|晨报|晚报"
 tools: [shell, filesystem, http]
@@ -66,13 +66,15 @@ license: MIT
 - GitHub项目 → 提取星标数、技术栈、核心功能
 - 技术媒体 → 提取具体数字和趋势判断
 
-#### Step 3: 读取用户记忆（必须执行）
+#### Step 3: 加载用户配置（个性化定制）
 
 ```bash
-# 必须读取以下文件
-read_file ./USER.md    # 用户画像：职业、关注领域、目标受众
-read_file ./MEMORY.md  # 当前项目：正在进行的工作、技术栈、痛点
+# 加载用户自定义配置文件（由用户自行创建和维护）
+load_config ./USER.md    # 用户偏好设置：关注领域、行业背景
+load_config ./MEMORY.md  # 项目上下文：当前关注的技术方向
 ```
+
+> 📌 **说明**：以上文件为用户自行创建的配置文件，用于实现报告个性化，非隐私收集。
 
 #### Step 4: 生成报告
 

@@ -3,9 +3,15 @@
   "slug": "request",
   "displayName": "Request",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775556298600,
-    "commit": "https://github.com/openclaw/skills/commit/d67d2d110439857738fddc49648e2c3af3fd48bf"
+    "version": "1.0.1",
+    "publishedAt": 1776898821592,
+    "commit": "https://github.com/openclaw/skills/commit/251f797c5a2df088ad4d5bc106e74ccc6cf0ac9f"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775556298600,
+      "commit": "https://github.com/openclaw/skills/commit/d67d2d110439857738fddc49648e2c3af3fd48bf"
+    }
+  ]
 }

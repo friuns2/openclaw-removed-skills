@@ -1,9 +1,9 @@
 #!/bin/bash
-# 向量搜索工具库 v2.7.0
+# 向量搜索工具库 v3.3.0
 # 依赖 LM Studio embedding API
 
 VECTOR_API="${VECTOR_API:-http://localhost:1234/v1/embeddings}"
-VECTOR_MODEL="${VECTOR_MODEL:-text-embedding-qwen3-embedding-0.6b}"
+VECTOR_MODEL="${VECTOR_MODEL:-text-embedding-bge-large-zh-v1.5}"
 VECTOR_DIR=""
 
 # 初始化：设置 VECTOR_DIR 并创建目录
@@ -25,6 +25,89 @@ vector_check() {
   curl -s --max-time 3 "$VECTOR_API" \
     -H "Content-Type: application/json" \
     -d "{\"model\":\"$VECTOR_MODEL\",\"input\":\"health\"}" 2>/dev/null | grep -q '"embedding"'
+}
+
+# 降级搜索：关键词匹配（当向量搜索不可用时）
+vector_fallback_search() {
+  local query="$1" top_n="${2:-5}"
+  [ -z "$VECTOR_DIR" ] && vector_init
+  [ ! -f "$VECTOR_DIR/index.jsonl" ] && return 1
+  
+  # 预处理查询
+  local query_processed
+  query_processed=$(vector_preprocess "$query")
+  
+  # 用 python3 做关键词匹配：提取文本中的关键词，做简单包含匹配
+  python3 -c "
+import json, sys, re
+query = ' '.join(sys.argv[1:])
+top_n = int(sys.argv[$#])
+results = []
+with open('$VECTOR_DIR/index.jsonl') as f:
+    for line in f:
+        line = line.strip()
+        if not line: continue
+        entry = json.loads(line)
+        text = entry.get('text', '').lower()
+        # 简单关键词匹配：查询词在文本中出现的次数
+        keywords = query.lower().split()
+        matches = sum(1 for kw in keywords if kw in text)
+        if matches > 0:
+            score = min(matches / len(keywords), 1.0)
+            results.append((score, entry.get('id',''), entry.get('text','')[:80], entry.get('area','')))
+results.sort(reverse=True)
+for score, eid, text, area in results[:top_n]:
+    clean_text = text.replace(chr(10), ' ').replace(chr(13), '')
+    print(f'{score:.3f}|{eid}|{area}|{clean_text}')
+" $query_processed $top_n
+}
+
+# 预处理查询：增强纯数字/英文，检测否定语义，纠正拼写错误
+vector_preprocess() {
+  local query="$1"
+  
+  # 1. 拼写纠错（常见错误映射，避免wrong是right前缀的陷阱）
+  # 注意：docke->docker会导致双重扩展，已删除
+  eval "set -- phpfpm:php-fpm ngins:nginx apahce:apache reids:redis mencache:memcached"
+  for pair in "$@"; do
+    wrong="${pair%%:*}"
+    right="${pair##*:}"
+    if [[ "$query" == *"$wrong"* ]]; then
+      query="${query//$wrong/$right}"
+    fi
+  done
+  
+  # 2. 纯数字增强（404/502等错误码）
+  if [[ "$query" =~ ^[0-9]+$ ]]; then
+    query="错误代码 $query"
+  fi
+  
+  # 3. 纯英文/小写增强（给技术术语加更具体的上下文）
+  if [[ "$query" =~ ^[a-zA-Z]+$ ]]; then
+    query_lower=$(echo "$query" | tr '[:upper:]' '[:lower:]')
+    # 常见技术术语自动加配置/服务器等上下文
+    case "$query_lower" in
+      nginx|apache|redis|memcached|mysql|php|docker|kubernetes|git)
+        query="$query 配置"
+        ;;
+      *)
+        query="$query 服务器"
+        ;;
+    esac
+  fi
+  
+  # 4. 混合查询中含英文词时加中文补充（docker/nginx等英文软件名）
+  if python3 -c "
+import sys, locale
+text = sys.stdin.read().strip()
+has_cn = any('\u4e00' <= c <= '\u9fff' for c in text)
+has_en = any('a' <= c <= 'z' or 'A' <= c <= 'Z' for c in text)
+sys.exit(0 if (has_cn and has_en) else 1)
+" 2>/dev/null; then
+    query="$query 服务器"
+  fi
+  
+  echo "$query"
 }
 
 # 调用 API 生成 embedding，输出向量 JSON 数组到 stdout
@@ -114,13 +197,30 @@ print(json.dumps(d, ensure_ascii=False))
 
 # 搜索：输入文本 → 生成向量 → 遍历 index.jsonl 计算 cosine → 返回 topN
 # 输出格式: score|id|area|text
+# 如果向量生成失败，自动降级到关键词搜索
 vector_search() {
   local query="$1" top_n="${2:-5}" threshold="${3:-0.6}"
   [ -z "$VECTOR_DIR" ] && vector_init
   
-  local query_vec
-  query_vec=$(vector_embed "$query") || return 1
+  # 预处理：增强数字/英文，纠错
+  local query_processed
+  query_processed=$(vector_preprocess "$query")
   
+  # 尝试向量搜索，失败则降级到关键词搜索
+  local query_vec
+  if query_vec=$(vector_embed "$query_processed") 2>/dev/null; then
+    # 向量搜索正常
+    _vector_search_vec "$query_vec" "$threshold" "$top_n"
+  else
+    # 降级到关键词搜索
+    echo "⚠️  向量搜索不可用，降级到关键词搜索" >&2
+    vector_fallback_search "$query_processed" "$top_n"
+  fi
+}
+
+# 向量搜索核心实现
+_vector_search_vec() {
+  local query_vec="$1" threshold="$2" top_n="$3"
   [ ! -f "$VECTOR_DIR/index.jsonl" ] && return 1
   
   # python3 一次性处理：遍历所有条目，计算余弦相似度，输出 topN
@@ -222,7 +322,7 @@ with open(index_path, 'w', encoding='utf-8') as idx:
         if emb is None:
             continue
 
-        record = {'id': entry_id, 'text': text, 'vector': emb, 'area': area, 'namespace': namespace, 'tags': tags}
+        record = {'id': 'EXP-' + entry_id, 'text': text, 'vector': emb, 'area': area, 'namespace': namespace, 'tags': tags}
         idx.write(json.dumps(record, ensure_ascii=False) + '\n')
         count += 1
         print('  Indexing: ' + str(count), flush=True)

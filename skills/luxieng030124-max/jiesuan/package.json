@@ -1,0 +1,51 @@
+{
+  "name": "ai-settlement-pro",
+  "version": "1.1.0",
+  "description": "AI驱动的智能结算助手，支持话题词精准识别、自然语言规则解析、规则确认流程、多种结算模式",
+  "author": "AI智能结算助手Pro团队",
+  "emoji": "🏆",
+  "created": "2026-04-11",
+  "updated": "2026-04-21",
+  "tags": ["结算", "活动", "AI解析", "话题词识别", "数据处理"],
+  "requires": {
+    "python": ">=3.7"
+  },
+  "files": [
+    "SKILL.md",
+    "settlement_engine.py",
+    "test_topic_rule.py",
+    "README.md",
+    "UPDATE_v1.1.0.md",
+    "package.json"
+  ],
+  "main": "settlement_engine.py",
+  "keywords": [
+    "结算",
+    "瓜分",
+    "排名赛",
+    "话题词",
+    "精准匹配",
+    "规则解析",
+    "活动奖励"
+  ],
+  "changelog": {
+    "1.1.0": {
+      "date": "2026-04-21",
+      "changes": [
+        "新增话题词精准匹配功能",
+        "新增规则确认流程",
+        "支持且/或逻辑关系",
+        "优化数据加载逻辑"
+      ]
+    },
+    "1.0.0": {
+      "date": "2026-04-11",
+      "changes": [
+        "初始版本发布",
+        "支持四种结算模式",
+        "AI规则解析",
+        "本地数据处理"
+      ]
+    }
+  }
+}

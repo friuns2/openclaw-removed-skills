@@ -1,0 +1,25 @@
+986:                     data["实收保费"] = f"{total:.2f}"
+987:                 elif len(valid) == 1:
+988:                     data["实收保费"] = f"{valid[0]:.2f}"
+989:             return clean_data(data, text)
+990:         elif rt == "商业险":
+991:             data = parse_shangye(text, huanghai_company)
+992:             # 华海商业险：¥符号后的数字被编码进CID字体，无法从文字层提取。
+993:             # 改从费用表格加总：第三者责任+车上人员+医保外+道路救援
+994:             if not data.get("实收保费") or data.get("实收保费", "").strip() in ("", "0"):
+995:                 amounts = re.findall(r"(\d{3,}\.\d{2})[\s\n]*$", text, re.MULTILINE)
+996:                 # 找表格中右对齐的金额（4-6位整数部分，2位小数）
+997:                 all_amounts = re.findall(r"\b(\d{3,6}\.\d{2})\b", text)
+998:                 valid = [float(a) for a in all_amounts if 10 <= float(a) <= 10000]
+999:                 if valid:
+1000:                     # 取最大的一组（总保费最大，各分项较小）
+1001:                     total = max(valid)
+1002:                     data["实收保费"] = f"{total:.2f}"
+1003:             return clean_data(data, text)
+1004:         else:
+1005:             return clean_data(parse_changxing(text, pdf_path), text)
+1006: 
+1007:     # ===== Step 4: 通用路径：先用pymupdf，失败则fallback到pdfplumber =====
+1008:     # 如果pymupdf返回空文本，直接用pdfplumber（pymupdf对这些PDF完全失效）
+1009:     if not pymupdf_text and plumber_text:
+1010:         text = plumber_text

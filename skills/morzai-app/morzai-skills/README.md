@@ -13,49 +13,29 @@ The root [`SKILL.md`](SKILL.md) remains a thin router.
 - It then opens the routed child skill and continues execution in the same user-facing agent.
 - It does not duplicate child-skill capability details at the root layer.
 
-## Architecture: Two-Layer Capability
+## Architecture
 
-### Layer 1: Single-Function Professional Editing
-Focuses on high-precision processing of a single aspect of an image.
+### Layer 1: Single-Function Editing
+Focuses on one editing job at a time.
 
-| Skill | Description | Key Capabilities |
-|-------|-------------|------------------|
-| [apparel-recolor](skills/apparel-recolor) | Precise garment recolor. | Part-based recolor, sample-assisted color picking, pattern handling, 2K/4K output. |
-| [garment-retouch](skills/garment-retouch) | Advanced apparel cleanup. | Ghost mannequin effect, hanger cleanup, background cleanup, 2K/4K output. |
-| [clothing-adjustment](skills/clothing-adjustment) | Preset-driven garment cleanup. | Whole-garment wrinkle cleanup, surface cleanup, lint and pet hair cleanup. |
+| Skill | Description |
+|-------|-------------|
+| [apparel-recolor](skills/apparel-recolor) | Garment recolor workflow. |
+| [garment-retouch](skills/garment-retouch) | Apparel cleanup workflow. |
+| [clothing-adjustment](skills/clothing-adjustment) | Preset-based garment cleanup workflow. |
 
-### Layer 2: Full-Chain Listing Sets and Kits
-Focuses on generating end-to-end marketing assets from a single product photo.
+### Layer 2: Composite Listing Workflow
+Focuses on multi-image ecommerce deliverables.
 
-| Skill | Description | Key Capabilities |
-|-------|-------------|------------------|
-| [morzai-ecommerce-product-kit](skills/morzai-ecommerce-product-kit) | Product kits and listing sets. | P1-P7 listing sets, hero/detail/lifestyle images, marketing posters, apparel visuals. |
+| Skill | Description |
+|-------|-------------|
+| [morzai-ecommerce-product-kit](skills/ecommerce-product-kit) | Ecommerce image kit workflow. |
 
-## Quick Reference
+## Notes
 
-| Task | Skill | Technical Mapping |
-|------|-------|-------------------|
-| Change shirt color to Morandi Gray | `apparel-recolor` | `target_parts: ['upper_body']`, `hex_color: "#B8B8B8"` |
-| Extract color from a sample image | `apparel-recolor` | `extract_color -> confirm hex_color` |
-| Remove ghost mannequin in 4K | `garment-retouch` | `model_version: "v2.0"`, `resolution: "4K"` |
-| Perfectly iron a wrinkled coat | `clothing-adjustment` | `preset_direction: strong_flattening` |
-| Remove pet hair and lint from fabric | `clothing-adjustment` | `preset_direction: surface_cleanup` |
-| Make the garment look cleaner and flatter overall | `clothing-adjustment` | `preset_direction: balanced_cleanup` |
-| Build a full Amazon listing image set | `morzai-ecommerce-product-kit` | `platform: "amazon"`, `market: "US"`, `output_type: "listing_set"` |
-
-## Example Prompts
-
-- "Recolor this dress to the same blue as the reference photo, but keep the brand logo visible."
-- "Apply a ghost mannequin effect to this sweater and output it in 4K resolution."
-- "The jacket is too wrinkled from transit. Give it a cleaner, flatter overall look."
-- "Match the color of these pants to the first sample image I sent earlier."
-
-## Technical Features
-
-- Expert SOPs: every skill is backed by `references/` containing industry-specific benchmarks.
-- Global compliance: built-in rules for Amazon, Pinterest, Instagram, Shopify, Temu, and SHEIN.
-- Router + knowledge split: routing stays in root, domain detail stays in child skills.
-- Execution split: all public skills now trigger the `morzai` CLI, and `morzai-ecommerce-product-kit` continues through `morzai-cli-server` to the nano backend.
+- Routing stays at the root layer; task details stay in child skills.
+- Child skills declare their own execution boundary.
+- User-facing output should stay minimal and operational.
 
 ## Requirements
 

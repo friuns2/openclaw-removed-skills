@@ -7,13 +7,15 @@
  *   node bus-query.js --departure "北京" --destination "上海"
  *   node bus-query.js --departure-station "北京六里桥客运站" --arrival-station "上海长途汽车客运站"
  *   node bus-query.js --departure "北京" --destination "上海" --extra "明天"
+ *   node bus-query.js --departure "北京" --destination "上海" --extra "最早"
+ *   node bus-query.js --departure "北京" --destination "上海" --extra "下午 最便宜"
  * 
  * 参数说明：
  *   --departure <城市>        出发地城市
  *   --destination <城市>      目的地城市
  *   --departure-station <站>  出发站（精确）
  *   --arrival-station <站>    到达站（精确）
- *   --extra <补充信息>        额外信息（日期、偏好等）
+ *   --extra <补充信息>        额外信息（日期、时间偏好、价格偏好等）
  *   --channel <渠道>          通信渠道（webchat/wechat 等）
  *   --surface <界面>          交互界面（mobile/desktop/table/card）
  * 
@@ -130,7 +132,7 @@ function handle_result(response_data, { print_success_once, format_options, prin
     if (!has_output) {
       print_no_match();
     } else if (round_trip) {
-      console.log(ROUND_TRIP_PROMPTS.bus);
+      console.log(ROUND_TRIP_PROMPTS.BUS);
     }
   } else {
     print_no_match();
@@ -151,7 +153,7 @@ const runner = create_query_runner({
   },
   validate: validate_params,
   handle_result: handle_result,
-  no_match_detail: NO_MATCH_DETAIL.bus,
+  no_match_detail: NO_MATCH_DETAIL.BUS,
   usage_example: `  node bus-query.js --departure "北京" --destination "上海"
   node bus-query.js --departure-station "北京六里桥客运站" --arrival-station "上海长途汽车客运站"
   node bus-query.js --departure "北京" --destination "上海" --extra "明天"`

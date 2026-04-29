@@ -68,9 +68,69 @@ If the file does **not** exist (new agent, never used memory_search):
 
 ---
 
+## Phase 1.5 · Plan Quality Gates — Read Only, No Writes
+
+Before touching any memory file, make an explicit consolidation plan and check it against these guards:
+
+### 1. Topic identity guard
+
+Do **not** merge records just because names are similar. Split or preserve separate L2 files when any of these differ materially:
+
+- owner / customer / friend group
+- environment or host (IP, domain, machine, OS user, cloud account)
+- project lifecycle (legacy vs current, prototype vs production)
+- world / database / repo / app ID / claim ID / other durable identifier
+
+If old and new material share a broad label, prefer:
+
+- `memory/<topic-current>.md` for the active project
+- `memory/<topic-legacy>.md` for historical material
+- `memory/<topic>.md` as a short disambiguation index, if needed
+
+### 2. Lifecycle state guard
+
+Classify every candidate as one of: **active**, **waiting**, **done**, **archived**, **closed**, or **snowed/paused**.
+
+- Closed / archived / snowed projects must not be reintroduced as active TODOs.
+- If a daily log says the human closed a line of work, update L2 + MEMORY.md to reduce future resurfacing.
+- Historical facts may remain, but phrase them as reference/archive, not action items.
+
+### 3. Secret propagation guard
+
+Never copy secrets from daily logs into L2, MEMORY.md, or dream-log.md. Treat these as sensitive by default:
+
+- API keys, tokens, OAuth strings, cookies, private keys
+- passwords, invite/player/server passwords, recovery codes
+- signed URLs or URLs containing access tokens
+- private SSH keys or full credential-bearing command lines
+
+If a source log contains a suspected live secret, do **not** quote it. Record only: `sensitive value omitted; source file needs manual review` and alert in the final response / dream summary.
+
+### 4. Write plan
+
+List the exact files you expect to touch. Phase 2 may touch only L2 files plus backups under `<WORKSPACE_ROOT>/.backup/memory-dreams/`. Phase 3 may touch only `MEMORY.md`, backups under `<WORKSPACE_ROOT>/.backup/memory-dreams/`, and `memory/dream-log.md`.
+
+If the plan requires editing daily logs, system config, or files outside the workspace, stop and ask the human for explicit approval.
+
+---
+
 ## Phase 2 · Consolidate — Write L2 Files Only
 
 Process the priority list from Phase 1. **Do not modify MEMORY.md, dream-log.md, or any daily log file in this phase.**
+
+### 0. Back up touched L2 files first
+
+Before modifying an existing L2 file, copy it to:
+
+`<WORKSPACE_ROOT>/.backup/memory-dreams/YYYYMMDD-HHMM/<relative-path-from-workspace-root>.bak`
+
+Example: `memory/clash-verge.md` → `.backup/memory-dreams/20260426-1100/memory/clash-verge.md.bak`.
+
+Keep dream backups **outside `memory/`** and use a non-`.md` final suffix (`.bak`) so memory indexing does not recall stale states or old TODOs from backups.
+
+Create parent directories as needed. If backup creation fails, stop before writing.
+
+For a newly created L2 file, no pre-existing backup is required; include it in the dream-log as `created`.
 
 ### High-score recall entries → L2 promotion
 
@@ -89,13 +149,21 @@ Process the priority list from Phase 1. **Do not modify MEMORY.md, dream-log.md,
 - Only correct clear expired expressions: "today"/"this week" in L2 files → absolute dates
 - Do not guess at vague expressions
 
+### L2 write quality rules
+
+- Prefer small, source-grounded edits over broad rewrites.
+- Keep active and legacy material clearly separated; add a one-line pointer instead of duplicating long history.
+- Do not add TODOs unless the source explicitly implies continuing action.
+- Preserve security posture: write `password not stored`, `token omitted`, or `credential managed in env` instead of values.
+- If an `edit` attempt fails twice for the same block, stop trying that block; use a safer whole-file rewrite only after re-reading the file, or leave a blocker in the final summary.
+
 ---
 
 ## Phase 3 · Settle — Write Index + Diary
 
 ### 1. Back up MEMORY.md
 
-Write current MEMORY.md content → `memory/.dream-backup.md` (overwrite).
+Copy current MEMORY.md content → `<WORKSPACE_ROOT>/.backup/memory-dreams/YYYYMMDD-HHMM/MEMORY.md.bak`.
 
 **⚠️ Path guidance**: Always use absolute paths derived from the workspace root (e.g. `/path/to/workspace/MEMORY.md`). Never use `~`-prefixed paths in tool calls — isolated sessions may not resolve them. Use the workspace root passed in the task message.
 
@@ -104,6 +172,7 @@ Write current MEMORY.md content → `memory/.dream-backup.md` (overwrite).
 - Target: ≤ 8KB (hard cap; note in dream-log if approaching 10KB — manual cleanup may be needed)
 - Update project states from Phase 2 findings
 - Sync TODO states: mark completed ✅ items as done, add newly discovered todos
+- Preserve lifecycle state: closed / archived / snowed items belong in archive/reference wording, not active sections
 - Each section: one-line status + 2–4 bullets + L2 pointer (a reference to the relevant L2 file, e.g. `**Details**: memory/clash-verge.md`)
 - Move fully completed/archived projects to a short footer section
 
@@ -142,6 +211,33 @@ DREAM_EOF
 If total `## 🌙 Dream #` entries exceed 30, delete the oldest entry.
 Boundary rule: delete from the start of the oldest `## 🌙 Dream #` heading up to (but not including) the start of the next `## 🌙 Dream #` heading. Do not use `---` as a boundary — it may appear inside dream content.
 
+### 6. Post-write audit
+
+Run a small verification pass before finalizing:
+
+- `MEMORY.md` is ≤ 8KB, or the final summary clearly says it is over target
+- `memory/dream-log.md` remains Markdown and has no malformed duplicate heading for the new dream
+- touched L2 files still separate current vs legacy/archived material correctly
+- touched files contain no obvious credential-bearing values
+
+This is a **lightweight sanity check**, not a full DLP or exhaustive secret scanner. It catches common high-signal credential patterns, but the secret propagation guard still relies on careful review and redaction.
+
+Use filename-only scans where possible so secrets are not echoed into chat/logs, for example:
+
+```bash
+grep -IlrE '(github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|[0-9]{8,12}:AA[A-Za-z0-9_-]{30,}|mfa\.[A-Za-z0-9_-]{20,}|-----BEGIN (RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----)' <TOUCHED_FILES>
+```
+
+This skill also includes a helper script for the common checks:
+
+```bash
+<SKILL_DIR>/references/dream-audit.sh <WORKSPACE_ROOT> [touched-file ...]
+```
+
+Pass relative or absolute paths for touched files. The helper reports suspected secret filenames only; it does not print matched values. It is intentionally conservative and lightweight, not a replacement for a dedicated secret-scanning/DLP tool.
+
+If a possible secret is found after writing, restore from the relevant backup where possible, then report the file path without quoting the secret.
+
 ---
 
 ## Safety Rules
@@ -151,10 +247,13 @@ Boundary rule: delete from the start of the oldest `## 🌙 Dream #` heading up 
 | Guardian runs before Phase 1 | Skip condition check; skip writes only to dream-log.md |
 | Phase 1 is read-only | Error in Sense = no files touched |
 | Never archive daily logs | Moving `YYYY-MM-DD*.md` breaks memory_search indexing |
-| Always back up before rewriting | `memory/.dream-backup.md` before touching MEMORY.md |
+| Always back up before rewriting | `<WORKSPACE_ROOT>/.backup/memory-dreams/YYYYMMDD-HHMM/MEMORY.md.bak` before touching MEMORY.md |
 | dream-log.md = Markdown | Append text; never parse or write as JSON |
 | L2 files are permanent | Never delete or archive `memory/<topic>.md` files |
 | Phase 2 = L2 only | MEMORY.md changes happen in Phase 3, not Phase 2 |
+| Backup before L2 edits | Existing L2 files get timestamped backups in `<WORKSPACE_ROOT>/.backup/memory-dreams/` before modification |
+| No secret propagation | Never promote credentials from logs; redact/omit and alert instead |
+| Lifecycle is sticky | Closed/archived/snowed items stay non-active unless the human explicitly reopens them |
 
 ---
 

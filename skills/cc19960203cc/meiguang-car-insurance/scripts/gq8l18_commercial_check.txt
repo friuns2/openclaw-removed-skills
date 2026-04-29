@@ -1,0 +1,12 @@
+File: 徐世林_鲁GQ8L18_华海财险_商业险_1103707000703301120260001865(2).pdf
+pymupdf len: 1732
+plumber len: 1648
+pymupdf has ¥: True
+plumber has ¥: True
+text used (len): 1732
+
+Premium segment: '保险费合计(人民币大写):                                               '
+
+Regex NO MATCH
+  4 3 9 found: False
+  ¥ context: '¥           元）\n第三者责任保险\n保险期间:自\n'

@@ -1,12 +1,160 @@
-# Agent 使用指南
+# Agent Implementation Guide
 
-> 本文件指导 Claude Code、OpenClaw 等 AI Agent 如何使用 llm-wiki。
+> This document guides Claude Code, OpenClaw, and other AI Agents on how to use llm-wiki.
+> **All Agents operating in this project directory MUST read and understand `SKILL.md` before performing any task.**
 
-## 文件类型处理策略
+## Mandatory Pre-Flight Checklist
 
-> **关键原则**：不同文件类型需要不同的读取策略，避免直接使用 Read 工具处理二进制文件。
+Before executing any wiki-related task, every Agent MUST:
 
-### 决策树
+1. **Read `SKILL.md`** — Understand the machine-readable specification, entry points, functions, and dependencies.
+2. **Read `CLAUDE.md`** — Understand the core protocol and behavioral rules.
+3. **Verify available tools** — Check whether CLI tools are available; if not, fall back to protocol mode (direct file operations).
+4. **Respect `sources/` integrity** — Never write LLM-generated content into `sources/`.
+
+Failure to follow the above may result in corrupted knowledge base, fabricated sources, or broken cross-references.
+
+---
+
+## Sources Directory Write Rules
+
+> The integrity of `sources/` is the foundation of the entire knowledge base. Once raw materials are polluted, all derived wiki content loses credibility.
+
+### Two Allowed Cases for Writing to `sources/`
+
+| Case | Condition | Action |
+|------|-----------|--------|
+| A | User manually placed a file | Read-only, do not modify |
+| B | User provided a URL/DOI and the file is not yet in `sources/` | Use network tools to fetch, verify non-empty and correct format, then write |
+
+### Absolute Prohibitions
+
+- **NEVER** save LLM-generated text, summaries, or speculative content as `.md`, `.txt`, or any format into `sources/`
+- **NEVER** claim "downloaded" and create files without actually executing a network request
+- **NEVER** "fall back" to generated content when fetching fails
+
+### Standard Network Fetch Template
+
+**Direct download (PDF, text files)**:
+
+```bash
+# Check if URL is reachable
+curl -I -L "https://example.com/paper.pdf"
+
+# Download to sources/
+curl -L -o "sources/YYYY-MM-DD-description.pdf" "https://example.com/paper.pdf"
+
+# Verify file is non-empty
+ls -la "sources/YYYY-MM-DD-description.pdf"
+```
+
+**Rendered web pages (tech blogs, dynamic content)**:
+
+Use Playwright tools to fetch page content:
+
+```bash
+# Use playwright to get rendered page
+playwright screenshot --full-page "https://tech.blog.example.com/article" "sources/temp-screenshot.png"
+```
+
+Or use a Python script to get text:
+
+```python
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    page.goto("https://tech.blog.example.com/article")
+    text = page.inner_text("article")  # or appropriate selector
+    with open("sources/YYYY-MM-DD-description.md", "w", encoding="utf-8") as f:
+        f.write(text)
+    browser.close()
+```
+
+**DOI resolution**:
+
+```bash
+# DOI usually redirects to publisher pages; paywalls may apply
+curl -L -o "sources/paper.html" "https://doi.org/10.xxxx/xxxxx"
+
+# Prefer open-access versions like arXiv
+curl -L -o "sources/paper.pdf" "https://arxiv.org/pdf/xxxxx.pdf"
+```
+
+### Fetch Failure Handling Flow
+
+```
+Fetch attempt
+    |
+    +-- Success → Verify file non-empty → Write to sources/ → Continue ingest
+    |
+    +-- Failure (404/403/paywall/anti-bot)
+          |
+          +--> Do NOT create any file in sources/
+          +--> Create or update [[Pending: SourceName]] stub page in wiki/
+          +--> Record failure reason in log.md
+          +--> Reply to user explaining the situation and request assistance
+```
+
+### Correct vs Incorrect Examples
+
+**Incorrect** (absolutely forbidden):
+
+```
+User: Please ingest these papers [provides 5 titles, no URLs]
+
+Agent: (Did not execute any curl/playwright call)
+      Directly creates sources/paper-1.md with LLM-generated "summary"
+      Then creates wiki pages based on fabricated content
+```
+
+**Correct** (no URL, Agent proactively searches):
+
+```
+User: Please ingest these papers [provides 5 titles, no URLs]
+
+Agent: Uses WebSearch to find open-access versions for each title
+      → Found arXiv link for paper 1, author homepage PDF for paper 2
+      Replies to user: "I found the following possible sources, please confirm:
+      1. Paper Title 1 → https://arxiv.org/pdf/xxxx.pdf
+      2. Paper Title 2 → https://author-page.edu/paper2.pdf
+      I will download and ingest after your confirmation."
+      (User confirms → Execute curl download → Continue ingest)
+```
+
+**Correct** (URL provided):
+
+```
+User: Please ingest https://arxiv.org/pdf/2401.xxxxx.pdf
+
+Agent: Execute curl -L -o "sources/2026-04-20-paper.pdf" "https://arxiv.org/pdf/2401.xxxxx.pdf"
+      Verify file size > 0
+      Read PDF content
+      Continue normal ingest flow
+```
+
+**Correct** (fetch failed):
+
+```
+User: Please ingest https://example.com/paywalled-paper.pdf
+
+Agent: Execute curl -I "https://example.com/paywalled-paper.pdf"
+      → Returns 403 Forbidden
+      Do NOT create sources/ file
+      Create wiki/Pending-Paywalled-Paper.md (stub, marked as pending)
+      Record in log.md: "[Date] pending | Paywall prevented fetching xxx"
+      Reply to user: "This paper requires paid access; I cannot fetch it automatically.
+      Please download manually and place in sources/, or provide an open-access link."
+```
+
+---
+
+## File Type Processing Strategy
+
+> **Key principle**: Different file types require different reading strategies; avoid using the Read tool directly on binary files.
+
+### Decision Tree
 
 ```
 File Type Recognition
@@ -30,34 +178,34 @@ File Type Recognition
           +--> Find or create corresponding Python processing script
 ```
 
-### PDF 文件处理详细流程
+### PDF File Processing Detailed Flow
 
-**步骤 1：检查依赖**
+**Step 1: Check dependency**
 
 ```bash
-# 检查 PyMuPDF 是否已安装
+# Check if PyMuPDF is installed
 python -c "import fitz; print(fitz.__doc__[:30])"
 ```
 
-如果失败，需要先安装：
+If it fails, install first:
 
 ```bash
 pip install pymupdf>=1.25.0
 ```
 
-**步骤 2：读取 PDF 内容**
+**Step 2: Read PDF content**
 
-**方法 A：使用现有脚本**
+**Method A: Use existing script**
 
 ```bash
-# 读取全部页面
+# Read all pages
 python scripts/read_pdf.py sources/paper.pdf
 
-# 读取指定页面范围
+# Read specific page range
 python scripts/read_pdf.py sources/paper.pdf 1-10
 ```
 
-**方法 B：使用 Python 代码（推荐：PyMuPDF）**
+**Method B: Use Python code (Recommended: PyMuPDF)**
 
 ```python
 import fitz  # PyMuPDF
@@ -68,9 +216,9 @@ for page in doc:
 doc.close()
 ```
 
-**回退方案：pdfplumber（表格提取）**
+**Fallback: pdfplumber (table extraction)**
 
-如果 PyMuPDF 在提取复杂表格时效果不佳，可回退使用 `pdfplumber`（注意需安装安全版本 >= 0.11.8 以修复 CVE-2025-64512）：
+If PyMuPDF performs poorly on complex tables, fall back to `pdfplumber` (note: install secure version >= 0.11.8 to fix CVE-2025-64512):
 
 ```python
 import pdfplumber
@@ -80,20 +228,20 @@ with pdfplumber.open("sources/paper.pdf") as pdf:
         print(page.extract_text())
 ```
 
-**OCR 最后手段**
+**OCR last resort**
 
-对于扫描版 PDF 或上述方法均失败的情况，可使用 `pdf2image` + `pytesseract` 进行 OCR。
+For scanned PDFs or when all above methods fail, use `pdf2image` + `pytesseract` for OCR.
 
-**PDF 提取质量不佳时的回退方案**
+**PDF extraction quality fallback**
 
-如果 pdfplumber 提取的文本出现大量乱码（尤其是包含中文、特殊字体或复杂排版的学术论文），可尝试以下替代方案：
+If pdfplumber produces garbled text (especially with Chinese, special fonts, or complex academic layouts), try these alternatives:
 
-**方法 C：使用 PyMuPDF（fitz）**
+**Method C: Use PyMuPDF (fitz)**
 
-PyMuPDF 对 CJK（中日韩）字体和复杂 PDF 的文本提取通常更可靠：
+PyMuPDF is typically more reliable for CJK fonts and complex PDF text extraction:
 
 ```bash
-# 安装
+# Install
 pip install pymupdf
 ```
 
@@ -105,155 +253,160 @@ for page in doc:
     print(page.get_text())
 ```
 
-**方法 D：转换为图片后 OCR（最后手段）**
+**Method D: Convert to images then OCR (last resort)**
 
-对于扫描版 PDF 或上述方法均失败的情况，可使用 `pdf2image` + `pytesseract` 进行 OCR，但速度较慢。
+For scanned PDFs or when all above methods fail, use `pdf2image` + `pytesseract` for OCR — slower but more robust.
 
-### 文本文件处理
+### Text File Processing
 
-直接使用 Read 工具：
+Use Read tool directly:
 
 ```python
-# 直接读取 Markdown、文本、代码文件
+# Directly read Markdown, text, code files
 Read("sources/notes.md")
 Read("sources/config.yaml")
 Read("sources/script.py")
 ```
 
-### 图片文件处理
+### Image File Processing
 
-Read 工具支持视觉模型：
+Read tool supports vision models:
 
 ```python
-# Read 工具可以处理图片并返回视觉内容
+# Read tool can process images and return visual content
 Read("sources/diagram.png")
 Read("sources/screenshot.jpg")
 ```
 
-### 依赖管理
+### Dependency Management
 
-**依赖文件位置**：`src/requirements.txt`
+**Dependency file location**: `src/requirements.txt`
 
-**包含的依赖**：
-- `click>=8.0.0` - CLI 框架
-- `pyyaml>=6.0` - YAML 解析
-- `pymupdf>=1.25.0` - PDF 处理（PyMuPDF，支持 CJK 字体和复杂排版）
+**Included dependencies**:
+- `click>=8.0.0` - CLI framework
+- `pyyaml>=6.0` - YAML parsing
+- `pymupdf>=1.25.0` - PDF processing (PyMuPDF, supports CJK fonts and complex layouts)
 
-**回退依赖**（仅在 PyMuPDF 提取表格效果不佳时使用）：
-- `pdfplumber>=0.11.8` - PDF 表格提取（需安全版本修复 CVE-2025-64512）
-- `pdfminer.six>=20251107` - PDF 底层库
+**Fallback dependencies** (only when PyMuPDF table extraction is poor):
+- `pdfplumber>=0.11.8` - PDF table extraction (secure version required for CVE-2025-64512)
+- `pdfminer.six>=20251107` - PDF underlying library
 
-**安装命令**：
+**Installation commands**:
 
 ```bash
-# 使用 conda（推荐）
+# Using conda (recommended)
 conda activate llm-wiki
 pip install -r src/requirements.txt
 
-# 使用 pip
+# Using pip
 pip install -r src/requirements.txt
 
-# 使用 uv（如果你有）
+# Using uv (if you have it)
 uv pip install -r src/requirements.txt
 ```
 
 ---
 
-## 你有两种工作模式
+## Two Work Modes
 
-### 模式 A：协议模式（推荐）
+### Mode A: Protocol Mode (Recommended)
 
-**适用场景**：用户用自然语言指令，如"请摄入资料"、"查询 wiki"
+**Applicable scenario**: User uses natural language commands, e.g. "Please ingest material", "Query wiki"
 
-**你的行为**：
-1. 阅读 `CLAUDE.md` 了解协议
-2. **根据文件类型选择正确的读取策略**（见上方"文件类型处理策略"）
-3. 直接操作文件（读取、写入、编辑）
-4. 按照 Ingest/Query/Lint 工作流执行
-   - **Ingest 时必须创建 stub 页面**：任何新页面中首次出现的 `[[Concept]]`，如果目标页面不存在，必须同步创建一个 stub（至少包含 frontmatter + 一句话定义）
-   - **双向链接检查**：更新现有页面后，检查是否有新页面应该反向链接过来
+**Your behavior**:
+1. Read `CLAUDE.md` to understand the protocol
+2. Read `SKILL.md` to understand available functions, entry points, and dependencies
+3. **Select the correct reading strategy based on file type** (see "File Type Processing Strategy" above)
+4. Operate files directly (read, write, edit)
+5. Follow Ingest/Query/Lint workflow
+   - **Must create stub pages during Ingest**: Any `[[Concept]]` first appearing in a new page must have a corresponding stub created synchronously (at least frontmatter + one-sentence definition) if the target page does not exist
+   - **Bidirectional link check**: After updating existing pages, check if new pages should link back
 
-**不需要**：调用任何 CLI 命令
+**Not needed**: Invoke any CLI commands
 
-### 模式 B：CLI 模式
+### Mode B: CLI Mode
 
-**适用场景**：用户明确要求使用命令行工具，或需要脚本化操作
+**Applicable scenario**: User explicitly requests command-line tools, or scripting operations are needed
 
-**你的行为**：
-1. 检查 CLI 是否可用：`python -m src.llm_wiki --help`
-2. 使用相应命令辅助执行
+**Your behavior**:
+1. Check CLI availability: `python -m src.llm_wiki --help`
+2. Use corresponding commands to assist execution
 
-## CLI 工具参考
+---
 
-### 检查依赖和虚拟环境
+## CLI Tool Reference
 
-项目可能已安装虚拟环境，优先检查：
+### Check Dependencies and Virtual Environment
+
+The project may already have a virtual environment; check first:
 
 ```bash
-# 检查项目目录是否有虚拟环境
-ls -la .venv/  # 或 venv/
+# Check if virtual environment exists in project directory
+ls -la .venv/  # or venv/
 
-# 如果有，使用虚拟环境的 Python
+# If yes, use virtual environment's Python
 .venv/Scripts/python -m src.llm_wiki --help  # Windows
 .venv/bin/python -m src.llm_wiki --help      # Linux/macOS
 ```
 
-### 检查 CLI 可用性
+### Check CLI Availability
 
 ```bash
-# 使用虚拟环境的 Python（优先）
+# Using virtual environment Python (preferred)
 .venv/Scripts/python -c "from src.llm_wiki.core import WikiManager; print('OK')"
 
-# 或使用系统 Python
+# Or using system Python
 python -c "from src.llm_wiki.core import WikiManager; print('OK')"
 
-# 命令行入口
+# Command-line entry point
 # python -m src.llm_wiki --help
 ```
 
-### 可用命令
+### Available Commands
 
 ```bash
-# 查看 wiki 状态
+# View wiki status
 python -m src.llm_wiki status
 
-# 健康检查
+# Health check
 python -m src.llm_wiki lint
 
-# 查看所有命令帮助
+# View all command help
 python -m src.llm_wiki --help
 ```
 
-| 命令 | 用途 | 说明 |
-|-----|------|------|
-| `status` | 查看 wiki 概览 | 页面数量、最近活动 |
-| `lint` | 健康检查 | 孤儿页面、死链等问题 |
-| `ingest <path>` | 摄取资料（辅助）| 仅预览，实际处理需用协议模式 |
-| `query <text>` | 查询 wiki（辅助）| 仅列出页面，实际查询需用协议模式 |
+| Command | Purpose | Note |
+|---------|---------|------|
+| `status` | View wiki overview | Page count, recent activity |
+| `lint` | Health check | Orphan pages, dead links, etc. |
+| `ingest <path>` | Ingest material (auxiliary) | Only preview; actual processing requires protocol mode |
+| `query <text>` | Query wiki (auxiliary) | Only lists pages; actual query requires protocol mode |
 
-**注意**：`ingest` 和 `query` 需要 LLM 处理，CLI 只提供辅助功能。实际内容处理建议用**协议模式**直接操作文件。
+**Note**: `ingest` and `query` require LLM processing; CLI only provides auxiliary functions. Actual content processing is recommended via **protocol mode** direct file operations.
 
-### CLI 辅助工作流示例
+### CLI Auxiliary Workflow Example
 
 ```bash
-# 使用虚拟环境（推荐）
+# Use virtual environment (recommended)
 PY=".venv/Scripts/python"  # Windows
 PY=".venv/bin/python"      # Linux/macOS
 
-# 1. 先检查 wiki 状态
+# 1. Check wiki status first
 $PY -m src.llm_wiki status
 
-# 2. 运行 lint 检查问题
+# 2. Run lint to check for issues
 $PY -m src.llm_wiki lint
 
-# 3. 用户要求摄入新资料，你（Agent）直接处理：
-#    - 读取 sources/new-paper.pdf
-#    - 提取洞察
-#    - 更新 wiki/ 下的页面
-#    - 追加 log.md
+# 3. User requests ingesting new material; you (Agent) process directly:
+#    - Read sources/new-paper.pdf
+#    - Extract insights
+#    - Update pages under wiki/
+#    - Append log.md
 ```
 
-## 决策树
+---
+
+## Decision Tree
 
 ```
 User Input
@@ -268,109 +421,261 @@ User Input
           +--> CLI mode: generate / execute scripts
 ```
 
-## 重要原则
+---
 
-1. **默认用协议模式**：大多数用户期望自然语言交互
-2. **CLI 是补充**：用于状态查看、批量操作、脚本集成
-3. **不要假设 CLI 已安装**：用户可能没装依赖，优先用纯文件操作
-4. **保持透明**：如果使用了 CLI，告诉用户你在做什么
+## Important Principles
 
-## 示例对话
+1. **Default to protocol mode**: Most users expect natural language interaction
+2. **CLI is supplementary**: For status viewing, batch operations, script integration
+3. **Do not assume CLI is installed**: User may not have installed dependencies; prefer pure file operations
+4. **Be transparent**: If using CLI, tell the user what you are doing
+5. **Synchronize all README files**: When updating `README.md`, apply the same changes to all language variants (e.g. `docs/README.cn.md`). Never let the translated versions fall out of sync with the primary file
 
-### 场景 1：自然语言指令
+---
 
-```
-用户：请摄入 sources/paper.pdf
+## Example Conversations
 
-你（协议模式）：
-1. 读取 sources/paper.pdf
-2. 提取关键洞察
-3. 创建 wiki/Attention-Mechanism.md（内含 [[Self-Attention]]、[[Transformer]] 等链接）
-4. 检查死链：创建 wiki/Self-Attention.md 和 wiki/Transformer.md 等 stub 页面
-5. 更新 wiki/index.md
-6. 追加 log.md
-
-回复：已摄入 paper.pdf，创建了 [[Attention Mechanism]] 页面，并同步创建了 [[Self-Attention]]、[[Transformer]] 等关联概念 stub...
-```
-
-### 场景 2：明确 CLI 请求
+### Scenario 1: Natural Language Command
 
 ```
-用户：运行 wiki lint 看看有什么问题
+User: Please ingest sources/paper.pdf
 
-你（CLI 模式）：
-1. 执行：python -m src.llm_wiki lint
-2. 分析输出
-3. 解释问题并提供修复建议
+You (Protocol mode):
+1. Read sources/paper.pdf
+2. Extract key insights
+3. Create wiki/Attention-Mechanism.md (with [[Self-Attention]], [[Transformer]], etc. links)
+4. Check dead links: Create wiki/Self-Attention.md and wiki/Transformer.md stub pages
+5. Update wiki/index.md
+6. Append log.md
 
-回复：发现 3 个孤儿页面：[[PageA]]、[[PageB]]...
+Reply: Ingested paper.pdf, created [[Attention Mechanism]] page, and synchronously created stub pages for [[Self-Attention]], [[Transformer]], etc...
 ```
 
-### 场景 3：使用虚拟环境
+### Scenario 2: Explicit CLI Request
 
 ```
-用户：检查 wiki 状态
+User: Run wiki lint to see if there are any issues
 
-你：发现项目有 .venv/ 目录，使用虚拟环境
+You (CLI mode):
+1. Execute: python -m src.llm_wiki lint
+2. Analyze output
+3. Explain issues and provide fix suggestions
+
+Reply: Found 3 orphan pages: [[PageA]], [[PageB]]...
+```
+
+### Scenario 3: Using Virtual Environment
+
+```
+User: Check wiki status
+
+You: Found .venv/ directory in the project; using virtual environment
     .venv/Scripts/python -c "from src.llm_wiki.core import ..."
-    → 成功获取信息
+    → Successfully retrieved information
 
-回复：wiki 目前有 15 个页面，最近活动是...
+Reply: Wiki currently has 15 pages; recent activity was...
 ```
 
-### 场景 4：使用 conda 环境
+### Scenario 4: Using conda Environment
 
 ```
-用户：检查 wiki 状态
+User: Check wiki status
 
-你：检测到 CONDA_PREFIX 环境变量，使用 conda 环境
+You: Detected CONDA_PREFIX environment variable; using conda environment
     $CONDA_PREFIX/bin/python -c "from src.llm_wiki.core import ..."
-    → 成功获取信息
+    → Successfully retrieved information
 
-回复：wiki 目前有 15 个页面，最近活动是...
-（使用 conda 环境：llm-wiki）
+Reply: Wiki currently has 15 pages; recent activity was...
+(Using conda environment: llm-wiki)
 ```
 
-### 场景 5：CLI 依赖未安装（协议模式降级）
+### Scenario 5: CLI Dependencies Not Installed (Protocol Mode Fallback)
 
 ```
-用户：运行 wiki lint
+User: Run wiki lint
 
-你：尝试执行
+You: Attempted execution
     .venv/Scripts/python -c "from src.llm_wiki.core import WikiManager"
-    → 失败（ModuleNotFoundError: .venv 不存在或未安装依赖）
+    → Failed (ModuleNotFoundError: .venv does not exist or dependencies not installed)
 
-你：切换到协议模式，直接读取文件
-    - 读取 wiki/ 统计页面数量
-    - 读取 log.md 获取最近活动
-    - 手动执行 lint 逻辑
+You: Switched to protocol mode; reading files directly
+    - Read wiki/ to count pages
+    - Read log.md to get recent activity
+    - Manually executed lint logic
 
-回复：wiki 目前有 15 个页面，发现 3 个孤儿页面：[[PageA]]...
-（注：CLI 依赖未安装，我直接读取文件获取的信息）
+Reply: Wiki currently has 15 pages; found 3 orphan pages: [[PageA]]...
+(Note: CLI dependencies not installed; I retrieved this information by reading files directly)
 ```
 
-## 技术细节
+---
 
-### CLI 入口点
+## Bidirectional Update Implementation Guide
 
-- **模块**：`src.llm_wiki`
-- **主文件**：`src/llm_wiki/commands.py`
-- **核心逻辑**：`src/llm_wiki/core.py`
+> This section guides Agents on how to perform dynamic linking and bidirectional updates during ingest.
+> **Before using any `link` or `relink` CLI commands, you MUST have read `SKILL.md` to understand the function signatures, inputs, and workflow.**
 
-### 辅助脚本
+### Why Bidirectional Updates Are Needed
 
-项目包含辅助脚本（`scripts/`）：
-- `scripts/wiki-status.sh` — 快速查看 wiki 状态
-- `scripts/wiki-lint.sh` — 运行健康检查
-- `scripts/init-wiki.sh` — 初始化新项目
+Traditional ingest only creates new pages; existing pages do not automatically reflect new knowledge. Bidirectional updates let the knowledge base **self-improve** over time:
+- New paper improves an old method → old page automatically gets "Latest Progress" section
+- New work contrasts with old work → both pages add comparison links
+- New work depends on old concept → old concept page gets backlinked
 
-### 依赖和虚拟环境
+### Linking Workflow
 
-依赖文件：`src/requirements.txt`
-- `click` - 命令行框架
-- `pyyaml` - YAML 解析
+```
+Finish new page creation
+    |
+    v
++----------------------------------+
+| 1. Run: wiki link --source PAGE  |  <-- CLI discovers relations
+|         --mode light             |
++----------------------------------+
+    |
+    v
++----------------------------------+
+| 2. Agent reviews relation report |  <-- LLM judges relevance
+|    Only process score >= 0.5     |
++----------------------------------+
+    |
+    v
++----------------------------------+
+| 3. For each high-confidence rel: |
+|    a. Read existing page         |
+|    b. Analyze old vs new         |
+|    c. Choose merge strategy      |
+|    d. Run: wiki link --target    |
+|    e. Review diff, then apply    |
++----------------------------------+
+    |
+    v
+Update log.md, record operations
+```
 
-#### 检查依赖（含虚拟环境检测）
+### Merge Strategy Decision Tree
+
+```
+Relation between new page and existing page
+    |
+    +-- Same field, different work
+    |     +--> link_only (add to "Related Pages")
+    |
+    +-- New work extends/improves old method
+    |     +--> append_section (add "Latest Progress")
+    |
+    +-- New work contrasts with old work
+    |     +--> append_section (add "Comparison with xxx")
+    |     +--> append_related (bidirectional links)
+    |
+    +-- New work corrects old concept
+    |     +--> update_concept (update definition, use with care)
+    |     +--> append_section (add "Concept Evolution")
+    |
+    +-- New work heavily depends on old concept
+          +--> append_related (add backlink to old page)
+```
+
+### CLI Command Reference
+
+**Discover relations (light mode):**
+```bash
+python -m src.llm_wiki link --source "Bid2X" --mode light
+```
+Output: Markdown relation report with related pages, score, relation type, suggested action
+
+**Discover relations (deep mode, with embedding):**
+```bash
+python -m src.llm_wiki link --source "Bid2X" --mode deep --max-related 10
+```
+
+**Execute specific merge (with diff review):**
+```bash
+# Preview
+python -m src.llm_wiki link --source "Bid2X" --target "RTBAgent" \
+    --strategy append_related --dry-run
+
+# Apply
+python -m src.llm_wiki link --source "Bid2X" --target "RTBAgent" \
+    --strategy append_related
+```
+
+**Batch global linking:**
+```bash
+# Global deep linking for pages added in the last 7 days
+python -m src.llm_wiki relink --mode deep --dry-run
+
+# Specify date range
+python -m src.llm_wiki relink --since 2026-04-20 --mode deep
+```
+
+### Agent Implementation Pattern (Protocol Mode)
+
+**Scenario: User requests ingesting sources/new-paper.pdf**
+
+```
+Agent:
+1. Read sources/new-paper.pdf
+2. Extract insights, create wiki/NewMethod.md
+3. Check dead links, create stub pages
+4. Run CLI (if virtual environment available):
+   .venv/Scripts/python -m src.llm_wiki link --source "NewMethod" --mode light
+   → Get relation report
+5. For score >= 0.5 relations, e.g. [[OldMethod]]:
+   a. Read wiki/OldMethod.md
+   b. LLM analysis: "NewMethod is an improvement over OldMethod, extending xxx capabilities"
+   c. Decision: Use append_section strategy, append "Relationship with NewMethod"
+   d. Run CLI to generate diff:
+      .venv/Scripts/python -m src.llm_wiki link \
+        --source "NewMethod" --target "OldMethod" \
+        --strategy append_section --dry-run
+   e. Review diff, confirm it is reasonable
+   f. Apply modification (remove --dry-run)
+6. Update log.md, record new pages and relation updates
+7. Update wiki/index.md
+```
+
+### Safety Rules
+
+1. **Always --dry-run first**: Generate diff for review before applying
+2. **Append only, never replace**: `append_related` and `append_section` are safe strategies
+3. **Use update_concept with caution**: Only when new information genuinely corrects an old definition
+4. **Limit batch updates**: Single source should trigger no more than 5 backward updates
+5. **Automatic backups**: CLI tools automatically back up to `wiki/.backups/`; rollback available
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| `wiki link` errors: page not found | Confirm page has been created; check title spelling |
+| Diff is unreasonable | Do not apply; manually edit the page instead |
+| False positive relation to unrelated page | Ignore (score usually < 0.3); do not execute merge |
+| Strategy not in allowed list | Check config.yaml `linking.deep_mode.strategies_allowed` |
+| Backup directory too large | Manually clean old backups in `wiki/.backups/` |
+
+---
+
+## Technical Details
+
+### CLI Entry Points
+
+- **Module**: `src.llm_wiki`
+- **Main file**: `src/llm_wiki/commands.py`
+- **Core logic**: `src/llm_wiki/core.py`
+
+### Auxiliary Scripts
+
+Project includes auxiliary scripts (`scripts/`):
+- `scripts/wiki-status.sh` — Quick wiki status view
+- `scripts/wiki-lint.sh` — Run health check
+- `scripts/init-wiki.sh` — Initialize new project
+
+### Dependencies and Virtual Environment
+
+Dependency file: `src/requirements.txt`
+- `click` - Command line framework
+- `pyyaml` - YAML parsing
+
+#### Check Dependencies (including virtual environment detection)
 
 ```python
 import importlib.util
@@ -378,12 +683,12 @@ from pathlib import Path
 import subprocess
 import sys
 
-# 1. 检测虚拟环境（uv/venv 或 conda）
+# 1. Detect virtual environment (uv/venv or conda)
 venv_paths = [
     Path(".venv"),           # uv / modern tools
     Path("venv"),            # traditional
 ]
-# 检测 conda 环境
+# Detect conda environment
 conda_env = Path(os.environ.get("CONDA_PREFIX", ""))
 if conda_env.exists():
     venv_python = conda_env / "python.exe" if sys.platform == "win32" else conda_env / "bin" / "python"
@@ -395,31 +700,32 @@ for venv in venv_paths:
         venv_python = venv / "Scripts" / "python.exe" if sys.platform == "win32" else venv / "bin" / "python"
         break
 
-# 决策路径
+# Decision path
 if venv_python and check_dep("src.llm_wiki", venv_python):
-    print(f"使用虚拟环境: {venv_python}")
+    print(f"Using virtual environment: {venv_python}")
     python_cmd = str(venv_python)
 elif check_dep("src.llm_wiki"):
-    print("使用系统 Python")
+    print("Using system Python")
     python_cmd = "python"
 else:
-    print("依赖未安装，使用协议模式")
+    print("Dependencies not installed; using protocol mode")
 
-# 2. 检查依赖是否可用
+# 2. Check if dependency is available
 def check_dep(module_name, python_path=None):
     py = python_path or sys.executable
     result = subprocess.run([py, "-c", f"import {module_name}"], capture_output=True)
     return result.returncode == 0
 ```
 
-### 与 CLAUDE.md 的关系
+### Relationship with CLAUDE.md
 
-- `CLAUDE.md`：定义**用户可见**的工作协议
-- `AGENTS.md`：定义**Agent 内部**的实现策略
+- `CLAUDE.md`: Defines **user-visible** working protocol
+- `AGENTS.md`: Defines **Agent-internal** implementation strategy
+- `SKILL.md`: Machine-readable specification that **ALL Agents MUST read** before operating
 
-两者不矛盾：协议模式实现 CLAUDE.md 的语义，CLI 模式提供额外的工具能力。
+They are not contradictory: Protocol mode implements the semantics of CLAUDE.md; CLI mode provides additional tooling capabilities.
 
 ---
 
-*Agent 指南版本：1.1.0*
-*最后更新：2026-04-16*
+*Agent Guide Version: 1.3.0*
+*Last Updated: 2026-04-21*

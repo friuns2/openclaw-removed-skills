@@ -15,47 +15,26 @@ metadata: {"openclaw": {"alwaysActive": false, "emoji": "👗", "homepage": ""}}
 
 ### Python 執行規則
 
-執行任何 Python 腳本前，**先偵測環境可用的指令**，再決定使用哪個：
+此 skill 在 macOS 系統 Python（`/usr/bin/python3`）環境下執行，有兩個注意事項：
 
+1. **套件路徑**：pip 安裝到 user site-packages，需明確設定 `PYTHONPATH`
+2. **工作目錄**：必須從非專案目錄（如 `/tmp`）執行，避免和 repo 內的 numpy 衝突
+
+### 必要套件安裝（首次或套件遺失時執行）
 ```bash
-# 步驟一：偵測環境
-PYTHON_CMD=""
-if command -v python3 &>/dev/null; then
-  PYTHON_CMD="python3"
-elif command -v python &>/dev/null; then
-  PYTHON_CMD="python"
-else
-  echo "❌ 找不到 Python，請先安裝"
-  exit 1
-fi
-echo "✅ 使用 $PYTHON_CMD"
+python3 -m pip install requests pandas openpyxl
 ```
 
-偵測完成後，**整個任務過程中統一使用同一個指令**，不要混用。
-
-### 腳本路徑規則
-
-此 skill 的腳本位於 `scripts/` 資料夾，執行時需先定位 SKILL.md 所在目錄作為根目錄：
-
+### 執行 fetch_insights.py
 ```bash
-# 取得 skill 根目錄（SKILL.md 所在位置）
-SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# 執行 scripts/ 底下的腳本
-$PYTHON_CMD "$SKILL_DIR/scripts/fetch_insights.py"
+# 只載入 META_ 變數，避免 .env 中含空格的行（如 apt packages）造成錯誤
+export $(grep -E '^META_' /Users/shangweilin/projects/openclaw/.env | xargs) && \
+cd /tmp && \
+PYTHONPATH="/Users/shangweilin/Library/Python/3.9/lib/python/site-packages" \
+python3 ~/.openclaw/workspace/skills/tw-fashion-social-manager/scripts/fetch_insights.py
 ```
 
-> ⚠️ 不要用相對路徑 `./scripts/fetch_insights.py`，agent 的工作目錄不一定是 skill 根目錄，會找不到檔案。
-
-### 必要套件安裝（需要時執行）
-```bash
-# pip 也依環境選擇
-if command -v pip3 &>/dev/null; then
-  pip3 install pandas openpyxl matplotlib seaborn requests python-dotenv --break-system-packages
-elif command -v pip &>/dev/null; then
-  pip install pandas openpyxl matplotlib seaborn requests python-dotenv --break-system-packages
-fi
-```
+> ⚠️ 不要用相對路徑或從 openclaw repo 目錄執行，會和 repo 內的 numpy 衝突導致 ImportError。
 
 ---
 

@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-blue)](https://github.com/openclaw)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/ankechenlab/synapse-wiki/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-green.svg)](https://github.com/ankechenlab-node/synapse-wiki/releases)
 
 > 智能知识库管理系统 — 让知识随时间复利增长，越用越聪明。
 

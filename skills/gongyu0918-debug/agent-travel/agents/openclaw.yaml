@@ -1,7 +1,7 @@
 interface:
   display_name: "Agent Travel"
-  short_description: "Quiet-window background research for OpenClaw / 面向 OpenClaw 的安静窗口背景研究"
-  default_prompt: "Use $agent-travel only during quiet windows or explicit user commands, keep default search_mode low, and save only advisory-only hints into the isolated suggestion channel. / 仅在安静窗口或用户显式命令下使用 $agent-travel，默认 search_mode 保持 low，并且只把 advisory-only 提示写入隔离建议通道。"
+  short_description: "OpenClaw heartbeat travel with isolated hints"
+  default_prompt: "Use $agent-travel during OpenClaw heartbeat, task-end, scheduled, or explicit user windows when the thread needs one external clue. Run a redacted public-first query plan, keep default search_mode low, and write only advisory-only hints into the isolated suggestion channel."
 
 policy:
   allow_implicit_invocation: false

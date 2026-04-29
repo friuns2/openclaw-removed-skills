@@ -1,4 +1,4 @@
-# business-blueprint-skill
+# kai-business-blueprint
 
 > 售前需求、会议纪要、RFP 材料 → 可编辑的业务能力蓝图、泳道流程图、应用架构图。一份 canonical JSON IR，多个下游导出格式（SVG / draw.io / Excalidraw / Mermaid）。
 
@@ -61,16 +61,16 @@ The skill file (`SKILL.md`) is a routing layer — it tells Claude *which* file 
 ### Claude Code
 
 ```bash
-git clone https://github.com/kaisersong/business-blueprint-skill ~/.claude/skills/business-blueprint-skill
+git clone https://github.com/kaisersong/kai-business-blueprint ~/.claude/skills/kai-business-blueprint
 ```
 
-Then: `cd business-blueprint-skill && pip install -e .`
+Then: `cd kai-business-blueprint && pip install -e .`
 
 ### OpenClaw
 
 ```bash
-git clone https://github.com/kaisersong/business-blueprint-skill ~/.openclaw/skills/business-blueprint-skill
-cd business-blueprint-skill && pip install -e .
+git clone https://github.com/kaisersong/kai-business-blueprint ~/.openclaw/skills/kai-business-blueprint
+cd kai-business-blueprint && pip install -e .
 ```
 
 ---
@@ -82,6 +82,7 @@ cd business-blueprint-skill && pip install -e .
 | Flag | Purpose |
 |------|---------|
 | `--plan "text"` | Parse raw text into canonical blueprint JSON |
+| `--project <blueprint.json>` | Derive canonical `solution.projection.json` for downstream skills |
 | `--generate <output>` | Generate JSON + static HTML viewer package |
 | `--edit <blueprint.json>` | Refresh viewer for an existing blueprint (preserves human edits) |
 | `--export <blueprint.json>` | Export diagrams (default: free-flow SVG + HTML viewer) |
@@ -92,6 +93,13 @@ cd business-blueprint-skill && pip install -e .
 | `--industry <pack>` | Apply industry template pack (common, finance, manufacturing, retail) |
 | `--theme <dark|light>` | Color theme for output (default: dark) |
 | `--format <fmt>` | Export format: svg, drawio, excalidraw, mermaid, all |
+
+### Export Quality Contracts
+
+- Export routing is explicit: specialized views are only used when the blueprint structure clearly matches them; otherwise the exporter stays on `freeflow`.
+- SVG output now runs structural integrity checks for missing defs references and basic canvas overflow before an artifact is accepted.
+- Export thresholds and defect taxonomy live under [`evals/`](evals), so route and integrity behavior are backed by machine-readable fixtures rather than prose only.
+- Windows/terminal support is intentionally scoped: the canonical path is `python -m business_blueprint.cli`, and encoding-sensitive runs should use `PYTHONIOENCODING=utf-8` when needed.
 
 ### Typical Workflows
 
@@ -121,6 +129,11 @@ business-blueprint --validate solution.blueprint.json
 business-blueprint --export solution.blueprint.json
 ```
 
+**Prepare downstream machine handoff:**
+```bash
+business-blueprint --project solution.blueprint.json
+```
+
 ---
 
 ## Outputs
@@ -128,10 +141,11 @@ business-blueprint --export solution.blueprint.json
 | File | Role |
 |------|------|
 | `solution.blueprint.json` | Canonical IR — single source of truth |
+| `solution.projection.json` | Canonical downstream machine projection |
 | `solution.viewer.html` | Static viewer + light editor |
 | `solution.exports/` | SVG, draw.io, Excalidraw, Mermaid exports |
 | `solution.patch.jsonl` | Edit traceability log (JSON patches) |
-| `solution.handoff.json` | Revision manifest for AI handoff |
+| `solution.handoff.json` | Viewer revision manifest |
 
 ### SVG Architecture Export
 
@@ -140,7 +154,9 @@ The SVG export renders a free-flow L→R architecture diagram:
 - **Main flow chain** (center row) — systems connected via flow steps, left to right
 - **Auxiliary systems** (rows above/below) — placed by category (database, security, cloud)
 - **Entry node** (left) — auto-generated from blueprint actors
-- **Arrows** — solid lines for data flow, dashed for support/dependency; cross-row elbows route below source nodes with collision avoidance
+- **Semantic arrows** — 4 types with distinct colors/markers: `supports` (green solid), `depends-on` (gray dashed), `flows-to` (blue solid), `owned-by` (yellow dotted)
+- **Semantic node shapes** — diamond for flow steps, left color strip for systems, rounded rects for capabilities, pill shapes for actors
+- **Industry themes** — accent color overlays for retail (orange), finance (blue), manufacturing (gray)
 
 The layout engine computes positions dynamically with overlap resolution, horizontal alignment, and mid-y collision avoidance. The region boundary box and SVG canvas auto-expand to contain all arrow paths.
 
@@ -149,16 +165,21 @@ The layout engine computes positions dynamically with overlap resolution, horizo
 ## Project Structure
 
 ```
-business-blueprint-skill/
+kai-business-blueprint/
 ├── SKILL.md                      # Skill definition (routing layer)
 ├── business_blueprint/           # Python engine (zero external deps)
 │   ├── cli.py                    # CLI entry point
 │   ├── generate.py               # Blueprint generation from text
 │   ├── model.py                  # Data model & top-level shape
+│   ├── projection.py             # Downstream projection builder
 │   ├── validate.py               # Machine-readable validation
 │   ├── clarify.py                # Clarification request builder
 │   ├── normalize.py              # Entity resolution & synonym merging
 │   ├── viewer.py                 # HTML viewer package writer
+│   ├── export_theme.py           # Shared export theme tokens and semantic colors
+│   ├── export_text.py            # Shared SVG text width + wrapping helpers
+│   ├── export_routes.py          # Explicit export route resolution
+│   ├── export_integrity.py       # Structural export integrity checks + diagnostics
 │   ├── export_svg.py             # SVG exporter (two-pass layout, content router, free-flow)
 │   ├── export_drawio.py          # draw.io exporter
 │   ├── export_excalidraw.py      # Excalidraw exporter
@@ -191,18 +212,23 @@ Run `--validate` to check all rules. Warnings indicate potential issues (e.g., a
 
 ## For AI Agents
 
-Other skills consume blueprint artifacts:
+Other skills should consume blueprint artifacts through prompt orchestration, not through the viewer handoff manifest.
 
 ```
-# report-creator: embed blueprint summary in a business report
-/report --from blueprint-summary.md --theme corporate-blue
+# 1. Prepare the machine artifacts
+business-blueprint --plan solution.blueprint.json --from "..."
+business-blueprint --project solution.blueprint.json
 
-# slide-creator: build a presentation from blueprint
-/slide-creator --from solution.handoff.json
+# 2. Prompt report-creator with the blueprint/projection artifacts
+"Use solution.blueprint.json and solution.projection.json to generate a report IR first. Do not render HTML yet."
 
-# Generate PlantUML from relations
-# Parse relations from solution.blueprint.json → generate PlantUML syntax
+# 3. Prompt slide-creator with the blueprint/projection artifacts
+"Use solution.blueprint.json and solution.projection.json to generate PLANNING.md first. Do not generate HTML yet."
 ```
+
+See [references/prompt-orchestration-templates.md](references/prompt-orchestration-templates.md) for copy-paste prompt templates.
+
+`solution.handoff.json` is only a viewer manifest. Do not use it as report/deck input.
 
 **Extracting structured data:**
 ```python
@@ -211,12 +237,13 @@ import json
 with open("solution.blueprint.json") as f:
     bp = json.load(f)
 
-# Entities
-for sys in bp["entities"].get("applicationSystems", []):
+# Systems
+for sys in bp["library"].get("systems", []):
     print(f"System: {sys['name']}")
 
-for cap in bp["entities"].get("businessCapabilities", []):
-    print(f"Capability: {cap['name']} (supports {cap['systemId']})")
+# Capabilities
+for cap in bp["library"].get("capabilities", []):
+    print(f"Capability: {cap['name']}")
 
 # Relations
 for rel in bp["relations"]:
@@ -237,12 +264,20 @@ for rel in bp["relations"]:
 
 | Platform | Version | Install path |
 |----------|---------|--------------|
-| Claude Code | any | `~/.claude/skills/business-blueprint-skill/` |
-| OpenClaw | >= 0.9 | `~/.openclaw/skills/business-blueprint-skill/` |
+| Claude Code | any | `~/.claude/skills/kai-business-blueprint/` |
+| OpenClaw | >= 0.9 | `~/.openclaw/skills/kai-business-blueprint/` |
 
 ---
 
 ## Version History
+
+**v0.10.0** — Quality hardening release: add explicit export route resolution and SVG integrity checks with structured fallback diagnostics; introduce machine-readable eval assets under `evals/` (thresholds, defect taxonomy, route fixtures, scoring schema); improve cross-platform CLI handling for spaced paths, CRLF input, and UTF-8 validation output; split shared export text/theme helpers out of `export_svg.py`; and refine the evolution timeline view so dark cards stay readable and wrapped system pills no longer overflow.
+
+**v0.9.0** — Canonical projection release: add `solution.projection.json` generation via `--project`; formalize prompt-native orchestration templates for report/slide downstream skills; strengthen export routing rules so non-standard diagram requests fall back to free-flow; and ship substantial SVG quality upgrades across poster, swimlane, hierarchy, and evolution views, including dark-theme fixes, label collision handling, width-aware title wrapping, centered card rows, and new regression coverage.
+
+**v0.8.0** — Skill rename: rebranded from `business-blueprint-skill` to `kai-business-blueprint`; updated all GitHub URLs, install paths, and documentation references.
+
+**v0.7.0** — Visual enhancements: 4 semantic arrow types (supports/depends-on/flows-to/owned-by) with distinct colors, dash patterns, and SVG markers; semantic node shapes (diamond for flowStep, left color strip for systems, rounded rects for capabilities, pill for actors); 3 industry theme overlays (retail=#F97316, finance=#3B82F6, manufacturing=#6B7280); HTML template-driven viewer generation (replaces 244 lines of f-strings); architecture layout fix — one column per unique capability; free-flow now renders full relation arrows from `blueprint.relations`; same-column arrow routing uses direct vertical paths; region box covers all system nodes; 46 new tests.
 
 **v0.6.1** — Layout engine genericization: remove all hardcoded company/product names (AWS service mappings, Kingdee product IDs, brand text) from layout and rendering code; `_categorize_system()` now uses language-agnostic keyword matching (Chinese + English); `_layout_layered()` assigns distinct colors per layer instead of category keyword lookup; dark theme node colors increased contrast (brighter fills, bolder strokes); legend rendered behind arrows and nodes (z-order fix) so overlaps never obscure content; product tree and capability matrix auto-derive segments from blueprint data instead of hardcoded IDs.
 

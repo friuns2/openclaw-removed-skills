@@ -19,11 +19,31 @@ Source:
   - https://docs.tensorlake.ai/document-ingestion/datasets/data.md
   - https://docs.tensorlake.ai/document-ingestion/file-management/overview.md
   - https://docs.tensorlake.ai/document-ingestion/parsing/on-prem.md
-SDK version: tensorlake 0.4.39
-Last verified: 2026-04-08
+SDK version: tensorlake 0.5.0
+Last verified: 2026-04-24
 -->
 
 # TensorLake DocumentAI SDK Reference
+
+## Table of Contents
+
+- [Imports](#imports)
+- [Client Initialization](#client-initialization)
+- [File Operations](#file-operations)
+- [Parsing](#parsing)
+- [Read](#read)
+- [Extract](#extract)
+- [Classify](#classify)
+- [Edit (Form Filling)](#edit-form-filling)
+- [DOCX Tracked Changes & Comments](#docx-tracked-changes--comments)
+- [Datasets](#datasets)
+- [Parsing Options](#parsing-options)
+- [Structured Extraction Options](#structured-extraction-options)
+- [Enrichment Options](#enrichment-options)
+- [Page Classification](#page-classification)
+- [Result Models](#result-models)
+- [Supported File Types](#supported-file-types)
+- [Async Support](#async-support)
 
 ## Imports
 

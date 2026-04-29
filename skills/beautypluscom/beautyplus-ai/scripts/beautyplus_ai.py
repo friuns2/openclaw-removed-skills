@@ -700,7 +700,7 @@ def cmd_resolve_input(args: argparse.Namespace) -> int:
             timeout=url_to,
             headers={
                 "User-Agent": getattr(
-                    skill_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"
+                    skill_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"
                 )
             },
         )
@@ -780,7 +780,7 @@ def cmd_resolve_input(args: argparse.Namespace) -> int:
             timeout=skill_config.url_download_timeout_tuple(),
             headers={
                 "User-Agent": getattr(
-                    skill_config, "USER_AGENT", "beautyplus-web-skill-v1.0.0"
+                    skill_config, "USER_AGENT", "beautyplus-web-skill-v1.0.1"
                 )
             },
         )

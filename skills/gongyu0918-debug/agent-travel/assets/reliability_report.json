@@ -1,11 +1,13 @@
 {
-  "total_cases": 40,
-  "passed_cases": 40,
+  "total_cases": 50,
+  "passed_cases": 50,
   "crash_count": 0,
-  "validator_cases": 23,
-  "validator_passed": 23,
-  "trigger_cases": 17,
-  "trigger_passed": 17,
+  "validator_cases": 25,
+  "validator_passed": 25,
+  "trigger_cases": 22,
+  "trigger_passed": 22,
+  "plan_cases": 3,
+  "plan_passed": 3,
   "results": [
     {
       "case": "canonical",
@@ -14,7 +16,7 @@
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-8wp0quq3\\canonical.md"
+      "output": "OK: validated 1 suggestion(s) in <tmp>/canonical.md"
     },
     {
       "case": "missing_markers",
@@ -206,13 +208,31 @@
       "output": "ERROR: suggestion-1 field fit_reason must be non-empty"
     },
     {
+      "case": "misplaced_top_level_visibility",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: top-level field visibility must appear before the first suggestion heading"
+    },
+    {
+      "case": "malformed_evidence_item",
+      "kind": "validator",
+      "expected_pass": false,
+      "actual_pass": false,
+      "ok": true,
+      "crashed": false,
+      "output": "ERROR: suggestion-1 evidence items must use source_label: reference format"
+    },
+    {
       "case": "valid_optional_fields",
       "kind": "validator",
       "expected_pass": true,
       "actual_pass": true,
       "ok": true,
       "crashed": false,
-      "output": "OK: validated 1 suggestion(s) in C:\\Users\\admin\\AppData\\Local\\Temp\\agent-travel-reliability-8wp0quq3\\valid_optional_fields.md"
+      "output": "OK: validated 1 suggestion(s) in <tmp>/valid_optional_fields.md"
     },
     {
       "case": "should_travel_heartbeat_quiet_low",
@@ -226,6 +246,19 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"heartbeat_default\"]}"
+    },
+    {
+      "case": "should_travel_required_timestamp_null_is_missing",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "missing_required_field",
+      "actual_error_code": "missing_required_field",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"missing required field: last_thread_activity\", \"error_code\": \"missing_required_field\"}"
     },
     {
       "case": "should_travel_user_active",
@@ -394,7 +427,7 @@
       "actual_error_code": "ready",
       "ok": true,
       "crashed": false,
-      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"user_configured_periodic_travel\", \"scheduled_default\"]}"
     },
     {
       "case": "should_travel_host_managed_schedule_runs_without_manual_opt_in",
@@ -408,6 +441,19 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"scheduled_trigger_managed_by_host\", \"scheduled_default\"]}"
+    },
+    {
+      "case": "should_travel_scheduled_defaults_closed_without_host_signal",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "scheduled_opt_in_required",
+      "actual_error_code": "scheduled_opt_in_required",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\", \"error_code\": \"scheduled_opt_in_required\"}"
     },
     {
       "case": "should_travel_scheduled_without_host_or_opt_in_blocks",
@@ -434,6 +480,87 @@
       "ok": true,
       "crashed": false,
       "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"scheduled\", \"reason\": \"host-generated scheduled prompts must stay neutral\", \"error_code\": \"scheduled_prompt_must_be_neutral\", \"observed_signals\": [\"host_generated_scheduled_prompt\", \"scheduled_prompt_emotion:frustrated\"]}"
+    },
+    {
+      "case": "should_travel_idle_fallback_stays_low_with_passive_signals",
+      "kind": "trigger",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "ready",
+      "actual_error_code": "ready",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": true, \"search_mode\": \"low\", \"trigger_reason\": \"idle_fallback\", \"reason\": \"active conversation, quiet window, within cooldown\", \"error_code\": \"ready\", \"observed_signals\": [\"idle_fallback_default\"]}"
+    },
+    {
+      "case": "should_travel_negative_thread_runs_rejected",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "invalid_integer",
+      "actual_error_code": "invalid_integer",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"heartbeat\", \"reason\": \"invalid integer value: -5\", \"error_code\": \"invalid_integer\"}"
+    },
+    {
+      "case": "should_travel_negative_related_failures_rejected",
+      "kind": "trigger",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_error_code": "invalid_integer",
+      "actual_error_code": "invalid_integer",
+      "ok": true,
+      "crashed": false,
+      "output": "{\"should_run\": false, \"search_mode\": \"low\", \"trigger_reason\": \"failure_recovery\", \"reason\": \"invalid integer value: -1\", \"error_code\": \"invalid_integer\"}"
+    },
+    {
+      "case": "plan_travel_heartbeat_low_query",
+      "kind": "plan",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_query_count": 1,
+      "actual_query_count": 1,
+      "leaked_forbidden_substrings": [],
+      "ok": true,
+      "crashed": false,
+      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": true,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"heartbeat\",\n    \"reason\": \"active conversation, quiet window, within cooldown\",\n    \"error_code\": \"ready\",\n    \"observed_signals\": [\n      \"heartbeat_default\"\n    ]\n  },\n  \"problem_fingerprint\": \"OpenClaw|current-version|cron digest repeats stale notes|public-only search|fresh advisory hint\",\n  \"fingerprint_hash\": \"h64:5e02c6953f60c9f7b626ad5fcca2dee8ec3d3e2bf5cf91a46fb519efce4fbe80\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 63,\n    \"context_chars_used\": 63,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"email\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [\n    {\n      \"tier\": \"primary\",\n      \"surface\": \"official docs / release notes\",\n      \"purpose\": \"Anchor the suggestion in official behavior before considering community advice.\",\n      \"query\": \"OpenClaw current-version cron digest repeats stale notes official docs\"\n    }\n  ],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
+    },
+    {
+      "case": "plan_travel_scheduled_blocked_no_queries",
+      "kind": "plan",
+      "expected_should_run": false,
+      "actual_should_run": false,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_query_count": 0,
+      "actual_query_count": 0,
+      "leaked_forbidden_substrings": [],
+      "ok": true,
+      "crashed": false,
+      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": false,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"scheduled\",\n    \"reason\": \"scheduled travel needs a host-managed schedule or explicit periodic travel\",\n    \"error_code\": \"scheduled_opt_in_required\"\n  },\n  \"problem_fingerprint\": \"Claude Code|current-version|scheduled task repeats old log triage|current thread constraints|next useful answer\",\n  \"fingerprint_hash\": \"h64:cddd60a95c207c91b9fc47cb166c9974558e28d6bbed8158759f47093913729a\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 0,\n    \"context_chars_used\": 0,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"email\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
+    },
+    {
+      "case": "plan_travel_redacts_state_secrets",
+      "kind": "plan",
+      "expected_should_run": true,
+      "actual_should_run": true,
+      "expected_search_mode": "low",
+      "actual_search_mode": "low",
+      "expected_query_count": 1,
+      "actual_query_count": 1,
+      "leaked_forbidden_substrings": [],
+      "ok": true,
+      "crashed": false,
+      "output": "{\n  \"dry_run\": true,\n  \"network_used\": false,\n  \"decision\": {\n    \"should_run\": true,\n    \"search_mode\": \"low\",\n    \"trigger_reason\": \"heartbeat\",\n    \"reason\": \"active conversation, quiet window, within cooldown\",\n    \"error_code\": \"ready\",\n    \"observed_signals\": [\n      \"heartbeat_default\"\n    ]\n  },\n  \"problem_fingerprint\": \"OpenClaw|current-version|cron failed|public-only search|safe query\",\n  \"fingerprint_hash\": \"h64:ded1aa1340b05f831c60bbaaa71832a01469bd879cee01b34ff80b73633c2bc3\",\n  \"redaction_summary\": {\n    \"context_chars_seen\": 81,\n    \"context_chars_used\": 79,\n    \"context_redacted_items\": {\n      \"credential_assignment\": 0,\n      \"token_like\": 0,\n      \"internal_url\": 1,\n      \"private_path\": 1,\n      \"email\": 0\n    },\n    \"state_redacted_items\": {\n      \"credential_assignment\": 1,\n      \"email\": 0,\n      \"internal_url\": 0,\n      \"private_path\": 0,\n      \"token_like\": 0\n    },\n    \"total_redacted_items\": {\n      \"credential_assignment\": 1,\n      \"email\": 0,\n      \"internal_url\": 1,\n      \"private_path\": 1,\n      \"token_like\": 0\n    }\n  },\n  \"query_budget\": {\n    \"search_mode\": \"low\",\n    \"max_queries\": 1\n  },\n  \"queries\": [\n    {\n      \"tier\": \"primary\",\n      \"surface\": \"official docs / release notes\",\n      \"purpose\": \"Anchor the suggestion in official behavior before considering community advice.\",\n      \"query\": \"OpenClaw current-version cron failed official docs\"\n    }\n  ],\n  \"notes\": [\n    \"This is a dry-run plan. The host agent performs any web/search calls.\",\n    \"Review queries before executing them with private connectors or internal search tools.\",\n    \"Store only cross-validated advisory hints in the isolated suggestion channel.\"\n  ]\n}"
     }
   ]
 }

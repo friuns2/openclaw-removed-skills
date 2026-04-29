@@ -134,6 +134,73 @@ This is a practical subset, not an exhaustive dump.
 - `Refill()`
 - `SetDepletable(bool depletable = true, int units = 1, int maxUnits = 1)`
 
+## Card Deck Extensions on `ProbabilityList<T>`
+
+Use these when the list should behave like an ordered deck, not a weighted table.
+
+### Peek and draw
+
+- `PeekTopItem()`
+- `TryPeekTopItem(out ProbabilityItem<T> item)`
+- `PeekTop()`
+- `TryPeekTop(out T value)`
+- `PeekAtItem(int index)`
+- `TryPeekAtItem(int index, out ProbabilityItem<T> item)`
+- `DrawTopItem()`
+- `TryDrawTopItem(out ProbabilityItem<T> item)`
+- `DrawAtItem(int index)`
+- `TryDrawAtItem(int index, out ProbabilityItem<T> item)`
+
+### Place and move
+
+- `PlaceItemOnTop(ProbabilityItem<T> item)`
+- `TryPlaceItemOnTop(ProbabilityItem<T> item)`
+- `PlaceItemOnBottom(ProbabilityItem<T> item)`
+- `TryPlaceItemOnBottom(ProbabilityItem<T> item)`
+- `PlaceAtItem(int index, ProbabilityItem<T> item)`
+- `TryPlaceAtItem(int index, ProbabilityItem<T> item)`
+- `DealItemToDeck(ProbabilityList<T> target)`
+- `TryDealItemToDeck(ProbabilityList<T> target, out ProbabilityItem<T> item)`
+
+### Reorder and shuffle
+
+- `TryCut(int index)`
+- `TryReverseDeck()`
+- `CreateShufflePlan()`
+- `CreateShufflePlan(IDeckShuffleMethod shuffleMethod)`
+- `ApplyShufflePlan(DeckShufflePlan shufflePlan)`
+- `TryApplyShufflePlan(DeckShufflePlan shufflePlan)`
+- `ShuffleDeck()`
+- `TryShuffleDeck()`
+- `ShuffleDeck(IDeckShuffleMethod shuffleMethod)`
+- `TryShuffleDeck(IDeckShuffleMethod shuffleMethod)`
+- `RiffleShuffle()`
+- `TryRiffleShuffle()`
+- `OverhandShuffle()`
+- `TryOverhandShuffle()`
+- `CutNearHalf()`
+- `TryCutNearHalf()`
+
+### Deck shuffle planning types
+
+- `IDeckShuffleMethod`
+- `DeckShufflePlan`
+  - `MethodId`
+  - `DisplayName`
+  - `Steps`
+  - `FinalOrder`
+- `DeckShuffleStep`
+  - `StepType`
+  - `Description`
+  - `SourceIndices`
+  - `ResultIndices`
+- `DeckShuffleMethods`
+  - `Default`
+  - `Uniform`
+  - `Riffle`
+  - `Overhand`
+  - `CutNearHalf`
+
 ## `PLCollection<T>`
 
 Use this when many named lists belong together.

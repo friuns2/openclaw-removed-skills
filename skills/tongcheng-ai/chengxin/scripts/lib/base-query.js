@@ -32,6 +32,24 @@ const {
 } = require('./query-response');
 
 /**
+ * 清洗字符串参数：移除控制字符，超长截断
+ * 
+ * @param {string} value - 原始参数值
+ * @param {number} [max_len=500] - 最大长度（仅对自由文本参数生效）
+ * @returns {string} 清洗后的参数值
+ */
+function sanitize_string_arg(value, max_len = 500) {
+  if (typeof value !== 'string') return value;
+  // 移除控制字符（保留 \t \n \r）
+  let cleaned = value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  // 超长截断
+  if (cleaned.length > max_len) {
+    cleaned = cleaned.substring(0, max_len) + '…';
+  }
+  return cleaned;
+}
+
+/**
  * 通用参数解析器
  * 
  * 支持两种参数格式：
@@ -65,8 +83,8 @@ function parse_args(param_defs) {
             // 布尔参数：转换字符串值为布尔
             params[key] = val === 'true' || val === '1';
           } else {
-            // 普通参数：直接赋值
-            params[key] = val;
+            // 普通参数：清洗后赋值（过滤控制字符，超长截断）
+            params[key] = sanitize_string_arg(val);
           }
         } else if (typeof params[key] === 'boolean') {
           // 无值：flag 参数，设为 true
@@ -99,8 +117,13 @@ function build_request_params(params) {
   const request_params = {};
   
   for (const [key, value] of Object.entries(params)) {
-    if (value) {
-      request_params[to_camel_case(key)] = value;
+    if (value !== '' && value !== null && value !== undefined) {
+      const camel_key = to_camel_case(key);
+      // extra 字段可能承载大量用户需求，单独放宽长度限制
+      const final_value = (camel_key === 'extra' && typeof value === 'string')
+        ? sanitize_string_arg(value, 1000)
+        : value;
+      request_params[camel_key] = final_value;
     }
   }
   
@@ -200,7 +223,9 @@ function create_query_runner(config) {
         no_match_detail: no_match_detail,
         on_success: (res) => {
           const print_success_once = create_success_banner_once();
-          // 解包业务数据：API 响应为双层嵌套 { code, data: { code, data: {...} } }
+          // 解包业务数据：防御性双层解包
+          // 部分 API 响应为双层嵌套 { code, data: { code, data: {...} } }，
+          // 也有单层 { code, data: {...} } 的情况；此处兼容两种格式
           let response_data = extract_response_data(res);
           if (response_data && response_data.data !== undefined &&
               (response_data.code === '0' || response_data.code === 0)) {

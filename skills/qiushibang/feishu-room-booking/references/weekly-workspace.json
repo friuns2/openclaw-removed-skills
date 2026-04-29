@@ -1,0 +1,17 @@
+{
+  "segments": [
+    {
+      "from": "2026-04-27",
+      "to": "2026-05-02",
+      "workspace": "丽金智地中心 B座",
+      "set_at": "2026-04-27T13:36:56.526221",
+      "set_by": "manual"
+    }
+  ],
+  "next_week": {
+    "week_start": "2026-05-04",
+    "workspace": "丽金智地中心 B座",
+    "set_at": "2026-04-27T13:36:56.620997",
+    "set_by": "manual"
+  }
+}

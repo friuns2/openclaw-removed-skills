@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (c) 2024 DBCheck Contributors
+# sdfiyon@gmail.com
+#
+# This file is part of DBCheck, an open-source database health inspection tool.
+# DBCheck is released under the MIT License.
+# See LICENSE or visit https://opensource.org/licenses/MIT for full license text.
+#
 """
 DBCheck - Oracle 全面巡检工具（增强版）
 =======================================
@@ -25,6 +33,7 @@ import json
 import io
 import argparse
 import platform
+import getpass
 
 try:
     import oracledb
@@ -1690,10 +1699,27 @@ def _docx_table(doc, headers, rows, header_bg='336699'):
     return tbl
 
 
-def build_word_report(db_info, os_data, check_results, db_version, ai_advice='', inspector=''):
+def build_word_report(db_info, os_data, check_results, db_version, ai_advice='', inspector='', lang='zh', desensitize=False):
     """构建完整 Word 巡检报告（纯 python-docx，无模板依赖）"""
     if not _HAS_DOCX:
         return None
+
+    def _t(key):
+        try:
+            from i18n import t
+            return t(key, lang)
+        except Exception:
+            return key
+
+    # ── 脱敏处理（IP / 端口 / 用户名 / 服务名 / 主机名）───────────
+    if desensitize:
+        try:
+            from desensitize import apply_desensitization
+            _ds = apply_desensitization
+            db_info = _ds({'db_info': db_info})['db_info']
+            os_data  = _ds({'system_info': os_data})['system_info']
+        except Exception:
+            pass
 
     doc = Document()
 
@@ -1707,19 +1733,38 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
     section.bottom_margin = Cm(2)
 
     # ── 封面标题 ────────────────────────────────────────────────────────────
-    title_p = doc.add_heading('DBCheck Oracle 全面巡检报告', level=1)
+    # Logo 图片
+    logo_path = os.path.join(os.path.dirname(__file__), 'dbcheck_logo.png')
+    if os.path.exists(logo_path):
+        logo_para = doc.add_paragraph()
+        logo_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        logo_run = logo_para.add_run()
+        logo_run.add_picture(logo_path, width=Cm(3.5))
+
+    # 报告标题
+    title_p = doc.add_paragraph()
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    for run in title_p.runs:
-        run.font.color.rgb = RGBColor(0, 102, 204)
+    title_run = title_p.add_run('Oracle ' + _t('report.oracle_title').replace('DBCheck Oracle Full Inspection Report', '').strip())
+    title_run.font.size = Pt(28)
+    title_run.font.bold = True
+    title_run.font.color.rgb = RGBColor(15, 75, 135)
 
-    sub_p = doc.add_paragraph()
-    sub_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub_p.add_run(f'版本: {db_version}').font.color.rgb = RGBColor(102, 102, 102)
-    sub_p.add_run(f'\n巡检时间: {time.strftime("%Y-%m-%d %H:%M:%S")}').font.color.rgb = RGBColor(102, 102, 102)
-    if inspector:
-        sub_p.add_run(f'\n巡检人: {inspector}').font.color.rgb = RGBColor(0, 102, 204)
+    # 英文副标题
+    subtitle_p = doc.add_paragraph()
+    subtitle_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    subtitle_run = subtitle_p.add_run('Database Health Inspection Report')
+    subtitle_run.font.size = Pt(14)
+    subtitle_run.font.color.rgb = RGBColor(100, 100, 100)
+    subtitle_run.font.italic = True
 
-    doc.add_paragraph()  # 空行
+    # 装饰分隔线
+    doc.add_paragraph()
+    line_para = doc.add_paragraph()
+    line_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    line_run = line_para.add_run('━' * 50)
+    line_run.font.color.rgb = RGBColor(15, 75, 135)
+    line_run.font.size = Pt(8)
+    doc.add_paragraph()
 
     # ── 汇总信息卡片 ────────────────────────────────────────────────────────
     inst_rows = check_results.get('实例信息', {}).get('instance', [])
@@ -1727,13 +1772,13 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
     ver = db_version
     uptime = os_data.get('uptime', 'N/A')
     cpu = f"{os_data.get('cpu_model','')} × {os_data.get('cpu_count','?')}"
-    mem = f"{os_data.get('mem_total_mb','?')} MB，使用率 {os_data.get('mem_usage_pct','?')}%"
+    mem = f"{os_data.get('mem_total_mb','?')} MB，{_t('report.cover_mem_usage')} {os_data.get('mem_usage_pct','?')}%"
 
     summary_data = [
-        ('主机名', hostname), ('数据库版本', ver), ('运行时间', uptime),
-        ('CPU', cpu), ('内存', mem),
+        (_t('report.cover_hostname'), hostname), (_t('report.cover_version'), ver), (_t('report.cover_start_time'), uptime),
+        (_t('report.cover_cpu'), cpu), (_t('report.cover_mem'), mem),
     ]
-    tbl = _docx_table(doc, ['项目', '内容'], summary_data, '0066CC')
+    tbl = _docx_table(doc, [_t('report.tbl_col_key'), _t('report.tbl_col_val')], summary_data, '336699')
     tbl.columns[0].width = Cm(4)
     tbl.columns[1].width = Cm(10)
 
@@ -1753,13 +1798,161 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
             run.font.color.rgb = RGBColor(0, 102, 204)  # 蓝色，二级标题
             run.font.size = Pt(12)
 
+    def _add_inline_runs(p, text):
+        """向段落中添加文本_run，支持 **加粗** 和 `行内代码` 格式"""
+        import re
+        # 匹配顺序：**加粗**、`行内代码`、其他普通文本
+        # 用占位符保护代码段避免双重匹配
+        segments = []
+        last = 0
+        for m in re.finditer(r'\*\*(.+?)\*\*|`([^`]+)`', text):
+            if m.start() > last:
+                segments.append(('plain', text[last:m.start()]))
+            if m.group(0).startswith('**'):
+                segments.append(('bold', m.group(1)))
+            else:
+                segments.append(('code', m.group(2)))
+            last = m.end()
+        if last < len(text):
+            segments.append(('plain', text[last:]))
+
+        for seg_type, seg_text in segments:
+            run = p.add_run(seg_text)
+            run.font.size = Pt(10.5)
+            if seg_type == 'bold':
+                run.bold = True
+            elif seg_type == 'code':
+                run.font.name = 'Courier New'
+                run.font.size = Pt(9)
+                run.font.color.rgb = RGBColor(0, 102, 204)
+
+    def _render_ai_advice(doc, text):
+        """将 Markdown 格式的 AI 诊断建议渲染为 Word 格式"""
+        lines = text.split('\n')
+        in_code_block = False
+        code_buf = []
+        h2_counter = 0   # 用于 ## 标题序号
+        h3_counter = 0   # 用于 ### 小节序号（在同一 ## 内递增）
+        prev_was_content = False  # 上一行是否渲染了内容（排除空行和纯分隔线）
+
+        for raw in lines:
+            stripped = raw.strip()
+
+            # 代码块开始/结束
+            if stripped.startswith('```'):
+                if in_code_block:
+                    # 渲染代码块
+                    p = doc.add_paragraph()
+                    p.paragraph_format.left_indent = Cm(0.6)
+                    for cl in code_buf:
+                        r = p.add_run(cl + '\n')
+                        r.font.name = 'Courier New'
+                        r.font.size = Pt(9)
+                        r.font.color.rgb = RGBColor(0, 128, 0)
+                    code_buf = []
+                    in_code_block = False
+                    prev_was_content = True
+                else:
+                    in_code_block = True
+                continue
+
+            if in_code_block:
+                code_buf.append(stripped)
+                continue
+
+            # 空行：只打一个间距，不渲染独立空段落
+            if not stripped:
+                prev_was_content = False
+                continue
+
+            # ── 标题处理（>0 个 # + 空格 + 标题文字）─────────────
+            heading_match = re.match(r'^(#{1,3})\s+(.*)', stripped)
+            if heading_match:
+                hashes, title_text = heading_match.groups()
+                h_count = len(hashes)
+
+                if h_count == 1:          # # 一级标题（章）
+                    h = doc.add_heading(title_text, level=2)
+                    for run in h.runs:
+                        run.font.color.rgb = RGBColor(0, 102, 204)
+                        run.font.size = Pt(12)
+                    h2_counter = 0
+                    h3_counter = 0
+
+                elif h_count == 2:        # ## 二级标题（24.1/24.2）
+                    h2_counter += 1
+                    h3_counter = 0
+                    h = doc.add_heading(f"24.{h2_counter} {title_text}", level=2)
+                    for run in h.runs:
+                        run.font.color.rgb = RGBColor(0, 102, 204)
+                        run.font.size = Pt(12)
+
+                elif h_count == 3:        # ### 三级标题（24.1.1）
+                    h3_counter += 1
+                    h = doc.add_heading(f"24.{h2_counter}.{h3_counter} {title_text}", level=3)
+                    for run in h.runs:
+                        run.font.color.rgb = RGBColor(0, 102, 204)
+                        run.font.size = Pt(11)
+
+                prev_was_content = False   # 标题不计入内容行
+                continue
+
+            # 水平线 → 分隔段落
+            if re.match(r'^[-*_]{3,}$', stripped):
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(4)
+                p.paragraph_format.space_after = Pt(4)
+                prev_was_content = True
+                continue
+
+            # 引用块
+            if stripped.startswith('> '):
+                p = doc.add_paragraph()
+                p.paragraph_format.left_indent = Cm(0.5)
+                p.paragraph_format.space_before = Pt(0)
+                p.paragraph_format.space_after = Pt(0)
+                _add_inline_runs(p, stripped[2:])
+                for run in p.runs:
+                    run.font.color.rgb = RGBColor(96, 96, 96)
+                    run.font.italic = True
+                prev_was_content = True
+                continue
+
+            # 无序列表
+            if stripped.startswith('- ') or stripped.startswith('* '):
+                p = doc.add_paragraph(style='List Bullet')
+                p.paragraph_format.space_before = Pt(0)
+                p.paragraph_format.space_after = Pt(0)
+                _add_inline_runs(p, stripped[2:])
+                prev_was_content = True
+                continue
+
+            # 有序列表（数字+.）
+            m = re.match(r'^(\d+)\.\s*(.*)', stripped)
+            if m:
+                p = doc.add_paragraph(style='List Number')
+                p.paragraph_format.space_before = Pt(0)
+                p.paragraph_format.space_after = Pt(0)
+                _add_inline_runs(p, m.group(2))
+                prev_was_content = True
+                continue
+
+            # 普通段落（含行内格式）
+            p = doc.add_paragraph()
+            p.paragraph_format.space_before = Pt(0)
+            p.paragraph_format.space_after = Pt(0)
+            _add_inline_runs(p, stripped)
+            prev_was_content = True
+
+        doc.add_paragraph()
+
     def _add_kv_table(data, cols=2):
         rows = list(data)
-        headers = ['项目', '内容'] if cols == 2 else ['项目', '内容', '备注']
+        headers = [_t('report.tbl_col_key'), _t('report.tbl_col_val')]
         _docx_table(doc, headers, rows)
         doc.add_paragraph()
 
-    _add_section('一、OS 主机信息')
+    _add_section(_t('report.oracle_sec_os'))
     os_kv = [(k, os_data.get(k, 'N/A')) for k in [
         'hostname', 'os_version', 'kernel', 'uptime', 'cpu_model', 'cpu_count',
         'mem_total_mb', 'mem_used_mb', 'mem_usage_pct', 'swap_total_mb', 'swap_used_mb',
@@ -1768,238 +1961,289 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
     _add_kv_table(os_kv)
 
     # ── 数据库基本信息 ──────────────────────────────────────────────────────
-    _add_section('二、数据库基本信息')
+    _add_section(_t('report.oracle_sec_db'))
     db_kv = []
-    for k, label in [
-        ('NAME', '数据库名'), ('DATABASE_ROLE', '角色'), ('OPEN_MODE', '打开模式'),
-        ('LOG_MODE', '归档模式'), ('CDB', 'CDB'), ('flashback_on', '闪回'),
-        ('force_logging', 'Force Logging'), ('block_size', '块大小'),
-        ('sga_max_size', 'SGA Max'), ('sga_target', 'SGA Target'),
-        ('pga_aggregate_target', 'PGA Target'), ('spfile', 'SPFILE'),
+    for k, label_key in [
+        ('NAME', 'report.oracle_col_db_name'), ('DATABASE_ROLE', 'report.oracle_col_db_role'),
+        ('OPEN_MODE', 'report.oracle_col_open_mode2'), ('LOG_MODE', 'report.oracle_col_log_mode2'),
+        ('CDB', 'report.oracle_col_cdb'), ('flashback_on', 'report.oracle_col_flashback'),
+        ('force_logging', 'report.oracle_col_force_log'), ('block_size', 'report.oracle_col_block_size'),
+        ('sga_max_size', 'report.oracle_col_sga_max'), ('sga_target', 'report.oracle_col_sga_target'),
+        ('pga_aggregate_target', 'report.oracle_col_pga_target'), ('spfile', 'report.oracle_col_spfile'),
     ]:
         v = db_info.get(k, 'N/A')
-        db_kv.append((label, str(v)))
+        db_kv.append((_t(label_key), str(v)))
     _add_kv_table(db_kv)
 
     # ── 实例信息 ────────────────────────────────────────────────────────────
     inst = check_results.get('实例信息', {})
     if inst.get('instance'):
-        _add_section('三、实例信息')
+        _add_section(_t('report.oracle_sec_instance'))
         _docx_table(doc,
-            ['INST_ID', '实例名', '主机', '版本', '启动时间', '状态', '并行', '日志模式', '角色', '打开模式'],
+            [_t('report.oracle_col_inst_id'), _t('report.oracle_col_inst_name'),
+             _t('report.oracle_col_host'), _t('report.oracle_col_version'),
+             _t('report.oracle_col_startup'), _t('report.oracle_col_status'),
+             _t('report.oracle_col_parallel'), _t('report.oracle_col_log_mode'),
+             _t('report.oracle_col_role'), _t('report.oracle_col_open_mode')],
             inst['instance'])
         doc.add_paragraph()
 
     # ── 版本/补丁 ───────────────────────────────────────────────────────────
     vp = check_results.get('版本/补丁', {})
     if vp.get('version'):
-        _add_section('四、数据库版本与补丁')
-        _docx_table(doc, ['版本信息'], [[r[0]] for r in vp['version']])
+        _add_section(_t('report.oracle_sec_version'))
+        _docx_table(doc, [_t('report.oracle_col_version')], [[r[0]] for r in vp['version']])
         doc.add_paragraph()
 
     # ── 表空间 ──────────────────────────────────────────────────────────────
     ts = check_results.get('表空间', {})
     if ts.get('data_tablespaces') or ts.get('temp_tablespaces'):
-        _add_section('五、表空间')
+        _add_section(_t('report.oracle_sec_ts'))
     if ts.get('data_tablespaces'):
-        _add_subsection('5.1 永久表空间')
+        _add_subsection(_t('report.oracle_sec_ts_perm'))
         _docx_table(doc,
-            ['表空间名', '状态', '类型', '日志', '最大MB', '当前MB', '已用MB', '使用率%'],
+            [_t('report.oracle_col_ts_name'), _t('report.oracle_col_ts_status'),
+             _t('report.oracle_col_ts_type'), _t('report.oracle_col_ts_log'),
+             _t('report.oracle_col_ts_max_mb'), _t('report.oracle_col_ts_cur_mb'),
+             _t('report.oracle_col_ts_used_mb'), _t('report.oracle_col_ts_pct')],
             ts['data_tablespaces'])
         doc.add_paragraph()
     if ts.get('temp_tablespaces'):
-        _add_subsection('5.2 临时表空间')
+        _add_subsection(_t('report.oracle_sec_ts_temp'))
         _docx_table(doc,
-            ['表空间名', '状态', '最大MB', '当前MB', '已用MB', '使用率%'],
+            [_t('report.oracle_col_ts_name'), _t('report.oracle_col_ts_status'),
+             _t('report.oracle_col_ts_max_mb'), _t('report.oracle_col_ts_cur_mb'),
+             _t('report.oracle_col_ts_used_mb'), _t('report.oracle_col_ts_pct')],
             ts['temp_tablespaces'])
         doc.add_paragraph()
 
     # ── Redo 日志 ───────────────────────────────────────────────────────────
     redo = check_results.get('Redo日志', {})
     if redo.get('logs'):
-        _add_section('六、Redo 日志')
+        _add_section(_t('report.oracle_sec_redo'))
         _docx_table(doc,
-            ['Group#', 'Thread#', 'Sequence#', '大小MB', '状态', '成员数', '已归档'],
+            [_t('report.oracle_col_redo_g'), _t('report.oracle_col_redo_th'),
+             _t('report.oracle_col_redo_seq'), _t('report.oracle_col_redo_sz'),
+             _t('report.oracle_col_redo_st'), _t('report.oracle_col_redo_mbr'),
+             _t('report.oracle_col_redo_arch')],
             redo['logs'])
         doc.add_paragraph()
 
     # ── 控制文件 ────────────────────────────────────────────────────────────
     cf = check_results.get('控制文件', {})
     if cf.get('controlfiles'):
-        _add_section('七、控制文件')
+        _add_section(_t('report.oracle_sec_cf'))
         _docx_table(doc,
-            ['名称', '状态', '恢复目录', '块大小', '文件块数'],
+            [_t('report.oracle_col_cf_name'), _t('report.oracle_col_cf_st'),
+             _t('report.oracle_col_cf_recovery'), _t('report.oracle_col_cf_block'),
+             _t('report.oracle_col_cf_blocks')],
             cf['controlfiles'])
         doc.add_paragraph()
 
     # ── SGA/PGA 内存 ────────────────────────────────────────────────────────
     sga = check_results.get('SGA/PGA内存', {})
     if sga.get('sga_components') or sga.get('pga_stats') or sga.get('memory_params'):
-        _add_section('八、SGA/PGA 内存')
+        _add_section(_t('report.oracle_sec_sga_pga'))
     if sga.get('sga_components'):
-        _add_subsection('8.1 SGA 动态组件')
+        _add_subsection(_t('report.oracle_sec_sga'))
         _docx_table(doc,
-            ['组件名', '当前MB', '最小MB', '用户指定MB'],
+            [_t('report.oracle_col_sga_comp'), _t('report.oracle_col_sga_cur'),
+             _t('report.oracle_col_sga_min'), _t('report.oracle_col_sga_user')],
             sga['sga_components'])
         doc.add_paragraph()
     if sga.get('sga_total'):
-        _docx_table(doc, ['SGA 总计（MB）'], [[r[0]] for r in sga['sga_total']])
+        _docx_table(doc, [_t('report.oracle_col_sga_total')], [[r[0]] for r in sga['sga_total']])
         doc.add_paragraph()
     if sga.get('pga_stats'):
-        _add_subsection('8.2 PGA 统计')
-        _docx_table(doc, ['指标名', '值（MB）'], sga['pga_stats'])
+        _add_subsection(_t('report.oracle_sec_pga'))
+        _docx_table(doc,
+            [_t('report.oracle_col_pga_stat_name'), _t('report.oracle_col_pga_stat_val')],
+            sga['pga_stats'])
         doc.add_paragraph()
     if sga.get('memory_params'):
-        _add_subsection('8.3 内存参数')
-        _docx_table(doc, ['参数名', 'VALUE', '显示值', '是否默认'], sga['memory_params'])
+        _add_subsection(_t('report.oracle_sec_mem_param'))
+        _docx_table(doc,
+            [_t('report.oracle_col_param_name'), _t('report.oracle_col_param_val'),
+             _t('report.oracle_col_param_disp'), _t('report.oracle_col_param_def'),
+             _t('report.oracle_col_param_sess'), _t('report.oracle_col_param_sys'),
+             _t('report.oracle_col_param_desc')],
+            sga['memory_params'])
         doc.add_paragraph()
 
     # ── 关键参数 ───────────────────────────────────────────────────────────
     params = check_results.get('关键参数', {})
     if params.get('params'):
-        _add_section('九、关键参数')
+        _add_section(_t('report.oracle_sec_params'))
         _docx_table(doc,
-            ['参数名', 'VALUE', '显示值', '是否默认', '会话可改', '系统可改', '描述'],
+            [_t('report.oracle_col_param_name'), _t('report.oracle_col_param_val'),
+             _t('report.oracle_col_param_disp'), _t('report.oracle_col_param_def'),
+             _t('report.oracle_col_param_sess'), _t('report.oracle_col_param_sys'),
+             _t('report.oracle_col_param_desc')],
             params['params'])
         doc.add_paragraph()
 
     # ── Undo 信息 ──────────────────────────────────────────────────────────
     undo = check_results.get('Undo信息', {})
     if undo.get('undo_info') or undo.get('undo_segments'):
-        _add_section('十、Undo 信息')
+        _add_section(_t('report.oracle_sec_undo'))
     if undo.get('undo_info'):
         _docx_table(doc,
-            ['Undo表空间', '保留策略', '已用MB', '总大小MB', '已提交块', '未提交块', '总块数'],
+            [_t('report.oracle_col_undo_ts'), _t('report.oracle_col_undo_ret'),
+             _t('report.oracle_col_undo_used'), _t('report.oracle_col_undo_total'),
+             _t('report.oracle_col_undo_committed'), _t('report.oracle_col_undo_uncommitted'),
+             _t('report.oracle_col_undo_total_blocks')],
             undo['undo_info'])
         doc.add_paragraph()
     if undo.get('undo_segments'):
         _docx_table(doc,
-            ['状态', '段数量', '总大小MB'],
+            [_t('report.oracle_col_undo_seg_status'), _t('report.oracle_col_undo_seg_count'),
+             _t('report.oracle_col_undo_seg_size')],
             undo['undo_segments'])
         doc.add_paragraph()
 
     # ── 长SQL ───────────────────────────────────────────────────────────────
     long_sql = check_results.get('长SQL', {})
     if long_sql.get('long_sql'):
-        _add_section('十一、长时间运行的 SQL')
+        _add_section(_t('report.oracle_sec_long_sql'))
         _docx_table(doc,
-            ['SID', 'SERIAL#', '用户名', 'SQL_ID', '操作', '已完成', '总工作量', '完成%', '已耗时秒', '剩余秒'],
+            [_t('report.oracle_col_sid'), _t('report.oracle_col_serial'),
+             _t('report.oracle_col_username'), _t('report.oracle_col_sql_id'),
+             _t('report.oracle_col_operation'), _t('report.oracle_col_done'),
+             _t('report.oracle_col_work'), _t('report.oracle_col_pct_done'),
+             _t('report.oracle_col_elapsed'), _t('report.oracle_col_remaining')],
             long_sql['long_sql'])
         doc.add_paragraph()
 
     # ── 性能指标 ────────────────────────────────────────────────────────────
     perf = check_results.get('性能指标', {})
     if perf.get('session_by_status') or perf.get('wait_events'):
-        _add_section('十二、性能指标')
+        _add_section(_t('report.oracle_sec_perf'))
     if perf.get('session_by_status'):
-        _add_subsection('12.1 会话状态统计')
-        _docx_table(doc, ['状态', '数量'], perf['session_by_status'])
+        _add_subsection(_t('report.oracle_sec_perf_ses'))
+        _docx_table(doc,
+            [_t('report.oracle_col_status'), _t('report.oracle_col_count')],
+            perf['session_by_status'])
         doc.add_paragraph()
     if perf.get('wait_events'):
-        _add_subsection('12.2 等待事件统计')
+        _add_subsection(_t('report.oracle_sec_perf_wait'))
         _docx_table(doc,
-            ['事件', '总等待次数', '等待时间(秒)', '等待占比%', '类别'],
+            [_t('report.oracle_col_wait_event'), _t('report.oracle_col_wait_total'),
+             _t('report.oracle_col_wait_time'), _t('report.oracle_col_wait_pct'),
+             _t('report.oracle_col_wait_class')],
             perf['wait_events'])
         doc.add_paragraph()
 
     # ── Top SQL ─────────────────────────────────────────────────────────────
     top_sql = check_results.get('Top SQL', {})
     if top_sql.get('top_sql_buffer_gets'):
-        _add_section('十三、Top SQL（按 Buffer Gets）')
+        _add_section(_t('report.oracle_sec_top_sql'))
         _docx_table(doc,
-            ['SQL_ID', 'SQL片段', 'Buf MB', 'Disk MB', '执行次数', '耗时秒', 'Gets/执行', '模块'],
+            [_t('report.oracle_col_sql_id'), _t('report.oracle_col_sql_text'),
+             _t('report.oracle_col_buf_mb'), _t('report.oracle_col_disk_mb'),
+             _t('report.oracle_col_exec_cnt'), _t('report.oracle_col_elapsed_s'),
+             _t('report.oracle_col_gets_exec'), _t('report.oracle_col_module')],
             top_sql['top_sql_buffer_gets'])
         doc.add_paragraph()
 
     # ── 无效对象 ────────────────────────────────────────────────────────────
     io = check_results.get('无效对象', {})
+    _add_section(_t('report.oracle_sec_invalid'))
     if io.get('invalid_by_type'):
-        _add_section('十四、无效对象')
-        _docx_table(doc, ['所有者', '类型', '数量'], io['invalid_by_type'])
-        doc.add_paragraph()
+        _docx_table(doc, [_t('report.oracle_col_owner'), _t('report.oracle_col_obj_type'), _t('report.oracle_col_count')], io['invalid_by_type'])
+    else:
+        p = doc.add_paragraph(_t('report.no_data'))
+        for run in p.runs:
+            run.font.size = Pt(10.5)
+            run.font.color.rgb = RGBColor(128, 128, 128)
+    doc.add_paragraph()
 
     # ── 用户安全 ────────────────────────────────────────────────────────────
     users = check_results.get('用户安全', {})
     if users.get('default_accounts') or users.get('locked_users'):
-        _add_section('十五、用户安全')
+        _add_section(_t('report.oracle_sec_users'))
     if users.get('default_accounts'):
-        _add_subsection('15.1 默认账户状态')
+        _add_subsection(_t('report.oracle_sec_user_def'))
         _docx_table(doc,
-            ['用户名', '状态', '锁定日期', '到期日期', '创建时间'],
+            [_t('report.oracle_col_username'), _t('report.oracle_col_status'), _t('report.oracle_col_lock_date'), _t('report.oracle_col_expire'), _t('report.oracle_col_create_time')],
             users['default_accounts'])
         doc.add_paragraph()
     if users.get('locked_users'):
-        _add_subsection('15.2 锁定账户')
+        _add_subsection(_t('report.oracle_sec_user_lock'))
         _docx_table(doc,
-            ['用户名', '状态', '锁定日期', '到期日期'],
+            [_t('report.oracle_col_username'), _t('report.oracle_col_status'), _t('report.oracle_col_lock_date'), _t('report.oracle_col_expire')],
             users['locked_users'])
         doc.add_paragraph()
 
     # ── 备份信息 ────────────────────────────────────────────────────────────
     backup = check_results.get('备份信息', {})
+    _add_section(_t('report.oracle_sec_backup'))
     if backup.get('rman_jobs'):
-        _add_section('十六、备份信息（RMAN）')
         _docx_table(doc,
-            ['会话KEY', '类型', '状态', '开始时间', '结束时间', '大小GB', '耗时分钟'],
+            [_t('report.oracle_col_session_key'), _t('report.oracle_col_rtype'), _t('report.oracle_col_rstatus'), _t('report.oracle_col_start_time'), _t('report.oracle_col_end_time'), _t('report.oracle_col_size_gb'), _t('report.oracle_col_duration')],
             backup['rman_jobs'])
-        doc.add_paragraph()
+    else:
+        p = doc.add_paragraph(_t('report.no_data'))
+        for run in p.runs:
+            run.font.size = Pt(10.5)
+            run.font.color.rgb = RGBColor(128, 128, 128)
+    doc.add_paragraph()
 
     # ── 闪回/回收站 ─────────────────────────────────────────────────────────
     fb = check_results.get('闪回/回收站', {})
     if fb.get('flashback'):
-        _add_section('十七、闪回与回收站')
+        _add_section(_t('report.oracle_sec_flashback'))
         _docx_table(doc,
-            ['闪回开关', '保留目标(分)', '最旧闪回时间', '保留分钟'],
+            [_t('report.oracle_col_fb_on'), _t('report.oracle_col_fb_ret'), _t('report.oracle_col_fb_oldest'), _t('report.oracle_col_fb_ret_min')],
             fb['flashback'])
         doc.add_paragraph()
 
     # ── Data Guard ──────────────────────────────────────────────────────────
     dg = check_results.get('Data Guard', {})
     if dg.get('dg_status'):
-        _add_section('十八、Data Guard')
+        _add_section(_t('report.oracle_sec_dataguard'))
         _docx_table(doc,
-            ['数据库模式', '恢复模式', '保护模式', 'Standby'],
+            [_t('report.oracle_col_dg_mode'), _t('report.oracle_col_dg_protection'), _t('report.oracle_col_dg_protect_mode'), _t('report.oracle_col_dg_standby')],
             dg['dg_status'])
         doc.add_paragraph()
 
     # ── RAC ─────────────────────────────────────────────────────────────────
     rac = check_results.get('RAC+ASM', {})
     if rac.get('rac_instances'):
-        _add_section('十九、RAC + ASM')
+        _add_section(_t('report.oracle_sec_rac'))
         _docx_table(doc,
-            ['Inst#', '实例名', '主机', '状态', '并行'],
+            [_t('report.oracle_col_inst'), _t('report.oracle_col_inst_name2'), _t('report.oracle_col_host2'), _t('report.oracle_col_status2'), _t('report.oracle_col_parallel2')],
             rac['rac_instances'])
         doc.add_paragraph()
 
     # ── AWR ─────────────────────────────────────────────────────────────────
     awr = check_results.get('AWR快照', {})
     if awr.get('awr_snaps'):
-        _add_section('二十、AWR 快照（近7天）')
+        _add_section(_t('report.oracle_sec_awr'))
         _docx_table(doc,
-            ['Inst#', 'Snap ID', '开始时间', '结束时间', '耗时HR', '错误'],
+            [_t('report.oracle_col_inst'), _t('report.oracle_col_snap_id'), _t('report.oracle_col_btime'), _t('report.oracle_col_etime'), _t('report.oracle_col_elapsed_hr'), _t('report.oracle_col_error')],
             awr['awr_snaps'])
         doc.add_paragraph()
 
     # ── 作业调度 ────────────────────────────────────────────────────────────
     jobs = check_results.get('作业调度', {})
     if jobs.get('scheduler_jobs'):
-        _add_section('二十一、作业调度')
+        _add_section(_t('report.oracle_sec_jobs'))
         _docx_table(doc,
-            ['作业名', '状态', '启用', '调度类型', '下次运行', '运行次数', '失败次数'],
+            [_t('report.oracle_col_job_name'), _t('report.oracle_col_job_status'), _t('report.oracle_col_enabled'), _t('report.oracle_col_sched_type'), _t('report.oracle_col_next_run'), _t('report.oracle_col_runs'), _t('report.oracle_col_failures')],
             jobs['scheduler_jobs'])
         doc.add_paragraph()
 
     # ── Alert 日志 ─────────────────────────────────────────────────────────
     alert = check_results.get('Alert日志', {})
     if alert.get('alert_errors'):
-        _add_section('二十二、Alert 日志错误（近7天）')
+        _add_section(_t('report.oracle_sec_alert'))
         _docx_table(doc,
-            ['时间', '错误信息（截取200字符）'],
+            [_t('report.oracle_col_alert_time'), _t('report.oracle_col_alert_msg')],
             alert['alert_errors'])
         doc.add_paragraph()
 
     # ── 风险与建议 ─────────────────────────────────────────────────────────
-    _add_section('二十三、风险与建议')
+    _add_section(_t('report.oracle_sec_risks'))
     # 收集各章节中的问题，构建风险项列表
     risk_items = []
     # 从表空间数据中提取高使用率风险
@@ -2010,15 +2254,15 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
                 used_pct = float(row[7]) if row[7] != '-' else 0
                 if used_pct > 90:
                     risk_items.append({
-                        'col1': f'表空间 {row[0]}', 'col2': '高风险',
-                        'col3': f'表空间使用率 {used_pct:.1f}%，超过 90% 告警线',
-                        'col4': '高', 'col5': 'DBA', 'fix_sql': '-- 查询表空间使用情况'
+                        'col1': _t('report.risk_tablespace').format(name=row[0]), 'col2': _t('report.risk_high'),
+                        'col3': _t('report.risk_ts_high').format(pct=f'{used_pct:.1f}'),
+                        'col4': _t('report.severity_high'), 'col5': _t('report.risk_dba'), 'fix_sql': _t('report.risk_fix_ts')
                     })
                 elif used_pct > 80:
                     risk_items.append({
-                        'col1': f'表空间 {row[0]}', 'col2': '中风险',
-                        'col3': f'表空间使用率 {used_pct:.1f}%，超过 80% 建议关注',
-                        'col4': '中', 'col5': 'DBA', 'fix_sql': ''
+                        'col1': _t('report.risk_tablespace').format(name=row[0]), 'col2': _t('report.risk_mid'),
+                        'col3': _t('report.risk_ts_mid').format(pct=f'{used_pct:.1f}'),
+                        'col4': _t('report.severity_mid'), 'col5': _t('report.risk_dba'), 'fix_sql': ''
                     })
             except (ValueError, TypeError):
                 pass
@@ -2029,39 +2273,39 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
             cnt = row[2] if isinstance(row[2], int) else 0
             if cnt > 0:
                 risk_items.append({
-                    'col1': f'无效{row[1]}对象', 'col2': '中风险',
-                    'col3': f'存在 {cnt} 个无效 {row[1]} 对象',
-                    'col4': '中', 'col5': 'DBA', 'fix_sql': f'SELECT * FROM {row[0]}.{row[1]} WHERE status=\'INVALID\';'
+                    'col1': _t('report.risk_invalid_obj').format(type=row[1]), 'col2': _t('report.risk_mid'),
+                    'col3': _t('report.risk_invalid_desc').format(cnt=cnt, type=row[1]),
+                    'col4': _t('report.severity_mid'), 'col5': _t('report.risk_dba'), 'fix_sql': f'SELECT * FROM {row[0]}.{row[1]} WHERE status=\'INVALID\';'
                 })
     # 从锁定用户中提取风险
     users = check_results.get('用户安全', {})
     locked = users.get('locked_users', [])
     if locked:
         risk_items.append({
-            'col1': '账户锁定', 'col2': '中风险',
-            'col3': f'存在 {len(locked)} 个被锁定的账户',
-            'col4': '中', 'col5': 'DBA', 'fix_sql': '-- 查看锁定账户: SELECT username, lock_date FROM dba_users WHERE account_status LIKE \'%LOCKED%\';'
+            'col1': _t('report.risk_locked'), 'col2': _t('report.risk_mid'),
+            'col3': _t('report.risk_locked_desc').format(n=len(locked)),
+            'col4': _t('report.severity_mid'), 'col5': _t('report.risk_dba'), 'fix_sql': f"-- {_t('report.risk_fix_locked')}: SELECT username, lock_date FROM dba_users WHERE account_status LIKE '%LOCKED%';"
         })
     # 从Alert日志错误中提取风险
     alert = check_results.get('Alert日志', {})
     err_count = len(alert.get('alert_errors', []))
     if err_count > 0:
         risk_items.append({
-            'col1': 'Alert日志错误', 'col2': '高风险',
-            'col3': f'近7天存在 {err_count} 条Error级别Alert日志',
-            'col4': '高', 'col5': 'DBA', 'fix_sql': '-- 检查Alert日志具体内容'
+            'col1': _t('report.risk_alert'), 'col2': _t('report.risk_high'),
+            'col3': _t('report.risk_alert_desc').format(n=err_count),
+            'col4': _t('report.severity_high'), 'col5': _t('report.risk_dba'), 'fix_sql': f"-- {_t('report.risk_fix_alert')}"
         })
 
     if risk_items:
         # 23.1 问题明细
-        _add_subsection('23.1 问题明细')
+        _add_subsection(_t('report.oracle_risk_detail_chapter'))
         risk_table_data = [(str(i+1), x['col1'], x['col2'], x['col3'], x['col4'], x['col5']) for i, x in enumerate(risk_items)]
-        _docx_table(doc, ['序号', '项目', '风险等级', '问题描述', '严重程度', '责任人'], risk_table_data)
+        _docx_table(doc, [_t('report.col_seq'), _t('report.col_risk_item'), _t('report.col_level'), _t('report.col_desc'), _t('report.col_severity'), _t('report.col_owner')], risk_table_data)
         doc.add_paragraph()
         # 23.2 修复SQL速查
         fix_sqls = [(x['col1'], x['fix_sql']) for x in risk_items if x['fix_sql']]
         if fix_sqls:
-            _add_subsection('23.2 修复SQL速查')
+            _add_subsection(_t('report.oracle_risk_fix_chapter'))
             for fname, sql in fix_sqls:
                 p = doc.add_paragraph()
                 p.add_run(f'【{fname}】').bold = True
@@ -2069,66 +2313,49 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
             doc.add_paragraph()
     else:
         # 即使无高风险，也汇总各项巡检结论
-        _add_subsection('23.1 巡检结论')
+        _add_subsection(_t('report.oracle_risk_summary_chapter'))
         summary_items = []
         ts = check_results.get('表空间', {})
         if ts.get('data_tablespaces'):
             total_ts = len(ts['data_tablespaces'])
             high_ts = sum(1 for r in ts['data_tablespaces'] if len(r) >= 8 and str(r[7]).replace('.','').isdigit() and float(r[7]) > 80)
-            summary_items.append(f'表空间共 {total_ts} 个，其中使用率超过 80% 的有 {high_ts} 个')
+            summary_items.append(_t('report.summary_ts').format(total=total_ts, high=high_ts))
         perf = check_results.get('性能指标', {})
         if perf.get('wait_events'):
             top_wait = perf['wait_events'][0][0] if perf['wait_events'] else 'N/A'
-            summary_items.append(f'等待事件最突出项: {top_wait}')
+            summary_items.append(_t('report.summary_wait').format(event=top_wait))
         io = check_results.get('无效对象', {})
         if io.get('invalid_by_type'):
             total_inv = sum(int(r[2]) for r in io['invalid_by_type'] if len(r) >= 3 and str(r[2]).isdigit())
-            summary_items.append(f'无效对象共 {total_inv} 个')
+            summary_items.append(_t('report.summary_invalid').format(total=total_inv))
         if summary_items:
             for item in summary_items:
                 p = doc.add_paragraph(item, style='List Bullet')
         else:
-            p = doc.add_paragraph("未发现明显风险项，数据库整体运行状况良好")
+            p = doc.add_paragraph(_t('report.no_risk_found_oracle'))
             for run in p.runs:
                 run.font.size = Pt(10.5)
 
     # ── 第24章 AI 诊断 ─────────────────────────────────────────────────────
-    _add_section('二十四、AI 诊断建议')
+    _add_section(_t('report.oracle_sec_ai'))
     if ai_advice:
-        for line in ai_advice.split('\n'):
-            if line.strip():
-                if line.startswith('# '):
-                    h = doc.add_heading(line[2:], level=2)
-                    for run in h.runs:
-                        run.font.color.rgb = RGBColor(0, 102, 204)
-                elif line.startswith('- ') or line.startswith('* '):
-                    doc.add_paragraph(line[2:], style='List Bullet')
-                elif re.match(r'^\d+\.', line):
-                    # 避免与 Word 自动编号冲突，直接写纯文本段落
-                    p = doc.add_paragraph(line)
-                    for run in p.runs:
-                        run.font.size = Pt(10.5)
-                else:
-                    p = doc.add_paragraph(line)
-                    for run in p.runs:
-                        run.font.size = Pt(10.5)
-        doc.add_paragraph()
+        _render_ai_advice(doc, ai_advice)
     else:
-        p = doc.add_paragraph("AI 诊断未启用或无可用建议。请在 ai_config.json 中配置 Ollama 后重新巡检以获取 AI 诊断。")
+        p = doc.add_paragraph(_t('report.ai_disabled'))
         for run in p.runs:
             run.font.size = Pt(10.5)
             run.font.color.rgb = RGBColor(128, 128, 128)
         doc.add_paragraph()
 
     # ── 第25章 报告说明 ────────────────────────────────────────────────────
-    _add_section('二十五、报告说明')
+    _add_section(_t('report.notes_chapter'))
     notes = [
-        "本报告基于 Oracle 数据库实时状态生成，反映了生成时刻的数据库健康状况。",
-        "报告中空白的项表示未能获取到相关数据，可能是由于权限限制或该功能未启用。",
-        "磁盘信息仅显示主要分区的使用率，如需查看完整磁盘信息请使用系统命令 'df -h'。",
-        "巡检结果仅供参考，实际运维中请结合具体业务场景进行分析。",
-        "建议定期进行数据库巡检，及时发现并解决潜在问题。",
-        "AI 诊断功能（若启用）生成的建议仅供参考，不构成专业 DBA 意见。"
+        _t('report.oracle_note_1'),
+        _t('report.oracle_note_2'),
+        _t('report.oracle_note_3'),
+        _t('report.oracle_note_4'),
+        _t('report.oracle_note_5'),
+        _t('report.oracle_note_6'),
     ]
     for text in notes:
         p = doc.add_paragraph()
@@ -2140,7 +2367,7 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
     # ── 页脚 ────────────────────────────────────────────────────────────────
     footer_p = doc.add_paragraph()
     footer_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = footer_p.add_run(f'DBCheck Oracle 巡检工具 {VER} | 报告生成时间 {time.strftime("%Y-%m-%d %H:%M:%S")}')
+    run = footer_p.add_run(_t('report.oracle_footer').format(VER=VER, time=time.strftime("%Y-%m-%d %H:%M:%S")))
     run.font.size = Pt(9)
     run.font.color.rgb = RGBColor(128, 128, 128)
 
@@ -2152,6 +2379,21 @@ def build_word_report(db_info, os_data, check_results, db_version, ai_advice='',
 # ═══════════════════════════════════════════════════════════════════════════
 
 def print_banner():
+    # Detect language
+    try:
+        from i18n import get_lang, t as _tt
+        _lang = get_lang()
+    except Exception:
+        _lang = 'zh'
+
+    def _t(key):
+        try:
+            return _tt(key, _lang)
+        except Exception:
+            return key
+
+    banner_tool = _t('oracle_banner_tool')
+    banner_sub  = _t('oracle_banner_subtitle')
     art = f"""
 {CYAN}{BOLD}  ██████╗ ██████╗  ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
   ██╔══██╗██╔══██╗██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
@@ -2159,9 +2401,9 @@ def print_banner():
   ██║  ██║██╔══██╗██║     ██╔══██║██╔══╝  ██║     ██╔═██╗
   ██████╔╝██████╔╝╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
   ╚═════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝{RESET}
-{BOLD}      🗄️  DBCheck Oracle 全面巡检工具  {VER}{RESET}
+{BOLD}      🗄️  {banner_tool}  {VER}{RESET}
 {DIM}  ──────────────────────────────────────────────────────────{RESET}
-{GREEN}  基于 OS 层 + 数据库层{RESET}
+{GREEN}  {banner_sub}{RESET}
 {DIM}  ──────────────────────────────────────────────────────────{RESET}
 """
     print(art)
@@ -2171,11 +2413,58 @@ def single_inspection(args):
     """单机巡检主流程"""
     import paramiko
 
-    print(f"\n{GREEN}▶ 开始 Oracle 全面巡检{RESET}")
+    # Get language and local _t for this function
+    try:
+        from i18n import get_lang
+        _lang = get_lang()
+    except Exception:
+        _lang = 'zh'
+
+    def _t(key):
+        try:
+            from i18n import t as _tt
+            return _tt(key, _lang)
+        except Exception:
+            return key
+
+    def _plural(cnt, singular, plural):
+        """Return singular or plural form. EN: 1→singular else→plural; ZH: always singular."""
+        return singular if _lang == 'en' and cnt == 1 else plural
+
+    # Map internal Chinese check-item keys to i18n display names
+    _item_i18n = {
+        '实例信息':      'oracle_check_item_instance',
+        '数据库信息':    'oracle_check_item_database',
+        '版本/补丁':     'oracle_check_item_version',
+        '表空间':        'oracle_check_item_tablespace',
+        'Redo日志':      'oracle_check_item_redolog',
+        '控制文件':      'oracle_check_item_controlfile',
+        'SGA/PGA内存': 'oracle_check_item_sga_pga',
+        '关键参数':      'oracle_check_item_params',
+        'Undo信息':      'oracle_check_item_undo',
+        '长SQL':         'oracle_check_item_long_sql',
+        '性能指标':      'oracle_check_item_perf',
+        'Top SQL':       'oracle_check_item_top_sql',
+        '无效对象':     'oracle_check_item_invalid_obj',
+        '用户安全':     'oracle_check_item_users',
+        '备份信息':     'oracle_check_item_backup',
+        '闪回/回收站': 'oracle_check_item_flashback',
+        'Data Guard':   'oracle_check_item_dataguard',
+        'RAC+ASM':      'oracle_check_item_rac_asm',
+        'AWR快照':      'oracle_check_item_awr',
+        '作业调度':     'oracle_check_item_jobs',
+        'Alert日志':    'oracle_check_item_alert',
+    }
+
+    def _item_name(name):
+        key = _item_i18n.get(name)
+        return _t(key) if key else name
+
+    print(f"\n{GREEN}▶ {_t('oracle_log_start')}{RESET}")
     t0 = time.time()
 
     # ── 1. Oracle 连接 ─────────────────────────────────────────────────────
-    print(f"\n[{GREEN}1/6{RESET}] 连接 Oracle 数据库...")
+    print(f"\n[{GREEN}1/6{RESET}] {_t('oracle_log_connect_db')}")
     try:
         if args.servicename:
             dsn = oracledb.makedsn(args.host, args.port, service_name=args.servicename)
@@ -2188,18 +2477,18 @@ def single_inspection(args):
             conn = oracledb.connect(user=args.user, password=args.password, dsn=dsn, mode=oracledb.SYSDBA)
         else:
             conn = oracledb.connect(user=args.user, password=args.password, dsn=dsn)
-        print(f"  ✅ 连接成功 (mode: {'SYSDBA' if args.sysdba else 'NORMAL'})")
+        print(f"  ✅ {_t('oracle_log_connect_ok')} (mode: {'SYSDBA' if args.sysdba else 'NORMAL'})")
     except Exception as e:
-        print(f"  ❌ 连接失败: {e}")
+        print(f"  ❌ {_t('oracle_log_connect_fail')}: {e}")
         return
 
     # ── 2. 获取版本 ───────────────────────────────────────────────────────
-    print(f"\n[{GREEN}2/6{RESET}] 获取数据库版本...")
+    print(f"\n[{GREEN}2/6{RESET}] {_t('oracle_log_get_version')}")
     version_str, ver_major = get_db_version_and_major(conn)
-    print(f"  版本: {version_str}  (主版本: {ver_major})")
+    print(f"  {_t('oracle_log_version_fmt').format(ver=version_str, major=ver_major)}")
 
     # ── 3. OS 层采集 ──────────────────────────────────────────────────────
-    print(f"\n[{GREEN}3/6{RESET}] 采集 OS 层信息...")
+    print(f"\n[{GREEN}3/6{RESET}] {_t('oracle_log_collect_os')}")
     os_data = {}
     ssh_client = None
     if args.ssh_host:
@@ -2213,18 +2502,18 @@ def single_inspection(args):
             )
             collector = OSCollector(ssh_client)
             os_data = collector.collect()
-            print(f"  ✅ SSH 采集成功 (host: {args.ssh_host})")
+            print(f"  ✅ {_t('oracle_log_ssh_ok')} (host: {args.ssh_host})")
         except Exception as e:
-            print(f"  ⚠ SSH 采集失败: {e}，使用本地采集")
+            print(f"  ⚠ {_t('oracle_log_ssh_fail')}: {e}，{_t('oracle_log_use_local')}")
             collector = OSCollector(None)
             os_data = collector.collect()
     else:
         collector = OSCollector(None)
         os_data = collector.collect()
-        print(f"  ✅ 本地采集完成")
+        print(f"  ✅ {_t('oracle_log_local_ok')}")
 
     # ── 4. 数据库层巡检（版本自适应）──────────────────────────────────────
-    print(f"\n[{GREEN}4/6{RESET}] 执行数据库层巡检（Oracle {ver_major}c）...")
+    print(f"\n[{GREEN}4/6{RESET}] {_t('oracle_log_db_inspect')} (Oracle {ver_major}c)...")
     check_results = {}
 
     # 根据版本号动态选择检查列表
@@ -2237,19 +2526,19 @@ def single_inspection(args):
                 check_results[name] = result
                 rows = list(result.values())[0] if result else []
                 cnt = len(rows) if isinstance(rows, list) else '-'
-                print(f"  ✅ {name}  ({cnt} 条)")
+                print(f"  ✅ {_item_name(name)}  ({cnt} {_plural(cnt, 'row', 'rows')})")
             elif result and 'error' in result:
                 # 有 error 键，说明查询执行了但失败了，打印具体错误
-                print(f"  ⚠ {name}  查询失败: {result.get('error', '未知错误')}")
+                print(f"  ⚠ {_item_name(name)}  {_t('oracle_log_check_fail').format(error=result.get('error', 'unknown'))}")
             else:
-                print(f"  ⚠ {name}  无数据")
+                print(f"  ⚠ {_item_name(name)}  {_t('oracle_log_check_empty')}")
         except Exception as e:
-            print(f"  ⚠ {name}  跳过: {e}")
+            print(f"  ⚠ {_item_name(name)}  {_t('oracle_log_check_skip')}: {e}")
 
     conn.close()
 
     # ── 4.5 AI 诊断（根据配置判断是否启用）───────────────────────────────────
-    print(f"\n[{GREEN}4.5/6{RESET}] AI 诊断...")
+    print(f"\n[{GREEN}4.5/6{RESET}] {_t('oracle_log_ai_diagnosis')}")
     ai_advice = ''
     try:
         from analyzer import AIAdvisor
@@ -2281,7 +2570,7 @@ def single_inspection(args):
                     _db_info.setdefault('HOST_NAME', row[2])
                     _db_info.setdefault('VERSION', row[3])
             label = _db_info.get('NAME', args.servicename or args.sid or 'ORACLE')
-            print(f"  🤖 正在调用 AI 诊断（{advisor.backend} / {advisor.model}）...")
+            print(f"  🤖 {_t('oracle_log_ai_calling')} ({advisor.backend} / {advisor.model})...")
             # 收集风险项作为上下文
             risk_items = []
             ts = check_results.get('表空间', {})
@@ -2290,26 +2579,26 @@ def single_inspection(args):
                     try:
                         used_pct = float(row[7])
                         if used_pct > 90:
-                            risk_items.append({'col1': f'表空间 {row[0]}', 'col2': '高风险',
-                                'col3': f'表空间使用率 {used_pct:.1f}%，超过 90% 告警线'})
+                            risk_items.append({'col1': _t('report.risk_tablespace').format(name=row[0]), 'col2': _t('report.risk_high'),
+                                'col3': _t('report.risk_ts_high').format(pct=f'{used_pct:.1f}')})
                         elif used_pct > 80:
-                            risk_items.append({'col1': f'表空间 {row[0]}', 'col2': '中风险',
-                                'col3': f'表空间使用率 {used_pct:.1f}%，超过 80% 建议关注'})
+                            risk_items.append({'col1': _t('report.risk_tablespace').format(name=row[0]), 'col2': _t('report.risk_mid'),
+                                'col3': _t('report.risk_ts_mid').format(pct=f'{used_pct:.1f}')})
                     except (ValueError, TypeError):
                         pass
             # 收集等待事件 Top5
             perf = check_results.get('性能指标', {})
             wait_top5 = perf.get('wait_events', [])[:5]
-            wait_summary = '\n'.join([f"- {w[0]}: {w[1]}次等待, {w[2]}秒, 占比{w[3]}%"
+            wait_summary = '\n'.join([_t('oracle_log_ai_wait_fmt').format(w0=w[0], w1=w[1], w2=w[2], w3=w[3])
                                       for w in wait_top5]) if wait_top5 else 'N/A'
             # 收集阻塞会话
             blocked_sessions = check_results.get('阻塞会话', [])
-            blocked_summary = f"共 {len(blocked_sessions)} 个阻塞会话" if blocked_sessions else '无阻塞会话'
+            blocked_summary = _t('oracle_log_ai_blocked').format(n=len(blocked_sessions)) if blocked_sessions else _t('oracle_log_ai_no_blocked')
             # 收集 Top SQL（按 Buffer Gets 前5）
             top_sql_raw = check_results.get('Top SQL', {})
             top_sql5 = top_sql_raw.get('top_sql_buffer_gets', [])[:5]
             top_sql_summary = '\n'.join([
-                f"- SQL_ID={r[0]}: Buf={r[2]}MB, Execs={r[4]},耗时={r[5]}s, 片断={str(r[1])[:60]}"
+                _t('oracle_log_ai_top_sql_fmt').format(s0=r[0], s1=str(r[1])[:60], s2=r[2], s4=r[4], s5=r[5])
                 for r in top_sql5]) if top_sql5 else 'N/A'
             # 构建详细指标
             metrics = {
@@ -2322,26 +2611,54 @@ def single_inspection(args):
                 'blocked_sessions': blocked_summary,
                 'top_sql_top5': top_sql_summary,
             }
-            ai_advice = advisor.diagnose('oracle', label, metrics, risk_items, timeout=600)
+            ai_advice = advisor.diagnose('oracle', label, metrics, risk_items, timeout=600, lang=_lang)
             if ai_advice:
-                print(f"  ✅ AI 诊断完成")
+                print(f"  ✅ {_t('oracle_log_ai_ok')}")
             else:
-                print(f"  ⚠ AI 诊断返回空")
+                print(f"  ⚠ {_t('oracle_log_ai_empty')}")
         else:
-            print(f"  ⏭ AI 诊断未启用（backend: {advisor.backend}）")
+            print(f"  ⏭ {_t('oracle_log_ai_disabled')} (backend: {advisor.backend})")
     except TimeoutError as e:
-        ai_advice = "⚠ AI 诊断超时：大模型加载时间较长，请到「AI 配置」中增加超时时间后重试"
+        ai_advice = f"⚠ {_t('oracle_log_ai_timeout')}"
         print(f"  {ai_advice}")
     except Exception as e:
         err_str = str(e)
         if 'connection' in err_str.lower() or 'refused' in err_str.lower():
-            ai_advice = "⚠ AI 诊断连接失败：请确认 Ollama 服务已启动"
+            ai_advice = f"⚠ {_t('oracle_log_ai_conn_fail')}"
         else:
-            ai_advice = f"⚠ AI 诊断失败：{err_str[:120]}"
+            ai_advice = f"⚠ {_t('oracle_log_ai_fail')}: {err_str[:120]}"
         print(f"  {ai_advice}")
 
+    # ── 4.6 慢查询深度分析（P2）────────────────────────────────────────────
+    slow_query_result = None
+    try:
+        from slow_query_analyzer import OracleSlowQueryAnalyzer
+        analyzer = OracleSlowQueryAnalyzer()
+        ai_advisor = None
+        try:
+            from analyzer import AIAdvisor
+            ai_advisor = AIAdvisor(
+                backend=ai_cfg.get('backend'),
+                api_key=ai_cfg.get('api_key'),
+                api_url=ai_cfg.get('api_url'),
+                model=ai_cfg.get('model')
+            )
+        except Exception:
+            pass
+        print(f"\n[{GREEN}4.6/6{RESET}] {_t('oracle_log_slow_query')}")
+        result = analyzer.analyze(conn, ai_advisor=ai_advisor, lang=_lang)
+        slow_query_result = result.to_dict()
+        if result.is_empty():
+            print(f"  \u2139\ufe0f  {_t('oracle_log_slow_query_empty')}")
+        else:
+            print(f"  \u2705  {_t('oracle_log_slow_query_ok').format(count=len(result.top_sql_by_latency))}")
+    except ImportError:
+        print(f"  \u26a0  slow_query_analyzer 模块未找到，跳过慢查询深度分析")
+    except Exception as e:
+        print(f"  \u26a0  慢查询深度分析失败: {e}")
+
     # ── 5. 生成报告 ────────────────────────────────────────────────────────
-    print(f"\n[{GREEN}5/6{RESET}] 生成巡检报告...")
+    print(f"\n[{GREEN}5/6{RESET}] {_t('oracle_log_gen_report')}")
     # 从 check_results 提取 db_info
     db_info = {}
     inst_rows = check_results.get('实例信息', {}).get('instance', [])
@@ -2363,10 +2680,12 @@ def single_inspection(args):
         db_info['STARTUP_TIME']  = inst_rows[0][4]
         db_info['STATUS']         = inst_rows[0][5]
 
-    docx = build_word_report(db_info, os_data, check_results, version_str, ai_advice, inspector=args.inspector or 'dbcheck')
+    docx = build_word_report(db_info, os_data, check_results, version_str, ai_advice,
+                              inspector=args.inspector or 'dbcheck', lang=_lang,
+                              desensitize=bool(getattr(args, 'desensitize', False)))
 
     # ── 6. 保存报告 ────────────────────────────────────────────────────────
-    print(f"\n[{GREEN}6/6{RESET}] 保存报告...")
+    print(f"\n[{GREEN}6/6{RESET}] {_t('oracle_log_save_report')}")
     output_dir = args.output or os.path.join(os.getcwd(), 'reports')
     os.makedirs(output_dir, exist_ok=True)
 
@@ -2376,13 +2695,14 @@ def single_inspection(args):
 
     # Word
     if docx:
-        docx_fname = f"oracle_fullcheck_{db_name}_{ver_tag}_{ts}.docx"
+        fname_template = _t('webui.oracle_report_filename')
+        docx_fname = fname_template.format(name=db_name, ts=ts)
         docx_path  = os.path.join(output_dir, docx_fname)
         try:
             docx.save(docx_path)
             print(f"   Word:  {docx_path}")
         except Exception as e:
-            print(f"   Word报告生成失败: {e}")
+            print(f"   {_t('oracle_log_word_report')}: {e}")
 
     # ── 保存历史记录 ──────────────────────────────────────────────────────
     try:
@@ -2410,27 +2730,52 @@ def single_inspection(args):
                     })
             return rows
 
+        # 当前会话总数（session_by_status: [(status, count), ...] → [{TOTAL_SESSIONS: N}])
+        sess_rows = perf.get('session_by_status', [])
+        total_sess = sum(int(r[1]) for r in sess_rows if len(r) >= 2 and str(r[1]).isdigit())
+        ora_sessions_formatted = [{'TOTAL_SESSIONS': total_sess}]
+
+        # SGA 总计（sga_total: [[12345.6]] → [{SGA_TOTAL_MB: 12345.6}]）
+        sga_rows = check_results.get('SGA/PGA内存', {}).get('sga_total', [])
+        sga_val = sga_rows[0][0] if sga_rows and sga_rows[0] else 0.0
+        ora_sga_formatted = [{'SGA_TOTAL_MB': float(sga_val)}]
+
+        # 会话上限（从关键参数 processes/sessions 中取）
+        params = check_results.get('关键参数', {})
+        sess_limit = 0
+        for row in params.get('params', []):
+            if len(row) >= 2 and str(row[0]).lower() == 'sessions':
+                try:
+                    sess_limit = int(float(str(row[1])))
+                except (ValueError, TypeError):
+                    pass
+                break
+        ora_session_limit_formatted = [{'SESSIONS_LIMIT': sess_limit}] if sess_limit else []
+
         context = {
             'ora_version': [{'BANNER': version_str}],
             'ora_tablespace': _ts_rows(ts.get('data_tablespaces', [])),
-            'ora_sessions': perf.get('session_by_status', []),
+            'ora_sessions': ora_sessions_formatted,
+            'ora_sga_total': ora_sga_formatted,
+            'ora_session_limit': ora_session_limit_formatted,
             'system_info': {
                 'hostname': os_data.get('hostname', ''),
-                'cpu': {'usage_percent': os_data.get('cpu_percent', 0)},
-                'memory': {'usage_percent': os_data.get('mem_percent', 0)},
+                'cpu': {'usage_percent': os_data.get('cpu_usage_pct', 0)},
+                'memory': {'usage_percent': os_data.get('mem_usage_pct', os_data.get('mem_percent', 0))},
                 'disk_list': [{'mountpoint': d.get('mount', '/'), 'usage_percent': d.get('percent', 0)}
                               for d in os_data.get('disk_list', [])],
+                'disk_usage': os_data.get('disk_usage', ''),  # SSH 采集原始文本，disk_list 为空时备用
             },
-            'health_status': '良好' if not risk_items else ('存在风险' if any(r.get('col2') == '高风险' for r in risk_items) else '一般'),
+            'health_status': _t('report.health_good') if not risk_items else (_t('report.health_attention') if any(r.get('col2') == _t('report.risk_high') for r in risk_items) else _t('report.health_fair')),
             'auto_analyze': risk_items if risk_items else [],
         }
         hm.save_snapshot('oracle_full', args.host, args.port, label, context)
-        print(f"  ✅ 历史记录已保存")
+        print(f"  ✅ {_t('oracle_log_history_ok')}")
     except Exception as e:
-        print(f"  ⚠ 保存历史记录失败: {e}")
+        print(f"  ⚠ {_t('oracle_log_history_fail')}: {e}")
 
     elapsed = time.time() - t0
-    print(f"\n{GREEN}{BOLD}✅ 巡检完成！耗时 {elapsed:.1f} 秒{RESET}")
+    print(f"\n{GREEN}{BOLD}✅ {_t('oracle_log_complete')}！{_t('oracle_log_time')} {_t('oracle_log_time_secs').format(elapsed=elapsed)}{RESET}")
 
     if ssh_client:
         ssh_client.close()
@@ -2444,47 +2789,53 @@ def _input(prompt, default=''):
     return input(f"{prompt}: ").strip()
 
 
+def _password_input(prompt):
+    """密码输入函数，隐藏用户输入"""
+    return getpass.getpass(prompt)
+
+
 def interactive_single_inspection():
     """交互式单机巡检（替代 argparse，适合无参数直接运行）"""
+    from i18n import t
     print(f"\n{BOLD}{'='*52}{RESET}")
-    print(f"{RED}{BOLD}   Oracle 全面巡检（增强版）{RESET}")
+    print(f"{RED}{BOLD}   {t('oracle_banner_title')}{RESET}")
     print(f"{DIM}{'='*52}{RESET}\n")
 
     # ── Oracle 连接信息 ─────────────────────────────────────────
-    host        = _input(f"{CYAN}Oracle 主机IP{RESET}",    '192.168.1.10')
-    port        = _input(f"{CYAN}端口{RESET}",             '1521')
-    connect_by  = _input(f"{CYAN}连接方式 (S=SID / N=ServiceName){RESET}", 'S').upper()
+    host        = _input(f"{CYAN}{t('oracle_host_ip')}{RESET}",    'localhost')
+    port        = _input(f"{CYAN}{t('oracle_port')}{RESET}",             '1521')
+    connect_by  = _input(f"{CYAN}{t('oracle_connect_by')}{RESET}", 'S').upper()
     if connect_by == 'N':
-        sid_or_svc = _input(f"{CYAN}ServiceName{RESET}")
+        sid_or_svc = _input(f"{CYAN}{t('oracle_servicename')}{RESET}")
         sid, svc = None, sid_or_svc
     else:
-        sid     = _input(f"{CYAN}ORACLE_SID{RESET}",       'ORCL')
+        sid     = _input(f"{CYAN}{t('oracle_sid')}{RESET}",       'ORCL')
         svc     = None
-    user        = _input(f"{CYAN}用户名{RESET}",           'sys')
-    password    = _input(f"{CYAN}密码{RESET}")
+    user        = _input(f"{CYAN}{t('oracle_username')}{RESET}",           'sys')
+    password    = _password_input(f"{t('oracle_password')}: ")
     # sys 用户默认以 SYSDBA 登录，其他用户可自行选择
     if user.upper() == 'SYS':
         sysdba_default = 'Y'
     else:
         sysdba_default = 'N'
-    sysdba_opt  = _input(f"{CYAN}是否以 SYSDBA 身份连接 (Y/N){RESET}", sysdba_default).upper()
+    sysdba_opt  = _input(f"{CYAN}{t('oracle_sysdba_prompt')}{RESET}", sysdba_default).upper()
     sysdba      = (sysdba_opt == 'Y')
 
     # ── SSH 信息（可选）────────────────────────────────────────
-    use_ssh = _input(f"\n{GREEN}是否使用 SSH 采集 OS 信息 (y/N){RESET}", 'N').upper()
+    use_ssh = _input(f"\n{GREEN}{t('oracle_ssh_use')}{RESET}", 'n').upper()
     ssh_host, ssh_port, ssh_user, ssh_pass = None, 22, None, None
     if use_ssh == 'Y':
-        ssh_host = _input(f"{CYAN}SSH 主机IP{RESET}", host)
-        ssh_port = _input(f"{CYAN}SSH 端口{RESET}",   '22')
-        ssh_user = _input(f"{CYAN}SSH 用户名{RESET}")
-        ssh_pass = _input(f"{CYAN}SSH 密码{RESET}")
+        ssh_host = _input(f"{CYAN}{t('oracle_ssh_host')}{RESET}", host)
+        ssh_port = _input(f"{CYAN}{t('oracle_ssh_port')}{RESET}",   '22')
+        ssh_user = _input(f"{CYAN}{t('oracle_ssh_username')}{RESET}")
+        ssh_pass = _password_input(f"{t('oracle_ssh_password')}: ")
         if not ssh_user or not ssh_pass:
-            print(f"  {YELLOW}⚠ SSH 用户名和密码不能为空，已跳过 SSH 采集{RESET}")
+            print(f"  {YELLOW}⚠ {t('oracle_ssh_skip_warning')}{RESET}")
             ssh_host, ssh_user, ssh_pass = None, None, None
 
     # ── 输出选项 ───────────────────────────────────────────────
-    output_dir = _input(f"\n{GREEN}报告输出目录（默认当前目录 reports）{RESET}", 'reports')
-    inspector  = _input(f"{GREEN}巡检人姓名（默认 dbcheck）{RESET}")
+    output_dir = _input(f"\n{GREEN}{t('oracle_output_dir')}{RESET}", 'reports')
+    inspector  = _input(f"{GREEN}{t('oracle_inspector_name')}{RESET}", 'dbcheck')
 
     # ── 构造 args ───────────────────────────────────────────────
     class _Args:
@@ -2516,14 +2867,14 @@ def main():
         epilog="""
 示例:
   # 本地 Oracle（使用 SID）
-  python main_oracle_full.py -h 192.168.1.10 -P 1521 -s ORCL -u system -p xxx
+  python main_oracle_full.py -h localhost -P 1521 -s ORCL -u system -p xxx
 
   # 使用 ServiceName 连接
-  python main_oracle_full.py -h 192.168.1.10 -P 1521 -S ORCL -u system -p xxx
+  python main_oracle_full.py -h localhost -P 1521 -S ORCL -u system -p xxx
 
   # SSH 采集 OS 信息
-  python main_oracle_full.py -h 192.168.1.10 -P 1521 -s ORCL -u system -p xxx \\
-      --ssh-host 192.168.1.10 --ssh-user oracle --ssh-pass xxx
+  python main_oracle_full.py -h localhost -P 1521 -s ORCL -u system -p xxx \\
+      --ssh-host localhost --ssh-user oracle --ssh-pass xxx
 
         """
     )
@@ -2543,6 +2894,20 @@ def main():
 
     args = parser.parse_args()
 
+    # Local _t for main() error messages
+    try:
+        from i18n import get_lang
+        _lang = get_lang()
+    except Exception:
+        _lang = 'zh'
+
+    def _t(key):
+        try:
+            from i18n import t as _tt
+            return _tt(key, _lang)
+        except Exception:
+            return key
+
     # 无参数时进入交互模式
     if len(sys.argv) == 1 or (
            not args.host and not args.sid and not args.servicename
@@ -2551,11 +2916,11 @@ def main():
         return
 
     if not args.sid and not args.servicename:
-        print("❌ 必须指定 --sid 或 --servicename")
+        print(f"❌ {_t('oracle_log_need_sid_svc')}")
         return
 
     if args.ssh_host and not (args.ssh_user and args.ssh_pass):
-        print("❌ SSH 采集需要同时指定 --ssh-user 和 --ssh-pass")
+        print(f"❌ {_t('oracle_log_need_ssh_cred')}")
         return
 
     print_banner()

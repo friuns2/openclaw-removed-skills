@@ -5,6 +5,61 @@ All notable changes to Synapse Skills will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-04-10
+
+### Added
+- **Brain/Hands 架构** — synapse-wiki 作为 synapse-brain 的 Hand Agent 被调度执行
+- **code 互操作** — 接收 synapse-code Pipeline 完成后的自动知识沉淀
+- **知识沉淀内容** — 技术决策、代码模式、Bug 修复、API 变更
+- **意图路由兼容** — 支持被 task_router.py 识别（ingest/query/lint 意图）
+
+### Changed
+- **homepage** — 更新为 `https://github.com/ankechenlab-node/synapse-wiki`
+- **tags** — 新增 `brain-compatible` 标记
+
+### Why
+- 让知识管理成为开发流程的自然延伸，而非独立操作
+- 通过 Brain 统一入口，降低用户学习成本
+- synapse-code 开发过程自动沉淀知识到 wiki
+
+---
+
+## [1.1.7] - 2026-04-09
+
+### Fixed
+- **脚本 --help 支持** — 所有 4 个脚本改用 argparse，支持标准 --help 参数
+
+---
+
+## [1.1.6] - 2026-04-09
+
+### Fixed
+- **代码审计问题修复** — 修复 3 个 P1/P2 级别问题
+- `ingest.py` — 修复 YAML sources 格式错误（从字符串改为列表格式）
+- `ingest.py` — 添加路径穿越保护（检查 source 是否在 wiki root 内）
+- `query.py` — 修复 `or not pages` 逻辑反转问题
+- `baseline_test.py` — 修复 lint 测试过于宽松的问题
+
+### Why
+- 提高代码质量和健壮性
+- 减少潜在崩溃风险
+
+---
+
+## [1.1.5] - 2026-04-09
+
+### Changed
+- **版本号同步** — 与 synapse-code 保持版本对齐（无实际代码变更）
+
+---
+
+## [1.1.4] - 2026-04-08
+
+### Changed
+- **CHANGELOG 对齐** — 补充 v1.1.x 版本历史记录，与 synapse-code 一致
+
+---
+
 ## [1.1.3] - 2026-04-08
 
 ### Changed

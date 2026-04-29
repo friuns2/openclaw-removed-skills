@@ -1,11 +1,17 @@
 {
   "owner": "bajie-git",
   "slug": "ohyesai-mv",
-  "displayName": "music video mv 制作（内测版）",
+  "displayName": "music video mv 制作",
   "latest": {
-    "version": "0.0.2",
-    "publishedAt": 1776741406260,
-    "commit": "https://github.com/openclaw/skills/commit/9b8c16d871ee94a2889bf22efda4208320877734"
+    "version": "0.1.0",
+    "publishedAt": 1777023504057,
+    "commit": "https://github.com/openclaw/skills/commit/782c5a6fbd5b287afa173e7a5ac7142e1cbdde14"
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.0.2",
+      "publishedAt": 1776741406260,
+      "commit": "https://github.com/openclaw/skills/commit/9b8c16d871ee94a2889bf22efda4208320877734"
+    }
+  ]
 }

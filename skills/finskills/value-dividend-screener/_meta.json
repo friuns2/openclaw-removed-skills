@@ -1,0 +1,11 @@
+{
+  "owner": "finskills",
+  "slug": "value-dividend-screener",
+  "displayName": "value-dividend-screener",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776528384567,
+    "commit": "https://github.com/openclaw/skills/commit/b954b33f476d48f25ce919702e540be635d52509"
+  },
+  "history": []
+}

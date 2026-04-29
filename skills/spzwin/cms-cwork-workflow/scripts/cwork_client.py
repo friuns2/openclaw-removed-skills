@@ -122,7 +122,15 @@ class CWorkClient:
 
     def search_emp_by_name(self, search_key: str) -> dict:
         """Returns {inside: {empList:[]}, outside: {empList:[]}}"""
-        return self._get("/open-api/cwork-user/searchEmpByName", {"searchKey": search_key})
+        normalized_key = (search_key or "").strip()
+        try:
+            return self._get("/open-api/cwork-user/searchEmpByName", {"searchKey": normalized_key})
+        except CWorkError:
+            # 某些租户环境下带中文 searchKey 会返回非 1 resultCode；兜底为全量后本地过滤。
+            if not normalized_key:
+                raise
+            raw = self._get("/open-api/cwork-user/searchEmpByName", {"searchKey": ""})
+            return _filter_emp_search_result(raw, normalized_key)
 
     # -------------------------------------------------------------------------
     # Reports — inbox / outbox / detail
@@ -240,6 +248,21 @@ class CWorkClient:
             "/open-api/work-report/open-platform/report/readReport",
             {"reportId": str(report_id)},
         )
+
+    def create_share_link(self, biz_id: str | int, biz_type: int) -> str:
+        """创建汇报/任务分享链接。
+
+        biz_type:
+          1 = 汇报
+          2 = 任务
+        """
+        if biz_type not in (1, 2):
+            raise ValueError("create_share_link: biz_type 仅支持 1(汇报) 或 2(任务)")
+        data = self._post("/open-api/work-report/report/share/create", {
+            "bizId": int(str(biz_id)),
+            "bizType": biz_type,
+        })
+        return str(data)
 
     # -------------------------------------------------------------------------
     # Report — reply / submit / remind
@@ -883,6 +906,49 @@ def flatten_emp_search_bucket(raw) -> list:
                 out.append(item)
         return out
     return []
+
+
+def _match_emp_name(emp: dict, search_key: str) -> bool:
+    name = str(emp.get("name") or "")
+    if not name:
+        return False
+    return (search_key == name) or (search_key in name)
+
+
+def _filter_emp_search_result(raw: dict, search_key: str) -> dict:
+    """Filter searchEmpByName payload client-side by employee name."""
+    if not isinstance(raw, dict):
+        return {"inside": {"empList": []}, "outside": []}
+
+    inside_raw = raw.get("inside")
+    outside_raw = raw.get("outside")
+
+    filtered_inside = {"empList": []}
+    if isinstance(inside_raw, dict):
+        filtered_inside = dict(inside_raw)
+        emp_list = inside_raw.get("empList")
+        if isinstance(emp_list, list):
+            filtered_inside["empList"] = [e for e in emp_list if isinstance(e, dict) and _match_emp_name(e, search_key)]
+        else:
+            filtered_inside["empList"] = []
+
+    filtered_outside: list = []
+    if isinstance(outside_raw, list):
+        for group in outside_raw:
+            if not isinstance(group, dict):
+                continue
+            copied_group = dict(group)
+            emp_list = group.get("empList")
+            if isinstance(emp_list, list):
+                copied_group["empList"] = [
+                    e for e in emp_list if isinstance(e, dict) and _match_emp_name(e, search_key)
+                ]
+            else:
+                copied_group["empList"] = []
+            if copied_group["empList"]:
+                filtered_outside.append(copied_group)
+
+    return {"inside": filtered_inside, "outside": filtered_outside}
 
 
 def parse_deadline(value: str | None) -> int | None:

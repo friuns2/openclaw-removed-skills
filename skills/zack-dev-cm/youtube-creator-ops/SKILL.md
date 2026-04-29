@@ -1,6 +1,7 @@
 ---
 name: youtube-creator-ops
-description: Public OpenClaw skill for publishing a YouTube Short through a logged-in browser profile and generating a reusable run report.
+description: OpenClaw YouTube Publisher is a public ClawHub YouTube publishing skill. Use it when the user says "youtube creator ops", "youtube publisher", "YouTube Studio publish", or wants to publish a YouTube Short through a logged-in browser profile with a reusable run report.
+version: 1.1.4
 homepage: https://github.com/zack-dev-cm/youtube-creator-ops
 license: MIT-0
 user-invocable: true
@@ -8,6 +9,8 @@ metadata: {"openclaw":{"homepage":"https://github.com/zack-dev-cm/youtube-creato
 ---
 
 # OpenClaw YouTube Publisher
+
+Search intent: `youtube creator ops`, `youtube publisher`, `youtube studio publish`, `shorts publisher`
 
 ## Goal
 

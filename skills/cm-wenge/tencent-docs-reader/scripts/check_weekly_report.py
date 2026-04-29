@@ -13,7 +13,8 @@ import urllib.request
 # 配置
 DOC_URL = "https://docs.qq.com/sheet/DQ2xhSUdzQW9CZ2NE"
 OUTPUT_FILE = "workspace/qq_weekly_report.txt"
-QQ_USER_ID = "7B423FBDC28B52E0BC22A7808EBD4AC1"  # 文哥的QQ号
+QQ_USER_ID = os.environ.get("QQ_USER_ID", "7B423FBDC28B52E0BC22A7808EBD4AC1")  # 文哥的QQ号，从环境变量读取
+WEBHOOK_URL = os.environ.get("WECOM_WEBHOOK_URL", "")  # 企业微信webhook，从环境变量读取
 
 # 脚本路径
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -126,8 +127,12 @@ def main():
         print("所有同事都已填写周报", file=sys.stderr)
         sys.exit(0)
 
-    # 发送企业微信通知
-    webhook_url = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=cf5f6765-913d-48a3-9b3f-8a6884ca4e95'
+    # 发送企业微信通知（需要配置WECOM_WEBHOOK_URL环境变量）
+    webhook_url = WEBHOOK_URL
+    if not webhook_url:
+        print("未配置WECOM_WEBHOOK_URL环境变量，跳过企业微信通知", file=sys.stderr)
+        print("未填写周报的同事: " + ", ".join(not_filled), file=sys.stderr)
+        sys.exit(0)
     msg_lines = ['周报检查：以下同事尚未填写周报，请尽快完成：']
     for i, name in enumerate(not_filled, 1):
         msg_lines.append(f'{i}. {name}')

@@ -6,8 +6,6 @@ import asyncio
 import json
 import os
 import re
-import shutil
-import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -19,6 +17,7 @@ from telethon.tl.types import Channel
 from openpyxl import Workbook
 
 from tg_monitor_kit.config import Config, load_config
+from tg_monitor_kit.session_runtime import cleanup_temp_session_files, create_temp_session_client
 
 NOTIFY_TARGET = "me"
 
@@ -414,24 +413,13 @@ async def run_search_daemon():
     _ensure_root(cfg)
     _load_search_settings(cfg)
 
-    original_session_base = cfg.session_file_base
-    original_session = f"{original_session_base}.session"
-    if not os.path.exists(original_session):
-        print(
-            f"❌ 未找到会话文件：{original_session}。\n"
-            "   请先执行登录（tg-monitor auth + tg-monitor login）后再运行 search。"
-        )
+    try:
+        temp = create_temp_session_client(cfg, "search")
+    except FileNotFoundError as exc:
+        print(f"❌ {exc}")
         return
-    temp_session_base = f"{original_session_base}_search_{uuid.uuid4().hex[:8]}"
-    temp_session = f"{temp_session_base}.session"
-    shutil.copy2(original_session, temp_session)
 
-    client = TelegramClient(
-        temp_session_base,
-        cfg.api_id,
-        cfg.api_hash,
-        proxy=cfg.proxy,
-    )
+    client = temp.client
     await client.start()
     print("已连接 Telegram，进入每日定时搜索模式。")
     try:
@@ -447,10 +435,7 @@ async def run_search_daemon():
             await run_search_once(client)
     finally:
         await client.disconnect()
-        if os.path.exists(temp_session):
-            os.remove(temp_session)
-        if os.path.exists(f"{temp_session}-journal"):
-            os.remove(f"{temp_session}-journal")
+        cleanup_temp_session_files(temp.temp_session_base)
     print("✅ 已完成并断开连接。")
 
 

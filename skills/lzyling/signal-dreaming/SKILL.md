@@ -1,5 +1,5 @@
 ---
-name: memory-dreaming
+name: signal-dreaming
 description: Signal-driven memory consolidation for OpenClaw agents. Automatically consolidates recent session logs into long-term memory using recall frequency signals from memory/.dreams/short-term-recall.json — content that has been searched more often gets prioritized. Runs in three safe phases (Sense/Consolidate/Settle) with a human-readable dream diary. Use when setting up automated memory maintenance, running a manual "dream" consolidation pass, or upgrading from date-ordered log processing to signal-aware prioritization.
 ---
 
@@ -67,6 +67,16 @@ The dream protocol reads `totalScore` to rank candidates. Snippets with `totalSc
 
 Phase 1 is always read-only. An error in Sense never corrupts files.
 
+## Quality Gates
+
+The full protocol includes a read-only planning checkpoint before writes:
+
+- **Topic identity guard** — do not merge legacy/current projects just because names are similar; split active, legacy, and index files when durable IDs, hosts, owners, or lifecycle differ.
+- **Lifecycle guard** — classify candidates as active / waiting / done / archived / closed / snowed; closed or snowed work must not reappear as active TODOs unless the human reopens it.
+- **Secret propagation guard** — never promote API keys, tokens, passwords, private keys, signed URLs, or credential-bearing command lines from daily logs into L2, MEMORY.md, or dream-log.md.
+- **Backup guard** — existing L2 files are copied outside `memory/` to `<WORKSPACE_ROOT>/.backup/memory-dreams/YYYYMMDD-HHMM/` with a `.bak` suffix before modification; `MEMORY.md` is backed up there too before rewrite.
+- **Post-write audit** — check size, Markdown structure, current-vs-legacy separation, and obvious credential patterns before finalizing. Use `references/dream-audit.sh` for the common lightweight sanity checks; it is not full DLP.
+
 
 ## Compatibility with OpenClaw 2026.4.15+
 
@@ -88,7 +98,10 @@ If you use **both**:
 
 - **Never move or delete daily logs** (`memory/YYYY-MM-DD*.md`) — archiving breaks memory_search indexing
 - **dream-log.md is Markdown** — append text directly, do not write JSON
-- **Back up MEMORY.md** to `memory/.dream-backup.md` before rewriting it
+- **Never copy secrets into curated memory** — omit/redact and alert instead
+- **Keep lifecycle state sticky** — closed/archived/snowed lines stay non-active unless explicitly reopened
+- **Back up MEMORY.md** to `<WORKSPACE_ROOT>/.backup/memory-dreams/YYYYMMDD-HHMM/MEMORY.md.bak` before rewriting it
+- **Back up touched L2 files** outside `memory/`, with `.bak` suffix, before editing existing topic files
 - **MEMORY.md target**: ≤ 8KB
 
 ## Full Protocol

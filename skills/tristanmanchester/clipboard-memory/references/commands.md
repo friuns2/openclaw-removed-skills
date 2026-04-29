@@ -18,7 +18,7 @@ Pick the narrowest command that answers the question. Always pass `--format json
 8. `clipmem forget <snapshot_id>` — hard-delete one snapshot and its capture history.
 9. `clipmem purge --older-than <duration> [--dry-run]` — prune by `last_observed_at`.
 10. `clipmem storage compact [--dry-run] --format json` — reclaim SQLite/WAL disk space without changing content.
-11. `clipmem storage optimize-images [--dry-run] [--no-compact] [--limit N] --format json` — convert eligible stored images to lossless WebP and compact by default.
+11. `clipmem storage optimize-images [--dry-run] [--no-compact] [--limit N] [--format json|--progress jsonl]` — convert eligible stored images to lossless WebP and compact by default.
 12. `clipmem settings show --format json` — inspect persistent capture policy.
 13. `clipmem ocr status --format json` — inspect local OCR queue and result counts.
 14. `clipmem ocr run [--limit N] [--snapshot ID]` — backfill OCR for image snapshots.
@@ -39,7 +39,7 @@ Pick the narrowest command that answers the question. Always pass `--format json
 | `forget <SNAPSHOT_ID>` | text | — | Hard-delete one snapshot and its capture history |
 | `purge` | text | — | Delete old snapshots by `last_observed_at` |
 | `storage compact` | text (`json` supported) | — | Reclaim SQLite/WAL disk space |
-| `storage optimize-images` | text (`json` supported) | — | Convert eligible images to lossless WebP |
+| `storage optimize-images` | text (`json` supported, progress JSONL available) | — | Convert eligible images to lossless WebP |
 | `settings show` | `text` | **no** | Show persistent pause / retention / ignore-list policy |
 | `settings pause` | text | — | Persistently pause or resume capture |
 | `settings api-key-filter` | text | — | Enable or disable API key filtering |
@@ -58,6 +58,10 @@ Pick the narrowest command that answers the question. Always pass `--format json
 | `agents openclaw install-skill` | — | — | Write packaged skill files to disk |
 | `agents openclaw print-skill` | — | — | Print embedded `SKILL.md` to stdout |
 | `agents openclaw uninstall-skill` | — | — | Remove installed skill directory |
+| `agents hermes doctor` | text | — | Hermes integration health: PATH, skill discovery |
+| `agents hermes install-skill` | — | — | Write packaged Hermes skill to disk |
+| `agents hermes print-skill` | — | — | Print embedded Hermes `SKILL.md` to stdout |
+| `agents hermes uninstall-skill` | — | — | Remove installed Hermes skill directory |
 
 `--json` is a compatibility alias for `--format json` on `search`, `recent`, `timeline`, `get`, `storage compact`, `storage optimize-images`, `ocr status`, `ocr run`, `capture-once`, and `doctor`.
 
@@ -193,7 +197,7 @@ clipmem export <snapshot_id> --item <index> --uti <uti> --out <path> [--force]
 clipmem forget <snapshot_id>
 clipmem purge --older-than 30d [--dry-run]
 clipmem storage compact [--dry-run] [--format json]
-clipmem storage optimize-images [--dry-run] [--no-compact] [--limit N] [--format json]
+clipmem storage optimize-images [--dry-run] [--no-compact] [--limit N] [--format json|--progress jsonl]
 clipmem settings show [--format json]
 clipmem settings pause on|off
 clipmem settings api-key-filter on|off
@@ -210,7 +214,7 @@ clipmem ocr run [--limit N] [--snapshot ID] [--retry-failed] [--format json]
 
 `purge` computes age from `snapshot_stats.last_observed_at`, not `snapshots.created_at`. Duration grammar is a single integer plus one unit: `Nd`, `Nh`, or `Nm`.
 
-`storage compact` checkpoints WAL state and vacuums SQLite pages back to the filesystem. It never changes clipboard content. `storage optimize-images` rewrites eligible image representations to lossless WebP only when doing so saves meaningful space, then compacts SQLite storage by default; already compressed or skipped rows are not retried by normal runs. Use `--no-compact` only when batching optimization runs and compacting once at the end.
+`storage compact` checkpoints WAL state and vacuums SQLite pages back to the filesystem. It never changes clipboard content. `storage optimize-images` rewrites eligible image representations to lossless WebP only when doing so saves meaningful space, then compacts SQLite storage by default; already compressed or skipped rows are not retried by normal runs. Use `--progress jsonl` for streamed `started`, `scanning`, `compacting`, and `complete` progress events. Use `--no-compact` only when batching optimization runs and compacting once at the end.
 
 `settings` is the persistent capture-policy entrypoint. Ignore matching is exact, case-insensitive bundle-id matching only. OCR is opt-in, runs locally through Apple Vision on macOS, and stores text/status separately from raw image bytes.
 

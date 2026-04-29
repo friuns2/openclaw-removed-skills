@@ -23,6 +23,9 @@ from common import (
     SQLDialect, OBJECT_PREFIXES, TYPE_PRIORITY, BLOCK_OBJECT_TYPES,
     clean_object_name, strip_sql_comments, find_matching_end,
 )
+from error_handler import (
+    ErrorHandler, SplitError, SplitWarning, SplitResult, ErrorType,
+)
 
 
 # ============================================================
@@ -625,6 +628,16 @@ def split_sql_file(
 
     # 按位置排序
     found_objects.sort(key=lambda x: x['start'])
+
+    # 去重：同一位置、同一类型、同一名称的对象只保留一个
+    seen = set()
+    unique_objects = []
+    for obj in found_objects:
+        key = (obj['start'], obj['type'], obj['name'])
+        if key not in seen:
+            seen.add(key)
+            unique_objects.append(obj)
+    found_objects = unique_objects
 
     if verbose:
         print(f"[scan] 找到 {len(found_objects)} 个对象")

@@ -1,111 +1,108 @@
 ---
-name: "Code Reviewer"
-slug: skylv-code-reviewer
-version: 1.0.2
+name: code-reviewer
 description: Code review assistant. Analyzes code quality, detects bugs and security issues, and suggests improvements. Triggers: code review, security audit, code quality, bug detection.
-author: SKY-lv
-license: MIT-0
-tags: [openclaw, agent, code]
-keywords: code-review, linting, security, quality
-triggers: code reviewer
+metadata: {"openclaw": {"emoji": "🔍"}}
 ---
 
-# CodeReview Agent Skill
+# Code Reviewer — 代码审查助手
 
-> AI-powered code review and quality analysis agent
+## 功能说明
 
-## 功能
+对代码进行全面审查，发现问题和优化机会。
 
-- **代码质量分析** - 检测代码异味、复杂度问题
-- **安全漏洞扫描** - SQL注入、XSS、敏感信息泄露
-- **性能优化建议** - 识别性能瓶颈
-- **最佳实践检查** - 符合语言规范和设计模式
-- **自动修复建议** - 提供可执行的修复代码
+## 使用方法
 
-## 使用场景
+### 1. 代码质量检查
 
 ```
-用户: 帮我审查这段Python代码的安全性
-Agent: [调用code-reviewer skill分析代码，输出安全问题列表和修复建议]
+用户: 审查这段代码的质量：
+[粘贴代码]
 ```
 
-## 工具函数
+审查维度：
+- 代码结构
+- 命名规范
+- 注释完整性
+- 函数复杂度
+- 重复代码
 
-### `review_code(code, language, focus_areas)`
+### 2. 安全漏洞检查
 
-审查代码并返回分析报告。
-
-**参数:**
-- `code` (str): 要审查的代码
-- `language` (str): 编程语言 (python/javascript/go/rust/java等)
-- `focus_areas` (list): 关注点 ['security', 'performance', 'style', 'complexity']
-
-**返回:**
-```python
-{
-    "issues": [
-        {
-            "type": "security",
-            "severity": "high",
-            "line": 42,
-            "message": "Potential SQL injection vulnerability",
-            "suggestion": "Use parameterized queries"
-        }
-    ],
-    "score": 75,
-    "summary": "代码整体可读性良好，但存在安全风险"
-}
+```
+用户: 检查这段代码是否有安全问题
 ```
 
-### `analyze_complexity(code, language)`
+检查项：
+- SQL注入风险
+- XSS漏洞
+- 敏感信息硬编码
+- 不安全的依赖
+- 权限控制缺失
 
-分析代码复杂度（圈复杂度、认知复杂度）。
+### 3. 性能优化建议
 
-### `detect_patterns(code, language)`
-
-检测代码中使用的设计模式。
-
-## 配置
-
-```json
-{
-    "rules": {
-        "max_complexity": 10,
-        "max_line_length": 120,
-        "require_docstring": true,
-        "security_checks": ["injection", "xss", "secrets"]
-    }
-}
+```
+用户: 这段代码有什么性能问题？如何优化？
 ```
 
-## 示例
+分析项：
+- 时间复杂度
+- 空间复杂度
+- 不必要的循环
+- 数据结构选择
+- 缓存机会
 
-```python
-# 审查Python代码
-result = review_code('''
-def get_user(id):
-    query = f"SELECT * FROM users WHERE id = {id}"
-    return db.execute(query)
-''', 'python', ['security'])
+### 4. 代码重构建议
 
-# 输出:
-# [HIGH] SQL Injection: Use parameterized queries
-# Line 3: query = f"SELECT * FROM users WHERE id = {id}"
-# Suggestion: query = "SELECT * FROM users WHERE id = ?"
+```
+用户: 这段代码如何重构使其更清晰？
 ```
 
-## 安装
+重构方向：
+- 提取函数
+- 消除重复
+- 简化条件
+- 改善命名
+- 添加类型注解
 
-```bash
-clawhub install SKY-lv/code-reviewer
+## 示例输出
+
+```
+代码审查报告
+
+【质量问题】
+1. 函数 `processData` 过长（85行），建议拆分
+   - 提取数据验证逻辑
+   - 提取数据转换逻辑
+
+2. 变量命名不清晰
+   - `temp` → 建议改为 `processedResult`
+   - `flag` → 建议改为 `isValidUser`
+
+【安全问题】
+⚠️ 高危：SQL查询使用字符串拼接
+   第23行: `query = "SELECT * FROM users WHERE id=" + userId`
+   建议：使用参数化查询
+
+【性能问题】
+1. O(n²) 嵌套循环可优化为 O(n)
+   第45-52行：使用 Map 替代数组查找
+
+2. 重复计算
+   第67行：`calculateTotal()` 在循环内重复调用
+   建议：提取到循环外
+
+【优化建议】
+- 添加输入验证
+- 使用 TypeScript 类型注解
+- 添加单元测试
 ```
 
-## License
+## 支持语言
 
-MIT
-
-## Usage
-
-1. Install the skill
-2. Configure as needed
-3. Run with OpenClaw
+- JavaScript / TypeScript
+- Python
+- Go
+- Java
+- C / C++
+- Rust

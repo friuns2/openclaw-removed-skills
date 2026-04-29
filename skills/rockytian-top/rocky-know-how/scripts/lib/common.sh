@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 公共函数库 v2.7.0
+# rocky-know-how 公共函数库 v3.3.0
 # 被 search.sh / record.sh 等脚本 source
 
 # 获取状态目录（支持多网关实例）

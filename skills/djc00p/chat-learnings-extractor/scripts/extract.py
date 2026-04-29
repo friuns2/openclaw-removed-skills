@@ -84,16 +84,16 @@ Keep responses focused and concise. Use bullet points. Skip categories if nothin
 
 Return ONLY the structured markdown below. No preamble or explanation:
 
-## Lessons Learned
+### Lessons Learned
 [bullet points or "None"]
 
-## Decisions Made
+### Decisions Made
 [bullet points or "None"]
 
-## Patterns Noticed
+### Patterns Noticed
 [bullet points or "None"]
 
-## Dead Ends
+### Dead Ends
 [bullet points or "None"]
 """
 
@@ -149,16 +149,16 @@ Keep responses focused and concise. Use bullet points. Skip categories if nothin
 
 Return ONLY the structured markdown below. No preamble or explanation:
 
-## Lessons Learned
+### Lessons Learned
 [bullet points or "None"]
 
-## Decisions Made
+### Decisions Made
 [bullet points or "None"]
 
-## Patterns Noticed
+### Patterns Noticed
 [bullet points or "None"]
 
-## Dead Ends
+### Dead Ends
 [bullet points or "None"]
 """
 
@@ -251,7 +251,7 @@ def extract_learnings_for_chat(chat: Dict, model: str) -> str:
     messages = chat.get("messages", [])
 
     if not messages:
-        return "## Lessons Learned\nNone\n\n## Decisions Made\nNone\n\n## Patterns Noticed\nNone\n\n## Dead Ends\nNone"
+        return "### Lessons Learned\nNone\n\n### Decisions Made\nNone\n\n### Patterns Noticed\nNone\n\n### Dead Ends\nNone"
 
     # Split into chunks
     chunks = [messages[i:i + CHUNK_SIZE] for i in range(0, len(messages), CHUNK_SIZE)]
@@ -269,7 +269,7 @@ def extract_learnings_for_chat(chat: Dict, model: str) -> str:
         if result:
             results.append(result)
 
-    return merge_learnings(results) if results else "## Lessons Learned\nNone\n\n## Decisions Made\nNone\n\n## Patterns Noticed\nNone\n\n## Dead Ends\nNone"
+    return merge_learnings(results) if results else "### Lessons Learned\nNone\n\n### Decisions Made\nNone\n\n### Patterns Noticed\nNone\n\n### Dead Ends\nNone"
 
 
 def parse_conversations(file_path: Path) -> Generator[Dict, None, None]:

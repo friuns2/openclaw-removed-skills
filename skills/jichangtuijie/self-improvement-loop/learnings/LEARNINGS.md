@@ -7,7 +7,7 @@
 ## Template Format (Do Not Delete)
 
 ```markdown
-## [LRN-YYYYMMDD-NNN] correction|best_practice|insight
+## [LRN-YYYYMMDD-NNN] correction|best_practice|insight|knowledge_gap
 **Logged**: ISO-8601
 **Status**: pending | active | in_progress | resolved | promoted | dormant
 **Pattern-Key**: <source>.<type>.<identifier>

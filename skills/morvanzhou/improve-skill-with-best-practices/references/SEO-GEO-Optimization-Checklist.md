@@ -347,22 +347,24 @@ curl -sI -H "Accept-Encoding: gzip, br" "$SITE_URL/" | grep -i 'content-encoding
 
 All audit scripts live in `scripts/` and accept the same core arguments. They use `$SITE_URL` from `.env` or `--url`.
 
+> All example commands below assume the venv has been activated: `source "$DATA_DIR/venv/bin/activate"`
+
 ### 7.1 SEO Audit (`seo_audit.py`)
 
 Covers: JSON-LD coverage, meta tags, headings, og:image, canonical, hreflang, SSR empty-shell detection, sitemap, HowTo/FAQ schema.
 
 ```bash
 # Homepage only
-python3 scripts/seo_audit.py --url "$SITE_URL"
+python scripts/seo_audit.py --url "$SITE_URL"
 
 # Specific pages
-python3 scripts/seo_audit.py --url "$SITE_URL" --pages "/,/about,/pricing"
+python scripts/seo_audit.py --url "$SITE_URL" --pages "/,/about,/pricing"
 
 # Full-site audit via sitemap (JSON-LD + meta per page)
-python3 scripts/seo_audit.py --url "$SITE_URL" --sitemap
+python scripts/seo_audit.py --url "$SITE_URL" --sitemap
 
 # Save results to file
-python3 scripts/seo_audit.py --url "$SITE_URL" --sitemap -o data/seo_audit.json
+python scripts/seo_audit.py --url "$SITE_URL" --sitemap -o data/seo_audit.json
 ```
 
 ### 7.2 GEO Audit (`geo_audit.py`)
@@ -371,16 +373,16 @@ Covers: llms.txt / llms-full.txt, robots.txt AI crawler rules, content depth (au
 
 ```bash
 # Homepage only
-python3 scripts/geo_audit.py --url "$SITE_URL"
+python scripts/geo_audit.py --url "$SITE_URL"
 
 # Specific pages
-python3 scripts/geo_audit.py --url "$SITE_URL" --pages "/,/blog/my-post"
+python scripts/geo_audit.py --url "$SITE_URL" --pages "/,/blog/my-post"
 
 # Full-site audit via sitemap (max 50 pages)
-python3 scripts/geo_audit.py --url "$SITE_URL" --sitemap
+python scripts/geo_audit.py --url "$SITE_URL" --sitemap
 
 # Save results to file
-python3 scripts/geo_audit.py --url "$SITE_URL" --sitemap -o data/geo_audit.json
+python scripts/geo_audit.py --url "$SITE_URL" --sitemap -o data/geo_audit.json
 ```
 
 ### 7.3 Performance & Security Audit (`perf_audit.py`)
@@ -389,24 +391,24 @@ Covers: load time (TTFB, total), compression (Brotli/gzip), HTML size, HSTS, HTT
 
 ```bash
 # Homepage only
-python3 scripts/perf_audit.py --url "$SITE_URL"
+python scripts/perf_audit.py --url "$SITE_URL"
 
 # Specific pages
-python3 scripts/perf_audit.py --url "$SITE_URL" --pages "/,/about"
+python scripts/perf_audit.py --url "$SITE_URL" --pages "/,/about"
 
 # Full-site via sitemap (max 20 pages)
-python3 scripts/perf_audit.py --url "$SITE_URL" --sitemap
+python scripts/perf_audit.py --url "$SITE_URL" --sitemap
 
 # Save results to file
-python3 scripts/perf_audit.py --url "$SITE_URL" --sitemap -o data/perf_audit.json
+python scripts/perf_audit.py --url "$SITE_URL" --sitemap -o data/perf_audit.json
 ```
 
 ### 7.4 Run All Audits
 
 ```bash
-python3 scripts/seo_audit.py  --url "$SITE_URL" --sitemap -o data/seo_audit.json
-python3 scripts/geo_audit.py  --url "$SITE_URL" --sitemap -o data/geo_audit.json
-python3 scripts/perf_audit.py --url "$SITE_URL" --sitemap -o data/perf_audit.json
+python scripts/seo_audit.py  --url "$SITE_URL" --sitemap -o data/seo_audit.json
+python scripts/geo_audit.py  --url "$SITE_URL" --sitemap -o data/geo_audit.json
+python scripts/perf_audit.py --url "$SITE_URL" --sitemap -o data/perf_audit.json
 ```
 
 ---

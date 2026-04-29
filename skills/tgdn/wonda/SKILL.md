@@ -1,6 +1,24 @@
 ---
 name: wonda-cli
 description: Using the Wonda CLI to generate images, videos, music, and audio from the terminal — plus LinkedIn, Reddit, and X/Twitter research and automation
+version: 1.2.0
+metadata:
+  openclaw:
+    requires:
+      env:
+        - WONDERCAT_API_KEY
+      anyBins:
+        - wonda
+    primaryEnv: WONDERCAT_API_KEY
+    install:
+      - kind: node
+        package: "@degausai/wonda"
+        bins: [wonda]
+      - kind: brew
+        formula: degausai/tap/wonda
+        bins: [wonda]
+    homepage: https://wonda.sh
+    emoji: "🎬"
 ---
 
 # Wonda CLI
@@ -12,18 +30,17 @@ Wonda CLI is a content creation toolkit for terminal-based agents. Use it to gen
 If `wonda` is not found on PATH, install it first:
 
 ```bash
-curl -fsSL https://wonda.sh/install.sh | bash
-```
+# npm
+npm i -g @degausai/wonda
 
-Or via Homebrew: `brew tap degausai/tap && brew install wonda`
-Or via npm: `npm i -g @degausai/wonda`
+# Homebrew
+brew tap degausai/tap && brew install wonda
+```
 
 ## Setup
 
-- **Auth**: `wonda auth login` (opens browser) or `export WONDERCAT_API_KEY=sk_...` or `wonda config set api-key sk_...`
-- **Base URL** (local dev): `export WONDERCAT_BASE_URL=http://localhost:14692`
+- **Auth**: `wonda auth login` (opens browser, recommended) or set `WONDERCAT_API_KEY` env var
 - **Verify**: `wonda auth check`
-- **Config**: `wonda config set <key> <value>` / `wonda config get <key>` (keys: `api-key`, `base-url`)
 
 ### Access tiers
 
@@ -36,6 +53,32 @@ Not all commands are available to every account type:
 | **Paid** (Plus, Pro, or Absolute plan)      | Everything above + **video analysis** (requires credits), **skill commands** (`wonda skill install/list/get`)                    |
 
 If a command returns a `403` error, check your plan at https://app.wondercat.ai/settings/billing.
+
+### Social signups (Instagram, TikTok, etc.)
+
+Drive them with the `wonda device` primitives + a throwaway mailbox from `wonda email`. The screenshot → decide → tap/type/swipe loop is how these flows work — there's no shortcut command, and that's fine: social apps change their UI constantly and any canned flow would drift faster than you could maintain it.
+
+Standard loop:
+
+1. `wonda email account create --random` → save `{email, password}`.
+2. `wonda device create` → pick a `ready` device (poll `wonda device get <id> --fields status`).
+3. `wonda device launch <device-id> com.instagram.android` (or `com.zhiliaoapp.musically` for TikTok). Fall back to `wonda device open-url` if you'd rather start in the web flow.
+4. Loop: `wonda device screenshot <device-id> > s.json` → decode the base64 PNG → read → pick an action → `tap | type | swipe | key` → screenshot again. Use `--text "SomeButtonLabel"` on `tap` before guessing coordinates; fall back to `--x --y` read off the screenshot for elements without matching text (number pickers, date spinners, etc.).
+5. When the app sends a verification email, `wonda email inbox wait <email> --timeout 120` — returns `{codes: ["483921"], links: [...]}` with the 6-digit code already extracted. `wonda device type <device-id> --text "<code>"` to feed it back.
+6. For number/date spinners: tap on the highlighted cell, Android pops up a numeric or alphabetic keyboard, `wonda device type --text "<value>"` replaces the selected text. `wonda device key --code 4` dismisses the keyboard when done.
+
+**Consent-like taps** — anything that accepts Terms/Privacy/Cookies, grants permissions, or publishes something — stop and ask the user for explicit confirmation in chat before tapping. That isn't about signups specifically; it applies to any automation step.
+
+**Rate-limit signals** — if the app shows you a visual puzzle ("we want to make sure you're a real person"), stop and hand off to the user with `wonda device stream <id>` (see next section). Don't click through puzzles yourself.
+
+### Handing off to a human
+
+If automation hits a screen that requires a human to take over (consent flow you shouldn't auto-accept, ambiguous UI, step where the user prefers to act themselves), use `wonda device stream <device-id>` — returns a `playerUrl` signed with a short-lived JWT (1h). Give that URL to the user, they act in their own browser, and automation can resume afterward.
+
+```bash
+wonda device stream <device-id>
+# → { "streamUrl": "wss://…", "playerUrl": "https://…", "deviceType": "social" }
+```
 
 ### Global output flags
 
@@ -87,20 +130,67 @@ wonda skill get <slug>                          # Full step-by-step guide for a 
 
 **Full skill index:**
 
-| Slug                      | Description                                                        | Input                     |
-| ------------------------- | ------------------------------------------------------------------ | ------------------------- |
-| product-video             | Product/scene video — prompt library for all categories            | optional product image    |
-| ugc-talking               | Talking-head UGC — single clip, two-angle PIP, or 20s+ with B-roll | optional reference        |
-| ugc-reaction-batch        | Batch TikTok-native UGC reactions with viral strategy              | optional product image    |
-| tiktok-ugc-pipeline       | Scrape viral reel → generate 5 UGC → post as drafts                | reel or TikTok URL        |
-| ugc-dance-motion          | Dance/motion transfer                                              | image + video             |
-| marketing-brain           | Marketing strategy brain — hooks, visuals, ads                     | user brief                |
-| reddit-subreddit-intel    | Scrape top posts, analyze virality, generate ideas                 | subreddit + product       |
-| twitter-influencer-search | Find X influencers and amplifiers                                  | competitor/niche keywords |
+| Slug                         | Description                                                                  | Input                         |
+| ---------------------------- | ---------------------------------------------------------------------------- | ----------------------------- |
+| product-video                | Product/scene video — prompt library for all categories                      | optional product image        |
+| ugc-talking                  | Talking-head UGC — single clip, two-angle PIP, or 20s+ with B-roll           | optional reference            |
+| ugc-reaction-batch           | Batch TikTok-native UGC reactions with viral strategy                        | optional product image        |
+| tiktok-ugc-pipeline          | Scrape viral reel → generate 5 UGC → post as drafts                          | reel or TikTok URL            |
+| ugc-dance-motion             | Dance/motion transfer                                                        | image + video                 |
+| marketing-brain              | Marketing strategy brain — hooks, visuals, ads                               | user brief                    |
+| reddit-subreddit-intel       | Scrape top posts, analyze virality, generate ideas                           | subreddit + product           |
+| twitter-influencer-search    | Find X influencers and amplifiers                                            | competitor/niche keywords     |
+| tiktok-slideshow-carousel    | 3-slide TikTok carousel — hook, bridge, product reveal                       | app screenshot + audience     |
+| ffmpeg-local-video-finishing | Local ffmpeg finishing for deterministic trims, muxes, reverses, and exports | local video path or mediaId   |
+| ffmpeg-burn-captions         | Burn captions locally with ffmpeg after getting transcript/timing            | local video path or mediaId   |
+| ffmpeg-social-formatting     | Reformat local video for 9:16, 1:1, 16:9, and social-safe exports            | local video path or mediaId   |
+| ffmpeg-scene-splitting       | Detect scene boundaries locally, split into clips, or omit one scene         | local video path or mediaId   |
+| ffmpeg-silence-cut           | Detect and collapse dead air locally while preserving short natural pauses   | local video path or mediaId   |
+| ffmpeg-frame-extraction      | Extract single frames, poster frames, or evenly spaced stills locally        | local video path or mediaId   |
+| ffmpeg-analysis-artifacts    | Build local analysis artifacts: grid, first/last frame, and extracted audio  | local video path or mediaId   |
+| ffmpeg-reference             | Compact ffmpeg routing, font, codec, and command reference for agents        | local media path              |
+| remotion-local-render        | Render editorPipeline blueprint steps locally via @remotion/renderer         | manifest JSON + editor job id |
 
 **If a skill matches** → `wonda skill get <slug>`, read it, adapt to context, execute each step.
 
 **If no skill matches** → build from scratch (Step 3).
+
+### Step 2.5: Decide whether finishing should be local
+
+Not every media task should go back through Wonda editing. Use this routing rule:
+
+- Use `wonda` for AI generation, AI transcription/alignment, scraping, publishing, hosted transitions, and workflows that need media IDs or remote jobs.
+- Use local `ffmpeg` for deterministic transforms on files you already have or can download: trim, crop/scale/pad, concat, replace audio, extract audio/frame, reverse, normalize for delivery, burn captions, split scenes, cut silence, and build analysis artifacts.
+
+When a task starts from a Wonda media ID but the actual edit is deterministic, move it to local files first:
+
+```bash
+wonda media download <mediaId> -o ./input.mp4
+```
+
+Before any local ffmpeg work:
+
+```bash
+which ffmpeg
+which ffprobe
+ffmpeg -version
+ffprobe -v error -show_format -show_streams -of json ./input.mp4
+```
+
+Font rule for local caption/text work:
+
+- Prefer an explicit font file path over a family name.
+- Never assume a font exists. Check first with `fc-match`, `fc-list`, `/System/Library/Fonts`, `/Library/Fonts`, `~/Library/Fonts`, or `/usr/share/fonts`.
+- If the task is mainly local finishing/captions/formatting/splitting/artifact extraction, check the ffmpeg-specific skills before inventing commands.
+- `wonda edit video` renders locally by default for single-video ops (`trim`, `crop`, `speed`, `volume`, `textOverlay`, `animatedCaptions` with supplied captions, `editAudio`). The server returns a manifest; the CLI runs `@remotion/renderer` against a CloudFront-hosted bundle, uploads the output, and finalizes the editor_job. No flag needed. Pass `--render-server` only to force Lambda. Multi-video ops (`overlay`, `splitScreen`, `merge`, `splitScenes`, `motionDesign`) auto-reject with a 400 — the CLI will tell you to use `--render-server`. See the `remotion-local-render` content skill for the full recipe (including the STT-free TikTok-style caption flow via `wonda alignment extract-timestamps` → `--caption-segments`).
+
+Default local export target unless the user asked otherwise:
+
+```bash
+-c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart -c:a aac -b:a 192k
+```
+
+Always pass `-y` as the first flag so the command auto-overwrites the output. `ffmpeg` prompts interactively when the output path exists and agent shells hang on that prompt until timeout.
 
 ### Step 3: Build from scratch (chain endpoints)
 
@@ -141,9 +231,7 @@ The `animatedCaptions` operation handles everything in one step — it extracts 
 ```bash
 # Generate a video with speech audio
 VID_JOB=$(wonda generate video --model seedance-2 --prompt "..." --duration 5 --aspect-ratio 9:16 --params '{"quality":"high"}' --wait --quiet)
-VID_URL=$(wonda jobs get inference $VID_JOB --jq '.outputs[0].media.url')
-wonda media download "$VID_URL" -o /tmp/vid.mp4
-VID_MEDIA=$(wonda media upload /tmp/vid.mp4 --quiet)
+VID_MEDIA=$(wonda jobs get inference $VID_JOB --jq '.outputs[0].media.mediaId')
 
 # Add animated captions (single step)
 wonda edit video --operation animatedCaptions --media $VID_MEDIA \
@@ -152,6 +240,52 @@ wonda edit video --operation animatedCaptions --media $VID_MEDIA \
 ```
 
 The video's original audio is preserved. Do NOT replace the audio with TTS — Sora already generated the speech.
+
+**Transitions (effects pipelines on a single video):**
+
+```bash
+wonda transitions presets                            # List built-in presets (JSON)
+wonda transitions operations                         # Grouped by category (analysis/effect/...)
+wonda transitions operations --json                  # Full per-param metadata
+wonda transitions llms                               # Full reference (presets + ops + dependencies)
+wonda transitions run --media $VID --preset flash_glow --wait -o out.mp4
+# Or build a custom pipeline of steps:
+wonda transitions run --media $VID \
+  --steps '[{"glow":{"spread":8}},{"scene_flash":{}}]' --wait -o out.mp4
+# Or send an agent-generated timeline of clips (inline JSON):
+wonda transitions run --media $VID \
+  --clips '[{"layer_type":"video","start_frame":0,"end_frame":60}]' --wait -o out.mp4
+# …or from a file (handy for long agent timelines):
+wonda transitions run --media $VID --clips ./timeline.json --wait -o out.mp4
+wonda transitions job <jobId>                        # Poll a transition job
+```
+
+Use exactly one of `--preset`, `--steps`, or `--clips`. Requires a full (logged-in) account. **Always read `wonda transitions llms` first when composing a custom pipeline or a clips timeline** — it documents the detect→segment→effect dependencies, which ops need masks, and the full clip-spec shape (layer types, tracks, effects, transforms).
+
+**Preset variables (`variables` block).** Each preset declares the template variables it accepts under `variables` in `wonda transitions presets`. Each entry has `name`, `description`, and `required`. Required variables MUST be supplied or the job is rejected with a 400 — no more silent skipping. Pass them with `--var name=value` (repeatable) or, for the common `prompt` case, the `--prompt` shortcut:
+
+```bash
+# flash_glow_prompted requires { prompt }
+wonda transitions run --media $VID --preset flash_glow_prompted \
+  --prompt "woman in white dress" --wait -o out.mp4
+
+# text_behind_person requires { prompt, text }
+wonda transitions run --media $VID --preset text_behind_person \
+  --var prompt="the person" --var text="HELLO WORLD" --wait -o out.mp4
+```
+
+The `prompt` variable is a **detection text query** (Grounding DINO target describing which subject to mask), not a content-generation prompt. For presets that don't declare a `prompt` variable but still list `sam2`/`clip` in `models`, detection auto-picks the most recurring subject via CLIP — no variable needed.
+
+Building a custom `--steps` pipeline that uses `detect` + `segment`? Add a `detect` step with `method: grounding_dino` and put the subject description in that step's `prompt` param (or use `method: clip` for auto-detect).
+
+**Multi-scene presets (`requiresMultiScene: true`).** Some presets use `scene_split` and expect a video with multiple cuts/scenes. Check `requiresMultiScene` in `wonda transitions presets` — if true, feeding a single continuous shot will produce only one scene and the effect may look underwhelming. Combine clips first or use a video with natural cuts.
+
+**Per-step overrides (`--overrides`).** Tweak individual params of a preset's steps without rewriting the whole pipeline. Shape is **nested**: `{stepName: {paramName: value}}`. Step and param names come from `wonda transitions operations --json`.
+
+```bash
+wonda transitions run --media $VID --preset flash_glow \
+  --overrides '{"glow":{"spread":12},"zoom":{"end":2.5}}' --wait -o out.mp4
+```
 
 **Output URL paths differ by job type:**
 
@@ -169,14 +303,14 @@ Default: `nano-banana-2`. Only use others when:
 - Need background removal → `birefnet-bg-removal`
 - Cheapest possible → `z-image`
 - NanoBanana fails (rare) → `seedream-4-5`
-- Need readable text in image → `gpt-image-1-5`
+- Need readable text in image → `nano-banana-pro`
 - Photorealistic/creative imagery → `grok-imagine` or `grok-imagine-pro`
-- Spicy/NSFW content → `cookie` (SDXL-based, tag-based or natural language prompts)
+- Spicy content → `cookie` (SDXL-based, tag-based or natural language prompts) — **ONLY select when the user explicitly asks for spicy content. Never auto-select.**
 
-**Cookie model (`cookie`):** SDXL with DMD acceleration and hires fix. Accepts both danbooru-style tags (`1girl, portrait, soft lighting`) and natural language. Supports `--negative-prompt` (has sensible defaults; override only when needed) and `--seed` for reproducibility.
+**Cookie model (`cookie`):** SDXL with DMD acceleration and hires fix. **Restricted: only use when the user explicitly requests spicy content.** Accepts both danbooru-style tags (`1cat, portrait, soft lighting`) and natural language. Supports `--negative-prompt` (has sensible defaults; override only when needed) and `--seed` for reproducibility.
 
 ```bash
-wonda generate image --model cookie --prompt "1girl, portrait, soft lighting" --wait -o out.png
+wonda generate image --model cookie --prompt "1cat, portrait, soft lighting" --wait -o out.png
 wonda generate image --model cookie --prompt "a woman in a garden, golden hour" \
   --negative-prompt "ugly, blurry, watermark" --seed 42 --wait -o out.png
 ```
@@ -187,17 +321,17 @@ Default: `seedance-2` (duration 5/10/15s, default 5s, quality: high). Escalation
 
 - Quality complaint or different style → `sora2` or `sora2pro`
 - Max single-clip duration is **15s** for Seedance 2, **20s** for Sora → for longer content, stitch multiple clips via merge
-- Fast generation needed → `veo3_1-fast` (Veo 3.1, supports 720p/1080p)
+- Veo (`veo3_1`, `veo3_1-fast`) is available but NOT in the default waterfall. Only pick Veo when the user explicitly asks for Veo by name.
 
 **Image-to-video routing (MANDATORY when attaching a reference image):**
 
-- Person/face visible in the **reference image** → MUST use `kling_3_pro_i2v` (preserves identity better for faces)
+- Person/face visible in the **reference image** → MUST use `kling_3_pro` (preserves identity better for faces)
 - No person in reference image → use `seedance-2`
 - **Text-to-video (no reference image):** Seedance 2 generates people fine. This rule ONLY applies when you `--attach` an image.
 
 **Kling model family:**
 
-- `kling_3_pro_i2v` — Best for image-to-video, supports start/end images, custom elements (@Element1, @Element2), 3-15s duration, 16:9/9:16/1:1
+- `kling_3_pro` — Text-to-video and image-to-video, supports start/end images, custom elements (@Element1, @Element2), 3-15s duration, 16:9/9:16/1:1
 - `kling_2_6_pro` — General purpose, 5-10s, 16:9/9:16/1:1, text-to-video and image-to-video
 - `kling_2_6_motion_control` — Motion transfer: requires both a reference image AND a reference video, recreates the video's motion with the image's appearance
 - `kling2_5-pro` — Budget Kling option, 5-10s, supports first/last frame images
@@ -206,12 +340,12 @@ Default: `seedance-2` (duration 5/10/15s, default 5s, quality: high). Escalation
 
 - `grok-imagine-video` — xAI video generation, 5-15s, supports 7 aspect ratios including 4:3 and 3:2
 - `topaz-video-upscale` — Upscale video resolution (1-4x factor, supports fps conversion)
-- `sync-lipsync-v2-pro` — Sync lip movements to audio (requires video + audio input)
+- `sync-lipsync-v2-pro` — Legacy lipsync for user-supplied video + audio pairs. Inferior to native-audio generation and almost never the right choice for new content. See the "Lip sync" section for rules.
 
 Seedance family (DEFAULT video model, watermarks automatically removed):
 
-- `seedance-2` — Base Seedance 2.0 (T2V/I2V, 5-15s, basic/high quality)
-- `seedance-2-omni` — Multi-reference generation (images, video, audio refs)
+- `seedance-2` — Base Seedance 2.0 (T2V/I2V, 5-15s, high=standard/basic=fast)
+- `seedance-2-omni` — Multi-reference generation (images, audio refs)
 - `seedance-2-video-edit` — Edit existing video via text prompt
 
 **Video durations:** Accepted `--duration` values vary by model. Check with `wonda capabilities` or `wonda models info <slug>`.
@@ -219,9 +353,11 @@ Seedance family (DEFAULT video model, watermarks automatically removed):
 ### Audio
 
 - Music: `suno-music` (set `--params '{"instrumental":true}'` for no vocals)
-- Text-to-speech: `elevenlabs-tts` — always set voiceId in params. Default female voice: `--params '{"voiceId":"21m00Tcm4TlvDq8ikWAM"}'` (Rachel).
+- Text-to-speech: `elevenlabs-tts` — only for explicit narrator/voice-over asks over silent footage. Do NOT use to "make a UGC character talk" — Sora / Sora 2 Pro / Veo 3.1 / Kling 3 / Seedance 2 generate native synced speech in any language, which looks and sounds far better. Always set voiceId in params. Default female voice: `--params '{"voiceId":"21m00Tcm4TlvDq8ikWAM"}'` (Rachel).
 - Transcription: `elevenlabs-stt`
 - Multi-speaker dialogue: `elevenlabs-dialogue`
+
+**Native synced speech (preferred over TTS + lipsync):** Sora, Sora 2 Pro, Veo 3.1, Kling 3, and Seedance 2 all generate dialogue in any language directly inside the video, with mouth movements baked in. Put the line (and language) in the video model's `--prompt`. Never chain `elevenlabs-tts` → `sync-lipsync-v2-pro` to fake speech over a silent generation.
 
 ## Prompt writing rules
 
@@ -255,6 +391,12 @@ Three cases, no exceptions:
 
 These patterns show how to compose multi-step pipelines by chaining CLI commands. Each step's output feeds into the next.
 
+> **No need to download and re-upload between steps.** Every generation and edit
+> produces a media ID in its output. Pass that ID directly to the next command
+> via `--media` or `--audio-media`. Use `--jq '.outputs[0].media.mediaId'`
+> for inference jobs and `--jq '.outputs[0].mediaId'` for editor jobs.
+> Only use `-o <file>` on the FINAL step to download the finished output.
+
 ### Animate an image to video
 
 ```bash
@@ -263,7 +405,7 @@ MEDIA=$(wonda media upload ./product.jpg --quiet)
 wonda generate video --model seedance-2 --prompt "camera slowly pushes in, product rotates" \
   --attach $MEDIA --duration 5 --params '{"quality":"high"}' --wait -o animated.mp4
 # Person in image → Kling (ONLY when attaching a reference image with a person)
-wonda generate video --model kling_3_pro_i2v --prompt "the person turns and smiles" \
+wonda generate video --model kling_3_pro --prompt "the person turns and smiles" \
   --attach $MEDIA --duration 5 --wait -o person.mp4
 ```
 
@@ -273,15 +415,13 @@ wonda generate video --model kling_3_pro_i2v --prompt "the person turns and smil
 # Generate TTS
 TTS_JOB=$(wonda audio speech --model elevenlabs-tts --prompt "The script" \
   --params '{"voiceId":"21m00Tcm4TlvDq8ikWAM"}' --wait --quiet)
-TTS_URL=$(wonda jobs get inference $TTS_JOB --jq '.outputs[0].media.url')
-wonda media download "$TTS_URL" -o /tmp/tts.mp3
-TTS_MEDIA=$(wonda media upload /tmp/tts.mp3 --quiet)
+TTS_MEDIA=$(wonda jobs get inference $TTS_JOB --jq '.outputs[0].media.mediaId')
 # Mix onto video (mute original, full voiceover)
 wonda edit video --operation editAudio --media $VID_MEDIA --audio-media $TTS_MEDIA \
   --params '{"videoVolume":0,"audioVolume":100}' --wait -o with-voice.mp4
 ```
 
-Only use this when you need to REPLACE the video's audio. Sora generates native speech audio — don't replace it unless the user specifically wants a different voiceover.
+Only use this when you need to REPLACE the video's audio. Sora, Sora 2 Pro, Veo 3.1, Kling 3, and Seedance 2 all generate native synced speech in any language — don't replace it with TTS unless the user explicitly asks for a different voiceover. Never reach for this step to "add speech" to a UGC/talking-head clip; put the dialogue in the video model's prompt instead.
 
 ### Add static text overlay
 
@@ -324,11 +464,29 @@ wonda edit video --operation textOverlay --media $VIDEO_MEDIA \
 ```bash
 MUSIC_JOB=$(wonda generate music --model suno-music \
   --prompt "upbeat lo-fi hip hop, warm vinyl crackle" --wait --quiet)
-MUSIC_URL=$(wonda jobs get inference $MUSIC_JOB --jq '.outputs[0].media.url')
-wonda media download "$MUSIC_URL" -o /tmp/music.mp3
-MUSIC_MEDIA=$(wonda media upload /tmp/music.mp3 --quiet)
+MUSIC_MEDIA=$(wonda jobs get inference $MUSIC_JOB --jq '.outputs[0].media.mediaId')
 wonda edit video --operation editAudio --media $VID_MEDIA --audio-media $MUSIC_MEDIA \
   --params '{"videoVolume":100,"audioVolume":30}' --wait -o with-music.mp4
+```
+
+### Editor output chaining
+
+When chaining multiple editor operations (e.g., editAudio → animatedCaptions → textOverlay), extract the media ID from each editor job output and pass it to the next step. Note the jq path differs from inference jobs:
+
+```bash
+# Inference jobs: .outputs[0].media.mediaId
+# Editor jobs:    .outputs[0].mediaId
+
+EDIT_JOB=$(wonda edit video --operation editAudio --media $VID --audio-media $AUDIO \
+  --params '{"videoVolume":0,"audioVolume":100}' --wait --quiet)
+STEP1_MEDIA=$(wonda jobs get editor $EDIT_JOB --jq '.outputs[0].mediaId')
+
+CAP_JOB=$(wonda edit video --operation animatedCaptions --media $STEP1_MEDIA \
+  --params '{"fontFamily":"TikTok Sans SemiCondensed","position":"bottom-center","sizePercent":80,"strokeWidth":2.5,"fontSizeScale":0.8,"highlightColor":"rgb(252, 61, 61)"}' --wait --quiet)
+STEP2_MEDIA=$(wonda jobs get editor $CAP_JOB --jq '.outputs[0].mediaId')
+
+wonda edit video --operation textOverlay --media $STEP2_MEDIA \
+  --prompt-text "Hook text" --params '{"position":"top-center","fontFamily":"TikTok Sans SemiCondensed","sizePercent":66,"fontSizeScale":0.5,"strokeWidth":4.5}' --wait -o final.mp4
 ```
 
 ### Merge multiple clips
@@ -380,7 +538,11 @@ wonda generate video --model bria-video-background-removal --attach $VIDEO_MEDIA
 
 CRITICAL: Image and video background removal are different models. Never swap them.
 
-### Lip sync
+### Lip sync (last-resort fallback — prefer native-audio video models)
+
+Sora, Sora 2 Pro, Veo 3.1, Kling 3, and Seedance 2 all generate speech in any language with correctly synced mouth movements as part of the video itself. That path produces dramatically better results than `sync-lipsync-v2-pro`: better lip physics, better lighting, better costs, and no second inference round-trip. For any talking UGC, ad, or spokesperson video, put the dialogue directly in the video model's prompt — do not chain TTS + lipsync.
+
+Only reach for `sync-lipsync-v2-pro` when the user EXPLICITLY supplies both a pre-existing video and a pre-existing audio clip and asks you to align the mouth to that audio. If a user asks for lipsync as the default method of making a character speak, push back: the native-audio video models are the better tool and work in any language.
 
 ```bash
 wonda generate video --model sync-lipsync-v2-pro --attach $VIDEO_MEDIA,$AUDIO_MEDIA --wait -o synced.mp4
@@ -408,10 +570,11 @@ wonda generate video --model topaz-video-upscale --attach $VIDEO_MEDIA \
 | `speed`            | video_0                     | speed (multiplier: 2 = 2x faster)                                             |
 | `extractAudio`     | video_0                     | Extracts audio track                                                          |
 | `reverseVideo`     | video_0                     | Plays backwards                                                               |
-| `skipSilence`      | video_0                     | maxSilenceDuration (default 0.3), padding (default 0.03)                      |
+| `skipSilence`      | video_0                     | maxSilenceDuration (default 0.03)                                             |
 | `imageCrop`        | video_0                     | aspectRatio                                                                   |
+| `textOverlay`      | video_0 (image)             | Same as video textOverlay — works on images, outputs image (png/jpg)          |
 
-Valid textOverlay fonts: Inter, Montserrat, Bebas Neue, Oswald, TikTok Sans, Poppins, Raleway, Anton, Comic Cat, Gavency
+Valid textOverlay fonts: Inter, Montserrat, Bebas Neue, Oswald, TikTok Sans, TikTok Sans Condensed, TikTok Sans SemiCondensed, TikTok Sans SemiExpanded, TikTok Sans Expanded, TikTok Sans ExtraExpanded, Nohemi, Poppins, Raleway, Anton, Comic Cat, Gavency
 Valid positions: top-left, top-center, top-right, center-left, center, center-right, bottom-left, bottom-center, bottom-right
 
 ## Marketing & distribution
@@ -458,11 +621,11 @@ wonda media info <mediaId>
 
 ### X/Twitter
 
-Cookie-based auth against X's internal GraphQL API. Supports reads, writes, and social graph.
+Supports reads, writes, and social graph.
 
 ```bash
-# Auth setup (get cookies from DevTools → Application → Cookies → x.com)
-wonda x auth set --auth-token <auth_token> --ct0 <ct0>
+# Auth setup (run `wonda x auth --help` for details)
+wonda x auth set
 wonda x auth check
 
 # Read
@@ -483,6 +646,8 @@ wonda x news --tab trending                          # Trending topics (tabs: fo
 
 # Write (uses internal API — use on secondary accounts)
 wonda x tweet "Hello world"                          # Post a tweet
+wonda x tweet "Hello world" --browser                # Full stealth via real browser (Patchright)
+wonda x tweet "Hello world" --attach ~/clip.mp4      # Attach image/gif/video (up to 4)
 wonda x reply <tweet-id-or-url> "Great point"        # Reply
 wonda x like <tweet-id-or-url>                       # Like
 wonda x unlike <tweet-id-or-url>                     # Unlike
@@ -497,13 +662,18 @@ wonda x refresh-ids                                  # Refresh cached GraphQL qu
 
 All paginated commands support: `-n <count>`, `--cursor`, `--all`, `--max-pages`, `--delay <ms>`.
 
+**Tweet modes:** The `tweet` command has two modes:
+
+- **Default (API):** X's internal GraphQL (`CreateTweet` for ≤280 chars, `CreateNoteTweet` for long-form Premium). Fast (<1s), supports `--attach` for media. Occasionally fails with error 226 when X rotates query IDs or feature flags — when that happens, recapture via `twitter-tone-research/_artifacts/scripts/capture-ct-bw.mjs` and bump the three knobs in `xclient/`.
+- **`--browser` (Patchright):** Launches a real undetected Chrome browser, opens x.com compose, types with human-style jitter, clicks Post. Supports `--attach` (image/gif/video, up to 4) — files are driven through the hidden compose input via Playwright's `setInputFiles`, no native picker dialog opens; the script waits for X's upload pipeline to finalize (up to 5 min for video) before submitting. Zero fingerprinting risk. Slower (~10s text, ~30-90s with video) but fully drift-proof — no queryIds, feature flags, or request shape to maintain. Requires: `npm i patchright && npx patchright install chromium`.
+
 ### LinkedIn
 
-Cookie-based auth against LinkedIn's Voyager API. Supports search, profiles, companies, messaging, and engagement.
+Supports search, profiles, companies, messaging, and engagement.
 
 ```bash
-# Auth setup (get cookies from DevTools → Application → Cookies → linkedin.com)
-wonda linkedin auth set --li-at-value <li_at> --jsessionid-value <JSESSIONID>
+# Auth setup (run `wonda linkedin auth --help` for details)
+wonda linkedin auth set
 wonda linkedin auth check
 
 # Read
@@ -515,8 +685,11 @@ wonda linkedin conversations                         # List message threads
 wonda linkedin messages <conversation-urn>           # Read messages in a thread
 wonda linkedin notifications -n 20                   # Recent notifications
 wonda linkedin connections                           # Your connections
+wonda linkedin reactions <activity-id>               # Reactions with reactor profiles + type
 
 # Write
+wonda linkedin connect <vanity-name> --message "Hey!" # Send connection request with note
+wonda linkedin connect <vanity-name> -m "Hey!" --browser  # Full stealth via real browser (Patchright)
 wonda linkedin like <activity-urn>                   # Like a post
 wonda linkedin unlike <activity-urn>                 # Remove a like
 wonda linkedin send-message <conversation-urn> "Hi!" # Send a message
@@ -526,13 +699,18 @@ wonda linkedin delete-post <activity-id>             # Delete a post
 
 Paginated commands support: `-n <count>`, `--start`, `--all`, `--max-pages`, `--delay <ms>`.
 
+**Connection request modes:** The `connect` command has two modes:
+
+- **Default (API):** Voyager REST API with fingerprint mitigations (profile visit → drawer warm-up → connect). Fast (~3s), supports notes via `customMessage`.
+- **`--browser` (Patchright):** Launches a real undetected Chrome browser, navigates to the profile, and clicks through the UI. Zero fingerprinting risk. Slower (~10s) but fully safe. Use this as a fallback if you want full protection. Requires: `npm i patchright && npx patchright install chromium`.
+
 ### Reddit
 
-Cookie-based auth (optional — many reads work unauthenticated). Supports search, feeds, users, posts, trending, and chat/DMs.
+Auth is optional — many reads work unauthenticated. Supports search, feeds, users, posts, trending, and chat/DMs.
 
 ```bash
-# Auth setup (get cookie from DevTools → Application → Cookies → reddit.com → reddit_session)
-wonda reddit auth set --session-value <jwt>
+# Auth setup (run `wonda reddit auth --help` for details)
+wonda reddit auth set
 wonda reddit auth check
 
 # Read (works without auth)
@@ -563,11 +741,11 @@ Paginated commands support: `-n <count>`, `--after <cursor>`, `--all`, `--max-pa
 
 ### Reddit chat / DMs
 
-Direct messaging via the Matrix protocol. Requires a separate chat token (different from the session cookie).
+Direct messaging via the Matrix protocol. Requires a separate chat token.
 
 ```bash
-# Auth setup (get token from DevTools → Console → JSON.parse(localStorage.getItem('chat:access-token')).token)
-wonda reddit chat auth-set --token <matrix-token>
+# Auth setup (run `wonda reddit chat auth-set --help` for details)
+wonda reddit chat auth-set
 
 # Read
 wonda reddit chat inbox                                  # List DM conversations with latest messages
@@ -609,7 +787,7 @@ wonda analyze video --media $VIDEO_MEDIA --wait -o /tmp/grid.jpg
 wonda analyze video --media $VIDEO_MEDIA --wait --jq '.outputs[] | select(.outputKey=="transcript") | .outputValue'
 ```
 
-**Error handling**: 402 = insufficient credits (use `wonda topup`), 409 = media still processing (CLI auto-retries).
+**Error handling**: 402 = insufficient credits, 409 = media still processing (CLI auto-retries).
 
 ### Chat (AI assistant)
 
@@ -648,7 +826,7 @@ wonda capabilities                                    # Full platform capabiliti
 wonda pricing list                                    # Pricing for all models
 wonda pricing estimate --model seedance-2 --prompt "..." # Cost estimate
 wonda style list                                      # Available visual styles
-wonda topup --amount 20                               # Top up credits ($5 minimum, opens Stripe)
+wonda topup                                            # Top up credits (opens Stripe checkout)
 ```
 
 ### Editing audio & images
@@ -657,9 +835,15 @@ wonda topup --amount 20                               # Top up credits ($5 minim
 # Edit audio
 wonda edit audio --operation <op> --media <id> --wait -o out.mp3
 
-# Edit image (crop, etc.)
+# Edit image (crop, text overlay)
 wonda edit image --operation imageCrop --media <id> \
   --params '{"aspectRatio":"9:16"}' --wait -o cropped.png
+
+# Add text to an image (outputs image, same format as input)
+wonda edit image --operation textOverlay --media <id> \
+  --prompt-text "Your text here" \
+  --params '{"fontFamily":"TikTok Sans","position":"bottom-center","fontSizeScale":1.5,"textColor":"#FFFFFF","strokeWidth":2}' \
+  --wait -o output.png
 ```
 
 ### Alignment (timestamp extraction)
@@ -680,7 +864,7 @@ wonda alignment extract-timestamps --model <model> --attach <mediaId> --wait
 
 | Symptom                          | Likely Cause                                  | Fix                                                    |
 | -------------------------------- | --------------------------------------------- | ------------------------------------------------------ |
-| Sora rejected image              | Person in image                               | Switch to `kling_3_pro_i2v`                            |
+| Sora rejected image              | Person in image                               | Switch to `kling_3_pro`                                |
 | Video adds objects not in source | Motion prompt describes elements not in image | Simplify to camera movement and atmosphere only        |
 | Text unreadable in video         | AI tried to render text in generation         | Remove text from video prompt, use textOverlay instead |
 | Hands look wrong                 | Complex hand actions in prompt                | Simplify to passive positions or frame to exclude      |
@@ -704,8 +888,8 @@ wonda alignment extract-timestamps --model <model> --attach <mediaId> --wait
 ## Error recovery
 
 - **Unknown model**: `wonda models list`
-- **No API key**: `export WONDERCAT_API_KEY=sk_...` or `wonda config set api-key sk_...`
+- **No API key**: `wonda auth login` or set `WONDERCAT_API_KEY` env var
 - **Job failed**: `wonda jobs get inference <id>` for error details
 - **Bad params**: `wonda models info <slug>` for valid params
 - **Timeout**: `wonda jobs wait inference <id> --timeout 20m`
-- **Insufficient credits (402)**: `wonda topup --amount 10` to add credits via Stripe
+- **Insufficient credits (402)**: `wonda topup` to add credits

@@ -60,7 +60,7 @@ Use the `chat` command (blocks until done), NOT `send`. Do NOT reply before gene
 **Handle these `final_status` values:**
 
 - `"done"` — Generation complete. Send the downloaded files to the user.
-- `"pending_confirmation"` — A high-cost tool (e.g. video) needs user approval.
+- `"pending_confirmation"` — A high-cost tool (e.g. video, or a premium-quality image variant) needs user approval before credits are consumed.
   **You MUST ask the user for explicit confirmation before proceeding. Do NOT auto-confirm.**
   1. Show the user: "This will cost approximately {estimated_cost} credits. Shall I proceed? (yes/no)"
   2. **WAIT for user response.** Only if user explicitly says yes/confirm/proceed, run:
@@ -76,19 +76,29 @@ Use the `chat` command (blocks until done), NOT `send`. Do NOT reply before gene
 
 **Handle errors:**
 
-If `chat` throws an error, first check the HTTP status code (available as `AgentSkillError.status_code`), then fall back to error-message matching:
+If `chat` throws an error (`AgentSkillError`), handle it by HTTP status and structured `code`. The `message` field already contains a user-ready explanation — surface it to the user as-is.
 
-| HTTP status / error contains | Meaning | What to tell the user |
-|---|---|---|
-| **`409`** (`code: 2011`, "Thread is busy") | Another task is still running on this thread | "A task is still running on this conversation. Wait for it to finish (`status`) before sending a new prompt, or start a new thread." |
-| **`402`** (`code: 2012`, "Task rejected") + body contains `1200000136` | Insufficient credits | "Your credits are insufficient. Please top up or switch to unlimited mode: `set-mode --unlimited`" |
-| **`402`** (`code: 2012`) + body contains `1200000200` | Concurrent task limit (cashier) | "You've hit the concurrent-task limit. Please wait for a running task to finish before starting a new one." |
-| **`402`** (`code: 2012`) + body contains `1200000146` | Free tier limit reached | "Free tier limit reached. Please subscribe or switch to unlimited mode." |
-| **`429`** (`code: 1429`, "Rate limit exceeded") | API rate limit hit | "Slowing down; rate limit hit. Retry in ~60s." |
-| `Invalid signature` / 401 | AK/SK misconfigured | "API key authentication failed. Please check your LOVART_ACCESS_KEY and LOVART_SECRET_KEY." |
-| `Project.*does not exist` | Invalid project ID | "Project not found. Please check the project ID or create a new one." |
+| HTTP status | `code` | What it means | What to tell the user |
+|---|---|---|---|
+| **`402`** | `2012` | Quota / billing / risk-control rejection | Show `AgentSkillError.message` directly — the server already returns a specific message (insufficient credits, free-tier reached, concurrent limit, risk control, phone verification, team plan required, etc.) and a suggested next step. |
+| **`409`** | `2011` | Another task is still running on this thread | "A task is still running on this conversation. Wait for it to finish (`status`) before sending a new prompt, or start a new thread." |
+| **`429`** | `1429` | API rate limit hit | "Slowing down; rate limit hit. Retry in ~60s." |
+| **`401`** | — | AK/SK misconfigured | "API key authentication failed. Please check your LOVART_ACCESS_KEY and LOVART_SECRET_KEY." |
+| — | — | `Project.*does not exist` in message | "Project not found. Please check the project ID or create a new one." |
 
-Note: errors from the skill carry both an HTTP status and a structured `code` in the response body. Prefer matching on status + code; the raw message is provided in `details` for diagnostics.
+Rule of thumb: prefer `AgentSkillError.message` for user-facing copy. Do not try to parse internal codes out of the response — the server already maps them to human-readable messages before returning.
+
+**Detect silent generation failures (`done` with no artifact):**
+
+Some prompts end with `final_status: "done"` but produce no `artifacts` / empty `downloaded`. This usually means the upstream image model refused the prompt (content moderation), timed out, or the LLM chose to reply with text instead of calling a tool. The skill flags this automatically — when `chat()` returns, check:
+
+- `result["generation_succeeded"]` — boolean. `False` means no artifact was produced.
+- `result["warning"]` — explanation string (present only when `generation_succeeded` is `False`).
+- `result["agent_message"]` — the agent's plain-text reply that hints at why (present when available).
+
+Typical triggers:
+- GPT Image 2 with very long/complex prompts involving weapons, specific bodies, or policy-sensitive wording — retry with a different model (`--include-tools generate_image_midjourney` or `generate_image_nano_banana_pro`) or simplify the prompt.
+- Prompt that describes a task the agent can't fulfill — show `agent_message` to the user.
 
 # ⚠️ RULE #3: ALWAYS DELIVER RESULTS + PROJECT LINK
 
@@ -374,43 +384,47 @@ Available models for `--prefer-models`:
 **IMAGE:**
 
 | Tool name | Display name |
-|-----------|-------------|
-| `generate_image_midjourney` | Midjourney |
+|---|---|
+| `generate_image_gpt_image_2` | GPT Image 2 Auto |
+| `generate_image_gpt_image_2_low` | GPT Image 2 Low |
+| `generate_image_gpt_image_2_medium` | GPT Image 2 Medium |
+| `generate_image_gpt_image_2_high` | GPT Image 2 High |
 | `generate_image_nano_banana_pro` | Nano Banana Pro |
 | `generate_image_nano_banana_2` | Nano Banana 2 |
-| `generate_image_nano_banana` | Nano Banana |
 | `generate_image_gpt_image_1_5` | GPT Image 1.5 |
 | `generate_image_seedream_v5` | Seedream 5.0 Lite |
-| `generate_image_seedream_v4_5` | Seedream 4.5 |
-| `generate_image_seedream_v4` | Seedream 4 |
-| `generate_image_imagen_v4` | Gemini Imagen 4 |
 | `generate_image_flux_2_max` | Flux.2 Max |
 | `generate_image_flux_2_pro` | Flux.2 Pro |
+| `generate_image_seedream_v4_5` | Seedream 4.5 |
+| `generate_image_nano_banana` | Nano Banana |
+| `generate_image_seedream_v4` | Seedream 4 |
+| `generate_image_imagen_v4` | Gemini Imagen 4 |
+| `generate_image_midjourney` | Midjourney |
 
 **VIDEO:**
 
 | Tool name | Display name |
-|-----------|-------------|
+|---|---|
 | `generate_video_seedance_v2_0` | Seedance 2.0 |
 | `generate_video_seedance_v2_0_fast` | Seedance 2.0 Fast |
-| `generate_video_seedance_pro_v1_5` | Seedance 1.5 Pro |
 | `generate_video_kling_v3` | Kling 3.0 |
 | `generate_video_kling_v3_omni` | Kling 3.0 Omni |
+| `generate_video_seedance_pro_v1_5` | Seedance 1.5 Pro |
 | `generate_video_kling_v2_6` | Kling 2.6 |
-| `generate_video_kling_omni_v1` | Kling O1 |
-| `generate_video_veo3_1` | Veo 3.1 |
-| `generate_video_veo3_1_fast` | Veo 3.1 Fast |
-| `generate_video_veo3` | Veo 3 |
+| `generate_video_wan_v2_6` | Wan 2.6 |
 | `generate_video_sora_v2_pro` | Sora 2 Pro |
 | `generate_video_sora_v2` | Sora 2 |
-| `generate_video_wan_v2_6` | Wan 2.6 |
+| `generate_video_veo3_1` | Veo 3.1 |
+| `generate_video_veo3_1_fast` | Veo 3.1 Fast |
+| `generate_video_kling_omni_v1` | Kling O1 |
 | `generate_video_hailuo_v2_3` | Hailuo 2.3 |
+| `generate_video_veo3` | Veo 3 |
 | `generate_video_vidu_q2` | Vidu Q2 |
 
 **3D:**
 
 | Tool name | Display name |
-|-----------|-------------|
+|---|---|
 | `generate_3d_tripo` | Tripo |
 
 When the user requests a specific model, prefer `--prefer-models` over putting model names in the prompt.
@@ -426,6 +440,25 @@ python3 {baseDir}/agent_skill.py chat --prompt "generate a video" --include-tool
 ```
 
 `--include-tools` strongly instructs the Agent to prioritize the listed tools. Use this when the user explicitly requests a specific tool or operation.
+
+## Reasoning Mode — `--mode thinking` / `--mode fast`
+
+Lovart has two reasoning modes you can select per thread:
+
+- **`fast`** (default) — lightweight single-pass response. Use for simple, one-shot generations where speed matters.
+- **`thinking`** — deep structured reasoning with planning and multi-step analysis. Use for complex brand systems, multi-asset campaigns, anything that benefits from deliberate planning. Slower but higher quality.
+
+Omitting `--mode` is equivalent to `--mode fast`, matching the web UI's default.
+
+```bash
+# Thinking mode — strategic, multi-step
+python3 {baseDir}/agent_skill.py chat --prompt "design a brand identity system for a sustainable coffee startup" --mode thinking --json --download
+
+# Fast mode — quick one-shot
+python3 {baseDir}/agent_skill.py chat --prompt "draw a cat" --mode fast --json --download
+```
+
+**Mode is locked to the thread on its first message.** Once you start a thread with `--mode thinking`, subsequent messages on the same `--thread-id` stay in thinking mode regardless of later `--mode` flags. To switch modes, start a new thread (omit `--thread-id`).
 
 ## Task-Specific Tool Selection (IMPORTANT)
 

@@ -31,7 +31,7 @@ python3 scripts/cms-match-businessunit.py \
 | `--type-id` | ❌ | 汇报类型 ID（默认 `9999`） |
 | `--plan-id` | ❌ | 关联任务 ID |
 | `--template-id` | ❌ | 模板 ID |
-| `--virtual-emp-id` | ❌ | 虚拟员工 ID（传入后由虚拟人代发） |
+| `--virtual-emp-id` | ❌ | 虚拟员工 ID（业务代发参数；脚本鉴权仍使用当前用户 AppKey） |
 | `--dry-run` | ❌ | 仅匹配不发送 |
 
 匹配规则补充：

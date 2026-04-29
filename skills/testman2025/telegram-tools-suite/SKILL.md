@@ -16,6 +16,10 @@ requiredEnv:
     required: true
 
 optionalEnv:
+  - name: ENABLE_HIGH_RISK_OPERATIONS
+    description: 高风险总开关（join/send-schedule 需设为 true 才可运行）
+    required: false
+    default: "false"
   - name: TELEGRAM_SESSION_NAME
     description: 会话文件名（默认 tg_monitor_session）
     required: false
@@ -44,7 +48,7 @@ optionalEnv:
     description: 监控群白名单文件路径
     required: false
   - name: TG_KEYWORDS_FILE
-    description: 监控关键词文件路径
+    description: 监控关键词文件路径（默认 config/keywords.txt）
     required: false
   - name: TG_MONITOR_REGEX_RULES_FILE
     description: 监控正则规则文件路径
@@ -70,18 +74,6 @@ optionalEnv:
     description: 单轮最多加群数量（最大 20）
     required: false
 
-  - name: TG_RISK_ACK
-    description: 高风险动作确认，scheduled_send 需设为 I_UNDERSTAND
-    required: false
-  - name: SCHEDULED_TARGET_GROUP_ID
-    description: 单任务模式目标群 ID
-    required: false
-  - name: SCHEDULED_MESSAGE_CONTENT
-    description: 单任务模式消息内容
-    required: false
-  - name: SCHEDULED_INTERVAL_HOURS
-    description: 单任务模式发送间隔（小时，>=0.5）
-    required: false
 ---
 
 # Telegram Tools Suite
@@ -89,8 +81,9 @@ optionalEnv:
 > ⚠️ 【重要安全&运行提示 安装前必读】
 > 1. 敏感文件生成：技能运行时会在`userdata/`目录生成`*.session`会话文件（包含Telegram登录认证状态），并使用`.env`配置文件，均为高敏感信息，已默认加入`.gitignore`/`.clawignore`禁止提交到代码仓库/发布，请勿手动分享这些文件。
 > 2. 持久运行说明：`monitor`（群监控）、`search`（群搜索）、`join`（批量加群定时模式）均为长时间运行的长驻任务，启动后会持续在后台运行直至手动终止。
-> 3. 合规使用提示：本工具仅用于合法的Telegram群组自动化管理用途，禁止用于发送垃圾信息、骚扰用户、批量爬取用户信息等违反Telegram服务条款和当地法律法规的行为。建议使用独立测试账号运行，避免主账号被平台封禁。所有配置需用户自行填写，工具无内置默认发送目标、消息内容或爬取规则。
-> 4. 默认风险保护：`join` 默认仅允许 `--once`；若需长驻必须设置 `TG_ENABLE_PERSISTENT_JOIN=true`。`scheduled_send.py` 默认拒绝发送，需设置 `TG_RISK_ACK=I_UNDERSTAND` 后才执行。
+> 3. 配置生效规则：所有配置文件（.env、config目录下的关键词/规则/配置文件）修改后，都需要重启对应的运行任务才会生效，修改配置不会影响正在运行的任务。
+> 4. 合规使用提示：本工具仅用于合法的Telegram群组自动化管理用途，禁止用于发送垃圾信息、骚扰用户、批量爬取用户信息等违反Telegram服务条款和当地法律法规的行为。建议使用独立测试账号运行，避免主账号被平台封禁。所有配置需用户自行填写，工具无内置默认发送目标、消息内容或爬取规则。
+> 4. 默认风险保护：`join` 与 `send-schedule` 均需先设置 `ENABLE_HIGH_RISK_OPERATIONS=true` 才可运行；其中 `join` 长驻模式还需额外设置 `TG_ENABLE_PERSISTENT_JOIN=true`。定时群发由 `send-schedule` 子命令执行，并按 `config/scheduled_tasks.json` 的限制进行校验。
 
 ## Instructions
 
@@ -107,26 +100,24 @@ optionalEnv:
 
 ### 🔹 多群定时发送功能使用说明
 支持同时给多个群发送不同内容、设置不同发送间隔，配置方法：
-1. 复制配置模板：`cp config/scheduled_tasks.example.json config/scheduled_tasks.json`
-2. 编辑`scheduled_tasks.json`，按示例格式添加多个任务：
+1. 在本地自行创建：`config/scheduled_tasks.json`
+2. 在 `scheduled_tasks.json` 中填写任务：
    - `name`：任务备注名，方便识别
    - `target_group_id`：目标群组ID（可以从`groups`命令输出中获取）
    - `message`：要发送的消息内容
    - `interval_hours`：发送间隔（小时，建议不小于1小时，避免被平台判定为垃圾消息）
-3. 启动定时任务：`python3 scheduled_send.py`
-> 💡 兼容性说明：旧版本的单任务环境变量配置依然有效，若存在多任务配置文件则优先使用多任务配置。
+3. 启动定时任务：`ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit send-schedule`
 > ⚠️ 防封号提示：建议不同群的消息内容不要完全一致，发送间隔不要低于30分钟，避免被Telegram判定为垃圾消息导致账号封禁。
-> ⚠️ 风险确认：执行前必须设置 `TG_RISK_ACK=I_UNDERSTAND`。
+> ⚠️ 校验限制：`interval_hours` 必须 `>= 0.5`，任务总数最多 20 个。
 
 
 ### Runtime Config Files (运行前按需编辑)
 
-- `config/target_groups.txt`：监控白名单群名（`monitor` 必需，空文件会拒绝启动）。
-- `config/monitor_regex_rules.json`：监控正则规则配置（可用 `TG_MONITOR_REGEX_RULES_FILE` 指定）。
-- `config/keywords.txt`：监控普通关键词（逐行匹配，可与正则规则叠加）。
-- `config/group_search_keywords.txt`：群搜索关键词（`search` 使用）。
-- `config/group_search.json`：群搜索时间、采样量、导出目录等参数。
-- `join_targets.txt`：批量加群目标列表（`join` 使用；可用 `TG_JOIN_LIST_FILE` 指定其他路径）。
+- 本技能发布包默认不包含 `config/` 目录内容；请在本地自行创建所需配置文件。
+- 监控：创建 `config/target_groups.txt`、`config/keywords.txt`、`config/monitor_regex_rules.json`。
+- 搜索：创建 `config/group_search_keywords.txt`、`config/group_search.json`。
+- 定时群发：创建 `config/scheduled_tasks.json`。
+- 批量加群：创建 `join_targets.txt`（或使用 `TG_JOIN_LIST_FILE` 指定路径）。
 
 ### Command Guide (命令入口)
 
@@ -136,8 +127,9 @@ optionalEnv:
 - `python3 -m tg_monitor_kit history --group "群名称" --limit 100`：导出指定群最近消息（需要群名；`--limit` 可选）。
 - `python3 -m tg_monitor_kit monitor`：关键词监控（长驻）。
 - `python3 -m tg_monitor_kit search`：群搜索（长驻，按配置定时）。
-- `python3 -m tg_monitor_kit join --once`：批量加群（单轮）。
-- `TG_ENABLE_PERSISTENT_JOIN=true python3 -m tg_monitor_kit join`：批量加群（长驻定时，默认关闭）。
+- `ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit join --once`：批量加群（单轮）。
+- `ENABLE_HIGH_RISK_OPERATIONS=true TG_ENABLE_PERSISTENT_JOIN=true python3 -m tg_monitor_kit join`：批量加群（长驻定时，默认关闭）。
+- `ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit send-schedule`：按 `config/scheduled_tasks.json` 执行定时群发（长驻）。
 
 ### 停止长驻任务
 - 前台运行：按 `Ctrl+C` 终止。
@@ -146,8 +138,9 @@ optionalEnv:
 ## Rules
 
 - 严禁在对话或日志中输出 `TELEGRAM_API_HASH`、短信验证码、`.session` 文件内容。
-- `monitor`、`search`、`join` 属于长驻任务，同一会话名同一时刻仅运行一个，避免 `database is locked`。
+- `monitor`、`search`、`join`、`send-schedule` 属于长驻任务，运行时会基于主会话复制临时会话副本；如遇异常退出仍可能触发 `database is locked`，请先结束残留进程后重试。
 - 所有定时相关行为按北京时间（UTC+8）理解与配置。
+- 在提供任何 Telegram 凭证前，必须先确认技能请求来源可信；发布方来源未知时，建议在一次性容器/隔离环境运行并使用测试账号。
 - 批量加群存在风控风险，需由使用者自行确认目标与频率合规。
 
 ## Examples
@@ -164,5 +157,5 @@ optionalEnv:
 
 ### 示例 3：批量加群单轮执行
 输入：用户已准备 `join_targets.txt`。  
-执行：`python3 -m tg_monitor_kit join --once`。  
+执行：`ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit join --once`。  
 输出：返回成功/已在群/失败统计。

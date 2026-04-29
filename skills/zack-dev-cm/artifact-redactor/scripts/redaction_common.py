@@ -35,8 +35,16 @@ TEXT_SUFFIXES = {
 URL_PATTERN = re.compile(r"https?://[^\s<>()\"']+")
 EMAIL_PATTERN = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
 PHONE_PATTERN = re.compile(r"(?<!\w)\+?[\d][\d().\s-]{8,}\d(?!\w)")
-UNIX_PATH_PATTERN = re.compile(r"(?:(?<=\s)|(?<=^)|(?<=[\"'`]))(?:~\/|\/(?:Users|home|var|etc|tmp|private)\/)[^\s\"'`]+")
+UNIX_PATH_PATTERN = re.compile(
+    r"(?:(?<=\s)|(?<=^)|(?<=[\"'`]))"
+    r"(?:"
+    r"~\/[^\s\"'`]+"
+    r"|\/(?:Users|home|var|etc|tmp|private|opt|workspace|mnt|srv|run|data)\/[^\s\"'`]+"
+    r"|\/(?:[^/\s\"'`]+\/)+[^/\s\"'`]+\.[A-Za-z0-9._-]+"
+    r")"
+)
 WINDOWS_PATH_PATTERN = re.compile(r"(?:(?<=\s)|(?<=^)|(?<=[\"'`]))[A-Za-z]:\\[^\s\"'`]+")
+UNC_PATH_PATTERN = re.compile(r"(?:(?<=\s)|(?<=^)|(?<=[\"'`]))\\\\[^\s\"'`\\]+\\[^\s\"'`\\]+(?:\\[^\s\"'`\\]+)+")
 FILE_URL_PATTERN = re.compile(r"file://[^\s\"'`]+", re.IGNORECASE)
 
 SECRET_PATTERNS = [
@@ -48,7 +56,7 @@ SECRET_PATTERNS = [
     re.compile(r"Bearer\s+[A-Za-z0-9._-]{10,}", re.IGNORECASE),
 ]
 
-PATH_PATTERNS = [FILE_URL_PATTERN, UNIX_PATH_PATTERN, WINDOWS_PATH_PATTERN]
+PATH_PATTERNS = [FILE_URL_PATTERN, UNIX_PATH_PATTERN, WINDOWS_PATH_PATTERN, UNC_PATH_PATTERN]
 
 
 def iter_candidate_files(root: Path) -> list[Path]:
@@ -76,9 +84,11 @@ def is_private_host(host: str) -> bool:
     normalized = (host or "").strip().lower()
     if not normalized:
         return True
-    if normalized == "localhost" or normalized.endswith(".local"):
+    if normalized == "localhost" or normalized.endswith((".local", ".internal", ".corp", ".lan")):
         return True
     if normalized in {"0.0.0.0", "127.0.0.1"}:
+        return True
+    if "." not in normalized and not any(char.isdigit() for char in normalized):
         return True
     try:
         ip = ipaddress.ip_address(normalized)

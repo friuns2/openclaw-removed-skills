@@ -1,3 +1,1034 @@
 {
-  "buildings": []
+  "buildings": [
+    {
+      "name": "上海新江湾广场T1",
+      "alias": [
+        "上海",
+        "上海新江湾",
+        "新江湾",
+        "Shanghai",
+        "Xinjiangwan"
+      ],
+      "rooms": [
+        {
+          "name": "F15-01[应急会议室]",
+          "room_id": "omm_fd96397eca334fd336f2ec8bf871d9de",
+          "capacity": 4
+        },
+        {
+          "name": "F15-02[短时会议室]",
+          "room_id": "omm_67d3f0d44f366e800aa8cbf5b091517f",
+          "capacity": 4
+        },
+        {
+          "name": "F15-03[短时会议室]",
+          "room_id": "omm_b9770a2f8dec35528d386c2c85166bc6",
+          "capacity": 4
+        },
+        {
+          "name": "F15-04",
+          "room_id": "omm_66bcf54a0d46b64aad8e11b3fa3e36ef",
+          "capacity": 8
+        },
+        {
+          "name": "F15-06",
+          "room_id": "omm_9968e7defe21b929ca61602af509f8df",
+          "capacity": 14
+        },
+        {
+          "name": "F15-07",
+          "room_id": "omm_f747bb89ae8cee22f36e941bd39f1a0c",
+          "capacity": 8
+        },
+        {
+          "name": "F15-08",
+          "room_id": "omm_dd6530efb2f902001ad89346d853ec29",
+          "capacity": 8
+        },
+        {
+          "name": "F15-09",
+          "room_id": "omm_71cd480f9162a9701f6792932c202c9a",
+          "capacity": 12
+        },
+        {
+          "name": "F15-10",
+          "room_id": "omm_1f64c6c2be4ad1348e0aad1310885016",
+          "capacity": 4
+        },
+        {
+          "name": "F15-11",
+          "room_id": "omm_6be02d1db248d407ff4fb8519ef267c8",
+          "capacity": 14
+        },
+        {
+          "name": "F15-12",
+          "room_id": "omm_661a01409f4f6c0e868bf38328593532",
+          "capacity": 18
+        },
+        {
+          "name": "F15-13",
+          "room_id": "omm_66adf52a3e66cd9081c31278039b8ef3",
+          "capacity": 14
+        },
+        {
+          "name": "F15-14",
+          "room_id": "omm_2df89a10aacb37ff5c93694213aacdaa",
+          "capacity": 8
+        },
+        {
+          "name": "F15-15",
+          "room_id": "omm_19e9aaad1d429cf4e6102d85b0a66ca0",
+          "capacity": 8
+        },
+        {
+          "name": "F15-16",
+          "room_id": "omm_b1f8b0dae8085a356c97173d5ca829d1",
+          "capacity": 4
+        },
+        {
+          "name": "F15-17",
+          "room_id": "omm_ca5e462552116ba931ec1ddf9551e542",
+          "capacity": 8
+        },
+        {
+          "name": "F15-18",
+          "room_id": "omm_111f1775716886ce4ffe316be9d2eeee",
+          "capacity": 4
+        },
+        {
+          "name": "F15-19",
+          "room_id": "omm_3ac9481ead22f07770f5dc80fce6fb14",
+          "capacity": 8
+        },
+        {
+          "name": "F15-20",
+          "room_id": "omm_57794a05580401c4ee443e050be3c8b9",
+          "capacity": 8
+        },
+        {
+          "name": "F16-01[短时会议室]",
+          "room_id": "omm_2653ce91847a46fe560eedd6550f97c6",
+          "capacity": 4
+        },
+        {
+          "name": "F16-02[短时会议室]",
+          "room_id": "omm_ab41cbafb23b339676156e166dee08c8",
+          "capacity": 4
+        },
+        {
+          "name": "F16-03",
+          "room_id": "omm_b94c0a7afad68fbd31137c4b3f7b8a2f",
+          "capacity": 4
+        },
+        {
+          "name": "F16-04",
+          "room_id": "omm_ceebf7e6e4cc5d91d516aa59fc981121",
+          "capacity": 8
+        },
+        {
+          "name": "F16-05[应急会议室]",
+          "room_id": "omm_d6d801c0ede5877f5e608d94bee5104d",
+          "capacity": 14
+        },
+        {
+          "name": "F16-06",
+          "room_id": "omm_0ff0990cb9cadde30baddb37297b0f9f",
+          "capacity": 14
+        },
+        {
+          "name": "F16-07",
+          "room_id": "omm_3410faa19583f7c5954eb030181a68ae",
+          "capacity": 8
+        },
+        {
+          "name": "F16-08",
+          "room_id": "omm_9f0d82a0a91c4d92802542a846df62a4",
+          "capacity": 8
+        },
+        {
+          "name": "F16-09",
+          "room_id": "omm_e3279b71456fd0c9adcb058457b31caa",
+          "capacity": 12
+        },
+        {
+          "name": "F16-10",
+          "room_id": "omm_6e00ce33a7de38b204d1415f4bdc37e0",
+          "capacity": 4
+        },
+        {
+          "name": "F16-11",
+          "room_id": "omm_cdebee739804be9eea7d1fb190058dfc",
+          "capacity": 14
+        },
+        {
+          "name": "F16-12",
+          "room_id": "omm_e100e9bcf2eb0594423e66222b861deb",
+          "capacity": 18
+        },
+        {
+          "name": "F16-13",
+          "room_id": "omm_70f62624db3bd2c267433f9720e0980e",
+          "capacity": 14
+        },
+        {
+          "name": "F16-14",
+          "room_id": "omm_7b5fa3d26d28ea15b930f59ffaee5284",
+          "capacity": 8
+        },
+        {
+          "name": "F16-15",
+          "room_id": "omm_6e4876e0f4614316d2877271cb11dc8e",
+          "capacity": 8
+        },
+        {
+          "name": "F16-16",
+          "room_id": "omm_043ee396996d8b3b50fc03e8a005722c",
+          "capacity": 4
+        },
+        {
+          "name": "F16-17",
+          "room_id": "omm_34bcb5e39ef11bf6f7d85bfba22f493c",
+          "capacity": 8
+        },
+        {
+          "name": "F16-18",
+          "room_id": "omm_5ac90c53215cb8ba56c1f81556b28e6f",
+          "capacity": 4
+        },
+        {
+          "name": "F16-19",
+          "room_id": "omm_dc893e28f1f08391a35e790290768121",
+          "capacity": 8
+        },
+        {
+          "name": "F16-20",
+          "room_id": "omm_79ee52801c964b6fcc026719bf487d6c",
+          "capacity": 8
+        },
+        {
+          "name": "F16-21",
+          "room_id": "omm_8d2f2fe0355a838f2e34c6f88b527cb6",
+          "capacity": 4
+        }
+      ]
+    },
+    {
+      "name": "丽金智地中心 西塔",
+      "alias": [
+        "丽金",
+        "丽金B座",
+        "丽金西塔",
+        "丽金智地中心",
+        "丽金智地",
+        "丽金智地中心 西塔",
+        "Lijin",
+        "Lijin B",
+        "Lijin West"
+      ],
+      "rooms": [
+        {
+          "name": "F11-01(8)",
+          "room_id": "omm_b45891eb32f6d5a46d5e25b925aa626d",
+          "capacity": 8
+        },
+        {
+          "name": "F11-02(4)",
+          "room_id": "omm_6951c197255b6d18e70f58462fde0439",
+          "capacity": 4
+        },
+        {
+          "name": "F11-03(4)",
+          "room_id": "omm_e752b1bda21c49457e2d1323b6559afa",
+          "capacity": 4
+        },
+        {
+          "name": "F11-04(4)",
+          "room_id": "omm_5ff23b02ecf12995c83f75c52fdcee15",
+          "capacity": 4
+        },
+        {
+          "name": "F11-05(16)",
+          "room_id": "omm_b65359665d0dcfd86a8ffd0d2aedb18f",
+          "capacity": 16
+        },
+        {
+          "name": "F11-06(4)",
+          "room_id": "omm_61e25bae551f777812e20302e76bb492",
+          "capacity": 4
+        },
+        {
+          "name": "F11-07(8)",
+          "room_id": "omm_7a94405f8f552a107b007537e04edd22",
+          "capacity": 8
+        },
+        {
+          "name": "F11-08(8)",
+          "room_id": "omm_00f6e87c847b6d7e258b4a71fb95f06d",
+          "capacity": 8
+        },
+        {
+          "name": "F11-09(4)",
+          "room_id": "omm_1aa8a12a3d7b0c5d0c6649a83a984939",
+          "capacity": 4
+        },
+        {
+          "name": "F11-10(4)",
+          "room_id": "omm_90bf540093d9129a0c0f05f24f5681ea",
+          "capacity": 4
+        },
+        {
+          "name": "F11-11(4)",
+          "room_id": "omm_b2ded49906fb8261107b6506791ae535",
+          "capacity": 4
+        },
+        {
+          "name": "F11-12(4)",
+          "room_id": "omm_e192ae0c45269b10f8f651ab1d720ca8",
+          "capacity": 4
+        },
+        {
+          "name": "F11-13(4)",
+          "room_id": "omm_cb8f06c4d08bc96a1da04a7a02e4dcdb",
+          "capacity": 4
+        },
+        {
+          "name": "F11-14(4)",
+          "room_id": "omm_7e0d4722f14c6eba848a5b5e7d726a67",
+          "capacity": 4
+        },
+        {
+          "name": "F11-15(8)",
+          "room_id": "omm_c88d266db315448731bd19fb2986c984",
+          "capacity": 8
+        },
+        {
+          "name": "F11-16(Lark&Zoom)(4)",
+          "room_id": "omm_65593188120e667275134d715d46ff00",
+          "capacity": 4,
+          "alias": [
+            "F11-16",
+            "Zoom会议室",
+            "Lark&Zoom会议室"
+          ]
+        },
+        {
+          "name": "F12-01",
+          "room_id": "omm_71afd8b765ac0b8ac212a129afdee3f8",
+          "capacity": 8
+        },
+        {
+          "name": "F12-02",
+          "room_id": "omm_f9fe86eebcfd1255ed02eadedb3117b3",
+          "capacity": 4
+        },
+        {
+          "name": "F12-03",
+          "room_id": "omm_5e9f198e856b5551a532ea07e9361cbd",
+          "capacity": 4
+        },
+        {
+          "name": "F12-04",
+          "room_id": "omm_e678af0919f2a3123b312cf17dd87f89",
+          "capacity": 4
+        },
+        {
+          "name": "F12-05(Lark&Zoom)",
+          "room_id": "omm_1c47661ef5514bdfb0e3e79389dd9b3c",
+          "capacity": 12
+        },
+        {
+          "name": "F12-06",
+          "room_id": "omm_ccae69f928b693d8fba929d2c62be7b8",
+          "capacity": 4
+        },
+        {
+          "name": "F12-07",
+          "room_id": "omm_a7911d4b0c662b81ddbc2963770d4eb3",
+          "capacity": 8
+        },
+        {
+          "name": "F12-08",
+          "room_id": "omm_37276172097fa72d594e4c33feb4cff9",
+          "capacity": 8
+        },
+        {
+          "name": "F12-09",
+          "room_id": "omm_f531b40a37c462e5fb4d65b94207d891",
+          "capacity": 4
+        },
+        {
+          "name": "F12-10",
+          "room_id": "omm_94c093cd86f1b0f2b4b7780f545fb0c3",
+          "capacity": 4
+        },
+        {
+          "name": "F12-11",
+          "room_id": "omm_8a49e0c001ebf9cad3656725ec768863",
+          "capacity": 4
+        },
+        {
+          "name": "F12-12",
+          "room_id": "omm_5f3c64ac30686f6e34402b327d5a1fb8",
+          "capacity": 4
+        },
+        {
+          "name": "F12-13",
+          "room_id": "omm_a32afc1675027f080daf9e36d0a68339",
+          "capacity": 4
+        },
+        {
+          "name": "F12-14",
+          "room_id": "omm_937775338185e2a4acd8be0435851299",
+          "capacity": 4
+        },
+        {
+          "name": "F12-15",
+          "room_id": "omm_9ac34b1da4a86440a5e0c2ac32c5ba6d",
+          "capacity": 8
+        },
+        {
+          "name": "F13-01",
+          "room_id": "omm_4bf7a12ee5d1f9d27ced95aee8dddec6",
+          "capacity": 8
+        },
+        {
+          "name": "F13-02",
+          "room_id": "omm_cc0574cb80e135625dfe78383d24e0fd",
+          "capacity": 4
+        },
+        {
+          "name": "F13-03",
+          "room_id": "omm_807e78388042527b0da476c501f6062b",
+          "capacity": 4
+        },
+        {
+          "name": "F13-04",
+          "room_id": "omm_0d0c71da38b87ca3a8198136dc5239d2",
+          "capacity": 4
+        },
+        {
+          "name": "F13-05(Lark&Zoom)",
+          "room_id": "omm_c40761f969b99284c42e639441a40ea1",
+          "capacity": 16
+        },
+        {
+          "name": "F13-06",
+          "room_id": "omm_04df79dad637d86bea6e4f79843e3a8d",
+          "capacity": 4
+        },
+        {
+          "name": "F13-07",
+          "room_id": "omm_e83e1b02be6e342eaaa3c0af4a7cf9e9",
+          "capacity": 8
+        },
+        {
+          "name": "F13-08",
+          "room_id": "omm_c316ef74dabbcdb16454527cd26e6359",
+          "capacity": 8
+        },
+        {
+          "name": "F13-09",
+          "room_id": "omm_5307bd0aa898dcd5ddb38e1f910c2237",
+          "capacity": 4
+        },
+        {
+          "name": "F13-10",
+          "room_id": "omm_93f8ba0c812e6ff113440955fe0c4975",
+          "capacity": 4
+        },
+        {
+          "name": "F13-11",
+          "room_id": "omm_fce28e552614c082ea03b4dd2042ed7a",
+          "capacity": 4
+        },
+        {
+          "name": "F13-12",
+          "room_id": "omm_98c19a3ff08eb6ed2a077c78e6f035be",
+          "capacity": 4
+        },
+        {
+          "name": "F13-13",
+          "room_id": "omm_802ac37f70ad4e623e2dbcc0861bd690",
+          "capacity": 4
+        },
+        {
+          "name": "F13-14",
+          "room_id": "omm_e2da29adefc5337b2c93b4e5560500e2",
+          "capacity": 4
+        },
+        {
+          "name": "F13-15",
+          "room_id": "omm_c005d7736f759c7eac7f375c9cbb3478",
+          "capacity": 8
+        },
+        {
+          "name": "F14-01",
+          "room_id": "omm_cb4aa4b0d017ec2fe2e3f474658fc781",
+          "capacity": 8
+        },
+        {
+          "name": "F14-02",
+          "room_id": "omm_bef68fbc7f57e55dad49119d9ba42401",
+          "capacity": 4
+        },
+        {
+          "name": "F14-03",
+          "room_id": "omm_a70fa6c0b2f852aec4ed02a146d487ca",
+          "capacity": 4
+        },
+        {
+          "name": "F14-04",
+          "room_id": "omm_f11ade2bca6fc2173a290184cdce41d0",
+          "capacity": 4
+        },
+        {
+          "name": "F14-05(Lark&Zoom)",
+          "room_id": "omm_f4c9f81e4b10c957e1f131111a156f50",
+          "capacity": 12
+        },
+        {
+          "name": "F14-06",
+          "room_id": "omm_4c2419bca3a1fd123fe6f1dbbea5751f",
+          "capacity": 4
+        },
+        {
+          "name": "F14-07",
+          "room_id": "omm_d3ce74d2a2ddecd46ab65fa64e6b0f1b",
+          "capacity": 8
+        },
+        {
+          "name": "F14-08",
+          "room_id": "omm_8d8aa9553d339a30e50478a4d433fcc7",
+          "capacity": 8
+        },
+        {
+          "name": "F14-09",
+          "room_id": "omm_08ffbe97f6158dd479405a33c763e36f",
+          "capacity": 4
+        },
+        {
+          "name": "F14-10",
+          "room_id": "omm_2d07d239e19b3984f46e479ca4e58b4c",
+          "capacity": 4
+        },
+        {
+          "name": "F14-11",
+          "room_id": "omm_579f6c7977b6e9ad0856713509cbe7d6",
+          "capacity": 4
+        },
+        {
+          "name": "F14-12",
+          "room_id": "omm_237c9549be90817078a4de51ab262b33",
+          "capacity": 4
+        },
+        {
+          "name": "F14-13",
+          "room_id": "omm_b2765d1536d37d558ac0d6a7ccb06452",
+          "capacity": 4
+        },
+        {
+          "name": "F14-14",
+          "room_id": "omm_a21cc95f6d1c1be3f2239d2488dfe7c7",
+          "capacity": 4
+        },
+        {
+          "name": "F14-15",
+          "room_id": "omm_2b0a512681aecc38f906bd3e0df2998d",
+          "capacity": 8
+        },
+        {
+          "name": "F15-01",
+          "room_id": "omm_25bb997961f422d491d5672bd03e0cf0",
+          "capacity": 58
+        },
+        {
+          "name": "F15-02",
+          "room_id": "omm_b5d01acc19a5db1988076f870e4cce44",
+          "capacity": 59
+        },
+        {
+          "name": "F15-03",
+          "room_id": "omm_48339561418c95732810a9e42c8dbd1a",
+          "capacity": 6
+        },
+        {
+          "name": "F15-04(Lark&Zoom)",
+          "room_id": "omm_9590a71b1e552b4a927ac2868739135c",
+          "capacity": 16
+        },
+        {
+          "name": "F15-05",
+          "room_id": "omm_afab10101ccf4b6ad1efa22f4dfbeddf",
+          "capacity": 12
+        },
+        {
+          "name": "F15-06",
+          "room_id": "omm_a78fd7f5e1d3b3f1f503848ccb051a7b",
+          "capacity": 28
+        },
+        {
+          "name": "F15-07",
+          "room_id": "omm_040e7274ef3a12e1a458c674b2d745b9",
+          "capacity": 10
+        },
+        {
+          "name": "F15-08",
+          "room_id": "omm_3608ec22964873506622760b73d86dda",
+          "capacity": 4
+        },
+        {
+          "name": "F15-09",
+          "room_id": "omm_d14c41d83dd26b5c9b4526530cafa570",
+          "capacity": 4
+        },
+        {
+          "name": "F15-10",
+          "room_id": "omm_a8087a2412a20e01a03a43ea2efa63f9",
+          "capacity": 12
+        },
+        {
+          "name": "F15-11",
+          "room_id": "omm_130596b98a1331db5913de2e53ec9fd3",
+          "capacity": 4
+        },
+        {
+          "name": "F16-01(Lark&Zoom)",
+          "room_id": "omm_648f6b890d612b341607f5b41165cd76",
+          "capacity": 12
+        },
+        {
+          "name": "F16-02",
+          "room_id": "omm_2abebf0cfabf292a572f1a1d0d72090f",
+          "capacity": 4
+        },
+        {
+          "name": "F16-03",
+          "room_id": "omm_1b8fc0b2efa37cc3c284898ad354f704",
+          "capacity": 4
+        },
+        {
+          "name": "F16-04",
+          "room_id": "omm_a1c24ea6cba76a3de95ae79cf932343f",
+          "capacity": 8
+        },
+        {
+          "name": "F16-05",
+          "room_id": "omm_2a80316663ec0b8c7264f2c099268908",
+          "capacity": 4
+        },
+        {
+          "name": "F16-06",
+          "room_id": "omm_9fd5bacd42691a1ed51be95536226da1",
+          "capacity": 4
+        },
+        {
+          "name": "F16-07",
+          "room_id": "omm_b411d55f7d61867eaedfb7cb91042801",
+          "capacity": 4
+        },
+        {
+          "name": "F16-08",
+          "room_id": "omm_f736b75fd35b001a4615706be35677e5",
+          "capacity": 4
+        },
+        {
+          "name": "F16-09",
+          "room_id": "omm_e3f4c15f0a31e29fc4ff7f737a41251a",
+          "capacity": 4
+        },
+        {
+          "name": "F16-10",
+          "room_id": "omm_b072e04ec052a825867103d339140c58",
+          "capacity": 4
+        },
+        {
+          "name": "F16-11",
+          "room_id": "omm_e758b57593d961010ba4b958212624b3",
+          "capacity": 8
+        },
+        {
+          "name": "F17-01",
+          "room_id": "omm_2110be86145d84a2a63948a057a9d58e",
+          "capacity": 4
+        },
+        {
+          "name": "F17-02",
+          "room_id": "omm_8e7bce7afef8f9d58968654a71711fa5",
+          "capacity": 4
+        },
+        {
+          "name": "F17-03",
+          "room_id": "omm_cc5b3956e4acbdb931d6e52b8a992fbe",
+          "capacity": 4
+        },
+        {
+          "name": "F17-04",
+          "room_id": "omm_283f978b6e475ef3b62966ae5c4047a9",
+          "capacity": 4
+        },
+        {
+          "name": "F17-05",
+          "room_id": "omm_f9ee1ad2439ca405d674b5ef8e5f1e5f",
+          "capacity": 16
+        },
+        {
+          "name": "F17-06",
+          "room_id": "omm_9f6f2e5910bce01f2d10f353444a2b0c",
+          "capacity": 4
+        },
+        {
+          "name": "F17-07",
+          "room_id": "omm_69df7dba18966e12ee40c692def40769",
+          "capacity": 8
+        },
+        {
+          "name": "F17-08",
+          "room_id": "omm_d31a05ebb5f980bf79e1dfcdc066474e",
+          "capacity": 8
+        },
+        {
+          "name": "F17-10",
+          "room_id": "omm_e9eeebbde8dd8ffd72a15a22b4f05deb",
+          "capacity": 4
+        },
+        {
+          "name": "F17-11",
+          "room_id": "omm_811381b1ebdbd5f5e17b62268ee34ae4",
+          "capacity": 4
+        },
+        {
+          "name": "F17-12",
+          "room_id": "omm_d22db2fcc2cdf7f4b4ac62db5aadbaec",
+          "capacity": 4
+        },
+        {
+          "name": "F17-13",
+          "room_id": "omm_2ad26eecf8e0927858ee1272cfd77830",
+          "capacity": 4
+        },
+        {
+          "name": "F17-14",
+          "room_id": "omm_e98d2b37c6576c2a16784a33cb3ae889",
+          "capacity": 4
+        },
+        {
+          "name": "F17-15",
+          "room_id": "omm_e135b7224b35d54fd57703ce43de6720",
+          "capacity": 8
+        },
+        {
+          "name": "F17-16",
+          "room_id": "omm_0b660141e19ef841e0968382adbaf66d",
+          "capacity": 12
+        }
+      ]
+    },
+    {
+      "name": "北京方恒中心",
+      "alias": [
+        "方恒",
+        "方恒中心",
+        "Fangheng",
+        "Fangheng Center"
+      ],
+      "rooms": [
+        {
+          "name": "F3-B1",
+          "room_id": "omm_1df4c4a5bca1b08885f803d1681500cb",
+          "capacity": 11
+        },
+        {
+          "name": "F3-B2",
+          "room_id": "omm_401f5ce72effe28eb91ceaeea9b5782d",
+          "capacity": 4
+        },
+        {
+          "name": "F3-B3",
+          "room_id": "omm_65d9b6b985ea6567044a92481839a795",
+          "capacity": 7
+        },
+        {
+          "name": "F3-B4",
+          "room_id": "omm_0431f5f505de67c29b053d1ed9f06333",
+          "capacity": 7
+        },
+        {
+          "name": "F3-B5",
+          "room_id": "omm_e1a0417ebf41f08c6970b07c293493a2",
+          "capacity": 7
+        },
+        {
+          "name": "F3-B6",
+          "room_id": "omm_20362ec7eb59e2087a086d2baaa4d102",
+          "capacity": 9
+        },
+        {
+          "name": "F3-B7",
+          "room_id": "omm_808050447ee9366514bd2ff67a575ffc",
+          "capacity": 11
+        },
+        {
+          "name": "F3-C1",
+          "room_id": "omm_1076f79524e7e79e82c4d25c77ae5636",
+          "capacity": 7
+        },
+        {
+          "name": "F3-C2[应急会议室]",
+          "room_id": "omm_9ae85862a351d51471e73e6eaad8930f",
+          "capacity": 9
+        },
+        {
+          "name": "F3-C3",
+          "room_id": "omm_fe2d20c728be572fbbb613f8ef86901f",
+          "capacity": 9
+        },
+        {
+          "name": "F3-D1",
+          "room_id": "omm_64c70f8f74bee23fd69e644080206997",
+          "capacity": 11
+        },
+        {
+          "name": "F3-D2",
+          "room_id": "omm_1d8dd6128477570c87d0f89d9a0f34cb",
+          "capacity": 11
+        },
+        {
+          "name": "F3-D3",
+          "room_id": "omm_60fec6507c3cd6a7ae16446029bc07a7",
+          "capacity": 11
+        },
+        {
+          "name": "F3-D4",
+          "room_id": "omm_325002d89a5a1d62944c0aeaa446174f",
+          "capacity": 11
+        },
+        {
+          "name": "F3-D5",
+          "room_id": "omm_124c92e68e7427e346dbcec812605d83",
+          "capacity": 11
+        },
+        {
+          "name": "F3-E1[应急会议室]",
+          "room_id": "omm_6004fe9a61cd196d2a3e4c99a633f2df",
+          "capacity": 22
+        },
+        {
+          "name": "F3-E2[应急会议室]",
+          "room_id": "omm_22ea5a53f0c8680052922ff1c0801098",
+          "capacity": 9
+        },
+        {
+          "name": "F3-E3",
+          "room_id": "omm_de03b2ee421244f3ca114fc709909116",
+          "capacity": 9
+        },
+        {
+          "name": "F3-E4",
+          "room_id": "omm_2a40b57bcf9c969b2ec3a2e664204908",
+          "capacity": 9
+        },
+        {
+          "name": "F3-G1",
+          "room_id": "omm_888db80b49ed78d77f087e356ea61da0",
+          "capacity": 7
+        },
+        {
+          "name": "F3-G2",
+          "room_id": "omm_80fd4f38daefe2c34640f179498ced03",
+          "capacity": 7
+        },
+        {
+          "name": "F3-G3",
+          "room_id": "omm_ea2b03a64e3636ced61626b00f5afee3",
+          "capacity": 7
+        },
+        {
+          "name": "F3-G4",
+          "room_id": "omm_09b3eff7c5ae4eab8374fa49de372c9d",
+          "capacity": 11
+        },
+        {
+          "name": "F3-G5",
+          "room_id": "omm_f9699536a9e2ba1417294f05a651c252",
+          "capacity": 7
+        },
+        {
+          "name": "F3-G6",
+          "room_id": "omm_7a50d87ee2ca289422913f5d16a7aefe",
+          "capacity": 7
+        },
+        {
+          "name": "F3-G7",
+          "room_id": "omm_1597228b143a940eff6d8bcc26418bc8",
+          "capacity": 7
+        },
+        {
+          "name": "F3-G8",
+          "room_id": "omm_833b700fe8d8f113f2aec601c57a70d2",
+          "capacity": 7
+        },
+        {
+          "name": "F3-H3",
+          "room_id": "omm_845f836ce845ed865f5a478d5897b8e9",
+          "capacity": 15
+        },
+        {
+          "name": "F3-H4",
+          "room_id": "omm_2b7b6da15b98e1e9ee1039f0147f05d3",
+          "capacity": 15
+        },
+        {
+          "name": "F3-H5",
+          "room_id": "omm_4d81afa418ea7b022aac5b0456b94856",
+          "capacity": 15
+        },
+        {
+          "name": "F3-K3",
+          "room_id": "omm_383a86eda03a0b3f81ced4369b47f4d2",
+          "capacity": 7
+        },
+        {
+          "name": "F3-K4",
+          "room_id": "omm_14a6df16e6330195bf614c9ba4b29050",
+          "capacity": 7
+        },
+        {
+          "name": "F3-K5",
+          "room_id": "omm_a5038c19aecd20580a404417e175c057",
+          "capacity": 11
+        },
+        {
+          "name": "F3-K6",
+          "room_id": "omm_0038df201a16d8737ff22b685328cf62",
+          "capacity": 11
+        },
+        {
+          "name": "F3-K7",
+          "room_id": "omm_f8afab26abbd9c19b2e78a2fc46165b4",
+          "capacity": 11
+        },
+        {
+          "name": "F3-L1[应急会议室]",
+          "room_id": "omm_172248172d9aff4e922c4023f17f4dc4",
+          "capacity": 7
+        },
+        {
+          "name": "F3-L2[应急会议室]",
+          "room_id": "omm_a7b883e3907ab7dc54c4bd2e19ebf901",
+          "capacity": 9
+        },
+        {
+          "name": "F3-L3",
+          "room_id": "omm_cb7dd6e66ab9d20873c763bc149ea2b6",
+          "capacity": 9
+        },
+        {
+          "name": "F3-M1",
+          "room_id": "omm_807bb07f7de2440fe68269dd81ef5488",
+          "capacity": 11
+        },
+        {
+          "name": "F3-M3[应急会议室]",
+          "room_id": "omm_63f8a905cb33ac73a2ac165696b85000",
+          "capacity": 11
+        },
+        {
+          "name": "F3-M4",
+          "room_id": "omm_af455f3867b2b67145d7c405c9627acf",
+          "capacity": 11
+        },
+        {
+          "name": "F3-M5 头脑风暴",
+          "room_id": "omm_a4a02a9f30ba059346de46676192f3e9",
+          "capacity": 8
+        }
+      ]
+    },
+    {
+      "name": "紫金数码园4号楼",
+      "alias": [
+        "紫金软件4号楼",
+        "紫金4号楼",
+        "紫金数码4号楼",
+        "Zijin4",
+        "F4"
+      ],
+      "rooms": [
+        {
+          "name": "F4-01",
+          "room_id": "omm_7a8d01470d2e3f21e8c9989e5abf1393",
+          "capacity": 10
+        },
+        {
+          "name": "F4-03",
+          "room_id": "omm_6f693a80490ceb81efee60a34b87ba33",
+          "capacity": 18
+        },
+        {
+          "name": "F4-04",
+          "room_id": "omm_61c1341b7ee8fb3c01fa79c56e43396b",
+          "capacity": 10
+        },
+        {
+          "name": "F4-06[应急会议室]",
+          "room_id": "omm_7c4efeff088599af4431179027c1b753",
+          "capacity": 18
+        },
+        {
+          "name": "F4-07",
+          "room_id": "omm_25d9c82033cdbbb66458baacb57857b8",
+          "capacity": 6
+        },
+        {
+          "name": "F4-08(8)",
+          "room_id": "omm_57556f2037f7bbd9d0a39564e794ad08",
+          "capacity": 8,
+          "alias": [
+            "F4-08",
+            "4号楼08"
+          ]
+        },
+        {
+          "name": "F4-09",
+          "room_id": "omm_2a6a55fde91f42990f5116dd1ad4b0e3",
+          "capacity": 6
+        },
+        {
+          "name": "F4-10",
+          "room_id": "omm_af0d825c5e3b168fabc0a8d1a46e8df4",
+          "capacity": 10
+        },
+        {
+          "name": "F4-11",
+          "room_id": "omm_f6f945126fd6b8af6be61c07a16926f4",
+          "capacity": 8
+        },
+        {
+          "name": "F4-12",
+          "room_id": "omm_8f23c74e955dcfa30eacf16be1ab9733",
+          "capacity": 8
+        },
+        {
+          "name": "F4-13",
+          "room_id": "omm_fb14e3d227305d71a6acc77a06883505",
+          "capacity": 8
+        },
+        {
+          "name": "F4-14",
+          "room_id": "omm_2f1bc82425109194b579d826f19106e3",
+          "capacity": 10
+        },
+        {
+          "name": "F4-DiscussionRoom 02[短时会议室]",
+          "room_id": "omm_2745e38c6abf15d1f3dfac5783c3a5c8",
+          "capacity": 4
+        },
+        {
+          "name": "F4-DiscussionRoom 05",
+          "room_id": "omm_e93c5e2ac8a887b4d830fd02595e56ff",
+          "capacity": 5
+        }
+      ]
+    }
+  ]
 }

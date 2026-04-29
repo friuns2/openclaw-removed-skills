@@ -1,11 +1,17 @@
 {
   "owner": "137984917-cyber",
   "slug": "interior-fullplan",
-  "displayName": "Interior Fullplan Generator",
+  "displayName": "Interior Fullplan",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776396960670,
-    "commit": "https://github.com/openclaw/skills/commit/b84f1dc6285f466325b0a403a90f7fc2c3b092ce"
+    "version": "1.0.1",
+    "publishedAt": 1777373473345,
+    "commit": "https://github.com/openclaw/skills/commit/d6c7a52fd34384cc8ab1a29275341552b95cd958"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776396960670,
+      "commit": "https://github.com/openclaw/skills/commit/b84f1dc6285f466325b0a403a90f7fc2c3b092ce"
+    }
+  ]
 }

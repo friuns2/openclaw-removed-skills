@@ -176,6 +176,47 @@ def extract_fragments(text, character_name, context_window=200):
 # 人格建模模块
 # ============================================================
 
+def infer_gender(text, character_name):
+    """
+    从文本中推断角色性别。
+    优先级：明确描述 > 代词统计 > 默认 male
+    """
+    # 明确性别描述（简体优先，兼顾繁体）
+    explicit_male = [
+        # 明确说"男"相关
+        "男主角", "男主", "男性角色", "男选手", "男演员", "男声",
+        "男孩", "男子", "先生", "绅士",
+        # 亲属
+        "哥哥", "弟弟", "父亲", "爸爸", "儿子", "丈夫", "外公", "舅舅", "伯伯",
+        # 角色代词+动词（过去式/将来式排除"他是"这类主语）
+        "他是", "他很", "他总", "他总是", "他性格", "他被",
+    ]
+    explicit_female = [
+        # 明确说"女"相关
+        "女主角", "女主", "女性角色", "女选手", "女演员", "女声",
+        "女孩", "女子", "女士", "小姐", "千金",
+        # 亲属
+        "姐姐", "妹妹", "母亲", "妈妈", "女儿", "妻子", "外婆", "舅妈", "姑姑",
+        # 角色代词+动词
+        "她是", "她很", "她总", "她总是", "她性格", "她被",
+    ]
+
+    male_count = sum(text.count(s) for s in explicit_male)
+    female_count = sum(text.count(s) for s in explicit_female)
+
+    if female_count > male_count:
+        return "female"
+    elif male_count > female_count:
+        return "male"
+    else:
+        # 统计纯代词出现频率
+        he_count = len(re.findall(r'[^她\s]他[的个是所在有能于被让把]', text))
+        she_count = len(re.findall(r'她[的个是所在有能于被让把]', text))
+        if she_count > he_count:
+            return "female"
+        return "male"
+
+
 def infer_personality(fragments, character_name):
     """
     从片段中推断 Big Five 人格维度 + 性格关键词。
@@ -186,6 +227,9 @@ def infer_personality(fragments, character_name):
     for category in fragments.values():
         for frag in category:
             all_text += " " + frag.get("text", "") + " " + frag.get("context", "")
+
+    # 性别推断
+    gender = infer_gender(all_text, character_name)
 
     # Big Five 启发式推断
     scores = {}
@@ -221,7 +265,8 @@ def infer_personality(fragments, character_name):
     return {
         "scores": scores,
         "keywords": keywords,
-        "confidence": "推断-基于文本分析"
+        "confidence": "推断-基于文本分析",
+        "gender": gender
     }
 
 
@@ -421,6 +466,10 @@ def generate_report(character_name, fragments, personality, style, memories):
                  "evaluation": "他人评价", "action": "行为描写"}.get(cat, cat)
         print(f"   {label}：{len(frags)} 条")
 
+    # 性别
+    gender_label = "男" if personality.get("gender") == "male" else "女"
+    print(f"\n🚻 性别：{gender_label}（自动推断）")
+
     # Big Five
     print(f"\n🧠 Big Five 人格维度：")
     dims = {
@@ -537,6 +586,7 @@ def main():
             profile = {
                 "name": character,
                 "alias": [character],
+                "gender": personality.get("gender", "male"),
                 "birth_year": None,
                 "death_year": None,
                 "relation": "小说/剧本角色",

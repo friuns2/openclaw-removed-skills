@@ -1,11 +1,11 @@
-{
+﻿{
   "id": "datu-ai-poster-generator",
   "name": "Digilifeform AI大图生成器",
-  "version": "1.0.0",
+  "version": "1.1.5",
   "author": "Digilifeform",
   "license": "MIT-0",
-  "description": "一键将文案、文档转换为4K/8K高清信息海报",
-  "shortDescription": "文案转大图，4K/8K高清海报生成器",
+  "description": "将文本、文档或已有海报发送到 Datu 外部 API 生成 4K/8K 高质量信息海报，并支持深度研究、研究报告、AI 修图与继续修图。",
+  "shortDescription": "调用 Datu 外部 API 进行文本转大图、文件转海报、深度研究报告与 AI 修图。",
   "category": "内容创作",
   "tags": [
     "AI生成",
@@ -15,13 +15,22 @@
     "8K",
     "信息可视化",
     "文本转图",
-    "智能修图"
+    "AI修图",
+    "深度研究",
+    "研究报告"
   ],
   "keywords": [
     "大图生成",
     "海报生成",
-    "文案转图",
+    "文档转海报",
     "信息海报",
+    "AI修图",
+    "继续修图",
+    "magic_wand",
+    "deep_research",
+    "深度研究",
+    "研究报告",
+    "9:16",
     "datu",
     "datu-ai"
   ],
@@ -34,27 +43,31 @@
     "DATU_API_KEY"
   ],
   "primaryCredential": "DATU_API_KEY",
-  "credentialDescription": "Digilifeform API Key - 访问 https://datu.digilifeform.com 注册账户后获取",
+  "credentialDescription": "Digilifeform API Key。此技能会使用该密钥调用 https://datu.digilifeform.com 外部服务，可在站内创建并复制。",
   "features": [
     {
-      "name": "文本转大图",
-      "description": "输入文案自动生成高清海报"
+      "name": "文本生成大图",
+      "description": "把文本内容直接生成高质量信息海报。"
     },
     {
-      "name": "文件上传",
-      "description": "支持PDF、Word、TXT、Markdown、PNG、JPG等多种格式"
+      "name": "文件解析生成",
+      "description": "支持 PDF、Word、Markdown、图片等文件解析后生成海报。"
     },
     {
-      "name": "多清晰度",
-      "description": "4K（5积分）和8K（10积分）两种清晰度选择"
+      "name": "魔法棒主流程",
+      "description": "大图生成支持 magic_wand 开关，可选择设计化生成或原始 Prompt 直出。"
     },
     {
-      "name": "多比例支持",
-      "description": "16:9和21:9等多种画面比例"
+      "name": "深度研究报告",
+      "description": "大图生成支持 deep_research 开关，完成后可同时交付图片和 Word 深度研究报告。"
     },
     {
-      "name": "AI修图",
-      "description": "对生成的图片进行智能修改和优化"
+      "name": "9:16 竖版支持",
+      "description": "支持 16:9、21:9、9:16 三种比例。"
+    },
+    {
+      "name": "AI 修图与继续修图",
+      "description": "支持原图、标注图、参考图组合修图，并保留继续修图链路。"
     }
   ],
   "pricing": {
@@ -67,6 +80,10 @@
       {
         "name": "8K大图生成",
         "cost": 10
+      },
+      {
+        "name": "深度研究",
+        "cost": 5
       },
       {
         "name": "4K修图",
@@ -83,32 +100,34 @@
     "营销人员",
     "内容创作者",
     "企业管理者",
-    "社交媒体运营",
-    "品牌推广"
+    "品牌运营",
+    "知识传播团队"
   ],
   "useCases": [
     "活动宣传和品牌推广",
-    "产品发布会信息海报",
-    "政策解读和公告发布",
-    "长文转大图内容转换",
-    "信息可视化展示"
+    "政策解读和方案海报",
+    "移动端竖版信息传播",
+    "长文档转信息可视化海报",
+    "已有海报的继续修图优化"
   ],
   "triggerWords": [
-    "用大图技能",
     "生成大图",
     "大图生成",
     "海报生成",
     "信息海报",
-    "文案转大图",
+    "文档转海报",
+    "AI修图",
+    "继续修图",
     "datu",
     "datu-ai"
   ],
   "externalApi": "https://datu.digilifeform.com/api",
   "apiKeyHeader": "X-API-Key",
-  "dataRetention": "生成的海报保留30天后自动删除",
+  "dataRetention": "生成结果默认保留 30 天，之后由系统自动清理。",
   "privacyPolicy": "https://datu.digilifeform.com/privacy",
   "rating": 4.8,
   "downloads": 1250,
-  "lastUpdated": "2026-04-14",
+  "lastUpdated": "2026-04-27",
   "status": "active"
 }
+

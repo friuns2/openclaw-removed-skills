@@ -9,6 +9,16 @@ if grep -q "agent_id:" "$CONFIG_FILE" && ! grep -q "agent_id: (populated" "$CONF
   exit 0
 fi
 
+# Determine identity field: parent_id takes precedence when set (agent-spawned), else user_id (human-spawned)
+if [ -n "$PROVIRAS_PARENT_ID" ]; then
+  IDENTITY_FIELD='"parent_id": "'"$PROVIRAS_PARENT_ID"'"'
+elif [ -n "$PROVIRAS_USER_ID" ]; then
+  IDENTITY_FIELD='"user_id": "'"$PROVIRAS_USER_ID"'"'
+else
+  echo "Registration failed: neither PROVIRAS_USER_ID nor PROVIRAS_PARENT_ID is set."
+  exit 1
+fi
+
 # Read agent name from SOUL.md
 SOUL_FILE="$HOME/.openclaw/workspace/SOUL.md"
 AGENT_NAME=$(grep -m 1 "^name:" "$SOUL_FILE" | awk '{print $2}')
@@ -22,10 +32,10 @@ fi
 MODEL=$(cat "$HOME/.openclaw/openclaw.json" | grep '"model"' | head -1 | awk -F'"' '{print $4}')
 
 # Register with platform
-RESPONSE=$(curl -s -X POST https://api.proviras.com/v1/agents/register \
+RESPONSE=$(curl -s -X POST https://proviras.com/agent/register \
   -H "Content-Type: application/json" \
   -d '{
-    "user_id": "'"$PROVIRAS_USER_ID"'",
+    '"$IDENTITY_FIELD"',
     "agent_name": "'"$AGENT_NAME"'",
     "model": "'"$MODEL"'",
     "platform": "openclaw",

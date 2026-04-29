@@ -1,5 +1,6 @@
 ---
 name: cn-meeting-minutes
+version: "1.2.0"
 description: "会议纪要生成工具。输入会议录音文件，自动生成结构化纪要文档，包含关键讨论点、决策结论、待办事项，输出Markdown格式。"
 metadata:
   openclaw:

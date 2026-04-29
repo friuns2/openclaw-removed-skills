@@ -5,7 +5,78 @@ All notable changes to Synapse Skills will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.2] - 2026-04-08
+## [2.0.0] - 2026-04-10
+
+### Added
+- **Brain/Hands 架构** — synapse-code 作为 synapse-brain 的 Hand Agent 被调度执行
+- **wiki 互操作** — Pipeline 完成后自动触发 synapse-wiki 知识沉淀
+- **session 状态追踪** — 任务结果写入 Brain state.json，支持跨会话恢复
+- **4 种运行模式** — standalone/lite/full/parallel（OpenClaw 原生子代理）
+- **意图路由兼容** — 支持被 task_router.py 识别并路由
+
+### Changed
+- **架构升级** — 从外部 pipeline.py 依赖迁移到 OpenClaw 原生多 Agent 调度
+- **默认模式** — standalone（独立模式）作为默认，降低新手门槛
+- **legacy 兼容** — 保留 `--legacy` flag 兼容旧 pipeline.py 工作流
+- **homepage** — 更新为 `https://github.com/ankechenlab-node/synapse-code`
+
+### Why
+- 消除新用户配置门槛，无需理解什么是 Pipeline
+- 利用 OpenClaw 原生 subagents（max 8）实现灵活调度
+- 通过 Brain 持久化状态，实现跨会话任务追踪
+- synapse-code + synapse-wiki 互操作，开发过程自动沉淀知识
+
+---
+
+## [1.1.7] - 2026-04-09
+
+### Fixed
+- **P0 崩溃修复** — `run_pipeline.py` 4 个致命 bug（Colors 类未定义、log_progress 函数名不匹配、mode 变量未定义、重复 else 块）
+- **--help 不工作** — `check_status.py` 和 `auto_log_trigger.py` 改用 argparse，支持标准 --help 参数
+- **硬编码路径** — `init_project.py` 支持从 config.json 读取 Pipeline workspace 路径
+- **auto_log fallback 路径** — knowledge_dirs 回退从 wiki 改为 .synapse（Synapse 标准目录）
+- **无效参数传递** — `run_pipeline.py` 移除 pipeline.py 不支持的 `--mode lite/full` 参数
+- **pipeline.py IndentationError** — 修复 line 907 空 try 块导致的 IndentationError
+
+### Why
+- 修复前 run_pipeline.py 任何模式都会 NameError 崩溃
+- 修复后 5 个脚本可正常运行，5/5 基线测试通过
+- 所有脚本支持标准 CLI 帮助和参数
+
+---
+
+## [1.1.6] - 2026-04-09
+
+### Fixed
+- **代码审计问题修复** — 修复 5 个 P1/P2 级别问题
+- `run_pipeline.py` — 移除重复参数解析，使用 argparse 统一处理
+- `query_memory.py` — 优化搜索性能，逐行读取避免大文件一次性加载
+
+### Why
+- 提高代码质量和健壮性
+- 减少潜在崩溃风险
+
+---
+
+## [1.1.5] - 2026-04-09
+
+### Added
+- **program.md 模板** — 定义项目实验目标、约束条件和迭代日志
+- **实验评估逻辑** — auto_log_trigger.py 自动评估测试结果（覆盖率、回归测试）
+- **配置化阈值** — config.json 支持自定义测试覆盖率阈值
+
+### Changed
+- `auto_log_trigger.py` — 新增 `evaluate_experiment()` 和 `update_program_log()` 函数
+- 实验评估结果仅供参考，不阻塞主流程（安全设计）
+
+### Why
+- 受 karpathy/autoresearch 的 program.md 启发，引入轻量级实验规范
+- 帮助用户建立可迭代、可度量、可回溯的实验机制
+- 评估逻辑作为"建议系统"，决策权仍归用户
+
+---
+
+## [1.1.4] - 2026-04-08
 
 ### Changed
 - **IM 平台友好输出** — 移除所有 ANSI 颜色码，适配 Telegram/微信/飞书等 IM 平台

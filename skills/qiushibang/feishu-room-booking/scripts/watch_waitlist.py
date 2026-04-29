@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 候补会议室轮询 - 定期检查候补队列中的日程是否有空闲会议室
+优化：候补时不限容量，只指定楼栋
 
 用法:
   # 检查候补队列状态
@@ -12,7 +13,7 @@
   # 添加到候补队列
   python3 watch_waitlist.py --add --event-id "xxx" --summary "周会" \
     --start "2026-04-20T14:00:00+08:00" --end "2026-04-20T15:00:00+08:00" \
-    --building "丽金" --capacity-gte 8
+    --building "丽金"
 
   # 移除候补
   python3 watch_waitlist.py --remove --event-id "xxx"
@@ -25,7 +26,7 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
@@ -54,14 +55,13 @@ def show_status():
         return
     print(f"📋 候补队列 ({len(pending)} 条):")
     for i, item in enumerate(pending, 1):
-        event_id = item.get("event_id", "unknown")
         summary = item.get("summary", "")
-        start = item.get("time", "")
+        start = item.get("start", "")
         building = item.get("building", "")
         attempts = item.get("attempts", 0)
         print(f"  {i}. {summary}")
         print(f"     时间: {start}")
-        print(f"     楼栋: {building}")
+        print(f"     楼栋: {building}（不限容量）")
         print(f"     尝试次数: {attempts}")
 
 
@@ -70,7 +70,6 @@ def add_waitlist(args):
     data = load_waitlist()
     pending = data.setdefault("pending", [])
 
-    # 检查是否已存在
     event_id = args.event_id
     for item in pending:
         if item.get("event_id") == event_id:
@@ -83,7 +82,6 @@ def add_waitlist(args):
         "start": args.start,
         "end": args.end,
         "building": args.building or "",
-        "capacity_gte": args.capacity_gte or 0,
         "attempted_rooms": [],
         "attempts": 0,
         "added_at": datetime.now().isoformat(),
@@ -91,6 +89,7 @@ def add_waitlist(args):
     })
     save_waitlist(data)
     print(f"✅ 已加入候补: {args.summary} ({args.start})")
+    print(f"   候补楼栋: {args.building}（不限容量，有任何空闲即预订）")
 
 
 def remove_waitlist(event_id):
@@ -112,7 +111,6 @@ def clean_expired():
     pending = data.get("pending", [])
     now = datetime.now()
 
-    # 简单判断：如果 start 时间已过去 1 小时，认为过期
     active = []
     removed = 0
     for item in pending:
@@ -136,9 +134,7 @@ def clean_expired():
 
 
 def poll_waitlist():
-    """执行一轮候补轮询"""
-    from datetime import timedelta
-
+    """执行一轮候补轮询（不限容量，扫描该楼栋所有会议室）"""
     data = load_waitlist()
     pending = data.get("pending", [])
     if not pending:
@@ -156,13 +152,13 @@ def poll_waitlist():
         start = item.get("start", "")
         end = item.get("end", "")
         building = item.get("building", "")
-        cap_gte = item.get("capacity_gte", 0)
         attempted = set(item.get("attempted_rooms", []))
 
         print(f"\n🔍 检查: {item.get('summary', event_id)}")
         print(f"   时间: {start} ~ {end}")
+        print(f"   楼栋: {building}（不限容量）")
 
-        # 用查询脚本查空闲会议室
+        # 查询空闲会议室（不限容量）
         cmd = [
             sys.executable, str(QUERY_SCRIPT),
             "-b", building,
@@ -170,8 +166,7 @@ def poll_waitlist():
             "-e", end,
             "-o", "json"
         ]
-        if cap_gte:
-            cmd.extend(["--capacity-gte", str(cap_gte)])
+        # 注意：不传 --capacity-gte，候补时接受任何容量的会议室
 
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -182,30 +177,30 @@ def poll_waitlist():
                 continue
 
             rooms = json.loads(result.stdout)
-            # 找到空闲且未尝试过的会议室
-            free_room = None
-            for room in rooms:
-                if room.get("status") == "free" and room.get("room_id") not in attempted:
-                    free_room = room
-                    break
+            # 找到空闲且未尝试过的会议室（按容量从大到小排序）
+            free_rooms = [r for r in rooms if r.get("status") == "free" and r.get("room_id") not in attempted]
+            free_rooms.sort(key=lambda x: -x.get("capacity", 0))
 
-            if free_room:
-                room_name = free_room["name"]
-                room_id = free_room["room_id"]
-                print(f"   🟢 找到空闲: {room_name}")
+            if free_rooms:
+                best = free_rooms[0]
+                room_name = best["name"]
+                room_id = best["room_id"]
+                capacity = best.get("capacity", 0)
+                print(f"   🟢 找到空闲: {room_name} ({capacity}人)")
                 print(f"   ⏳ 等待 agent 执行预订...")
                 item["status"] = "ready"
                 item["suggested_room"] = room_name
                 item["suggested_room_id"] = room_id
+                item["suggested_capacity"] = capacity
                 results.append({
                     "event_id": event_id,
                     "action": "book",
                     "room_name": room_name,
                     "room_id": room_id,
+                    "capacity": capacity,
                     "summary": item.get("summary", "")
                 })
             else:
-                # 没有空闲，更新已尝试列表
                 new_attempted = set(attempted)
                 for room in rooms:
                     new_attempted.add(room.get("room_id", ""))
@@ -226,7 +221,7 @@ def poll_waitlist():
     if results:
         print(f"\n🎉 有 {len(results)} 个候补可以预订:")
         for r in results:
-            print(f"  📌 {r['summary']} → {r['room_name']} ({r['room_id']})")
+            print(f"  📌 {r['summary']} → {r['room_name']} ({r['capacity']}人)")
         print("\n请 agent 执行以下操作:")
         print("  1. 对每个 result，调用 feishu_calendar_event_attendee create 添加会议室")
         print("  2. 等待 5 秒验证 RSVP")
@@ -236,12 +231,8 @@ def poll_waitlist():
         print("\n📭 本轮轮询没有可用会议室")
 
 
-# 需要导入 timedelta（在 clean_expired 和 poll 中使用）
-from datetime import timedelta
-
-
 def main():
-    parser = argparse.ArgumentParser(description="候补会议室轮询")
+    parser = argparse.ArgumentParser(description="候补会议室轮询（不限容量）")
     parser.add_argument("--status", action="store_true", help="查看候补状态")
     parser.add_argument("--poll", action="store_true", help="执行一轮轮询")
     parser.add_argument("--add", action="store_true", help="添加候补")
@@ -251,8 +242,7 @@ def main():
     parser.add_argument("--summary", help="会议标题")
     parser.add_argument("--start", "-s", help="开始时间")
     parser.add_argument("--end", "-e", help="结束时间")
-    parser.add_argument("--building", "-b", help="楼栋")
-    parser.add_argument("--capacity-gte", "-c", type=int, help="最小容量")
+    parser.add_argument("--building", "-b", help="候补楼栋")
 
     args = parser.parse_args()
 

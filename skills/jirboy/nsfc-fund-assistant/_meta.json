@@ -1,0 +1,11 @@
+{
+  "owner": "jirboy",
+  "slug": "nsfc-fund-assistant",
+  "displayName": "Nsfc",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776332911052,
+    "commit": "https://github.com/openclaw/skills/commit/77558da4381c16c30b4c6171bf3eb5e2c1036290"
+  },
+  "history": []
+}

@@ -1,8 +1,8 @@
-# BeautyPlus (OpenClaw skill)
+# BeautyPlus AI Skill
 
 **Before use:** Ensure **`scripts/config.py`** uses the correct BeautyPlus wapi host from your console/docs.
 
-Use the **BeautyPlus** commercial media API inside [OpenClaw](https://github.com/openclaw/openclaw) to process images with effect presets (reshape, hair, outfit, restoration). Agents use a single CLI entrypoint: `scripts/beautyplus_ai.py`.
+Use the **BeautyPlus** commercial media API to process images with effect presets (reshape, hair, outfit, restoration). Compatible with any AI coding agent — GitHub Copilot, Claude, Codex, OpenClaw, and more. Agents use a single CLI entrypoint: `scripts/beautyplus_ai.py`.
 
 Calls consume **quota / credits** for the tenant tied to **BP_AK**. Do not tell end users the service is free or guess pricing — see *Billing and user-facing claims* in [SKILL.md](SKILL.md).
 
@@ -14,10 +14,10 @@ Current catalog is **image-focused** and uses **effect KEY** as `--task` (not le
 |-------|----------------|
 | Image effects | **48 effect KEYs** in [SKILL.md](SKILL.md) (body reshape, hair color/style, outfit change, photo restoration) |
 
-## Installing for OpenClaw
+## Installing
 
-1. Add this repository (or the skill folder) as an OpenClaw skill per **your host’s documentation** (e.g. copy into the skills directory, or install from a marketplace / URL).
-2. Ensure **`python3`** is available and the skill can read **`BP_AK`** and **`BP_SK`** (same as `metadata.openclaw.requires` in [SKILL.md](SKILL.md)).
+1. Add this repository (or the skill folder) as a skill per **your agent host’s documentation** (e.g. copy into the skills directory, or install from a marketplace / URL).
+2. Ensure **`python3`** is available and the skill can read **`BP_AK`** and **`BP_SK`**.
 3. Detailed agent behavior and task flow are defined in [SKILL.md](SKILL.md); this README keeps only quick-start information.
 
 ## API keys (AK / SK)

@@ -11,6 +11,8 @@ import click
 from .config import load_config
 from .core import WikiManager, find_wiki_root, IngestResult
 from .embeddings import create_provider
+from .linker import KnowledgeLinker
+from .merge import ContentMerger, MergeStrategy, SafeWriter
 from .retrieval import EmbeddingIndex
 
 
@@ -138,6 +140,274 @@ def query(ctx, query_text: str, save: bool, semantic: bool):
     click.echo(f'  "查询 wiki: {query_text}"')
     if save:
         click.echo(f'  （添加 --save 会将结果存档）')
+
+
+@cli.command()
+@click.option('--source', required=True, help='新页面标题')
+@click.option('--target', help='目标已有页面标题（指定后执行合并而非仅报告）')
+@click.option('--mode', type=click.Choice(['light', 'deep']), default='light',
+              help='关联模式: light=仅报告, deep=包含内容融合建议')
+@click.option('--strategy', type=click.Choice(['link_only', 'append_related', 'append_section', 'update_concept']),
+              default='link_only', help='合并策略（仅当 --target 指定时生效）')
+@click.option('--max-related', default=5, help='返回的最大关联数')
+@click.option('--dry-run', is_flag=True, help='预览但不实际修改')
+@click.option('--output-format', type=click.Choice(['markdown', 'json']), default='markdown',
+              help='输出格式')
+@click.pass_context
+def link(ctx, source: str, target: Optional[str], mode: str, strategy: str,
+         max_related: int, dry_run: bool, output_format: str):
+    """
+    关联新知识与已有 wiki 页面。
+
+    单文件轻量关联（仅报告）：
+        wiki link --source "NewPage" --mode light
+
+    深度关联（含内容融合建议）：
+        wiki link --source "NewPage" --mode deep
+
+    执行具体合并（指定 --target）：
+        wiki link --source "NewPage" --target "OldPage" --strategy append_related
+    """
+    wiki = ctx.obj['wiki']
+    root = ctx.obj['root']
+
+    config = load_config(root)
+    linking_cfg = config.get('linking', {})
+    if not linking_cfg.get('enabled', True):
+        click.echo("错误：关联功能已禁用。请在 config.yaml 中设置 linking.enabled: true")
+        ctx.exit(1)
+
+    # 获取 source 页面
+    source_page = wiki.get_page(source)
+    if not source_page:
+        click.echo(f"错误：找不到源页面: {source}")
+        ctx.exit(1)
+
+    # 初始化关联引擎
+    linker = KnowledgeLinker(wiki)
+    if mode == 'deep':
+        # 尝试使用 embedding 索引
+        embedding_cfg = config.get('embedding', {})
+        if embedding_cfg.get('enabled', False):
+            try:
+                provider = create_provider(config)
+                if provider:
+                    index = EmbeddingIndex(wiki, provider)
+                    linker.index = index
+            except Exception:
+                pass  # embedding 不可用则回退到 keyword
+
+    # 如果指定了 target，执行合并操作
+    if target:
+        target_page = wiki.get_page(target)
+        if not target_page:
+            click.echo(f"错误：找不到目标页面: {target}")
+            ctx.exit(1)
+
+        strategy_enum = MergeStrategy(strategy)
+
+        # 检查策略是否被允许
+        deep_cfg = linking_cfg.get('deep_mode', {})
+        allowed = deep_cfg.get('strategies_allowed', [])
+        if strategy not in allowed:
+            click.echo(f"错误：策略 '{strategy}' 不在允许列表中。允许的策略: {', '.join(allowed)}")
+            ctx.exit(1)
+
+        merger = ContentMerger(wiki)
+        context = {
+            'target': source,
+            'relation_desc': f"由 {source} 关联添加",
+        }
+
+        # 根据策略准备 addition
+        if strategy_enum == MergeStrategy.APPEND_RELATED:
+            addition = ""
+        elif strategy_enum == MergeStrategy.APPEND_SECTION:
+            addition = f"参见 [[{source}]] 中的最新分析。"
+            context['section_title'] = '## 最新进展'
+        else:
+            addition = ""
+
+        new_content = merger.merge(target_page, addition, strategy_enum, context)
+        diff = merger.generate_diff(
+            target_page.path.read_text(encoding='utf-8'),
+            new_content,
+        )
+
+        if dry_run:
+            click.echo(f"【模拟模式】将修改: {target}")
+            click.echo(f"策略: {strategy}")
+            click.echo("\nDiff:")
+            click.echo(diff)
+            return
+
+        writer = SafeWriter(wiki)
+        proposal = writer.prepare(
+            target_page, new_content,
+            reason=f"关联 {source} → {target}",
+            strategy=strategy_enum,
+        )
+
+        # 如果深度模式要求审查，输出 diff 等待确认
+        if mode == 'deep' and deep_cfg.get('require_diff_review', True):
+            click.echo(f"变更提案: {target}")
+            click.echo(proposal.to_markdown())
+            click.echo("\n请审查 diff 后运行（不带 --dry-run）应用修改。")
+            return
+
+        backup = writer.apply(proposal)
+        click.echo(f"[OK] 已更新 {target}")
+        click.echo(f"  备份: {backup}")
+        return
+
+    # 未指定 target：执行关联发现，输出报告
+    light_cfg = linking_cfg.get('light_mode', {})
+    if mode == 'light':
+        rels = linker.find_related(
+            query=source,
+            query_tags=source_page.tags,
+            query_content=source_page.content,
+            top_k=max_related,
+            min_score=light_cfg.get('min_score', 0.3),
+            use_embedding=light_cfg.get('vector_weight', 0) > 0,
+            keyword_weight=light_cfg.get('keyword_weight', 0.6),
+            vector_weight=light_cfg.get('vector_weight', 0.0),
+            link_weight=light_cfg.get('link_weight', 0.4),
+        )
+    else:
+        deep_cfg = linking_cfg.get('deep_mode', {})
+        rels = linker.find_related(
+            query=source,
+            query_tags=source_page.tags,
+            query_content=source_page.content,
+            top_k=max_related,
+            min_score=deep_cfg.get('min_score', 0.2),
+            use_embedding=True,
+            keyword_weight=0.4,
+            vector_weight=0.4,
+            link_weight=0.2,
+        )
+
+    graph = linker.build_relation_graph([source], mode=mode)
+
+    if output_format == 'json':
+        import json
+        data = [
+            {
+                'source': r.source,
+                'target': r.target,
+                'score': r.score,
+                'relation_type': r.relation_type.value,
+                'evidence': r.evidence,
+                'suggested_action': r.suggested_action,
+            }
+            for r in rels
+        ]
+        click.echo(json.dumps(data, ensure_ascii=False, indent=2))
+    else:
+        click.echo(graph.to_markdown(title=f"关联报告: {source}"))
+
+
+@cli.command()
+@click.option('--since', help='自某日期（YYYY-MM-DD）以来的新页面')
+@click.option('--mode', type=click.Choice(['light', 'deep']), default='deep',
+              help='关联模式')
+@click.option('--dry-run', is_flag=True, help='预览但不实际修改')
+@click.option('--output-format', type=click.Choice(['markdown', 'json']), default='markdown')
+@click.pass_context
+def relink(ctx, since: Optional[str], mode: str, dry_run: bool, output_format: str):
+    """
+    全局深度关联：对近期新增页面执行全局关联更新。
+
+    对指定日期后新增的所有页面，分析其与整个 wiki 的关系网络。
+
+    示例：
+        wiki relink --since 2026-04-20 --mode deep
+        wiki relink --since 2026-04-20 --dry-run
+    """
+    wiki = ctx.obj['wiki']
+    root = ctx.obj['root']
+
+    config = load_config(root)
+    linking_cfg = config.get('linking', {})
+    if not linking_cfg.get('enabled', True):
+        click.echo("错误：关联功能已禁用。请在 config.yaml 中设置 linking.enabled: true")
+        ctx.exit(1)
+
+    # 筛选新页面
+    all_pages = wiki.list_pages()
+    if since:
+        try:
+            from datetime import datetime as dt
+            since_date = dt.strptime(since, '%Y-%m-%d')
+            new_pages = [
+                p for p in all_pages
+                if p.frontmatter.get('created')
+                and dt.strptime(str(p.frontmatter.get('created')), '%Y-%m-%d') >= since_date
+            ]
+        except ValueError:
+            click.echo(f"错误：日期格式无效: {since}。请使用 YYYY-MM-DD 格式。")
+            ctx.exit(1)
+    else:
+        # 默认取最近 7 天
+        from datetime import datetime as dt, timedelta
+        cutoff = dt.now() - timedelta(days=7)
+        new_pages = [
+            p for p in all_pages
+            if p.frontmatter.get('created')
+            and dt.strptime(str(p.frontmatter.get('created')), '%Y-%m-%d') >= cutoff
+        ]
+
+    if not new_pages:
+        click.echo("未找到需要关联的新页面。")
+        return
+
+    click.echo(f"发现 {len(new_pages)} 个新页面，执行 {mode} 模式关联...\n")
+
+    # 初始化关联引擎
+    linker = KnowledgeLinker(wiki)
+    if mode == 'deep':
+        embedding_cfg = config.get('embedding', {})
+        if embedding_cfg.get('enabled', False):
+            try:
+                provider = create_provider(config)
+                if provider:
+                    index = EmbeddingIndex(wiki, provider)
+                    linker.index = index
+            except Exception:
+                pass
+
+    new_page_titles = [p.title for p in new_pages]
+    graph = linker.build_relation_graph(
+        new_page_titles,
+        mode=mode,
+        top_k=linking_cfg.get('deep_mode', {}).get('top_k', 10) if mode == 'deep'
+        else linking_cfg.get('light_mode', {}).get('top_k', 5),
+    )
+
+    if dry_run:
+        click.echo("【模拟模式】关联报告:")
+
+    if output_format == 'json':
+        import json
+        data = [
+            {
+                'source': r.source,
+                'target': r.target,
+                'score': r.score,
+                'relation_type': r.relation_type.value,
+                'evidence': r.evidence,
+                'suggested_action': r.suggested_action,
+            }
+            for r in graph.relations
+        ]
+        click.echo(json.dumps(data, ensure_ascii=False, indent=2))
+    else:
+        click.echo(graph.to_markdown(title=f"全局关联报告 ({mode} 模式)"))
+
+    if not dry_run and mode == 'deep':
+        click.echo("\n【提示】深度模式的实际页面修改请使用:")
+        click.echo("  wiki link --source <页面> --target <页面> --strategy <策略>")
 
 
 @cli.command()

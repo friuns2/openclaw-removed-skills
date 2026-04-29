@@ -22,8 +22,9 @@ Works with any agent that speaks MCP and any host that loads [Agent Skills](http
 | **Claude Code** | ✅ Full support | Native SKILL.md + `claude mcp add` registration |
 | **Codex** | ✅ Full support | MCP entry in `~/.codex/config.toml` |
 | **Cursor / Windsurf / Hermes** | ✅ Full support | Standard `mcpServers` JSON block |
-| **LM Studio** | ✅ 0.3.17+ | Remote MCP via `~/.lmstudio/mcp.json` (requires tool-use-capable model) |
-| **OpenClaw** | ✅ Full support | `metadata.openclaw` namespace + MCP config |
+| **opencode** | ✅ Full support | Native skills + MCP in `~/.config/opencode/opencode.json` |
+| **OpenClaw/ClawHub** | ✅ Full support | `metadata.openclaw` namespace + MCP config |
+| **[pi-mono](https://github.com/badlogic/pi-mono)** | ✅ Full support | `metadata.pimo` namespace |
 | **SkillsMP** | ✅ Indexed | GitHub topics configured |
 
 ## Comparison
@@ -50,7 +51,7 @@ Works with any agent that speaks MCP and any host that loads [Agent Skills](http
 
 ## Prerequisites
 
-- An agent host with MCP support (Claude Code, Codex, Cursor, Windsurf, OpenClaw, etc.)
+- An agent host with MCP support (Claude Code, Codex, Cursor, Windsurf, opencode, OpenClaw/ClawHub, pi-mono, etc.)
 - An Asta API key — [request here](https://share.hsforms.com/1L4hUh20oT3mu8iXJQMV77w3ioxm)
 
   ```bash
@@ -94,23 +95,6 @@ headers = { "x-api-key" = "${ASTA_API_KEY}" }
 }
 ```
 
-### LM Studio
-
-LM Studio 0.3.17+ supports remote MCP servers. Edit `~/.lmstudio/mcp.json` (macOS/Linux) or `%USERPROFILE%\.lmstudio\mcp.json` (Windows), or open it via **Program** tab → **Install > Edit mcp.json**:
-
-```json
-{
-  "mcpServers": {
-    "asta": {
-      "url": "https://asta-tools.allen.ai/mcp/v1",
-      "headers": { "x-api-key": "<YOUR_API_KEY>" }
-    }
-  }
-}
-```
-
-Only models with **Tool Use: Supported** in LM Studio's model loader can call Asta tools. Recommended: Qwen 2.5 / 3 Instruct (7B+), Llama 3.1 / 3.3 Instruct (8B+), Mistral / Mixtral Instruct.
-
 ## Skill Installation
 
 ### Claude Code
@@ -129,13 +113,19 @@ git clone https://github.com/Agents365-ai/asta-skill.git .claude/skills/asta-ski
 git clone https://github.com/Agents365-ai/asta-skill.git ~/.codex/skills/asta-skill
 ```
 
-### OpenClaw
+### OpenClaw/ClawHub
 
 ```bash
 git clone https://github.com/Agents365-ai/asta-skill.git ~/.openclaw/skills/asta-skill
 
 # Project-level
 git clone https://github.com/Agents365-ai/asta-skill.git skills/asta-skill
+```
+
+### pi-mono
+
+```bash
+git clone https://github.com/Agents365-ai/asta-skill.git ~/.pimo/skills/asta-skill
 ```
 
 ### SkillsMP
@@ -150,7 +140,8 @@ skills install asta-skill
 |----------|-------------|--------------|
 | Claude Code | `~/.claude/skills/asta-skill/` | `.claude/skills/asta-skill/` |
 | Codex | `~/.codex/skills/asta-skill/` | N/A |
-| OpenClaw | `~/.openclaw/skills/asta-skill/` | `skills/asta-skill/` |
+| OpenClaw/ClawHub | `~/.openclaw/skills/asta-skill/` | `skills/asta-skill/` |
+| pi-mono | `~/.pimo/skills/asta-skill/` | — |
 | SkillsMP | N/A (installed via CLI) | N/A |
 
 ## Usage
@@ -198,6 +189,28 @@ After registering the MCP server and restarting your host, ask:
 
 A successful call returns *Attention Is All You Need*, NeurIPS 2017, Vaswani et al., with TLDR.
 
+## FAQ
+
+### Why do I need this skill if Asta is already an MCP server?
+
+The MCP server gives your agent raw **tools** (function names + parameter schemas). The skill gives your agent the **expertise** to use them well. Without the skill, the agent must figure everything out from scratch each session:
+
+| Layer | What it provides |
+|-------|-----------------|
+| **MCP server** | 8 callable tools with input/output schemas |
+| **This skill** | Intent routing, safe defaults, workflow patterns, pitfall warnings |
+
+Concretely, the skill adds:
+
+1. **Intent → tool mapping** — which of the 8 tools to call for "find papers about X" vs. "who cited paper Y"
+2. **Context-overflow protection** — warns agents to never request `fields=citations` (a single high-citation paper returns 200k+ characters)
+3. **Multi-step workflow patterns** — topic discovery, seed-paper expansion, author deep-dive, evidence retrieval
+4. **Parallel batching guidance** — prefer `get_paper_batch` over N sequential `get_paper` calls
+5. **Safe `fields` defaults** — curated field list that prevents context blowups
+6. **Consistent output formatting** — tables, counts, follow-up menus
+
+Think of it like API documentation vs. the API itself: the schema tells the agent *what's possible*, the skill tells it *what's wise*.
+
 ## Known Limitations
 
 - **`fields=citations` / `fields=references` blows up context** — a single highly-cited paper returns 200k+ characters. Use the dedicated `get_citations` tool (which paginates) instead. The SKILL.md warns against this explicitly.
@@ -205,6 +218,12 @@ A successful call returns *Attention Is All You Need*, NeurIPS 2017, Vaswani et 
 - **Author disambiguation** — common names collide; always inspect affiliations in `search_authors_by_name` before calling `get_author_papers`
 - **MCP loads at session start** — if you register the server mid-session, restart your host to pick up the new tools
 - **Abstract availability** — not every paper in the corpus has a full abstract; use `snippet_search` or `tldr` as fallback
+
+## Contributing
+
+Suggestions, bug reports, and pull requests are all welcome! If you have ideas to improve this skill — new workflow patterns, better defaults, additional MCP host recipes, documentation fixes, or anything else — feel free to [open an issue](https://github.com/Agents365-ai/asta-skill/issues) or submit a PR directly.
+
+This skill is community-friendly: every contribution, no matter how small, helps make it better for everyone.
 
 ## License
 

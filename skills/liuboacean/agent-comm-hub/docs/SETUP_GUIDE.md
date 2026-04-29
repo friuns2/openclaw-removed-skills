@@ -1,222 +1,195 @@
-# Setup Guide
+# Agent Communication Hub — 部署指南
 
-## 完整配置指南
+> 从零部署一个多智能体通信中心
 
-本文档详细说明如何在不同场景下配置和使用 Agent Communication Hub。
+## 前置条件
 
----
+- Node.js 18+（推荐 20+）
+- Python 3.9+（SDK 使用，可选）
+- macOS / Linux（Windows 需 WSL）
 
-## 场景 1：WorkBuddy + Hermes（最常用）
-
-### 步骤 1：启动 Hub 服务器
-
-在 WorkBuddy 所在机器上：
+## 方式一：一键安装（推荐）
 
 ```bash
-cd agent-comm-hub/hub-server
+bash ~/.workbuddy/skills/agent-comm-hub/scripts/install.sh
+```
+
+自动完成：克隆仓库 → 安装依赖 → 编译 TypeScript → 启动服务。
+
+## 方式二：手动安装
+
+### 1. 获取源码
+
+```bash
+# 如果已安装 Skill，源码在代码仓库
+cd ~/WorkBuddy/<workspace>/agent-comm-hub
+
+# 或从 GitHub 克隆
+git clone https://github.com/<user>/agent-comm-hub.git
+cd agent-comm-hub
+```
+
+### 2. 安装依赖
+
+```bash
 npm install
-npm run dev   # 或 nohup npm start &
 ```
 
-### 步骤 2：配置 WorkBuddy MCP
+依赖清单（5 个）：
+- `@modelcontextprotocol/sdk` — MCP 协议
+- `express` — HTTP 服务器
+- `better-sqlite3` — SQLite 数据库
+- `zod` — 参数校验
+- `eventsource` — SSE 客户端
 
-在 WorkBuddy 的 `.mcp.json` 或 MCP 配置中添加：
-
-```json
-{
-  "mcpServers": {
-    "agent-comm-hub": {
-      "url": "http://localhost:3100/mcp"
-    }
-  }
-}
-```
-
-### 步骤 3：配置 Hermes MCP
-
-在 Hermes 的 `.mcp.json` 或 `config.yaml` 中添加：
-
-```json
-{
-  "mcpServers": {
-    "agent-comm-hub": {
-      "url": "http://localhost:3100/mcp"
-    }
-  }
-}
-```
-
-### 步骤 4：启动 WorkBuddy SSE 守护（秒级响应）
+### 3. 编译
 
 ```bash
-SKILL_DIR="path/to/agent-comm-hub"
-
-# 修改 plist 中的路径
-sed -i '' "s|WORKBUDDY_SKILL_DIR|$SKILL_DIR|g" \
-  $SKILL_DIR/workbuddy-side/launchd/*.plist
-
-# 安装 launchd 服务
-cp $SKILL_DIR/workbuddy-side/launchd/*.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.workbuddy.hub-watcher.plist
-launchctl load ~/Library/LaunchAgents/com.workbuddy.hub-task-runner.plist
-
-# 验证
-launchctl list | grep hub
+npm run build
 ```
 
-### 步骤 5：启动 Hermes SSE 客户端
+### 4. 启动
 
 ```bash
-cd $SKILL_DIR/hermes-side/scripts
-pip install httpx  # 如果未安装
-python3 hub_integration.py  # 前台运行测试
+# 开发模式（热重载，推荐调试用）
+npm run dev
+
+# 生产模式
+npm start
 ```
 
-或后台运行：
-
-```bash
-nohup python3 $SKILL_DIR/hermes-side/scripts/hub_integration.py > /tmp/hermes-hub.log 2>&1 &
+输出：
+```
+╔════════════════════════════════════════╗
+║   Agent Communication Hub  v2.2.0     ║
+║   Stateless Mode — Multi-Client       ║
+╚════════════════════════════════════════╝
 ```
 
-### 步骤 6：验证
+### 5. 验证
 
 ```bash
-# 健康检查
 curl http://localhost:3100/health
-
-# 查看在线 Agent
-curl -s -X POST http://localhost:3100/mcp \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_online_agents","arguments":{}}}'
+# → {"status":"ok","version":"2.2.0",...}
 ```
 
-预期：两个 Agent 都在线。
+## 注册 Agent
 
----
-
-## 场景 2：通用 Agent 接入
-
-任何支持 MCP 协议的 Agent 都可以接入 Hub：
-
-### TypeScript/Node.js Agent
-
-```typescript
-import { AgentClient } from "agent-comm-hub/client-sdk/agent-client.js";
-
-const client = new AgentClient({
-  agentId: "my-custom-agent",
-  hubUrl: "http://your-hub-server:3100",
-  onTaskAssigned: async (task) => {
-    // 处理任务...
-    await client.updateTaskStatus(task.id, "completed", "done", 100);
-  },
-});
-await client.start();
-```
-
-### Python Agent
-
-```python
-from hub_client import HubClient
-
-client = HubClient(
-    agent_id="my-custom-agent",
-    hub_url="http://your-hub-server:3100",
-    on_task_assigned=on_task_handler,
-)
-await client.start()
-```
-
-### 纯 MCP 配置（无需代码）
-
-在 Agent 的 MCP 配置中添加 Hub URL 即可，LLM 可以直接调用 Hub 的 6 个工具。
-
----
-
-## 场景 3：远程部署
-
-Hub 和 Agent 可以在不同机器上运行，只需确保网络互通。
-
-### Hub 服务器
+### 使用脚本（推荐）
 
 ```bash
-# 设置监听地址（默认 0.0.0.0，所有网卡）
-PORT=3100 npm start
+bash ~/.workbuddy/skills/agent-comm-hub/scripts/setup_agent.sh "agent-name" "mcp,message,memory"
+# 输出 agent_id 和 api_token
 ```
 
-### Agent 客户端
+### 手动注册
 
+1. 获取邀请码（需要已有 admin 权限的 Agent）：
 ```bash
-# 设置 Hub URL 为远程地址
-export HUB_URL=http://192.168.1.100:3100
+# 通过 MCP 工具或直接 DB 操作生成邀请码
 ```
 
-### 防火墙
+2. 调用 MCP 工具注册：
+```json
+{
+  "name": "register_agent",
+  "arguments": {
+    "invite_code": "your-invite-code",
+    "name": "my-agent",
+    "capabilities": ["mcp", "message", "memory"]
+  }
+}
+```
 
-确保 Hub 服务器的 3100 端口对 Agent 开放。
+3. 保存返回的 `agent_id` 和 `token`。
 
----
+## 配置 MCP 连接
 
-## 环境变量完整列表
+### WorkBuddy / CodeBuddy
 
-### Hub 服务器
+在 MCP 配置中添加：
+```json
+{
+  "mcpServers": {
+    "agent-comm-hub": {
+      "url": "http://localhost:3100/mcp"
+    }
+  }
+}
+```
+
+### Hermes
+
+在 Hermes 的 MCP 配置中添加相同条目，然后在 `config.yaml` 中：
+```yaml
+mcp_servers:
+  agent-comm-hub:
+    url: http://localhost:3100/mcp
+```
+
+### 其他 MCP 兼容客户端
+
+任何支持 MCP Streamable HTTP Transport 的客户端，配置 `http://localhost:3100/mcp` 即可。
+
+## 环境变量
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `PORT` | 3100 | 监听端口 |
+| `LOG_LEVEL` | info | debug / info / warn / error |
+| `CORS_ORIGINS` | （空） | CORS 白名单，逗号分隔 |
 
-### WorkBuddy 守护
+## 数据库
 
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `HUB_URL` | http://localhost:3100 | Hub 地址 |
-| `HUB_AGENT_ID` | workbuddy | Agent ID |
-| `HUB_WATCHER_LOG` | INFO | 日志级别 |
-| `WB_TRIGGER_DIR` | ~/.workbuddy/hub-tasks | 触发文件目录 |
-| `SIGNAL_DIR` | ~/.hermes/shared/signals | 信号文件目录 |
+SQLite WAL 模式，数据文件 `comm_hub.db`。
 
-### Hermes 客户端
+首次启动自动创建 17 张表 + FTS5 索引。无需手动 migration。
 
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `HUB_URL` | http://localhost:3100 | Hub 地址 |
-| `HERMES_ID` | hermes | Agent ID |
+## 守护进程（可选）
 
----
-
-## 日志位置
-
-| 组件 | 日志 |
-|------|------|
-| Hub 服务器 | 控制台输出（npm run dev） |
-| hub_watcher | /tmp/hub-watcher.log + /tmp/hub-watcher.err |
-| hub_task_runner | /tmp/hub-task-runner.log + /tmp/hub-task-runner.err |
-| Hermes hub_client | 控制台输出 / logging 配置 |
-
----
-
-## 数据库维护
+### launchd（macOS）
 
 ```bash
-# 查看数据库大小
-ls -lh hub-server/comm_hub.db
+# 创建 plist 文件
+cat > ~/Library/LaunchAgents/com.agent-comm-hub.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.agent-comm-hub</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/node</string>
+        <string>/path/to/agent-comm-hub/dist/server.js</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/path/to/agent-comm-hub</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+EOF
 
-# 查看任务统计
-sqlite3 hub-server/comm_hub.db "
-SELECT status, COUNT(*) as count FROM tasks GROUP BY status;
-"
+launchctl load ~/Library/LaunchAgents/com.agent-comm-hub.plist
+```
 
-# 查看消息统计
-sqlite3 hub-server/comm_hub.db "
-SELECT status, COUNT(*) as count FROM messages GROUP BY status;
-"
+## 多机部署
 
-# 清理已完成任务（30天前）
-sqlite3 hub-server/comm_hub.db "
-DELETE FROM tasks WHERE status IN ('completed','failed') AND updated_at < (strftime('%s','now') - 30*86400) * 1000;
-"
+Hub 默认绑定 `localhost`。多机部署需要：
 
-# WAL 检查点（减小数据库文件大小）
-sqlite3 hub-server/comm_hub.db "PRAGMA wal_checkpoint(TRUNCATE);"
+1. 设置 `HOST=0.0.0.0`（需修改 server.ts 或设环境变量）
+2. 配置 `CORS_ORIGINS` 允许跨域
+3. SQLite 不支持网络访问，需替换为 PostgreSQL（当前版本不支持）
+
+## 端口冲突
+
+```bash
+# 检查端口占用
+lsof -i :3100
+
+# 使用其他端口
+PORT=3200 npm start
 ```

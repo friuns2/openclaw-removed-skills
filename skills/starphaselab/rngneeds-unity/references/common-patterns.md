@@ -66,11 +66,56 @@ Use a depletable list where each item has `Units = 1`.
 
 This is the cleanest way to say “once claimed, it is gone until refill.”
 
-## Card deck with duplicates
+## Finite pool with duplicates but no positional order
 
-Use a depletable list where each unique card is one item and `Units` holds the copy count.
+Use a depletable list where each unique item is one entry and `Units` holds the copy count.
 
-If the design needs true top/bottom draw order, manually traverse by index instead of calling random pick methods.
+This fits “draw without replacement” systems where exhaustion matters but top/bottom position does not.
+
+That includes lightweight card-deck style workflows where the user wants multiple copies of the same card but does **not** care about live ordering, shuffling behavior, peeking, or moving cards between gameplay zones.
+
+## True ordered card deck
+
+Use Card Deck Extensions on `ProbabilityList<Card>` when the design cares about top-of-deck order.
+
+Good fits:
+
+- drawing from the top into a hand
+- discarding to the bottom of another pile
+- maintaining separate draw, hand, table, discard, or graveyard zones
+- cutting, reversing, or otherwise reordering a live deck
+
+Prefer deck helpers like `TryDrawTopItem(...)`, `TryPlaceItemOnTop(...)`, and `TryPlaceItemOnBottom(...)` over manual index code when the built-in flow already matches the gameplay.
+
+## Inspectable physical-style shuffle
+
+Use shuffle plans when the deck should behave like a physical stack and the shuffle itself should be explainable.
+
+Good fits:
+
+- card battlers or tabletop-inspired systems
+- debug tools that need to show how the order changed
+- tutorials that compare `Riffle`, `Overhand`, and `CutNearHalf`
+
+Typical flow:
+
+1. create a `DeckShufflePlan`
+2. inspect or print its steps
+3. apply it to the deck
+
+## Multi-zone card flow
+
+Use one `ProbabilityList<Card>` per gameplay zone.
+
+Common zones:
+
+- draw pile
+- hand
+- discard pile
+- table / board
+- graveyard / exile
+
+Move `ProbabilityItem<T>` references between zones when card identity and current state should stay attached to the moved card.
 
 ## Distinct multi-pick rewards
 

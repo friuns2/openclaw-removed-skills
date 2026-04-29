@@ -26,6 +26,24 @@ If you find yourself writing a test step that invokes the project's test runner,
 - Launch the TUI and verify it renders (via screenshot or process lifecycle)
 - Chain multiple commands that exercise a full user workflow end-to-end
 
+## Hard gates
+
+Complete these **in order**. Do not advance to the next gate until its **Pass** condition is met (each pass should leave retrievable evidence: pasted command output, a written list, or the generated file on disk). **Scheduling:** Gate **1** before Step **2**; Gate **2** before Step **5**; Gate **3** before Step **7**; Gates **4–5** during **Step 8** (after the Step 7 summary).
+
+1. **Diff and base pinned (after Step 1)** — Resolve the base branch from `--base` when provided, otherwise use the repo default (`main` or `master` per Step 1). Compare `HEAD` to `$(git merge-base HEAD origin/<base_branch>)` (or equivalent if the remote ref differs). **Pass:** You record `current_branch`, `base_branch`, the merge-base SHA or range used, and `changed_files` from `git diff --name-only <merge-base>..HEAD` (empty list allowed if you paste or quote that output and state “no file changes vs base”).
+
+2. **Trace complete (after Step 4)** — **Pass:** Every affected entry point you will test has a **Core functionality** vs **Configuration/admin** classification, and the Step 4 requirement holds: at least one test targets a core entry point **or** you document why that is impossible and flag manual review.
+
+3. **Plan file valid (after Step 6, before Step 7)** — **Pass:** `docs/testing/test-plan.yaml` exists and the following command exits 0 (parses the YAML **and** asserts all four top-level keys are present — a single `grep -E` with alternations would pass on any one match, so do not substitute it):
+
+    ```bash
+    python3 -c "import sys, yaml; d = yaml.safe_load(open('docs/testing/test-plan.yaml')) or {}; missing = [k for k in ('version', 'metadata', 'setup', 'tests') if k not in d]; sys.exit('Missing keys: ' + ', '.join(missing) if missing else 0)"
+    ```
+
+4. **No automated-test duplication (Step 8)** — **Pass:** Every `run:` step and every `services:` `command:` is scanned for project test runners (`cargo test`, `pytest`, `npm test`, `go test`, `mix test`, `jest`, `vitest`, `mocha`, etc.); **zero** invocations. If any appear, remove or replace them with real E2E actions and re-run Gate 3.
+
+5. **Behavioral coverage (Step 8)** — **Pass:** Re-read `metadata.changes_summary` and recent commit messages; at least one test’s `context`/`steps` exercises the primary user-visible behavior they describe. If they describe a capability (e.g., a new provider) but no step invokes it, add that test or fail verification.
+
 ## Arguments
 
 - `--base <branch>`: Base branch to diff against (default: `main`)
@@ -37,14 +55,15 @@ If you find yourself writing a test step that invokes the project's test runner,
 # Get current branch
 git rev-parse --abbrev-ref HEAD
 
-# Get default base branch (try origin/main, then origin/master)
-git rev-parse --verify origin/main >/dev/null 2>&1 && echo "main" || echo "master"
+# Resolve base branch: use --base if supplied, otherwise default (main → master)
+BASE_BRANCH="${BASE_BRANCH:-$(git rev-parse --verify origin/main >/dev/null 2>&1 && echo main || echo master)}"
+MERGE_BASE="$(git merge-base HEAD "origin/${BASE_BRANCH}")"
 
 # Get changed files vs base
-git diff --name-only $(git merge-base HEAD origin/main)..HEAD
+git diff --name-only "${MERGE_BASE}"..HEAD
 
 # Get commit messages for context
-git log --oneline $(git merge-base HEAD origin/main)..HEAD
+git log --oneline "${MERGE_BASE}"..HEAD
 ```
 
 **Capture:**
@@ -320,7 +339,7 @@ After generating the test plan:
 
 ## Step 8: Verification
 
-Before completing:
+Confirm **Hard gates** 1–5 are satisfied with evidence (see **Hard gates** above) before treating the plan as complete. Then run:
 
 ```bash
 # Verify file was created

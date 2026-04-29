@@ -1,6 +1,7 @@
 # Artifact Contract
 
 ## `artifact_index.json`
+
 Top-level index for all outputs that belong to one paper reading bundle.
 
 Required keys:
@@ -10,6 +11,7 @@ Required keys:
 - `report`
 - `traceability_manifest`
 - `latex_paragraphs`
+- `research_lens`
 
 Optional keys:
 
@@ -18,6 +20,7 @@ Optional keys:
 - `notes`
 
 ## `traceability_manifest.json`
+
 Maps report claims to source evidence.
 
 Each claim entry should include:
@@ -30,8 +33,9 @@ Each claim entry should include:
 - `confidence`
 - `evidences`
 
-Recommended extra field:
+Recommended extra fields:
 
+- `research_role`
 - `human_locators`
 
 Each evidence entry may include:
@@ -49,6 +53,7 @@ Each evidence entry may include:
 - `notes`
 
 ## `latex_paragraphs.json`
+
 Stable anchor list extracted from LaTeX.
 
 Each paragraph entry should include:
@@ -61,16 +66,39 @@ Each paragraph entry should include:
 - `kind`
 - `text`
 
+## `research_lens.json`
+
+This is the compact idea-mining layer.
+It should capture:
+
+- research equation
+- direction reconstruction
+- challenge-to-module map
+- module hidden assumptions
+- citation logic
+- reusable story pattern
+- strongest future directions
+
+Every `claim_ids` entry inside `research_lens.json` must point to a real report claim.
+
 ## Report requirement
 
-In `report.md`, every claim bullet must be followed by one or more nested `原文定位` bullets that tell the reader:
+In `report.md`, every main-body claim bullet should appear in the form:
+
+- `[C<section>.<index>][interpretation label] statement`
+
+The detailed locator material should live in the final `# Appendix: Claim -> Evidence Index`, not inside the middle of the narrative body.
+
+For each claim entry in the appendix, provide enough detail for a human verifier to know:
 
 - which source file to open
 - which section / subsection to inspect
-- which line span to inspect
-- roughly from which excerpt to which excerpt the relevant paragraph runs
+- which line span or page span to inspect
+- what quote snippet or excerpt window to look for
+- what note or role explains why that evidence matters
 
 ## Claim typing
+
 Allowed interpretation labels:
 
 - `evidence-backed interpretation`

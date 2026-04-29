@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 从 memory/*.md 导入历史经验 v2.8.3
+# rocky-know-how 从 memory/*.md 导入历史经验 v3.3.0
 # 用法: import.sh [--dir /path/to/memory] [--dry-run] [--keywords "kw1,kw2"]
 
 MEMORY_DIR=""
@@ -48,7 +48,7 @@ fi
 
 [ ! -d "$MEMORY_DIR" ] && echo "❌ memory 目录不存在: $MEMORY_DIR" && exit 1
 
-echo "=== 导入经验诀窍 v2.8.3 ==="
+echo "=== 导入经验诀窍 v3.3.0 ==="
 echo "扫描目录: $MEMORY_DIR"
 $DRY_RUN && echo "模式: 预览（dry-run）"
 echo ""

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import html
 import json
 import os
@@ -21,10 +22,12 @@ import urllib.request
 DEFAULT_FEED_URL = "https://input.reai.group/v1/public/feed"
 DEFAULT_X_FEED_URL = "https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-x.json"
 DEFAULT_PODCAST_FEED_URL = "https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-podcasts.json"
-DEFAULT_TIMEOUT_SECONDS = 20
+DEFAULT_TIMEOUT_SECONDS = 60
 DEFAULT_USER_AGENT = "FollowScoutXSkill/0.1 (+https://input.reai.group)"
 PROFILE_VERSION = 1
 DEFAULT_SUMMARY_BUDGET_CHARS = 1200
+DEFAULT_FEISHU_MESSAGE_CHAR_LIMIT = 6000
+DEFAULT_GENERIC_MESSAGE_CHAR_LIMIT = 12000
 SOURCE_TYPES = ("scoutx", "x", "podcast")
 SOURCE_TYPE_LABELS = {
     "scoutx": "ScoutX",
@@ -82,6 +85,116 @@ STYLE_TO_ITEM_TIMEOUT_SECONDS = {
     "medium": 60,
     "long": 90,
 }
+AI_TOPIC_ALIASES = {
+    "ai": [
+        "ai",
+        "artificial intelligence",
+        "人工智能",
+        "ai agent",
+        "ai agents",
+        "agent",
+        "agents",
+        "agentic",
+        "智能体",
+        "llm",
+        "llms",
+        "大模型",
+        "模型",
+        "openai",
+        "anthropic",
+        "claude",
+        "gpt",
+        "gemini",
+        "llama",
+        "grok",
+        "cursor",
+        "codex",
+    ],
+    "人工智能": [
+        "人工智能",
+        "ai",
+        "artificial intelligence",
+        "智能体",
+        "agent",
+        "agents",
+        "agentic",
+        "llm",
+        "大模型",
+        "模型",
+        "openai",
+        "anthropic",
+        "claude",
+        "gpt",
+        "gemini",
+        "llama",
+        "grok",
+        "cursor",
+        "codex",
+    ],
+    "artificial intelligence": [
+        "artificial intelligence",
+        "ai",
+        "人工智能",
+        "agent",
+        "agents",
+        "agentic",
+        "智能体",
+        "llm",
+        "大模型",
+        "模型",
+        "openai",
+        "anthropic",
+        "claude",
+        "gpt",
+        "gemini",
+        "llama",
+        "grok",
+        "cursor",
+        "codex",
+    ],
+    "ai相关": [
+        "ai",
+        "人工智能",
+        "artificial intelligence",
+        "agent",
+        "agents",
+        "agentic",
+        "智能体",
+        "llm",
+        "大模型",
+        "模型",
+        "openai",
+        "anthropic",
+        "claude",
+        "gpt",
+        "gemini",
+        "llama",
+        "grok",
+        "cursor",
+        "codex",
+    ],
+    "ai 相关": [
+        "ai",
+        "人工智能",
+        "artificial intelligence",
+        "agent",
+        "agents",
+        "agentic",
+        "智能体",
+        "llm",
+        "大模型",
+        "模型",
+        "openai",
+        "anthropic",
+        "claude",
+        "gpt",
+        "gemini",
+        "llama",
+        "grok",
+        "cursor",
+        "codex",
+    ],
+}
 DAY_TO_CRON = {
     "sun": "0",
     "mon": "1",
@@ -120,12 +233,20 @@ def state_path() -> Path:
     return user_home() / "state.json"
 
 
+def prompt_sync_state_path() -> Path:
+    return user_home() / "prompt_sync_state.json"
+
+
 def local_service_config_path() -> Path:
     return user_home() / "service.json"
 
 
 def prompts_dir() -> Path:
     return user_home() / "prompts"
+
+
+def prompt_backups_dir() -> Path:
+    return prompts_dir() / "backups"
 
 
 def bundled_prompts_dir() -> Path:
@@ -235,6 +356,13 @@ def default_state() -> dict[str, Any]:
     }
 
 
+def default_prompt_sync_state() -> dict[str, Any]:
+    return {
+        "managed_hashes": {},
+        "last_synced_at": None,
+    }
+
+
 def load_json(path: Path, fallback: dict[str, Any]) -> dict[str, Any]:
     if not path.exists():
         return json.loads(json.dumps(fallback))
@@ -256,7 +384,79 @@ def save_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def ensure_local_files() -> None:
+def prompt_content_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def backup_prompt_file(path: Path) -> Path:
+    prompt_backups_dir().mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    backup_path = prompt_backups_dir() / f"{path.stem}.{timestamp}.bak{path.suffix}"
+    suffix = 1
+    while backup_path.exists():
+        backup_path = prompt_backups_dir() / f"{path.stem}.{timestamp}.{suffix}.bak{path.suffix}"
+        suffix += 1
+    shutil.copyfile(path, backup_path)
+    return backup_path
+
+
+def sync_bundled_prompts() -> dict[str, Any]:
+    sync_state = merge_missing_defaults(
+        load_json(prompt_sync_state_path(), default_prompt_sync_state()),
+        default_prompt_sync_state(),
+    )
+    managed_hashes = {
+        str(name): str(value)
+        for name, value in (sync_state.get("managed_hashes") or {}).items()
+        if str(name).strip() and str(value).strip()
+    }
+    installed: list[str] = []
+    updated: list[str] = []
+    preserved_custom: list[str] = []
+    backed_up: list[str] = []
+
+    for source in bundled_prompts_dir().glob("*.md"):
+        filename = source.name
+        bundled_text = source.read_text(encoding="utf-8")
+        bundled_hash = prompt_content_hash(bundled_text)
+        target = prompts_dir() / filename
+        managed_hash = managed_hashes.get(filename)
+
+        if not target.exists():
+            target.write_text(bundled_text, encoding="utf-8")
+            managed_hashes[filename] = bundled_hash
+            installed.append(filename)
+            continue
+
+        local_text = target.read_text(encoding="utf-8")
+        local_hash = prompt_content_hash(local_text)
+        if local_hash == bundled_hash:
+            managed_hashes[filename] = bundled_hash
+            continue
+
+        if managed_hash and local_hash != managed_hash:
+            preserved_custom.append(filename)
+            continue
+
+        backup_path = backup_prompt_file(target)
+        target.write_text(bundled_text, encoding="utf-8")
+        managed_hashes[filename] = bundled_hash
+        backed_up.append(str(backup_path))
+        updated.append(filename)
+
+    sync_state["managed_hashes"] = managed_hashes
+    sync_state["last_synced_at"] = utcnow_iso()
+    save_json(prompt_sync_state_path(), sync_state)
+    return {
+        "installed": installed,
+        "updated": updated,
+        "preserved_custom": preserved_custom,
+        "backed_up": backed_up,
+        "last_synced_at": sync_state["last_synced_at"],
+    }
+
+
+def ensure_local_files() -> dict[str, Any]:
     home = user_home()
     home.mkdir(parents=True, exist_ok=True)
     prompts_dir().mkdir(parents=True, exist_ok=True)
@@ -267,11 +467,7 @@ def ensure_local_files() -> None:
         save_json(state_path(), default_state())
     if not local_service_config_path().exists():
         save_service_config(load_service_config())
-
-    for source in bundled_prompts_dir().glob("*.md"):
-        target = prompts_dir() / source.name
-        if not target.exists():
-            shutil.copyfile(source, target)
+    return sync_bundled_prompts()
 
 
 def load_profile() -> dict[str, Any]:
@@ -742,32 +938,70 @@ def compress_item_summary(item: dict[str, Any], *, char_budget: int = DEFAULT_SU
     return compress_summary_text(summary, char_budget=char_budget)
 
 
-def item_text(item: dict[str, Any]) -> str:
+def item_primary_text(item: dict[str, Any]) -> str:
     return "\n".join(
         [
             str(item.get("title") or ""),
             str(item.get("summary") or ""),
-            str(item.get("source_type") or ""),
-            str(item.get("source_label") or ""),
-            " ".join(item["sources"]),
-            " ".join(item["tags"]),
         ]
     ).lower()
 
 
+def item_metadata_text(item: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            str(item.get("source_type") or ""),
+            str(item.get("source_label") or ""),
+            " ".join(item.get("sources") or []),
+            " ".join(item.get("tags") or []),
+        ]
+    ).lower()
+
+
+def split_filter_terms(values: list[str]) -> list[str]:
+    terms: list[str] = []
+    for value in values:
+        normalized = str(value).strip().lower()
+        if not normalized:
+            continue
+        parts = re.split(r"[/|｜、，,]+", normalized)
+        terms.extend(part.strip() for part in parts if part.strip())
+    return list(dict.fromkeys(terms))
+
+
+def expand_include_terms(values: list[str]) -> list[str]:
+    expanded: list[str] = []
+    for term in split_filter_terms(values):
+        expanded.extend(AI_TOPIC_ALIASES.get(term, [term]))
+    return list(dict.fromkeys(expanded))
+
+
+def term_matches_haystack(term: str, haystack: str) -> bool:
+    normalized = term.strip().lower()
+    if not normalized:
+        return False
+    if re.fullmatch(r"[a-z0-9][a-z0-9 .:+_-]*", normalized):
+        escaped = re.escape(normalized).replace(r"\ ", r"\s+")
+        pattern = rf"(?<![a-z0-9]){escaped}(?![a-z0-9])"
+        return re.search(pattern, haystack) is not None
+    return normalized in haystack
+
+
 def item_matches_profile(item: dict[str, Any], profile: dict[str, Any]) -> bool:
     preferences = profile["preferences"]
-    include_terms = [value.lower() for value in preferences.get("topics", []) + preferences.get("keywords_include", [])]
-    exclude_terms = [value.lower() for value in preferences.get("keywords_exclude", [])]
+    include_terms = expand_include_terms(preferences.get("topics", []) + preferences.get("keywords_include", []))
+    exclude_terms = split_filter_terms(preferences.get("keywords_exclude", []))
     preferred_sources = {value.lower() for value in preferences.get("preferred_sources", [])}
     item_sources = {value.lower() for value in item.get("sources", [])}
-    haystack = item_text(item)
+    primary_haystack = item_primary_text(item)
+    metadata_haystack = item_metadata_text(item)
+    full_haystack = "\n".join(part for part in [primary_haystack, metadata_haystack] if part).strip()
 
     if preferred_sources and not (preferred_sources & item_sources):
         return False
-    if include_terms and not any(term in haystack for term in include_terms):
+    if include_terms and not any(term_matches_haystack(term, primary_haystack) for term in include_terms):
         return False
-    if exclude_terms and any(term in haystack for term in exclude_terms):
+    if exclude_terms and any(term_matches_haystack(term, full_haystack) for term in exclude_terms):
         return False
     return True
 
@@ -827,6 +1061,15 @@ def arg_value(args: argparse.Namespace, name: str) -> Any:
     return getattr(args, name, None)
 
 
+def allow_partial_feed_results(args: argparse.Namespace) -> bool:
+    if bool(arg_value(args, "allow_partial_feeds")):
+        return True
+    env_value = os.getenv("FOLLOW_SCOUTX_ALLOW_PARTIAL_FEEDS", "").strip().lower()
+    if env_value in {"0", "false", "no"}:
+        return False
+    return True
+
+
 def fetch_selected_feed_payload(profile: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     message_group = arg_value(args, "message_group") or "all"
     source_types = source_types_for_message_group(profile, message_group)
@@ -848,6 +1091,14 @@ def fetch_selected_feed_payload(profile: dict[str, Any], args: argparse.Namespac
 
     if not feeds:
         raise SystemExit("; ".join(errors) or "No selected feeds could be loaded.")
+    if errors and not allow_partial_feed_results(args):
+        error_text = "; ".join(errors)
+        raise SystemExit(
+            "Failed to load all selected feeds. "
+            "Partial feed results are disabled for this run.\n"
+            f"{error_text}\n"
+            "Rerun with --allow-partial-feeds to continue with partial results."
+        )
 
     generated_at = utcnow_iso()
     for payload in feeds.values():
@@ -856,9 +1107,16 @@ def fetch_selected_feed_payload(profile: dict[str, Any], args: argparse.Namespac
             break
 
     return {
+        "status": "partial" if errors else "ok",
         "generated_at": generated_at,
         "source_types": source_types,
         "feeds": feeds,
+        "loaded_source_types": list(feeds.keys()),
+        "failed_source_types": [
+            source_type
+            for source_type in source_types
+            if source_type not in feeds
+        ],
         "errors": errors,
     }
 
@@ -957,6 +1215,8 @@ def digest_copy(language: str) -> dict[str, str]:
         return {
             "title": "Follow ScoutX 摘要",
             "empty": "No matching items found.",
+            "partial": "本次为降级结果：部分信息源拉取失败，仅投递可用内容。",
+            "failed_sources": "Failed sources",
             "generated_at": "Generated at",
             "items": "Items",
             "source": "Source",
@@ -967,6 +1227,8 @@ def digest_copy(language: str) -> dict[str, str]:
         return {
             "title": "Follow ScoutX Digest / 摘要",
             "empty": "No matching items found.",
+            "partial": "Partial result / 部分降级：some selected feeds failed, so only available content is delivered.",
+            "failed_sources": "Failed sources",
             "generated_at": "Generated at",
             "items": "Items",
             "source": "Source",
@@ -976,6 +1238,8 @@ def digest_copy(language: str) -> dict[str, str]:
     return {
         "title": "Follow ScoutX Digest",
         "empty": "No matching items found.",
+        "partial": "Partial result: some selected feeds failed, so only available content is delivered.",
+        "failed_sources": "Failed sources",
         "generated_at": "Generated at",
         "items": "Items",
         "source": "Source",
@@ -984,12 +1248,321 @@ def digest_copy(language: str) -> dict[str, str]:
     }
 
 
+def feed_payload_status(feed_payload: dict[str, Any]) -> str:
+    return "partial" if feed_payload.get("errors") else "ok"
+
+
+def partial_warning_lines(profile: dict[str, Any], feed_payload: dict[str, Any]) -> list[str]:
+    if feed_payload_status(feed_payload) != "partial":
+        return []
+    copy = digest_copy(profile["preferences"].get("language", "zh-CN"))
+    failed_sources = feed_payload.get("failed_source_types") or []
+    errors = feed_payload.get("errors") or []
+    lines = [copy["partial"]]
+    if failed_sources:
+        lines.append(f"{copy['failed_sources']}: {', '.join(str(value) for value in failed_sources)}")
+    if errors:
+        lines.extend(str(value) for value in errors)
+    return lines
+
+
+def digest_title(profile: dict[str, Any], *, part_index: int | None = None, part_count: int | None = None) -> str:
+    language = profile["preferences"].get("language", "zh-CN")
+    title = digest_copy(language)["title"]
+    if not part_index or not part_count or part_count <= 1:
+        return title
+    if language == "en":
+        return f"{title} (Part {part_index}/{part_count})"
+    if language == "bilingual":
+        return f"{title} (Part {part_index}/{part_count}) / 第 {part_index}/{part_count} 条"
+    return f"{title}（第 {part_index}/{part_count} 条）"
+
+
+def render_digest_item_block(
+    profile: dict[str, Any],
+    item: dict[str, Any],
+    *,
+    index: int,
+) -> str:
+    language = profile["preferences"].get("language", "zh-CN")
+    copy = digest_copy(language)
+    per_item_budget = summary_char_budget(profile)
+    source = item["sources"][0] if item["sources"] else "unknown"
+    lines = [f"{index}. {item['title']}"]
+    summary = compress_item_summary(item, char_budget=per_item_budget) if item["summary"] else ""
+    if summary:
+        lines.append(summary)
+    lines.append(f"{copy['source']}: {source}")
+    if item["published_at"]:
+        lines.append(f"{copy['published']}: {item['published_at']}")
+    if item["url"]:
+        lines.append(f"{copy['link']}: {item['url']}")
+    return "\n".join(lines).strip()
+
+
+def split_oversized_block(block: str, limit: int) -> list[str]:
+    if len(block) <= limit:
+        return [block]
+
+    pieces: list[str] = []
+    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", block) if part.strip()]
+    current = ""
+    for paragraph in paragraphs or [block]:
+        candidate = f"{current}\n\n{paragraph}".strip() if current else paragraph
+        if current and len(candidate) > limit:
+            pieces.append(current)
+            current = paragraph
+            continue
+        if len(candidate) <= limit:
+            current = candidate
+            continue
+
+        lines = [line.rstrip() for line in paragraph.splitlines() if line.strip()]
+        if current:
+            pieces.append(current)
+            current = ""
+        current_line_block = ""
+        for line in lines or [paragraph]:
+            candidate_line_block = f"{current_line_block}\n{line}".strip() if current_line_block else line
+            if current_line_block and len(candidate_line_block) > limit:
+                pieces.append(current_line_block)
+                current_line_block = line
+                continue
+            if len(candidate_line_block) <= limit:
+                current_line_block = candidate_line_block
+                continue
+
+            if current_line_block:
+                pieces.append(current_line_block)
+                current_line_block = ""
+            start = 0
+            while start < len(line):
+                end = min(start + limit, len(line))
+                pieces.append(line[start:end].rstrip())
+                start = end
+        if current_line_block:
+            pieces.append(current_line_block)
+    if current:
+        pieces.append(current)
+    return [piece for piece in pieces if piece.strip()]
+
+
+def digest_metadata_prefixes() -> tuple[str, ...]:
+    prefixes: list[str] = []
+    for language in ("zh-CN", "en", "bilingual"):
+        copy = digest_copy(language)
+        prefixes.extend(
+            [
+                f"{copy['source']}:",
+                f"{copy['published']}:",
+                f"{copy['link']}:",
+            ]
+        )
+    return tuple(dict.fromkeys(prefixes))
+
+
+def is_digest_metadata_line(line: str) -> bool:
+    return line.startswith(digest_metadata_prefixes())
+
+
+def digest_item_continuation_title(profile: dict[str, Any], title: str) -> str:
+    language = profile["preferences"].get("language", "zh-CN")
+    if language == "en":
+        return f"{title} (cont.)"
+    if language == "bilingual":
+        return f"{title} (cont.) / 续"
+    return f"{title}（续）"
+
+
+def split_digest_item_block(
+    profile: dict[str, Any],
+    block: str,
+    limit: int,
+    *,
+    section_header: str | None = None,
+) -> list[str]:
+    text = block.strip()
+    if not text:
+        return []
+    if len(text) <= limit and not section_header:
+        return [text]
+
+    lines = [line.rstrip() for line in text.splitlines() if line.strip()]
+    if not lines:
+        return [f"{section_header}\n\n{text}".strip()] if section_header else [text]
+
+    metadata_lines: list[str] = []
+    body_lines = lines[:]
+    while body_lines and is_digest_metadata_line(body_lines[-1]):
+        metadata_lines.insert(0, body_lines.pop())
+
+    title = body_lines[0]
+    summary = "\n".join(body_lines[1:]).strip()
+    leading_title = f"{section_header}\n\n{title}".strip() if section_header else title
+    continuation_title = digest_item_continuation_title(profile, title)
+
+    chunks: list[str] = []
+    if summary:
+        summary_limit = max(200, limit - max(len(leading_title), len(continuation_title)) - 1)
+        summary_chunks = split_oversized_block(summary, summary_limit)
+        for index, summary_chunk in enumerate(summary_chunks):
+            chunk_title = leading_title if index == 0 else continuation_title
+            chunks.append(f"{chunk_title}\n{summary_chunk}".strip())
+    else:
+        chunks.append(leading_title)
+
+    metadata_block = "\n".join(metadata_lines).strip()
+    if not metadata_block:
+        return chunks
+
+    if not chunks:
+        chunks.append(leading_title)
+
+    if len(f"{chunks[-1]}\n{metadata_block}") <= limit:
+        chunks[-1] = f"{chunks[-1]}\n{metadata_block}".strip()
+        return chunks
+
+    metadata_limit = max(120, limit - len(continuation_title) - 1)
+    for metadata_chunk in split_oversized_block(metadata_block, metadata_limit):
+        chunks.append(f"{continuation_title}\n{metadata_chunk}".strip())
+    return chunks
+
+
+def delivery_channel_hint(profile: dict[str, Any]) -> str:
+    hint = os.getenv("FOLLOW_SCOUTX_DELIVERY_CHANNEL_HINT", "").strip()
+    if hint:
+        return hint
+    delivery = profile.get("delivery") or {}
+    return str(delivery.get("channel") or "in_chat").strip() or "in_chat"
+
+
+def delivery_message_char_limit(profile: dict[str, Any], *, channel_hint: str | None = None) -> int:
+    override = os.getenv("FOLLOW_SCOUTX_MAX_MESSAGE_CHARS", "").strip()
+    if override:
+        return max(500, int(override))
+    hint = (channel_hint or delivery_channel_hint(profile)).strip().lower()
+    if hint == "feishu":
+        return DEFAULT_FEISHU_MESSAGE_CHAR_LIMIT
+    return DEFAULT_GENERIC_MESSAGE_CHAR_LIMIT
+
+
+def build_delivery_messages(
+    profile: dict[str, Any],
+    groups: list[dict[str, Any]],
+    generated_at: str,
+    *,
+    feed_payload: dict[str, Any] | None = None,
+    channel_hint: str | None = None,
+) -> list[str]:
+    language = profile["preferences"].get("language", "zh-CN")
+    copy = digest_copy(language)
+    limit = delivery_message_char_limit(profile, channel_hint=channel_hint)
+    prefix_reserve = 180
+    body_limit = max(800, limit - prefix_reserve)
+
+    all_items = flatten_digest_groups(groups)
+    if not all_items:
+        return [
+            "\n".join(
+                [
+                    digest_title(profile),
+                    "",
+                    f"{copy['generated_at']}: {generated_at}",
+                    f"{copy['items']}: 0",
+                    "",
+                    copy["empty"],
+                ]
+            ).strip()
+            + "\n"
+        ]
+
+    blocks: list[str] = []
+    multiple_groups = len(groups) > 1
+    for group in groups:
+        items = group.get("items", [])
+        group_label = str(group.get("label") or message_group_label(str(group.get("group_id") or "scoutx"), language))
+        if multiple_groups:
+            section_header = f"{group_label}\n{copy['items']}: {len(items)}"
+            if items:
+                first_block = render_digest_item_block(profile, items[0], index=1)
+                blocks.extend(
+                    split_digest_item_block(
+                        profile,
+                        first_block,
+                        body_limit,
+                        section_header=section_header,
+                    )
+                )
+                remaining_items = items[1:]
+                start_index = 2
+            else:
+                blocks.append(f"{section_header}\n\n{copy['empty']}")
+                remaining_items = []
+                start_index = 1
+        else:
+            remaining_items = items
+            start_index = 1
+
+        for index, item in enumerate(remaining_items, start=start_index):
+            blocks.extend(
+                split_digest_item_block(
+                    profile,
+                    render_digest_item_block(profile, item, index=index),
+                    body_limit,
+                )
+            )
+
+    chunk_bodies: list[str] = []
+    current_blocks: list[str] = []
+    current_length = 0
+    for block in blocks:
+        projected_length = current_length + 2 + len(block) if current_blocks else len(block)
+        if current_blocks and projected_length > body_limit:
+            chunk_bodies.append("\n\n".join(current_blocks).strip())
+            current_blocks = [block]
+            current_length = len(block)
+            continue
+        current_blocks.append(block)
+        current_length = projected_length
+    if current_blocks:
+        chunk_bodies.append("\n\n".join(current_blocks).strip())
+
+    messages: list[str] = []
+    chunk_count = len(chunk_bodies)
+    warning_lines = partial_warning_lines(profile, feed_payload or {})
+    for index, body in enumerate(chunk_bodies, start=1):
+        prefix = [
+            digest_title(profile, part_index=index if chunk_count > 1 else None, part_count=chunk_count if chunk_count > 1 else None),
+            "",
+        ]
+        if warning_lines:
+            prefix.extend(warning_lines + [""])
+        prefix.extend(
+            [
+            f"{copy['generated_at']}: {generated_at}",
+            f"{copy['items']}: {len(all_items)}",
+            ]
+        )
+        messages.append("\n".join(prefix + ["", body]).strip() + "\n")
+    return messages
+
+
+def render_delivery_messages_as_text(messages: list[str]) -> str:
+    if len(messages) <= 1:
+        return messages[0] if messages else ""
+    rendered_parts: list[str] = []
+    for index, message in enumerate(messages, start=1):
+        rendered_parts.append(f"[Message {index}/{len(messages)}]\n{message.strip()}")
+    return "\n\n---\n\n".join(rendered_parts).strip() + "\n"
+
+
 def render_digest(
     profile: dict[str, Any],
     items: list[dict[str, Any]],
     generated_at: str,
     *,
     group_id: str | None = None,
+    feed_payload: dict[str, Any] | None = None,
 ) -> str:
     language = profile["preferences"].get("language", "zh-CN")
     copy = digest_copy(language)
@@ -1000,10 +1573,17 @@ def render_digest(
     lines = [
         title,
         "",
-        f"{copy['generated_at']}: {generated_at}",
-        f"{copy['items']}: {len(items)}",
-        "",
     ]
+    warning_lines = partial_warning_lines(profile, feed_payload or {})
+    if warning_lines:
+        lines.extend(warning_lines + [""])
+    lines.extend(
+        [
+            f"{copy['generated_at']}: {generated_at}",
+            f"{copy['items']}: {len(items)}",
+            "",
+        ]
+    )
     if not items:
         lines.append(copy["empty"])
         return "\n".join(lines).strip() + "\n"
@@ -1023,12 +1603,26 @@ def render_digest(
     return "\n".join(lines).strip() + "\n"
 
 
-def render_digest_groups(profile: dict[str, Any], groups: list[dict[str, Any]], generated_at: str) -> str:
-    rendered = [
-        render_digest(profile, group.get("items", []), generated_at, group_id=str(group.get("group_id") or ""))
-        for group in groups
-    ]
-    return "\n---\n\n".join(part.strip() for part in rendered if part.strip()) + "\n"
+def render_digest_groups(
+    profile: dict[str, Any],
+    groups: list[dict[str, Any]],
+    generated_at: str,
+    *,
+    feed_payload: dict[str, Any] | None = None,
+) -> str:
+    if len(groups) <= 1:
+        rendered = [
+            render_digest(
+                profile,
+                group.get("items", []),
+                generated_at,
+                group_id=str(group.get("group_id") or ""),
+                feed_payload=feed_payload,
+            )
+            for group in groups
+        ]
+        return "\n---\n\n".join(part.strip() for part in rendered if part.strip()) + "\n"
+    return render_delivery_messages_as_text(build_delivery_messages(profile, groups, generated_at, feed_payload=feed_payload))
 
 
 def build_prepare_digest_payload(
@@ -1056,7 +1650,7 @@ def build_prepare_digest_payload(
         }
 
     return {
-        "status": "ok",
+        "status": feed_payload_status(feed_payload),
         "generated_at": generated_at,
         "config": {
             "language": profile["preferences"].get("language", "zh-CN"),
@@ -1103,14 +1697,14 @@ def build_prepare_digest_payload(
                 "Items: <number of selected items>",
             ],
             "item_template": [
-                "<index>. <title>",
-                "<one compact but complete paragraph based only on the item's summary_text>",
+                "<index>. <localized title based on the item when config.language is zh-CN or bilingual; otherwise use an English title>",
+                "<one compact but complete paragraph localized to config.language and based only on the item's summary_text>",
                 "Source: <primary source>",
                 "Published: <published_at if present>",
                 "Link: <canonical_url>",
             ],
             "failure_template": [
-                "<index>. <title>",
+                "<index>. <localized title based on the item when config.language is zh-CN or bilingual; otherwise use an English title>",
                 "Status: failed",
                 "Reason: <why the item could not be fully generated within the allowed budget or timeout>",
                 "Source: <primary source>",
@@ -1119,7 +1713,7 @@ def build_prepare_digest_payload(
             ],
             "rules": [
                 "Use only the selected items in this payload.",
-                "If groups contains more than one group, produce one separate digest message per group.",
+                "If groups contains more than one group, keep them in one digest by default and render one section per group.",
                 "The first_party group covers X posts and podcasts; the scoutx group covers ScoutX curated media.",
                 "Do not invent facts beyond title, summary_text, source, published_at, and canonical_url.",
                 "Respect item.source_type: scoutx is the curated ScoutX media feed, x is first-party X posts, and podcast is first-party podcast transcript content.",
@@ -1128,9 +1722,14 @@ def build_prepare_digest_payload(
                 "If an item cannot be fully produced within the allowed budget or timeout, emit the failure_template for that item instead of skipping it.",
                 "Do not silently drop items.",
                 "Keep one numbered section per item.",
+                "Do not merge item 4..n into grouped placeholders such as 'more updates', '更多动态', or '更多精选内容'.",
+                "Do not aggregate multiple selected items into one numbered entry, one paragraph, or one bullet.",
+                "If the final digest is too long for the target channel, split it into multiple messages while preserving section boundaries when possible.",
                 "Do not rewrite into bullet-point highlights under each item.",
                 "Preserve original links exactly.",
                 "Respect config.language and the prompt texts in prompts.",
+                "If config.language is zh-CN, localize both the title line and the summary paragraph into Chinese, especially for first_party items.",
+                "Do not leave first_party items in raw English when config.language is zh-CN unless a proper noun, handle, product name, or very short quote should remain in the original language for clarity.",
             ],
         },
         "groups": [
@@ -1145,6 +1744,8 @@ def build_prepare_digest_payload(
             for group in groups
         ],
         "items": [payload_item(item) for item in items],
+        "loaded_source_types": feed_payload.get("loaded_source_types") or [],
+        "failed_source_types": feed_payload.get("failed_source_types") or [],
         "prompts": load_prompt_texts(),
         "errors": feed_payload.get("errors") or [],
     }
@@ -1214,32 +1815,77 @@ def command_preview(args: argparse.Namespace) -> int:
     save_state(state)
 
     if args.json:
+        delivery_messages = build_delivery_messages(profile, groups, generated_at, feed_payload=feed_payload)
         payload = {
+            "status": feed_payload_status(feed_payload),
             "generated_at": generated_at,
             "profile": profile,
             "groups": groups,
             "items": items,
+            "stats": {
+                "group_counts": {
+                    str(group.get("group_id")): len(group.get("items", []))
+                    for group in groups
+                },
+                "item_count": len(items),
+            },
+            "delivery": {
+                "channel_hint": delivery_channel_hint(profile),
+                "message_count": len(delivery_messages),
+                "message_char_limit": delivery_message_char_limit(profile),
+                "messages": delivery_messages,
+            },
+            "loaded_source_types": feed_payload.get("loaded_source_types") or [],
+            "failed_source_types": feed_payload.get("failed_source_types") or [],
+            "errors": feed_payload.get("errors") or [],
         }
         json.dump(payload, sys.stdout, ensure_ascii=False, indent=2)
         sys.stdout.write("\n")
         return 0
 
-    sys.stdout.write(render_digest_groups(profile, groups, generated_at))
+    sys.stdout.write(render_digest_groups(profile, groups, generated_at, feed_payload=feed_payload))
     return 0
 
 
 def command_deliver(args: argparse.Namespace) -> int:
-    preview_args = argparse.Namespace(
-        feed_url=args.feed_url,
-        feed_file=args.feed_file,
-        x_feed_url=arg_value(args, "x_feed_url"),
-        x_feed_file=arg_value(args, "x_feed_file"),
-        podcast_feed_url=arg_value(args, "podcast_feed_url"),
-        podcast_feed_file=arg_value(args, "podcast_feed_file"),
-        message_group=arg_value(args, "message_group") or "all",
-        json=False,
-    )
-    return command_preview(preview_args)
+    profile = load_profile()
+    feed_payload = fetch_selected_feed_payload(profile, args)
+    message_group = arg_value(args, "message_group") or "all"
+    groups = build_digest_groups(profile, feed_payload, message_group=message_group)
+    items = flatten_digest_groups(groups)
+    generated_at = str(feed_payload.get("generated_at") or utcnow_iso())
+
+    state = load_state()
+    state["last_preview_at"] = utcnow_iso()
+    state["last_feed_fetch_at"] = generated_at
+    state["last_digest_item_ids"] = [item["content_id"] for item in items if item["content_id"]]
+    save_state(state)
+
+    delivery_messages = build_delivery_messages(profile, groups, generated_at, feed_payload=feed_payload)
+    if args.json:
+        payload = {
+            "status": feed_payload_status(feed_payload),
+            "generated_at": generated_at,
+            "channel_hint": delivery_channel_hint(profile),
+            "message_char_limit": delivery_message_char_limit(profile),
+            "message_count": len(delivery_messages),
+            "message_group": message_group,
+            "group_counts": {
+                str(group.get("group_id")): len(group.get("items", []))
+                for group in groups
+            },
+            "item_count": len(items),
+            "messages": delivery_messages,
+            "loaded_source_types": feed_payload.get("loaded_source_types") or [],
+            "failed_source_types": feed_payload.get("failed_source_types") or [],
+            "errors": feed_payload.get("errors") or [],
+        }
+        json.dump(payload, sys.stdout, ensure_ascii=False, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
+    sys.stdout.write(render_delivery_messages_as_text(delivery_messages))
+    return 0
 
 
 def command_prepare_digest(args: argparse.Namespace) -> int:
@@ -1310,6 +1956,52 @@ def feed_env_prefix(feed_urls: dict[str, str]) -> str:
     return " ".join(parts)
 
 
+def runtime_env_prefix(
+    feed_urls: dict[str, str],
+    *,
+    delivery_channel_hint_value: str | None = None,
+) -> str:
+    parts = []
+    feed_prefix = feed_env_prefix(feed_urls)
+    if feed_prefix:
+        parts.append(feed_prefix)
+    if delivery_channel_hint_value:
+        parts.append(f"FOLLOW_SCOUTX_DELIVERY_CHANNEL_HINT={shlex.quote(delivery_channel_hint_value)}")
+    return " ".join(part for part in parts if part).strip()
+
+
+def should_use_prepare_digest(profile: dict[str, Any], *, message_group: str = "all") -> bool:
+    language = str(profile.get("preferences", {}).get("language") or "zh-CN").strip()
+    if language == "en":
+        return False
+    source_types = source_types_for_message_group(profile, message_group)
+    return any(source_type in {"x", "podcast"} for source_type in source_types)
+
+
+def openclaw_delivery_payload_text(run_command: str) -> str:
+    return (
+        f"Run `{run_command}`. The command returns JSON with a `messages` array. "
+        "Send each entry in `messages` as a separate assistant message in order without rewriting. "
+        "If there is exactly one entry, use it as your final answer. "
+        "If there are multiple entries, send entries 1..n-1 first, then send the last entry as your final answer. "
+        "Do not merge, summarize, or reformat the chunks."
+    )
+
+
+def openclaw_prepare_digest_payload_text(run_command: str) -> str:
+    return (
+        f"Run `{run_command}`. The command returns a structured JSON payload with `status`, `config`, `groups`, "
+        "`items`, `prompts`, `output_contract`, `failed_source_types`, and `errors`. "
+        "Write the final digest strictly following `prompts` and `output_contract`. "
+        "Respect `config.language`: if it is `zh-CN`, write the digest in Chinese; if it is `bilingual`, keep it bilingual and compact. "
+        "When `config.language` is `zh-CN`, localize first-party source titles and summaries into natural Chinese instead of leaving them in raw English. "
+        "Keep exactly one numbered section per selected item. Preserve links exactly. "
+        "If `status` is `partial`, briefly explain that some selected feeds failed and name `failed_source_types` before the digest body. "
+        "If the final digest is too long for the target channel, split it into multiple assistant messages while preserving section boundaries when possible. "
+        "Do not drop selected items. Do not invent facts beyond the payload."
+    )
+
+
 def build_openclaw_cron_command(
     profile: dict[str, Any],
     *,
@@ -1325,18 +2017,8 @@ def build_openclaw_cron_command(
     main_session_system_event: bool = False,
 ) -> str:
     cron_expr = build_openclaw_cron_expression(profile)
-    env_prefix = feed_env_prefix(feed_urls)
-    deliver_parts = ["python3", script_path, "deliver"]
-    if message_group != "all":
-        deliver_parts.extend(["--message-group", message_group])
-    deliver_command = " ".join(shlex.quote(part) for part in deliver_parts)
-    run_command = f"{env_prefix} {deliver_command}".strip()
-    payload = (
-        f"Run `{run_command}`, "
-        "then return the command output verbatim as your final answer. "
-        "Do not rewrite, summarize, or reformat it."
-    )
     if main_session_system_event:
+        delivery_channel = "main_session_system_event"
         parts = [
             "openclaw",
             "cron",
@@ -1349,33 +2031,51 @@ def build_openclaw_cron_command(
             agent,
             "--session",
             "main",
-            "--system-event",
-            payload,
-            "--exact",
-            "--timeout-seconds",
-            str(timeout_seconds),
         ]
+    else:
+        resolved_channel, resolved_to = resolve_openclaw_delivery(profile, channel=channel, to=to)
+        delivery_channel = resolved_channel
+        parts = [
+            "openclaw",
+            "cron",
+            "add",
+            "--name",
+            name,
+            "--cron",
+            cron_expr,
+            "--agent",
+            agent,
+            "--session",
+            session,
+        ]
+
+    env_prefix = runtime_env_prefix(feed_urls, delivery_channel_hint_value=delivery_channel)
+    if should_use_prepare_digest(profile, message_group=message_group):
+        run_parts = ["python3", script_path, "prepare-digest"]
+        if message_group != "all":
+            run_parts.extend(["--message-group", message_group])
+        run_command = f"{env_prefix} {' '.join(shlex.quote(part) for part in run_parts)}".strip()
+        payload = openclaw_prepare_digest_payload_text(run_command)
+    else:
+        run_parts = ["python3", script_path, "deliver", "--json"]
+        if message_group != "all":
+            run_parts.extend(["--message-group", message_group])
+        run_command = f"{env_prefix} {' '.join(shlex.quote(part) for part in run_parts)}".strip()
+        payload = openclaw_delivery_payload_text(run_command)
+
+    if main_session_system_event:
+        parts.extend(["--system-event", payload, "--exact", "--timeout-seconds", str(timeout_seconds)])
         return " ".join(shlex.quote(part) for part in parts)
 
-    resolved_channel, resolved_to = resolve_openclaw_delivery(profile, channel=channel, to=to)
-    parts = [
-        "openclaw",
-        "cron",
-        "add",
-        "--name",
-        name,
-        "--cron",
-        cron_expr,
-        "--agent",
-        agent,
-        "--session",
-        session,
+    parts.extend(
+        [
         "--message",
         payload,
         "--announce",
         "--channel",
         resolved_channel,
-    ]
+        ]
+    )
     if resolved_to:
         parts.extend(["--to", resolved_to])
     parts.extend(["--best-effort-deliver", "--exact", "--timeout-seconds", str(timeout_seconds)])
@@ -1397,19 +2097,11 @@ def build_openclaw_cron_args(
     main_session_system_event: bool = False,
 ) -> list[str]:
     cron_expr = build_openclaw_cron_expression(profile)
-    env_prefix = feed_env_prefix(feed_urls)
-    deliver_parts = ["python3", script_path, "deliver"]
-    if message_group != "all":
-        deliver_parts.extend(["--message-group", message_group])
-    deliver_command = " ".join(shlex.quote(part) for part in deliver_parts)
-    run_command = f"{env_prefix} {deliver_command}".strip()
-    payload = (
-        f"Run `{run_command}`, "
-        "then return the command output verbatim as your final answer. "
-        "Do not rewrite, summarize, or reformat it."
-    )
     if main_session_system_event:
-        return [
+        delivery_channel = "main_session_system_event"
+        resolved_channel = None
+        resolved_to = None
+        args = [
             "openclaw",
             "cron",
             "add",
@@ -1421,32 +2113,43 @@ def build_openclaw_cron_args(
             agent,
             "--session",
             "main",
-            "--system-event",
-            payload,
-            "--exact",
-            "--timeout-seconds",
-            str(timeout_seconds),
+        ]
+    else:
+        resolved_channel, resolved_to = resolve_openclaw_delivery(profile, channel=channel, to=to)
+        delivery_channel = resolved_channel
+        args = [
+            "openclaw",
+            "cron",
+            "add",
+            "--name",
+            name,
+            "--cron",
+            cron_expr,
+            "--agent",
+            agent,
+            "--session",
+            session,
         ]
 
-    resolved_channel, resolved_to = resolve_openclaw_delivery(profile, channel=channel, to=to)
-    args = [
-        "openclaw",
-        "cron",
-        "add",
-        "--name",
-        name,
-        "--cron",
-        cron_expr,
-        "--agent",
-        agent,
-        "--session",
-        session,
-        "--message",
-        payload,
-        "--announce",
-        "--channel",
-        resolved_channel,
-    ]
+    env_prefix = runtime_env_prefix(feed_urls, delivery_channel_hint_value=delivery_channel)
+    if should_use_prepare_digest(profile, message_group=message_group):
+        run_parts = ["python3", script_path, "prepare-digest"]
+        if message_group != "all":
+            run_parts.extend(["--message-group", message_group])
+        run_command = f"{env_prefix} {' '.join(shlex.quote(part) for part in run_parts)}".strip()
+        payload = openclaw_prepare_digest_payload_text(run_command)
+    else:
+        run_parts = ["python3", script_path, "deliver", "--json"]
+        if message_group != "all":
+            run_parts.extend(["--message-group", message_group])
+        run_command = f"{env_prefix} {' '.join(shlex.quote(part) for part in run_parts)}".strip()
+        payload = openclaw_delivery_payload_text(run_command)
+
+    if main_session_system_event:
+        args.extend(["--system-event", payload, "--exact", "--timeout-seconds", str(timeout_seconds)])
+        return args
+
+    args.extend(["--message", payload, "--announce", "--channel", resolved_channel])
     if resolved_to:
         args.extend(["--to", resolved_to])
     args.extend(
@@ -1461,10 +2164,7 @@ def build_openclaw_cron_args(
 
 
 def openclaw_message_groups_for_profile(profile: dict[str, Any]) -> list[str]:
-    group_ids = selected_message_group_ids(profile, "all")
-    if len(group_ids) <= 1:
-        return ["all"]
-    return group_ids
+    return ["all"]
 
 
 def openclaw_job_name(base_name: str, message_group: str, *, split: bool) -> str:
@@ -1574,7 +2274,26 @@ def openclaw_delivery_diagnostics(
     session: str = "isolated",
     main_session_system_event: bool = False,
 ) -> dict[str, Any]:
+    delivery = profile.get("delivery") or {}
+    intended_channel = str(channel or delivery.get("channel") or "").strip().lower()
     if main_session_system_event:
+        if intended_channel == "feishu":
+            return {
+                "stable": False,
+                "delivery_mode": "main_session_system_event",
+                "channel": None,
+                "to": None,
+                "session": "main",
+                "warnings": [
+                    "Feishu delivery cannot use --main-session-system-event. "
+                    "System events only return results to the main session and do not explicitly announce to Feishu.",
+                    "Use explicit Feishu delivery instead: --channel feishu --to <ou_xxx|oc_xxx>.",
+                ],
+                "recommended_action": (
+                    "Remove --main-session-system-event and install the cron job with an explicit Feishu "
+                    "channel/target."
+                ),
+            }
         return {
             "stable": True,
             "delivery_mode": "main_session_system_event",
@@ -1614,17 +2333,29 @@ def openclaw_delivery_diagnostics(
 
 
 def require_stable_openclaw_delivery(diagnostics: dict[str, Any], *, allow_channel_last: bool) -> None:
-    if diagnostics.get("stable") or allow_channel_last:
+    if diagnostics.get("stable"):
+        return
+    if allow_channel_last and diagnostics.get("delivery_mode") == "announce" and diagnostics.get("channel") == "last":
         return
     warning_text = "\n".join(f"- {warning}" for warning in diagnostics.get("warnings", []))
+    current_chat_guidance = "For current-chat delivery, use --main-session-system-event."
+    extra_guidance = (
+        "Or rerun install-openclaw-cron with --allow-channel-last after you verify this OpenClaw installation "
+        "can reliably route channel=last."
+    )
+    if diagnostics.get("delivery_mode") == "main_session_system_event":
+        current_chat_guidance = (
+            "For Feishu delivery, remove --main-session-system-event and use "
+            "--channel feishu --to <ou_xxx|oc_xxx>."
+        )
+        extra_guidance = ""
     raise SystemExit(
         "Refusing to install an unstable OpenClaw cron delivery configuration.\n"
         f"{warning_text}\n"
         "Save an explicit delivery target, for example:\n"
         "  python3 scripts/follow_scoutx.py configure --delivery-channel feishu --delivery-target ou_xxx\n"
-        "For current-chat delivery, use --main-session-system-event. "
-        "Or rerun install-openclaw-cron with --allow-channel-last after you verify this OpenClaw installation "
-        "can reliably route channel=last."
+        f"{current_chat_guidance}"
+        + (f" {extra_guidance}" if extra_guidance else "")
     )
 
 
@@ -1644,6 +2375,13 @@ def openclaw_job_identity(job: dict[str, Any]) -> tuple[str, str]:
     job_id = str(job.get("id") or job.get("jobId") or job.get("job_id") or "").strip()
     job_name = str(job.get("name") or job.get("jobName") or job.get("job_name") or "").strip()
     return job_id, job_name
+
+
+def replacement_job_names(base_name: str) -> set[str]:
+    names = {base_name}
+    for suffix in MESSAGE_GROUP_NAME_SUFFIXES.values():
+        names.add(f"{base_name}-{suffix}")
+    return names
 
 
 def find_openclaw_jobs_by_name(names: set[str]) -> list[dict[str, str]]:
@@ -1809,7 +2547,7 @@ def command_install_openclaw_cron(args: argparse.Namespace) -> int:
 
     removed_jobs: list[dict[str, Any]] = []
     if args.replace_existing:
-        existing_jobs = find_openclaw_jobs_by_name({str(job["name"]) for job in jobs})
+        existing_jobs = find_openclaw_jobs_by_name(replacement_job_names(args.name))
         for existing_job in existing_jobs:
             removed_jobs.append(remove_openclaw_job(existing_job["id"]))
         failed_removals = [result for result in removed_jobs if result["returncode"] != 0]
@@ -1929,6 +2667,7 @@ def build_parser() -> argparse.ArgumentParser:
     preview_parser.add_argument("--podcast-feed-url")
     preview_parser.add_argument("--podcast-feed-file")
     preview_parser.add_argument("--message-group", choices=MESSAGE_GROUP_CHOICES, default="all")
+    preview_parser.add_argument("--allow-partial-feeds", action="store_true")
     preview_parser.add_argument("--json", action="store_true")
     preview_parser.set_defaults(handler=command_preview)
 
@@ -1943,6 +2682,8 @@ def build_parser() -> argparse.ArgumentParser:
     deliver_parser.add_argument("--podcast-feed-url")
     deliver_parser.add_argument("--podcast-feed-file")
     deliver_parser.add_argument("--message-group", choices=MESSAGE_GROUP_CHOICES, default="all")
+    deliver_parser.add_argument("--allow-partial-feeds", action="store_true")
+    deliver_parser.add_argument("--json", action="store_true")
     deliver_parser.set_defaults(handler=command_deliver)
 
     prepare_digest_parser = subparsers.add_parser(
@@ -1956,6 +2697,7 @@ def build_parser() -> argparse.ArgumentParser:
     prepare_digest_parser.add_argument("--podcast-feed-url")
     prepare_digest_parser.add_argument("--podcast-feed-file")
     prepare_digest_parser.add_argument("--message-group", choices=MESSAGE_GROUP_CHOICES, default="all")
+    prepare_digest_parser.add_argument("--allow-partial-feeds", action="store_true")
     prepare_digest_parser.set_defaults(handler=command_prepare_digest)
 
     openclaw_cron_parser = subparsers.add_parser(
@@ -1974,7 +2716,7 @@ def build_parser() -> argparse.ArgumentParser:
     openclaw_cron_parser.add_argument("--session", default="isolated")
     openclaw_cron_parser.add_argument("--channel")
     openclaw_cron_parser.add_argument("--to")
-    openclaw_cron_parser.add_argument("--timeout-seconds", type=int, default=120)
+    openclaw_cron_parser.add_argument("--timeout-seconds", type=int, default=300)
     openclaw_cron_parser.add_argument(
         "--main-session-system-event",
         action="store_true",
@@ -1999,7 +2741,7 @@ def build_parser() -> argparse.ArgumentParser:
     install_openclaw_cron_parser.add_argument("--session", default="isolated")
     install_openclaw_cron_parser.add_argument("--channel")
     install_openclaw_cron_parser.add_argument("--to")
-    install_openclaw_cron_parser.add_argument("--timeout-seconds", type=int, default=120)
+    install_openclaw_cron_parser.add_argument("--timeout-seconds", type=int, default=300)
     install_openclaw_cron_parser.add_argument(
         "--main-session-system-event",
         action="store_true",

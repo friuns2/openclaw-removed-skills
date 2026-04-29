@@ -10,6 +10,7 @@ import re
 import ssl
 import urllib.request
 import html.parser
+import certifi
 from pathlib import Path
 
 # 简单的HTML标签清理器
@@ -82,20 +83,25 @@ def extract(url):
     req = urllib.request.Request(url, headers={
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
     })
-    # 优先标准SSL验证
+    # 优先标准SSL验证（certifi根证书）
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            html = resp.read().decode('utf-8', errors='ignore')
-    except urllib.error.URLError:
-        # SSL验证失败时降级（先检查reason是否为SSLError再降级）
         ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        try:
-            with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
-                html = resp.read().decode('utf-8', errors='ignore')
-        except Exception as e2:
-            return {'error': f"请求失败: {e2}"}
+        ctx.load_verify_locations(certifi.where())
+        with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
+            html = resp.read().decode('utf-8', errors='ignore')
+    except urllib.error.URLError as e:
+        # SSL验证失败时降级
+        reason = getattr(e, 'reason', None)
+        if isinstance(reason, ssl.SSLError):
+            fallback_ctx = ssl.create_default_context()
+            fallback_ctx.load_verify_locations(certifi.where())
+            try:
+                with urllib.request.urlopen(req, timeout=10, context=fallback_ctx) as resp:
+                    html = resp.read().decode('utf-8', errors='ignore')
+            except Exception as e2:
+                return {'error': f"请求失败: {e2}"}
+        else:
+            return {'error': f"请求失败: {e}"}
     except Exception as e1:
         return {'error': f"请求失败: {e1}"}
     

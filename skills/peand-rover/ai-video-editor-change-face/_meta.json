@@ -1,0 +1,11 @@
+{
+  "owner": "peand-rover",
+  "slug": "ai-video-editor-change-face",
+  "displayName": "Ai Video Editor Change Face",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776334237582,
+    "commit": "https://github.com/openclaw/skills/commit/32129854a710640df700c3295472b2339a043607"
+  },
+  "history": []
+}

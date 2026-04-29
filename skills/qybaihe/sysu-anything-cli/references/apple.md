@@ -1,6 +1,6 @@
 # Apple integration
 
-Use the separate macOS entrypoint when the user explicitly wants Apple Calendar or Apple Reminders:
+Use the separate macOS 12+ entrypoint when the user explicitly wants Apple Calendar or Apple Reminders:
 
 ```bash
 sysu-anything-apple ...
@@ -11,6 +11,8 @@ Equivalent installed binary:
 ```bash
 sysu-anything-apple ...
 ```
+
+If the host is non-macOS or macOS 11 and below, stay on `sysu-anything` and skip the Apple sync layer. If the user previously installed an older npm runtime with the macOS 13+ bridge, have them upgrade `sysu-anything` before retrying Apple sync.
 
 ## First step on a new Mac
 

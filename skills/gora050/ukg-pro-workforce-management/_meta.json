@@ -3,9 +3,15 @@
   "slug": "ukg-pro-workforce-management",
   "displayName": "Ukg Pro Workforce Management",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775534865724,
-    "commit": "https://github.com/openclaw/skills/commit/1e39af95e855a63cce1ca43b381b3970e0fdadb1"
+    "version": "1.0.1",
+    "publishedAt": 1776893494207,
+    "commit": "https://github.com/openclaw/skills/commit/3168f165efe6d8f5bd20338fe287f2cfa5c6b0c8"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775534865724,
+      "commit": "https://github.com/openclaw/skills/commit/1e39af95e855a63cce1ca43b381b3970e0fdadb1"
+    }
+  ]
 }

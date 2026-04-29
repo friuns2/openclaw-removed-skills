@@ -3,11 +3,16 @@
   "slug": "reflexio",
   "displayName": "Reflexio",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1776381396747,
-    "commit": "https://github.com/openclaw/skills/commit/0f1595ad63e255f8620eb03931f7431f983d101f"
+    "version": "1.0.10",
+    "publishedAt": 1776843720084,
+    "commit": "https://github.com/openclaw/skills/commit/a50cd392e421b2ec15dfceac5da9ae1106247969"
   },
   "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1776381396747,
+      "commit": "https://github.com/openclaw/skills/commit/0f1595ad63e255f8620eb03931f7431f983d101f"
+    },
     {
       "version": "1.0.6",
       "publishedAt": 1776291386647,

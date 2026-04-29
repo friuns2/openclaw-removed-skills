@@ -3,9 +3,15 @@
   "slug": "jiadouai",
   "displayName": "加豆AI",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776411984508,
-    "commit": "https://github.com/openclaw/skills/commit/422d730e88faae5c6efc0a8dea2794c7ce53baf7"
+    "version": "1.0.1",
+    "publishedAt": 1776923604763,
+    "commit": "https://github.com/openclaw/skills/commit/bc8677ab9634fdb33f7599581132aaf4720aa1ab"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776411984508,
+      "commit": "https://github.com/openclaw/skills/commit/422d730e88faae5c6efc0a8dea2794c7ce53baf7"
+    }
+  ]
 }

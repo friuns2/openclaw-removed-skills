@@ -96,53 +96,6 @@ type TranscriptMessage = {
   timestamp?: string;
 };
 
-/**
- * Redact obvious secrets before the transcript leaves the host for the
- * extractor sub-agent (which calls the configured LLM provider). This is a
- * best-effort scrub, not a guarantee — see SECURITY.md. Patterns here target
- * high-confidence matches; anything subtler must be avoided by the user.
- */
-const REDACTION_PATTERNS: ReadonlyArray<[RegExp, string]> = [
-  // Private key blocks (PEM)
-  [
-    /-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-----[\s\S]*?-----END (?:RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-----/g,
-    "[REDACTED_PRIVATE_KEY]",
-  ],
-  // Vendor-prefixed tokens: OpenAI, Anthropic, GitHub, GitLab, Slack, Stripe, etc.
-  [/\bsk-ant-[A-Za-z0-9_-]{20,}/g, "[REDACTED_ANTHROPIC_KEY]"],
-  [/\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}/g, "[REDACTED_OPENAI_KEY]"],
-  [/\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{30,}/g, "[REDACTED_GITHUB_TOKEN]"],
-  [/\bglpat-[A-Za-z0-9_-]{20,}/g, "[REDACTED_GITLAB_TOKEN]"],
-  [/\bxox[abpors]-[A-Za-z0-9-]{10,}/g, "[REDACTED_SLACK_TOKEN]"],
-  [/\bAKIA[0-9A-Z]{16}\b/g, "[REDACTED_AWS_ACCESS_KEY]"],
-  [/\b(?:sk|pk|rk)_(?:live|test)_[A-Za-z0-9]{20,}/g, "[REDACTED_STRIPE_KEY]"],
-  // Bearer tokens in headers
-  [/\b[Bb]earer\s+[A-Za-z0-9._~+\/-]{20,}=*/g, "Bearer [REDACTED_TOKEN]"],
-  [
-    /\b[Aa]uthorization:\s*[A-Za-z]+\s+[A-Za-z0-9._~+\/-]{8,}=*/g,
-    "Authorization: [REDACTED]",
-  ],
-  // KEY=value / KEY: value for common secret-looking names
-  // (match through end-of-line; keep quotes intact for readability)
-  [
-    /\b([A-Z][A-Z0-9_]*(?:PASSWORD|PASSWD|SECRET|TOKEN|API_KEY|APIKEY|PRIVATE_KEY|ACCESS_KEY|AUTH))\s*[:=]\s*["']?[^\s"'\n]+["']?/g,
-    "$1=[REDACTED]",
-  ],
-  // JWTs: three base64url segments joined by dots
-  [
-    /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,
-    "[REDACTED_JWT]",
-  ],
-];
-
-export function redactSecrets(text: string): string {
-  let out = text;
-  for (const [pattern, replacement] of REDACTION_PATTERNS) {
-    out = out.replace(pattern, replacement);
-  }
-  return out;
-}
-
 /** Decide whether the current transcript is worth extracting from. */
 function transcriptWorthExtracting(messages: unknown[] | undefined): boolean {
   if (!Array.isArray(messages) || messages.length < 2) return false;
@@ -156,9 +109,8 @@ function serializeTranscript(messages: unknown[] | undefined): string {
     .map((raw) => {
       const m = raw as TranscriptMessage;
       const role = m.role ?? "unknown";
-      const rawContent =
+      const content =
         typeof m.content === "string" ? m.content : JSON.stringify(m.content);
-      const content = redactSecrets(rawContent);
       const ts = m.timestamp ? ` [${m.timestamp}]` : "";
       return `### ${role}${ts}\n${content}`;
     })
@@ -207,6 +159,7 @@ export type SpawnExtractorParams = {
   sessionKey?: string;
   messages?: unknown[];
   sessionFile?: string;
+  extraSystemPrompt?: string;
   log?: Logger;
   reason: string;
 };
@@ -222,7 +175,7 @@ export type SpawnExtractorParams = {
 export async function spawnExtractor(
   params: SpawnExtractorParams,
 ): Promise<string | undefined> {
-  const { runtime, sessionKey, messages, sessionFile, log, reason } = params;
+  const { runtime, sessionKey, messages, sessionFile, extraSystemPrompt, log, reason } = params;
 
   if (!transcriptWorthExtracting(messages) && !sessionFile) {
     return undefined;
@@ -244,8 +197,9 @@ export async function spawnExtractor(
     const result = await runFn({
       sessionKey: childSessionKey,
       message,
+      extraSystemPrompt,
       lane: "reflexio-extractor",
-      idempotencyKey: `${reason}:${childSessionKey}`,
+      idempotencyKey: `reflexio-extractor:${sessionKey ?? "unknown"}:${reason}`,
     });
     log?.info?.(
       `[reflexio-embedded] extractor spawned (runId=${result.runId}, reason=${reason})`,

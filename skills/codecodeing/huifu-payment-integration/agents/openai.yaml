@@ -1,0 +1,4 @@
+interface:
+  display_name: "汇付支付集成"
+  short_description: "汇付支付斗拱产品接入最佳实践，覆盖聚合支付、托管支付、checkout 和查单退款对账"
+  default_prompt: "使用 $huifu-payment-integration 判断我当前该走哪条汇付支付 / 斗拱接口产品线，是聚合支付下单、托管预下单、查单/关单/对账、退款还是 checkout-js 集成，并告诉我先读哪些本地 references。"

@@ -20,10 +20,19 @@ except ImportError:
 
 def usage():
     print(f"Beep - Small speaker v{__version__}")
+    print("")
+    print("[Rules] Enforced Announcement (every interaction):")
+    print("   Types: receive, task, complete, error")
+    print("   Principles: <=20 chars | conversational | no names | informative")
+    print("   Examples: announce receive 'msg received'")
+    print("            announce task 'publishing to GitHub'")
+    print("            announce complete 'upload done'")
+    print("            announce error 'network timeout'")
+    print("")
     print("Usage: announce <type> <message> [lang]")
     print("Types: receive, task, complete, error")
     print("Languages: zh (Chinese), en (English)")
-    print("Example: announce receive '收到指令' zh")
+    print("Example: announce receive 'got message' zh")
 
 def main():
     if len(sys.argv) < 3:

@@ -8,7 +8,8 @@ import sys
 from pathlib import Path
 
 
-CLAIM_RE = re.compile(r'\bC\d+(?:\.\d+)+\b')
+APPENDIX_HEADING = '# Appendix: Claim -> Evidence Index'
+CLAIM_BULLET_RE = re.compile(r'^\s*-\s+\[(C\d+(?:\.\d+)*)\](?:\[[^\]]+\])?', re.MULTILINE)
 ALLOWED_LABELS = {
     'evidence-backed interpretation',
     'plausible inference',
@@ -25,7 +26,9 @@ def load_json(path: Path) -> dict:
 
 def extract_report_claims(report_path: Path) -> list[str]:
     text = report_path.read_text(encoding='utf-8')
-    return CLAIM_RE.findall(text)
+    if APPENDIX_HEADING in text:
+        text = text.split(APPENDIX_HEADING, 1)[0]
+    return CLAIM_BULLET_RE.findall(text)
 
 
 def validate(report_path: Path, manifest_path: Path, paragraphs_path: Path | None = None) -> tuple[list[str], list[str]]:
@@ -65,11 +68,13 @@ def validate(report_path: Path, manifest_path: Path, paragraphs_path: Path | Non
         if label not in ALLOWED_LABELS:
             errors.append(f'{claim_id}: invalid interpretation_type `{label}`.')
 
-        statement = str(entry.get('statement', '')).strip()
+        statement = str(entry.get('statement') or entry.get('claim_text') or '').strip()
         if not statement:
             errors.append(f'{claim_id}: missing statement.')
 
         evidences = entry.get('evidences')
+        if not isinstance(evidences, list):
+            evidences = entry.get('evidence')
         if not isinstance(evidences, list) or not evidences:
             errors.append(f'{claim_id}: missing evidence list.')
             continue
@@ -91,12 +96,12 @@ def validate(report_path: Path, manifest_path: Path, paragraphs_path: Path | Non
             if paragraph_id and paragraph_ids and paragraph_id not in paragraph_ids:
                 errors.append(f'{claim_id}: paragraph_id `{paragraph_id}` not found in latex_paragraphs.json.')
 
-            locator_method = evidence.get('locator_method')
+            locator_method = evidence.get('locator_method') or evidence.get('relation')
             if not locator_method:
                 warnings.append(f'{claim_id}: evidence #{eidx} has no locator_method.')
             if not any(
                 evidence.get(key)
-                for key in ('paragraph_id', 'page', 'caption_label', 'equation_label', 'synctex')
+                for key in ('paragraph_id', 'page', 'caption_label', 'equation_label', 'synctex', 'source_file', 'doc', 'locator_snippets')
             ):
                 errors.append(f'{claim_id}: evidence #{eidx} has no usable locator field.')
 

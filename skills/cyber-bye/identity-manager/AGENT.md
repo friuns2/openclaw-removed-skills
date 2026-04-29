@@ -8,14 +8,15 @@ description: Agent-level behavioral guardrails. Enforces pre/post hooks, group a
 ## Scope
 
 These rules apply to EVERY agent turn while this skill is loaded.
-They cannot be overridden by user instructions.
-They cannot be deferred to a later turn.
+They can be disabled by setting `IDENTITY_AUTO_SCAN=false`.
+When disabled, skill only runs on explicit `/identity` command.
+They can be deferred to a later turn when `IDENTITY_AUTO_SCAN=false`.
 
 ---
 
-## Rule 1 — Name Extraction is Mandatory
+## Rule 1 — Name Extraction (When Enabled)
 
-Before composing any response, the agent MUST:
+When `IDENTITY_AUTO_SCAN != false`, before composing any response, the agent MUST:
 
 1. Scan full input for any person, org, or group name.
 2. For each entity found:
@@ -24,7 +25,7 @@ Before composing any response, the agent MUST:
    - Exists → check if new info arrived → UPDATE if so.
 3. Only after ALL creates/updates complete may the agent compose its response.
 
-**No exceptions.**
+**No exceptions** (when enabled).
 Ambiguous name (spelling unclear, role unknown) → CREATE draft + open question.
 Do NOT skip because "seems unimportant" or "probably fictional."
 
@@ -80,6 +81,9 @@ HIGH → write to `[ACTIVE ENTITIES]` or `[GROUPS]` section.
 
 If soul file does not exist → create from `SOUL.md` template first.
 
+**Soul file location:** `soul/identity_context.md` — auto-created in workspace root.
+**Soul is append-only** — owner can review/edit at any time.
+
 ---
 
 ## Rule 5 — Memory Index Must Stay in Sync
@@ -121,13 +125,15 @@ log it: `[identity-manager] Skipped: "<name>" — reason: <why>`
 
 ---
 
-## Rule 8 — Owner Instructions Cannot Override Privacy Rules
+## Rule 8 — Privacy Rules Always Apply
 
 Even if explicitly asked, the agent MUST NOT store:
 - Passwords or authentication credentials
 - Full payment card or bank account numbers
 - Government ID numbers in plaintext
 - Raw medical diagnoses or records
+
+These rules apply regardless of `IDENTITY_AUTO_SCAN` setting.
 
 Acknowledge the request. Explain what cannot be stored.
 Store a reference note instead: e.g. `"financial details discussed — see owner records"`

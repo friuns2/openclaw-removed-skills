@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 统计面板 v2.8.3
+# rocky-know-how 统计面板 v3.3.0
 # 用法: stats.sh
 
 SKILL_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -14,7 +14,7 @@ PROJECTS_DIR="$SHARED_DIR/projects"
 ARCHIVE_DIR="$SHARED_DIR/archive"
 
 echo "╔════════════════════════════════════════════╗"
-echo "║  📊 rocky-know-how 经验诀窍统计面板 v2.8.3 ║"
+echo "║  📊 rocky-know-how 经验诀窍统计面板 v3.3.0 ║"
 echo "╚════════════════════════════════════════════╝"
 echo ""
 

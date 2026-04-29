@@ -9,119 +9,84 @@ from business_blueprint.validate import validate_blueprint
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_plan_writes_blueprint_json(tmp_path: Path) -> None:
+def test_plan_creates_skeleton_with_source(tmp_path: Path) -> None:
+    """--plan creates a valid empty blueprint with source text stored."""
     source = tmp_path / "brief.txt"
     source.write_text(
-        "零售客户需要会员运营和门店运营，导购负责会员注册，运营负责活动执行，客服负责售后跟进，CRM、POS和ERP需要支撑订单管理与积分累计。",
+        "零售客户需要会员运营和门店运营，导购负责会员注册，CRM和POS支撑订单管理。",
         encoding="utf-8",
     )
     output = tmp_path / "solution.blueprint.json"
 
     result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "business_blueprint.cli",
-            "--plan",
-            str(output),
-            "--from",
-            str(source),
-            "--industry",
-            "retail",
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
+        [sys.executable, "-m", "business_blueprint.cli",
+         "--plan", str(output), "--from", str(source), "--industry", "retail"],
+        cwd=ROOT, capture_output=True, text=True,
     )
 
     assert result.returncode == 0
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["meta"]["industry"] == "retail"
-    assert any(cap["name"] == "会员运营" for cap in payload["library"]["capabilities"])
-    assert any(cap["name"] == "订单管理" for cap in payload["library"]["capabilities"])
-    assert any(cap["name"] == "门店运营" for cap in payload["library"]["capabilities"])
-    assert any(actor["name"] == "门店导购" for actor in payload["library"]["actors"])
-    assert any(actor["name"] == "客服" for actor in payload["library"]["actors"])
-    assert any(actor["name"] == "运营" for actor in payload["library"]["actors"])
-    assert any(step["name"] == "会员注册" for step in payload["library"]["flowSteps"])
-    assert any(system["name"] == "CRM" for system in payload["library"]["systems"])
-    assert any(system["name"] == "POS" for system in payload["library"]["systems"])
-    assert any(system["name"] == "ERP" for system in payload["library"]["systems"])
-
-    membership = next(cap for cap in payload["library"]["capabilities"] if cap["name"] == "会员运营")
-    order = next(cap for cap in payload["library"]["capabilities"] if cap["name"] == "订单管理")
-    store_ops = next(cap for cap in payload["library"]["capabilities"] if cap["name"] == "门店运营")
-    assert "sys-crm" in membership["supportingSystemIds"]
-    assert "sys-pos" in order["supportingSystemIds"]
-    assert "sys-erp" in store_ops["supportingSystemIds"]
-
-    flow_step = next(step for step in payload["library"]["flowSteps"] if step["name"] == "会员注册")
-    assert flow_step["actorId"] == "actor-store-guide"
-    assert flow_step["capabilityIds"] == ["cap-membership"]
-    assert flow_step["systemIds"] == []
-    assert flow_step["stepType"] == "task"
-    assert flow_step["inputRefs"] == []
-    assert flow_step["outputRefs"] == []
-    assert "actorIds" not in flow_step
-
-    assert [view["id"] for view in payload["views"]] == [
-        "view-capability",
-        "view-swimlane",
-        "view-architecture",
-    ]
-    assert [view["type"] for view in payload["views"]] == [
-        "business-capability-map",
-        "swimlane-flow",
-        "application-architecture",
-    ]
-    assert [view["title"] for view in payload["views"]] == [
-        "业务能力蓝图",
-        "泳道流程图",
-        "应用架构图",
-    ]
-    assert payload["views"][0]["includedRelationIds"] == []
-    assert payload["views"][1]["includedRelationIds"] == []
-    assert payload["views"][2]["includedRelationIds"] == []
-    assert payload["views"][0]["layout"] == {"groups": []}
-    assert payload["views"][1]["layout"] == {
-        "lanes": ["actor-store-guide", "actor-service", "actor-ops"]
-    }
-    assert payload["views"][2]["layout"] == {"groups": []}
+    assert "零售客户" in payload["context"]["sourceRefs"][0]["excerpt"]
+    # Skeleton only — AI agent fills entities
+    assert isinstance(payload["library"]["capabilities"], list)
+    assert isinstance(payload["library"]["actors"], list)
+    assert isinstance(payload["library"]["flowSteps"], list)
+    assert isinstance(payload["library"]["systems"], list)
+    assert "industryHints" not in payload
 
 
-def test_plan_with_flow_only_does_not_create_missing_capability_refs(tmp_path: Path) -> None:
-    source = tmp_path / "brief.txt"
-    source.write_text("只需要下单流程。", encoding="utf-8")
-    output = tmp_path / "flow-only.blueprint.json"
-
+def test_plan_requires_source_text(tmp_path: Path) -> None:
+    """--plan without --from should fail."""
+    output = tmp_path / "solution.blueprint.json"
     result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "business_blueprint.cli",
-            "--plan",
-            str(output),
-            "--from",
-            str(source),
-            "--industry",
-            "retail",
-        ],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
+        [sys.executable, "-m", "business_blueprint.cli",
+         "--plan", str(output), "--industry", "retail"],
+        cwd=ROOT, capture_output=True, text=True,
     )
+    assert result.returncode == 1
+    assert "requires source text" in result.stderr
 
-    assert result.returncode == 0
-    payload = json.loads(output.read_text(encoding="utf-8"))
-    flow_step = next(step for step in payload["library"]["flowSteps"] if step["name"] == "订单创建")
-    assert flow_step["capabilityIds"] == []
-    assert flow_step["actorId"] == ""
-    assert any(
-        request["code"] == "MISSING_FLOW_CAPABILITY_LINKAGE"
-        and request["affectedIds"] == [flow_step["id"]]
-        for request in payload["context"]["clarifyRequests"]
-    )
-    assert not any(
-        issue["errorCode"] == "MISSING_CAPABILITY_REFERENCE"
-        for issue in validate_blueprint(payload)["issues"]
-    )
+
+def test_validate_blueprint_with_entities(tmp_path: Path) -> None:
+    """Validate works correctly on a blueprint with entities written by AI agent."""
+    output = tmp_path / "test.blueprint.json"
+    blueprint = {
+        "version": "1.0",
+        "meta": {"title": "Test", "industry": "retail"},
+        "context": {"goals": [], "scope": [], "assumptions": [], "constraints": [],
+                    "sourceRefs": [], "clarifyRequests": [], "clarifications": []},
+        "library": {
+            "capabilities": [
+                {"id": "cap-member", "name": "会员运营", "level": 1,
+                 "description": "会员管理", "ownerActorIds": [], "supportingSystemIds": ["sys-crm"]},
+                {"id": "cap-store", "name": "门店运营", "level": 1,
+                 "description": "门店管理", "ownerActorIds": [], "supportingSystemIds": ["sys-pos"]},
+            ],
+            "actors": [{"id": "actor-guide", "name": "导购"}],
+            "flowSteps": [
+                {"id": "flow-register", "name": "会员注册", "actorId": "actor-guide",
+                 "capabilityIds": ["cap-member"], "systemIds": [], "stepType": "task",
+                 "inputRefs": [], "outputRefs": []},
+            ],
+            "systems": [
+                {"id": "sys-crm", "kind": "system", "name": "CRM", "aliases": [],
+                 "description": "客户关系管理",
+                 "resolution": {"status": "canonical", "canonicalName": "CRM"},
+                 "capabilityIds": ["cap-member"]},
+                {"id": "sys-pos", "kind": "system", "name": "POS", "aliases": [],
+                 "description": "收银系统",
+                 "resolution": {"status": "canonical", "canonicalName": "POS"},
+                 "capabilityIds": ["cap-store"]},
+            ],
+        },
+        "relations": [],
+        "views": [],
+        "editor": {"fieldLocks": {}, "theme": "enterprise-default"},
+        "artifacts": {},
+    }
+    output.write_text(json.dumps(blueprint, ensure_ascii=False), encoding="utf-8")
+
+    result = validate_blueprint(blueprint)
+    assert "summary" in result
+    assert result["summary"]["errorCount"] == 0

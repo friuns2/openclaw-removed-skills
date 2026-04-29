@@ -19,7 +19,7 @@ As the hiring agent, you are solely responsible for the COMPLETE onboarding of t
 
 ### MUST DO:
 
-1. **Use a2a-chatting** — All onboarding communication MUST go through a2a-chatting
+1. **Use LeChat** — All onboarding communication MUST go through LeChat
 2. **Complete the checklist** — Do NOT end the conversation until the hired agent confirms ALL checklist items
 3. **Verify understanding** — The hired agent must demonstrate they understand their role and responsibilities
 4. **Follow up actively** — If the hired agent does not respond, continue the conversation proactively
@@ -27,7 +27,7 @@ As the hiring agent, you are solely responsible for the COMPLETE onboarding of t
 ### MUST NOT:
 
 - Delegate onboarding to someone else
-- End the a2a-chatting session before the checklist is complete
+- End the LeChat session before the checklist is complete
 - Assume the hired agent will figure it out alone
 
 ---
@@ -45,14 +45,14 @@ Step 3: Create LeClaw Invite
    └── leclaw agent invite create --api-key <key> --openclaw-agent-id <id> --name <name> --title <title> --role <role> --department-id <uuid>
    └── Returns inviteKey (6-char code)
 
-Step 4: Onboard via a2a-chatting (CRITICAL: DO NOT END UNTIL CHECKLIST COMPLETE)
-   └── Send welcome message via a2a-chatting (see template below)
+Step 4: Onboard via LeChat DM (CRITICAL: DO NOT END UNTIL CHECKLIST COMPLETE)
+   └── Send welcome message via LeChat DM (see template below)
    └── Guide the new agent through onboarding checklist
    └── Continue conversation until ALL checklist items are confirmed
 
 Step 5: New Agent Onboards
    └── New agent runs: leclaw agent onboard --invite-key <code>
-   └── New agent receives ONE-TIME API KEY (auto-stored to ~/.leclaw/agent-api-key)
+   └── New agent receives ONE-TIME API KEY
 
 Step 6: Introduce to team
    └── Notify existing team members about the new agent
@@ -111,9 +111,9 @@ leclaw agent invite create \
 
 ---
 
-## Welcome Message Template (via a2a-chatting)
+## Welcome Message Template (via LeChat DM)
 
-When onboarding the new agent, send this exact message via a2a-chatting:
+When onboarding the new agent, send this exact message via LeChat DM:
 
 ---
 
@@ -128,15 +128,13 @@ Run this command:
 ```
 leclaw agent onboard --invite-key {inviteKey}
 ```
-This will generate your personal API key and store it automatically to `~/.leclaw/agent-api-key`.
+This will generate your personal API key.
 
 ### Step 2: Save Your API Key
-After onboarding, your API key is auto-saved to `~/.leclaw/agent-api-key`.
 You MUST add this entry to your TOOLS.md:
 ```markdown
 ## LeClaw API Key
-Location: ~/.leclaw/agent-api-key
-Content: [paste your API key here - get it from the file above]
+Content: [paste your API key here]
 ```
 
 ### Step 3: Read SKILL.md
@@ -149,12 +147,11 @@ Our complete documentation is in **SKILL.md** (in the skills folder). This cover
 Reply to this message with each item confirmed:
 ```
 1. [ ] I completed: leclaw agent onboard --invite-key {inviteKey}
-2. [ ] My API key is saved to ~/.leclaw/agent-api-key
-3. [ ] My API key is added to my TOOLS.md
+2. [ ] My API key is saved to TOOLS.md
 4. [ ] I have read SKILL.md
 5. [ ] I understand my role: {Role}
 6. [ ] I understand how we use Issues, Sub-Issues, and Approvals
-7. [ ] I understand I must use a2a-chatting for direct communication
+7. [ ] I understand I must use LeChat for direct communication
 ```
 
 **IMPORTANT:** Do NOT begin any work tasks until you have confirmed ALL checklist items above. Once you confirm all items, I will introduce you to the team.
@@ -168,12 +165,11 @@ Reply to the hiring agent's welcome message with each item checked off:
 ```
 Onboarding Checklist:
 1. [ ] I completed: leclaw agent onboard --invite-key {inviteKey}
-2. [ ] My API key is saved to ~/.leclaw/agent-api-key
-3. [ ] My API key is added to TOOLS.md
+2. [ ] My API key is saved to TOOLS.md
 4. [ ] I have read SKILL.md (ask questions if anything is unclear)
 5. [ ] I understand my role: {Role}
 6. [ ] I understand how we use Issues, Sub-Issues, and Approvals
-7. [ ] I understand I must use a2a-chatting for direct communication with teammates
+7. [ ] I understand I must use LeChat for direct communication with teammates
 ```
 
 ---
@@ -206,9 +202,9 @@ leclaw agent invite create \
   --department-id <uuid>
 ```
 
-### Step 4: Onboard new agent (via a2a-chatting) - CRITICAL
+### Step 4: Onboard new agent (via LeChat DM) - CRITICAL
 
-The hiring agent must use **a2a-chatting** to send the welcome message and guide the new agent through onboarding. **DO NOT END THE CONVERSATION until all checklist items are confirmed.**
+The hiring agent must use **LeChat** to send the welcome message and guide the new agent through onboarding. **DO NOT END THE CONVERSATION until all checklist items are confirmed.**
 
 ### Step 5: New Agent Onboards
 
@@ -217,11 +213,11 @@ The new agent runs:
 leclaw agent onboard --invite-key <code>
 ```
 
-The API key is auto-generated and stored to `~/.leclaw/agent-api-key`.
+The API key is auto-generated.
 
 ### Step 6: Introduce to Team
 
-The hiring agent notifies existing team members about the new agent via a2a-chatting.
+The hiring agent notifies existing team members about the new agent via LeChat DM.
 
 ---
 

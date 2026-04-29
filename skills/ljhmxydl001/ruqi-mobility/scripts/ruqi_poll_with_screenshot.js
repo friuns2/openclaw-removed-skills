@@ -52,13 +52,32 @@
 
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { spawn } from "child_process";
 import fs from "fs";
 import ruqiApi from "./ruqi_api.js";
-import { config, getEnvConfig } from "./config.js";
+import { execCommand } from "./request.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const STATUS_DESCRIPTIONS = {
+  3: "指派中",
+  4: "已接单",
+  5: "已发车",
+  6: "已到达",
+  7: "服务中",
+  8: "服务已结束",
+  9: "已完成",
+  10: "已取消",
+  17: "免密待支付",
+  18: "待支付",
+};
+
+const STATUS_END_MESSAGES = {
+  9: { emoji: "🎉", text: "订单已完成，轮询结束" },
+  10: { emoji: "❌", text: "订单已取消，轮询结束" },
+  17: { emoji: "💳", text: "等待支付，轮询结束" },
+  18: { emoji: "💳", text: "等待支付，轮询结束" },
+};
 
 /**
  * 轮询脚本配置
@@ -71,7 +90,8 @@ const __dirname = dirname(__filename);
  * @property {number} notifyInterval - 通知间隔（毫秒）
  */
 const POLL_CONFIG = {
-  deviceName: "iPhone 12",
+  viewportWidth: 390,
+  viewportHeight: 844,
   screenshotDir: resolve(__dirname, "../tmp/screenshots"),
   pageLoadWait: 5000,
   queryRetry: 3,
@@ -111,7 +131,7 @@ function clearScreenshotDir() {
 
 /**
  * 解析命令行参数
- * @returns {Object|null} 解析后的参数对象，包含 orderId
+ * @returns {Object|null} 解析后的参数对象，包含 orderId 和 phone 参数
  */
 function parseArguments() {
   const args = process.argv.slice(2);
@@ -121,7 +141,11 @@ function parseArguments() {
   if (orderIdIndex !== -1 && orderIdIndex + 1 < args.length) {
     params.orderId = args[orderIdIndex + 1];
   }
-  return params.orderId ? params : null;
+  const phoneIndex = args.indexOf("--phone");
+  if (phoneIndex !== -1 && phoneIndex + 1 < args.length) {
+    params.phone = args[phoneIndex + 1];
+  }
+  return params.orderId && params.phone ? params : null;
 }
 
 /**
@@ -151,40 +175,12 @@ function log(message) {
 }
 
 /**
- * 执行外部命令
- * @param {string} command - 要执行的命令
- * @param {string[]} args - 命令参数数组
- * @param {Object} options - 执行选项
- * @param {number} [options.timeout=30000] - 超时时间（毫秒）
- * @returns {Promise<string>} 命令输出的 stdout
- */
-function execCommand(command, args, options = {}) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(command, args, {
-      shell: false,
-      stdio: ["ignore", "pipe", "pipe"],
-      timeout: options.timeout || 30000,
-    });
-    let stdout = "";
-    let stderr = "";
-    proc.stdout.on("data", (d) => (stdout += d.toString()));
-    proc.stderr.on("data", (d) => (stderr += d.toString()));
-    proc.on("close", (code) => {
-      if (code === 0) resolve(stdout);
-      else reject(new Error(stderr || `exit code ${code}`));
-    });
-    proc.on("error", reject);
-  });
-}
-
-/**
  * 关闭浏览器
  */
 async function closeBrowser() {
   try {
-    await execCommand("agent-browser", ["close"], {
+    await execCommand("openclaw", ["browser", "close"], {
       timeout: 10000,
-      shell: false,
     });
     log(`✅ 浏览器已关闭`);
   } catch (e) {
@@ -218,28 +214,13 @@ async function sendMessage(message, imagePath = null) {
 }
 
 /**
- * 订单结束状态消息映射
- * @property {Object} 9 - 已完成
- * @property {Object} 10 - 已取消
- * @property {Object} 17 - 免密待支付
- * @property {Object} 18 - 待支付
- */
-const STATUS_END_MESSAGES = {
-  9: { emoji: "🎉", text: "订单已完成，轮询结束" },
-  10: { emoji: "❌", text: "订单已取消，轮询结束" },
-  17: { emoji: "💳", text: "等待支付，轮询结束" },
-  18: { emoji: "💳", text: "等待支付，轮询结束" },
-};
-
-/**
  * 轮询订单状态并发送截图
  * @param {string} orderId - 订单ID
  */
-async function pollWithScreenshots(orderId) {
-  log(`🚀 启动订单跟踪，订单ID: ${orderId}`);
+async function pollWithScreenshots(orderId, phone) {
+  log(`🚀 启动订单跟踪，订单ID: ${orderId}，手机号: ${phone}`);
 
-  const envConfig = getEnvConfig();
-  const orderUrl = `${envConfig.passengerH5Host}/busiClientWeb/index.html#/TripShare?orderId=${orderId}`;
+  const orderUrl = `https://web.ruqimobility.com/busiClientWeb/index.html#/TripShare?orderId=${orderId}`;
   let pollCount = 0;
 
   let lastStatus = null;
@@ -247,18 +228,29 @@ async function pollWithScreenshots(orderId) {
 
   let browserReady = false;
   try {
-    log(`🌐 打开浏览器（${POLL_CONFIG.deviceName} 模式）...`);
+    log(
+      `🌐 打开浏览器（${POLL_CONFIG.viewportWidth}x${POLL_CONFIG.viewportHeight} 竖屏模式）...`,
+    );
     await execCommand(
-      "agent-browser",
-      ["set", "device", POLL_CONFIG.deviceName],
+      "openclaw",
+      [
+        "browser",
+        "resize",
+        String(POLL_CONFIG.viewportWidth),
+        String(POLL_CONFIG.viewportHeight),
+      ],
       { timeout: 10000 },
     );
-    await execCommand("agent-browser", ["open", orderUrl], {
-      timeout: 30000,
-    });
+    const openResult = await execCommand(
+      "openclaw",
+      ["browser", "open", orderUrl],
+      { timeout: 30000 },
+    );
     await sleep(POLL_CONFIG.pageLoadWait);
     browserReady = true;
-    log(`✅ 浏览器已打开（${POLL_CONFIG.deviceName}），页面加载完成`);
+    log(
+      `✅ 浏览器已打开（${POLL_CONFIG.viewportWidth}x${POLL_CONFIG.viewportHeight}），页面加载完成`,
+    );
   } catch (e) {
     log(`⚠️ 浏览器初始化失败，将使用纯文本模式: ${e.message}`);
   }
@@ -271,7 +263,7 @@ async function pollWithScreenshots(orderId) {
       let orderData = null;
       for (let retry = 0; retry < POLL_CONFIG.queryRetry; retry++) {
         try {
-          orderData = await ruqiApi.query_ride_order({ orderId });
+          orderData = await ruqiApi.query_ride_order({ orderId, phone });
           break;
         } catch (e) {
           log(`⚠️ 查询失败，第 ${retry + 1} 次重试: ${e.message}`);
@@ -283,8 +275,7 @@ async function pollWithScreenshots(orderId) {
       const orderInfo = orderData?.content?.orderInfo;
       if (orderInfo) {
         const status = orderInfo.orderState;
-        const statusDesc =
-          config.statusDescriptions?.[status] || `状态(${status})`;
+        const statusDesc = STATUS_DESCRIPTIONS?.[status] || `状态(${status})`;
         log(`📊 订单状态: ${statusDesc}`);
 
         const statusChanged = status !== lastStatus;
@@ -297,16 +288,26 @@ async function pollWithScreenshots(orderId) {
           let screenshotPath = null;
 
           if (browserReady) {
-            screenshotPath = `${POLL_CONFIG.screenshotDir}/${orderId}_${Date.now()}.png`;
             try {
-              await execCommand(
-                "agent-browser",
-                ["screenshot", screenshotPath],
+              const screenshotResult = await execCommand(
+                "openclaw",
+                ["browser", "screenshot", "--full-page"],
                 {
                   timeout: 30000,
                 },
               );
-              screenshotSuccess = true;
+              // 解析 MEDIA:~/.openclaw/media/browser/xxx.png 路径
+              const mediaMatch = screenshotResult.match(/MEDIA:(\S+\.png)/);
+              if (mediaMatch) {
+                // 将 ~ 展开为绝对路径
+                screenshotPath = mediaMatch[1].replace(
+                  /^~/,
+                  process.env.HOME || "/root",
+                );
+                screenshotSuccess = true;
+              } else {
+                log(`⚠️ 截图结果中未找到 MEDIA 路径`);
+              }
             } catch (e) {
               log(`⚠️ 截图失败: ${e.message}`);
             }
@@ -378,9 +379,9 @@ async function main() {
       );
       process.exit(0);
     }
-    const { orderId } = params;
+    const { orderId, phone } = params;
     ensureScreenshotDir();
-    await pollWithScreenshots(orderId);
+    await pollWithScreenshots(orderId, phone);
     process.exit(0);
   } catch (error) {
     console.error(`错误: ${error.message}`);

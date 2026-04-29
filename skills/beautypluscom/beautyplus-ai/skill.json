@@ -1,11 +1,11 @@
 {
   "name": "beautyplus-ai",
-  "version": "1.0.0",
-  "description": "BeautyPlus AI image effects: body reshape (breast/butt with strength tiers), hair color and hairstyle, outfit change (formal, vacation, cosplay), photo restoration and AI ultra-HD. Use --task with the effect KEY; params from POST /skill/config.json invoke. Current catalog is image-only (blocking run-task). Video async spawn path reserved for future keys. Paid API.",
-  "author": "one2x-ai",
+  "version": "1.0.1",
+  "description": "BeautyPlus Portrait Beauty: body reshape (breast/butt with strength tiers), hair color and hairstyle, outfit change (formal, vacation, cosplay, party, sports), face style, expression (smile/wink/cool), photo art (tan/flash/film), photo restoration and AI ultra-HD. Use --task with the effect KEY; params from POST /skill/config.json invoke. Current catalog is image-only (blocking run-task). Video async spawn path reserved for future keys. Paid API. ",
+  "author": "BeautyPlus",
   "license": "MIT",
-  "homepage": "https://github.com/openclaw/openclaw",
-  "repository": "https://github.com/openclaw/openclaw",
+  "homepage": "https://beautyplus.com",
+  "repository": "https://github.com/beautyplusAI/beautyplus-ai/",
   "keywords": [
     "image-processing",
     "body-reshape",
@@ -16,7 +16,13 @@
     "photo-restoration",
     "beautyplus",
     "ai-image",
-    "quality-enhancement"
+    "quality-enhancement",
+    "face-style",
+    "expression",
+    "photo-art",
+    "flash-effect",
+    "party-outfit",
+    "sports-outfit"
   ],
   "sbom": {
     "files": [
@@ -125,7 +131,24 @@
       "haircut",
       "outfit swap",
       "image quality",
-      "hd upscale"
+      "hd upscale",
+      "face style",
+      "facial temperament",
+      "expression change",
+      "smile effect",
+      "wink effect",
+      "party outfit",
+      "sports outfit",
+      "tennis outfit",
+      "yoga outfit",
+      "bikini",
+      "racing suit",
+      "photo art",
+      "tan filter",
+      "flash effect",
+      "film effect",
+      "ccd flash",
+      "fuji filter"
     ],
     "platforms": [
       "feishu",

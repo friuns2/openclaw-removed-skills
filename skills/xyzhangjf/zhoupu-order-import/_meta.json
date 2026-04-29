@@ -1,0 +1,11 @@
+{
+  "owner": "xyzhangjf",
+  "slug": "zhoupu-order-import",
+  "displayName": "舟谱订单导入",
+  "latest": {
+    "version": "1.2.0",
+    "publishedAt": 1776049457581,
+    "commit": "https://github.com/openclaw/skills/commit/042765e42137d045b1143ed66e05f559b44bc64e"
+  },
+  "history": []
+}

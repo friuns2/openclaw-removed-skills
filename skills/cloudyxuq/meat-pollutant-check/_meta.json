@@ -1,0 +1,11 @@
+{
+  "owner": "cloudyxuq",
+  "slug": "meat-pollutant-check",
+  "displayName": "meatpollutant牛羊肉罐头污染物超标判定",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776336126687,
+    "commit": "https://github.com/openclaw/skills/commit/5cab85f4462b63f081a8c93566454902065a1e50"
+  },
+  "history": []
+}

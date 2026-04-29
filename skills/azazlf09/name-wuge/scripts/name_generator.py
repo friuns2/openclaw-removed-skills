@@ -337,7 +337,7 @@ def run_generate(
         return format_name_results(results, surname)
 
 
-def run_random_names(count: int = 10, given_len: int = 0, require_all_ji: bool = False) -> str:
+def run_random_names(count: int = 10, given_len: int = 0, require_all_ji: bool = False, gender: str = "auto") -> str:
     """
     纯随机生成姓名：姓氏+名字都随机挑选
 
@@ -345,6 +345,7 @@ def run_random_names(count: int = 10, given_len: int = 0, require_all_ji: bool =
         count:          生成多少个（默认10）
         given_len:      名字字数，0=随机混合单双名（默认0）
         require_all_ji: True=五格全吉，False=只保总格为吉（默认False）
+        gender:         "female"=女名池,"male"=男名池,"auto"=混合（默认auto）
     """
     from .name_wuge import ensure_full_data, get_81_info
     import random
@@ -396,13 +397,23 @@ def run_random_names(count: int = 10, given_len: int = 0, require_all_ji: bool =
 
     ensure_full_data()
 
+    # 根据性别选择名字用字池
+    if gender == "female":
+        char_pool = _FEMALE_SET
+    elif gender == "male":
+        char_pool = _MALE_SET
+    else:
+        char_pool = _FEMALE_SET  # auto默认女名池
+
     surnames = list(_SURNAME_POOL)
     random.shuffle(surnames)
 
     all_results = []
     used_names = set()  # 同名去重
+    used_surnames = {}  # 跟踪每姓氏已用数量，控制多样性
     checked = 0
     max_check = count * 50
+    max_per_surname = 3  # 每姓氏最多取3个，避免同一姓氏垄断
 
     if given_len == 0:
         given_lens = [1, 2]
@@ -412,18 +423,26 @@ def run_random_names(count: int = 10, given_len: int = 0, require_all_ji: bool =
     for sn in surnames:
         if checked >= max_check or len(all_results) >= count:
             break
+        if used_surnames.get(sn, 0) >= max_per_surname:
+            continue
         for gl in given_lens:
             if len(all_results) >= count:
+                break
+            if used_surnames.get(sn, 0) >= max_per_surname:
                 break
             try:
                 results = generate_names(
                     surname=sn,
                     given_len=gl,
                     require_all_ji=require_all_ji,
+                    char_pool=char_pool,  # 传入性别专用字池
                     max_results=6,
                 )
+                random.shuffle(results)  # 打乱结果，真正随机
                 for r in results:
                     if len(all_results) >= count:
+                        break
+                    if used_surnames.get(sn, 0) >= max_per_surname:
                         break
                     name = r['name']
                     if name in used_names:
@@ -431,6 +450,7 @@ def run_random_names(count: int = 10, given_len: int = 0, require_all_ji: bool =
                     if not _check_phonetic(name):
                         continue
                     used_names.add(name)
+                    used_surnames[sn] = used_surnames.get(sn, 0) + 1
                     all_results.append(r)
                     checked += 1
             except ValueError:
@@ -464,5 +484,38 @@ def run_random_names(count: int = 10, given_len: int = 0, require_all_ji: bool =
 # ──────────────────────────────────────────────
 
 _SURNAME_POOL = (
-    "李王张刘陈杨黄赵周吴徐孙马朱胡郭林何高罗郑梁谢宋唐许韩邓冯曹彭曾肖田董袁潘于蒋蔡余杜叶程苏魏陆聂戴范金陶姜崔谭廖熊丘邹孟石秦姚邵湛汪崔邱龚庞侯孟顾武贺赖姜"
+    "赵钱孙李周吴郑王冯陈褚卫蒋沈韩杨朱秦尤许何吕施张孔曹严华金魏陶姜戚谢邹喻柏水窦章云苏潘葛奚范彭郎鲁韦昌马苗凤花方俞任袁柳酆鲍史唐费廉岑薛雷贺倪汤滕殷罗毕郝邬安常乐于时傅皮卞齐康伍余元卜顾孟平黄和穆萧尹姚邵湛汪祁毛禹狄米贝明臧计伏成戴谈宋茅庞熊纪舒屈项祝董梁杜阮蓝闵席季麻强贾路娄危江童颜郭梅盛林刁钟徐邱骆高夏蔡田樊胡凌霍虞万支柯昝管卢莫经房裘缪干解应宗丁宣贲邓郁单杭洪包诸左石崔吉钮龚程嵇邢滑裴陆荣翁荀羊惠甄曲家封芮羿储靳汲邴糜松井段富巫乌焦巴弓牧隗山谷车侯宓蓬全郗班仰秋仲伊宫宁仇栾暴甘钭厉戎祖武符刘景詹束叶幸司韶郜黎蓟薄印宿白怀蒲邰从鄂索咸籍赖卓蔺屠蒙池乔阴能苍双闻莘党翟谭贡劳逄姬申扶堵冉宰郦雍却璩桑桂濮牛寿通边扈燕冀郏浦尚农温别庄晏柴瞿阎充慕连茹习宦艾鱼容向古易慎戈廖庾居衡步都耿满弘空圃肖崃呦盍权稽闪问弋赏卑苟迈岩朴心耨铁列刀过校剧密恭肃施营退仇撩闾绪枚植其烦段鄂承赫弦"
 )
+
+# ──────────────────────────────────────────────
+# § 7  女生姓名专用字池（2025流行+音韵好听）
+# ──────────────────────────────────────────────
+
+_FEMALE_CHARS = (
+    # 2025流行女名用字（月曦/清窈/云笺/灵晞/星冉/婉柠/芊澄/芮熹/倩柔/乐涵/语诺/敏彤/可夏 等）
+    "月曦清窈云笺灵晞星冉婉柠芊澄芮熹倩柔乐涵语诺敏彤可夏沁恬瑜玥珞芙蕾雅岚桐芸竹棠栩梓晴朵妤珝琛琳琅瑀珞珈珂珺琦璇璟璐琬琰沁蕾桐岚缃瑾璇瑾妤婉柠"
+    # 经典柔美女名用字
+    "婷娟秀英华慧敏静丽芳兰玉萍红艳霞凤洁素云莲雪荣妹香雅菲蓉花佳蓉苹晖嫒纨仪贞莉娣璧蘅芷妍玟萱怡惠羽雁露霜寒梦悦希安静娴映璇诗涵梓晴朗"
+    # 珍贵美玉系（女孩名常见）
+    "琳瑶琪瑾琦璇璟璐琬琰珂珂珺珩珞珈"
+    # 植物芳草系
+    "芷萱兰莲蓉蔷薇月桂棠桐楠榆柳棉槐樱枫杉杉"
+    # 叠字亲昵系
+    "婷婷娟娟丽丽瑶瑶璐璐琪琪琳琳"
+)
+
+_FEMALE_SET = set(_FEMALE_CHARS)
+
+# ──────────────────────────────────────────────
+# § 8  男生姓名专用字池
+# ──────────────────────────────────────────────
+
+
+_MALE_CHARS = (
+    "伟强勇军涛波祥瑞嘉树彬磊超文博志明轩志鹏海涛"
+    "健柏树林川洋瀚清润诚玄辉飞翔波涛春雨夏月秋收冬藏"
+    "昊天宇浩凯晨旭伟强俊豪靖峰岳岩川泉海涛"
+    "博学笃行善思明辨至善唯诚创新卓越"
+)
+
+_MALE_SET = set(_MALE_CHARS)

@@ -2,9 +2,9 @@
 /**
  * 会话注入构建器
  * 会话开始前自动组装上下文注入
- * 
+ *
  * 用法: node build-session-injection.js
- * 输出: 注入内容文本
+ * 输出: 注入内容文本（JSON格式）
  */
 
 const fs = require('fs');
@@ -19,7 +19,6 @@ function readFile(p) {
 }
 
 function extractKeyInfo(snapshot) {
-  // 提取关键信息
   const lines = snapshot.split('\n').filter(l => l.trim());
   const info = {
     用户信息: [],
@@ -27,35 +26,34 @@ function extractKeyInfo(snapshot) {
     最近结论: [],
     待办: []
   };
-  
+
   let currentSection = null;
   lines.forEach(line => {
-    if (line.includes('📌 用户信息')) currentSection = '用户信息';
-    else if (line.includes('📋 当前任务状态')) currentSection = '当前任务';
-    else if (line.includes('🧠 最近关键结论')) currentSection = '最近结论';
-    else if (line.includes('### 待办')) currentSection = '待办';
+    if (line.includes('📌') && line.includes('信息')) currentSection = '用户信息';
+    else if (line.includes('📋') && line.includes('当前任务')) currentSection = '当前任务';
+    else if (line.includes('🧠') && line.includes('最近')) currentSection = '最近结论';
+    else if (line.includes('待办')) currentSection = '待办';
     else if (line.startsWith('- ') && currentSection) {
       info[currentSection].push(line.slice(2));
     }
   });
-  
+
   return info;
 }
 
 function buildInjection() {
   const snapshot = readFile(SNAPSHOT_PATH);
   const buffer = readFile(BUFFER_PATH);
-  
+
   if (!snapshot) {
     console.log(JSON.stringify({ error: 'SNAPSHOT not found', injection: '' }));
     return;
   }
-  
+
   const info = extractKeyInfo(snapshot);
-  
-  // 组装注入内容
+
   const injection = `【当前会话上下文】
-  
+
 【用户】${info.用户信息.join(' | ') || '未知'}
 
 【进行中】${info.当前任务.join(', ') || '无'}

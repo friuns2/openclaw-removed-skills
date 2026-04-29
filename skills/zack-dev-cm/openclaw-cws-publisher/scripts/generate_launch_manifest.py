@@ -40,6 +40,16 @@ def resolve_public_site_base(explicit_base: str | None) -> str | None:
     return raw_value.rstrip("/") + "/"
 
 
+def detect_reviewer_gate(repo_root: Path) -> dict[str, str | bool]:
+    script_path = repo_root / "scripts" / "reviewer_gate.py"
+    hook_path = repo_root / ".githooks" / "pre-push"
+    return {
+        "detected": script_path.exists() or hook_path.exists(),
+        "script": "scripts/reviewer_gate.py" if script_path.exists() else "",
+        "pre_push_hook": ".githooks/pre-push" if hook_path.exists() else "",
+    }
+
+
 def build_launch_manifest(
     repo_root: Path,
     *,
@@ -79,6 +89,7 @@ def build_launch_manifest(
         "privacy_policy_url": privacy_policy_url,
         "test_instructions_url": test_instructions_url,
         "github_topics": topics or DEFAULT_TOPICS,
+        "reviewer_gate": detect_reviewer_gate(repo_root),
         "extension": {
             "name": extension_name,
             "version": manifest["version"],

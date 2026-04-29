@@ -3,7 +3,7 @@ name: data-auto-analyzer
 description: 数据自动分析 + 广告投放优化一体化 Skill。当用户上传 Excel/CSV 文件，或提到以下任一场景时必须触发：①通用数据分析（看报表、数据趋势、可视化）；②账户诊断（哪些计划效果差、哪些要暂停、投放诊断、账户体检）；③A/B 测试分析（两组数据对比、哪个版本好、是否显著、置信度）；④日报生成（投放日报、每日汇报、钉钉/飞书周报、对比昨日）。适用于信息流广告优化师、运营、数据分析师。支持巨量引擎、腾讯广告、Meta Ads、Google Ads、快手等平台导出数据，也支持销售、财务、运营等任何结构化表格。即使用户只说"分析一下""看看报表""哪些计划要调整""这俩哪个好""生成日报"，也应触发此 Skill。
 metadata:
   homepage: https://clawhub.ai/ming0429/data-auto-analyzer
-  version: 3.0.0
+  version: 3.0.1
   author: guojiaming
   tags: [data-analysis, advertising, ab-test, daily-report, 数据分析, 广告优化, 账户诊断, AB测试, 日报生成]
   clawdbot:

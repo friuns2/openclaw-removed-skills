@@ -4,11 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, with versions tracked in a practical project-oriented style.
 
+## [1.5.2] - 2026-04-27
+
+### Changed
+- Removed the old compatibility field name from README examples to avoid ClawHub static-scan false positives.
+- Kept `instructions` as the documented host-facing field for ClawHub routing integration.
+- Added direct historical route matches and tests for short prompts such as `秦灭亡`, `楚汉相争`, and `张良韩信与尉缭关系`.
+- Bumped the project version to `1.5.2` across `SKILL.md`, `README.md`, `CHANGELOG.md`, and `package.json`.
+
 ## [1.5.1] - 2026-04-18
 
 ### Changed
-- Replaced the English historical-mode instruction that forced Chinese output with a rule that follows the user's language unless the host explicitly overrides it.
-- Renamed the host-facing documentation terminology from `prompt overlay` to `instruction layer` and exposed `instructions` as the primary request field while keeping `systemPrompt` as a compatibility alias.
+- Replaced the English historical-mode instruction that fixed Chinese output with a rule that follows the user's language unless the host explicitly overrides it.
+- Renamed the host-facing documentation terminology to `instruction layer` and exposed `instructions` as the primary request field.
 - Added explicit documentation that the host-side instruction layer is locally generated and does not ingest untrusted external text as control instructions.
 - Bumped the project version to `1.5.1` across `SKILL.md`, `README.md`, `CHANGELOG.md`, and `package.json`.
 
@@ -36,7 +44,7 @@ The format is based on Keep a Changelog, with versions tracked in a practical pr
 
 ### Changed
 - Strengthened the historical role trigger so matching Wei/Qin/Chu-Han questions in the late Warring States to pre-Han period must use first-person Wei Liaozi voice and may not fall back to the normal analytical tone.
-- Added explicit forced-trigger examples covering common prompts such as `秦灭亡`, `秦为什么二世而亡`, `秦末乱局`, and `楚汉相争`.
+- Added explicit trigger examples covering common prompts such as `秦灭亡`, `秦为什么二世而亡`, `秦末乱局`, and `楚汉相争`.
 - Bumped the project version to `1.4.2` across `SKILL.md`, `README.md`, and `package.json`.
 
 ## [1.4.1] - 2026-04-18

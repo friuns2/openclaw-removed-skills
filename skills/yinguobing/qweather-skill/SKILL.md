@@ -1,7 +1,7 @@
 ---
 name: qweather
-version: 0.4.0
-description: 查询全球城市实时天气、天气预报、空气质量等信息的技能。当用户询问某个城市的天气、气温、降雨、风向、空气质量时调用。
+version: 0.5.0
+description: 查询全球城市或者经纬度位置的实时天气、天气预报、空气质量等信息的技能。当用户询问某个城市或者经纬度的天气、气温、降雨、风向、空气质量时调用。
 homepage: https://github.com/yinguobing/qweather-skill
 required_env_vars:
   - QWEATHER_KID
@@ -18,22 +18,19 @@ metadata: {"openclaw":{"requires":{"env":["QWEATHER_KID","QWEATHER_PROJECT_ID","
 基于和风天气（QWeather）API，提供全球城市的天气查询能力。
 
 ## 安装
-
-使用curl + install.sh安装：
-```bash
-curl -sSL https://raw.githubusercontent.com/yinguobing/qweather-skill/main/install.sh | bash
-```
-
-使用Cargo安装可执行文件：
+使用Cargo安装：
 ```bash
 cargo install qweather
 ```
-安装后二进制名为 `qw`。
-
 
 源码安装
 ```bash
 cargo install --git https://github.com/yinguobing/qweather-skill.git
+```
+
+如果需要使用curl + install.sh安装请参考官方文档：
+```url
+https://github.com/yinguobing/qweather-skill
 ```
 
 ## 身份认证
@@ -59,6 +56,7 @@ export QWEATHER_GEO_URL="https://your-host.qweatherapi.com/geo/v2"
 ```bash
 # 地理位置
 qw geo city-lookup 北京
+qw geo reverse --lon 113.4695 --lat 23.1895    # 经纬度反查行政区划
 qw geo top-city --range cn
 qw geo poi-lookup 故宫 --type scenic
 qw geo poi-range 116.40,39.90 --type scenic --radius 10

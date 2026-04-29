@@ -125,7 +125,7 @@ def _post_json(
 # ─────────────────────────────────────────────
 
 def fetch_questions(
-    device_fingerprint: str,
+    bench_session_id: str,
     primary_model: str,
     api_url: str = DEFAULT_API_URL,
     openclaw_root: str = "",
@@ -144,7 +144,7 @@ def fetch_questions(
     out = _post_json(
         api_url,
         body={"model_name": primary_model, "client_version": CLIENT_VERSION},
-        headers={"X-Device-Fingerprint": device_fingerprint},
+        headers={"X-Bench-Session-Id": bench_session_id},
         encrypt=True,
     )
 
@@ -288,7 +288,7 @@ def _cache_dir() -> str:
     return _CACHE_DIR
 
 
-def _save_pending_upload(body: bytes, fingerprint: str, upload_url: str) -> str:
+def _save_pending_upload(body: bytes, bench_session_id: str, upload_url: str) -> str:
     """
     将上传失败的 body 连同元信息序列化写入 cache 目录。
     文件名格式：cache_<timestamp_ms>.dat
@@ -299,7 +299,7 @@ def _save_pending_upload(body: bytes, fingerprint: str, upload_url: str) -> str:
     path = os.path.join(_cache_dir(), filename)
     record = {
         "upload_url": upload_url,
-        "fingerprint": fingerprint,
+        "bench_session_id": bench_session_id,
         "body_hex": body.hex(),       # bytes 转 hex 字符串，便于 JSON 序列化
         "created_at": ts,
     }
@@ -308,12 +308,12 @@ def _save_pending_upload(body: bytes, fingerprint: str, upload_url: str) -> str:
     return path
 
 
-def _do_post_body(body: bytes, fingerprint: str, upload_url: str, timeout: int = 30) -> tuple[bool, str]:
+def _do_post_body(body: bytes, bench_session_id: str, upload_url: str, timeout: int = 30) -> tuple[bool, str]:
     """发送已构建好的 body bytes，返回 (ok, msg)。"""
     req = urllib.request.Request(upload_url, data=body, method="POST")
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json")
-    req.add_header("X-Device-Fingerprint", fingerprint)
+    req.add_header("X-Bench-Session-Id", bench_session_id)
     try:
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             raw = resp.read().decode("utf-8", errors="replace")
@@ -348,14 +348,14 @@ def flush_pending_uploads() -> list[str]:
             with open(path, "r", encoding="utf-8") as f:
                 record = json.load(f)
             body = bytes.fromhex(record["body_hex"])
-            fingerprint = record.get("fingerprint", "")
+            bench_session_id = record.get("bench_session_id", "")
             upload_url = record.get("upload_url", DEFAULT_SUBMIT_API_URL)
         except Exception as e:
             # 文件损坏，跳过但不删除，避免误删
             print(f"[flush] 读取缓存文件失败 {filename}: {e}")
             continue
 
-        ok, msg = _do_post_body(body, fingerprint, upload_url)
+        ok, msg = _do_post_body(body, bench_session_id, upload_url)
         if ok:
             try:
                 os.remove(path)
@@ -401,7 +401,7 @@ def _parse_leaderboard(raw_response: str) -> dict[str, Any]:
 
 def upload_results_from_dict(
     data: dict[str, Any],
-    fingerprint: str,
+    bench_session_id: str,
     hash: str,
     upload_url: str = DEFAULT_SUBMIT_API_URL,
 ) -> tuple[bool, str, dict[str, Any]]:
@@ -432,18 +432,18 @@ def upload_results_from_dict(
     key_b64, gpv, _aes = hybrid_encrypt_json(payload)
     body = json.dumps({"key": key_b64, "gpv": gpv}, ensure_ascii=False).encode("utf-8")
 
-    ok, msg = _do_post_body(body, fingerprint, upload_url)
+    ok, msg = _do_post_body(body, bench_session_id, upload_url)
     if ok:
         leaderboard = _parse_leaderboard(msg)
         return True, msg, leaderboard
 
     # 上报失败时，缓存数据
-    cached_path = _save_pending_upload(body, fingerprint, upload_url)
+    cached_path = _save_pending_upload(body, bench_session_id, upload_url)
     return False, f"{msg}（已缓存至 {os.path.basename(cached_path)}，下次启动自动补报）", {}
 
 def upload_results(
     results_path: str,
-    finger_print: str,
+    bench_session_id: str,
     session_id: str,
     hash: str,
 ) -> tuple[bool, str, dict[str, Any]]:
@@ -460,13 +460,13 @@ def upload_results(
     except Exception as e:
         return False, f"读取结果文件失败: {e}", {}
 
-    return upload_results_from_dict(data, finger_print, hash)
+    return upload_results_from_dict(data, bench_session_id, hash)
 
 
 # ─────────────────────────────────────────────
 # CLI 入口
 # ─────────────────────────────────────────────
-from utils import get_fingerprint
+from utils import get_bench_session_id
 
 def test_upload():
     path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
@@ -477,14 +477,14 @@ def test_upload():
 
     # 下载题目
     try:
-        device_fingerprint = get_fingerprint()
-        fetch_result = fetch_questions(device_fingerprint, "minimax-cn/MiniMax-M2.5")
+        bench_session_id = get_bench_session_id()
+        fetch_result = fetch_questions(bench_session_id, "minimax-cn/MiniMax-M2.5")
         #questions = fetch_result["questions"]
         api_session_id = fetch_result["session_id"]
         api_hash = fetch_result["hash"]
         print("api_hash", api_hash)
 
-        ok, msg = upload_results(path, device_fingerprint, api_session_id, api_hash)
+        ok, msg, _ = upload_results(path, bench_session_id, api_session_id, api_hash)
         print("成功" if ok else "失败", ":", msg)
     except Exception as e:
         print(e)

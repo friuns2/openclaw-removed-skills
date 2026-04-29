@@ -1,14 +1,14 @@
 ---
 name: vibbit-skills
-version: 1.0.7
+version: 1.0.9
 display_description: |
-  帮你用集思 AI 出 B-roll 素材、复刻爆款文案、拆解热门视频、查数字人、一键生成数字人口播视频。
-  - B-roll 生图 — 告诉我口播的主题或台词，帮你生成配套的 B-roll 素材图
-  - 爆款复刻 — 丢给我一条抖音 / 小红书 / B站链接，帮你解析视频内容、提炼文案结构，直接复刻
-  - 爆款拆解 — 深度分析一条视频的钩子、节奏、台词，搞清楚它为什么火
-  - 查数字人 — 看看你账号下有哪些可用的数字人形象
-  - 数字人口播 — 给我一段文案，选好数字人，直接帮你生成一条口播视频
-description: 调用 Vibbit OpenAPI 完成五类能力——AI 生图、解析抖音/小红书/B站链接、爆款视频拆解、查询当前用户可用的数字人列表、初始化数字人口播视频工作流。当用户说"生成一张图 / AI 出图"、"解析这个抖音/小红书/B站链接"、"拆解一下这条爆款 / 视频拆解"、"看看我有哪些数字人 / 列一下数字人"、或"用 xx 数字人做条口播 / 初始化数字人视频 / 数字人口播"时，都应主动触发此 skill，即便用户没有明确提到 "vibbit" 或 "openapi"。只要任务能映射到这五项能力之一、且用户正在和 Vibbit / willing-agentcy 系统打交道，就优先用这个 skill 而不是自己手写 HTTP 请求。
+  Help you use Vibbit AI to generate B-roll materials, replicate viral scripts, break down trending videos, check avatars, and generate avatar voiceover videos with one click.
+  - B-roll Image Generation — Tell me the topic or script, and I'll generate matching B-roll images
+  - Viral Replication — Give me a Douyin/Xiaohongshu/Bilibili link, and I'll analyze the video content, extract the script structure, and replicate it
+  - Viral Breakdown — Deep analysis of a video's hook, rhythm, and script to understand why it went viral
+  - Check Avatars — See which avatars are available in your account
+  - Avatar Voiceover — Give me a script, choose an avatar, and I'll generate a voiceover video
+description: Call Vibbit OpenAPI to complete five capabilities — AI image generation, parse Douyin/Xiaohongshu/Bilibili links, viral video breakdown, query available avatar list, initialize avatar voiceover video workflow. When users say "generate an image / AI image", "parse this Douyin/Xiaohongshu/Bilibili link", "break down this viral video / video breakdown", "show me my avatars / list avatars", or "use XX avatar for voiceover / initialize avatar video / avatar voiceover", this skill should be triggered proactively, even if the user doesn't explicitly mention "vibbit" or "openapi". As long as the task maps to one of these five capabilities and the user is working with the Vibbit/willing-agentcy system, prioritize this skill over writing HTTP requests manually.
 metadata:
   openclaw:
     primaryEnv: VIBBIT_API_KEY
@@ -20,64 +20,64 @@ metadata:
     envVars:
       - name: VIBBIT_API_KEY
         required: true
-        description: "集思平台 API Key，前往 https://app.vibbit.cn/api-keys 获取"
+        description: "Vibbit platform API Key, get it from https://app.vibbit.ai/api-keys"
       - name: VIBBIT_BASE_URL
         required: false
-        description: "API 地址，默认 https://openapi.vibbit.cn，切换测试环境时使用"
+        description: "API base URL, defaults to https://openapi.vibbit.cn, use this to switch to test environments"
 ---
 
-# Vibbit OpenAPI skill
+# Vibbit OpenAPI Skill
 
-把 Vibbit OpenAPI 的五类能力封装成一个 Node.js CLI，Claude 不用每次都手写 HTTP 调用。其中两项是**同步**接口（提交即返回结果），另外三项是**异步**接口（脚本自动轮询直到 COMPLETED / FAILED）。
+Wraps Vibbit OpenAPI's five capabilities into a Node.js CLI so Claude doesn't need to write HTTP calls manually each time. Two are **synchronous** APIs (submit and get results immediately), and three are **asynchronous** APIs (script auto-polls until COMPLETED/FAILED).
 
-## 何时触发
+## When to Trigger
 
-当用户的请求能对应到下面任意一项时，触发本 skill：
+Trigger this skill when the user's request matches any of the following:
 
-| 用户意图（示例） | 任务类型 | 同步? |
+| User Intent (Examples) | Task Type | Sync? |
 | --- | --- | --- |
-| "生成一张图"、"AI 画一只猫"、"出图" | `AIGC_IMAGE_GENERATION` | 异步 |
-| "解析这个抖音链接"、"这条小红书链接讲了什么" | `PARSE_CONTENT_URL` | 异步 |
-| "拆解一下这条爆款"、"视频拆解"、"分析这条带货视频" | `VIDEO_BREAKDOWN` | 异步 |
-| "我有哪些数字人"、"列一下可用数字人" | `QUERY_DIGITAL_HUMAN_LIST` | 同步 |
-| "用 xx 数字人做条口播"、"初始化数字人视频"、"数字人口播" | `DIGITAL_HUMAN_ORAL_BROADCAST` | 同步 |
+| "Generate an image", "AI draw a cat", "create image" | `AIGC_IMAGE_GENERATION` | Async |
+| "Parse this Douyin link", "What's this Xiaohongshu link about" | `PARSE_CONTENT_URL` | Async |
+| "Break down this viral video", "Video breakdown", "Analyze this product video" | `VIDEO_BREAKDOWN` | Async |
+| "What avatars do I have", "List available avatars" | `QUERY_DIGITAL_HUMAN_LIST` | Sync |
+| "Use XX avatar for voiceover", "Initialize avatar video", "Avatar voiceover" | `DIGITAL_HUMAN_ORAL_BROADCAST` | Sync |
 
-五项之外的任何场景都不要用这个 skill。
+Do not use this skill for any scenarios outside these five.
 
-## 前置条件
+## Prerequisites
 
-用户的 shell 必须已导出以下两个环境变量：
+The user's shell must have these environment variables exported:
 
-- `VIBBIT_API_KEY` —— 集思平台签发的 bearer token，**必填**，缺失时脚本报错退出
-- `VIBBIT_BASE_URL` —— **可选**，不设置时默认走 prd `https://openapi.vibbit.cn`；需要切别的环境（测试/灰度等）时 export 这个变量覆盖
+- `VIBBIT_API_KEY` — Bearer token issued by Vibbit platform, **required**, script exits with error if missing
+- `VIBBIT_BASE_URL` — **Optional**, defaults to production `https://openapi.vibbit.cn`; export this variable to override for other environments (test/staging)
 
-`VIBBIT_API_KEY` 缺失时，告诉用户去 https://app.vibbit.cn/api-keys 获取，获取后告诉我，我来帮你配置；不要猜或跳过。
+When `VIBBIT_API_KEY` is missing, tell the user to get it from https://app.vibbit.ai/api-keys, and after they get it, help them configure it; don't guess or skip.
 
-Node.js 要求 18+（用到内置 `fetch`）。脚本通过远程接口 `https://tools.vibbit.ai/api/file-info` 获取素材元信息，无需 WASM 或 npm 依赖。系统若装有 `ffprobe`（ffmpeg 附带）会自动作为备用探测方式，没有也完全能正常运行。
+Node.js 18+ required (uses built-in `fetch`). The script gets material metadata via remote API `https://tools.vibbit.ai/api/file-info`, no WASM or npm dependencies needed. If the system has `ffprobe` (comes with ffmpeg), it will automatically be used as a fallback probe method, but it works fine without it.
 
-## 脚本路径
+## Script Path
 
-脚本目录：`$VIBBIT_SKILL_DIR = ~/.claude/skills/vibbit-skills/scripts`，主入口是 `$VIBBIT_SKILL_DIR/vibbit.js`。下面示例里的 `$VIBBIT_SKILL_DIR` 仅用于可读性，实际调用时请用真实的绝对路径。
+Script directory: `$VIBBIT_SKILL_DIR = ~/.claude/skills/vibbit-skills/scripts`, main entry is `$VIBBIT_SKILL_DIR/vibbit.js`. The `$VIBBIT_SKILL_DIR` in examples below is for readability only; use the actual absolute path when calling.
 
-> **独立使用**：`scripts/vibbit.js` 是**自包含**的单文件，没有 npm 依赖。拷到任何 Node 18+ 的机器上直接跑，不限定必须放在 `~/.claude/skills/` 下。系统若装有 `ffprobe` 可选自动启用，没有也完全可以运行。
+> **Standalone Usage**: `scripts/vibbit.js` is a **self-contained** single file with no npm dependencies. Copy it to any Node 18+ machine and run directly, not limited to `~/.claude/skills/`. If the system has `ffprobe`, it can optionally be auto-enabled, but it works fine without it.
 
-## 怎么调用
+## How to Call
 
-始终通过 bundled CLI，不要直接调 HTTP 接口。这很重要，因为线格式有几个坑：
+Always use the bundled CLI, don't call HTTP APIs directly. This is important because the wire format has several gotchas:
 
-1. `input_info.input` 是一个**已经字符串化**的 JSON（双层编码），不是嵌套对象
-2. 所有字段走 **snake_case**（`task_type`、`input_info`、`digital_human_id` 等）
-3. `oral_broadcast` 的 `material_list` 每个元素需要完整 `file_info` 结构（含 `file_size` / `mime_type` / `width` / `height` / `duration` 等），脚本会自动探测生成
+1. `input_info.input` is an **already-stringified** JSON (double-encoded), not a nested object
+2. All fields use **snake_case** (`task_type`, `input_info`, `digital_human_id`, etc.)
+3. `oral_broadcast`'s `material_list` requires complete `file_info` structure for each element (including `file_size` / `mime_type` / `width` / `height` / `duration`, etc.), which the script auto-detects and generates
 
 ```bash
-node $VIBBIT_SKILL_DIR/vibbit.js <子命令> [--参数]
+node $VIBBIT_SKILL_DIR/vibbit.js <subcommand> [--args]
 ```
 
-脚本成功时把 JSON 写到 stdout：同步任务是 `{"result": ...}`，异步任务是 `{"task_id": "...", "result": ...}`；失败时输出 `{"error": "..."}` 并以非零退出码结束。拿到 stdout 后先解析出有用字段，再用自然语言呈现给用户，不要把原始 JSON 一股脑 dump 给用户看。
+On success, the script writes JSON to stdout: sync tasks return `{"result": ...}`, async tasks return `{"task_id": "...", "result": ...}`; on failure, it outputs `{"error": "..."}` and exits with non-zero code. After getting stdout, parse out useful fields first, then present to the user in natural language; don't dump raw JSON to the user.
 
-## 子命令
+## Subcommands
 
-### 1. AI 生图 —— `gen_image`
+### 1. AI Image Generation — `gen_image`
 
 ```bash
 node $VIBBIT_SKILL_DIR/vibbit.js gen_image \
@@ -85,21 +85,21 @@ node $VIBBIT_SKILL_DIR/vibbit.js gen_image \
   [--ref-url https://cdn.example.com/ref.jpg]
 ```
 
-- `--prompt` 必填。按用户原话翻译/搬运即可，除非用户明确要求润色，否则不要随便加戏
-- `--ref-url` 可选，参考图
+- `--prompt` required. Translate/copy the user's words as-is; don't add embellishments unless the user explicitly asks for refinement
+- `--ref-url` optional, reference image
 
-脚本会提交并自动轮询；最终 `result` 里一般包含生成图的 URL，把 URL 直接给用户。
+The script submits and auto-polls; the final `result` usually contains the generated image URL, give the URL directly to the user.
 
-### 2. 解析链接 —— `parse_url`
+### 2. Parse Link — `parse_url`
 
 ```bash
 node $VIBBIT_SKILL_DIR/vibbit.js parse_url \
   --url "https://v.douyin.com/xxxxxxx"
 ```
 
-支持抖音 / 小红书 / B 站的分享链接。`result` 通常包含原始视频 URL、标题、描述、ASR 字幕。只展示用户关心的字段，不要全量 dump。
+Supports Douyin/Xiaohongshu/Bilibili share links. `result` typically contains original video URL, title, description, ASR subtitles. Only show fields the user cares about, don't dump everything.
 
-### 3. 爆款视频拆解 —— `breakdown`
+### 3. Viral Video Breakdown — `breakdown`
 
 ```bash
 node $VIBBIT_SKILL_DIR/vibbit.js breakdown \
@@ -107,99 +107,99 @@ node $VIBBIT_SKILL_DIR/vibbit.js breakdown \
   --sub-tasks asr,hot,bgm
 ```
 
-- `--video-url` 必填。直接传分享链接（抖音 / 小红书 / B站）或裸 MP4 URL 都可以，breakdown 内部已包含解析能力，不需要先调 `parse_url`
-- `--sub-tasks` 必填，逗号分隔，可选值：
-  - `asr` —— 语音转文字
-  - `transition` —— 转场分析
-  - `hot` —— 爆点 / 钩子分析
-  - `bgm` —— 背景音乐
-  - 如果用户没指定，默认选 `asr,hot`，并**告诉用户你选了什么**方便纠正
+- `--video-url` required. Can pass share links (Douyin/Xiaohongshu/Bilibili) or raw MP4 URLs directly; breakdown includes parsing capability internally, no need to call `parse_url` first
+- `--sub-tasks` required, comma-separated, options:
+  - `asr` — Speech to text
+  - `transition` — Transition analysis
+  - `hot` — Viral hooks analysis
+  - `bgm` — Background music
+  - If user doesn't specify, default to `asr,hot`, and **tell the user what you chose** so they can correct
 
-拆解任务偏慢，一两分钟很正常。等待过程中主动告诉用户"正在分析视频，稍等一下"，让用户知道在跑，不是卡住了。
+Breakdown tasks are slow, 1-2 minutes is normal. During the wait, proactively tell the user "Analyzing video, please wait" so they know it's running, not stuck.
 
-### 4. 查询数字人列表 —— `list_digital_humans`
+### 4. Query Avatar List — `list_digital_humans`
 
 ```bash
 node $VIBBIT_SKILL_DIR/vibbit.js list_digital_humans
 ```
 
-同步接口。返回当前用户可用的数字人配置（租户级 + 共享 + 个人）。呈现给用户时至少展示名称，按分组列出，让用户直接说"用 XX"，不要让用户手动填写 ID。
+Synchronous API. Returns available avatar configurations for the current user (tenant-level + shared + personal). When presenting to the user, at least show names, list by group, let the user directly say "use XX", don't make them manually enter IDs.
 
-### 5. 初始化数字人口播 —— `oral_broadcast`
+### 5. Initialize Avatar Voiceover — `oral_broadcast`
 
 ```bash
 node $VIBBIT_SKILL_DIR/vibbit.js oral_broadcast \
-  --message "大家好，今天给大家介绍一款新品..." \
+  --message "Hello everyone, today I'll introduce a new product..." \
   --digital-human-id 10001 \
-  [--title "新品上架首秀"] \
+  [--title "New Product Launch"] \
   [--material-url https://cdn.example.com/a.mp4 \
-   --material-name "新品A镜头.mp4" \
+   --material-name "Product A Shot.mp4" \
    --material-url https://cdn.example.com/b.jpg \
-   --material-name "包装特写.jpg"]
+   --material-name "Packaging Close-up.jpg"]
 ```
 
-- `--message` 必填。**既是聊天消息，又是预设文案**——后端会自动把 `has_script` 置为 true，用户传什么文字就会被当作视频口播的脚本原文使用，LLM 不会再改写
-- `--digital-human-id` 必填。如果用户没指定用哪一个，先调 `list_digital_humans` 让用户挑，再继续
-- `--title` 可选。传了就作为预设标题，跳过 LLM 自动生标题那一步；不传时后端照常调模型生成
-- `--material-url` 可选、可重复。每项只传 URL，`file_name` 默认由 URL 末段自动推断。
-- `--material-name` 可选、可重复。**传了就必须和 `--material-url` 数量相等，按出现顺序一一对应**。用户给出友好名称（比如 OSS key 是乱码、展示名另有规定）时用这个；不需要可以整个不传。
+- `--message` required. **Both chat message and preset script** — backend automatically sets `has_script` to true, whatever text the user passes will be used as the video voiceover script verbatim, LLM won't rewrite it
+- `--digital-human-id` required. If user doesn't specify which one, call `list_digital_humans` first to let them choose, then continue
+- `--title` optional. If passed, it's used as the preset title, skipping the LLM auto-title generation step; if not passed, backend calls the model to generate as usual
+- `--material-url` optional, repeatable. Each item only passes URL, `file_name` defaults to auto-inferred from URL tail.
+- `--material-name` optional, repeatable. **If passed, must match the count of `--material-url`, corresponding in order of appearance**. Use this when the user provides friendly names (e.g., OSS key is gibberish, display name has specific requirements); can omit entirely if not needed.
 
-**任何情况下调用 `oral_broadcast` 之前，必须先完成 B-roll 生图**。不管文案是用户提供的、还是对话中生成确认的，都要先跑 `gen_image`，拿到图片 URL 后再提交口播。除非用户明确说"不需要 B-roll"或"不要配图"，否则不允许跳过这一步。
+**Before calling `oral_broadcast` in any case, B-roll image generation must be completed first**. Whether the script is user-provided or generated and confirmed in conversation, always run `gen_image` first, get the image URLs, then submit the voiceover. Unless the user explicitly says "no B-roll" or "no images", this step cannot be skipped.
 
-同步接口。返回的 `result` 是一个**字符串 URL**，指向前端聊天页（prd 和 demo 域名不同）。返回给用户时，用以下格式呈现，不要用其他措辞：
+Synchronous API. The returned `result` is a **string URL** pointing to the frontend chat page (production and demo domains differ). When returning to the user, present in the following format, don't use other wording:
 
 ```
-已经帮你备好了
-主题：{口播标题或文案前10字}
-数字人：{数字人名称}
-B-roll 素材：共 {N} 张图片（没有素材时省略这行）
-点进去确认一下，没问题就直接出片 👉 {URL}
+All set for you
+Topic: {voiceover title or first 10 chars of script}
+Avatar: {avatar name}
+B-roll Materials: {N} images total (omit this line if no materials)
+Check it out, and if it looks good, generate the video 👉 {URL}
 ```
 
-## 能力之间的搭配
+## Capability Combinations
 
-- 用户说"帮我做一条口播"但**没有提供文案** → 先问用户"你这条视频想讲什么主题？"，根据主题帮用户写一版口播文案，展示给用户确认；文案确认后如果还没选数字人，再列数字人让用户选；选好后自动串联 B-roll 生图 + 口播（同下面的流程）
-- 用户说"帮我做一条数字人口播"但没指定数字人、**且已有文案** → 先 `list_digital_humans`，把选项呈现给用户，等用户挑完再继续
-- 用户说"帮我做一条口播"并提供了文案，或上下文中已有确认好的文案 → **必须先生成 B-roll，再提交口播，不能跳过**：
-  1. 根据文案主题，自动推断 3-4 个 B-roll 画面描述，依次调 `gen_image` 生成（不需要用户额外描述画面）
-  2. 收集所有成功生成的图片 URL（失败的跳过，不阻塞流程）
-  3. 把图片作为 `--material-url` 附入 `oral_broadcast`，一并提交
-  4. 按新格式返回结果（含 B-roll 张数）
-- 用户说"帮我复刻这条视频" / "爆款复刻" + 分享链接 → 走完整复刻链路：
-  1. `parse_url` 解析链接，拿到标题 + ASR 字幕
-  2. 把原视频文案（ASR 字幕还原）展示给用户
-  3. 根据字幕提炼原视频的钩子结构、节奏、核心卖点，用相同逻辑**重新创作**一版口播文案（不是照搬，是再创作），展示给用户
-  4. 问用户"用哪个文案？还是要改？"，等用户确认后继续
-  5. 根据文案主题自动推断 3-4 个 B-roll 画面，并行跑 `gen_image`
-  6. 文案 + 成功生成的 B-roll 一起提交 `oral_broadcast`
-  7. 按统一格式返回结果
-- 用户问"你能做什么" / "有什么功能" / "怎么用" → 回复：
+- User says "help me make a voiceover" but **doesn't provide a script** → First ask "What topic do you want this video to cover?", help write a voiceover script based on the topic, show it to the user for confirmation; after script is confirmed, if no avatar is selected yet, list avatars for the user to choose; after selection, automatically chain B-roll generation + voiceover (same as the flow below)
+- User says "help me make a avatar voiceover" but doesn't specify avatar, **and already has a script** → First `list_digital_humans`, present options to the user, wait for them to choose before continuing
+- User says "help me make a voiceover" and provides a script, or there's already a confirmed script in context → **Must generate B-roll first, then submit voiceover, cannot skip**:
+  1. Based on the script topic, automatically infer 3-4 B-roll scene descriptions, call `gen_image` sequentially to generate (no need for user to describe scenes additionally)
+  2. Collect all successfully generated image URLs (skip failures, don't block the flow)
+  3. Include images as `--material-url` in `oral_broadcast`, submit together
+  4. Return result in new format (including B-roll count)
+- User says "help me replicate this video" / "viral replication" + share link → Go through complete replication flow:
+  1. `parse_url` to parse the link, get title + ASR subtitles
+  2. Show the original video script (restored from ASR subtitles) to the user
+  3. Extract the original video's hook structure, rhythm, core selling points from subtitles, use the same logic to **recreate** a voiceover script (not copy, but recreate), show to the user
+  4. Ask "Which script to use? Or want to modify?", wait for user confirmation before continuing
+  5. Based on script topic, automatically infer 3-4 B-roll scenes, run `gen_image` in parallel
+  6. Submit script + successfully generated B-roll together to `oral_broadcast`
+  7. Return result in unified format
+- User asks "what can you do" / "what features" / "how to use" → Reply:
 
-  > 我能帮你做这几件事：
+  > I can help you with these:
   >
-  > - 做口播视频 — 有文案直接做，没有告诉我主题我来写
-  > - 复刻爆款 — 丢个抖音 / 小红书 / B站链接，照着做一条你自己的
-  > - 拆解视频 — 分析一条视频为什么火、钩子在哪、节奏怎么走
-  > - 生 B-roll — 根据口播内容自动配图
-  > - 看数字人 — 查看你能用哪些数字人形象
+  > - Make voiceover videos — If you have a script, I'll make it directly; if not, tell me the topic and I'll write it
+  > - Replicate viral videos — Drop a Douyin/Xiaohongshu/Bilibili link, and I'll make one for you
+  > - Break down videos — Analyze why a video went viral, where the hooks are, how the rhythm flows
+  > - Generate B-roll — Auto-generate images based on voiceover content
+  > - Check avatars — See which avatars you can use
   >
-  > 想做哪个？
+  > What would you like to do?
 
-- **首次交互**：如果用户安装或更新后没有明确的任务意图（比如只是打招呼、说"你好"、"嗨"、"开始"等），主动用上面的功能介绍回复，引导用户选择想做的事
-- 用户丢过来一条抖音分享链接说"分析一下这条爆款" → 直接调 `breakdown`，传入分享链接即可，不需要先调 `parse_url`
-- 用户只想知道某条分享链接的内容（不做分析）→ 到 `parse_url` 就可以了
-- 用户想要视频的原始链接 / 下载地址 → 调 `parse_url`，从结果里提取原视频 URL 给用户
-- 用户做 AI 生图时提到参考图 URL → 走 `gen_image --ref-url`，不要误触 `parse_url` 或 `breakdown`
+- **First interaction**: If the user has no clear task intent after installation or update (e.g., just greeting, saying "hi", "hello", "start", etc.), proactively reply with the feature introduction above to guide the user to choose what they want to do
+- User drops a Douyin share link saying "analyze this viral video" → Directly call `breakdown`, pass the share link, no need to call `parse_url` first
+- User only wants to know the content of a share link (not analysis) → `parse_url` is enough
+- User wants the original link/download address of a video → Call `parse_url`, extract the original video URL from the result and give to the user
+- User mentions a reference image URL when doing AI image generation → Use `gen_image --ref-url`, don't mistakenly trigger `parse_url` or `breakdown`
 
-## 错误处理
+## Error Handling
 
-- **缺少 API Key** → 告诉用户："需要先配置集思 API Key 才能继续。去这里获取：https://app.vibbit.cn/api-keys ，获取后告诉我，我来帮你配置。"，不要猜或跳过
-- **HTTP 401 / 403** → 告诉用户："API Key 已失效，请去 https://app.vibbit.cn/api-keys 重新获取，然后重新配置"
-- **任务失败** → 告诉用户任务没跑成功，建议联系小思反馈，联系时把任务链接发给他们；不要把原始错误信息丢给用户看
-- **等待超时（超过 10 分钟）** → 告诉用户："视频还在处理中，可能需要更多时间，联系客服时把你的任务链接发给他们：{oral_broadcast 返回的聊天页 URL}"
+- **Missing API Key** → Tell the user: "Need to configure Vibbit API Key first to continue. Get it here: https://app.vibbit.ai/api-keys, then tell me and I'll help you configure it.", don't guess or skip
+- **HTTP 401/403** → Tell the user: "API Key has expired, please get a new one from https://app.vibbit.ai/api-keys and reconfigure"
+- **Task failed** → Tell the user the task didn't succeed, suggest contacting Vibbit support with the task link; don't dump raw error messages to the user
+- **Wait timeout (over 10 minutes)** → Tell the user: "Video is still processing, may need more time. Contact support with your task link: {chat page URL returned by oral_broadcast}"
 
-## 不要做这些
+## Don't Do These
 
-- 不要自己写 `curl` / `fetch` —— 永远走 `vibbit.js`。snake_case + 双层字符串化 JSON + file_info 结构这些坑，手写一次就容易出 bug
-- 不要把完整原始 JSON 响应丢给用户，抽取关键字段（URL、标题、转写等）用自然语言展示
-- 不要瞎编数字人 ID 或视频 URL，用户没给就问
+- Don't write `curl` / `fetch` yourself — always use `vibbit.js`. snake_case + double-stringified JSON + file_info structure are traps that easily cause bugs when written manually
+- Don't dump complete raw JSON responses to the user, extract key fields (URL, title, transcription, etc.) and present in natural language
+- Don't make up avatar IDs or video URLs, ask the user if they don't provide them

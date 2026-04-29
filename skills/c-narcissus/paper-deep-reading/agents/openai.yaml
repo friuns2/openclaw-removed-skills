@@ -1,9 +1,5 @@
 interface:
-  display_name: "Paper Deep Reading (Traceable)"
-  short_description: "Generate report.md plus traceable evidence artifacts and reader-ready bundles."
+  display_name: "Paper Deep Reading"
+  short_description: "Deep single-file paper reading for ClawHub."
   brand_color: "#2563EB"
-  default_prompt: "Deep-read this paper and produce report.md, reader_artifacts.json, traceability_manifest.json, and latex_paragraphs.json."
-policy:
-  allow_implicit_invocation: true
-dependencies:
-  tools: []
+  default_prompt: "Deep-read this paper, produce a rich narrative report.md, keep main-body claims anchored with claim IDs, move detailed evidence into the final Claim -> Evidence Index appendix, emit traceability_manifest.json, latex_paragraphs.json, artifact_index.json, and research_lens.json, and match the report language to the user request language."

@@ -226,14 +226,28 @@ Fires when a KNX group write/read/response matches the configured addresses.
 
 ## 5. sun_event — Sunrise/Sunset
 
-Fires at sunrise or sunset (with optional offset).
+Fires at sunrise or sunset, calculated from the system's geographic location
+(latitude/longitude). Supports an optional minute offset for triggering before
+or after the actual event.
+
+
+**Scheduling behavior**:
+- **Zero offset** (`sun_offset_min: 0` or omitted): triggered by the system
+  monitor's sunrise/sunset event bus (accurate to ~30 seconds).
+- **Non-zero offset**: uses per-trigger timer scheduling — computes the exact
+  next fire time daily based on astronomical data, re-schedules automatically
+  after each firing and when the system location changes.
 
 **Extra fields**:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `sun_event` | string | yes | `"sunrise"` or `"sunset"` |
-| `sun_offset_min` | int | no | Offset in minutes (negative = before, positive = after). Default: 0 |
+| `sun_offset_min` | int | no | Offset in minutes (negative = before, positive = after). Range: -720 to 720. Default: 0 |
+
+**Trigger data available at runtime**:
+- `trigger.new_value` — `"sunrise"` or `"sunset"`
+- `trigger.source` — `"system"`
 
 ```json
 {
@@ -247,11 +261,27 @@ Fires at sunrise or sunset (with optional offset).
 }
 ```
 
+**Example — at sunrise (no offset)**:
+```json
+{
+  "uuid": "t1",
+  "trigger_type": "sun_event",
+  "label": "Sunrise",
+  "enabled": true,
+  "sun_event": "sunrise",
+  "pos_x": 100, "pos_y": 200
+}
+```
+
 ---
 
-## 6. webhook — External HTTP Trigger
+## 6. webhook — Inbound HTTP Trigger
 
-Fires when the webhook URL is called externally.
+Fires when the workflow's webhook URL is called by an approved client.
+
+Use webhook triggers only when the user explicitly wants inbound HTTP access to
+the gateway workflow. Keep the token in the gateway configuration or secret store;
+do not place a real token in documentation or shared workflow examples.
 
 **Extra fields**:
 
@@ -263,9 +293,9 @@ Fires when the webhook URL is called externally.
 {
   "uuid": "t1",
   "trigger_type": "webhook",
-  "label": "External Trigger",
+  "label": "Inbound Trigger",
   "enabled": true,
-  "webhook_token": "my-secret-token",
+  "webhook_token": "WEBHOOK_TOKEN_PLACEHOLDER",
   "pos_x": 100, "pos_y": 200
 }
 ```

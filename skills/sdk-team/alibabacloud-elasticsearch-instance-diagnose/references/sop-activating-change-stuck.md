@@ -51,7 +51,7 @@ In the “long `activating`” context, remember: **orchestration is waiting for
 | Dimension | Source | Requirement |
 |-----------|--------|-------------|
 | Lifecycle | `DescribeInstance` | **MUST:** `status`, `updatedAt`, etc.; at least once before and after remediation |
-| Change task detail | `elasticsearch ListActionRecords` | **MUST** whenever `activating` / change-stuck: type, progress, stuck or pending nodes; **do not** skip this call with only Describe text |
+| Change task detail | `ListActionRecords` | **MUST** whenever `activating` / change-stuck: type, progress, stuck or pending nodes; **do not** skip this call with only Describe text |
 | Nodes | `ListAllNode` | **SHOULD:** rolling and abnormal nodes |
 | Cluster health (control/CMS) | `DescribeMetricList` (ClusterStatus, etc.) | **SHOULD:** cross-check with engine |
 | Engine root cause | `allocation/explain`, `/_cat/shards` | **MUST** when Red / unassigned: steps in **sop-cluster-health** Section 1 |
@@ -62,7 +62,7 @@ In the “long `activating`” context, remember: **orchestration is waiting for
 2. **`ListActionRecords`** → task detail (distinguish from “we guessed RestartInstance”: **must come from API**).  
 3. `ListAllNode` (recommended) → corroborate with change records.  
 4. Engine: `allocation/explain`, `_cat/shards`, etc. (cluster-health Red section).  
-5. **Before risky remediation:** another snapshot of `DescribeInstance` + `ListActionRecords` if time has passed since steps 1–2 or you are about to delete indices.  
+5. **Before risky remediation:** another snapshot of `DescribeInstance` + `ListActionRecords` if time has passed since steps 1–2 or you are about to delete indices.
 6. Execute remediation → watch `_cluster/health` / CMS for intermediate states.  
 7. **After remediation:** `DescribeInstance` (+ optional `ListActionRecords`) → confirm `activating` cleared.
 

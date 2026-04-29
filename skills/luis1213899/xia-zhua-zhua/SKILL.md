@@ -1,93 +1,203 @@
 ---
 name: xia-zhua-zhua
-description: 将任意网页抓取并保存为 Markdown 文件（中文名：虾抓抓）。使用 Playwright + Turndown 引擎，支持所有网页。触发条件：用户要求抓取网页、网页转 markdown、clip 网页、虾抓抓。
+description: >
+  虾抓抓(xia-zhua-zhua) v4.0 - 超强内容抓取技能
+  支持：Markdown/PDF/多模态提取/结构化抽取/翻译/视频下载
+  触发词：抓取网页、网页转Markdown、内容抓取、虾抓抓、视频下载
+version: 4.0.0
 ---
 
-# 虾抓抓 - 网页转 Markdown（v2.1.3）
+# 虾抓抓 v4.0 - 超强内容抓取技能
 
-## 使用方式
+> 原名：xia-zhua-zhua，又称Content Catcher
 
+---
+
+## 升级亮点 (v4.0)
+
+| 新功能 | 说明 |
+|--------|------|
+| PDF导出 | 直接导出为PDF |
+| 多模态提取 | 图片/音频/视频资源 |
+| 结构化抽取 | 表格/列表/卡片智能识别 |
+| 增量监测 | 页面更新自动提醒 |
+| 翻译集成 | 抓取后自动翻译 |
+| 深度渲染 | 完整JS动态内容 |
+
+---
+
+## 核心能力
+
+### 1. 网页内容抓取
+
+| 模式 | 命令 | 说明 |
+|------|------|------|
+| 标准模式 | `node markdown-clip.js <url>` | CSS选择器 |
+| Smart模式 | `node markdown-clip.js <url> --smart` | Readability AI |
+| 分析模式 | `node markdown-clip.js <url> --analyze` | 摘要+关键词 |
+
+### 2. 视频下载
+
+| 命令 | 说明 |
+|------|------|
+| `python video_catcher_pro.py ytdlp <url>` | yt-dlp下载 |
+| `python video_catcher_pro.py m3u8 <url>` | M3U8下载 |
+
+---
+
+## v4.0 新增功能
+
+### 多模态提取
 ```bash
-# 单个网页（标准模式）
-node markdown-clip.js <url> [输出目录]
+# 提取图片资源
+node content-extractor.js <url> --images
 
-# Smart 模式（Readability AI 内容识别）
-node markdown-clip.js <url> [输出目录] --smart
-
-# 抓取 + 自动分析（摘要/关键词/洞察）
-node markdown-clip.js <url> [输出目录] --analyze
-
-# 批量并发抓取
-node batch-clip.js <url文件> [并发数] [输出目录]
-
-# 查看配置和抓取历史
-node markdown-clip.js --config
-node markdown-clip.js --log
-node markdown-clip.js --set outputDir /path
+# 提取所有媒体
+node content-extractor.js <url> --media
 ```
 
-## v2.1.2 新功能：自动抓取后分析
-
+### PDF导出
 ```bash
-node markdown-clip.js <url> --analyze
+# 导出为PDF
+node content-extractor.js <url> --pdf
+
+# Markdown + PDF双导出
+node content-extractor.js <url> --both
 ```
 
-抓取完成后自动分析文章，生成：
-
-| 分析维度 | 说明 |
-|---------|------|
-| **摘要** | TextRank 算法提取的 3-5 句核心内容 |
-| **关键词** | 高频主题词（5个） |
-| **关键洞察** | 含数据/结论/重要观点的句子 |
-| **统计** | 字数、句子数、预计阅读时间 |
-
-分析结果追加到 markdown 文件末尾。
-
-## v2.1 Smart 模式
-
-```
-node markdown-clip.js <url> --smart
-```
-
-**「教它识字」**——用 Readability 算法自动识别主内容区域，不依赖预设 CSS 选择器。
-
-| 模式 | 原理 | 适用场景 |
-|------|------|---------|
-| **标准模式** | CSS 选择器预设列表 | 大多数常规网站 |
-| **Smart 模式** | Readability 算法自动判断"这里是正文" | 从未抓过的陌生网站 |
-
-## Clip Log
-
-记录文件：`~/.clips/clips.json`
-
-```json
-{
-  "https://mp.weixin.qq.com/s/xxxxx": {
-    "url": "https://mp.weixin.qq.com/s/xxxxx",
-    "path": "C:/Users/262/Desktop/2026-04-17-mp-weixin-标题.md",
-    "title": "文章标题",
-    "clippedAt": "2026-04-17T03:30:00.000Z"
-  }
-}
-```
-
-## 反爬措施
-
-- 随机 User-Agent（4种浏览器）
-- 隐藏 `navigator.webdriver` 标志
-- 随机等待 1~3s 模拟人类访问节奏
-- 加载失败自动降级重试
-- WeChat 二维码区域自动过滤
-
-## 依赖
-
-- playwright
-- turndown
-- python + readability-lxml（Smart 模式）
-- python + scikit-learn（分析模式，可选，有则用 TF-IDF TextRank，无则降级）
-
-## 发布（维护者用）
-
+### 结构化抽取
 ```bash
-clawhub publish . --slug xia-zhua-zhua --version 2.1.3 --no-input
+# 智能识别表格
+node content-extractor.js <url> --tables
+
+# 识别列表数据
+node content-extractor.js <url> --lists
 ```
+
+### 增量监测
+```bash
+# 监测页面更新
+node content-watcher.js <url> --watch
+
+# 设置更新提醒
+node content-watcher.js <url> --watch --notify
+```
+
+### 翻译功能
+```bash
+# 翻译为英文
+node content-extractor.js <url> --translate en
+
+# 翻译为日文
+node content-extractor.js <url> --translate jp
+```
+
+---
+
+## 技术架构
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              Content Catcher v4.0                      │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
+│  │  Playwright  │  │   Turndown   │  │   yt-dlp    │    │
+│  │  (渲染)      │  │ (Markdown)  │  │  (视频)     │    │
+│  └──────┬──────┘  └──────┬──────┘  └─────────────┘    │
+│         │                 │                            │
+│  ┌──────▼──────┐  ┌──────▼──────┐                     │
+│  │ 多模态提取   │  │  结构化    │                     │
+│  │ 图片/音频   │  │  表格/列表  │                     │
+│  └─────────────┘  └─────────────┘                     │
+│         │                                                    │
+│  ┌──────▼──────┐                                        │
+│  │  输出格式   │                                        │
+│  │ Markdown   │                                        │
+│  │ PDF        │                                        │
+│  │ JSON       │                                        │
+│  └─────────────┘                                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 升级对比
+
+| 功能 | v2.x | v3.x | v4.x |
+|------|-------|-------|-------|
+| Markdown | ✅ | ✅ | ✅ |
+| Smart模式 | ✅ | ✅ | ✅ |
+| 分析 | ✅ | ✅ | ✅ |
+| 视频下载 | - | ✅ | ✅ |
+| PDF导出 | - | - | ✅ |
+| 多模态 | - | - | ✅ |
+| 结构化 | - | - | ✅ |
+| 增量监测 | - | - | ✅ |
+| 翻译 | - | - | ✅ |
+
+---
+
+## 依赖工具
+
+| 工具 | 状态 | 用途 |
+|------|------|------|
+| Node.js | ✅ | 运行环境 |
+| Playwright | ✅ | 页面渲染 |
+| Turndown | ✅ | HTML→Markdown |
+| Python | ✅ | 分析/翻译 |
+| yt-dlp | ✅ | 视频下载 |
+| weasyprint | ✅ | PDF导出 |
+| googletrans | ⬜ | 翻译(可选) |
+
+---
+
+## 使用示例
+
+### 基础抓取
+```bash
+node xia-zhua-zhua/markdown-clip.js https://example.com --smart
+```
+
+### 多模态+PDF
+```bash
+node content-extractor.js https://example.com --media --pdf
+```
+
+### 视频下载
+```bash
+python video-catcher/video_catcher_pro.py ytdlp https://b.com/video
+```
+
+---
+
+## 文件结构
+
+```
+content-catcher/
+├── SKILL.md                    # 本文档
+├── xia-zhua-zhua/            # 虾抓抓模块
+│   ├── markdown-clip.js       # 主脚本
+│   └── ...
+└── video-catcher/            # 视频模块
+    ├── video_catcher_pro.py  # 主脚本
+    └── ...
+```
+
+---
+
+## 更新日志
+
+### v4.0.0 (最新)
+- 多模态内容提取
+- PDF导出
+- 结构化数据抽取
+- 增量更新监测
+- 翻译集成
+
+### v3.0.0
+- 融合Video Catcher
+
+### v2.1.3
+- Smart模式
+- 分析功能

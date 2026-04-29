@@ -19,6 +19,7 @@ export interface PalaceWriteInput {
   importance?: Importance;
   project?: string;
   auto_name?: boolean;
+  tags?: string[];
 }
 
 export interface PalaceWriteResult {
@@ -29,6 +30,7 @@ export interface PalaceWriteResult {
   importance: Importance;
   fan_out: { updated_rooms: string[]; new_edges: number };
   generated_name?: string;
+  file_path?: string;
 }
 
 export async function palaceWrite(input: PalaceWriteInput): Promise<PalaceWriteResult> {
@@ -78,7 +80,7 @@ export async function palaceWrite(input: PalaceWriteInput): Promise<PalaceWriteR
       const entry = `\n### ${timestamp.slice(0, 10)} — ${importance}\n\n${input.content}\n`;
       fs.writeFileSync(targetFile, existing + entry, "utf-8");
     } else {
-      const fm = generateFrontmatter({ room: input.room, topic: targetTopic, created: timestamp, importance });
+      const fm = generateFrontmatter({ room: input.room, topic: targetTopic, created: timestamp, importance, tags: input.tags ?? [] });
       fs.writeFileSync(targetFile, `${fm}# ${input.room} / ${targetTopic}\n\n${input.content}\n`, "utf-8");
     }
   }
@@ -98,5 +100,6 @@ export async function palaceWrite(input: PalaceWriteInput): Promise<PalaceWriteR
     importance,
     fan_out: { updated_rooms: fanOutResult.updatedRooms, new_edges: fanOutResult.newEdges },
     generated_name: generatedName,
+    file_path: targetFile,
   };
 }

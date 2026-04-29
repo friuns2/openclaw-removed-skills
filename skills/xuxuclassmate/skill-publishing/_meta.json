@@ -1,11 +1,17 @@
 {
   "owner": "xuxuclassmate",
   "slug": "skill-publishing",
-  "displayName": "Hermes 技能发布指南",
+  "displayName": "Hermes Skill Publishing Guide",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776494589150,
-    "commit": "https://github.com/openclaw/skills/commit/f1ad069a6677e059b41604336c814867c564c735"
+    "version": "1.1.1",
+    "publishedAt": 1776836617013,
+    "commit": "https://github.com/openclaw/skills/commit/b3b838cf595214e42bf411f789c8abafaaf1afb3"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776494589150,
+      "commit": "https://github.com/openclaw/skills/commit/f1ad069a6677e059b41604336c814867c564c735"
+    }
+  ]
 }

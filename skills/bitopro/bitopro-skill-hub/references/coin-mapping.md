@@ -74,3 +74,69 @@ A coin in this mapping may return `market_cap_rank: null` or `market_cap: 0` fro
 ## Handling Pairs Outside This Mapping
 
 If `get_bitopro_pairs` returns a pair whose `base` is not listed in this mapping, treat it as out of scope: exclude it from the main table and flag it separately under "⚠️ 不在映射內". Refresh this mapping periodically (see below) to keep it aligned with the live BitoPro listing.
+
+## News matching patterns (for Tool 8)
+
+Used by `get_bitopro_relevant_news` to match articles to BitoPro coins. Each coin has multiple patterns: ticker, English name(s), 繁中 name(s). Patterns are **case-insensitive** with **word boundaries** for tickers (so `BTC` matches `BTC` but not `BTCUSD-something-other`).
+
+> **Order matters**: longer / more specific patterns must be checked first to avoid false matches. For example, check `Bitcoin Cash` before `Bitcoin` (else BCH articles get tagged as BTC).
+
+| Symbol | Patterns (ticker / EN name / 中文名) |
+|--------|-------------------------------------|
+| USDT | `\bUSDT\b`, `\bTether\b`, `泰達(幣\|)` |
+| USDC | `\bUSDC\b`, `\bUSD Coin\b` |
+| BCH  | `\bBCH\b`, `Bitcoin Cash`, `比特幣現金` |
+| SHIB | `\bSHIB\b`, `Shiba Inu`, `柴犬幣?` |
+| DOGE | `\bDOGE\b`, `Dogecoin`, `狗狗幣` |
+| KAIA | `\bKAIA\b` |
+| BITO | `\bBITO\b` |
+| APE  | `\bAPE\b`, `Apecoin`, `ApeCoin` |
+| POL  | `\bPOL\b`, `\bMATIC\b`, `Polygon` |
+| TON  | `\bTON\b`, `Toncoin`, `The Open Network` |
+| TRX  | `\bTRX\b`, `\bTron\b`, `波場` |
+| LTC  | `\bLTC\b`, `Litecoin`, `萊特幣` |
+| ADA  | `\bADA\b`, `Cardano`, `卡爾達諾` |
+| SOL  | `\bSOL\b`, `Solana`, `索拉納` |
+| BNB  | `\bBNB\b`, `Binance Coin`, `幣安幣` |
+| XRP  | `\bXRP\b`, `Ripple`, `瑞波` |
+| ETH  | `\bETH\b`, `Ethereum`, `以太(坊\|幣\|)` |
+| BTC  | `\bBTC\b`, `Bitcoin`, `比特幣` |
+
+> Note `MATIC` is included under POL because legacy English news still uses the old ticker. Some articles refer to "Polygon (MATIC)" — both forms should hit POL.
+
+### Reference implementation (Python)
+
+```python
+import re
+
+PATTERNS = [
+    ('USDT', [r'\bUSDT\b', r'\bTether\b', r'泰達(幣|)']),
+    ('USDC', [r'\bUSDC\b', r'\bUSD Coin\b']),
+    ('BCH',  [r'\bBCH\b', r'Bitcoin Cash', r'比特幣現金']),
+    # ... (longer first, shorter last — see table above)
+    ('ETH',  [r'\bETH\b', r'Ethereum', r'以太(坊|幣|)']),
+    ('BTC',  [r'\bBTC\b', r'Bitcoin', r'比特幣']),
+]
+COMPILED = [(sym, [re.compile(p, re.IGNORECASE) for p in pats]) for sym, pats in PATTERNS]
+
+def find_coins(text: str) -> list[str]:
+    matched, seen = [], set()
+    for sym, regexes in COMPILED:
+        if any(r.search(text) for r in regexes):
+            if sym not in seen:
+                matched.append(sym); seen.add(sym)
+    return matched
+```
+
+### Maintenance
+
+When BitoPro lists a new coin:
+1. Add full mapping (symbol, name, CoinGecko ID, CoinPaprika ID) to the table at the top.
+2. Add ticker / English name / 中文名 patterns to the **News matching patterns** table above.
+3. Update T3's canonical `ids=` string in SKILL.md.
+4. Re-run T8 evals to verify the new coin appears in news matches.
+
+When a coin is delisted from BitoPro:
+1. Remove from the top mapping table.
+2. Remove from the News matching patterns table (so news no longer surfaces it).
+3. Keep an internal note in `CLAUDE.md` about the delisting (do NOT publish).

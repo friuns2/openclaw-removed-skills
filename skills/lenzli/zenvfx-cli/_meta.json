@@ -3,9 +3,15 @@
   "slug": "zenvfx-cli",
   "displayName": "ZenVFX CLI",
   "latest": {
-    "version": "1.0.8",
-    "publishedAt": 1776264789447,
-    "commit": "https://github.com/openclaw/skills/commit/09af4bb409aaa72bf21f20d4adfe018651941c88"
+    "version": "1.0.16",
+    "publishedAt": 1777343699432,
+    "commit": "https://github.com/openclaw/skills/commit/fab6c4c3829b0cce3d79b1b5c95e4d6eb35b6d36"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.8",
+      "publishedAt": 1776264789447,
+      "commit": "https://github.com/openclaw/skills/commit/09af4bb409aaa72bf21f20d4adfe018651941c88"
+    }
+  ]
 }

@@ -12,6 +12,8 @@
 
 **降级**：某一围栏 ``mmdc`` 生图失败时**不中断**：该处**保留原** `` ```mermaid`` … `` ``` `` 围栏；其余块照常渲染。仍写出 .md 并**照常尝试** ``md_to_docx.py``（Word 中失败块以代码块形式出现）。
 
+**清晰度**：默认对 ``mmdc`` 传入较大视口（``-w`` / ``-H``）与 ``-s 2``（Puppeteer 像素密度），PNG 在 Word 中按约 5.5 英寸宽嵌入时更锐利。可用 ``--mmdc-scale 3`` 等进一步提高（文件更大）。
+
 用法：
   python tools/mermaid_render.py -i draft.md -o disclosure.md
   # 默认在同目录生成 disclosure.docx；失败时 stderr 会给出可复制的 md_to_docx 命令
@@ -61,7 +63,33 @@ def _find_mmdc_invocation() -> tuple[list[str], bool]:
     return ["npx", "-y", "@mermaid-js/mermaid-cli", "mmdc"], False
 
 
-def _render_one_mermaid(mermaid_source: str, png_path: Path, mmdc_base: list[str], *, use_shell: bool) -> None:
+def _mmdc_extra_args(
+    *,
+    scale: float,
+    width: int,
+    height: int,
+) -> list[str]:
+    """传给 mmdc 的分辨率相关参数（-s 为 Puppeteer deviceScaleFactor，显著影响 PNG 清晰度）。"""
+    return [
+        "-s",
+        str(scale),
+        "-w",
+        str(width),
+        "-H",
+        str(height),
+    ]
+
+
+def _render_one_mermaid(
+    mermaid_source: str,
+    png_path: Path,
+    mmdc_base: list[str],
+    *,
+    use_shell: bool,
+    scale: float,
+    width: int,
+    height: int,
+) -> None:
     png_path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
         mode="w",
@@ -72,6 +100,7 @@ def _render_one_mermaid(mermaid_source: str, png_path: Path, mmdc_base: list[str
         tmp.write(mermaid_source.strip() + "\n")
         tmp_path = Path(tmp.name)
     try:
+        extra = _mmdc_extra_args(scale=scale, width=width, height=height)
         if use_shell:
             parts = [
                 *mmdc_base,
@@ -81,6 +110,7 @@ def _render_one_mermaid(mermaid_source: str, png_path: Path, mmdc_base: list[str
                 str(png_path),
                 "-b",
                 "white",
+                *extra,
             ]
             cmd = " ".join(shlex.quote(p) for p in parts)
             r = subprocess.run(
@@ -99,6 +129,7 @@ def _render_one_mermaid(mermaid_source: str, png_path: Path, mmdc_base: list[str
                 str(png_path),
                 "-b",
                 "white",
+                *extra,
             ]
             r = subprocess.run(
                 cmd,
@@ -125,6 +156,9 @@ def render_markdown_mermaid(
     *,
     out_md_path: Path,
     assets_rel: str,
+    mmdc_scale: float = 2.0,
+    mmdc_width: int = 1400,
+    mmdc_height: int = 1050,
 ) -> tuple[str, int, int]:
     """
     返回 (新 markdown 全文, 成功转为 PNG 的块数, 生图失败而保留围栏的块数)。
@@ -156,7 +190,15 @@ def render_markdown_mermaid(
             fname = f"fig_{ok + 1:03d}.png"
             png_path = assets_dir / fname
             try:
-                _render_one_mermaid("".join(body), png_path, mmdc_base, use_shell=use_shell)
+                _render_one_mermaid(
+                    "".join(body),
+                    png_path,
+                    mmdc_base,
+                    use_shell=use_shell,
+                    scale=mmdc_scale,
+                    width=mmdc_width,
+                    height=mmdc_height,
+                )
             except Exception as e:
                 failed += 1
                 print(
@@ -280,7 +322,34 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="不生成 Word，仅输出替换图片后的 Markdown",
     )
+    p.add_argument(
+        "--mmdc-scale",
+        type=float,
+        default=2.0,
+        metavar="N",
+        help="mmdc -s：Puppeteer 缩放（默认 2，约 2 倍像素密度；越大越清晰但文件更大）",
+    )
+    p.add_argument(
+        "--mmdc-width",
+        type=int,
+        default=1400,
+        metavar="PX",
+        help="mmdc -w：渲染视口宽度像素（默认 1400，复杂 flowchart 不易裁切）",
+    )
+    p.add_argument(
+        "--mmdc-height",
+        type=int,
+        default=1050,
+        metavar="PX",
+        help="mmdc -H：渲染视口高度像素（默认 1050）",
+    )
     args = p.parse_args(argv)
+    if args.mmdc_scale <= 0:
+        print("错误：--mmdc-scale 须为正数", file=sys.stderr)
+        return 1
+    if args.mmdc_width < 400 or args.mmdc_height < 400:
+        print("错误：--mmdc-width / --mmdc-height 建议不小于 400", file=sys.stderr)
+        return 1
 
     in_path = args.input.resolve()
     if not in_path.is_file():
@@ -299,6 +368,9 @@ def main(argv: list[str] | None = None) -> int:
         md,
         out_md_path=out_path,
         assets_rel=args.assets_dir.strip("/\\") or "mermaid_figures",
+        mmdc_scale=args.mmdc_scale,
+        mmdc_width=args.mmdc_width,
+        mmdc_height=args.mmdc_height,
     )
 
     out_path.write_text(new_md, encoding="utf-8")

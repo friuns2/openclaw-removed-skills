@@ -1,0 +1,11 @@
+{
+  "owner": "tianheihei002",
+  "slug": "cron-system-manager",
+  "displayName": "Cron System Manager",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776526827963,
+    "commit": "https://github.com/openclaw/skills/commit/6d532f8bc2d03b18cca510a4b02a35c83faa792f"
+  },
+  "history": []
+}

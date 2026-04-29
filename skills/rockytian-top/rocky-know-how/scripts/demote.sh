@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 降级检查脚本 v2.8.3
+# rocky-know-how 降级检查脚本 v3.3.0
 # 用法: demote.sh [--dry-run] [--days N]
 # 检查未使用模式，降级到 WARM（30天）或归档到 COLD（90天）
 # 永不删除数据
@@ -38,7 +38,7 @@ ARCHIVE_DIR="$SHARED_DIR/archive"
 DOMAINS_DIR="$SHARED_DIR/domains"
 PROJECTS_DIR="$SHARED_DIR/projects"
 
-echo "=== 降级检查 (v2.8.3) ==="
+echo "=== 降级检查 (v3.3.0) ==="
 echo "降级阈值: ${DAYS_THRESHOLD} 天"
 echo "归档阈值: ${ARCHIVE_THRESHOLD} 天"
 echo ""

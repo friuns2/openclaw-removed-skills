@@ -1,0 +1,11 @@
+{
+  "owner": "alvisdunlop",
+  "slug": "alvis-ai-image-generation",
+  "displayName": "Ai Image Generation",
+  "latest": {
+    "version": "2.0.0",
+    "publishedAt": 1776237309118,
+    "commit": "https://github.com/openclaw/skills/commit/ecb97df572e7f8a92bf285d071cb4ac4bc8d4c2a"
+  },
+  "history": []
+}

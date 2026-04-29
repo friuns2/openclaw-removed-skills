@@ -1,16 +1,18 @@
 ---
-name: pangolinfo-listing-optimization
+name: pangolinfo-amazon-listing-optimization
 description: >
   This skill serves as an advanced Amazon Listing Optimization & Copywriting Engine (powered by Pangolinfo API). It is strictly designed to craft high-conversion, data-driven Amazon listings (Title, Bullet Points, Backend Search Terms). It performs deep Voice of Customer (VOC) analysis by scraping Amazon Reviews and external social media (Reddit/TikTok/Quora), executing pain-point reversal strategies, and conducting strict WIPO trademark risk screening before generating the final copy.
 metadata:
   openclaw:
+    emoji: "📝"
+    os: ["darwin", "linux"]
     requires:
       env:
         - PANGOLINFO_API_KEY
         - PANGOLINFO_EMAIL
         - PANGOLINFO_PASSWORD
       notes: "Auth: set PANGOLINFO_API_KEY (recommended) OR PANGOLINFO_EMAIL + PANGOLINFO_PASSWORD. All bundled scripts share the same credentials."
-tags: [amazon, listing-optimization, seo, copywriting, keyword-research, ecommerce, fba, content-generation, voc, sentiment-analysis, 亚马逊, listing优化, 关键词, 跨境电商]
+tags: ["amazon", "listing-optimization", "seo", "copywriting", "keyword-research", "ecommerce", "fba", "content-generation", "voc", "sentiment-analysis", "亚马逊", "listing优化", "关键词", "跨境电商"]
 version: 2.0.0
 homepage: https://pangolinfo.com/?referrer=clawhub_listing_optimization
 ---
@@ -36,7 +38,7 @@ This is a **Super Skill** that bundles multiple underlying Pangolinfo APIs out-o
 
 **❌ WHEN NOT TO USE (Strict Negative Boundaries):**
 
-- **DO NOT** use this skill if the user is asking to find a brand-new niche from scratch (Route to `pangolinfo-amazon-product-discovery`).
+- **DO NOT** use this skill if the user is asking to find a brand-new niche from scratch (Route to `pangolinfo-amazon-product-explorer`).
 - **DO NOT** use this skill if the user asks to monitor daily competitor price drops, daily ranking changes, or BSR fluctuations (Route to `pangolinfo-daily-competitor-radar`).
 
 ---

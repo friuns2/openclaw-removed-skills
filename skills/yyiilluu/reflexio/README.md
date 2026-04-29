@@ -1,137 +1,84 @@
-# Reflexio OpenClaw-Embedded Plugin
+# Reflexio Embedded
 
-A lightweight Openclaw plugin that delivers Reflexio-style user profile and playbook capabilities entirely within Openclaw's native primitives — no Reflexio server required.
-
-## Table of Contents
-
-- [How It Works](#how-it-works)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [First-use Setup](#first-use-setup)
-- [Configuration](#configuration)
-- [Comparison with Other Reflexio Integrations](#comparison-with-other-reflexio-integrations)
-- [Uninstall](#uninstall)
-- [Further Reading](#further-reading)
-
-## How It Works
-
-The plugin captures two kinds of memory:
-
-- **Profiles** — durable user facts (diet, preferences, timezone, role). Stored as `.md` files under `.reflexio/profiles/` with a TTL.
-- **Playbooks** — procedural rules learned from corrections (user corrects → agent adjusts → user confirms → rule written). Stored under `.reflexio/playbooks/`.
-
-Three flows capture memory at different moments:
-
-- **Flow A (in-session profile)**: agent detects a preference/fact/config in the user message and writes immediately.
-- **Flow B (in-session playbook)**: agent recognizes correction+confirmation multi-turn pattern and writes the rule.
-- **Flow C (session-end batch)**: hook fires on `session:compact:before` / `command:stop` / `command:reset`; spawns a sub-agent that extracts from the full transcript, runs shallow pairwise dedup, and writes/deletes `.md` files.
-
-A daily 3am cron job runs full-sweep consolidation (n-way cluster merges) across all files.
-
-All retrieval is via Openclaw's memory engine — vector + FTS + MMR + temporal decay. When Active Memory is enabled, relevant profiles/playbooks are auto-injected into each turn.
+Openclaw plugin for user profile and playbook extraction — learns your preferences, corrections, and workflows across sessions using Openclaw's native memory engine, hooks, and sub-agents. No Reflexio server required.
 
 ## Prerequisites
 
-- [OpenClaw](https://openclaw.ai) installed and `openclaw` CLI on PATH
-- Node.js and npm (for the hook handler)
-- macOS or Linux (Windows via WSL)
-- A bash-compatible shell (install/uninstall scripts and `reflexio-write.sh` use `#!/usr/bin/env bash`)
-- Strongly recommended:
-  - An embedding provider API key (OpenAI, Gemini, Voyage, or Mistral) for vector search
-  - The `active-memory` plugin enabled (auto-retrieval into turns)
+- [Openclaw CLI](https://docs.openclaw.ai) (>= 2026.3.24)
+- Node.js
 
-The plugin works without active-memory and without an embedding key — with degraded retrieval quality. See `references/architecture.md` for degradation modes.
-
-## Installation
-
-The default install is minimal — it links the plugin and copies workspace files, nothing more. Host-wide side effects (enabling `active-memory`, registering the cron, restarting the gateway) are behind explicit opt-in flags so shared installs can audit the blast radius.
+## Install
 
 ```bash
-# Minimal install — plugin + workspace files only:
-./scripts/install.sh
+# 1. Install and enable the plugin
+openclaw plugins install /path/to/this/directory
+openclaw plugins enable reflexio-embedded
 
-# Full install (same behavior as pre-opt-in versions):
-./scripts/install.sh --all
+# 2. Enable the active-memory plugin (required for memory search)
+openclaw plugins enable active-memory
+openclaw config set plugins.entries.active-memory.config.agents '["*"]'
 
-# Or enable pieces individually:
-./scripts/install.sh --enable-active-memory --enable-cron --restart-gateway
+# 3. Register .reflexio/ as a memory search path
+openclaw config set agents.defaults.memorySearch.extraPaths '[".reflexio/"]' --strict-json
+
+# 4. Restart the gateway to pick up changes
+openclaw gateway restart
 ```
 
-What `install.sh` always does:
-1. Registers and enables the `reflexio-embedded` plugin itself
-2. Copies `SKILL.md`, the consolidate command, and agent definitions to the workspace
-3. Copies prompts and helper scripts
+Verify it loaded:
 
-What it does **only with the matching flag**:
-| Flag | Effect | Why it's opt-in |
-|---|---|---|
-| `--enable-active-memory` | Enables the `active-memory` plugin host-wide | Host-wide change that affects every agent on the instance |
-| `--enable-cron` | Registers a daily 3am consolidation cron | Adds a scheduled job (and the extractor sub-agent it spawns will hit the configured LLM provider) |
-| `--restart-gateway` | Runs `openclaw gateway restart` | Affects other agents/sessions on the host; most users prefer to time this themselves |
-
-Per-agent config (active-memory targeting, `.reflexio/` extraPath) is NOT done at install — it happens at first use via the SKILL.md bootstrap. See [`SECURITY.md`](SECURITY.md) for the full threat model.
-
-## First-use Setup
-
-The first time an agent invokes the `reflexio-embedded` skill, it runs a one-time bootstrap:
-
-1. Probes current config via `openclaw config get` + `openclaw memory status --deep`.
-2. For any missing prereq, asks the user for approval before running `openclaw config set` via the `exec` tool.
-3. On success, creates `.reflexio/.setup_complete_<agentId>` marker — subsequent sessions skip.
-
-This guarantees zero manual `openclaw.json` editing. If `exec` is denied by admin policy, the skill prints the exact commands for the user to run manually.
-
-## Configuration
-
-Defaults live in `config.json`. To override, use one of:
-
-1. Edit `config.json` directly
-2. Use `openclaw config` for overrides persisted at the Openclaw layer
-
-(env var overrides are planned for v2; see `references/future-work.md`)
-
-Tunables:
-
-| Knob | Default | What it controls |
-|---|---|---|
-| `dedup.shallow_threshold` | 0.7 | Similarity above which in-session writes trigger pairwise dedup |
-| `dedup.full_threshold` | 0.75 | Similarity cluster-member cutoff in daily consolidation |
-| `dedup.top_k` | 5 | How many neighbors to consider |
-| `ttl_sweep.on_bootstrap` | `true` | Whether to sweep expired profiles on each agent bootstrap |
-| `consolidation.cron` | `"0 3 * * *"` | Daily consolidation schedule |
-| `extraction.subagent_timeout_seconds` | 120 | Flow C sub-agent timeout |
-
-### Tuning guidance
-
-| Symptom | Likely cause | Knob |
-|---|---|---|
-| Duplicate `.md` files accumulating between cron runs | Shallow threshold too high | Lower `shallow_threshold` (e.g., 0.65) |
-| Good-but-distinct entries getting merged | Thresholds too low | Raise both thresholds (e.g., 0.8) |
-| Daily consolidation takes too long | Too many / too broad clusters | Raise `full_threshold`, cap cluster size |
-| Session-end latency slightly noticeable | Too many shallow dedup LLM calls | Lower `top_k` to 3 |
-
-## Comparison with Other Reflexio Integrations
-
-See `references/comparison.md` for a full matrix.
-
-- **`integrations/openclaw-embedded/`** (this plugin): self-contained; no Reflexio server; single-user.
-- **`integrations/openclaw/`** (federated): requires running Reflexio server; multi-user; cross-instance aggregation.
-
-Both can coexist in the same Openclaw instance, but installing both serves no purpose — pick one.
+```bash
+openclaw plugins inspect reflexio-embedded
+```
 
 ## Uninstall
 
 ```bash
-./scripts/uninstall.sh                     # preserves .reflexio/ user data
-./scripts/uninstall.sh --purge             # also deletes .reflexio/ user data
-./scripts/uninstall.sh --restart-gateway   # restart the gateway when done
+# 1. Remove the plugin
+openclaw plugins disable reflexio-embedded
+openclaw plugins uninstall --force reflexio-embedded
+
+# 2. Clean up state files
+rm -f ~/.openclaw/reflexio-consolidation-state.json
+
+# 3. Restart the gateway
+openclaw gateway restart
 ```
 
-## Further Reading
+Your `.reflexio/` user data (profiles and playbooks) is preserved by default. To remove it:
 
-- [Design spec](../../../../docs/superpowers/specs/2026-04-16-reflexio-openclaw-embedded-plugin-design.md)
-- [Implementation plan](../../../../docs/superpowers/plans/2026-04-16-reflexio-openclaw-embedded-plugin.md)
-- [Architecture deep-dive](references/architecture.md)
-- [Prompt porting notes](references/porting-notes.md)
-- [Future work / v2 deferrals](references/future-work.md)
-- [Manual testing guide](TESTING.md)
+```bash
+rm -rf .reflexio/
+```
+
+## What it does
+
+- **Profile extraction** — automatically captures user preferences, facts, and corrections from conversations into `.reflexio/profiles/`
+- **Playbook capture** — records recurring workflows and patterns into `.reflexio/playbooks/`
+- **Dedup and contradiction resolution** — new entries are compared against existing ones via LLM; overlapping content is merged, contradictions resolved (new wins), and non-contradicted facts preserved
+- **Consolidation** — periodic heartbeat-triggered sweep that clusters similar entries and merges duplicates
+- **TTL management** — profiles can have time-to-live values; expired entries are swept automatically
+
+## Configuration
+
+Override defaults in your `openclaw.json`:
+
+```json
+{
+  "plugins": {
+    "entries": {
+      "reflexio-embedded": {
+        "config": {
+          "dedup": { "shallow_threshold": 0.4, "top_k": 5 },
+          "consolidation": { "threshold_hours": 24 }
+        }
+      }
+    }
+  }
+}
+```
+
+## Learn more
+
+Full project source, design docs, and development setup:
+https://github.com/ReflexioAI/reflexio/tree/main/reflexio/integrations/openclaw-embedded

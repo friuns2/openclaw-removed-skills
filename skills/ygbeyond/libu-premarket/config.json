@@ -5,36 +5,17 @@
     "max_total_mv_wan": 25000000
   },
   "filter_financial": {
-    "min_netprofit_yoy": 0.3,
-    "min_or_yoy": 0.2,
-    "min_dt_netprofit_yoy": 0.2,
+    "min_netprofit_yoy": 30,
+    "min_or_yoy": 20,
+    "min_dt_netprofit_yoy": 20,
     "min_roe": 8
   },
   "scoring": {
-    "weights": {
-      "finance": 0.5,
-      "technical": 0.5
-    },
-    "growth_weights": {
-      "dt_netprofit_yoy": 0.4,
-      "netprofit_yoy": 0.3,
-      "or_yoy": 0.3
-    },
-    "technical_bonuses": {
-      "rsi_range": [
-        40,
-        70
-      ],
-      "rsi_bonus": 10,
-      "macd_golden_bonus": 15,
-      "macd_red_bonus": 10
-    }
+    "weights": {"finance": 0.5, "technical": 0.5},
+    "growth_weights": {"dt_netprofit_yoy": 0.4, "netprofit_yoy": 0.3, "or_yoy": 0.3},
+    "technical_bonuses": {"rsi_range": [40, 70], "rsi_bonus": 10, "macd_golden_bonus": 15, "macd_red_bonus": 10}
   },
-  "blacklist_prefixes": [
-    "8",
-    "4",
-    "9"
-  ],
+  "blacklist_prefixes": ["8", "4", "9"],
   "cache": {
     "root_dir": "./cache_data"
   },

@@ -1,0 +1,11 @@
+{
+  "owner": "toliuweijing",
+  "slug": "draft-agent-loop",
+  "displayName": "Draft Agent Loop",
+  "latest": {
+    "version": "1.6.0",
+    "publishedAt": 1776754669549,
+    "commit": "https://github.com/openclaw/skills/commit/a6b2038e9150e25a3ff8ffcb1541978c85f30cd5"
+  },
+  "history": []
+}

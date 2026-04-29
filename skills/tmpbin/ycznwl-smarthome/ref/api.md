@@ -319,9 +319,8 @@ All other fields use defaults when omitted.
 **Response**: Full workflow object with server-assigned UUID and remapped flow_data.
 
 > **Security — Review before enabling**: Before calling `/validate` and `/enable`, inspect
-> the imported workflow JSON for `http_request` nodes with unexpected external URLs,
-> `mqtt_publish` nodes targeting remote brokers, or `webhook` triggers. Only import
-> workflows from sources you trust.
+> the imported workflow JSON for off-LAN HTTP destinations, MQTT brokers outside the trusted
+> LAN, webhook triggers, or embedded secrets. Only import workflows from sources you trust.
 
 > **IMPORTANT — Verify import response**: After import, check the response body to confirm
 > `node_subtype` is non-empty for all nodes. If it is empty `""`, you likely used the wrong
@@ -485,6 +484,33 @@ POST /automation/executions/:uuid/cancel
 ```
 
 Cancels a running execution.
+
+---
+
+## Sun Times Endpoints
+
+
+### Get Today's Sun Times
+
+```
+GET /system/sun-times
+```
+
+Query params:
+- `date` (string, optional) — Date in `YYYY-MM-DD` format. Default: today
+- `tz` (string, optional) — Timezone override (e.g. `"Asia/Shanghai"`)
+
+**Response**:
+```json
+{
+  "latitude": 31.2304,
+  "longitude": 121.4737,
+  "date": "2025-04-24",
+  "sunrise": "2025-04-24T05:23:00+08:00",
+  "sunset": "2025-04-24T18:31:00+08:00",
+  "timezone": "Asia/Shanghai"
+}
+```
 
 ---
 

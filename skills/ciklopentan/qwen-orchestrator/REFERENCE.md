@@ -9,7 +9,7 @@ Use this file when debugging runtime failures, daemon issues, auth problems, or 
 - `ask-puppeteer.js` — main runtime
 - `qwen-daemon.js` — persistent browser daemon for fast startup
 - `auth-check.js` — Qwen-specific auth detection
-- `.qwen.json` — runtime config overrides
+- `.qwen.json` — runtime config overrides (including `preferredModel`)
 
 ## Expected Files
 - `.daemon-ws-endpoint` — daemon websocket endpoint
@@ -74,6 +74,7 @@ bash scripts/test-mode-matrix.sh
 - Qwen DOM/selectors may drift.
 - Daemon mode depends on a valid `.daemon-ws-endpoint`.
 - Search toggle may need selector updates if chat.qwen.ai UI changes.
+- Model selector may need selector updates if Qwen changes the model-picker UI or renames `Qwen3.6-Max-Preview`.
 - Browser auth state is profile-backed; profile corruption can require re-login.
 - Local mode and daemon mode currently share one Chromium profile. Do not run local mode while `qwen-daemon` is active; use `--daemon` or stop the daemon first.
 - Restored follow-up chats can briefly show a valid URL and composer before prior messages hydrate; this shell-only state is unsafe for follow-up submit and must be waited out or treated as recovery-needed.

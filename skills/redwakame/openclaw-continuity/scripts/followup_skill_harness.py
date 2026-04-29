@@ -28,7 +28,7 @@ CONFIG_PATH_RAW = os.environ.get("PERSONAL_HOOKS_OPENCLAW_CONFIG_PATH", "").stri
 CONFIG_PATH = Path(CONFIG_PATH_RAW).expanduser() if CONFIG_PATH_RAW else PACKAGE_ROOT / "examples" / "openclaw.sample.json"
 REPORT_DIR_RAW = os.environ.get("PERSONAL_HOOKS_REPORT_DIR", "").strip()
 REPORT_DIR = Path(REPORT_DIR_RAW).expanduser() if REPORT_DIR_RAW else PACKAGE_ROOT / "harness-reports"
-TAIPEI = timezone(timedelta(hours=8))
+TEST_TZ = timezone(timedelta(hours=8))
 DIRECT_SESSION_KEY = os.environ.get("PERSONAL_HOOKS_TEST_SESSION_KEY", "agent:main:frontstage-web:test-user")
 SKILL_HEADINGS = []
 for heading in (
@@ -41,7 +41,16 @@ for heading in (
 
 
 def now_iso() -> str:
-    return datetime.now(TAIPEI).isoformat(timespec="seconds")
+    return datetime.now(TEST_TZ).isoformat(timespec="seconds")
+
+
+def test_tz_name() -> str:
+    offset = TEST_TZ.utcoffset(None) or timedelta(0)
+    total_minutes = int(offset.total_seconds() // 60)
+    sign = "+" if total_minutes >= 0 else "-"
+    abs_minutes = abs(total_minutes)
+    hours, minutes = divmod(abs_minutes, 60)
+    return f"UTC{sign}{hours:02d}:{minutes:02d}"
 
 
 def ensure_parent(path: Path) -> None:
@@ -425,7 +434,7 @@ class Harness:
     def run_casual_chat_case(self) -> dict:
         self.reset_case()
         case_id = "casual_chat"
-        now_dt = datetime(2026, 3, 19, 1, 20, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 1, 20, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         turn = self.run_user_turn(case_id, "casual-session", "好累喔，今天好忙。", now_dt, 1)
         after = self.snapshot(now_dt)
@@ -458,7 +467,7 @@ class Harness:
     def run_parked_topic_case(self) -> dict:
         self.reset_case()
         case_id = "parked_topic"
-        now_dt = datetime(2026, 3, 19, 1, 30, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 1, 30, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         turn1 = self.run_user_turn(case_id, "parked-session", "我先把這件事放妳這裡，晚點再接，不用現在展開。", now_dt, 1)
         turn2 = self.run_user_turn(case_id, "parked-session", "是工作上的，明天我回來再補。", now_dt + timedelta(minutes=3), 2)
@@ -496,7 +505,7 @@ class Harness:
     def run_watchful_state_case(self) -> dict:
         self.reset_case()
         case_id = "watchful_state"
-        now_dt = datetime(2026, 3, 19, 1, 45, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 1, 45, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         turn = self.run_user_turn(case_id, "watchful-session", "我現在真的很累，但不想被勸睡，妳先陪我放著。", now_dt, 1)
         hook_store = self.ph.load_hooks()
@@ -521,6 +530,7 @@ class Harness:
         result["actual_class"] = (target or {}).get("event_kind")
         result["actual_memory_layer"] = "tracked_followup" if result["incident_delta"] >= 0 else "staged_memory"
         result["actual_event_chain_fields"] = event_chain_fields(target or {})
+        result["actual_hook_event_chain_fields"] = event_chain_fields(followup.get("hook") or {})
         result["actual_followup_dispatch"] = followup
         result["actual_followup_reply_continuity"] = {
             "selected_summary": (continuity_record or {}).get("normalized_seed_summary"),
@@ -543,6 +553,7 @@ class Harness:
             and continuity_ok
             and result["this_reply_used_schedule_context"]
             and bool(result["actual_daily_memory_trace"])
+            and all(field in result["actual_hook_event_chain_fields"] for field in ("context_before", "event_core", "immediate_result", "followup_focus"))
         )
         result["pass/fail"] = "pass" if is_pass else "fail"
         result["failure_reason"] = "" if is_pass else "watchful state failed tracking, natural follow-up, or continuity"
@@ -551,7 +562,7 @@ class Harness:
     def run_delegated_task_case(self) -> dict:
         self.reset_case()
         case_id = "delegated_task"
-        now_dt = datetime(2026, 3, 19, 2, 5, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 2, 5, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         turn = self.run_user_turn(case_id, "task-session", "這份資料妳之後先幫我查一下，整理重點再回來接我。", now_dt, 1)
         hook_store = self.ph.load_hooks()
@@ -573,6 +584,7 @@ class Harness:
         result["actual_class"] = (target or {}).get("event_kind")
         result["actual_memory_layer"] = "tracked_followup" if after["incident_count"] > before["incident_count"] else "staged_memory"
         result["actual_event_chain_fields"] = event_chain_fields(target or {})
+        result["actual_hook_event_chain_fields"] = event_chain_fields(followup.get("hook") or {})
         result["actual_followup_dispatch"] = followup
         result["actual_followup_reply_continuity"] = {
             "selected_summary": (continuity_record or {}).get("normalized_seed_summary"),
@@ -593,6 +605,7 @@ class Harness:
             and bool(followup.get("message"))
             and result["actual_followup_reply_continuity"]["continuity_match"]
             and bool(result["actual_daily_memory_trace"])
+            and all(field in result["actual_hook_event_chain_fields"] for field in ("context_before", "event_core", "immediate_result", "followup_focus"))
         )
         result["pass/fail"] = "pass" if is_pass else "fail"
         result["failure_reason"] = "" if is_pass else "delegated task failed tracked flow or follow-up continuity"
@@ -601,7 +614,7 @@ class Harness:
     def run_sensitive_event_case(self) -> dict:
         self.reset_case()
         case_id = "sensitive_event"
-        now_dt = datetime(2026, 3, 19, 2, 25, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 2, 25, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         text = "我剛剛去陽台抽煙，邊走邊跟妳聊，回房間時跌倒，腳有點受傷了。"
         turn = self.run_user_turn(case_id, "sensitive-session", text, now_dt, 1)
@@ -624,6 +637,7 @@ class Harness:
         result["actual_class"] = (target or {}).get("event_kind")
         result["actual_memory_layer"] = "tracked_followup" if after["incident_count"] > before["incident_count"] else "staged_memory"
         result["actual_event_chain_fields"] = event_chain_fields(target or {})
+        result["actual_hook_event_chain_fields"] = event_chain_fields(followup.get("hook") or {})
         result["actual_followup_dispatch"] = followup
         result["actual_followup_reply_continuity"] = {
             "selected_summary": (continuity_record or {}).get("normalized_seed_summary"),
@@ -646,6 +660,7 @@ class Harness:
             and chainful
             and result["actual_followup_reply_continuity"]["continuity_match"]
             and bool(result["actual_daily_memory_trace"])
+            and all(field in result["actual_hook_event_chain_fields"] for field in ("context_before", "event_core", "immediate_result", "followup_focus"))
         )
         result["pass/fail"] = "pass" if is_pass else "fail"
         result["failure_reason"] = "" if is_pass else "sensitive event did not keep event chain or continuity"
@@ -654,7 +669,7 @@ class Harness:
     def run_incremental_update_case(self) -> dict:
         self.reset_case()
         case_id = "incremental_update"
-        now_dt = datetime(2026, 3, 19, 2, 40, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 2, 40, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         self.run_user_turn(case_id, "incremental-session", "我今天心情不好，但不想說，妳先陪我放著。", now_dt, 1)
         self.run_user_turn(case_id, "incremental-session", "是因為家裡那件事。", now_dt + timedelta(minutes=2), 2)
@@ -699,7 +714,7 @@ class Harness:
         case_id = "new_session_carryover"
         old_session_id = "carryover-old"
         new_session_id = "carryover-new"
-        t0 = datetime(2026, 3, 19, 2, 55, tzinfo=TAIPEI)
+        t0 = datetime(2026, 3, 19, 2, 55, tzinfo=TEST_TZ)
         before = self.snapshot(t0)
         self.append_message("user", "我先把技能倉庫那件事放妳這裡，晚點再接。", t0)
         self.append_message("assistant", "好，我先幫你把這件事接住。", t0 + timedelta(seconds=20))
@@ -742,6 +757,15 @@ class Harness:
             "pending_topics_prompt": trim(new_ctx.get("pending_topics_prompt", ""), 240),
             "carryover_prompt": trim(new_ctx.get("carryover_prompt", ""), 240),
         }
+        carryover_prompt_lines = [line.strip() for line in str(new_ctx.get("carryover_prompt") or "").splitlines() if line.strip()]
+        continuity_mode_present = any(line == "carryover_new_session_continuity_mode: recent_4_turns_first" for line in carryover_prompt_lines)
+        primary_recent_four = any(line == "carryover_primary_continuity_field: recent_4_turns_summary" for line in carryover_prompt_lines)
+        selected_recent_four = any(line.startswith("carryover_recent_4_turns:") for line in carryover_prompt_lines)
+        result["actual_new_session_continuity_mode"] = {
+            "mode_present": continuity_mode_present,
+            "primary_recent_4_turns": primary_recent_four,
+            "selected_recent_4_turns_present": selected_recent_four,
+        }
         result["actual_followup_reply_continuity"] = {
             "primary_summary": (primary or {}).get("normalized_seed_summary"),
             "primary_source_layer": (primary or {}).get("source_layer"),
@@ -760,6 +784,9 @@ class Harness:
             bool(new_ctx.get("new_session_carryover_applied"))
             and bool(new_ctx.get("carryover_summary_present"))
             and bool(new_ctx.get("carryover_prompt"))
+            and continuity_mode_present
+            and primary_recent_four
+            and selected_recent_four
             and bool(primary)
         )
         result["pass/fail"] = "pass" if is_pass else "fail"
@@ -769,7 +796,7 @@ class Harness:
     def run_active_hook_closure_case(self) -> dict:
         self.reset_case()
         case_id = "active_hook_closure"
-        now_dt = datetime.now(TAIPEI)
+        now_dt = datetime.now(TEST_TZ)
         before = self.snapshot(now_dt)
         hook_store = self.ph.load_hooks()
         for idx, hook_type in enumerate(("emotional_followup", "health_followup", "progress_followup", "tomorrow_check"), start=1):
@@ -818,9 +845,41 @@ class Harness:
     def run_time_sense_case(self) -> dict:
         self.reset_case()
         case_id = "time_sense"
-        now_dt = datetime(2026, 3, 19, 1, 35, tzinfo=TAIPEI)
+        settings = self.ph.load_settings()
+        routine = settings.setdefault("routine_schedule", {})
+        routine.update(
+            {
+                "enabled": True,
+                "timezone": test_tz_name(),
+                "sleep_time": "05:30",
+                "wake_time": "13:15",
+                "wake_window_minutes": 60,
+            }
+        )
+        self.ph.save_settings(settings)
+        profile = self.ph.load_profile()
+        profile["sleep_pattern"] = {
+            "chronotype": "night_owl",
+            "usual_sleep_time": "05:30",
+            "usual_wake_time": "13:15",
+            "active_window": "13:15-05:30",
+            "care_nudge_time": "04:00",
+            "sleep_block_window": "05:30-13:15",
+            "source": "harness",
+        }
+        self.ph.save_profile(profile)
+        now_dt = datetime(2026, 3, 19, 1, 35, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         turn = self.run_user_turn(case_id, "time-session", "我現在真的很累，但不想被勸睡，妳先陪我放著。", now_dt, 1)
+        same_day_sleep_dt = datetime(2026, 3, 19, 5, 9, tzinfo=TEST_TZ)
+        same_day_sleep = self.ph.build_runtime_context(
+            session_id="time-session",
+            session_key=DIRECT_SESSION_KEY,
+            user_text="沒有，我準備睡覺了",
+            now_dt=same_day_sleep_dt,
+            is_new_session=False,
+            user_turn_index=2,
+        )
         hook_store = self.ph.load_hooks()
         pending_ids = [hook.get("id") for hook in hook_store.get("hooks", []) if hook.get("status") == "pending"]
         self.shorten_pending_hook_triggers(now_dt, pending_ids)
@@ -841,15 +900,22 @@ class Harness:
         result["this_reply_used_schedule_context"] = bool(turn["runtime_context"].get("schedule_context_prompt"))
         result["this_reply_used_no_memory_guard"] = bool(turn["runtime_context"].get("pending_memory_guard_prompt"))
         result["this_reply_used_false_closure_guard"] = bool(turn["runtime_context"].get("false_closure_guard_prompt"))
-        is_pass = result["this_reply_used_schedule_context"] and not any(token in message for token in ("快去睡", "太晚了還不睡", "早點睡"))
+        same_day_prompt = str(same_day_sleep.get("time_modifier_prompt") or "")
+        result["same_day_wake_guard_present"] = "same local calendar day" in same_day_prompt and "13:15" in same_day_prompt
+        result["same_day_wake_guard_prompt"] = same_day_prompt
+        is_pass = (
+            result["this_reply_used_schedule_context"]
+            and result["same_day_wake_guard_present"]
+            and not any(token in message for token in ("快去睡", "太晚了還不睡", "早點睡"))
+        )
         result["pass/fail"] = "pass" if is_pass else "fail"
-        result["failure_reason"] = "" if is_pass else "schedule context was not present or late-night reply slipped into sleep-policing"
+        result["failure_reason"] = "" if is_pass else "schedule context was missing, same-day wake guard was missing, or late-night reply slipped into sleep-policing"
         return result
 
     def run_duplicate_followup_suppression_case(self) -> dict:
         self.reset_case()
         case_id = "duplicate_followup_suppression"
-        now_dt = datetime(2026, 3, 19, 3, 5, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 3, 5, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         self.run_user_turn(case_id, "dup-session", "我現在有點悶，但先陪我放著就好。", now_dt, 1)
         hook_store = self.ph.load_hooks()
@@ -887,7 +953,7 @@ class Harness:
     def run_user_reply_closes_active_hook_case(self) -> dict:
         self.reset_case()
         case_id = "user_reply_closes_active_hook"
-        now_dt = datetime(2026, 3, 19, 3, 20, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 3, 20, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         self.run_user_turn(case_id, "closure-session", "這份資料妳之後先幫我查一下，整理重點再回來接我。", now_dt, 1)
         hook_store = self.ph.load_hooks()
@@ -916,7 +982,7 @@ class Harness:
     def run_unrelated_event_preserves_chain_case(self) -> dict:
         self.reset_case()
         case_id = "unrelated_event_preserves_chain"
-        now_dt = datetime(2026, 3, 19, 3, 35, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 3, 35, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         self.run_user_turn(case_id, "same-session", "這份資料妳之後先幫我查一下，整理重點再回來接我。", now_dt, 1)
         second_turn = self.run_user_turn(case_id, "same-session", "我剛剛去陽台抽煙，邊走邊跟妳聊，回房間時跌倒，腳有點受傷了。", now_dt + timedelta(minutes=2), 2)
@@ -940,7 +1006,7 @@ class Harness:
     def run_new_session_top_priority_carryover_case(self) -> dict:
         self.reset_case()
         case_id = "new_session_top_priority_carryover"
-        t0 = datetime(2026, 3, 19, 3, 50, tzinfo=TAIPEI)
+        t0 = datetime(2026, 3, 19, 3, 50, tzinfo=TEST_TZ)
         before = self.snapshot(t0)
         self.run_user_turn(case_id, "carryover-priority", "我先把技能倉庫那件事放妳這裡，晚點再接。", t0, 1)
         self.run_user_turn(case_id, "carryover-priority", "不要簡體，顏文字要自然。", t0 + timedelta(minutes=1), 2)
@@ -983,7 +1049,7 @@ class Harness:
     def run_absence_dispatch_cap_case(self) -> dict:
         self.reset_case()
         case_id = "absence_dispatch_cap"
-        now_dt = datetime(2026, 3, 19, 4, 5, tzinfo=TAIPEI)
+        now_dt = datetime(2026, 3, 19, 4, 5, tzinfo=TEST_TZ)
         before = self.snapshot(now_dt)
         hook_store = self.ph.load_hooks()
         hook = self.ph.build_hook(
@@ -1051,7 +1117,7 @@ def main() -> int:
     args = parser.parse_args()
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    output_path = args.output or REPORT_DIR / f"followup_harness_{datetime.now(TAIPEI).strftime('%Y%m%d-%H%M%S')}.json"
+    output_path = args.output or REPORT_DIR / f"followup_harness_{datetime.now(TEST_TZ).strftime('%Y%m%d-%H%M%S')}.json"
     harness = Harness(absence_minutes=args.absence_minutes, keep_sandbox=args.keep_sandbox)
     try:
         report = harness.run_all()

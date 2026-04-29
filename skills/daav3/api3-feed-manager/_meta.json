@@ -3,9 +3,15 @@
   "slug": "api3-feed-manager",
   "displayName": "Api3 Feed Manager",
   "latest": {
-    "version": "0.2.1",
-    "publishedAt": 1776355718359,
-    "commit": "https://github.com/openclaw/skills/commit/1b6371b0d9896c7e6a2abfe866892f1c28565db1"
+    "version": "0.4.0",
+    "publishedAt": 1777391868712,
+    "commit": "https://github.com/openclaw/skills/commit/9fe736b7c44f11684787d392503cd202742d6d38"
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.2.1",
+      "publishedAt": 1776355718359,
+      "commit": "https://github.com/openclaw/skills/commit/1b6371b0d9896c7e6a2abfe866892f1c28565db1"
+    }
+  ]
 }

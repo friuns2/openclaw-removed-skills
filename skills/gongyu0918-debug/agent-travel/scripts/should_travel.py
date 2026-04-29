@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 import re
-import sys
+import argparse
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -85,6 +85,12 @@ def parse_timestamp(name: str, value: str) -> datetime:
     return parsed
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("path", help="Path to a JSON state file")
+    return parser.parse_args()
+
+
 def as_bool(value: object, default: bool) -> bool:
     if value is None:
         return default
@@ -99,15 +105,19 @@ def as_bool(value: object, default: bool) -> bool:
     raise InputError("invalid_boolean", f"invalid boolean value: {value}")
 
 
-def as_int(value: object, default: int) -> int:
+def as_int(value: object, default: int, *, minimum: int | None = None) -> int:
     if value is None:
-        return default
-    if isinstance(value, bool):
+        parsed = default
+    elif isinstance(value, bool):
         raise InputError("invalid_integer", f"invalid integer value: {value}")
-    try:
-        return int(value)
-    except (TypeError, ValueError) as exc:
-        raise InputError("invalid_integer", f"invalid integer value: {value}") from exc
+    else:
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError) as exc:
+            raise InputError("invalid_integer", f"invalid integer value: {value}") from exc
+    if minimum is not None and parsed < minimum:
+        raise InputError("invalid_integer", f"invalid integer value: {value}")
+    return parsed
 
 
 def get_duration(state: dict[str, object], key: str) -> timedelta:
@@ -141,6 +151,28 @@ def get_optional_timestamp(state: dict[str, object], key: str) -> datetime | Non
     return parse_timestamp(key, text)
 
 
+def get_required_raw(state: dict[str, object], key: str) -> str:
+    if key not in state:
+        raise KeyError(key)
+    raw = state[key]
+    if raw is None:
+        raise KeyError(key)
+    text = str(raw).strip()
+    if not text or text.lower() == "none":
+        raise KeyError(key)
+    return text
+
+
+def get_fallback_timestamp(state: dict[str, object], key: str, fallback: datetime) -> datetime:
+    raw = state.get(key)
+    if raw is None:
+        return fallback
+    text = str(raw).strip()
+    if not text or text.lower() == "none":
+        return fallback
+    return parse_timestamp(key, text)
+
+
 def blocked(
     event_kind: str,
     reason: str,
@@ -152,11 +184,11 @@ def blocked(
 
 def collect_escalation_signals(state: dict[str, object]) -> list[str]:
     signals: list[str] = []
-    if as_int(state.get("related_failures"), 0) >= 2:
+    if as_int(state.get("related_failures"), 0, minimum=0) >= 2:
         signals.append("related_failures")
-    if as_int(state.get("user_corrections"), 0) >= 2:
+    if as_int(state.get("user_corrections"), 0, minimum=0) >= 2:
         signals.append("user_corrections")
-    if as_int(state.get("unresolved_blocker_count"), 0) >= 1:
+    if as_int(state.get("unresolved_blocker_count"), 0, minimum=0) >= 1:
         signals.append("unresolved_blocker_count")
     if as_bool(state.get("version_mismatch_seen"), False):
         signals.append("version_mismatch_seen")
@@ -167,9 +199,11 @@ def collect_escalation_signals(state: dict[str, object]) -> list[str]:
     return signals
 
 
-def infer_search_mode(state: dict[str, object], event_kind: str, signals: list[str]) -> tuple[str, list[str]]:
+def infer_search_mode(event_kind: str, signals: list[str]) -> tuple[str, list[str]]:
     if "user_explicit_deep_research_request" in signals:
         return "high", ["user_explicit_deep_research_request"]
+    if "user_explicit_search_request" in signals:
+        return "medium", ["user_explicit_search_request"]
     if event_kind == "task_end":
         mode_signals = ["task_end_default"]
         if signals:
@@ -180,7 +214,7 @@ def infer_search_mode(state: dict[str, object], event_kind: str, signals: list[s
         if signals:
             mode_signals.extend(signals)
         return "medium", mode_signals
-    if signals:
+    if event_kind in {"heartbeat", "scheduled"} and signals:
         return "medium", signals
     return "low", [f"{event_kind}_default"]
 
@@ -194,16 +228,13 @@ def decide(state: dict[str, object]) -> Decision:
         return blocked(event_kind, "travel is disabled", "disabled")
 
     try:
-        now = parse_timestamp("now", str(state["now"]))
-        last_thread_activity = parse_timestamp("last_thread_activity", str(state["last_thread_activity"]))
-        last_user_action = parse_timestamp(
-            "last_user_action",
-            str(state.get("last_user_action", state["last_thread_activity"])),
+        now = parse_timestamp("now", get_required_raw(state, "now"))
+        last_thread_activity = parse_timestamp(
+            "last_thread_activity",
+            get_required_raw(state, "last_thread_activity"),
         )
-        last_agent_action = parse_timestamp(
-            "last_agent_action",
-            str(state.get("last_agent_action", state["last_thread_activity"])),
-        )
+        last_user_action = get_fallback_timestamp(state, "last_user_action", last_thread_activity)
+        last_agent_action = get_fallback_timestamp(state, "last_agent_action", last_thread_activity)
     except KeyError as exc:
         return blocked(event_kind, f"missing required field: {exc.args[0]}", "missing_required_field")
 
@@ -213,11 +244,13 @@ def decide(state: dict[str, object]) -> Decision:
     repeat_fingerprint_cooldown = get_duration(state, "repeat_fingerprint_cooldown")
     max_runs_per_thread = as_int(
         state.get("max_runs_per_thread_per_day"),
-        int(DEFAULTS["max_runs_per_thread_per_day"]),
+        DEFAULTS["max_runs_per_thread_per_day"],
+        minimum=0,
     )
     max_runs_per_user = as_int(
         state.get("max_runs_per_user_per_day"),
-        int(DEFAULTS["max_runs_per_user_per_day"]),
+        DEFAULTS["max_runs_per_user_per_day"],
+        minimum=0,
     )
 
     if as_bool(state.get("user_operation_in_progress"), False):
@@ -232,9 +265,9 @@ def decide(state: dict[str, object]) -> Decision:
         return blocked(event_kind, "quiet window after user action has not elapsed", "quiet_after_user_action")
     if now - last_agent_action < quiet_after_agent:
         return blocked(event_kind, "quiet window after agent action has not elapsed", "quiet_after_agent_action")
-    if as_int(state.get("thread_runs_today"), 0) >= max_runs_per_thread:
+    if as_int(state.get("thread_runs_today"), 0, minimum=0) >= max_runs_per_thread:
         return blocked(event_kind, "thread run limit reached", "thread_run_limit_reached")
-    if as_int(state.get("user_runs_today"), 0) >= max_runs_per_user:
+    if as_int(state.get("user_runs_today"), 0, minimum=0) >= max_runs_per_user:
         return blocked(event_kind, "user run limit reached", "user_run_limit_reached")
 
     host_supports_heartbeat = as_bool(state.get("host_supports_heartbeat"), True)
@@ -264,15 +297,7 @@ def decide(state: dict[str, object]) -> Decision:
         and last_travel_generated_at is not None
         and now - last_travel_generated_at < repeat_fingerprint_cooldown
     )
-    cooldown_bypass_signals = {
-        "related_failures",
-        "user_corrections",
-        "unresolved_blocker_count",
-        "version_mismatch_seen",
-        "user_explicit_search_request",
-        "user_explicit_deep_research_request",
-    }
-    cooldown_bypassed = cooldown_active and bool(set(signals) & cooldown_bypass_signals)
+    cooldown_bypassed = cooldown_active and bool(signals)
     if cooldown_active and not cooldown_bypassed:
         return blocked(
             event_kind,
@@ -283,7 +308,7 @@ def decide(state: dict[str, object]) -> Decision:
     user_configured_periodic_travel = as_bool(state.get("user_configured_periodic_travel"), False)
     scheduled_trigger_managed_by_host = as_bool(
         state.get("scheduled_trigger_managed_by_host"),
-        event_kind == "scheduled",
+        False,
     )
 
     if event_kind == "failure_recovery":
@@ -325,7 +350,7 @@ def decide(state: dict[str, object]) -> Decision:
                 ["host_generated_scheduled_prompt", f"scheduled_prompt_emotion:{scheduled_prompt_emotion}"],
             )
 
-    search_mode, observed_signals = infer_search_mode(state, event_kind, signals)
+    search_mode, observed_signals = infer_search_mode(event_kind, signals)
     if event_kind == "scheduled":
         if scheduled_trigger_managed_by_host:
             observed_signals = ["scheduled_trigger_managed_by_host", *observed_signals]
@@ -344,11 +369,8 @@ def decide(state: dict[str, object]) -> Decision:
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: python scripts/should_travel.py state.json", file=sys.stderr)
-        return 2
-
-    path = Path(sys.argv[1])
+    args = parse_args()
+    path = Path(args.path)
     try:
         raw = path.read_text(encoding="utf-8")
     except OSError as exc:
@@ -380,7 +402,7 @@ def main() -> int:
                 "unexpected_internal_error",
             )
         )
-        return 0
+        return 1
 
     emit(decision)
     return 0

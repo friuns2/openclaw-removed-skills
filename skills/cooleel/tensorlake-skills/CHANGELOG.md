@@ -2,6 +2,111 @@
 
 All notable changes to the TensorLake skill are documented here.
 
+## [2.5.5] — 2026-04-28
+
+### Changed (Eval harness — skill-trigger detection)
+- **`evals/run.py`** — switched `claude -p` to `--output-format stream-json --verbose` and added `detect_skill_trigger()` / `extract_final_text()`. Each run now writes `stream.jsonl`, `output.md`, and `trigger.json` (`{"skill_triggered": bool, "skill_invocations": [...]}`).
+- **`evals/grade.py`** — reads `trigger.json` first; if the skill didn't trigger, the judge LLM call is skipped and all expectations are recorded as failed with reason `"skill not triggered; grading skipped"`. Adds `skill_triggered`, `skill_invocations`, and aggregate `skill_trigger_rate` to `benchmark.json`.
+- **`evals/ci_summary.py`** — added a `Skill triggered` column to the per-eval table (with `_(skipped)_` annotation when the judge was bypassed) and a new `## Skill trigger rate` section with the overall rate and per-eval invocation list.
+
+### Why
+Eval pass-rate alone conflates "skill didn't fire" with "skill fired but answered wrong" — two very different failure modes. Surfacing trigger detection as a first-class signal makes regressions in the description/trigger criteria visible immediately, and short-circuiting the judge on no-trigger runs saves the cost of grading a response that was never going to consult the skill.
+
+## [2.5.4] — 2026-04-28
+
+### Changed (Snapshot restore — surfacing the filesystem/full distinction earlier)
+- **`SKILL.md`, `AGENTS.md`** — added a Core Patterns bullet stating that snapshot restore is **not** uniformly "as-is": filesystem snapshots (the default) accept `cpus=`, `memory_mb=`, `disk_mb=` overrides at `Sandbox.create(snapshot_id=...)` (`disk_mb` growth-only, 10240–102400 MiB); full snapshots lock resources. Eagerly loaded so the agent doesn't fall back on stale priors when answering snapshot-restore questions without reading `sandbox_persistence.md`.
+- **`references/sandbox_persistence.md`** — added a TL;DR callout at the top of the Snapshots section so the filesystem-default override behavior is encountered before the per-row "cannot be changed at restore time" wording in the Snapshot Types table. `Last verified: 2026-04-28`.
+- **`references/sandbox_sdk.md`** — replaced the absolute "When restoring, the new sandbox inherits image, resources, entrypoint, and secrets from the snapshot — these cannot be overridden" line in the Snapshots (Instance) section with a type-distinguished version that links to `sandbox_persistence.md#snapshot-types--filesystem-default-vs-full`. `Last verified: 2026-04-28`.
+- **`.github/scripts/sources.yaml`** — bumped `last_verified` for `sandbox_sdk.md` and `sandbox_persistence.md` to `2026-04-28`.
+
+### Why
+Eval 15 (`filesystem-snapshot-restore-with-resource-overrides`) regressed to 0/6 with the CI-pinned sonnet agent: the pre-0.5.3 absolute claim still in `sandbox_sdk.md:266` contradicted the 0.5.3 filesystem/full distinction in `sandbox_persistence.md`, and the agent was answering from a strong "restore is as-is" prior — fabricating quotes rather than reading the reference. Putting the override fact directly in `SKILL.md` / `AGENTS.md` lifted the score to 6/6.
+
+## [2.5.3] — SDK 0.5.3 — 2026-04-27
+
+### Changed (References — verified against live docs)
+- **`references/sandbox_sdk.md`** — bumped to SDK 0.5.3. Added `disk_mb` (10240–102400 MiB, growth-only) to `Sandbox.create()` and `resources` info. Added intro paragraph on Firecracker/CloudHypervisor MicroVMs, boot times, HIPAA + SOC 2 Type II + EU residency + zero data retention. Expanded TypeScript `createPty()` example with `args`, `env`, `workingDir`, `onData`, `onExit` (with note that Python attaches via `pty.on_data(...)` after creation). Expanded desktop API table with `mouse_press`, `mouse_release`, `scroll`, `width`/`height` properties, plus ~4s startup delay note. Documented `image.build(cpus, memory_mb, disk_mb)` (defaults 2.0 / 4096 / 10240) and `tl sbx image create --cpus --memory --disk_mb`. Added `tl sbx clone` to CLI commands. Added `debian11-minimal`, `debian12-minimal`, `debian-minimal` to base images table; dropped `tensorlake/` prefix from base-image references.
+- **`references/sandbox_persistence.md`** — bumped to SDK 0.5.3. Added Filesystem (default) vs Full snapshot distinction with comparison table. Documented `sandbox.checkpoint(timeout=300, poll_interval=1.0)` defaults. Added `tl sbx clone` CLI shortcut (CLI-only, no SDK equivalent). Updated restore semantics: filesystem snapshots accept `cpus=`, `memory_mb=`, `disk_mb=` overrides at restore (`disk_mb` growth-only); full snapshots remain locked.
+- **`references/sandbox_advanced.md`** — dropped `tensorlake/` prefix from base-image references for consistency with the docs' base-image table.
+
+## [2.5.2] — 2026-04-27
+
+### Added (Eval CI)
+- **`.github/workflows/evals.yml`** — CI workflow that runs the eval suite on PRs touching `references/**.md`. Triggers narrowly: version bumps, `SKILL.md`/`AGENTS.md` edits, and `evals/**` script changes do NOT auto-run evals. Full runs are available via `workflow_dispatch` (with optional comma-separated eval IDs).
+- **`evals/filter.py`** — maps changed files to eval IDs via each eval's `references[]` field, deduplicating across overlapping reference files. Empty result skips the CI job.
+- **`evals/ci_summary.py`** — renders a markdown summary table for `$GITHUB_STEP_SUMMARY`. Report-only (always exits 0); failures show in the table and uploaded `eval-workspace` artifact, never block the PR.
+
+### Changed (Eval harness)
+- **`evals/grade.py`** — `JUDGE_MODEL` constant replaced by a `--model` CLI flag (`DEFAULT_JUDGE_MODEL` = `claude-opus-4-7`). Judge model now propagates into `benchmark.json` → `metadata.analyzer_model`.
+- **`evals/run.py`** — writes `evals/workspace/iteration-N/run_meta.json` recording the executor model. `grade.py` reads it so `benchmark.json` → `metadata.executor_model` reflects the real model used (was previously hardcoded as `"default (claude -p)"`).
+- CI is pinned to **agent: `claude-sonnet-4-6`**, **judge: `claude-haiku-4-5-20251001`**.
+
+### Fixed
+- **`evals/evals.json`** eval 1 (`named-sandbox-suspend-resume`) — expectation #4 no longer requires an unsolicited contrast against snapshot/restore. The original prompt asks only about suspend/resume + ephemeral, and `expected_output` doesn't request the comparison either; the negative-direction expectation #5 still tests the underlying misconception.
+
+## [2.5.1] — SDK 0.5.1 — 2026-04-25
+
+### Changed (Sandbox SDK 0.5.1)
+- **sandbox_sdk.md** — updated to reflect 0.5.1 API surface:
+  - Rename and port exposure now live on the `Sandbox` instance via `sandbox.update(name=..., exposed_ports=..., allow_unauthenticated_access=...)`. `SandboxClient.update_sandbox` / `expose_ports` / `unexpose_ports` still work but are deprecated.
+  - `expose_ports` / `allow_unauthenticated_access` removed from `Sandbox.create()` parameters — port exposure is now a post-create operation.
+  - `SandboxClient` construction emits a `DeprecationWarning`. Only `client.list()` lacks a direct `Sandbox`-level replacement.
+  - `sandbox.status` returns a `SandboxStatus` enum (e.g., `SandboxStatus.RUNNING`); use `.value` for the lowercase string form.
+  - `sandbox.read_file(...)` / `sandbox.list_directory(...)` now return `Traced[...]` — unwrap with `.value`.
+- **sources.yaml** — bumped `sandbox_sdk.md` to `sdk_version: 0.5.1`, `last_verified: 2026-04-25`.
+- Verified all examples in **sandbox_persistence.md** continue to run cleanly against `tensorlake==0.5.1` (no doc changes needed).
+
+## [2.5.0] — SDK 0.5.0 — 2026-04-24
+
+### Changed (breaking — Sandbox SDK 0.5.0)
+- **sandbox_sdk.md** — rewritten for the 0.5.0 Sandbox API. `SandboxClient` is **removed**; the entry point is now the `Sandbox` class itself:
+  - Static methods: `Sandbox.create()`, `Sandbox.connect()`, `Sandbox.list()`, `Sandbox.update()`, `Sandbox.expose_ports()`, `Sandbox.unexpose_ports()`, `Sandbox.get_snapshot()`, `Sandbox.delete_snapshot()`
+  - Instance methods on returned handles: `.suspend()`, `.resume()`, `.terminate()`, `.checkpoint()` (replaces `snapshot_and_wait`), `.list_snapshots()`, `.run()`, file / process / PTY operations
+  - `create_and_connect()` is gone — `Sandbox.create()` now returns a ready-to-use handle
+  - Snapshot restore: `Sandbox.create(snapshot_id=...)` (was `client.create_and_connect(snapshot_id=...)`)
+  - New creation parameters: `expose_ports`, `allow_unauthenticated_access`
+  - `Image.build()` now exists in Python too (was TypeScript-only via `createSandboxImage()`)
+  - `tl sbx new` → `tl sbx create`; `tl sbx snapshot <id>` → `tl sbx checkpoint <id>`
+- **sandbox_persistence.md** — updated every snippet to the new static/instance split. `client.snapshot_and_wait()` → `sandbox.checkpoint()`; `client.suspend()` / `client.resume()` → `sandbox.suspend()` / `sandbox.resume()`; restore via `Sandbox.create(snapshot_id=...)`. Added top-of-file 0.5.0 upgrade note.
+- **sandbox_advanced.md** — replaced every `SandboxClient` / `create_and_connect` / `snapshot_and_wait` / `sandbox.close()` with the new API in Skills-in-Sandboxes, AI Code Execution, Data Analysis, and CI/CD patterns
+- **integrations.md** — updated LangChain, OpenAI function-calling, and multi-agent examples to use `Sandbox.create()` / `sandbox.terminate()`
+- **SKILL.md** / **AGENTS.md** — bumped version to 2.5.0. Updated CLI quick-reference (`tl sbx create`, `tl sbx checkpoint`). Annotated the LLM code-execution pattern with the 0.5.0 import change.
+- **sources.yaml** — bumped every `sdk_version` to `0.5.0` and `last_verified` to `2026-04-24`. Added `sandboxes/lifecycle.md` to the `sandbox_sdk.md` source list (now explicitly referenced for the static-method API surface).
+- All reference files — bumped `SDK version:` / `Last verified:` headers together, per the paired-bump rule.
+
+## [2.4.1] — 2026-04-22
+
+### Added
+- **SKILL.md** / **AGENTS.md** — "Verify before suggesting" guardrail: before showing any Tensorlake SDK code, confirm every symbol (import path, class, method, parameter) exists in the installed package or in `references/`, and say so instead of guessing when a symbol can't be verified
+
+## [2.4.0] — SDK 0.4.49 — 2026-04-22
+
+### Added
+- **sandbox_sdk.md** — new **Browser Access with noVNC** subsection under Computer Use: backend-tunnel + WebSocket bridge architecture for live human-facing desktop streams on VNC port `5901` (password `tensorlake`), with a `@novnc/novnc` browser client snippet and the hybrid pattern of `noVNC` for the live view + `sandbox.connect_desktop()` for programmatic actions. Sourced from the new upstream section in `sandboxes/computer-use.md`
+- **sandbox_sdk.md** — new **Running Docker Inside a Sandbox** subsection under Sandbox Images, cross-referencing the new upstream `sandboxes/docker.md` page (full install script lives there; `ubuntu-systemd` base image was already in the Base Images table)
+- **sandbox_sdk.md** — `sandboxes/sdk-reference.md` (new upstream Sandbox SDK Reference page) and `sandboxes/docker.md` added to the source URL header
+- **sources.yaml** — four sources added to `sandbox_sdk.md`: `sandboxes/sdk-reference.md`, `sandboxes/docker.md`, `sandboxes/environment-variables.md`, `sandboxes/quickstart.md`. The last two were already in the reference file's source header (added in v2.3.1) but had never been registered in `sources.yaml` — a drift-check bug from that release
+- **CLAUDE.md** — new rule: `SDK version:` and `Last verified:` must always bump together. Bumping the SDK version without also bumping the date creates a false record claiming verification against a newer SDK on an older date. Applies to PyPI releases, content edits, and `Source:` / `sources.yaml` URL changes
+
+### Changed
+- **SKILL.md** / **AGENTS.md** / **README.md** — renamed the product from "Orchestrate" to "Orchestration" to match the upstream docs terminology shift in `agent-skills.md` and the new `sandboxes/sdk-reference.md`. Affects the "Two APIs" opening paragraph, Quick Start heading, Core Patterns bullet, reference-list title (`Orchestration SDK`), and the README description/tree comment. Lowercase verb uses of "orchestrate" ("orchestrate multi-step LLM pipelines") were left alone
+- All reference files + `sources.yaml` + README example — bumped `SDK version:` / `sdk_version:` to `tensorlake 0.4.49` (latest on PyPI) and `Last verified:` / `last_verified:` to `2026-04-22`
+
+### Fixed
+- **applications_sdk.md** / **sources.yaml** — removed dangling `applications/guides/autoscaling.md` entry (upstream page deleted in docs commit 3abea5f; content was consolidated into `applications/scaling-agents.md`, which was already tracked)
+
+## [2.3.1] — SDK 0.4.46 — 2026-04-16
+
+### Added
+- **sandbox_sdk.md** — new **Environment Variables** section consolidating command-scope (`sandbox.run`), process-scope (`start_process`), and PTY-scope (`create_pty`) env usage, plus the `tl sbx exec --env` and `tl sbx ssh --env` CLI flags, sourced from the new upstream `sandboxes/environment-variables.md` page
+- **sandbox_sdk.md** — `pip install tensorlake` and `tl login` / `TENSORLAKE_API_KEY` auth note in the Install line, sourced from the new upstream `sandboxes/quickstart.md` page
+- **sandbox_sdk.md** — `ubuntu-vnc` row added to the Base Images table (previously only referenced in the Computer Use section)
+- **sandbox_sdk.md** — `sandboxes/environment-variables.md` and `sandboxes/quickstart.md` added to the source URL header
+
+### Changed
+- **sandbox_sdk.md** / **sandbox_persistence.md** — bumped `SDK version` header to `tensorlake 0.4.46` and `Last verified` to `2026-04-16`
+
 ## [2.3.0] — SDK 0.4.44 — 2026-04-14
 
 ### Changed

@@ -18,7 +18,7 @@
 | `export_html.py` 200+ 行内嵌 SVG 构建 | 改为直接输出预生成的 SVG |
 | `--export` 默认调 9 个 Python 函数 | Claude 生成 HTML+SVG（主），Python 格式转换（备） |
 | 依赖 `importlib.metadata`、`math`、`pathlib` | 只依赖 `json`、`pathlib`（stdlib） |
-| 沙箱需 `pip install business-blueprint-skill` | 沙箱只需 `json.load()` + 写文件，或 Claude 直接生成 |
+| 沙箱需 `pip install kai-business-blueprint` | 沙箱只需 `json.load()` + 写文件，或 Claude 直接生成 |
 
 ### 2. Claude 生成架构图的具体机制
 
@@ -184,7 +184,7 @@ if args.export:
 3. Agent 生成 HTML+SVG 字符串 → 通过沙箱 `write_file` 或 `Path.write_text()` 写入
 4. 返回给用户
 
-沙箱不再需要 `pip install business-blueprint-skill`：
+沙箱不再需要 `pip install kai-business-blueprint`：
 ```python
 # 极简沙箱用法——只需 stdlib
 import json

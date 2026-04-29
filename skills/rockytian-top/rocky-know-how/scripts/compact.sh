@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 压缩整理脚本 v2.8.3
+# rocky-know-how 压缩整理脚本 v3.3.0
 # 用法: compact.sh [--dry-run] [--file memory.md]
 # 当文件超过限制时压缩：
 #   memory.md: >100行 → 合并相似条目，摘要冗余，保留已确认偏好
@@ -48,7 +48,7 @@ DOMAINS_DIR="$SHARED_DIR/domains"
 PROJECTS_DIR="$SHARED_DIR/projects"
 ARCHIVE_DIR="$SHARED_DIR/archive"
 
-echo "=== 压缩整理 (v2.8.3) ==="
+echo "=== 压缩整理 (v3.3.0) ==="
 $DRY_RUN && echo "模式: 模拟 (dry-run)"
 echo ""
 
@@ -114,7 +114,7 @@ compact_file() {
     fi
     
     # 保留所有日期条目（## YYYY-MM-DD 开头）及其完整内容
-    # 用 || 分隔符替代内容中的换行，确保每条条目只有一行
+    # 用换行符保留原始 markdown 格式
     awk '
       BEGIN { buffer=""; in_date_entry=0 }
       /^## [0-9]{4}-[0-9]{2}-[0-9]{2}/ {
@@ -125,7 +125,7 @@ compact_file() {
         if (in_date_entry && buffer != "") { print buffer }
         buffer=""; in_date_entry=0; next
       }
-      in_date_entry { buffer = buffer " || " $0; next }
+      in_date_entry { buffer = buffer "\n" $0; next }
       !in_date_entry { print }
       END { if (in_date_entry && buffer != "") { print buffer } }
     ' "$file" > "$tmp_file"
@@ -158,11 +158,11 @@ compact_file() {
       mkdir -p "$ARCHIVE_DIR"
       local archive_file="${ARCHIVE_DIR}/corrections-archive.md"
 
-      # 获取所有日期块（倒序）
-      local all_dates=$(grep "^## [0-9]" "$file" 2>/dev/null | tail -r)
+      # 获取所有日期块（chronological 顺序，最旧→最新）
+      local all_dates=$(grep "^## [0-9]" "$file" 2>/dev/null)
       local total_dates=$(echo "$all_dates" | wc -l | tr -d ' ')
 
-      # 保留最近50个日期块（倒序的前50个，即最早的那些日期）
+      # 保留最近50个（chronological 的最后50条 = 最新），归档最旧的
       local dates_to_keep=$(echo "$all_dates" | tail -50)
       local to_archive=$((total_dates - 50))
       local dates_to_archive=$(echo "$all_dates" | head -$to_archive)
@@ -341,7 +341,7 @@ else
   echo "✅ 压缩整理完成"
 fi
 echo ""
-echo "💡 压缩策略 v2.8.3:"
+echo "💡 压缩策略 v3.3.0:"
 echo "   1. memory.md: 合并相似条目，摘要冗余，保留已确认偏好"
 echo "   2. corrections.md: 保留最近50条"
 echo "   3. domains/projects: 超出部分移到 archive/ 再截断"

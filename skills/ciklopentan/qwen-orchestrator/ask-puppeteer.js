@@ -44,6 +44,7 @@ const DEFAULT_CONFIG = {
   followUpHydrationTimeoutMs: 20000,
   followUpStableMs: 2000,
   followUpMinVisibleHistoryNodes: 1,
+  preferredModel: 'Qwen3.6-Max-Preview',
   debugMode: false,
   logToFile: false,
   logPath: '.logs/qwen.log',
@@ -63,6 +64,7 @@ const CONFIG = loadConfig();
 const TIMEOUT_ANSWER = CONFIG.answerTimeout;
 const TIMEOUT_BROWSER = CONFIG.browserLaunchTimeout;
 const MIN_RESPONSE = CONFIG.minResponseLength;
+const PREFERRED_MODEL = String(CONFIG.preferredModel || 'Qwen3.6-Max-Preview').trim();
 const OVERSIZE_RETRY_MIN_CHARS = 4000;
 const OVERSIZE_RETRY_KEEP_RATIO = 0.85;
 const OVERSIZE_MAX_RETRIES = 6;
@@ -1249,6 +1251,199 @@ async function enableWebSearch(page) {
   return false;
 }
 
+// ═══ Force preferred model ═══════════════════════════════════════════════
+async function ensurePreferredModel(page, desiredModel = PREFERRED_MODEL) {
+  const desired = String(desiredModel || '').trim();
+  if (!desired) return false;
+
+  const normalize = (s) => String(s || '').trim().replace(/\s+/g, ' ');
+  const matchesDesired = (s) => normalize(s).toLowerCase() === desired.toLowerCase();
+
+  const readCurrentModel = async () => page.evaluate(() => {
+    const normalize = (s) => String(s || '').trim().replace(/\s+/g, ' ');
+    const isVisible = (el) => {
+      if (!el) return false;
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+    };
+    const direct = Array.from(document.querySelectorAll('.header-left .ant-dropdown-trigger, .header-content .ant-dropdown-trigger, header .ant-dropdown-trigger')).find((el) => {
+      if (!isVisible(el)) return false;
+      const text = normalize(el.innerText || el.textContent || '');
+      return /qwen\d/i.test(text);
+    });
+    if (direct) return normalize(direct.innerText || direct.textContent || '');
+
+    const roots = Array.from(document.querySelectorAll('.header-left, header, .header-content')).filter(isVisible);
+    const candidates = [];
+    for (const root of roots) {
+      const nodes = Array.from(root.querySelectorAll('[class*="model-selector-text" i], .ant-dropdown-trigger, [class*="model-selector" i], span, div')).filter(isVisible);
+      for (const el of nodes) {
+        const text = normalize(el.innerText || el.textContent || '');
+        if (!text || !/qwen\d/i.test(text)) continue;
+        const cls = typeof el.className === 'string' ? el.className : '';
+        candidates.push({ text, cls, len: text.length });
+      }
+    }
+    candidates.sort((a, b) => a.len - b.len);
+    return candidates[0]?.text || '';
+  }).catch(() => '');
+
+  const openModelSelector = async () => {
+    const openedByDomClick = await page.evaluate(() => {
+      const normalize = (s) => String(s || '').trim().replace(/\s+/g, ' ');
+      const isVisible = (el) => {
+        if (!el) return false;
+        const s = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+      };
+
+      const direct = Array.from(document.querySelectorAll('.header-left .ant-dropdown-trigger, .header-content .ant-dropdown-trigger, header .ant-dropdown-trigger')).find((el) => {
+        if (!isVisible(el)) return false;
+        const text = normalize(el.innerText || el.textContent || '');
+        return /qwen\d/i.test(text);
+      });
+
+      const fallbackText = Array.from(document.querySelectorAll('.header-left [class*="model-selector-text" i], .header-content [class*="model-selector-text" i], header [class*="model-selector-text" i]')).find((el) => {
+        if (!isVisible(el)) return false;
+        const text = normalize(el.innerText || el.textContent || '');
+        return /qwen\d/i.test(text);
+      });
+
+      const target = direct || fallbackText?.closest('.ant-dropdown-trigger') || fallbackText || null;
+      if (!target) return false;
+      target.scrollIntoView({ block: 'center', inline: 'center' });
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      target.click();
+      return true;
+    }).catch(() => false);
+
+    if (!openedByDomClick) {
+      const info = await page.evaluate(() => {
+        const normalize = (s) => String(s || '').trim().replace(/\s+/g, ' ');
+        const isVisible = (el) => {
+          if (!el) return false;
+          const s = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+        };
+        const direct = Array.from(document.querySelectorAll('.header-left .ant-dropdown-trigger, .header-content .ant-dropdown-trigger, header .ant-dropdown-trigger')).find((el) => {
+          if (!isVisible(el)) return false;
+          const text = normalize(el.innerText || el.textContent || '');
+          return /qwen\d/i.test(text);
+        });
+        if (!direct) return null;
+        const r = direct.getBoundingClientRect();
+        return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+      }).catch(() => null);
+
+      if (!info) {
+        log('⚠️ Не удалось найти селектор модели');
+        return false;
+      }
+
+      try {
+        await page.mouse.move(info.x, info.y);
+        await page.mouse.down();
+        await sleep(80);
+        await page.mouse.up();
+      } catch {
+        return false;
+      }
+    }
+
+    return await page.waitForFunction(() => {
+      const isVisible = (el) => {
+        if (!el) return false;
+        const s = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+      };
+      return Array.from(document.querySelectorAll('body *')).some((el) => {
+        if (!isVisible(el)) return false;
+        const text = (el.innerText || el.textContent || '').trim().replace(/\s+/g, ' ');
+        const cls = typeof el.className === 'string' ? el.className : '';
+        return /qwen3\.6-(plus|max-preview|27b)/i.test(text) && /model-item|model-list|model-selector-popup/i.test(cls);
+      });
+    }, { timeout: 2000 }).then(() => true).catch(() => false);
+  };
+
+  const currentModel = normalize(await readCurrentModel());
+  if (matchesDesired(currentModel)) {
+    log(`🧠 Модель уже установлена: ${currentModel}`);
+    return true;
+  }
+
+  log(`🧠 Переключаю модель: ${currentModel || 'unknown'} -> ${desired}`);
+
+  const opened = await openModelSelector();
+  if (!opened) {
+    log('⚠️ Не удалось раскрыть селектор модели');
+    return false;
+  }
+
+  const picked = await page.evaluate((desiredModel) => {
+    const normalize = (s) => String(s || '').trim().replace(/\s+/g, ' ');
+    const desired = normalize(desiredModel).toLowerCase();
+    const isVisible = (el) => {
+      if (!el) return false;
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+    };
+
+    const nodes = Array.from(document.querySelectorAll('body *')).filter(isVisible);
+    const modelItems = nodes.filter((el) => {
+      const text = normalize(el.innerText || el.textContent || '');
+      const cls = typeof el.className === 'string' ? el.className : '';
+      return text && text.toLowerCase().includes(desired) && (/model-item|model-list|model-selector-popup/i.test(cls) || /qwen3\.6-/i.test(text));
+    });
+
+    const target = modelItems.map((el) => el.closest('[class*="model-item" i]') || el).find(Boolean);
+    if (!target) return { ok: false, reason: 'no-model-option' };
+
+    const r = target.getBoundingClientRect();
+    target.scrollIntoView({ block: 'center' });
+    target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 }));
+    target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 }));
+    target.click();
+    return { ok: true, text: normalize(target.innerText || target.textContent || '') };
+  }, desired).catch((e) => ({ ok: false, reason: e.message }));
+
+  if (!picked?.ok) {
+    log(`⚠️ Не удалось выбрать модель ${desired}: ${picked?.reason || 'unknown'}`);
+    return false;
+  }
+
+  const confirmed = await page.waitForFunction((desiredModel) => {
+    const normalize = (s) => String(s || '').trim().replace(/\s+/g, ' ');
+    const desired = normalize(desiredModel).toLowerCase();
+    const isVisible = (el) => {
+      if (!el) return false;
+      const s = getComputedStyle(el);
+      const r = el.getBoundingClientRect();
+      return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+    };
+    const roots = Array.from(document.querySelectorAll('.header-left, header, .header-content')).filter(isVisible);
+    return roots.some((root) => Array.from(root.querySelectorAll('[class*="model-selector-text" i], .ant-dropdown-trigger, [class*="model-selector" i], span, div')).some((el) => {
+      if (!isVisible(el)) return false;
+      const text = normalize(el.innerText || el.textContent || '');
+      return text.toLowerCase() === desired;
+    }));
+  }, { timeout: 2500 }, desired).then(() => true).catch(() => false);
+
+  const finalModel = normalize(await readCurrentModel());
+  if (confirmed || matchesDesired(finalModel)) {
+    log(`🧠 Модель установлена: ${finalModel || desired}`);
+    return true;
+  }
+
+  log(`⚠️ Не удалось подтвердить модель ${desired} (после переключения: ${finalModel || 'unknown'})`);
+  return false;
+}
+
 // ═══ Force thinking mode ═════════════════════════════════════════════════
 async function ensureThinkingMode(page) {
   const readModeInfo = async () => {
@@ -1870,7 +2065,8 @@ async function main() {
       return;
     }
 
-    // Force thinking mode before every prompt
+    // Force preferred model + thinking mode before every prompt
+    await ensurePreferredModel(page);
     await ensureThinkingMode(page);
 
     // Enable search

@@ -128,7 +128,7 @@ function out(obj) { process.stdout.write(JSON.stringify(obj) + '\n'); }
 // ==================== 命令处理 ====================
 
 async function cmdUpload(args) {
-  const { localPath, remotePath, conflictStrategy = 'ask' } = args;
+  const { localPath, remotePath, conflictStrategy = 'rename' } = args;
   if (!localPath) return out({ success: false, error: '缺少必填参数 localPath' });
 
   const absLocal = expandHome(localPath);

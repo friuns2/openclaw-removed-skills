@@ -6,8 +6,8 @@ Harbor 合规性检查脚本
 生成 HTML 或 JSON 格式的合规报告。
 
 用法:
-  python3 compliance_check.py --url https://harbor.mycompany.com --auth admin:Harbor12345 --standard 等保2级
-  python3 compliance_check.py --url https://harbor.mycompany.com --auth admin:Harbor12345 --output /tmp/report.html
+  python3 compliance_check.py --url https://harbor.example.com --auth username:password --standard 等保2级
+  python3 compliance_check.py --url https://harbor.example.com --auth username:password --output /tmp/report.html
 """
 
 import argparse

@@ -86,9 +86,9 @@ def search_records_by_keyword(memory_dir: Path, keyword: str, limit: int = 10) -
 
         for md_file in task_type_dir.glob("*.md"):
             try:
-                content = md_file.read_text(encoding="utf-8")
-                if keyword_lower in content.lower():
-                    # Find the matching line
+                # 优化：先检查文件名，再逐行读取（避免整个文件读入内存 + 小写转换）
+                if keyword_lower in md_file.name.lower():
+                    content = md_file.read_text(encoding="utf-8")
                     matching_lines = [
                         line.strip() for line in content.split("\n")
                         if keyword_lower in line.lower()
@@ -96,12 +96,36 @@ def search_records_by_keyword(memory_dir: Path, keyword: str, limit: int = 10) -
                     results.append({
                         "task_type": task_type_dir.name,
                         "file": md_file.name,
-                        "matching_lines": matching_lines[:3],  # First 3 matches
+                        "matching_lines": matching_lines[:3],
                         "created": datetime.fromtimestamp(md_file.stat().st_ctime).isoformat(),
                         "path": str(md_file)
                     })
                     if len(results) >= limit:
                         return results
+                    continue
+
+                # 逐行读取，避免大文件一次性读入
+                matched = False
+                matching_lines = []
+                with open(md_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if keyword_lower in line.lower():
+                            matched = True
+                            matching_lines.append(line.strip())
+                            if len(matching_lines) >= 3:
+                                break
+
+                if matched:
+                    results.append({
+                        "task_type": task_type_dir.name,
+                        "file": md_file.name,
+                        "matching_lines": matching_lines,
+                        "created": datetime.fromtimestamp(md_file.stat().st_ctime).isoformat(),
+                        "path": str(md_file)
+                    })
+                    if len(results) >= limit:
+                        return results
+
             except Exception:
                 continue
 

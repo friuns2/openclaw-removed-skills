@@ -1,0 +1,11 @@
+{
+  "owner": "tobewin",
+  "slug": "emailbox",
+  "displayName": "emailbox",
+  "latest": {
+    "version": "1.2.0",
+    "publishedAt": 1776528702177,
+    "commit": "https://github.com/openclaw/skills/commit/27698071e2610ff8026207c78880f05a610717d5"
+  },
+  "history": []
+}

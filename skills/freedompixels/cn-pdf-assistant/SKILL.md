@@ -1,5 +1,6 @@
 ---
 name: cn-pdf-assistant
+version: "1.2.0"
 description: "PDF文档处理工具。本地处理PDF文件，支持文本提取、智能摘要、表格导出、关键词问答、PDF拆分。纯本地处理，保护文档隐私。"
 metadata:
   openclaw:

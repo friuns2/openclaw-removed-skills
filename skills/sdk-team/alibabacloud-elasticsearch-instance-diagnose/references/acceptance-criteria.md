@@ -100,50 +100,54 @@ python3 scripts/check_es_instance_health.py \
 
 #### ✅ CORRECT
 ```bash
-aliyun --profile <profile_name> elasticsearch DescribeInstance \
+aliyun --profile <profile_name> elasticsearch describe-instance \
   --region cn-hangzhou \
-  --InstanceId es-cn-xxxxx
+  --instance-id es-cn-xxxxx
 
-aliyun --profile <profile_name> elasticsearch ListSearchLog \
+aliyun --profile <profile_name> elasticsearch list-search-log \
   --region cn-hangzhou \
-  --InstanceId es-cn-xxxxx \
+  --instance-id es-cn-xxxxx \
   --type INSTANCELOG \
   --query "*" \
-  --beginTime <epoch_ms> \
-  --endTime <epoch_ms>
+  --begin-time <epoch_ms> \
+  --end-time <epoch_ms>
 
-aliyun --profile <profile_name> elasticsearch ListActionRecords \
+aliyun --profile <profile_name> elasticsearch list-action-records \
   --region cn-hangzhou \
-  --InstanceId es-cn-xxxxx
+  --instance-id es-cn-xxxxx
 
-aliyun --profile <profile_name> elasticsearch ListAllNode \
+aliyun --profile <profile_name> elasticsearch list-all-node \
   --region cn-hangzhou \
-  --InstanceId es-cn-xxxxx
+  --instance-id es-cn-xxxxx
 ```
+
+#### ❌ INCORRECT (legacy CLI — do not use for this skill)
+
+Do **not** copy old tutorials that put a **PascalCase OpenAPI action name** as the `aliyun <product> <verb>` verb, or use **CamelCase** query flags. The **✅ CORRECT** block above is the only canonical shell shape for this skill.
 
 ### 4.2 CMS OpenAPI
 
 #### ✅ CORRECT
 ```bash
-aliyun --profile <profile_name> cms DescribeMetricList \
+aliyun --profile <profile_name> cms describe-metric-list \
   --region cn-hangzhou \
-  --Namespace acs_elasticsearch \
-  --MetricName ClusterStatus \
-  --Dimensions '[{"clusterId":"es-cn-xxxxx"}]' \
-  --StartTime <epoch_ms> \
-  --EndTime <epoch_ms> \
-  --Period 300
+  --namespace acs_elasticsearch \
+  --metric-name ClusterStatus \
+  --dimensions '[{"clusterId":"es-cn-xxxxx"}]' \
+  --start-time <epoch_ms> \
+  --end-time <epoch_ms> \
+  --period 300
 
-aliyun --profile <profile_name> cms DescribeSystemEventAttribute \
+aliyun --profile <profile_name> cms describe-system-event-attribute \
   --region cn-hangzhou \
-  --Product elasticsearch \
-  --SearchKeywords es-cn-xxxxx \
-  --StartTime <epoch_ms> \
-  --EndTime <epoch_ms>
+  --product elasticsearch \
+  --search-keywords es-cn-xxxxx \
+  --start-time <epoch_ms> \
+  --end-time <epoch_ms>
 
-aliyun --profile <profile_name> cms DescribeMetricMetaList \
+aliyun --profile <profile_name> cms describe-metric-meta-list \
   --region cn-hangzhou \
-  --Namespace acs_elasticsearch
+  --namespace acs_elasticsearch
 ```
 
 **Expected output**:

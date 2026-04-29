@@ -1,0 +1,11 @@
+{
+  "owner": "poedenon",
+  "slug": "ourgroceries",
+  "displayName": "OurGroceries Integration",
+  "latest": {
+    "version": "1.0.2",
+    "publishedAt": 1777422967643,
+    "commit": "https://github.com/openclaw/skills/commit/9ca89d202b1f6457290b99fbe3cdeb0603c6a63f"
+  },
+  "history": []
+}

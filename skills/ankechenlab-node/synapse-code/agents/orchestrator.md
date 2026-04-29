@@ -218,7 +218,7 @@ def detect_scenario(user_input: str) -> str:
 
 ## 交付物
 ### 📄 需求文档
-[.knowledge/req-XXX.md](链接)
+[.knowledge/req-{id}.md](对应链接)
 
 ### 💻 代码
 ```

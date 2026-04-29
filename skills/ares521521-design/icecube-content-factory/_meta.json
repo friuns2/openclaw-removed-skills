@@ -1,0 +1,11 @@
+{
+  "owner": "ares521521-design",
+  "slug": "icecube-content-factory",
+  "displayName": "IceCube Content Factory",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776528605003,
+    "commit": "https://github.com/openclaw/skills/commit/b478eced98b7bd503b826c41eb7d9e7329abaedb"
+  },
+  "history": []
+}

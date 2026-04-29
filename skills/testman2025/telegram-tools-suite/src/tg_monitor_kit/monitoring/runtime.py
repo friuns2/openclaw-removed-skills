@@ -13,8 +13,8 @@ try:
 except ImportError:
     Workbook = None
 
-from tg_monitor_kit.client import build_client
 from tg_monitor_kit.config import find_project_root, load_config
+from tg_monitor_kit.session_runtime import cleanup_temp_session_files, create_temp_session_client
 
 DEFAULT_TARGET_GROUP_NAMES = []
 DEFAULT_KEYWORD_RULES = []
@@ -295,8 +295,11 @@ async def run_monitor():
     asyncio.create_task(daily_summary_scheduler())
     while True:
         client = None
+        temp_session_base = None
         try:
-            client = build_client(cfg)
+            temp = create_temp_session_client(cfg, "monitor")
+            temp_session_base = temp.temp_session_base
+            client = temp.client
             client.add_event_handler(
                 message_handler,
                 events.NewMessage(incoming=True, outgoing=True),
@@ -314,6 +317,9 @@ async def run_monitor():
             raise ConnectionError("连接已断开")
         except (asyncio.CancelledError, KeyboardInterrupt):
             raise
+        except FileNotFoundError as exc:
+            print(f"❌ {exc}")
+            return
         except Exception as exc:
             if isinstance(exc, sqlite3.DatabaseError) and 'file is not a database' in str(exc).lower():
                 print(
@@ -337,6 +343,8 @@ async def run_monitor():
                     print("⚠️ 会话文件被占用（database is locked），已忽略本次断开异常，稍后重试。")
                 else:
                     raise
+            if temp_session_base:
+                cleanup_temp_session_files(temp_session_base)
 
 
 __all__ = ["run_monitor"]

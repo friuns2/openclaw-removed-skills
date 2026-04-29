@@ -1,13 +1,18 @@
 {
   "owner": "fish1981bimmer",
   "slug": "sql-splitter",
-  "displayName": "SQL 文件拆分工具",
+  "displayName": "sql-splitter",
   "latest": {
-    "version": "2.0.0",
-    "publishedAt": 1776596676466,
-    "commit": "https://github.com/openclaw/skills/commit/599444b02ed74682b946d65fe678ba1c65268faa"
+    "version": "2.2.0",
+    "publishedAt": 1777296231074,
+    "commit": "https://github.com/openclaw/skills/commit/911699f0005f9bea65b2f2ec9b2c9d5bf1cc12ae"
   },
   "history": [
+    {
+      "version": "2.0.0",
+      "publishedAt": 1776596676466,
+      "commit": "https://github.com/openclaw/skills/commit/599444b02ed74682b946d65fe678ba1c65268faa"
+    },
     {
       "version": "1.1.0",
       "publishedAt": 1776260403116,

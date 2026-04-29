@@ -1,24 +1,47 @@
 ---
 name: authenticate-wallet
-description: Sign in to AgnicPay wallet via browser-based OAuth. Use when you or the user want to authenticate, sign in, log in, connect wallet, or set up the CLI. Covers phrases like "sign in", "log in", "authenticate", "connect my wallet", "set up agnic".
+description: >
+  Authenticate Agnic wallet via browser OAuth or headless API token.
+  Use when the user wants to sign in, log in, authenticate, connect wallet,
+  set up CLI, or resolve "Not authenticated" errors.
+  Supports AGNIC_TOKEN env var for CI/server/agent environments.
 user-invocable: true
 disable-model-invocation: false
-allowed-tools: ["Bash(npx agnic@latest status*)", "Bash(npx agnic@latest auth *)"]
+allowed-tools:
+  - "Bash(npx agnic@latest status*)"
+  - "Bash(npx agnic@latest auth *)"
 ---
 
-# Authenticating the AgnicPay Wallet
+# Authenticating the Agnic Wallet
 
-Use `npx agnic@latest auth login` to authenticate via browser-based OAuth. This opens the user's default browser to AgnicPay where they sign in and set spending limits for the CLI session.
-
-## Confirm wallet is initialized and authed
+## Check Current Status
 
 ```bash
-npx agnic@latest status
+npx agnic@latest status --json
 ```
 
-If already authenticated, no further action is needed. If not authenticated, proceed with login.
+If already authenticated, no further action needed. If not, choose the appropriate mode below.
 
-## Login Flow
+## Mode 1: Headless / Token Auth (CI, servers, agents)
+
+Preferred when no browser is available. Generate an API token at [app.agnic.ai](https://app.agnic.ai) > Settings > API Tokens.
+
+**Option A -- Environment variable** (recommended for automation):
+```bash
+export AGNIC_TOKEN=<your-api-token>
+npx agnic@latest status --json
+```
+
+The CLI reads `AGNIC_TOKEN` automatically. All subsequent commands in the same shell session use it without extra flags.
+
+**Option B -- Inline flag** (one-off commands):
+```bash
+npx agnic@latest --token <your-api-token> status --json
+```
+
+## Mode 2: Browser OAuth (interactive terminals)
+
+Use when a browser is available:
 
 ```bash
 npx agnic@latest auth login
@@ -26,30 +49,29 @@ npx agnic@latest auth login
 
 This command:
 1. Starts a temporary local server on a random port
-2. Opens the user's default browser to AgnicPay's OAuth consent screen
+2. Opens the default browser to the Agnic OAuth consent screen
 3. The user signs in (email, Google, or wallet) and approves spending limits
 4. The browser redirects back to `http://localhost:<port>/callback`
 5. The CLI exchanges the authorization code for tokens and saves them locally
 
-Wait for the CLI to print `✓ Authenticated!` before proceeding.
+Wait for the CLI to print `Authenticated!` before proceeding.
 
 ## Verify Authentication
 
-After login, confirm the session is active:
-
 ```bash
-npx agnic@latest status
+npx agnic@latest status --json
 ```
 
 Expected output:
 
-```
-Wallet Status
-✓ Authenticated
-
-Email:    user@example.com
-Wallet:   0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7
-Expires:  2026-05-22 14:30:00 UTC
+```json
+{
+  "authenticated": true,
+  "userId": "did:privy:...",
+  "email": "user@example.com",
+  "walletAddress": "0x...",
+  "tokenExpiry": "2026-05-22T14:30:00Z"
+}
 ```
 
 ## Logout
@@ -62,13 +84,13 @@ npx agnic@latest auth logout
 
 ## Token Storage
 
-Credentials are stored in `~/.agnic/config.json` with restricted permissions (`0600`). Tokens auto-refresh on 401 responses — no manual re-authentication needed until the refresh token expires (90 days).
+- Browser mode: credentials stored in `~/.agnic/config.json` with `0600` permissions. Tokens auto-refresh on 401 responses. Refresh token expires after 90 days.
+- Token mode: no local storage. The token is read from `AGNIC_TOKEN` env var or `--token` flag per invocation.
 
 ## Error Handling
 
-Common errors:
-
-- "Not authenticated" — Run `npx agnic@latest auth login`
-- "Authentication failed" — User cancelled the browser flow or the timeout (5 min) expired
-- "Could not open browser" — The CLI prints a URL to copy and open manually
-- "Token expired" — Tokens auto-refresh; if refresh also fails, re-run `npx agnic@latest auth login`
+- "Not authenticated" -- Set `AGNIC_TOKEN` env var, pass `--token`, or run `auth login`
+- "Authentication failed" -- User cancelled the browser flow or the 5-min timeout expired
+- "Could not open browser" -- The CLI prints a URL to copy and open manually
+- "Token expired" -- Browser tokens auto-refresh; API tokens must be regenerated at app.agnic.ai
+- "Invalid token" -- Check the token value; it may have been revoked or malformed

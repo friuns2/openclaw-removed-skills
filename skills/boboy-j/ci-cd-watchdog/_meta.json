@@ -1,0 +1,11 @@
+{
+  "owner": "boboy-j",
+  "slug": "ci-cd-watchdog",
+  "displayName": "ci-cd-watchdog",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776527183280,
+    "commit": "https://github.com/openclaw/skills/commit/0cdda307c0649342886da709e4a38ae513c25377"
+  },
+  "history": []
+}

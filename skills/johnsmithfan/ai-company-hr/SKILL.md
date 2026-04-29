@@ -3,7 +3,7 @@ name: "AI Company HR"
 slug: "ai-company-hr"
 version: "2.2.0"
 homepage: "https://clawhub.com/skills/ai-company-hr"
-description: "AI公司人力资源Skill包（execute层·EXEC-008）。AI Agentfull lifecyclemanage：招聘→入职→考核→ethics→淘汰。通过HQ统1调度，CHOstrategymanage。integrateNIST AI RMF、PDCA循环、FAIRrisk量化framework。"
+description: "AI Company Human Resources Skill Package (Execution Layer, EXEC-008). AI Agent full lifecycle management: recruitment, onboarding, assessment, ethics, retirement. Dispatched via HQ with CHO strategic oversight. Integrates NIST AI RMF, PDCA cycle, FAIR risk quantification framework."
 license: MIT-0
 tags: [ai-company, hr, recruitment, onboarding, assessment, ethics, retirement, PDCA, NIST, RAG, FAIR, prompt]
 triggers:

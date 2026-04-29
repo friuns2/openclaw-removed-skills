@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (c) 2024 DBCheck Contributors
+# sdfiyon@gmail.com
+#
+# This file is part of DBCheck, an open-source database health inspection tool.
+# DBCheck is released under the MIT License.
+# See LICENSE or visit https://opensource.org/licenses/MIT for full license text.
+#
 """
 数据库巡检工具统一入口
 ===========================
@@ -9,9 +17,25 @@
 import sys
 import os
 import warnings
+import argparse
 
 # 屏蔽打包后 jinja2/markupsafe 引发的 pkg_resources 废弃警告
 warnings.filterwarnings("ignore", category=UserWarning, message="pkg_resources is deprecated")
+
+# ── i18n 初始化（必须在其他模块导入之前）──────────────────────────
+_i18n_loaded = False
+
+
+def _init_i18n(lang_override=None):
+    """初始化 i18n，设置全局语言偏好"""
+    global _i18n_loaded
+    if _i18n_loaded:
+        return
+    # lang_override: 来自 --lang 参数，CLI 临时覆盖，不写配置文件
+    if lang_override:
+        from i18n import set_lang
+        set_lang(lang_override, persist=False)
+    _i18n_loaded = True
 
 # frozen 模式下 sys._MEIPASS 包含打包后的临时目录，
 # 将其加入搜索路径以确保子模块能找到 version.py 等资源
@@ -41,9 +65,20 @@ BOLD    = "\033[1m"
 DIM     = "\033[2m"
 RESET   = "\033[0m"
 RED     = "\033[91m"
+WHITE   = "\033[97m"
+ORANGE  = "\033[38;2;255;140;0m"  # 真橙色 RGB
+
+
+def _parse_args():
+    parser = argparse.ArgumentParser(description='DBCheck - Database Inspection Tool')
+    parser.add_argument('--lang', dest='lang', default=None,
+                        help='Language: zh (Chinese, default) or en (English)')
+    return parser.parse_args()
 
 
 def print_banner():
+    from i18n import t
+    title = t("cli.main_banner_title")
     art = f"""
 {CYAN}{BOLD}  ██████╗ ██████╗  ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
   ██╔══██╗██╔══██╗██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
@@ -51,17 +86,17 @@ def print_banner():
   ██║  ██║██╔══██╗██║     ██╔══██║██╔══╝  ██║     ██╔═██╗
   ██████╔╝██████╔╝╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
   ╚═════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝{RESET}
-{BOLD}          🗄️  数据库自动化巡检工具  {VER}  统一入口{RESET}
+{BOLD}          🗄️  {title}  {VER}  {t("cli.main_menu_title")}{RESET}
 {DIM}  ──────────────────────────────────────────────────────────{RESET}
-{GREEN}{BOLD}    🐬  1 │ MySQL 巡检         {RESET}{DIM}命令行快速巡检（单库）{RESET}
-{CYAN}{BOLD}    🐘  2 │ PostgreSQL 巡检     {RESET}{DIM}命令行快速巡检（单库）{RESET}
-{RED}{BOLD}    🔴  3 │ Oracle 巡检         {RESET}{DIM}命令行快速巡检（单库）{RESET}
-{RED}    🔴  4 │ Oracle 全面巡检     {RESET}{DIM}增强版（10g/11g/12c+，输出 Word）{RESET}
-{GREEN}{BOLD}    🟡  5 │ DM8 达梦 巡检       {RESET}{DIM}命令行快速巡检（单库）{RESET}
+{CYAN}{BOLD}    {t("cli.main_menu_line1")}{RESET}
+{WHITE}{BOLD}    {t("cli.main_menu_line2")}{RESET}
+{RED}{BOLD}    {t("cli.main_menu_line3")}{RESET}
+{YELLOW}{BOLD}    {t("cli.main_menu_line4")}{RESET}
+{ORANGE}{BOLD}    {t("cli.main_menu_line5")}{RESET}
 {DIM}  ──────────────────────────────────────────────────────────{RESET}
-{YELLOW}    📋  6 │ 批量巡检模板生成     {RESET}{DIM}生成 Excel 批量巡检模板{RESET}
-{MAGENTA}    🌐  7 │ 启动 Web UI          {RESET}{DIM}通过浏览器可视化巡检{RESET}
-{DIM}        8 │ 退出{RESET}
+{GREEN}{BOLD}    {t("cli.main_menu_line6")}{RESET}
+{MAGENTA}{BOLD}    {t("cli.main_menu_line7")}{RESET}
+{DIM}        {t("cli.main_menu_line8")}{RESET}
 {DIM}  ──────────────────────────────────────────────────────────{RESET}
 """
     print(art)
@@ -79,112 +114,112 @@ def _run_pg():
     main_pg.main()
 
 
-def _run_oracle():
-    import main_oracle
-    main_oracle.main()
-
-
 def _run_dm():
     import main_dm
     main_dm.main()
 
 
+def _run_sqlserver():
+    import main_sqlserver
+    main_sqlserver.main()
+
+
 def _run_oracle_full():
     """Oracle 全面巡检（增强版，基于 OS 层 + 数据库层）"""
     import main_oracle_full
+    import sys
+    sys.argv = ['main_oracle_full']      # 重置，避免父进程 argv 干扰子模块的 argparse
     main_oracle_full.main()
 
 
 # ── 批量模板生成 ─────────────────────────────────────────────────
 
 def _run_template_menu():
+    from i18n import t
     while True:
         print(f"\n{BOLD}{'='*50}{RESET}")
-        print(f"{YELLOW}{BOLD}   批量巡检模板生成{RESET}")
+        print(f"{YELLOW}{BOLD}   {t('cli.batch_menu_title')}{RESET}")
         print(f"{DIM}{'='*50}{RESET}")
-        print(f"  {GREEN}1{RESET}. MySQL 批量巡检模板 (xlsx)")
-        print(f"  {CYAN}2{RESET}. PostgreSQL 批量巡检模板 (xlsx)")
-        print(f"  {RED}3{RESET}. Oracle 批量巡检模板 (xlsx)")
-        print(f"  {GREEN}4{RESET}. DM8 达梦 批量巡检模板 (xlsx)")
-        print(f"  {DIM}0. 返回主菜单{RESET}")
+        print(f"  {GREEN}1{RESET}. {t('cli.template_mysql')}")
+        print(f"  {CYAN}2{RESET}. {t('cli.template_pg')}")
+        print(f"  {RED}3{RESET}. {t('cli.template_dm')}")
+        print(f"  {DIM}{t('cli.batch_menu_opt0')}{RESET}")
         print(f"{DIM}{'='*50}{RESET}")
-        sub = input("请选择 [0-4]: ").strip()
+        sub = input(f"{t('cli.batch_menu_prompt')}").strip()
 
         if sub == '1':
             import main_mysql
             if hasattr(main_mysql, 'create_excel_template'):
                 main_mysql.create_excel_template()
             else:
-                print("❌ 当前版本不支持 MySQL 批量模板")
+                print(t("cli.batch_menu_not_support").format("MySQL"))
         elif sub == '2':
             import main_pg
             if hasattr(main_pg, 'create_excel_template'):
                 main_pg.create_excel_template()
             else:
-                print("❌ 当前版本不支持 PostgreSQL 批量模板")
+                print(t("cli.batch_menu_not_support").format("PostgreSQL"))
         elif sub == '3':
-            import main_oracle
-            if hasattr(main_oracle, 'create_excel_template'):
-                main_oracle.create_excel_template()
-            else:
-                print("❌ 当前版本不支持 Oracle 批量模板")
-        elif sub == '4':
             import main_dm
             if hasattr(main_dm, 'create_excel_template'):
                 main_dm.create_excel_template()
             else:
-                print("❌ 当前版本不支持 DM8 批量模板")
+                print(t("cli.batch_menu_not_support").format("DM8"))
         elif sub in ('0', ''):
             break
         else:
-            print("\n❌ 无效选择。")
+            print(f"\n{t('cli.batch_menu_invalid')}")
 
 
 # ── Web UI ────────────────────────────────────────────────────────
 
 def _run_web_ui():
     """启动 Web UI"""
+    from i18n import t
     import web_ui
-    print("\n🌐 正在启动 Web UI，请在浏览器打开 http://localhost:5003")
-    print("   按 Ctrl+C 停止服务\n")
+    print(f"\n{t('cli.webui_starting')}")
+    print(f"   {t('cli.webui_stop_hint')}\n")
     try:
         web_ui.socketio.run(web_ui.app, host='0.0.0.0', port=5003)
     except KeyboardInterrupt:
-        print("\n⏹️  Web UI 已停止")
+        print(f"\n{t('cli.webui_stopped')}")
 
 
 # ── 主循环 ───────────────────────────────────────────────────────
 
 def main():
+    from i18n import t
     while True:
         print_banner()
-        choice = input("请选择功能 (1-8): ").strip()
+        choice = input(t("cli.main_menu_prompt")).strip()
 
         if choice == '1':
-            print("\n正在启动 MySQL 数据库巡检工具...\n")
+            print(f"\n{t('cli.main_menu_mysql_starting')}\n")
             _run_mysql()
         elif choice == '2':
-            print("\n正在启动 PostgreSQL 数据库巡检工具...\n")
+            print(f"\n{t('cli.main_menu_pg_starting')}\n")
             _run_pg()
         elif choice == '3':
-            print("\n正在启动 Oracle 数据库巡检工具...\n")
-            _run_oracle()
-        elif choice == '4':
-            print("\n正在启动 Oracle 全面巡检工具（增强版）...\n")
+            print(f"\n{t('cli.main_menu_oracle_starting')}\n")
             _run_oracle_full()
-        elif choice == '5':
-            print("\n正在启动达梦 DM8 数据库巡检工具...\n")
+        elif choice == '4':
+            print(f"\n{t('cli.main_menu_dm_starting')}\n")
             _run_dm()
+        elif choice == '5':
+            print(f"\n{t('cli.main_menu_sqlserver_starting')}\n")
+            _run_sqlserver()
         elif choice == '6':
             _run_template_menu()
         elif choice == '7':
             _run_web_ui()
         elif choice == '8':
-            print("\n感谢使用 DBCheck 数据库巡检工具，再见！👋")
+            print(f"\n{t('cli.main_menu_exiting')}")
             break
         else:
-            print("\n❌ 无效选择，请输入 1-8。")
+            print(f"\n{t('cli.main_menu_invalid')}")
 
 
 if __name__ == '__main__':
+    args = _parse_args()
+    _init_i18n(args.lang)
     main()

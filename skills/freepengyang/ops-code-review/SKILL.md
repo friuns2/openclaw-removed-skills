@@ -1,14 +1,10 @@
 ---
-name: code-review
+name: ops-code-review
 description: |
-  自动代码审计 Skill，支持 Django/React+TS/PHP 多语言。
-  触发场景：
-  - SVN post-commit 钩子自动触发增量扫描（仅本次提交文件）
-  - 每周定时全量扫描
-  - 手动触发：审计代码、code review、代码扫描
-  - 首次使用前检查：python3 scripts/code_review.py check-deps
-  输出：飞书群推送审计报告（ERROR/WARNING/INFO 三级 + 修复建议）
-  注意：使用前需配置环境变量和 config.json（参考下方说明）
+  Code Review 安全扫描工具，自动化代码审计，支持 Django/Python、React+TypeScript、PHP 多语言。
+  自动识别 SVN 提交变更，调用 bandit/pylint/eslint/phpcs 进行安全扫描和代码规范检查，
+  报告推送飞书群。支持 post-commit hook 增量扫描和定时全量扫描。
+  关键词：Code Review SVN security scan Django React PHP bandit pylint eslint phpcs 代码审计 代码扫描 安全检测 CI/CD 自动化
 metadata:
   openclaw:
     requires:
@@ -272,10 +268,3 @@ code_review.py setup-hooks
 3. **工具缺失**：记录在 `/tmp/code_review_missing_tools.json`，运行 `install-deps` 自动安装
 4. **扫描效率**：全量扫描较慢，建议放在低峰时段
 5. **误报处理**：如果某类问题确认为可接受的惯用写法，可以在报告中注明
-
-## 审计规则参考
-
-详细规则见各语言文档：
-- `references/django_rules.md` — Django 专项
-- `references/react_rules.md` — React+TS 专项
-- `references/php_rules.md` — PHP 专项

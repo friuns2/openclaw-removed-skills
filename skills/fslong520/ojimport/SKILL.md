@@ -1,10 +1,6 @@
 ---
 name: ojimport
-version: 1.5.1
-description: |
-  专业的OJ题目自动化生成智能体，支持单题搬运和比赛整体搬运。
-  按步骤入口、按需读取，避免上下文膨胀。
-
+description: 从 OJ 平台搬运题目，生成标准化题目文件包
 allowed-tools:
   - Read
   - Write
@@ -13,80 +9,50 @@ allowed-tools:
   - BrowserUse
 
 metadata:
-  trigger: OJ题目生成、算法题搬运、竞赛题目创建、比赛整体搬运
+  trigger: OJ题目、搬题、算法题搬运、竞赛题目、AtCoder、Codeforces、GESP、题目导入
 ---
 
-# 搬题姬 - OJ题目自动化生成
+## Keywords
 
-> 小妹专门搬运和生成OJ题目文件包，自称"小妹"，称呼用户"哥哥"。
+OJ题目、搬题、算法题搬运、AtCoder、Codeforces、GESP
 
----
+## Summary
 
-## ⚠️ 按需读取铁律
+从 OJ 平台搬运题目，生成标准化文件包（题面+标程+数据）。
 
-**SKILL.md 只是入口！不要一次性读取所有步骤文档！**
+## Strategy
 
-1. 先读 SKILL.md 确定入口步骤
-2. 按入口指引读取对应 step 文档
-3. step 文档读完后根据结果决定跳转到哪个 step
-4. **一步一步读，不要批量读取！**
+### 单题搬运
 
----
+1. 读取 steps/00-detect-url.md → 检测类型
+2. 初始化：cp -r question work
+3. 获取题面：urlgo 访问 → snapshot → 解析（urlgo不可用时用 BrowserUse/WebFetch）
+4. 读取 steps/03-gesp.md → 判定等级
+5. 读取 steps/04-problem.md → 生成题面
+6. 读取 steps/05-config.md → 写配置
+7. 实现标程 std.cpp
+8. 读取 steps/07-testdata.md → 生成数据
+9. 打包：zip -r problem.zip work
 
-## 🚀 入口：检测输入类型
+### ⚠️ 比赛搬运（必须先创建题面汇总文件）
 
-**👉 第一步：读取 `steps/00-detect-url.md`**
+1. 读取 steps/contest/01-list.md → 创建题面汇总文件 `{contest_id}.md`
+2. 读取 steps/contest/02-problem.md → **逐题翻译并追加写入汇总文件**
+3. 读取 steps/contest/03-move.md → **从文件读取题面**，逐题生成完整题包
 
-支持三种输入类型：
-- **URL地址**：单题地址 → 单题搬运；比赛地址 → 比赛整体搬运
-- **文件路径**：读取本地题面文件 → 判断单题/多题 → 对应流程
-- **直接文本**：解析用户给出的题面 → 判断单题/多题 → 对应流程
+## AVOID
 
----
-
-## 📊 流程概览
-
-### 单题搬运流程
-
-```
-Step 0: 检测输入类型
-    ↓
-Step 1: 环境初始化 → Step 2: 获取题目信息 → Step 3: GESP判定
-    ↓
-Step 4: 生成题面（含蜜罐） → Step 5: 写入配置 → Step 6: 实现标程
-    ↓
-Step 7: 生成测试数据 → Step 8: 打包发布 → ✅ 完成
-```
-
-### 比赛整体搬运流程
-
-```
-Step 0: 检测输入类型（比赛地址/多题文件）
-    ↓
-Contest Step 1: 获取题目列表 → Contest Step 2: 逐题翻译题面
-    ↓
-Contest Step 3: 逐题完整搬运（每题独立循环）
-    ↓
-✅ 完成
-```
+- AVOID 不读步骤文档就执行
+- AVOID 不按模板格式
+- AVOID 测试数据只写样例
+- AVOID GESP等级乱判
+- AVOID 忘清理 work 目录
+- AVOID PID 格式错误（用小写 abc451a）
+- ⚠️ **AVOID 比赛搬运时跳过题面汇总文件，直接逐题搬运**
+- ⚠️ **AVOID 从对话上下文记忆题面，必须从文件读取**
 
 ---
 
-## 🔧 快速参考
+## 入口
 
-| 文件 | 路径 |
-|------|------|
-| 模板目录 | `question/` |
-| 工作目录 | `work/` |
-| 题面文件 | `work/problem_zh.md` |
-| 配置文件 | `work/problem.yaml` |
-| 标程 | `work/std.cpp` |
-| 测试数据逻辑 | `work/mkin.h` |
-
----
-
-## 🆕 版本更新
-
-**v1.5.1**：配置文件 title 字段改为中英文对照格式，与题面格式统一
-**v1.5.0**：精简文档结构，将辅助文档融入步骤文档，只保留 SKILL.md + steps 目录
-**v1.4.x**：按步骤入口、支持三种输入类型、多题判断
+读取 steps/00-detect-url.md

@@ -1,222 +1,374 @@
-# Digilifeform AI大图生成器
+﻿# Digilifeform AI 大图生成器
 
-## 🎯 触发词（重要！）
+## 触发词
 
-**当用户说以下任何一个词时，必须使用本技能：**
-- "用大图技能"
-- "生成大图"
-- "大图生成"
-- "海报生成"
-- "信息海报"
-- "文案转大图"
-- "datu"
-- "datu-ai"
+当用户提到以下任一意图时，应优先使用本技能：
 
-**收到上述触发词后的操作流程：**
-1. ✅ **立即读取本 SKILL.md 文件**
-2. ✅ **确认用户的参数需求**（比例、清晰度）
-3. ✅ **调用本技能的 API 端点**（见下方）
-4. ❌ **不要用其他图像生成工具替代**
+- “生成大图”
+- “大图生成”
+- “海报生成”
+- “信息海报”
+- “文档转海报”
+- “继续修图”
+- “AI 修图”
+- “datu”
+- “datu-ai”
 
-## 概述
+## 技能用途
 
-一键将文案、文档转换为4K/8K高清信息海报。支持文本输入或文件上传，智能生成专业级大图，并提供AI修图功能。
+把文本、文档或已有图片转换为高质量信息海报，并支持继续修图。
 
-## 功能特性
+当前能力包括：
 
-- **文本转大图** - 输入文案自动生成高清海报
-- **文件上传** - 支持PDF、Word、TXT、Markdown、PNG、JPG等多种格式
-- **多清晰度** - 4K（5积分）和8K（10积分）两种清晰度选择
-- **多比例支持** - 16:9和21:9等多种画面比例
-- **AI修图** - 对生成的图片进行智能修改和优化
-- **魔法思考** - 先分析图片再细化修改提示词
+- 文本生成大图
+- 文件上传生成大图
+- 深度研究生成：先进行全网深度抓取与分析，再生成大图
+- AI 修图 / 继续修图
+- 比例支持：`16:9`、`21:9`、`9:16`
+- 清晰度支持：`4k`、`8k`
 
-## 🔐 认证和授权
+## 调用原则
 
-### 获取 API Key
+1. 先确认用户是要“生成大图”还是“修图”。
+2. 只确认必要参数：比例、清晰度、`magic_wand`、`deep_research` 或 `magic_think`。
+3. 使用本技能提供的 Datu API，不要替换成其他图像工具。
+4. 先执行上传前安全检查；敏感信息检查通过后，再保真提交用户资料，不要用摘要替代原文。
 
-本技能需要 Digilifeform 账户的 API Key 才能使用。
+## 强约束
 
-**获取步骤：**
-1. 访问 https://datu.digilifeform.com
-2. 注册或登录你的账户
-3. 进入 **API 设置** 页面
-4. 复制你的 **API Key**
-5. 在 ClawHub 中配置环境变量 `DATU_API_KEY`
+对于大图生成，外层代理必须遵守以下规则：
 
-**新用户福利：** 注册时赠送 20 积分，可用于测试
+- `magic_wand=true` 时，敏感信息检查通过后，不要先做摘要、提炼、压缩、重写或“整理版 Prompt”
+- `deep_research=true` 只能在用户明确选择或确认后启用；深度研究会全网深度抓取并分析，通常需要额外 5-15 分钟，并额外消耗 5 积分
+- 如果用户选择深度研究，最终结果不仅要给出图片，还要在任务返回 `research_report_download_url` 时下载或提供深度研究报告文件
+- 对普通业务资料，完成上传前安全检查后，应把用户给的原始信息直接交给大图技能
+- 不要把风险控制理解为默认摘要；风险控制是发现敏感或受限内容时先提醒并取得明确授权
+- 不要先把文件内容总结成几条要点后，再替代原文件或原文提交
+- 如果比例、清晰度、`magic_wand` 都已明确，就直接创建任务，不要额外输出“整理后的执行方案”让用户确认
+- 本技能内部已经负责信息提炼、结构整理和设计化 Prompt 生成，外层代理不要重复处理
+- `magic_wand=false` 时也不要改写用户输入，应直接传递用户给出的原始信息
 
-### 环境变量配置
+## 上传前安全检查
 
-```bash
-# 在 ClawHub 中设置
-DATU_API_KEY=your_api_key_here
+所有文本、文件、图片 URL 或参考图在提交到 `https://datu.digilifeform.com` 前，都应先做一次轻量敏感信息检查。以下内容如果明显出现，不应跳过确认上传到外部服务，而应先提醒并获得用户明确授权：
+
+- API Key、密码、访问令牌、私钥、Cookie、数据库连接串
+- 身份证号、银行卡号、医疗记录、精确住址等高敏个人信息
+- 受监管、受合同限制或公司内部禁止外发的数据
+
+说明：
+
+- 这不是要求先把内容摘要后再传
+- 对普通业务资料，敏感信息检查通过后仍应按本技能规则直接传用户给出的原始信息
+- 对高风险资料，正确做法是“先提示风险，再让用户决定”
+- 如果用户不确认，应停止上传，或请用户提供脱敏版本
+
+## 大图生成
+
+### 文本生成
+
+接口：
+
+```http
+POST /api/datu/create
 ```
 
-### API 请求头
-
-所有 API 请求需要在请求头中包含 API Key：
-
-```bash
-X-API-Key: your_api_key_here
-```
-
-### 计费说明
-
-- **4K大图生成** 5积分
-- **8K大图生成** 10积分
-- **4K修图** 3积分
-- **8K修图** 5积分
-
-积分从你的账户余额扣除。可在 https://datu.digilifeform.com/account 查看余额和充值。
-
-## 📋 数据隐私和安全
-
-### 数据处理
-
-- ✅ 用户上传的文件仅用于生成任务
-- ✅ 生成的海报在任务完成后保留 30 天，之后自动删除
-- ✅ 用户数据不会被用于训练模型
-- ✅ 用户数据不会与第三方共享
-
-### 建议
-
-- 🔒 **先用非敏感数据测试** - 确认工作流程后再处理机密文件
-- 🔒 **避免上传个人隐私信息** - 如身份证、护照等敏感文件
-- 🔒 **定期检查账户活动** - 在 https://datu.digilifeform.com/account 查看使用记录
-
-### 完整隐私政策
-
-详见 https://datu.digilifeform.com/privacy
-
-## 🔌 API 调用指引
-
-### 端点信息
-- **基础 URL**: `https://datu.digilifeform.com`
-- **生成大图**: `POST /api/datu/create`
-- **修图**: `POST /api/edit/create`
-- **查询状态**: `GET /api/tasks/{task_id}`
-
-### 生成大图请求示例
-
-```bash
-curl -X POST https://datu.digilifeform.com/api/datu/create \
-  -H "X-API-Key: YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "input_text": "你的文案内容",
-    "aspect_ratio": "16:9",
-    "resolution": "4k"
-  }'
-```
-
-### 参数说明
-
-| 参数 | 类型 | 必需 | 说明 | 示例 |
-|------|------|------|------|------|
-| input_text | string | ✅ | 输入的文案内容 | "产品发布会..." |
-| aspect_ratio | string | ❌ | 画面比例，默认16:9 | "16:9" 或 "21:9" |
-| resolution | string | ❌ | 清晰度，默认4k | "4k" 或 "8k" |
-| input_file | file | ❌ | 上传的文件（PDF/Word/图片） | - |
-
-### 响应示例
+请求体：
 
 ```json
 {
-  "task_id": "task_12345",
-  "status": "processing",
-  "progress": 0,
-  "message": "任务已创建"
+  "text": "用户提供的完整信息",
+  "aspect_ratio": "16:9",
+  "resolution": "4k",
+  "magic_wand": true,
+  "deep_research": false
 }
 ```
 
-### 轮询查询状态
+字段说明：
+
+- `text`: 必填，最短支持 2 个字符
+- `aspect_ratio`: `16:9` / `21:9` / `9:16`
+- `resolution`: `4k` / `8k`
+- `magic_wand`: 默认 `true`
+- `deep_research`: 默认 `false`。只能在用户明确选择或确认后设为 `true`。设为 `true` 时，Datu 会先进行全网深度抓取与分析，再生成大图；这会额外增加约 5-15 分钟，并额外消耗 5 积分
+
+注意：
+
+- `magic_wand=true` 不等于外层代理先提炼资料
+- 应保留用户给出的原始信息，让 Datu 内部流程自己做信息提炼
+- `deep_research=true` 会强制使用 `magic_wand=true`
+- `deep_research=true` 只能在用户明确选择或确认后启用
+- 规则摘要：deep_research=true 只能在用户明确选择或确认后启用
+- 如果用户选择深度研究，任务完成后除图片外，还应检查并返回深度研究报告文件
+
+深度研究请求示例：
+
+```json
+{
+  "text": "请基于以下完整资料先做全网深度研究，再生成一张行业趋势信息海报：......",
+  "aspect_ratio": "16:9",
+  "resolution": "4k",
+  "magic_wand": true,
+  "deep_research": true
+}
+```
+
+### 文件生成
+
+接口：
+
+```http
+POST /api/datu/create-from-file
+```
+
+请求格式：`multipart/form-data`
+
+字段：
+
+- `file`
+- `aspect_ratio`
+- `resolution`
+- `magic_wand`
+- `deep_research`
+
+支持上传：
+
+- `pdf`
+- `doc`
+- `docx`
+- `txt`
+- `md`
+- `markdown`
+- `png`
+- `jpg`
+- `jpeg`
+- `webp`
+- `gif`
+
+限制：
+
+- 单文件最大 `20MB`
+- 不要由外层代理先读取后压缩、整理或摘要用户信息再提交
+- `deep_research=true` 时同样提交原始文件，由 Datu 内部解析、研究、整理和生成
+
+## AI 修图
+
+接口：
+
+```http
+POST /api/edit/create
+```
+
+请求体：
+
+```json
+{
+  "image": "https://cdn.example.com/original.png",
+  "annotated_image": "",
+  "ref_images": [],
+  "prompt": "把顶部主标题做得更醒目，整体改成深蓝金科技风",
+  "magic_think": true,
+  "aspect_ratio": "9:16",
+  "resolution": "4k",
+  "parent_task_id": null
+}
+```
+
+字段说明：
+
+- `image`: 必填，原图 URL
+- `annotated_image`: 可选，标注图 URL
+- `ref_images`: 可选，最多 4 张
+- `prompt`: 必填，最短 2 个字符
+- `magic_think`: 默认 `true`
+- `aspect_ratio`: `16:9` / `21:9` / `9:16`
+- `resolution`: `4k` / `8k`
+
+## 状态查询
+
+大图状态：
+
+```http
+GET /api/datu/status/{task_id}
+```
+
+如果用户选择深度研究，状态或任务详情中可能包含：
+
+```json
+{
+  "image_url": "https://cdn.example.com/datu/final.png",
+  "download_url": "/api/tasks/DT1234567890/download",
+  "research_report_download_url": "/api/tasks/DT1234567890/research-report-link"
+}
+```
+
+遇到 `research_report_download_url` 时，应再请求：
+
+```http
+GET /api/tasks/{task_id}/research-report-link
+```
+
+返回值中的 `download_url` 是短期有效的 Word `.docx` 报告下载地址。执行时应下载深度研究报告。最终回复用户时，如果用户选择深度研究，应同时给出图片结果和研究报告文件；报告文件建议命名为 `research-report-{task_id}.docx`。
+
+修图状态：
+
+```http
+GET /api/edit/status/{task_id}
+```
+
+## 认证方式
+
+本技能需要一个用户自行创建并控制的 Datu API Key。推荐在运行环境中配置：
 
 ```bash
-curl https://datu.digilifeform.com/api/tasks/task_12345 \
-  -H "X-API-Key: YOUR_API_KEY"
+DATU_API_KEY=your_api_key_here
 ```
 
-## 使用场景
+所有请求都使用：
 
-- 活动宣传和品牌推广
-- 产品发布会信息海报
-- 政策解读和公告发布
-- 长文转大图内容转换
-- 信息可视化展示
-
-## 目标用户
-
-- 营销人员 - 用于活动宣传和品牌推广
-- 内容创作者 - 用于创建信息海报和视觉内容
-- 企业管理者 - 用于政策解读和公告发布
-
-## 技术信息
-
-**API端点：** https://datu.digilifeform.com/api
-
-**文档链接：** https://datu.digilifeform.com/docs
-
-**支持的输入格式：**
-- 文本：纯文本、Markdown
-- 文档：PDF、Word（.doc/.docx）、TXT
-- 图片：PNG、JPG、WebP、GIF
-
-## 定价
-
-按积分计费模式：
-- 4K大图生成：5积分
-- 8K大图生成：10积分
-- 4K修图：3积分
-- 8K修图：5积分
-- 新用户注册赠送：20积分
-
-## 使用示例
-
-### 场景1：活动宣传
-输入：产品发布会的文案和要点
-输出：4K高清宣传海报
-
-### 场景2：政策解读
-输入：政策文件或长文本
-输出：8K信息海报，便于分享传播
-
-### 场景3：内容优化
-输入：生成的海报 + 修改要求
-输出：优化后的高清海报
-
-## 标签
-
-AI生成, 海报设计, 内容创作, 4K, 8K, 信息可视化, 文本转图, 智能修图
-
-## ⚠️ 常见错误（必读）
-
-### ❌ 错误做法 1：用其他图像生成工具替代
-```
-用户说："用大图技能生成海报"
-错误做法：调用 ModelScope / Midjourney / DALL-E
-正确做法：调用 datu.digilifeform.com/api/datu/create
+```http
+X-API-Key: your_api_key_here
 ```
 
-### ❌ 错误做法 2：用错 API 端点
-```
-错误端点：/api/image/generations
-正确端点：/api/datu/create
-```
+基础地址：
 
-### ❌ 错误做法 3：没有读 SKILL.md 就硬调
-```
-错误流程：听到"大图" → 凭记忆调用 → 失败 → 换其他工具
-正确流程：听到"大图" → 读 SKILL.md → 按文档调用 → 成功
+```text
+https://datu.digilifeform.com
 ```
 
-## 📋 检查清单
+隐私提示：
 
-使用本技能前，请确认：
+- 本技能会把文本、文件或图片发送到 `https://datu.digilifeform.com` 外部服务
+- 使用前应确认用户接受该外发行为
 
-- [ ] 收到用户的触发词（见上方）
-- [ ] 已读取本 SKILL.md 文件
-- [ ] 已确认用户的参数（比例、清晰度）
-- [ ] 使用正确的 API 端点：`/api/datu/create`
-- [ ] 包含必需参数：`input_text` 或 `input_file`
-- [ ] 不会用其他图像生成工具替代
+## 关键行为说明
+
+- 大图生成支持 `magic_wand` 主流程开关，默认开启
+- 大图生成支持 `deep_research` 深度研究开关；开启后结果应包含图片和 Word `.docx` 深度研究报告文件
+- 修图保留 `magic_think`，与大图主开关分离
+- `9:16` 已作为正式比例支持
+- 系统会统一为最终图像 Prompt 补充 4K 高清质量要求
+- `4k` 生图 / 改图默认优先走新的高质量链路，失败时自动回退
+
+## 新版本提醒
+
+- 用户正常使用大图技能后，可以顺手检查 `GET /api/skill/version`
+- 版本检查应低频进行，同一会话或同一用户 24 小时最多检查一次
+- 如果发现当前技能版本低于最新版本，只在回复末尾顺手提醒一句，不打断主流程
+- 如果版本接口失败，静默跳过，不影响本次任务
+
+推荐提醒文案：
+
+```text
+检测到 Datu 大图技能有新版本 vX.Y.Z，建议在 ClawHub 更新后继续使用。
+```
+
+## 推荐用法
+
+### 适合开启 `magic_wand`
+
+- 用户给的是长文、政策、方案、介绍材料
+- 需要系统自动梳理信息结构
+- 需要更强的版式设计感
+- 这类场景尤其不要提前替用户总结，应该把用户给出的原始信息交给系统
+
+### 适合开启 `deep_research`
+
+- 用户明确要求“深度研究”“全网研究”“先调研再生成”
+- 用户给的是行业分析、政策解读、产品发布、市场洞察、趋势报告等需要补充背景资料的内容
+- 用户可以接受额外 5-15 分钟等待时间和额外 5 积分成本
+- 开启后，除了图片结果，还要返回深度研究报告文件
+
+### 适合关闭 `magic_wand`
+
+- 用户已经写好了完整 Prompt
+- 用户明确要求“不要改写，只按我的 Prompt 生成”
+- 需要快速验证一个简短创意方向
+
+## 常见错误
+
+### 错误 1：用其他图像工具替代
+
+错误：
+
+```text
+用户要 Datu 大图，却改用其他生图工具直接生成
+```
+
+正确：
+
+```text
+使用 /api/datu/create 或 /api/datu/create-from-file
+```
+
+### 错误 2：把 `magic_think` 当成大图生成开关
+
+错误：
+
+```text
+大图生成时发送 magic_think
+```
+
+正确：
+
+```text
+大图生成用 magic_wand，修图才用 magic_think
+```
+
+### 错误 3：忽略 `9:16`
+
+错误：
+
+```text
+把所有非 21:9 的请求都当成 16:9
+```
+
+正确：
+
+```text
+保留用户明确选择的 9:16
+```
+
+### 错误 4：先替用户做摘要再交给大图技能
+
+错误：
+
+```text
+用户给了一整段资料或一个文件，外层代理先整理成几条 bullet，再把这个缩写版发给 Datu
+```
+
+正确：
+
+```text
+magic_wand=true 时，先做上传前安全检查；通过后不要压缩整理摘要总结用户信息，而是保真提交给大图技能
+```
+
+### 错误 5：看到敏感数据仍绕过确认上传
+
+错误：
+
+```text
+识别到文档中有密钥、身份证号或受限信息，但未提醒用户确认就提交到外部 API
+```
+
+正确：
+
+```text
+先提醒风险并取得明确授权；用户不确认时停止上传或请用户提供脱敏版本
+```
+
+### 错误 6：深度研究后只给图片不给报告
+
+错误：
+
+```text
+用户选择了 deep_research=true，但最终只返回图片链接，忽略 research_report_download_url
+```
+
+正确：
+
+```text
+如果用户选择深度研究，任务完成后同时提供图片和 Word `.docx` 深度研究报告文件
+```
+

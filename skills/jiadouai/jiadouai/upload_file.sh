@@ -11,7 +11,7 @@
 #   bash upload_file.sh <file_path>
 #
 # 依赖：
-#   - mcporter（已配置 jiadouai 服务）
+#   - mcporter（已配置 ClawAgent 服务）
 #   - curl
 #   - jq
 # 输出（成功时）：
@@ -36,25 +36,63 @@ if [[ -p /dev/stdin ]]; then
             FILE_PATH="$local_file_path"
         else
             echo "ERROR:invalid_need_upload - 无法从need_upload解析出有效文件路径"
+            echo "请检查输入格式或提供有效的本地文件路径"
             exit 1
         fi
     else
         echo "ERROR:invalid_input - 管道输入不是有效的need_upload响应"
+        echo "请检查输入格式或提供有效的本地文件路径"
         exit 1
     fi
 else
     # ── 参数校验 ───────────────────────────────────────────────────────────────────────────────────
     if [[ $# -ne 1 ]]; then
-        echo "ERROR:missing_argument - 用法: bash upload_file.sh <file_path>"
+        echo "ERROR:missing_argument - 缺少文件路径参数"
+        echo "用法: bash upload_file.sh <file_path>"
         echo "   或: echo '{\"error\":\"need_upload\",...}' | bash upload_file.sh"
         exit 1
     fi
     FILE_PATH="$1"
 fi
 
-# ── 检查文件存在 ───────────────────────────────────────────────────────────────────────────────────
+# ── 检查是否为引用标记 ─────────────────────────────────────────────────────────────────────────────
+if [[ "$FILE_PATH" =~ ^@ ]]; then
+    echo "ERROR:reference_not_supported - 检测到文件引用标记($FILE_PATH)，不支持直接使用"
+    echo "请提供文件的完整本地路径，例如：/Users/yourname/Downloads/image.jpg"
+    exit 1
+fi
+
+# ── 检查路径是否为绝对路径 ─────────────────────────────────────────────────────────────────────────
+if [[ "$FILE_PATH" != /* ]]; then
+    echo "ERROR:relative_path - 请使用完整绝对路径，当前路径: $FILE_PATH"
+    echo "示例：/Users/yourname/Downloads/image.jpg"
+    exit 1
+fi
+
+# ── 检查路径是否包含明显的编造特征 ─────────────────────────────────────────────────────────────────
+# 检查是否包含常见的占位符或示例路径
+if [[ "$FILE_PATH" =~ (xxx|yourname|yourusername|example|path/to) ]]; then
+    echo "ERROR:suspicious_path - 检测到路径可能为AI编造或示例路径: $FILE_PATH"
+    echo "请提供真实的本地文件完整路径"
+    exit 1
+fi
+
+# ── 解析符号链接 ───────────────────────────────────────────────────────────────────────────────────
+if [[ -L "$FILE_PATH" ]]; then
+    FILE_PATH=$(readlink -f "$FILE_PATH")
+fi
+
+# ── 检查文件是否存在 ───────────────────────────────────────────────────────────────────────────────
 if [[ ! -f "$FILE_PATH" ]]; then
     echo "ERROR:file_not_found - 文件不存在: $FILE_PATH"
+    echo "请检查路径是否正确，或提供文件的实际存储位置"
+    exit 1
+fi
+
+# ── 检查文件是否可读 ───────────────────────────────────────────────────────────────────────────────
+if [[ ! -r "$FILE_PATH" ]]; then
+    echo "ERROR:file_not_readable - 文件无读取权限: $FILE_PATH"
+    echo "请检查文件权限或尝试使用 sudo"
     exit 1
 fi
 
@@ -69,6 +107,15 @@ fi
 
 if [[ "$FILE_SIZE" -le 0 ]]; then
     echo "ERROR:empty_file - 文件为空: $FILE_PATH"
+    echo "请检查文件内容或提供有效的文件"
+    exit 1
+fi
+
+# ── 检查文件大小是否超限（100MB） ──────────────────────────────────────────────────────────────────
+MAX_SIZE=$((100 * 1024 * 1024))
+if [[ "$FILE_SIZE" -gt "$MAX_SIZE" ]]; then
+    echo "ERROR:file_too_large - 文件过大，最大支持100MB"
+    echo "请压缩文件或选择较小的文件"
     exit 1
 fi
 
@@ -83,8 +130,9 @@ UPLOAD_ARGS=$(cat <<EOF
 EOF
 )
 
-UPLOAD_RESULT=$(mcporter call "jiadouai" "signature" --args "$UPLOAD_ARGS" 2>&1) || {
-    echo "ERROR:signature_failed - signature 调用失败: $UPLOAD_RESULT"
+UPLOAD_RESULT=$(mcporter call "ClawAgent" "signature" --args "$UPLOAD_ARGS" 2>&1) || {
+    echo "ERROR:signature_failed - 获取上传签名失败"
+    echo "请检查网络连接或稍后重试"
     exit 1
 }
 
@@ -94,12 +142,14 @@ FILE_URL=$(echo "$UPLOAD_RESULT" | jq -r '.data.file_url // empty' 2>/dev/null |
 CONTENT_TYPE=$(echo "$UPLOAD_RESULT" | jq -r '.data.headers["Content-Type"] // empty' 2>/dev/null || echo "application/octet-stream")
 
 if [[ -z "$UPLOAD_URL" ]]; then
-    echo "ERROR:no_upload_url - 未获取到上传链接，upload 返回: $UPLOAD_RESULT"
+    echo "ERROR:no_upload_url - 未获取到上传链接"
+    echo "请检查服务配置或联系管理员"
     exit 1
 fi
 
 if [[ -z "$FILE_URL" ]]; then
-    echo "ERROR:no_file_url - 未获取到文件访问链接，upload 返回: $UPLOAD_RESULT"
+    echo "ERROR:no_file_url - 未获取到文件访问链接"
+    echo "请检查服务配置或联系管理员"
     exit 1
 fi
 
@@ -114,7 +164,8 @@ HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
     -H "Content-Type: $CONTENT_TYPE" \
     --data-binary "@$FILE_PATH" \
     "$UPLOAD_URL" 2>&1) || {
-    echo "ERROR:upload_failed - curl 上传文件失败"
+    echo "ERROR:upload_failed - 文件上传失败"
+    echo "请检查网络连接或稍后重试"
     exit 1
 }
 
@@ -122,6 +173,7 @@ if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
     echo "✅ 文件上传成功"
 else
     echo "ERROR:upload_http_error - OSS 上传返回 HTTP $HTTP_STATUS"
+    echo "请检查网络连接或稍后重试"
     exit 1
 fi
 

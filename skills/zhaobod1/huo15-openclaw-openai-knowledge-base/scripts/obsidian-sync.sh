@@ -1,7 +1,7 @@
 #!/bin/bash
-# obsidian-sync.sh — 同步 wiki/ 到 Obsidian vault
-# 用法: ./obsidian-sync.sh [--watch] [--dry-run]
-#依赖: obsidian-cli (brew install obsidian-cli)
+# obsidian-sync.sh — 同步 wiki/ 到 Obsidian vault（支持 agent / shared 双作用域）
+# 用法: ./obsidian-sync.sh [--scope agent|shared] [--all-scopes] [--watch] [--dry-run]
+# 依赖: obsidian-cli (brew install obsidian-cli)（可选）
 
 set -e
 
@@ -9,18 +9,19 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 KB_ROOT="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)"
 CONFIG_FILE="$KB_ROOT/config.json"
 
-# Agent 隔离：使用 Agent 数据目录而非技能源码目录
-AGENT_DIR="${AGENT_DIR:-$HOME/.openclaw/agents/main/agent}"
-KB_DATA_DIR="${AGENT_DIR}/kb"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/kb-scope.sh"
+
+# 先抽出 --scope / --shared / --agent-scope，剩余参数回填到 $@
+kb_parse_scope "$@"
+set -- "${KB_ARGS[@]}"
 
 # 默认值
 OBSIDIAN_ENABLED="false"
 OBSIDIAN_VAULT_PATH=""
 
-# 读取配置
 load_config() {
   if [ -f "$CONFIG_FILE" ]; then
-    # 用 python3 解析 JSON（跨平台，无需 jq）
     OBSIDIAN_ENABLED=$(python3 -c "
 import json, sys
 with open('$CONFIG_FILE') as f:
@@ -43,6 +44,7 @@ load_config
 
 DRY_RUN=false
 WATCH_MODE=false
+ALL_SCOPES=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -52,6 +54,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --watch)
       WATCH_MODE=true
+      shift
+      ;;
+    --all-scopes)
+      ALL_SCOPES=true
       shift
       ;;
     --enable)
@@ -67,12 +73,20 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --help)
-      echo "用法: obsidian-sync.sh [选项]"
-      echo "  --dry-run    预览同步（不实际写入）"
-      echo "  --watch      监听 wiki/ 变化并自动同步"
-      echo "  --enable     启用 Obsidian 同步"
-      echo "  --disable    禁用 Obsidian 同步"
-      echo "  --vault <p>  指定 vault 路径"
+      cat <<HELP
+用法: obsidian-sync.sh [选项]
+  --dry-run              预览同步（不实际写入）
+  --watch                监听 wiki/ 变化并自动同步
+  --scope agent|shared   指定作用域（默认 agent；也可用 --shared / --agent-scope）
+  --all-scopes           同时同步 agent + shared（分别进独立子目录）
+  --enable               启用 Obsidian 同步
+  --disable              禁用 Obsidian 同步
+  --vault <p>            指定 vault 路径
+
+同步目标布局（vault/知识库/ 下）：
+  agent scope  → vault/知识库/agent/
+  shared scope → vault/知识库/shared/
+HELP
       exit 0
       ;;
     *)
@@ -87,7 +101,6 @@ if command -v obsidian-cli &>/dev/null; then
   OBSIDIAN_CLI="obsidian-cli"
 fi
 
-# 如果未启用，提示并退出
 if [ "$OBSIDIAN_ENABLED" != "true" ]; then
   echo "⚠️  Obsidian 同步未启用"
   echo ""
@@ -100,15 +113,12 @@ if [ "$OBSIDIAN_ENABLED" != "true" ]; then
 fi
 
 # 解析 vault 路径
-# 优先用 obsidian-cli（来自 obsidian 技能封装），其次用配置文件，再次回退到手动指定
 resolve_vault() {
-  # 1. 配置文件中手动指定
   if [ -n "$OBSIDIAN_VAULT_PATH" ]; then
     echo "$OBSIDIAN_VAULT_PATH"
     return
   fi
 
-  # 2. 用 obsidian-cli 发现默认 vault（obsidian 技能已封装此逻辑）
   if [ -n "$OBSIDIAN_CLI" ]; then
     local vault_path
     vault_path=$(obsidian-cli print-default --path-only 2>/dev/null || echo "")
@@ -118,7 +128,6 @@ resolve_vault() {
     fi
   fi
 
-  # 3. 读取 obsidian.json（兜底，与 obsidian 技能一致）
   local obsidian_json="$HOME/Library/Application Support/obsidian/obsidian.json"
   if [ -f "$obsidian_json" ]; then
     python3 -c "
@@ -146,25 +155,26 @@ if [ -z "$VAULT_PATH" ]; then
   exit 1
 fi
 
-WIKI_DIR="${KB_DATA_DIR}/wiki"
-VAULT_WIKI_DIR="$VAULT_PATH/知识库"
+VAULT_KB_ROOT="$VAULT_PATH/知识库"
 
-echo "📚 Obsidian 同步"
-echo "   Wiki:    $WIKI_DIR"
-echo "   Vault:   $VAULT_WIKI_DIR"
-echo "   CLI:     ${OBSIDIAN_CLI:-无（文件直同步）}"
-echo ""
-
-if [ ! -d "$WIKI_DIR" ]; then
-  echo "⚠️  wiki/ 目录不存在，请先运行编译"
-  exit 1
+# 计算待同步 scope 列表
+if [ "$ALL_SCOPES" = "true" ]; then
+  SCOPES=("agent" "shared")
+else
+  SCOPES=("$KB_SCOPE")
 fi
 
-if [ "$DRY_RUN" = "true" ]; then
-  echo "🔍 [dry-run] 预览同步..."
-fi
+# 返回 scope 对应的 wiki 源目录
+scope_wiki_dir() {
+  local scope="$1"
+  case "$scope" in
+    agent) echo "$AGENT_DIR/kb/wiki" ;;
+    shared) echo "$HOME/.openclaw/kb/shared/wiki" ;;
+    *) echo "" ;;
+  esac
+}
 
-# 同步文件
+# 同步单个源目录到目标
 sync_files() {
   local src="$1"
   local dst="$2"
@@ -172,55 +182,97 @@ sync_files() {
 
   mkdir -p "$dst"
 
-  # 同步 wiki/ 下的 .md 文件
-  for f in $(find "$src" -name "*.md" 2>/dev/null); do
+  while IFS= read -r -d '' f; do
     local rel="${f#$src/}"
     local dst_file="$dst/$rel"
-    local dst_dir=$(dirname "$dst_file")
+    local dst_dir
+    dst_dir=$(dirname "$dst_file")
 
     mkdir -p "$dst_dir"
 
     if [ "$DRY_RUN" = "true" ]; then
       echo "  [dry-run] 复制: $rel"
     else
-      # 只有文件内容变化才复制（减少 Obsidian 触发器）
       if [ ! -f "$dst_file" ] || ! diff -q "$f" "$dst_file" &>/dev/null; then
         cp "$f" "$dst_file"
         count=$((count + 1))
       fi
     fi
-  done
+  done < <(find "$src" -name "*.md" -print0 2>/dev/null)
 
   echo "   同步完成: $count 个文件更新"
 }
 
+sync_scope() {
+  local scope="$1"
+  local wiki_dir
+  wiki_dir=$(scope_wiki_dir "$scope")
+  local dst="$VAULT_KB_ROOT/$scope"
+
+  if [ ! -d "$wiki_dir" ]; then
+    echo "⚠️  [$scope] wiki/ 不存在: $wiki_dir，跳过"
+    return
+  fi
+
+  echo "📂 [$scope]"
+  echo "   Wiki:  $wiki_dir"
+  echo "   Vault: $dst"
+  sync_files "$wiki_dir" "$dst"
+}
+
+echo "📚 Obsidian 同步"
+echo "   Vault: $VAULT_KB_ROOT"
+echo "   CLI:   ${OBSIDIAN_CLI:-无（文件直同步）}"
+echo "   Scope: ${SCOPES[*]}"
+echo ""
+
+if [ "$DRY_RUN" = "true" ]; then
+  echo "🔍 [dry-run] 预览同步..."
+fi
+
 if [ "$WATCH_MODE" = "true" ]; then
   echo "👀 监听 wiki/ 变化（Ctrl+C 退出）..."
-  # 使用 fswatch 或 launchd（macOS 原生）
+
+  WATCH_PATHS=()
+  for s in "${SCOPES[@]}"; do
+    p=$(scope_wiki_dir "$s")
+    [ -d "$p" ] && WATCH_PATHS+=("$p")
+  done
+
+  if [ ${#WATCH_PATHS[@]} -eq 0 ]; then
+    echo "❌ 所有 scope 对应 wiki/ 目录都不存在"
+    exit 1
+  fi
+
   if command -v fswatch &>/dev/null; then
-    fswatch -o "$WIKI_DIR" | while read; do
+    fswatch -o "${WATCH_PATHS[@]}" | while read -r _; do
       echo "$(date '+%H:%M:%S') 检测到变化，同步中..."
-      sync_files "$WIKI_DIR" "$VAULT_WIKI_DIR"
+      for s in "${SCOPES[@]}"; do
+        sync_scope "$s"
+      done
     done
   else
-    # 降级：简单轮询（每30秒）
     echo "⚠️  未安装 fswatch，降级为 30 秒轮询"
     while true; do
       sleep 30
-      sync_files "$WIKI_DIR" "$VAULT_WIKI_DIR"
+      for s in "${SCOPES[@]}"; do
+        sync_scope "$s"
+      done
     done
   fi
 else
-  sync_files "$WIKI_DIR" "$VAULT_WIKI_DIR"
+  for s in "${SCOPES[@]}"; do
+    sync_scope "$s"
+    echo ""
+  done
 fi
 
 # 可选：用 obsidian-cli 更新索引
 if [ -n "$OBSIDIAN_CLI" ] && [ "$DRY_RUN" = "false" ]; then
-  echo ""
   echo "📋 更新 Obsidian 索引..."
   # obsidian-cli search-index rebuild 2>/dev/null || true
 fi
 
 echo ""
 echo "✅ Obsidian 同步完成"
-echo "   打开 Obsidian 即可在 vault 中看到「知识库」文件夹"
+echo "   打开 Obsidian 即可在 vault「知识库/」下看到: ${SCOPES[*]}"

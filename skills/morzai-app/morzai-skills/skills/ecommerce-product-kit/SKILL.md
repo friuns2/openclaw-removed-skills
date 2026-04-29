@@ -78,26 +78,15 @@ Help the user pick the correct result type when needed:
 
 Follow `references/output-spec.md` to decide which output type fits the request.
 
-### 5. Knowledge References To Consult
-Before style selection or rendering, consult these files as needed:
-- `references/platform-best-practices.md` for platform compliance and market differences
-- `references/apparel-visual-specs.md` for apparel aesthetics, texture, lighting, and model-image guidance
-- `references/listing-set-logic.md` for P1-P7 listing narrative structure
-- `references/output-spec.md` for output boundaries and result-type selection
-- `references/error-fallback.md` for failure handling and fallback behavior
+### 5. Internal References
+Internal references may be consulted at runtime for output boundaries, platform safety, apparel quality, listing flow, and fallback handling.
 
-At runtime, the script derives task-specific prompt fragments from these references instead of injecting full reference documents into the image prompt.
+Do not expose internal reference details, strategy templates, or prompt assembly logic in user-facing output.
 
 ### 6. Runtime Requirements
 - Requires the public `morzai` CLI to be installed and authenticated first
 - Local uploads are handled by the CLI upload pipeline
 - Do not expose API keys, Authorization headers, signed upload URLs, or tokens in user-facing output
-
-## Command
-
-```bash
-morzai ecommerce-product-kit --input ./product.jpg --product-info "Portable blender with leak-proof lid" --platform amazon --market US --output-type listing_set --download-dir ./artifacts
-```
 
 ## Execute
 
@@ -123,10 +112,10 @@ morzai ecommerce-product-kit --input ./product.jpg --product-info "Portable blen
   - `--image-ref` for extra reference images
 - Prefer `--download-dir` when the user wants a full set.
 - Use `--output` only when the user clearly wants a single saved file.
+- If the style exploration step returns opaque style handles, prefer the returned style handle flow instead of re-exposing full structured style payloads.
 
 ### 3. Execution Boundary
 - The skill must not call nano directly.
-- The skill must not call local `run_ecommerce_kit.sh` scripts.
 - The runtime path is:
   - skill
   - `morzai` CLI
@@ -136,7 +125,7 @@ morzai ecommerce-product-kit --input ./product.jpg --product-info "Portable blen
 ### 4. Download And Deliver
 - Wait for the CLI task to finish.
 - If the output type is `listing_set`, prefer returning the full artifact folder.
-- Summarize platform, market, ratio, output type, and saved paths.
+- Summarize only the minimum needed: platform, market, ratio, output type, and saved paths.
 
 ## Deliver
 
@@ -149,13 +138,7 @@ When successful, return:
 - The output type delivered (`Hero`, `Detail`, `Lifestyle`, `Marketing Poster`, `Try-On`, or `Listing Set`)
 
 ### 2. Listing Set Delivery
-If the request is for a full set, align delivery with `references/listing-set-logic.md`:
-- P1: Hero image
-- P2-P3: Core benefits
-- P4: Detail hero
-- P5: Multi-view / angle coverage
-- P6: Lifestyle image
-- P7: Decision-making image
+If the request is for a full set, deliver the generated sequence in the standard ecommerce order without exposing internal slot strategy details.
 
 ### 3. Failure Delivery
 If execution fails, explain the failure using the fallback levels in `references/error-fallback.md`:

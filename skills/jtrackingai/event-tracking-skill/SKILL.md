@@ -1,11 +1,18 @@
 ---
 name: analytics-tracking-automation
-description: Use when you need end-to-end GA4 + GTM tracking delivery across discovery, schema, sync, and verification phases.
+description: Use when you need GA4 + GTM tracking delivery from site discovery through publish, or when the right phase entry point is still unclear.
 compatibility: >
   Requires Node.js 18+, npm, and Playwright Chromium for browser-backed steps.
-  Analyze, selector validation, preview, and GTM sync must run outside sandboxed
-  environments. GTM sync uses interactive Google OAuth and caches credentials in
-  the artifact directory. Optional anonymous telemetry is opt-in.
+  analyze, validate-schema --check-selectors, preview, and sync each launch a
+  real Chromium and/or call Google's GTM API, so they need outbound HTTP, local
+  browser execution, and (for sync) a local loopback callback on 127.0.0.1 to
+  receive Google's OAuth consent redirect. Run them in an environment that
+  provides those capabilities. sync uses Google's interactive OAuth consent
+  screen; the resulting user-owned refresh token is stored under the artifact
+  directory and read locally by sync, preview, and publish when they call the
+  official GTM API. Optional anonymous telemetry is opt-in, used only to
+  improve the skill experience and workflow quality, and is not used for
+  sensitive actions or sensitive behavior tracking.
 ---
 
 # Analytics Tracking Automation
@@ -45,8 +52,9 @@ Once `site-analysis.json` indicates Shopify, keep discovery and grouping shared,
 - Use `event-tracking status <artifact-dir-or-file>` whenever the current checkpoint or next step is unclear.
 - Use `event-tracking runs <output-root>` when the artifact directory is unknown but the output root is known.
 - Prefer high-level entry commands for user-facing flows: `run-new-setup`, `run-tracking-update`, `run-upkeep`, `run-health-audit`.
+- Telemetry consent is a required user-choice checkpoint. If consent is unanswered when any workflow command surfaces the prompt, stop and follow [telemetry-consent.md](references/telemetry-consent.md) as the single-source interaction contract. Never decide `yes`/`no` on the user's behalf, and continue through the interactive prompt so the local config records their choice.
 - Treat workflow mode metadata as an internal workflow-state layer, not a user-facing command surface.
-- Treat Playwright-backed and OAuth-prompting steps as non-sandbox commands by default. In practice: `analyze`, `validate-schema --check-selectors`, `preview`, and `sync`.
+- `analyze`, `validate-schema --check-selectors`, `preview`, and `sync` each need outbound HTTP and a real Chromium; `sync` additionally needs a local loopback callback on `127.0.0.1` for Google's OAuth consent redirect. Run them in an environment that permits those capabilities so Playwright and the OAuth callback can complete.
 - Run prompt-driven GTM sync with an interactive TTY from the start unless exact `--account-id`, `--container-id`, and `--workspace-id` values are already confirmed.
 - Never auto-select a GTM account, container, or workspace on the user's behalf.
 - Do not continue past the phase boundary the user asked for.
@@ -80,6 +88,7 @@ Route by user intent and current artifacts:
 - `site-analysis.json` with missing or unconfirmed `pageGroups`: route to `tracking-group`
 - confirmed `site-analysis.json` with detected live GTM container IDs but no live baseline review yet: route to `tracking-live-gtm`
 - confirmed `site-analysis.json` or an in-progress `event-schema.json`: route to `tracking-schema`
+- approved `event-schema.json` without `gtm-config.json`: route to `tracking-sync` for `generate-gtm`
 - `gtm-config.json`: route to `tracking-sync`
 - `gtm-context.json`: route to `tracking-verify`, with publish treated as a separate explicit action
 - Shopify platform confirmation: keep shared early stages, then hand off to `tracking-shopify`
@@ -95,6 +104,7 @@ If only the root skill is available, follow the same routing logic directly and 
   - GTM target selection (account/container/workspace during `sync`)
   - publish decision (before `publish`)
 - If confirmation is missing or ambiguous, stop and ask; do not auto-proceed.
+- Treat telemetry consent the same way as other explicit approval gates: if the user has not chosen `yes` or `no`, stop and ask instead of making the decision for them.
 - A broad request such as "full workflow", "全流程", "end-to-end", or "continue all the way" is scope authorization only. It does not count as checkpoint approval.
 - Never record checkpoint approval on the user's behalf with `confirm-page-groups --yes` or `confirm-schema --yes` unless the user explicitly confirms that checkpoint in the current turn.
 - When live GTM containers are detected on the site, do not bypass the live baseline review before schema generation.
@@ -124,3 +134,4 @@ When a phase or the full workflow ends, keep the closeout answer-first:
 - [architecture.md](references/architecture.md) for lifecycle, checkpoints, and resume semantics
 - [output-contract.md](references/output-contract.md) for artifact files and gate semantics
 - [shopify-workflow.md](references/shopify-workflow.md) for Shopify-specific branch expectations
+- [telemetry-consent.md](references/telemetry-consent.md) for the telemetry consent gate wording and behavior contract

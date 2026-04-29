@@ -35,7 +35,7 @@ from qweather_utils import (
     set_cache_dir,
 )
 
-# ============ Emoji 映射 ============
+# ============ 预警 Emoji 映射（预警专用）=============
 
 SEVERITY_EMOJI = {
     "extreme": "🔴",

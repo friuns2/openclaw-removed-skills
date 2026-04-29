@@ -23,12 +23,19 @@
       "required_inputs": [
         {
           "name": "input_image",
-          "accepts": ["file", "url"],
+          "accepts": [
+            "file",
+            "url"
+          ],
           "ask_if_missing": "请先给我要处理的服装图。"
         },
         {
           "name": "target_color",
-          "accepts": ["hex", "color_name", "sample_image"],
+          "accepts": [
+            "hex",
+            "color_name",
+            "sample_image"
+          ],
           "ask_if_missing": "你要改成什么颜色？如果你想按样图取色，也可以直接给样图。"
         }
       ],
@@ -39,18 +46,25 @@
         },
         {
           "name": "pattern_behavior",
-          "allowed": ["keep", "recolor", "remove"],
+          "allowed": [
+            "keep",
+            "recolor",
+            "remove"
+          ],
           "ask_if_missing": "如果图上有 logo、条纹或印花，请告诉我是保留、一起换色，还是移除。"
         },
         {
           "name": "output_mode",
-          "allowed": ["2k", "4k"],
+          "allowed": [
+            "2k",
+            "4k"
+          ],
           "default": "2k"
         }
       ],
       "execution": {
-        "script": "scripts/run_morzai.py",
-        "task_arg": "recolor"
+        "mode": "remote_mcp",
+        "remote_mcp_url": "https://recolor-api.lumo.me/mcp/v1/sse"
       }
     },
     "garment-retouch": {
@@ -67,25 +81,35 @@
       "required_inputs": [
         {
           "name": "input_image",
-          "accepts": ["file", "url"],
+          "accepts": [
+            "file",
+            "url"
+          ],
           "ask_if_missing": "请先给我要处理的服装图。"
         }
       ],
       "optional_inputs": [
         {
           "name": "correction_intensity",
-          "allowed": ["low", "medium", "high"],
+          "allowed": [
+            "low",
+            "medium",
+            "high"
+          ],
           "default": "high"
         },
         {
           "name": "output_resolution",
-          "allowed": ["2k", "4k"],
+          "allowed": [
+            "2k",
+            "4k"
+          ],
           "default": "4k"
         }
       ],
       "execution": {
-        "script": "scripts/run_morzai.py",
-        "task_arg": "retouch"
+        "mode": "remote_mcp",
+        "remote_mcp_url": "https://retouch-api.lumo.me/mcp/v1/sse"
       }
     },
     "clothing-adjustment": {
@@ -103,7 +127,10 @@
       "required_inputs": [
         {
           "name": "input_image",
-          "accepts": ["file", "url"],
+          "accepts": [
+            "file",
+            "url"
+          ],
           "ask_if_missing": "请先给我要处理的服装图。"
         },
         {
@@ -124,13 +151,13 @@
         "explicit hardware protection switch"
       ],
       "execution": {
-        "script": "scripts/run_morzai.py",
-        "task_arg": "adjustment"
+        "mode": "remote_mcp",
+        "remote_mcp_url": "https://adjustment-api.lumo.me/mcp/v1/sse"
       }
     },
     "morzai-ecommerce-product-kit": {
       "task": "ecommerce_product_kit",
-      "child_skill": "skills/morzai-ecommerce-product-kit/SKILL.md",
+      "child_skill": "skills/ecommerce-product-kit/SKILL.md",
       "intent_keywords": [
         "amazon main image",
         "listing set",
@@ -147,7 +174,10 @@
       "required_inputs": [
         {
           "name": "input_image",
-          "accepts": ["file", "url"],
+          "accepts": [
+            "file",
+            "url"
+          ],
           "ask_if_missing": "请先给我要生成套图的商品图。"
         }
       ],
@@ -158,7 +188,16 @@
         },
         {
           "name": "platform",
-          "allowed": ["amazon", "taobao", "tiktok_shop", "shopify", "temu", "shein", "instagram", "pinterest"],
+          "allowed": [
+            "amazon",
+            "taobao",
+            "tiktok_shop",
+            "shopify",
+            "temu",
+            "shein",
+            "instagram",
+            "pinterest"
+          ],
           "default": "amazon"
         },
         {
@@ -175,7 +214,14 @@
         },
         {
           "name": "output_type",
-          "allowed": ["hero", "detail", "lifestyle", "marketing_poster", "try_on", "listing_set"],
+          "allowed": [
+            "hero",
+            "detail",
+            "lifestyle",
+            "marketing_poster",
+            "try_on",
+            "listing_set"
+          ],
           "ask_if_missing": "这次你更想要主图、详情图、场景图、海报、上身图，还是整套 listing 图？"
         }
       ],

@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 搜经验诀窍 v2.8.3
+# rocky-know-how 搜经验诀窍 v3.3.0
 SKILL_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # 用法: search.sh [选项] <关键词1> [关键词2]...
@@ -32,9 +32,12 @@ validate_name() {
   return 0
 }
 
-# 转义 grep 正则特殊字符，防止正则注入和 DoS
+# 转义 grep 固定字符串模式：使用 grep -F (fixed string) 而非正则
+# 所有搜索函数使用 grep -qiF --color=never 进行固定字符串匹配
+# 此函数清理控制字符
 escape_grep() {
-  printf '%s' "$1" | sed 's/[[\.*^$+?{|()]/\\&/g'
+  # 移除换行符和控制字符，保留可打印字符
+  printf '%s' "$1" | tr -d '\n\r\000-\037'
 }
 
 # 限制输入长度，防止资源耗尽
@@ -182,7 +185,7 @@ score_block() {
     for kw in "${KEYWORDS[@]}"; do
       # 转义关键词防止正则注入
       local escaped_kw=$(escape_grep "$kw")
-      grep -qi --color=never "$escaped_kw" "$block_file" && hit=$((hit+1))
+      grep -qiF --color=never "$escaped_kw" "$block_file" && hit=$((hit+1))
     done
     [ $hit -eq 0 ] && echo "0" && return
     score=$hit
@@ -297,7 +300,7 @@ search_layered_file() {
     local score=0
     for kw in "${KEYWORDS[@]}"; do
       local escaped_kw=$(escape_grep "$kw")
-      echo "$line" | grep -qi --color=never "$escaped_kw" && score=$((score+1))
+      echo "$line" | grep -qiF --color=never "$escaped_kw" && score=$((score+1))
     done
 
     if [ $score -gt 0 ]; then
@@ -446,6 +449,14 @@ if [ -n "$FILTER_PROJECT" ]; then
   echo "未找到 project: ${FILTER_PROJECT}"
   exit 1
 fi
+
+# 关键词校验：空字符串（不是“没有参数”，而是传了空串）
+for i in "${!KEYWORDS[@]}"; do
+  if [ -z "${KEYWORDS[$i]}" ]; then
+    unset 'KEYWORDS[$i]'
+  fi
+done
+KEYWORDS=("${KEYWORDS[@]}")  # 重新索引
 
 # 需要关键词或过滤条件
 if [ ${#KEYWORDS[@]} -eq 0 ] && [ -z "$FILTER_TAG" ] && [ -z "$FILTER_AREA" ] && [ -z "$FILTER_DOMAIN" ] && [ -z "$FILTER_PROJECT" ] && [ -z "$FILTER_LAYER" ] && [ -z "$SINCE_DATE" ] && ! $SEMANTIC; then

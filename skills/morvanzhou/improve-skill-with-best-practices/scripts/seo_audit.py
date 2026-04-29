@@ -26,42 +26,17 @@ import os
 import re
 import sys
 import time
-import warnings
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
-# Suppress FutureWarning (Python 3.9 EOL notices from google libs)
-# and NotOpenSSLWarning (urllib3 v2 + LibreSSL) so they don't pollute output.
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", message=".*urllib3.*OpenSSL.*")
-
-from dotenv import load_dotenv
+import utils  # noqa: F401  — triggers .env loading & warning suppression
 
 try:
     import requests
 except ImportError:
     print("Error: 'requests' package required. Install with: pip install requests", file=sys.stderr)
     sys.exit(1)
-
-
-# ---------------------------------------------------------------------------
-# Env loading (same pattern as gsc_query.py / ga4_query.py)
-# ---------------------------------------------------------------------------
-
-def _find_env():
-    """Walk up from script dir to find .skills-data/.../.env at project root."""
-    d = Path(__file__).resolve().parent
-    while d != d.parent:
-        candidate = d / ".skills-data" / "google-analytics-and-search-improve" / ".env"
-        if candidate.exists():
-            return candidate
-        d = d.parent
-    return None
-
-_env_path = _find_env()
-if _env_path:
-    load_dotenv(_env_path)
 
 
 # ---------------------------------------------------------------------------

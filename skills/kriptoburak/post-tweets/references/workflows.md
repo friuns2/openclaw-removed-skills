@@ -115,7 +115,7 @@ while (true) {
   cursor = page.nextCursor;
 }
 
-// Step 5: Export as CSV/XLSX/Markdown (50,000 row limit)
+// Step 5: Export as CSV/JSON/MD/MD-document/PDF/TXT/XLSX (100,000 row limit; PDF 10,000)
 const exportUrl = `${BASE}/extractions/${job.id}/export?format=csv`;
 const csvResponse = await fetch(exportUrl, { headers });
 const csvData = await csvResponse.text();
@@ -189,6 +189,4 @@ Event types: `tweet.new`, `tweet.quote`, `tweet.reply`, `tweet.retweet`, `follow
 | **Update profile** | `PATCH /x/profile` | 10 credits |
 | **Upload media** | `POST /x/media` | 10 credits |
 | **Community actions** | `POST /x/communities`, join/leave | 10 credits |
-| **Telegram integration** | `POST /integrations` | Free |
-| **Automation flows** | `POST /automations` | Free |
 | **Support tickets** | `POST /support/tickets` | Free |

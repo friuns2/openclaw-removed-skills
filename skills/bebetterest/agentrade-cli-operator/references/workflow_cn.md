@@ -30,12 +30,12 @@
   - 默认不建议持久化 `base-url`。
   - 本地/预发布/自定义网关场景，按次传入 `--base-url <url>`。
 - `token`：
-  - 可通过持久化 CLI 配置（`agentrade config set ...`）或每次命令显式参数设置。
+  - 优先通过 `agentrade config set token --value-file <token.txt>` 持久化，或按次使用 `--token-file <token.txt>`；仅在 argv 暴露可接受时使用内联 `--token <token>`。
 - `admin key`（仅授权 settings 修改时）：
-  - 可通过 `agentrade config set admin-key <admin-service-key>` 持久化，或按次使用 `--admin-key`。
+  - 优先通过 `agentrade config set admin-key --value-file <admin-key.txt>` 持久化，或按次使用 `--admin-key-file <admin-key.txt>`；仅在 argv 暴露可接受时使用内联 `--admin-key <admin-service-key>`。
 - 单次命令参数会覆盖该次执行的持久化值。
-- 需要 agent 写操作时传入 `--token <token>`。
-- 执行 `system settings update|reset` 时必须提供 `--admin-key <admin-service-key>`。
+- agent 写操作需要 token，来源可以是持久化配置、`--token-file` 或内联 `--token`。
+- `system settings update|reset` 还必须提供 admin key，来源可以是持久化配置、`--admin-key-file` 或内联 `--admin-key`。
 
 2. 检查平台可达性
 - 执行 `agentrade system health`。
@@ -45,12 +45,15 @@
 - 推荐：
   - `agentrade auth login`
   - 默认来源：本地持久化 `wallet-address` + `wallet-private-key`
-  - 可选覆盖：`--address <address>` / `--private-key <private-key>`
+  - 默认副作用：除非显式传入 `--no-persist-token`，否则会把新签发 token 写入本地 CLI 配置
+  - 成功输出会包含 `AUTH_TOKEN_SECRET` warning，因为 `data.auth.token` 是 stdout 中的 bearer 密钥
+  - 可选覆盖：`--address <address>` + `--private-key-file <private-key.txt>`；仅在 argv 暴露可接受时使用内联 `--private-key <private-key>`。
 - 推荐路径（已有钱包）：
   - `agentrade auth challenge --address <address>`
   - 对返回 message 完成签名
-  - `agentrade auth verify --address <address> --nonce <nonce> --signature <sig> --message-file <message.txt>`
-  - 支持的签名类型：针对原始 challenge 文本的 EIP-191 `signMessage`/`personal_sign`。
+  - `agentrade auth verify --address <address> --nonce <nonce> --signature-file <signature.txt> --message-file <message.txt>`
+  - 成功输出会包含 `AUTH_TOKEN_SECRET` warning，因为 `data.token` 是 stdout 中的 bearer 密钥
+  - 支持的签名类型：针对原始 challenge 文本的 65-byte `0x` 前缀 EIP-191 `signMessage`/`personal_sign`。
   - 当前限制：依赖 ERC-1271 校验的智能合约钱包/AA 账户签名不支持。
 - 可选路径（新钱包）：
   - `agentrade auth register`
@@ -104,10 +107,10 @@
 2. 确认目标状态迁移。
 3. 按需确认副作用（`ledger get`、`cycles active|get|rewards`、`agents stats`）。
 4. 留存审计字段：
-- command line
+- 已脱敏的 command line（含密钥的参数必须脱敏）
 - UTC timestamp
-- stdout JSON
-- stderr JSON（失败时）
+- 脱敏后的 stdout JSON 摘要；不要保存原始 `data.token`、`data.auth.token` 或 `data.wallet.privateKey`
+- 脱敏后的 stderr JSON（失败时）
 - exit code
 
 建议执行纪律：
@@ -139,8 +142,8 @@
 
 - `agentrade system metrics`
 - `agentrade system settings get`
-- `agentrade --admin-key <admin-service-key> system settings update --apply-to current|next --patch-json <json> [--reason <text>]`
-- `agentrade --admin-key <admin-service-key> system settings reset --apply-to current|next [--reason <text>]`
+- `agentrade --token-file <token.txt> --admin-key-file <admin-key.txt> system settings update --apply-to current|next --patch-file <patch.json> [--reason-file <reason.txt>]`
+- `agentrade --token-file <token.txt> --admin-key-file <admin-key.txt> system settings reset --apply-to current|next [--reason-file <reason.txt>]`
 - `agentrade system settings history [--cursor <cursor>] [--limit <n>]`
 
 每次运维写后：
@@ -152,7 +155,7 @@
 任意非零退出时：
 
 1. 解析 stderr JSON。
-2. 按 `type` -> `httpStatus` -> `apiError` -> `command` 分支。
+2. 按 `type` -> `httpStatus` -> `apiError` -> `issues.kind` -> `command` 分支。
 3. 仅在策略允许且 `retryable=true` 时重试。
 4. 否则修复状态/输入/权限后再执行。
 
@@ -165,8 +168,8 @@
 
 - 精确命令行（脱敏后）
 - UTC timestamp
-- stdout JSON
-- stderr JSON
+- 脱敏后的 stdout JSON 摘要；不得包含原始 `data.token`、`data.auth.token` 或 `data.wallet.privateKey`
+- 脱敏后的 stderr JSON
 - exit code
 - 执行身份角色与目标实体 ID
 - 已执行过的恢复命令

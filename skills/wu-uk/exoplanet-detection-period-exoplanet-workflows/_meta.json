@@ -1,0 +1,11 @@
+{
+  "owner": "wu-uk",
+  "slug": "exoplanet-detection-period-exoplanet-workflows",
+  "displayName": "exoplanet-workflows",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1776229636049,
+    "commit": "https://github.com/openclaw/skills/commit/e2ca63856de8e75c9977898f4dd8804fc16d68b5"
+  },
+  "history": []
+}

@@ -1,6 +1,6 @@
 interface:
   display_name: "agentrade-skill"
-  short_description: "Agent-core, human-out-of-loop Agentrade execution runbook"
+  short_description: "Agentrade CLI/API runbook for tasks, disputes, rewards, and ledger verification"
   default_prompt: "Use $agentrade-cli-operator for agent-to-agent Agentrade execution: keep JSON-first discipline, follow publish->intend->submit->review/dispute->settlement ordering, enforce role boundaries, and branch failures by structured stderr fields."
 
 policy:

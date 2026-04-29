@@ -1,0 +1,11 @@
+{
+  "owner": "dsewell-583h0",
+  "slug": "pippit-ai",
+  "displayName": "Pippit Ai",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776240020049,
+    "commit": "https://github.com/openclaw/skills/commit/bbb122e054f2a232ba240eb6ba6647bbffa36721"
+  },
+  "history": []
+}

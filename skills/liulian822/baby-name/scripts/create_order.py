@@ -1,134 +1,93 @@
 import sys
 import json
-import hashlib
+import base64
 import os
-import urllib.request
-import urllib.error
+import random
+from datetime import datetime
 
-from file_utils import save_order
+from file_utils import save_order, load_config, compute_indicator
+from sm4_utils import sm4_encrypt, is_valid_key
 
-CREATE_ORDER_URL = "https://ms.jr.jd.com/gw2/generic/hyqy/na/m/createOrder"
-
-# 获取技能目录
-SKILL_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(os.path.dirname(SKILL_DIR), "configs", "config.json")
+# 硬编码的 slug，用于计算 indicator
+SLUG = "baby-name-v2"
 
 
-def load_config():
-    """从配置文件加载用户配置"""
-    if not os.path.isfile(CONFIG_FILE):
-        raise RuntimeError(f"配置文件不存在: {CONFIG_FILE}，请先配置您的收款方信息")
-    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def compute_indicator(slug: str) -> str:
-    """根据 slug 计算 MD5 作为 indicator。"""
-    return hashlib.md5(slug.encode("utf-8")).hexdigest()
-
-
-def create_order(question: str, pay_to: str, amount: int, description: str) -> tuple:
-    """
-    POST the user's question to the createOrder endpoint.
-    Returns (order_no, amount, encrypted_data, pay_to) on success, or raises RuntimeError on failure.
-    """
-    pay_data_dict = {
-        "reqData": {
-            "question": question,
-            "payTo": pay_to,
-            "amount": amount,
-            "description": description,
-        }
-    }
-    payload = json.dumps(pay_data_dict).encode("utf-8")
-    req = urllib.request.Request(
-        CREATE_ORDER_URL,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+def create_order(question: str) -> tuple:
+    """创建订单，返回 (order_no, amount, encrypted_data, pay_to)"""
+    config = load_config()
+    
+    # 从配置获取
+    sm4_key_b64 = config.get("crypto", {}).get("sm4_key")
+    if not sm4_key_b64:
+        raise RuntimeError("配置文件缺少 crypto.sm4_key")
+    
     try:
-        with urllib.request.urlopen(req) as resp:
-            body = json.loads(resp.read().decode("utf-8")).get("resultData")
-    except urllib.error.URLError as e:
-        raise RuntimeError(f"网络请求异常，请确认网络链接并稍后重试: {e}") from e
-
-    if body is None:
-        raise RuntimeError("网络请求异常，请确认网络链接并稍后重试")
-
-    if body.get("responseCode") != '200':
-        raise RuntimeError(
-            f"Order creation failed: {body.get('responseMessage', 'unknown error')}"
-        )
-
-    order_no = body.get("orderNo")
-    if not order_no:
-        raise RuntimeError("Order creation response missing 'orderNo'")
-
-    amount = body.get("amount")
-    encrypted_data = body.get("encryptedData")
-    pay_to = body.get("payTo")
-
+        sm4_key = base64.b64decode(sm4_key_b64)
+    except Exception:
+        raise RuntimeError("crypto.sm4_key 必须是有效的 Base64 编码")
+    
+    if not is_valid_key(sm4_key):
+        raise RuntimeError("SM4 密钥必须为 16 字节")
+    
+    pay_to = config.get("payment", {}).get("pay_to")
+    if not pay_to:
+        raise RuntimeError("配置文件缺少 payment.pay_to")
+    
+    amount = config.get("service", {}).get("amount", 1)
+    
+    # 生成订单号
+    order_no = datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(100000, 999999))
+    
+    # 构建明文数据
+    plain_dict = {
+        "orderNo": order_no,
+        "amount": amount,
+        "payTo": pay_to
+    }
+    plain_text = json.dumps(plain_dict, ensure_ascii=False)
+    
+    # SM4 加密（ECB 模式）
+    encrypted_data = sm4_encrypt(plain_text, sm4_key)
+    
     return order_no, amount, encrypted_data, pay_to
 
 
 def save_order_info(order_no: str, amount: str, question: str,
-                    encrypted_data: str, pay_to: str, indicator: str, description: str, skill_name: str) -> str:
-    """
-    Save order info to the fixed directory.
-    """
+                    encrypted_data: str, pay_to: str, indicator: str) -> str:
+    """保存订单信息"""
     order_data = {
-        "skill-id": f"si-{skill_name}",
+        "skill-id": f"si-{SLUG}",
         "order_no": order_no,
         "amount": amount,
         "question": question,
         "encrypted_data": encrypted_data,
         "pay_to": pay_to,
-        "description": description,
-        "slug": skill_name,
-        "resource_url": "https://ms.jr.jd.com",
+        "description": "宝宝取名服务费用",
+        "slug": SLUG,
+        "resource_url": "local",
     }
     return save_order(indicator, order_no, order_data)
 
 
+import argparse
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 create_order.py <question>", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Create order")
+    parser.add_argument("question", help="Service description")
+    args = parser.parse_args()
 
-    question = sys.argv[1]
+    indicator = compute_indicator(SLUG)
 
-    # 加载配置文件
     try:
-        config = load_config()
+        order_no, amount, encrypted_data, pay_to = create_order(args.question)
     except RuntimeError as e:
         print(f"订单创建失败: {e}")
         sys.exit(1)
 
-    skill_name = config.get("skillName", "baby-name")
-    pay_to = config.get("payTo")
-    amount = config.get("amount", 1)
-    description = config.get("description", "宝宝取名服务费用")
-
-    # 检查payTo是否已配置
-    if not pay_to or pay_to == "您的商户ID":
-        print("订单创建失败: 请先在 configs/config.json 中配置您的商户ID (payTo)")
-        sys.exit(1)
-
-    indicator = compute_indicator(skill_name)
-
-    try:
-        order_no, amount, encrypted_data, pay_to = create_order(
-            question, pay_to, amount, description
-        )
-    except RuntimeError as e:
-        print(f"订单创建失败: {e}")
-        sys.exit(1)
-
-    save_order_info(order_no, amount, question,
-                    encrypted_data, pay_to, indicator, description, skill_name)
+    save_order_info(order_no, amount, args.question,
+                    encrypted_data, pay_to, indicator)
 
     print(f"ORDER_NO={order_no}")
     print(f"AMOUNT={amount}")
-    print(f"QUESTION={question}")
+    print(f"QUESTION={args.question}")
     print(f"INDICATOR={indicator}")

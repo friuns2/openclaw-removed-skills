@@ -1,0 +1,11 @@
+{
+  "owner": "boboy-j",
+  "slug": "tech-event-intelligence-engine",
+  "displayName": "tech-event-intelligence-engine",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1776527039353,
+    "commit": "https://github.com/openclaw/skills/commit/c6dc8f33b8772d84092dacc9ac2bda15b7b28ae6"
+  },
+  "history": []
+}

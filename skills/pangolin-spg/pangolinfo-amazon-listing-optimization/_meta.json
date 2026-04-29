@@ -3,9 +3,15 @@
   "slug": "pangolinfo-amazon-listing-optimization",
   "displayName": "pangolinfo-amazon-listing-optimization",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776434651491,
-    "commit": "https://github.com/openclaw/skills/commit/76e36aad2cb924ee81fc363867659d498797a261"
+    "version": "2.0.0",
+    "publishedAt": 1776937463708,
+    "commit": "https://github.com/openclaw/skills/commit/b222a0f3d204a3f156ba91ec2947a023f499d232"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776434651491,
+      "commit": "https://github.com/openclaw/skills/commit/76e36aad2cb924ee81fc363867659d498797a261"
+    }
+  ]
 }

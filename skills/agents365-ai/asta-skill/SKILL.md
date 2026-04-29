@@ -1,11 +1,11 @@
 ---
 name: asta-skill
-description: Use when searching academic papers via Ai2 Asta (Semantic Scholar corpus) through the Asta MCP server. Triggers on academic search, paper lookup, citation traversal, author search, or snippet search when the Asta MCP server is configured. Works with Claude Code, Codex, Hermes, OpenClaw, Windsurf, Cursor, and any MCP-compatible agent.
+description: Domain expertise for Ai2 Asta MCP tools (Semantic Scholar corpus). Intent-to-tool routing, safe defaults, workflow patterns, and pitfall warnings for academic paper search, citation traversal, and author discovery.
 license: MIT
 homepage: https://github.com/Agents365-ai/asta-skill
-compatibility: Requires an MCP-capable host (Claude Code, Codex, Cursor, Windsurf, Hermes, OpenClaw) with the Asta MCP server registered at https://asta-tools.allen.ai/mcp/v1 using an x-api-key header. The skill does not make HTTP calls itself.
+compatibility: Requires an MCP-capable host (Claude Code, Codex, Cursor, Windsurf, Hermes, OpenClaw/ClawHub) with the Asta MCP server registered at https://asta-tools.allen.ai/mcp/v1 using an x-api-key header. The skill does not make HTTP calls itself.
 platforms: [macos, linux, windows]
-metadata: {"openclaw":{"requires":{"env":["ASTA_API_KEY"]},"emoji":"🔭","mcp":{"name":"asta","type":"http","url":"https://asta-tools.allen.ai/mcp/v1","headers":{"x-api-key":"${ASTA_API_KEY}"}}},"hermes":{"tags":["asta","semantic-scholar","academic","paper-search","citation","mcp"],"category":"research","requires_tools":["mcp"],"related_skills":["semanticscholar-skill","zotero-research-assistant","literature-review"]},"author":"Agents365-ai","version":"0.2.1"}
+metadata: {"openclaw":{"requires":{"env":["ASTA_API_KEY"]},"emoji":"🔭","mcp":{"name":"asta","type":"http","url":"https://asta-tools.allen.ai/mcp/v1","headers":{"x-api-key":"${ASTA_API_KEY}"}}},"hermes":{"tags":["asta","semantic-scholar","academic","paper-search","citation","mcp"],"category":"research","requires_tools":["mcp"],"related_skills":["semanticscholar-skill","zotero-research-assistant","literature-review"]},"pimo":{"category":"research","tags":["asta","semantic-scholar","academic","paper-search","citation","mcp"]},"author":"Agents365-ai","version":"0.2.7"}
 ---
 
 # Asta MCP — Academic Paper Search
@@ -15,6 +15,10 @@ Asta is Ai2's Scientific Corpus Tool, exposing the Semantic Scholar academic gra
 - **MCP endpoint:** `https://asta-tools.allen.ai/mcp/v1`
 - **Auth:** `x-api-key` header (request key at https://share.hsforms.com/1L4hUh20oT3mu8iXJQMV77w3ioxm)
 - **Transport:** streamable HTTP
+
+## Update Notifications
+
+If `<skill_directory>/.last_version_check` is missing or >24h old, fetch the `version` from `https://raw.githubusercontent.com/Agents365-ai/asta-skill/main/SKILL.md`, compare to the local version, then write the current Unix timestamp to `.last_version_check`. If remote is newer, tell the user once: `📢 asta-skill X.Y.Z → A.B.C. Run 'git -C <skill_directory> pull' to update.` Silently skip on any failure. Never run `git pull` yourself.
 
 ## Prerequisite Check
 
@@ -33,11 +37,11 @@ Before invoking any tool, verify the Asta MCP server is registered in the host a
 | An author's publications | `get_author_papers` | Pass author id from previous call |
 | Find passages mentioning X | `snippet_search` | ~500-word excerpts from paper bodies |
 
-All tools accept **date-range filters** and **field selection** — pass them whenever the user's intent constrains scope (e.g., "recent", "since 2022", "at NeurIPS").
+Search/citation tools accept **`publication_date_range`** (format `YYYY-MM-DD:YYYY-MM-DD`; year shorthand like `"2021:"`, `":2015-01"`, `"2015:2020"` is also accepted) and **`venues`** (comma-separated) filters, plus **`fields`** for field selection — pass them whenever the user's intent constrains scope (e.g., "recent", "since 2022", "at NeurIPS").
 
 ### ⚠️ `fields` parameter — avoid context blowups
 
-`get_paper` / `get_paper_batch` accept a `fields` string. **Never request `citations` or `references`** via `fields` — a single highly-cited paper (e.g. *Attention Is All You Need*) returns 200k+ characters and will overflow the agent's context window. Use the dedicated `get_citations` tool instead (it paginates).
+`get_paper` / `get_paper_batch` accept a `fields` string. **Never request `citations` or `references`** via `fields` — a single highly-cited paper (e.g. *Attention Is All You Need*) returns 200k+ characters and will overflow the agent's context window. Use the dedicated `get_citations` tool for forward citations (it paginates). Asta does not provide a dedicated `get_references` tool — to retrieve a paper's reference list, use `get_paper` with `fields=references` only for papers you know have a small reference list (typically < 100).
 
 Safe default `fields` for `get_paper`:
 ```
@@ -48,7 +52,7 @@ Add `journal`, `publicationDate`, `fieldsOfStudy`, `isOpenAccess` only when need
 ## Workflow Patterns
 
 ### Pattern 1 — Topic Discovery
-1. `search_papers_by_relevance(query, year="2022-", venue=?)` → initial hits
+1. `search_papers_by_relevance(keyword, publication_date_range="<current_year-5>:", venues=?)` → initial hits (compute the lower bound from today's date — e.g., in 2026 pass `publication_date_range="2021:"`; adjust or drop the filter if the user asks for older work)
 2. Rank/present top N by citationCount + recency
 3. Offer follow-ups: `get_citations` on the most influential, or `snippet_search` for specific claims
 
@@ -81,109 +85,10 @@ Add `journal`, `publicationDate`, `fieldsOfStudy`, `isOpenAccess` only when need
 - **Respect rate limits.** An API key buys higher limits but not unlimited — stop expanding citation graphs beyond what the user asked for.
 - **Do not fabricate fields.** If Asta returns null `abstract` or `venue`, say so rather than inventing.
 
-## Relationship to `semanticscholar-skill`
+## Handling Asta responses
 
-Both wrap the Semantic Scholar corpus, but target different runtimes:
-
-| | `semanticscholar-skill` | `asta-skill` |
-|---|---|---|
-| Transport | Python + direct REST (`s2.py`) | MCP (streamable HTTP) |
-| Host needs | `S2_API_KEY` + Python | Asta MCP registered in host |
-| Best for | Scripted batch workflows, custom filters | Zero-code agent integration (Claude Code, Codex, Cursor, Windsurf, OpenClaw) |
-| Auth | `S2_API_KEY` | `ASTA_API_KEY` via `x-api-key` header |
-
-Use `asta-skill` when the host agent supports MCP; fall back to `semanticscholar-skill` for scripted/pipeline work.
-
----
-
-## Installation
-
-Set `ASTA_API_KEY` in your shell first:
-
-```bash
-export ASTA_API_KEY="..."   # request at https://share.hsforms.com/1L4hUh20oT3mu8iXJQMV77w3ioxm
-```
-
-### Claude Code
-
-```bash
-claude mcp add asta \
-  --transport http \
-  --url https://asta-tools.allen.ai/mcp/v1 \
-  --header "x-api-key: $ASTA_API_KEY"
-```
-
-Or edit `~/.claude.json` / `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "asta": {
-      "type": "http",
-      "url": "https://asta-tools.allen.ai/mcp/v1",
-      "headers": { "x-api-key": "${ASTA_API_KEY}" }
-    }
-  }
-}
-```
-
-### Codex CLI
-
-Edit `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.asta]
-type = "http"
-url = "https://asta-tools.allen.ai/mcp/v1"
-headers = { "x-api-key" = "${ASTA_API_KEY}" }
-```
-
-### Windsurf / Cursor / Hermes / other MCP clients
-
-Add to the client's MCP server config file:
-
-```json
-{
-  "mcpServers": {
-    "asta": {
-      "serverUrl": "https://asta-tools.allen.ai/mcp/v1",
-      "headers": { "x-api-key": "<YOUR_API_KEY>" }
-    }
-  }
-}
-```
-
-### LM Studio
-
-LM Studio 0.3.17+ supports remote MCP servers. Edit `~/.lmstudio/mcp.json` (macOS/Linux) or `%USERPROFILE%\.lmstudio\mcp.json` (Windows) — or in the app: **Program** tab → **Install > Edit mcp.json**:
-
-```json
-{
-  "mcpServers": {
-    "asta": {
-      "url": "https://asta-tools.allen.ai/mcp/v1",
-      "headers": { "x-api-key": "<YOUR_API_KEY>" }
-    }
-  }
-}
-```
-
-Only models with "Tool Use: Supported" in LM Studio's model loader will be able to call Asta tools. Recommended: Qwen 2.5 / 3 Instruct (7B+), Llama 3.1 / 3.3 Instruct (8B+), Mistral / Mixtral Instruct.
-
-### OpenClaw
-
-Install this skill into `~/.openclaw/skills/asta-skill/` and register the MCP server in your OpenClaw config using the same URL + `x-api-key` header pattern. The skill's frontmatter declares `ASTA_API_KEY` as required via `metadata.openclaw.requires.env`.
-
-## Verification
-
-After installation, ask the agent: *"Use Asta to look up the paper with DOI 10.48550/arXiv.1706.03762."* A successful call returns the "Attention Is All You Need" paper metadata. If the agent reports no Asta tools, the MCP server is not registered — re-check the config file path and restart the host.
-
-## Troubleshooting
-
-| Symptom | Cause | Fix |
-|---|---|---|
-| `401 Unauthorized` | Missing or invalid `x-api-key` | Verify `ASTA_API_KEY` is set and header is forwarded |
-| `429 Too Many Requests` | Rate limit hit | Slow down / batch; ensure API key is attached (unauth'd limits are lower) |
-| No Asta tools visible | MCP server not registered in host | Re-run install step, restart agent |
-| Empty `abstract` | Not all corpus papers have full text | Use `snippet_search` instead, or fall back to title + TLDR |
-| Author disambiguation wrong | Common name collisions | Inspect affiliations in `search_authors_by_name` before calling `get_author_papers` |
+| Situation | What to do |
+|---|---|
+| Empty `abstract` | Not all corpus papers have full text — use `snippet_search`, or fall back to title + TLDR |
+| Author disambiguation uncertain | Inspect affiliations in `search_authors_by_name` results before calling `get_author_papers` |
+| `429 Too Many Requests` | Back off; batch with `get_paper_batch` instead of sequential `get_paper` calls |

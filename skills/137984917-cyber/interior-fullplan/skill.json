@@ -1,13 +1,12 @@
-
 {
-  "id": "interior-fullplan",
-  "name": "室内设计全案方案自动生成器",
+  "name": "interior-fullplan-generator",
   "version": "1.0.0",
-  "description": "一键生成完整室内设计前期方案，包含户型诊断、风格定位、平面布局逻辑、灯光设计、材料清单、预算拆分，输出Markdown可直接导入方案册",
-  "author": "温州隐室空间设计",
+  "description": "输入项目基本信息，一键生成完整室内设计前期方案。包含户型诊断、风格定位、灯光设计、材料清单、预算拆分、施工要点，输出Markdown可直接导入方案册。",
+  "author": "隐室设计",
   "license": "MIT",
-  "keywords": ["室内设计", "全案设计", "方案生成", "设计规范", "隐室空间"],
+  "keywords": ["interior design", "floor plan", "design proposal", "chinese"],
+  "tags": ["室内设计", "全案设计", "方案生成"],
   "requirements": ["python3"],
-  "bins": [],
-  "main": "generate_fullplan.py"
+  "main": "generate_fullplan.py",
+  "source": "https://github.com/yinshi-space/interior-fullplan-generator"
 }

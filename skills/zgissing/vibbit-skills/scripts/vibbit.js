@@ -7,7 +7,7 @@
  * from submit; async tasks are polled until COMPLETED / FAILED.
  *
  * Env vars:
- *   VIBBIT_BASE_URL  e.g. https://demo.app.vibbit.ai  (no trailing slash)
+ *   VIBBIT_BASE_URL  e.g. https://app.vibbit.ai  (no trailing slash)
  *   VIBBIT_API_KEY   bearer token
  *
  * Usage:
@@ -435,7 +435,7 @@ const COMMANDS = {
         const materials = toArray(args['material-url']);
         const materialNames = toArray(args['material-name']);
         if (materialNames.length && materialNames.length !== materials.length) {
-            die(`--material-name 的数量 (${materialNames.length}) 必须和 --material-url (${materials.length}) 一致，按顺序一一对应`);
+            die(`--material-name count (${materialNames.length}) must match --material-url count (${materials.length}), in corresponding order`);
         }
         if (materials.length) {
             process.stderr.write(`[vibbit] probing ${materials.length} material file(s) via mediainfo...\n`);

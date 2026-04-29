@@ -99,6 +99,9 @@ def chunk_words(words: list, max_chars: int = 42, max_words: int = 8,
 
         if should_flush:
             flush_chunk()
+            # After flush, recompute test_text from the now-empty buffer so
+            # the next chunk does not inherit the previous chunk's text.
+            test_text = word
 
         # Start new chunk if needed
         if chunk_start is None:

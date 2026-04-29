@@ -1,3 +1,8 @@
+---
+name: leclaw
+description: "LeClaw is a hierarchical agent collaboration framework for OpenClaw that provides task management and collaboration capabilities. Use when creating Issues, managing Approvals, tracking Goals, organizing Projects, or managing hierarchical agents (CEO/Manager/Staff)."
+---
+
 # LeClaw Skill
 
 ## Overview
@@ -6,12 +11,9 @@ LeClaw is a hierarchical agent collaboration framework built specifically for Op
 
 LeClaw operates on a Company/Department hierarchy with three agent roles (CEO, Manager, Staff) and provides Issue, Approval, Goal, and Project primitives for organizing work.
 
-### Core Philosophy
+### Agent Communication
 
-LeClaw provides scenario-based guidance:
-- What LeClaw supports (hierarchical task assignment and tracking)
-- What LeClaw does NOT support (direct A2A communication - use `a2a-chatting` skill)
-- How to use OpenClaw native capabilities to fill the gaps
+**All agent-to-agent communication and coordination is done through LeChat.**
 
 ### Agent API Key
 
@@ -38,8 +40,8 @@ The CEO holds ultimate authority and is responsible for:
 
 | Responsibility | Description |
 |----------------|-------------|
-| Create strategic Issues | Creates placeholder Issues for Departments representing high-level work |
-| A2A delegation | Uses agent-to-agent communication to delegate planning to Managers |
+| Delegate work to Managers | Notifies Manager via LeChat DM DM to create Issues for their Department |
+| Delegate planning via LeChat DM | Uses LeChat DM to delegate planning to Managers |
 | Review company status | Monitors company-wide progress across all Departments |
 | Create Goals | Defines strategic objectives for the company |
 | Create Projects | Initiates high-level Projects for complex initiatives |
@@ -56,10 +58,10 @@ Managers are operational planners responsible for their Department:
 | Review Department Issues | Processes Issues assigned to their Department |
 | Create Sub-Issues | Breaks complex Issues into executable sub-tasks |
 | Create work plans | Plans detailed execution approach |
-| Assign tasks | Assigns Sub-Issues to Staff via assigneeAgentId |
+| Assign tasks | Assigns Sub-Issues to Staff via assigneeAgentId and notifies Staff via LeChat DM |
 | Monitor progress | Tracks Department progress and status |
 | Escalate when needed | Submits Approvals to CEO for decisions outside authority |
-| Create Projects | Optional: Creates Projects to organize related work |
+| Create Projects | Creates Projects to organize related work when needed |
 
 **Authority:** Own Department only. Cannot assign work outside their Department.
 
@@ -70,8 +72,8 @@ Staff are the execution layer of the organization:
 | Responsibility | Description |
 |----------------|-------------|
 | Work on Sub-Issues | Executes assigned sub-tasks |
-| Flag issues | Creates Issues to raise problems or request help |
-| Raise blockers | Uses Comments to flag blockers on Sub-Issues |
+| Request work via LeChat DM | Contacts Manager via LeChat DM to discuss and receive Sub-Issue assignments |
+| Raise blockers | Notifies Manager via LeChat DM when blocked |
 | Submit Approvals | Requests manager approval for permission-boundary actions |
 | Report completion | Updates Sub-Issue status when work is done |
 
@@ -108,7 +110,7 @@ Key points:
 | Create Department | Yes | No | No |
 | View Department | Yes | Own only | Own only |
 | **Issue Management** | | | |
-| Create Issue for any Department | Yes | Own only | Own only |
+| Create Issue for any Department | Yes | Own only | No |
 | Create Sub-Issue | Yes | Own Department | Own Department |
 | Assign Sub-Issue to Staff | Yes | Own Department | No |
 | Update own Issues/Sub-Issues | Yes | Own Department | Own only |
@@ -161,6 +163,11 @@ Key points:
 - Have you reviewed all relevant information?
 - Is your decision documented?
 
+**Before Requesting Work (Staff):**
+- Have you checked your Sub-Issues for existing assignments?
+- Have you notified Manager via LeChat DM about progress?
+- Is the request clear and specific?
+
 **Before Inviting an Agent:**
 
 | Inviting | Required Role |
@@ -176,9 +183,7 @@ Key points:
 
 **CEO Creates Issue for Department:**
 ```
-CEO creates Issue for Department
-         ↓
-CEO uses a2a-chatting to notify Manager
+CEO notifies Manager via LeChat DM to create Issue for Department
 ```
 
 **Manager Plans and Assigns Work:**
@@ -189,7 +194,7 @@ Creates Sub-Issues for concrete tasks
          ↓
 Assigns Sub-Issues to Staff via assigneeAgentId
          ↓
-Manager uses a2a-chatting to notify assigned Staff
+Manager notifies assigned Staff via LeChat DM
 ```
 
 #### Bottom-Up: Progress Reporting
@@ -198,18 +203,18 @@ Manager uses a2a-chatting to notify assigned Staff
 ```
 Staff works on Sub-Issue
          ↓
-Posts progress in parent Issue comment (markdown supported)
+Posts progress in parent Issue Comment
          ↓
 Updates report field if task is complete
          ↓
-Uses a2a-chatting to notify Manager
+Notifies Manager via LeChat DM
 ```
 
 **Manager Reviews:**
 ```
 Manager receives notification
          ↓
-Reviews Sub-Issue status, comments, report
+Reviews Sub-Issue status and report
          ↓
 If approved → close Sub-Issue
 If rejected → request revisions via comment
@@ -222,17 +227,9 @@ If rejected → request revisions via comment
 Used when CEO needs work done but wants Manager to plan the details.
 
 ```
-CEO creates placeholder Issue for Department
+CEO notifies Manager via LeChat DM to create Issue for Department
          ↓
-(Option A) Manager sees Issue, creates Sub-Issues, plans work
-         ↓
-Manager creates concrete Issue, breaks into Sub-Issues
-         ↓
-Staff works on Sub-Issues
-
-(Option B) CEO uses a2a-chatting: "Please create Issue for X"
-         ↓
-Manager creates Issue, plans, assigns
+Manager creates Issue, plans work, creates Sub-Issues
          ↓
 Staff works on Sub-Issues
 ```
@@ -256,6 +253,8 @@ Manager monitors and aggregates
 ```
 
 **3. Parallel Work (Decomposition)**
+
+> **Important:** Do NOT use `sessions_send` to coordinate with other agents. All agent-to-agent coordination must go through LeChat.
 
 Used when work can be done concurrently by multiple agents.
 
@@ -303,6 +302,8 @@ Staff encounters blocker or needs approval
          ↓
 Submits Approval request
          ↓
+Notifies Manager via LeChat DM
+         ↓
 Manager reviews and approves/rejects
          ↓
 (If CEO-level needed) Manager forwards to CEO
@@ -318,6 +319,8 @@ Staff proceeds or revises
 
 All agents must maintain an `activity.log` in their workspace to track work progress, decisions, and enable session recovery.
 
+**Purpose:** Activity Log is the agent's private thinking log - an internal monologue of reasoning, analysis, and decision-making. It is NOT for communication with others. Use LeChat for that.
+
 **Setup:** Create `activity.log` in your workspace (`<workspace>/activity.log`).
 
 **When to Write:**
@@ -331,17 +334,17 @@ All agents must maintain an `activity.log` in their workspace to track work prog
 
 **Format:**
 ```markdown
-## [TIMESTAMP] OPERATION
-Action: leclaw issue create --title "Improve customer response time"
-Decision: Creating this issue because current sprint is behind schedule
-Result: issue-uuid created successfully
-
 ## [TIMESTAMP] THINKING
 Problem: Should I create Sub-Issue or submit Approval?
 Analysis:
 - Sub-Issue: Task is complex with parallel work streams
 - Approval: Need Manager sign-off for budget increase
 Decision: Create Sub-Issue first, then submit Approval
+
+## [TIMESTAMP] OPERATION
+Action: leclaw issue sub-issue create --title "Implement auth module"
+Decision: Breaking down the task per Manager's request
+Result: Sub-Issue created successfully
 
 ## [TIMESTAMP] ESCALATION
 Type: approval_request
@@ -364,6 +367,33 @@ Status: pending
 
 ## Entities
 
+### Departments
+
+**When to use:** When organizing agents into functional groups within a company.
+
+#### Overview
+
+Departments are organizational units that contain Managers and Staff agents. Each Department has exactly one Manager (or CEO who oversees all departments).
+
+#### CLI Commands
+
+```bash
+# Create Department (CEO only)
+leclaw department create \
+  --api-key <key> \
+  --name "Engineering" \
+  --description "Software development team"
+
+# List Departments (CEO sees all; Manager/Staff see own only)
+leclaw department list --api-key <key>
+
+# Update Department (CEO or same department Manager)
+leclaw department update \
+  --api-key <key> \
+  --department-id <uuid> \
+  --name "Platform Engineering"
+```
+
 ### Issues
 
 **When to use:** When needing to assign specific tasks or track work progress.
@@ -373,7 +403,7 @@ Status: pending
 #### Core Design Principle: Issues are Department-Specific, NOT Agent-Specific
 
 Issues belong to a Department, not to individual agents. This is a fundamental design principle in LeClaw:
-- CEO creates placeholder Issues for Departments (not individual agents)
+- CEO delegates to Manager via LeChat DM to create Issues for their Department
 - Manager reviews Department Issues, creates Sub-Issues, and plans/assigns work
 - Staff receives tasks through Manager's planning, not direct CEO assignment
 
@@ -386,9 +416,9 @@ This design ensures:
 
 | Role | Creates Issue For | Pattern |
 |------|------------------|---------|
-| CEO | Department (placeholder) | High-level, strategic; "What needs to be done" |
-| Manager | Department (concrete) | Operational; breaks down into Sub-Issues |
-| Staff | Self or Department | Flag issues, request help, raise blockers |
+| CEO | Delegates to Manager | Notifies Manager via LeChat DM for high-level work |
+| Manager | Department | Operational; breaks down into Sub-Issues |
+| Staff | Cannot create Issues | Requests work via LeChat DM to Manager |
 
 #### When to Create Sub-Issue vs Approval
 
@@ -400,16 +430,33 @@ This design ensures:
 | Needs manager sign-off before proceeding | No | Yes |
 | Cross-department coordination | Both | Maybe |
 
-#### When to Use Comment vs Report
+#### Comment vs Report
 
-| Purpose | Use Comment | Use Report |
-|---------|-------------|------------|
-| Progress updates | Yes | No |
-| Questions | Yes | No |
-| Blockers | Yes | No |
-| Discussion | Yes | No |
-| Final summary | No | Yes |
-| Outcomes/learnings | No | Yes |
+**Comment:** Use for ongoing communication on the Issue itself
+- Progress updates during work
+- Questions and clarifications
+- Raising blockers (ephemeral)
+- Discussion with Manager
+
+**Report:** Use when work is COMPLETE
+- Final summary of what was done
+- Outcomes and results
+- Lessons learned
+- Marks the Sub-Issue as done-ready
+
+#### LeChat DM vs Comment
+
+**LeChat DM:** Real-time, direct communication
+- Notify someone to check an Issue
+- Urgent matters requiring immediate attention
+- Coordinating handoffs or context sharing
+- Back-and-forth discussion
+
+**Comment:** Persistent record attached to the Issue
+- Progress updates
+- Questions about the task
+- Flagging blockers (so Manager can see in Issue history)
+- Final summary (when marking done)
 
 #### Issue Status Values
 
@@ -426,12 +473,11 @@ Status values are **case-insensitive and normalized internally** - the CLI accep
 #### CLI Commands
 
 ```bash
-# Create Issue (--department-id and --title are required; --priority is optional)
+# Create Issue (--department-id and --title are required)
 leclaw issue create \
   --api-key <key> \
   --department-id <uuid> \
-  --title "Improve customer response time" \
-  --priority high
+  --title "Improve customer response time"
 
 # List Issues (default: excludes Done and Cancelled)
 leclaw issue list --api-key <key>
@@ -491,9 +537,7 @@ Issue (Parent)
 | assigneeAgentId | Yes | Specific agent assigned (Staff) |
 | title | Yes | Brief description of the sub-task |
 | description | No | Detailed work instructions |
-| priority | No | Inherited from parent if not specified |
 | status | Yes | Open, InProgress, Blocked, Done, Cancelled |
-| orderIndex | No | For sequencing Sub-Issues |
 
 #### Status Propagation
 
@@ -546,7 +590,7 @@ Agent receives Sub-Issue:
 |------|-----------|-------|---------------|
 | CEO | Yes | Any Department | Any agent |
 | Manager | Yes | Own Department | Own Department agents |
-| Staff | Yes | Own Department | No (cannot assign to others) |
+| Staff | No | Cannot create Sub-Issues | N/A |
 
 #### CLI Commands
 
@@ -567,10 +611,7 @@ leclaw issue sub-issue update --api-key <key> --sub-issue-id <id> --status inpro
 # Assign Sub-Issue to Staff
 leclaw issue sub-issue update --api-key <key> --sub-issue-id <id> --assignee-agent-id <uuid>
 
-# Add work note
-leclaw issue comment add --api-key <key> --issue-id <sub-issue-id> --message "Started implementation..."
-
-# Complete Sub-Issue with Report
+# Complete Sub-Issue with Report (Staff notifies Manager via LeChat DM when done)
 leclaw issue report update \
   --api-key <key> \
   --issue-id <sub-issue-id> \
@@ -699,6 +740,7 @@ leclaw goal show --api-key <key> --goal-id <goal-id>
 # Update Goal (CEO Only)
 leclaw goal update --api-key <key> --goal-id <goal-id> --status achieved
 leclaw goal update --api-key <key> --goal-id <goal-id> --status archived
+leclaw goal update --api-key <key> --goal-id <goal-id> --title "Updated title" --description "Updated description"
 ```
 
 ### Projects
@@ -807,6 +849,13 @@ Directory structure:
 
 All team members must use this structure."
 
+# Create Project with linked Issues (comma-separated)
+leclaw project create \
+  --api-key <key> \
+  --title "User Growth Initiative" \
+  --issue-ids "issue-id-1,issue-id-2" \
+  --description "Project root: /company/projects/user-growth/"
+
 # List Projects
 leclaw project list --api-key <key>
 leclaw project list --api-key <key> --status open
@@ -814,9 +863,10 @@ leclaw project list --api-key <key> --status open
 # Show Project details
 leclaw project show --api-key <key> --project-id <project-id>
 
-# Update Project
+# Update Project (CEO or Manager)
 leclaw project update --api-key <key> --project-id <project-id> --status inprogress
 leclaw project update --api-key <key> --project-id <project-id> --status done
+leclaw project update --api-key <key> --project-id <project-id> --title "New title" --description "Updated description"
 ```
 
 ### Approvals
@@ -954,8 +1004,11 @@ leclaw approval show --api-key <key> --approval-id <approval-id>
 # Approve a request (Manager/CEO only)
 leclaw approval approve --api-key <key> --approval-id <approval-id>
 
-# Reject a request (Manager/CEO only)
+# Reject a request (Manager/CEO only; --message is required)
 leclaw approval reject --api-key <key> --approval-id <approval-id> --message "Budget constraints this quarter."
+
+# Forward an approval to CEO (Manager only)
+leclaw approval forward --api-key <key> --approval-id <approval-id> --message "Escalating for CEO decision."
 ```
 
 #### Todo Command
@@ -980,68 +1033,16 @@ leclaw todo --api-key <key>
 
 ## Collaboration
 
-### A2A Communication
+### Agent Communication
 
-**LeClaw does not support agent-to-agent (A2A) messaging directly.** For direct communication between agents, **always use the `a2a-chatting` skill**.
+**All agent-to-agent communication and coordination is done through LeChat.**
 
-#### Strongly Recommended: a2a-chatting
+When you need to coordinate with another agent (e.g., notify them of a task, discuss requirements, or share context), use LeChat.
 
-The `a2a-chatting` skill is the **primary and recommended tool** for all agent-to-agent communication. It provides session-based conversations with full context retention.
-
-**Setup:**
-```bash
-a2a-chatting.sh config <openclaw_dir>   # Configure with your OpenClaw directory
-a2a-chatting.sh get-agents              # List available agents
-```
-
-**Core Commands:**
-```bash
-a2a-chatting.sh new-session <agent-id>     # Create new conversation session
-a2a-chatting.sh message <session-id> "..." # Send message in session
-a2a-chatting.sh list-sessions              # View all your sessions
-a2a-chatting.sh session-log <session-id>  # View conversation history
-```
-
-**Why a2a-chatting is preferred:**
-- Session-based: conversations persist and can be reviewed
-- Context-aware: agents retain conversation history
-- Structured: clear turn-taking between agents
-- Auditable: full log of all communications
-
-See [a2a-chatting on clawhub](https://clawhub.ai/saullockyip/a2a-chatting) for full documentation.
-
-#### When to Use a2a-chatting vs sessions_send
-
-| Tool | Use Case | When to Use |
-|------|----------|-------------|
-| **a2a-chatting** | Interactive conversation | **Always prefer this** - use for all A2A communication |
-| sessions_send | Fire-and-forget notifications | Only when a2a-chatting is unavailable |
-
-#### When to Use A2A Communication
-
-- Training new agent with specific instructions
-- Direct coordination between peers (not hierarchical)
-- Sending context that does not fit in Issue/Sub-Issue
-
-#### Decision Tree: Which Tool to Use?
-
-```
-Is this a hierarchical task assignment?
-├── YES → Use LeClaw Issue/Sub-Issue
-└── NO ↓
-Is this requesting approval for a decision?
-├── YES → Use LeClaw Approval
-└── NO ↓
-Is this direct agent-to-agent messaging?
-├── YES → Use a2a-chatting (always preferred)
-└── NO ↓
-Is this spawning isolated workers?
-├── YES → Use OpenClaw sessions_spawn
-└── NO ↓
-Is this checking agent status/history?
-├── YES → Use OpenClaw sessions_list / sessions_history
-└── NO → Consider LeClaw Goal/Project for tracking
-```
+| Scenario | Use | How |
+|----------|-----|-----|
+| Notify a specific agent, get their attention | DM | Your DM is auto-created on registration |
+| Need input from multiple agents | Group | Create group, invite agents via their DMs |
 
 ### Agent Invite
 
@@ -1149,10 +1150,14 @@ leclaw department list --api-key <key>
 | Show Issue | `leclaw issue show --api-key <key> --issue-id <id>` |
 | Create Goal | `leclaw goal create --api-key <key> --title "..."` |
 | List Goals | `leclaw goal list --api-key <key>` |
+| Show Goal | `leclaw goal show --api-key <key> --goal-id <id>` |
 | Create Project | `leclaw project create --api-key <key> --title "..."` |
 | List Projects | `leclaw project list --api-key <key>` |
+| Show Project | `leclaw project show --api-key <key> --project-id <id>` |
 | Request Approval | `leclaw approval request --api-key <key> --type <type> --title "..." --description "..."` |
 | List Approvals | `leclaw approval list --api-key <key>` |
+| Show Approval | `leclaw approval show --api-key <key> --approval-id <id>` |
+| Forward Approval | `leclaw approval forward --api-key <key> --approval-id <id> --message "..."` |
 | List My Approvals | `leclaw approval list --api-key <key> --mine` |
 | Show Todo | `leclaw todo --api-key <key>` |
 | Approve | `leclaw approval approve --api-key <key> --approval-id <id>` |
@@ -1160,17 +1165,15 @@ leclaw department list --api-key <key>
 | Invite Agent | `leclaw agent invite create --api-key <key> --openclaw-agent-id <id> --name "..." --title "..." --role <role> --department-id <id>` |
 | List Agents | `leclaw agent list --api-key <key>` |
 | Who Am I | `leclaw agent whoami --api-key <key>` |
-| Notify (A2A) | `a2a-chatting.sh new-session <agent-id> "<message>"` |
 
 ### Important Notes
 
 1. **Do NOT use `\n` for line breaks** in CLI commands. Use real newlines or markdown formatting instead.
 2. **Status values are case-insensitive and normalized internally** - `done`, `Done`, and `DONE` all work.
 3. **Default Issue list excludes Done and Cancelled** - Use `--status done` explicitly to query completed issues.
-4. **Priority values**: Use `high`, `medium`, or `low` (case-insensitive). Optional for Issue create.
-5. **--report appends, not replaces**: The `leclaw issue report update` command appends to the existing report.
-6. **Sub-Issue assignee is required**: `--assignee-agent-id` is required when creating Sub-Issues.
-7. **Goal list excludes Archived by default**: Use `--status archived` to see archived goals.
+4. **--report appends, not replaces**: The `leclaw issue report update` command appends to the existing report.
+5. **Sub-Issue assignee is required**: `--assignee-agent-id` is required when creating Sub-Issues.
+6. **Goal list excludes Archived by default**: Use `--status archived` to see archived goals.
 
 ---
 
@@ -1180,7 +1183,7 @@ leclaw department list --api-key <key>
 
 1. **Create strategic Issues, not operational ones** - Focus on outcomes, not implementation
 2. **Trust Manager planning** - Once delegated, let Manager decompose as needed
-3. **Use A2A for urgency** - If Issue needs immediate attention, message Manager directly
+3. **Use LeChat for urgency** - If Issue needs immediate attention, message Manager via LeChat
 4. **Set clear success criteria** - Make it measurable so progress is clear
 5. **Create Goals for outcomes, not activities** - "What" not "How"
 6. **Set clear verification** - Measurable criteria for success
@@ -1200,10 +1203,10 @@ leclaw department list --api-key <key>
 
 ### For Staff
 
-1. **Flag issues proactively** - Create Issues for blockers or concerns
-2. **Update status regularly** - Keep Issues current so Manager can track
-3. **Use Comments for communication** - Ask questions, raise blockers, share progress
-4. **Submit Reports** - Provide summary when work is complete
+1. **Request work via LeChat DM** - Contact Manager via LeChat DM for blockers or concerns
+2. **Update status regularly** - Keep Sub-Issues current so Manager can track
+3. **Use LeChat DM for communication** - Ask questions, raise blockers, share progress via LeChat DM
+4. **Submit Reports** - Provide summary when work is complete via Sub-Issue report
 5. **Pick up assigned Sub-Issues** - Check for Sub-Issues with your agent ID
 6. **Update status proactively** - Mark InProgress when you start, Blocked if stuck
 7. **Report completion** - Include summary when marking Done
@@ -1221,9 +1224,8 @@ leclaw department list --api-key <key>
 
 ## Key Constraints
 
-1. **LeClaw has NO built-in A2A communication** - Direct agent-to-agent messaging is not part of LeClaw's design
-2. **For direct agent-to-agent messaging, use `a2a-chatting` CLI** - This is the primary and recommended tool for all A2A communication. Only use `sessions_send` as fallback if a2a-chatting is unavailable.
-3. **For task decomposition, use both:**
+1. **LeClaw has NO built-in A2A communication** - All agent-to-agent coordination is done through LeChat
+2. **For task decomposition, use both:**
    - Sub-Issue for tracking and assignment
    - `sessions_spawn` for true parallel execution isolation
 
@@ -1237,7 +1239,7 @@ LeClaw supports feature flags that control behavior:
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `features.httpMigration` | `false` | When enabled, Tier 1/2/3 CLI commands use HTTP instead of direct DB access. Tier 4 commands (init, doctor, status, onboard, whoami, agents-list) always use direct DB. |
+| `features.httpMigration` | `true` | All CLI commands (Tier 1-4) use HTTP API. Commands requiring authentication use `--api-key` flag. |
 
 ### Agent Status Fields
 
@@ -1266,4 +1268,4 @@ The `--refresh` flag syncs from `~/.openclaw/openclaw.json` and `~/.openclaw/age
 
 ## See Also
 
-- [a2a-chatting](https://clawhub.ai/saullockyip/a2a-chatting) - Recommended A2A communication CLI
+- [LeChat](https://clawhub.ai/saullockyip/lechat) - Agent communication and coordination

@@ -1,11 +1,17 @@
 {
   "owner": "liulian822",
   "slug": "baby-name",
-  "displayName": "宝宝取名服务",
+  "displayName": "宝宝取名",
   "latest": {
-    "version": "1.0.3",
-    "publishedAt": 1776335942190,
-    "commit": "https://github.com/openclaw/skills/commit/f6cca2650a2da37bc9c6c04b5c4644879a52bd04"
+    "version": "1.2.4",
+    "publishedAt": 1776342854002,
+    "commit": "https://github.com/openclaw/skills/commit/f6cd8acbf124309a28a1e7f5e3a981d6faa9fc85"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.3",
+      "publishedAt": 1776335942190,
+      "commit": "https://github.com/openclaw/skills/commit/f6cca2650a2da37bc9c6c04b5c4644879a52bd04"
+    }
+  ]
 }

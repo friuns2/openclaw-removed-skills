@@ -3,9 +3,15 @@
   "slug": "libu-premarket",
   "displayName": "Libu Premarket",
   "latest": {
-    "version": "13.4.1",
-    "publishedAt": 1776736205834,
-    "commit": "https://github.com/openclaw/skills/commit/3f8b342a8c66b47aace2745eb920b0858366564a"
+    "version": "1.3.45",
+    "publishedAt": 1777054124067,
+    "commit": "https://github.com/openclaw/skills/commit/0d19403a4d072c372546382ccf714f2011a99315"
   },
-  "history": []
+  "history": [
+    {
+      "version": "13.4.1",
+      "publishedAt": 1776736205834,
+      "commit": "https://github.com/openclaw/skills/commit/3f8b342a8c66b47aace2745eb920b0858366564a"
+    }
+  ]
 }

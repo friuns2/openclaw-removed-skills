@@ -35,11 +35,11 @@ Follow ScoutX is an installable agent skill for OpenClaw or Claude Code that del
 - `x` - First-party X/Twitter posts
 - `podcast` - Podcast transcripts
 
-**Message Groups:** Content is grouped for delivery:
+**Message Groups:** Content is grouped for rendering and per-group item limits:
 - `first_party` - X + Podcast sources
 - `scoutx` - ScoutX curated media
 
-When both groups are selected, OpenClaw cron generates separate jobs for each group.
+When both groups are selected, the default recurring delivery path still uses one cron job and one digest, but renders separate sections for each group. If the digest is too long for the target channel, it is split into multiple sequential messages.
 
 ## Common Commands
 
@@ -115,9 +115,9 @@ FOLLOW_SCOUTX_HOME=/tmp/follow-scoutx-test python3 scripts/follow_scoutx.py prev
 
 1. **Keep backend details hidden** - Never expose `BASE_URL`, API tokens, feed endpoints, or raw JSON filters to end users
 2. **Use standard library only** - Avoid external dependencies unless absolutely necessary
-3. **Message group splitting** - When both first-party and ScoutX sources are selected, recurring delivery must create two separate cron jobs
+3. **Message group rendering** - When both first-party and ScoutX sources are selected, recurring delivery should keep one cron job by default and render separate sections inside one digest
 4. **OpenClaw delivery** - Use `deliver` for deterministic output; use `prepare-digest` only when LLM remixing is needed
-5. **Cron delivery stability** - Default recurring delivery requires an explicit Feishu target; current-chat delivery should use `--main-session-system-event`; do not apply jobs that resolve to `channel=last` unless `--allow-channel-last` is explicitly passed after platform verification
+5. **Cron delivery stability** - Default recurring delivery requires an explicit Feishu target; current-chat delivery should use `--main-session-system-event`; do not use `--main-session-system-event` for Feishu delivery; do not apply jobs that resolve to `channel=last` unless `--allow-channel-last` is explicitly passed after platform verification
 6. **Cron replacement** - OpenClaw cron resources are id-based, so use `--replace-existing` or `openclaw cron list --json` plus `openclaw cron rm <id>` before reinstalling generated jobs
 7. **Prompt style** - Keep prompts direct, compact, and builder-focused; avoid marketing language
 8. **Feed URL handling** - If `service.json` has placeholder URLs (e.g., `*.example.com`), treat it as an operator packaging issue; don't ask users for URLs

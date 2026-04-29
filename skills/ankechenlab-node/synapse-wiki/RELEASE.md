@@ -1,213 +1,142 @@
-# Synapse Skills v1.0.0 发布说明
+# Synapse Skills v2.0.0 发布说明
 
-**发布日期**: 2026-04-08
-**版本**: v1.0.0 (初始公开发布)
+**发布日期**: 2026-04-10
+**版本**: v2.0.0 (Brain/Hands 架构升级)
 
 ---
 
 ## 概述
 
-Synapse Skills 是基于 Karpathy LLM Wiki 模式的知识库管理系统 + Pipeline 代码交付工作流的 OpenClaw Skill 封装。
+v2.0.0 是 Synapse Skills 的重大架构升级。新增 synapse-brain 作为持久调度核心，实现 Brain/Hands 架构：
 
-包含两个独立但可协同工作的技能：
-- **synapse-wiki** — 持久化 Wiki 构建 + 增量知识积累
-- **synapse-code** — Pipeline + Synapse 整合工作流
+- **synapse-brain** (新增) — OpenClaw 持久调度 Agent，跨会话状态管理 + 多 Agent 编排
+- **synapse-wiki** — 知识库管理系统（v2.0: Brain 兼容 + code 互操作）
+- **synapse-code** — 代码开发工作流引擎（v2.0: Brain 集成 + wiki 互操作）
+
+---
+
+## 新增：synapse-brain
+
+### 核心功能
+- **Session 持久化** — state.json 跨会话恢复，不再从零开始
+- **意图路由** — 自动识别用户意图并路由到正确的 Skill
+- **子代理调度** — 管理 1-8 个子代理并行执行
+- **状态可视化** — 随时查询项目进度
+
+### 安装
+```bash
+git clone https://github.com/ankechenlab-node/synapse-brain.git
+cd synapse-brain && ./install.sh
+```
+
+---
+
+## synapse-code 升级
+
+### 新增
+- Brain/Hands 集成 — 可作为 Hand Agent 被 synapse-brain 调度
+- wiki 互操作 — Pipeline 完成自动触发知识沉淀
+- 4 种运行模式 — standalone / lite / full / parallel
+
+### 变更
+- 默认模式改为 standalone（降低新手门槛）
+- 保留 `--legacy` flag 兼容旧 pipeline.py 工作流
+
+---
+
+## synapse-wiki 升级
+
+### 新增
+- Brain 兼容 — 可被 task_router 识别路由
+- code 互操作 — 接收 synapse-code Pipeline 完成后的自动知识沉淀
 
 ---
 
 ## 安装方式
 
-### 方式 1：使用安装脚本（推荐）
-
+### 方式 1：从源码安装
 ```bash
-# 安装 synapse-wiki
-cd ~/path/to/synapse-wiki
-./install.sh
+git clone https://github.com/ankechenlab-node/synapse-brain.git
+git clone https://github.com/ankechenlab-node/synapse-code.git
+git clone https://github.com/ankechenlab-node/synapse-wiki.git
 
-# 安装 synapse-code
-cd ~/path/to/synapse-code
-./install.sh
+cd synapse-brain && ./install.sh
+cd ../synapse-code && ./install.sh
+cd ../synapse-wiki && ./install.sh
 ```
 
-### 方式 2：手动复制
-
+### 方式 2：从 ClawHub 安装
 ```bash
-# 安装 synapse-wiki
-cp -r synapse-wiki ~/.claude/skills/
-
-# 安装 synapse-code
-cp -r synapse-code ~/.claude/skills/
-```
-
-### 方式 3：使用 OpenClaw 安装（如果有 .skill 文件）
-
-```bash
-claude skill install synapse-wiki.skill
-claude skill install synapse-code.skill
-```
-
----
-
-## 快速开始
-
-### synapse-wiki
-
-```bash
-# 1. 初始化新知识库
-/synapse-wiki init ~/my-wiki "AI 学习知识库"
-
-# 2. 摄取资料
-/synapse-wiki ingest ~/my-wiki raw/articles/article.md
-
-# 3. 查询知识
-/synapse-wiki query ~/my-wiki "LLM Wiki 的核心思想"
-
-# 4. 健康检查
-/synapse-wiki lint ~/my-wiki
-```
-
-### synapse-code
-
-```bash
-# 1. 初始化项目
-/synapse-code init ~/my-project
-
-# 2. 运行 Pipeline
-/synapse-code run my-project "实现登录功能"
-
-# 3. 检查状态
-/synapse-code status ~/my-project
+npx clawhub install synapse-brain
+npx clawhub install synapse-code
+npx clawhub install synapse-wiki
 ```
 
 ---
 
 ## 配置说明
 
-### synapse-code 配置
-
-编辑 `~/.claude/skills/synapse-code/config.json`:
-
+### synapse-brain 配置
+安装后自动生成 `config.json`：
 ```json
 {
-  "pipeline": {
-    "workspace": "~/pipeline-workspace",
-    "enabled": true,
-    "auto_log": true
-  },
-  "paths": {
-    "pipeline_script": "~/pipeline-workspace/pipeline.py",
-    "pipeline_summary": "/tmp/pipeline_summary.json"
-  },
-  "gitnexus": {
-    "enabled": true
+  "brain": {
+    "state_dir": "~/.openclaw/brain-state",
+    "auto_save": true,
+    "skills": { "code": "synapse-code", "wiki": "synapse-wiki" }
   }
 }
 ```
 
-### 环境变量
-
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| `SKIP_GITNEXUS_CHECK` | 跳过 GitNexus 检查 | `false` |
+### synapse-code 配置
+```json
+{
+  "pipeline": { "workspace": "~/pipeline-workspace", "auto_log": true },
+  "interop": { "wiki_enabled": true, "wiki_root": "~/my-project/wiki" }
+}
+```
 
 ---
 
 ## 依赖要求
 
-### synapse-wiki
-- Python 3.x ✓
-
-### synapse-code
-- Python 3.x ✓
-- GitNexus CLI（可选）: `npm install -g gitnexus`
-- Pipeline workspace（需要用户自行配置）
-
----
-
-## 主要特性
-
-### 三层架构
-
-```
-<wiki-root>/
-├── raw/       ← 原始资料层（LLM 只读）
-├── wiki/      ← Wiki 知识层（LLM 编写）
-└── outputs/   ← 探索产出层
-```
-
-### 核心操作
-
-| 操作 | 说明 |
+| 技能 | 依赖 |
 |------|------|
-| **Ingest** | 摄取源文件创建 Wiki 页面 |
-| **Query** | 查询知识并综合答案 |
-| **Lint** | 健康检查（死链接、孤立页面等） |
+| synapse-brain | Python 3.10+ |
+| synapse-code | Python 3.x, npm (GitNexus 可选) |
+| synapse-wiki | Python 3.x |
 
 ---
 
 ## 测试报告
 
-### 基线测试
-
 | 技能 | 测试项 | 结果 |
 |------|--------|------|
-| synapse-wiki | init, ingest, lint, query | **4/4 通过** |
-| synapse-code | init_syntax, infer, status | **3/3 通过** |
-
-### 测试方式
-
-```bash
-# synapse-wiki
-cd ~/.claude/skills/synapse-wiki
-python3 tests/baseline_test.py
-
-# synapse-code
-cd ~/.claude/skills/synapse-code
-python3 tests/baseline_test.py
-```
+| synapse-brain | 意图分类 8/8, CRUD, Session, 子代理 | **全部通过** |
+| synapse-code | 7 脚本语法, shell 语法 | **全部通过** |
+| synapse-wiki | 6 脚本语法, shell 语法 | **全部通过** |
 
 ---
 
 ## 升级路径
 
-### 从 v0.1.0 升级到 v1.0.0
+### 从 v1.x 升级到 v2.0.0
 
-v1.0.0 引入了配置化支持，如果你有旧版本：
-
-1. 备份现有配置（如果有）
-2. 重新安装：`./install.sh`
-3. 复制 `config.template.json` 为 `config.json`
-4. 根据需要修改配置
-
----
-
-## 已知问题
-
-1. **synapse-code 依赖外部 Pipeline**
-   - 需要用户自行配置 `~/pipeline-workspace/`
-   - 解决：未来版本将提供独立的 Pipeline 安装包
-
-2. **GitNexus 为可选依赖**
-   - 某些功能（影响分析）需要 GitNexus
-   - 解决：安装 `npm install -g gitnexus`
+1. 安装 synapse-brain（新依赖）
+2. 更新 synapse-code 和 synapse-wiki
+3. 旧 pipeline.py 工作流通过 `--legacy` flag 继续兼容
+4. 建议：编辑 config.json 启用 wiki 互操作
 
 ---
 
 ## 反馈与支持
 
-- GitHub Issues: （待添加）
-- 文档：详见 `README.md`
-- 开发日记：详见 `DEVELOPMENT_JOURNAL.md`
-
----
-
-## 贡献者
-
-- Initial work: Anke
-- Based on: [Karpathy llm-wiki Gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
+- GitHub Issues: https://github.com/ankechenlab-node/synapse-brain/issues
+- GitHub Issues: https://github.com/ankechenlab-node/synapse-code/issues
+- GitHub Issues: https://github.com/ankechenlab-node/synapse-wiki/issues
 
 ---
 
 ## 许可证
 
-MIT License
+MIT License — 详见各项目 LICENSE 文件

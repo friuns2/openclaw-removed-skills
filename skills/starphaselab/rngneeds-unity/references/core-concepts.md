@@ -17,6 +17,7 @@ Treat it as a gameplay-facing random system, not just a helper for `Random.Range
 - **Repeat Prevention**: logic that reduces or removes consecutive repeats.
 - **Influence Provider**: an object implementing `IProbabilityInfluenceProvider` that pushes odds up or down.
 - **Depletable List**: a list where item units can be consumed.
+- **Deck Extensions**: order-centric helpers that treat a `ProbabilityList<T>` like a card deck, with top at index `0` and bottom at the last index.
 - **Pick History**: recent picks stored by index and reused by helper APIs.
 
 ## Base probability vs resulting probability
@@ -46,7 +47,30 @@ Use depletable lists for finite stock.
 - Individual items also have depletable state plus `Units` and `MaxUnits`.
 - Consuming units makes depleted items behave like unavailable entries.
 
-Use this for card decks, unique rewards, limited spawns, or stock that refills later.
+Use this for unique rewards, limited spawns, finite stock, or deck-like pools where exhaustion and duplicate-copy counts matter but live top/bottom order does not.
+
+This means a simple card pool can still be modeled as a depletable list when the user does not care about shuffling, peeking, cutting, draw-pile vs discard-pile flow, or any other order-centric behavior.
+
+## Deck extensions
+
+Use deck extensions when **order itself** is part of the gameplay.
+
+Typical signals:
+
+- draw from the top
+- place on the bottom
+- move cards between draw pile, hand, discard, or table zones
+- cut or shuffle a deck as an ordered stack
+- inspect or explain how a shuffle changed the deck
+
+Important consequences:
+
+- top of deck is index `0`
+- these operations are **not** weighted picks
+- shuffle helpers use seeded index-based randomness to reorder items
+- moving or reordering cards changes positional gameplay, not just probabilities
+
+Use ordinary `PickValue()` or `PickValues()` when the user wants weighted outcome selection. Use deck extensions when the user wants card-flow or positional behavior.
 
 ## Repeat prevention
 

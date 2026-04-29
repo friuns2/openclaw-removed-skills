@@ -1,45 +1,58 @@
 /**
- * HTTP 请求封装 - 基于 axios
+ * HTTP 请求封装 - 基于 curl 命令
  */
 
-import axios from "axios";
-import { config, getEnvConfig } from "./config.js";
+import { spawn } from "child_process";
 
-/**
- * 不需要 Token 的接口白名单
- */
-const NO_TOKEN_ENDPOINTS = [
-  "send_verification_code",
-  "login_with_verification_code",
-];
+const requestConfig = {
+  baseUrl: "https://client.ruqimobility.com/mcp/v1",
+  passengerH5Host: "https://web.ruqimobility.com",
+  platform: "MINIPROGRAM_ANDROID",
+  noTokenEndpoints: [
+    "send_verification_code",
+    "login_with_verification_code",
+  ],
+};
 
-/**
- * 发送 HTTP 请求到如祺出行 API
- * @param {string} endpoint - 接口名称
- * @param {Object} requestData - 请求数据
- * @param {boolean} returnHeaders - 是否返回 headers（登录接口需要）
- */
+function execCommand(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(command, args, {
+      shell: false,
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: options.timeout || 30000
+    });
+    let stdout = "";
+    let stderr = "";
+    proc.stdout.on("data", (d) => (stdout += d.toString()));
+    proc.stderr.on("data", (d) => (stderr += d.toString()));
+    proc.on("close", (code) => {
+      if (code === 0) resolve(stdout);
+      else reject(new Error(stderr || `exit code ${code}`));
+    });
+    proc.on("error", reject);
+  });
+}
+
 export async function httpRequest(
   endpoint,
   requestData,
   returnHeaders = false,
 ) {
-  const needsToken = !NO_TOKEN_ENDPOINTS.includes(endpoint);
-  const envConfig = getEnvConfig();
+  const needsToken = !requestConfig.noTokenEndpoints.includes(endpoint);
+  const token = process.env.RUQI_CLIENT_MCP_TOKEN;
 
-  if (needsToken && !envConfig.token) {
+  if (needsToken && !token) {
     throw new Error("RUQI_CLIENT_MCP_TOKEN 环境变量未配置，请先登录");
   }
 
-  // 自动添加公共参数
   const fullRequest = {
-    ...config.commonParams,
+    platform: requestConfig.platform,
     timestamp: Date.now(),
-    ...(envConfig.token && { token: envConfig.token }),
+    ...(token && { token }),
     ...requestData,
+    deviceId: `${requestData.phone}-ruqimcp`,
   };
 
-  // 构建完整请求体
   const requestBody = {
     jsonrpc: "2.0",
     id: Date.now().toString(),
@@ -50,43 +63,78 @@ export async function httpRequest(
     },
   };
 
+  const timeout = 30000;
+
   try {
-    const response = await axios({
-      method: "POST",
-      url: envConfig.baseUrl,
-      data: requestBody,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      timeout: 30000, // 30 秒超时
-    });
+    const result = await execCommand("curl", [
+      "-s",
+      "-i",
+      "-X", "POST",
+      "-H", "Content-Type: application/json",
+      "-d", JSON.stringify(requestBody),
+      "--max-time", String(timeout / 1000),
+      requestConfig.baseUrl,
+    ]);
 
-    // 解析嵌套结构: data.result.content[].text
-    const content = response?.data?.data?.result?.content?.[0]?.text;
+    const headerEndIndex = result.indexOf("\r\n\r\n");
+    let responseHeaders = {};
+    let body = result;
+    if (headerEndIndex !== -1) {
+      const headerPart = result.substring(0, headerEndIndex);
+      body = result.substring(headerEndIndex + 4);
 
-    if (content) {
-      // 检查业务错误
-      if (content.code !== 0) {
+      const headerLines = headerPart.split("\r\n");
+      for (const line of headerLines) {
+        const colonIndex = line.indexOf(":");
+        if (colonIndex > 0) {
+          const key = line.substring(0, colonIndex).trim().toLowerCase();
+          const value = line.substring(colonIndex + 1).trim();
+          if (key === "set-cookie") {
+            if (!responseHeaders["set-cookie"]) {
+              responseHeaders["set-cookie"] = [];
+            }
+            responseHeaders["set-cookie"].push(value);
+          } else {
+            responseHeaders[key] = value;
+          }
+        }
+      }
+    }
+
+    let content;
+    try {
+      content = JSON.parse(body);
+    } catch (e) {
+      console.error("响应数据:", body);
+      throw new Error("无效的响应格式");
+    }
+
+    const text = content?.data?.result?.content?.[0]?.text;
+
+    if (text) {
+      const parsedText = typeof text === "string" ? JSON.parse(text) : text;
+
+      if (parsedText.code !== 0) {
         throw new Error(
-          `业务错误: ${content.message || JSON.stringify(content)}`,
+          `业务错误: ${parsedText.message || JSON.stringify(parsedText)}`,
         );
       }
 
-      // 登录接口返回包含 headers 的完整响应
       if (returnHeaders) {
         return {
-          data: content,
-          headers: response.headers,
+          data: parsedText,
+          headers: responseHeaders,
         };
       }
 
-      return content;
+      return parsedText;
     } else {
-      // 打印完整响应用于调试
-      console.error("响应数据:", JSON.stringify(response.data, null, 2));
+      console.error("响应数据:", JSON.stringify(content, null, 2));
       throw new Error("无效的响应格式");
     }
   } catch (error) {
-    throw new Error("error: " + error);
+    throw new Error("error: " + error.message);
   }
 }
+
+export { execCommand };

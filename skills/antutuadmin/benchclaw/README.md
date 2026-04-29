@@ -76,6 +76,7 @@ git clone https://github.com/BenchClaw/benchclaw.git
 - 评测数据端到端加密传输
 - 设备指纹机制防止刷分
 - 每台设备每 24 小时限跑 10 次
+- **上榜提交的数据范围与 stdout/stderr 脱敏说明**（含 `server.py` 节选，便于 BenchHub 等审查）：见 **[UPLOAD_DISCLOSURE.md](./UPLOAD_DISCLOSURE.md)**；Skill 场景另见同目录 **SKILL.md**「自动缓存与安全上报」。
 
 ---
 
@@ -154,8 +155,9 @@ Run the benchclaw benchmark
 ### 🛡️ Security
 
 - End-to-end encryption for test data transmission
-- Device fingerprinting to prevent score manipulation
+- Bench session id (`X-Bench-Session-Id`) for rate limiting and submission binding
 - Rate limiting: max 10 runs per device per 24 hours
+- **Submit payload scope & stdout/stderr sanitization** (excerpts from `server.py` for reviewers / BenchHub): see **[UPLOAD_DISCLOSURE.md](./UPLOAD_DISCLOSURE.md)**. For the OpenClaw Skill, see **SKILL.md** → “Offline Cache & Upload”.
 
 ### 🤝 Contributing
 

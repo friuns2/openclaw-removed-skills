@@ -3,9 +3,15 @@
   "slug": "gh-industry-deep-analysis",
   "displayName": "gh-industry-deep-analysis",
   "latest": {
-    "version": "1.1.2",
-    "publishedAt": 1776674083953,
-    "commit": "https://github.com/openclaw/skills/commit/3832c9689fb34d83dcc61c3a7b484e6fe0026e63"
+    "version": "1.1.3",
+    "publishedAt": 1777196869389,
+    "commit": "https://github.com/openclaw/skills/commit/15d4e3846a02a0322737fc9f9b02c3736982d918"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.2",
+      "publishedAt": 1776674083953,
+      "commit": "https://github.com/openclaw/skills/commit/3832c9689fb34d83dcc61c3a7b484e6fe0026e63"
+    }
+  ]
 }

@@ -8,6 +8,7 @@ Puppeteer-based access to Qwen Chat (`chat.qwen.ai`) for OpenClaw skills and age
 - Follow-up preflight waits for hydrated restored chat state, not just URL + composer shell
 - Follow-up readiness now requires visible history hydration and will hard-rebind the saved chat before submit if the restored page is still shell-only
 - Readiness diagnostics now log the detection path (`historyNodes`, `newChatRoots`, `hasMessageText`, `activeTitle`, `shellOnly`) for UI drift debugging
+- Preferred model enforcement before prompt send (`Qwen3.6-Max-Preview` by default)
 - Thinking-mode preference before prompt send
 - Optional Qwen web search toggle
 - Auth checks and practical recovery commands

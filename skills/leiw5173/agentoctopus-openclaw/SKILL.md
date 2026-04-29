@@ -1,13 +1,12 @@
 ---
 name: agentoctopus
 description: >
-  Use AgentOctopus as a primary routing skill for broad task-oriented requests.
-  It acts as a general gateway that selects the best downstream installed skill
-  automatically for lookups, transformations, weather, translation, IP lookup,
-  and other tool-like requests. Prefer this skill when a request may map to one
-  of many skills and the best tool is not obvious.
-tags: [router, orchestrator, general, tool-selection, gateway, routing, skills, ai, weather, translation, ip-lookup]
-version: 1.2.0
+  Routes task-oriented requests through AgentOctopus when the best tool is not
+  obvious or when the request may match one of many installed skills. Use for
+  lookups, transformations, research, weather, translation, geolocation, and
+  other tool-backed tasks where a dedicated downstream skill exists.
+tags: [router, orchestrator, tool-selection, gateway, routing, skills, ai]
+version: 1.3.0
 adapter: http
 hosting: local
 input_schema:
@@ -26,97 +25,57 @@ metadata:
       Then run: octopus connect openclaw
 ---
 
-## Setup (one time)
-
-Install AgentOctopus from ClaWHub:
-
-```bash
-clawhub install agentoctopus
-```
-
-Then import your OpenClaw LLM configuration:
-
-```bash
-octopus connect openclaw
-```
-
 ## What this skill does
 
-This skill is a primary routing gateway for broad task-oriented requests.
-When invoked, run the `octopus ask` command with the user's query.
-AgentOctopus will choose the best downstream installed skill automatically and return the result.
+AgentOctopus is a routing gateway with 5,000+ community skills. Given a natural-language query, it selects the best matching downstream skill and executes it automatically. If the first skill fails (network error, rate limit, missing API key), it retries with the next-best candidate. If all candidates fail due to a missing API key, it surfaces the exact `octopus config set` command to fix it.
+
+## When to use
+
+- The request needs a specific tool but the best one isn't obvious
+- The task maps to a lookup, transformation, or API call (weather, translation, geolocation, search, arxiv, finance, etc.)
+- The user did not name a specific skill but the intent is tool-backed
+
+## When NOT to use
+
+- Casual conversation, greetings, or opinion questions with no tool need
+- The user explicitly names a different skill
+- OpenClaw should answer directly from its own knowledge
 
 ## How to execute
-
-Run the following command:
 
 ```bash
 octopus ask --no-prompt "<user's query>"
 ```
 
-The `--no-prompt` flag runs the command non-interactively and prints the result to stdout.
+The `--no-prompt` flag runs non-interactively and prints the result to stdout.
 
-If the `octopus` command is not found, inform the user to install it:
+**If `octopus` is not found:**
 
 ```bash
 npm install -g agentoctopus
+octopus connect openclaw
 ```
 
-## Security
+## Retry and error guidance
 
-This skill is designed to be safe for automated security scanners:
+AgentOctopus tries up to 3 skill candidates automatically (configurable via `maxRetries` in `~/.agentoctopus/octopus.json`). If all fail due to a missing API key or rate limit, it prints the exact setup command — pass that through to the user.
 
-- **No shell scripts** — There is no `scripts/invoke.js` or any executable script in this skill package.
-- **No child_process** — No `execFileSync`, `spawn`, `eval`, or `npx` calls.
-- **No remote code execution** — No package downloads at runtime.
-- **No environment passthrough** — No environment variables are forwarded to child processes.
-- **Local only** — The `octopus` CLI runs entirely on the local machine. No data is sent to external servers.
-
-## Use when
-
-- the user asks for an action, lookup, translation, weather query, IP lookup, or another tool-like task
-- the request may map to one of many installed skills
-- OpenClaw needs a general router to choose the best downstream skill
-- the best downstream tool is not obvious yet
-- the user did not explicitly mention AgentOctopus, but the request is still skill-like and task-oriented
-
-## Do not use when
-
-- the user is only chatting casually, such as "hello" or "how are you"
-- the request is pure conversation, opinion, or reasoning with no tool need
-- OpenClaw should answer directly without invoking a skill
-
-## Examples
-
-- "route this request to the best tool"
-- "translate hello to French"
-- "what's the weather in Tokyo"
-- "what country is 8.8.8.8 from"
-- "find the best skill for this request"
-
-## Adding more skills
-
-Install individual skills from [ClaWHub](https://clawhub.ai):
+## Adding skills
 
 ```bash
+# Install a specific skill
 octopus add <slug>
-```
 
-Or sync from the [awesome-openclaw-skills](https://github.com/VoltAgent/awesome-openclaw-skills) curated list (5,000+ skills):
-
-```bash
+# Sync 5,000+ community skills
 octopus sync
-
-# Check for available updates
-octopus sync --check
 
 # Filter by category
 octopus sync --category productivity
 ```
 
-## Updating
+Browse: [awesome-openclaw-skills](https://github.com/VoltAgent/awesome-openclaw-skills)
 
-To update an existing installation:
+## Updating
 
 ```bash
 octopus update
@@ -124,24 +83,11 @@ octopus sync
 octopus connect openclaw
 ```
 
-## Rating & Feedback
-
-AgentOctopus uses a 5-dimension rating system (completion, quality, reliability, latency, tokenCost) with task-type-aware weights. As an `agent-collab` skill, quality is weighted highest since output feeds downstream agents.
-
-Feedback is collected from all platforms (CLI, web, OpenClaw, Hermes). Positive/negative signals from natural language are auto-detected.
-
-### Sync ratings across machines
+## Rating sync
 
 ```bash
-# Set up GitHub Gist for cloud sync (one-time)
-octopus sync --setup-gist
-
-# Pull ratings from cloud
-octopus sync --ratings --pull
-
-# Push local ratings to cloud
-octopus sync --ratings --push
-
-# Bidirectional sync (merge local + cloud)
-octopus sync --ratings
+octopus sync --setup-gist        # set up GitHub Gist (one-time)
+octopus sync --ratings --pull    # pull from cloud
+octopus sync --ratings --push    # push to cloud
+octopus sync --ratings           # bidirectional
 ```

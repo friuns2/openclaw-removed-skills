@@ -11,66 +11,22 @@ Usage:
         --dimensions pagePath,deviceCategory \
         --metrics sessions,bounceRate \
         --start-date 30daysAgo --end-date yesterday \
-        --order-by "-sessions"
+        --order-by="-sessions"
 
 Reads .env from: .skills-data/google-analytics-and-search-improve/.env
 Env vars: GA4_PROPERTY_ID
-Credentials: auto-discovered from .skills-data/google-analytics-and-search-improve/configs/*.json
 """
 
 import argparse
 import json
 import os
 import sys
-import warnings
-from pathlib import Path
 
-# Suppress FutureWarning (Python 3.9 EOL notices from google-auth / google-api-core)
-# and NotOpenSSLWarning (urllib3 v2 + LibreSSL) so they don't pollute output.
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", message=".*urllib3.*OpenSSL.*")
-
-from dotenv import load_dotenv
-
-
-def _find_data_dir():
-    """Walk up from script dir to find .skills-data/google-analytics-and-search-improve/."""
-    d = Path(__file__).resolve().parent
-    while d != d.parent:
-        candidate = d / ".skills-data" / "google-analytics-and-search-improve"
-        if candidate.is_dir():
-            return candidate
-        d = d.parent
-    return None
-
-
-_data_dir = _find_data_dir()
-if _data_dir:
-    env_path = _data_dir / ".env"
-    if env_path.exists():
-        load_dotenv(env_path)
-
-
-def _find_credentials():
-    """Auto-discover Service Account JSON key from configs/ directory."""
-    explicit = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-    if explicit and Path(explicit).is_file():
-        return explicit
-    if _data_dir:
-        configs_dir = _data_dir / "configs"
-        if configs_dir.is_dir():
-            json_files = sorted(configs_dir.glob("*.json"))
-            if json_files:
-                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(json_files[0])
-                return str(json_files[0])
-    return None
-
+from utils import require_google_credentials
 
 # Auto-discover credentials before importing Google client libs
 # (BetaAnalyticsDataClient reads GOOGLE_APPLICATION_CREDENTIALS on init)
-_creds_path = _find_credentials()
-if not _creds_path:
-    print("Warning: No Service Account JSON key found in configs/ directory", file=sys.stderr)
+require_google_credentials()
 
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
@@ -131,6 +87,44 @@ PRESETS = {
         "dimensions": ["eventName", "date"],
         "metrics": ["eventCount", "totalUsers", "conversions"],
         "order_by": "-eventCount",
+    },
+    # ── User Persona Presets ──────────────────────────────────
+    "demographics_age": {
+        "dimensions": ["userAgeBracket"],
+        "metrics": ["totalUsers", "sessions", "bounceRate",
+                     "engagementRate", "averageSessionDuration", "conversions"],
+        "order_by": "-totalUsers",
+    },
+    "demographics_gender": {
+        "dimensions": ["userGender"],
+        "metrics": ["totalUsers", "sessions", "bounceRate",
+                     "engagementRate", "averageSessionDuration", "conversions"],
+        "order_by": "-totalUsers",
+    },
+    "demographics_geo": {
+        "dimensions": ["country", "city"],
+        "metrics": ["totalUsers", "sessions", "bounceRate",
+                     "engagementRate", "conversions"],
+        "order_by": "-totalUsers",
+    },
+    "demographics_language": {
+        "dimensions": ["language"],
+        "metrics": ["totalUsers", "sessions", "bounceRate",
+                     "engagementRate"],
+        "order_by": "-totalUsers",
+    },
+    "demographics_interests": {
+        "dimensions": ["brandingInterest"],
+        "metrics": ["totalUsers", "sessions", "bounceRate",
+                     "engagementRate", "conversions"],
+        "order_by": "-totalUsers",
+    },
+    "new_vs_returning": {
+        "dimensions": ["newVsReturning"],
+        "metrics": ["totalUsers", "sessions", "sessionsPerUser",
+                     "bounceRate", "engagementRate", "averageSessionDuration",
+                     "screenPageViewsPerSession", "conversions"],
+        "order_by": "-totalUsers",
     },
 }
 
@@ -210,7 +204,7 @@ def main():
     parser.add_argument("--end-date", default="yesterday")
     parser.add_argument("--limit", type=int, default=1000)
     parser.add_argument("--order-by",
-                        help='Metric to order by (prefix with - for desc; quote in shell: --order-by "-sessions")')
+                        help='Metric to order by (prefix with - for desc; quote in shell: --order-by="-sessions")')
     parser.add_argument("--output", "-o", help="Output file path (default: stdout)")
 
     args = parser.parse_args()

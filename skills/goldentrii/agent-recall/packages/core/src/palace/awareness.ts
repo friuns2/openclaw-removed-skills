@@ -39,10 +39,20 @@ export function writeAwareness(content: string): void {
     const p = awarenessPath();
     ensureDir(path.dirname(p));
 
-    // Enforce 200-line max
+    // Enforce 200-line max — truncate at section boundary, not mid-line
     const lines = content.split("\n");
     if (lines.length > MAX_LINES) {
-      const truncated = lines.slice(0, MAX_LINES).join("\n");
+      // Walk backwards from MAX_LINES to find the last clean section boundary
+      let cutAt = MAX_LINES;
+      for (let i = MAX_LINES - 1; i >= MAX_LINES - 20 && i >= 0; i--) {
+        const line = lines[i];
+        // Stop before a heading line (##) or blank line preceding one
+        if (line.startsWith("## ") || (line === "" && i + 1 < lines.length && lines[i + 1].startsWith("## "))) {
+          cutAt = i;
+          break;
+        }
+      }
+      const truncated = lines.slice(0, cutAt).join("\n");
       fs.writeFileSync(p, truncated + "\n", "utf-8");
     } else {
       fs.writeFileSync(p, content, "utf-8");
@@ -221,7 +231,8 @@ export function addInsight(
       existing.lastConfirmed = now;
       // Only append evidence if it's not already present (prevents "evidence | evidence")
       if (!existing.evidence.includes(newInsight.evidence.slice(0, 40))) {
-        existing.evidence += ` | ${newInsight.evidence}`;
+        const merged = `${existing.evidence} | ${newInsight.evidence}`;
+        existing.evidence = merged.length > 500 ? merged.slice(0, 500) : merged;
       }
       for (const aw of newInsight.appliesWhen) {
         if (!existing.appliesWhen.includes(aw)) {
@@ -244,7 +255,8 @@ export function addInsight(
       existing.confirmations++;
       existing.lastConfirmed = now;
       if (!existing.evidence.includes(newInsight.evidence.slice(0, 40))) {
-        existing.evidence += ` | ${newInsight.evidence}`;
+        const merged = `${existing.evidence} | ${newInsight.evidence}`;
+        existing.evidence = merged.length > 500 ? merged.slice(0, 500) : merged;
       }
       for (const aw of newInsight.appliesWhen) {
         if (!existing.appliesWhen.includes(aw)) {
@@ -270,14 +282,14 @@ export function addInsight(
     source: newInsight.source,
   };
 
-  if (state.topInsights.length < 10) {
+  if (state.topInsights.length < 15) {
     state.topInsights.push(insight);
     writeAwarenessState(state);
     renderAwareness(state);
     return { action: "added", insight };
   }
 
-  // Over 10: demote lowest-confirmation insight to archive (not deleted)
+  // Over 15: demote lowest-confirmation insight to archive (not deleted)
   state.topInsights.sort((a, b) => b.confirmations - a.confirmations);
   const demoted = state.topInsights.pop()!;
   archiveInsight(demoted);
@@ -324,7 +336,7 @@ export function detectCompoundInsights(): CompoundInsight[] {
   }
 
   if (compounds.length > 0) {
-    state.compoundInsights = [...state.compoundInsights, ...compounds].slice(0, 5);
+    state.compoundInsights = [...state.compoundInsights, ...compounds].slice(0, 10);
     writeAwarenessState(state);
     renderAwareness(state);
   }
@@ -353,7 +365,7 @@ export function renderAwareness(state: AwarenessState): void {
   const sorted = [...state.topInsights].sort((a, b) => b.confirmations - a.confirmations);
   for (const insight of sorted) {
     lines.push(`### ${insight.title} (${insight.confirmations}x confirmed)`);
-    lines.push(`- Evidence: ${insight.evidence.slice(0, 150)}`);
+    lines.push(`- Evidence: ${insight.evidence.slice(0, 350)}`);
     lines.push(`- Applies when: ${insight.appliesWhen.join(", ")}`);
     lines.push(`- Source: ${insight.source} | Last: ${insight.lastConfirmed.slice(0, 10)}`);
     lines.push("");
@@ -365,7 +377,7 @@ export function renderAwareness(state: AwarenessState): void {
     lines.push("");
     for (const ci of state.compoundInsights) {
       lines.push(`### ${ci.title} (confidence: ${ci.confidence.toFixed(2)})`);
-      lines.push(`- Pattern: ${ci.pattern.slice(0, 200)}`);
+      lines.push(`- Pattern: ${ci.pattern.slice(0, 400)}`);
       lines.push(`- Sources: ${ci.sourceInsights.length} insights`);
       lines.push("");
     }

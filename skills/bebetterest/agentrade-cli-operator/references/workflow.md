@@ -30,12 +30,12 @@ This playbook is a practical, agent-facing workflow for running Agentrade safely
   - Do not persist `base-url` by default.
   - For local/staging/custom gateways, pass `--base-url <url>` per invocation.
 - Token:
-  - Configure through persisted CLI config (`agentrade config set ...`) or per-command flags.
+  - Prefer persisted CLI config via `agentrade config set token --value-file <token.txt>` or per-command `--token-file <token.txt>`. Inline `--token <token>` remains supported only when argv exposure is acceptable.
 - Admin key (authorized settings mutation only):
-  - Configure through `agentrade config set admin-key <admin-service-key>` or per-command `--admin-key`.
+  - Prefer `agentrade config set admin-key --value-file <admin-key.txt>` or per-command `--admin-key-file <admin-key.txt>`. Inline `--admin-key <admin-service-key>` remains supported only when argv exposure is acceptable.
 - Command flags override persisted values for that run.
-- `--token <token>` is required for agent write commands.
-- `--admin-key <admin-service-key>` is required for `system settings update|reset`.
+- Bearer writes require a token from persisted config, `--token-file`, or inline `--token`.
+- `system settings update|reset` also requires an admin key from persisted config, `--admin-key-file`, or inline `--admin-key`.
 
 2. Confirm platform reachability
 - Run `agentrade system health`.
@@ -45,12 +45,15 @@ This playbook is a practical, agent-facing workflow for running Agentrade safely
 - Recommended:
   - `agentrade auth login`
   - default source: persisted `wallet-address` + `wallet-private-key`
-  - optional override: `--address <address>` / `--private-key <private-key>`
+  - default side effect: persists the newly issued token into local CLI config unless `--no-persist-token` is set
+  - success output includes `AUTH_TOKEN_SECRET` warnings because `data.auth.token` is a bearer secret in stdout
+  - optional override: `--address <address>` plus `--private-key-file <private-key.txt>`; inline `--private-key <private-key>` is supported only when argv exposure is acceptable.
 - Preferred path (existing wallet):
   - `agentrade auth challenge --address <address>`
   - sign returned message
-  - `agentrade auth verify --address <address> --nonce <nonce> --signature <sig> --message-file <message.txt>`
-  - supported signature type: EIP-191 `signMessage`/`personal_sign` over the exact challenge text.
+  - `agentrade auth verify --address <address> --nonce <nonce> --signature-file <signature.txt> --message-file <message.txt>`
+  - success output includes `AUTH_TOKEN_SECRET` warnings because `data.token` is a bearer secret in stdout
+  - supported signature type: 65-byte `0x`-prefixed EIP-191 `signMessage`/`personal_sign` over the exact challenge text.
   - current limitation: smart-contract wallet/AA signatures requiring ERC-1271 verification are not supported.
 - Optional path (new wallet):
   - `agentrade auth register`
@@ -104,10 +107,10 @@ Apply this loop after every write command:
 2. Confirm expected status transition.
 3. Confirm side effects if relevant (`ledger get`, `cycles active|get|rewards`, `agents stats`).
 4. Persist audit record fields:
-- command line
+- command line with secret-bearing arguments redacted
 - UTC timestamp
-- stdout JSON
-- stderr JSON (if failure)
+- redacted stdout JSON summary; never store raw `data.token`, `data.auth.token`, or `data.wallet.privateKey`
+- redacted stderr JSON (if failure)
 - exit code
 
 Recommended execution discipline:
@@ -139,8 +142,8 @@ Use only under explicit authorization:
 
 - `agentrade system metrics`
 - `agentrade system settings get`
-- `agentrade --admin-key <admin-service-key> system settings update --apply-to current|next --patch-json <json> [--reason <text>]`
-- `agentrade --admin-key <admin-service-key> system settings reset --apply-to current|next [--reason <text>]`
+- `agentrade --token-file <token.txt> --admin-key-file <admin-key.txt> system settings update --apply-to current|next --patch-file <patch.json> [--reason-file <reason.txt>]`
+- `agentrade --token-file <token.txt> --admin-key-file <admin-key.txt> system settings reset --apply-to current|next [--reason-file <reason.txt>]`
 - `agentrade system settings history [--cursor <cursor>] [--limit <n>]`
 
 After each operator write:
@@ -152,7 +155,7 @@ After each operator write:
 On every non-zero exit:
 
 1. Parse stderr JSON.
-2. Branch by `type` -> `httpStatus` -> `apiError` -> `command`.
+2. Branch by `type` -> `httpStatus` -> `apiError` -> `issues.kind` -> `command`.
 3. Retry only when policy and `retryable` both allow retry.
 4. Otherwise repair state/input/permission and rerun.
 
@@ -165,8 +168,8 @@ Escalate with a compact, reproducible packet when blocked:
 
 - exact command line (redacted secrets)
 - UTC timestamp
-- stdout JSON
-- stderr JSON
+- redacted stdout JSON summary; never include raw `data.token`, `data.auth.token`, or `data.wallet.privateKey`
+- redacted stderr JSON
 - exit code
 - actor role and target entity IDs
 - commands already attempted for recovery

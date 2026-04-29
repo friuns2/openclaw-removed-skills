@@ -20,19 +20,76 @@ import numpy as np
 def load_file(path):
     ext = os.path.splitext(path)[1].lower()
     if ext in (".xlsx", ".xlsm"):
-        return pd.read_excel(path, engine="openpyxl")
-    if ext == ".xls":
-        return pd.read_excel(path, engine="xlrd")
-    if ext == ".csv":
+        df = pd.read_excel(path, engine="openpyxl")
+    elif ext == ".xls":
+        df = pd.read_excel(path, engine="xlrd")
+    elif ext == ".csv":
+        df = None
         for enc in ("utf-8", "utf-8-sig", "gbk", "gb2312"):
             try:
-                return pd.read_csv(path, encoding=enc)
+                df = pd.read_csv(path, encoding=enc)
+                break
             except Exception:
                 continue
-    raise ValueError(f"不支持的格式: {ext}")
+        if df is None:
+            raise ValueError(f"无法读取 CSV: {path}")
+    else:
+        raise ValueError(f"不支持的格式: {ext}")
+
+    # 清除汇总/合计/总计 行
+    return _drop_summary_rows(df)
+
+
+def _drop_summary_rows(df):
+    """识别并剔除报表中的汇总/合计/总计/平均行。
+    规则：某一行的任意一个字符串单元格的值是 '汇总'/'合计'/'总计'/'小计'/'平均'/'total'/'sum'/'summary'/'avg'/'average' 等"""
+    summary_markers = {
+        "汇总", "合计", "总计", "小计", "平均", "均值", "求和",
+        "total", "sum", "subtotal", "summary", "avg", "average", "mean",
+        "总合", "总和"
+    }
+
+    def is_summary_row(row):
+        for v in row.values:
+            if pd.isna(v):
+                continue
+            s = str(v).strip().lower()
+            if s in summary_markers:
+                return True
+            # 也检查字段值本身是不是"N个逗号分隔的名字"（疑似合计）
+            # 若含超过 5 个逗号且无空格后空格模式，很可能是堆叠的维度值
+            if s.count(",") >= 5 and len(s) > 20 and " " not in s:
+                return True
+        return False
+
+    before = len(df)
+    mask = df.apply(is_summary_row, axis=1)
+    if mask.any():
+        df = df[~mask].reset_index(drop=True)
+        print(f"  [自动清理] 移除 {before - len(df)} 行汇总/合计类数据")
+    return df
 
 
 # ── 自动识别列类型 ────────────────────────────────────────────────
+def _looks_like_date_name(col_name):
+    """列名看起来像日期列吗？"""
+    s = str(col_name).lower()
+    keywords = ["日期", "时间", "date", "time", "day", "month", "year", "周", "月", "年"]
+    return any(k in s for k in keywords)
+
+
+def _looks_like_id_name(col_name):
+    """列名看起来像ID/排名等不应作为指标的列吗？"""
+    s = str(col_name).lower().strip()
+    # 完全匹配的 ID 类
+    exact = {"排名", "序号", "编号", "id", "rank", "no", "no.", "#"}
+    if s in exact:
+        return True
+    # 包含匹配
+    keywords = ["排名", "序号", "编号", "rank no."]
+    return any(s == k or s.endswith(k) for k in keywords)
+
+
 def detect_columns(df):
     date_col = None
     dim_cols = []
@@ -40,19 +97,33 @@ def detect_columns(df):
 
     for col in df.columns:
         series = df[col].copy()
+        col_name_str = str(col)
 
-        # 尝试识别日期列
-        if date_col is None:
+        # 1. ID/排名类列 → 维度（即便是数字也不当指标）
+        if _looks_like_id_name(col_name_str):
+            dim_cols.append(col)
+            continue
+
+        # 2. 日期识别：必须同时满足
+        #    (a) 列名含日期关键词，或 (b) 列本身是 datetime 类型
+        #    不对纯数字列做 to_datetime（避免数字被当成 Unix 时间戳）
+        is_already_datetime = pd.api.types.is_datetime64_any_dtype(series)
+        if date_col is None and (is_already_datetime or _looks_like_date_name(col_name_str)):
             try:
-                converted = pd.to_datetime(series, errors="raise")
-                if converted.notna().sum() > len(df) * 0.5:
+                # 对非数字列才尝试解析
+                if not pd.api.types.is_numeric_dtype(series):
+                    converted = pd.to_datetime(series, errors="coerce")
+                    if converted.notna().sum() > len(df) * 0.5:
+                        date_col = col
+                        df[col] = converted
+                        continue
+                elif is_already_datetime:
                     date_col = col
-                    df[col] = converted
                     continue
             except Exception:
                 pass
 
-        # 尝试识别数值列（处理千分位逗号和百分号）
+        # 3. 数值列识别（处理千分位逗号和百分号）
         cleaned = series.astype(str).str.replace(",", "").str.replace("%", "").str.strip()
         numeric = pd.to_numeric(cleaned, errors="coerce")
         if numeric.notna().sum() >= len(df) * 0.6:
@@ -99,7 +170,9 @@ def get_suggestions(df, metric_cols, dim_cols):
     if not dim_cols:
         suggestions.append("建议数据中包含分类/分组维度列（如类别、部门、渠道等），便于深入对比分析")
         return suggestions
-    main_dim = dim_cols[0]
+    main_dim = _pick_main_dim(df, dim_cols)
+    if main_dim is None:
+        return suggestions
     grouped = df.groupby(main_dim)[metric_cols].sum()
     first = metric_cols[0]
     best = grouped[first].idxmax()
@@ -119,6 +192,35 @@ def get_suggestions(df, metric_cols, dim_cols):
 
 
 # ── 准备图表数据 ──────────────────────────────────────────────────
+def _pick_main_dim(df, dim_cols):
+    """从维度列中选一个最适合作为分组主维度的。
+    优先级：排除 ID/排名类 > 唯一值数量多的（但不超过行数） > 非数字列"""
+    if not dim_cols:
+        return None
+    candidates = []
+    for col in dim_cols:
+        # 排除 ID/排名类
+        if _looks_like_id_name(str(col)):
+            continue
+        unique_count = df[col].nunique()
+        # 唯一值为1或等于行数的列对分组没意义
+        if unique_count <= 1:
+            continue
+        # 评分：唯一值越多越好，但不能太离散（接近行数说明每行都不同）
+        ratio = unique_count / len(df)
+        score = unique_count
+        # 如果唯一值数量 == 行数（完全唯一），且行数较大，说明每行一个实体，适合做分组
+        if ratio == 1.0:
+            score = unique_count  # 每行一个值，直接用
+        candidates.append((score, col))
+
+    if not candidates:
+        # 退而求其次：取 dim_cols[0]
+        return dim_cols[0]
+    candidates.sort(key=lambda x: -x[0])
+    return candidates[0][1]
+
+
 def prepare_chart_data(df, metric_cols, dim_cols, date_col):
     charts = {}
 
@@ -129,9 +231,11 @@ def prepare_chart_data(df, metric_cols, dim_cols, date_col):
         "values": [round(float(v), 2) for v in totals.values],
     }
 
+    # 选一个有意义的主维度（排除排名/ID等列）
+    main_dim = _pick_main_dim(df, dim_cols)
+
     # 2. 维度对比
-    if dim_cols:
-        main_dim = dim_cols[0]
+    if main_dim is not None:
         grouped = (
             df.groupby(main_dim)[metric_cols]
             .sum()
@@ -168,8 +272,7 @@ def prepare_chart_data(df, metric_cols, dim_cols, date_col):
             })
 
     # 4. 饼图
-    if dim_cols:
-        main_dim = dim_cols[0]
+    if main_dim is not None:
         grouped_pie = df.groupby(main_dim)[metric_cols[0]].sum().sort_values(ascending=False)
         top = grouped_pie.head(10)
         others = grouped_pie.iloc[10:].sum() if len(grouped_pie) > 10 else 0

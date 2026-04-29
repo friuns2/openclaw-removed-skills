@@ -1,0 +1,2 @@
+line 924: 'taiping/renbao/yatai/dadi/zheshang"""\n    # 先查公司名称字段（精确匹配各公司关键词）\n    # 非贪婪+边界 lookahead，防止吞掉后续地址等字段\n'
+line 930: 'taiping"\n        if "中国人民" in name: return "renbao"\n        if "亚太财产" in name: return "yatai"\n      '

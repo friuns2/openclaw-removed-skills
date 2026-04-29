@@ -5,8 +5,9 @@ description: >
   一体化完成项目初始化、代码交付、知识沉淀和影响分析。
   内建代码图谱引擎，越用越懂你的项目。
   当用户提到开发、实现功能、运行 pipeline、记录知识、检查影响范围时使用此技能。
-version: 1.1.0
-date: 2026-04-08
+version: 2.0.1
+updated: 2026-04-15
+date: 2026-04-10
 user-invocable: true
 metadata:
   {
@@ -17,10 +18,10 @@ metadata:
         "install": [
           { "kind": "node", "package": "gitnexus", "bins": ["gitnexus"] }
         ],
-        "homepage": "https://github.com/openclaw/skills",
+        "homepage": "https://github.com/ankechenlab-node/synapse-code",
       },
   }
-tags: [pipeline, workflow, knowledge-management, code-analysis, development, multi-agent]
+tags: [pipeline, workflow, knowledge-management, code-analysis, development, multi-agent, brain-compatible]
 ---
 
 # Synapse Code Skill
@@ -295,6 +296,60 @@ Claude 直接分析需求 → 生成代码 → 完成
 - 🔍 影响分析 — 改动前查询影响范围
 - 📊 状态检查 — 实时查看项目进度
 
+## Brain 调度集成 (v2.0 新增)
+
+Synapse Code v2.0 可作为 synapse-brain 的被调度 Hand Agent 运行：
+
+```
+用户 → synapse-brain（意图识别 + 路由）
+         ↓ 路由到 code
+       synapse-code（执行开发）
+         ↓ 完成后
+       synapse-brain（汇总 + 状态保存）
+```
+
+当 synapse-code 被 Brain 调度时：
+1. 自动接收任务参数（mode, scenario, description）
+2. 执行对应 Pipeline 阶段
+3. 完成后返回结构化结果
+4. 自动触发 synapse-wiki 知识沉淀
+
+```bash
+# 直接调用（v1.x 方式）
+/synapse-code run my-project "实现登录功能"
+
+# 通过 Brain 调度（v2.0 推荐）
+/synapse-brain dispatch "实现登录功能" --skill synapse-code --mode lite
+```
+
+## 与 synapse-wiki 互操作
+
+Pipeline 完成后，自动触发 wiki 知识沉淀：
+
+```
+synapse-code Pipeline 完成
+         ↓
+    检测 auto_log 配置
+         ↓ (enabled)
+    synapse-wiki ingest
+         ↓
+    知识写入 wiki/summaries/
+         ↓
+    更新 session state
+```
+
+配置 `config.json` 启用互操作：
+
+```json
+{
+  "pipeline": { "workspace": "~/pipeline-workspace", "auto_log": true },
+  "interop": {
+    "wiki_enabled": true,
+    "wiki_root": "~/my-project/wiki"
+  }
+}
+```
+
 ## 安装
 
 ```bash
@@ -338,6 +393,6 @@ claude skill install synapse-code.skill
 
 ## 相关文件
 
-- `/Users/leo/pipeline-workspace/pipeline.py` — Pipeline 引擎
-- `~/.claude/skills/synapse-code/scripts/auto_log.py` — Auto-log 脚本（内置）
-- `/Users/leo/pipeline-workspace/SYNAPSE_INTEGRATION.md` — 整合文档
+- `~/pipeline-workspace/pipeline.py` — Pipeline 引擎
+- `scripts/auto_log.py` — Auto-log 脚本（内置）
+- `~/pipeline-workspace/SYNAPSE_INTEGRATION.md` — 整合文档

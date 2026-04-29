@@ -42,52 +42,54 @@ aliyun --profile <profile_name> sts get-caller-identity
 
 These steps can be run standalone or as manual backfill in a runbook.
 
+> **[MUST]** Use **plugin subcommands** (`describe-instance`, `describe-metric-list`, …) and **kebab-case** flags as in the examples below. Do **not** paste legacy POP-style lines (PascalCase verb after the product name, or flags like `--InstanceId`) — they are not the canonical shape for this skill (see `SKILL.md` §2.1 and `scripts/openapi_cli_collect.py`).
+
 ### 2.1 Elasticsearch OpenAPI
 
 ```bash
-aliyun --profile <profile_name> elasticsearch DescribeInstance \
+aliyun --profile <profile_name> elasticsearch describe-instance \
   --region <region> \
-  --InstanceId <instance_id>
+  --instance-id <instance_id>
 
-aliyun --profile <profile_name> elasticsearch ListSearchLog \
+aliyun --profile <profile_name> elasticsearch list-search-log \
   --region <region> \
-  --InstanceId <instance_id> \
+  --instance-id <instance_id> \
   --type INSTANCELOG \
   --query "*" \
-  --beginTime <epoch_ms> \
-  --endTime <epoch_ms>
+  --begin-time <epoch_ms> \
+  --end-time <epoch_ms>
 
-aliyun --profile <profile_name> elasticsearch ListActionRecords \
+aliyun --profile <profile_name> elasticsearch list-action-records \
   --region <region> \
-  --InstanceId <instance_id>
+  --instance-id <instance_id>
 
-aliyun --profile <profile_name> elasticsearch ListAllNode \
+aliyun --profile <profile_name> elasticsearch list-all-node \
   --region <region> \
-  --InstanceId <instance_id>
+  --instance-id <instance_id>
 ```
 
 ### 2.2 CMS OpenAPI
 
 ```bash
-aliyun --profile <profile_name> cms DescribeMetricList \
+aliyun --profile <profile_name> cms describe-metric-list \
   --region <region> \
-  --Namespace acs_elasticsearch \
-  --MetricName ClusterStatus \
-  --Dimensions '[{"clusterId":"<instance_id>"}]' \
-  --StartTime <epoch_ms> \
-  --EndTime <epoch_ms> \
-  --Period 300
+  --namespace acs_elasticsearch \
+  --metric-name ClusterStatus \
+  --dimensions '[{"clusterId":"<instance_id>"}]' \
+  --start-time <epoch_ms> \
+  --end-time <epoch_ms> \
+  --period 300
 
-aliyun --profile <profile_name> cms DescribeSystemEventAttribute \
+aliyun --profile <profile_name> cms describe-system-event-attribute \
   --region <region> \
-  --Product elasticsearch \
-  --SearchKeywords <instance_id> \
-  --StartTime <epoch_ms> \
-  --EndTime <epoch_ms>
+  --product elasticsearch \
+  --search-keywords <instance_id> \
+  --start-time <epoch_ms> \
+  --end-time <epoch_ms>
 
-aliyun --profile <profile_name> cms DescribeMetricMetaList \
+aliyun --profile <profile_name> cms describe-metric-meta-list \
   --region <region> \
-  --Namespace acs_elasticsearch
+  --namespace acs_elasticsearch
 ```
 
 **Checklist**:

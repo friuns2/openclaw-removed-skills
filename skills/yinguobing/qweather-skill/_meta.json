@@ -3,9 +3,15 @@
   "slug": "qweather-skill",
   "displayName": "和风天气",
   "latest": {
-    "version": "0.4.0",
-    "publishedAt": 1776696996709,
-    "commit": "https://github.com/openclaw/skills/commit/f114f1af9c2105949498e1a012419acda58c4a8d"
+    "version": "0.5.0",
+    "publishedAt": 1777027462465,
+    "commit": "https://github.com/openclaw/skills/commit/7e7c6ab299851ba5b65d1a87c9f0d10c4cc51fae"
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.4.0",
+      "publishedAt": 1776696996709,
+      "commit": "https://github.com/openclaw/skills/commit/f114f1af9c2105949498e1a012419acda58c4a8d"
+    }
+  ]
 }

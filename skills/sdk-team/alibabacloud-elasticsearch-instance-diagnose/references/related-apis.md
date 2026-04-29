@@ -6,15 +6,17 @@ Complete list of Alibaba Cloud OpenAPIs and Elasticsearch REST APIs used by this
 
 ## Control plane (OpenAPI)
 
+OpenAPI **action names** follow the official Alibaba Cloud API (PascalCase), e.g. [Elasticsearch API](https://api.aliyun.com/document/elasticsearch/2017-06-13/overview) and [CloudMonitor (CMS) API](https://api.aliyun.com/document/Cms/2019-01-01/overview). Use the **Aliyun CLI plugin** subcommands (lowercase-hyphenated) when showing shell examples.
+
 ### Elasticsearch OpenAPI
 
 | Product | API action | Description | Entry point |
 |---------|------------|-------------|-------------|
 | elasticsearch | DescribeInstance | Instance details (status, version, cluster-related fields) | `check_es_instance_health.py` / `openapi_cli_collect.py` |
-| elasticsearch | ListInstance | List instances | `aliyun elasticsearch ListInstance` |
+| elasticsearch | ListInstance | List instances | `aliyun elasticsearch list-instance` |
 | elasticsearch | ListSearchLog | Instance logs (instance, slow, GC, etc.) | `check_es_instance_health.py` / `openapi_cli_collect.py` |
-| elasticsearch | ListActionRecords | Change / action records | `aliyun elasticsearch ListActionRecords` |
-| elasticsearch | ListAllNode | Cluster node information | `aliyun elasticsearch ListAllNode` |
+| elasticsearch | ListActionRecords | Change / action records | `aliyun elasticsearch list-action-records` |
+| elasticsearch | ListAllNode | Cluster node information | `aliyun elasticsearch list-all-node` |
 
 ### Alibaba Cloud Monitor (CMS) OpenAPI
 
@@ -22,7 +24,7 @@ Complete list of Alibaba Cloud OpenAPIs and Elasticsearch REST APIs used by this
 |---------|------------|-------------|-------------|
 | cms | DescribeMetricList | Time-series metrics | `check_es_instance_health.py` / `openapi_cli_collect.py` |
 | cms | DescribeSystemEventAttribute | System events | `check_es_instance_health.py` / `openapi_cli_collect.py` |
-| cms | DescribeMetricMetaList | Metric metadata (available metric catalog) | `aliyun cms DescribeMetricMetaList` |
+| cms | DescribeMetricMetaList | Metric metadata (available metric catalog) | `aliyun cms describe-metric-meta-list` |
 
 ---
 

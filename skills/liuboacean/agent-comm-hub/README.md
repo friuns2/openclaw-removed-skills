@@ -1,102 +1,109 @@
-# Agent Communication Hub
+<p align="center">
+  <strong>Agent Communication Hub</strong><br>
+  多智能体协同通信基础设施<br>
+  <em>共享记忆，共同进化</em>
+</p>
 
-> 🔌 多 AI 智能体实时通信与任务调度基础设施
+<p align="center">
+  <img src="https://img.shields.io/badge/MCP_Tools-46-blue" alt="46 MCP Tools">
+  <img src="https://img.shields.io/badge/RBAC-4_Levels-green" alt="4-Level RBAC">
+  <img src="https://img.shields.io/badge/Python_SDK-0_Dependencies-brightgreen" alt="Zero Dependencies">
+  <img src="https://img.shields.io/badge/Protocol-MCP+%2B+SSE-orange" alt="MCP + SSE">
+  <img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT License">
+</p>
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/MCP-2025--03--26-FF6B35)](https://modelcontextprotocol.io/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
-让两个或多个独立 AI 智能体之间实现**实时双向通信**、**任务自动调度**和**在线状态感知**。
-
-基于 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) + SSE，消息零丢失，端到端延迟 < 2 秒。
+<p align="center">
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#核心能力">核心能力</a> ·
+  <a href="#安装方式">安装方式</a> ·
+  <a href="docs/API_REFERENCE.md">API 文档</a> ·
+  <a href="docs/TROUBLESHOOTING.md">踩坑经验</a>
+</p>
 
 ---
 
-## 特性
+## 它是什么
 
-- **📡 实时双向通信** — 基于 SSE 推送，Agent 间消息 < 50ms 送达
-- **📋 任务自动调度** — 分配任务给对方 Agent，自动接收并执行
-- **👁 在线状态感知** — 实时知道哪些 Agent 在线
-- **💾 离线不丢失** — 所有消息和任务持久化到 SQLite，上线自动补发
-- **🔌 MCP 原生** — 基于 MCP 协议，Agent 像调用本地工具一样调用远程能力
-- **📦 零依赖客户端** — WorkBuddy 侧 Python 守护进程仅用标准库，无需 pip install
-- **🔄 多 Agent 扩展** — 架构支持任意数量的 Agent 接入
+让两个或多个独立 AI 智能体实现**实时双向通信**、**任务自动调度**、**记忆共享**和**协同进化**。
 
-## 架构
+基于 MCP 协议 + SSE 推送，SQLite WAL 持久化，消息零丢失，延迟 < 50ms。
+
+> **注意**：本仓库是 Hub 的 **Skill 分发包**（SDK + 文档 + 安装脚本），不包含服务端源码。Hub 服务端是一个独立的 Node.js 项目，通过 `install.sh` 自动从 GitHub 克隆并构建。
 
 ```
-┌──────────────┐         ┌──────────────────────┐         ┌──────────────┐
-│   Agent A    │  SSE    │  Agent Communication  │  SSE    │   Agent B    │
-│  (Hermes)    │◄───────►│        Hub            │◄───────►│  (WorkBuddy) │
-│              │  MCP    │    (port 3100)        │  MCP    │              │
-└──────┬───────┘◄───────►│                      │◄───────►└──────┬───────┘
-       │                  └──────────┬───────────┘               │
-  hub_client.py              SQLite DB                   launchd
-  (Python httpx)            (WAL 模式)                  hub_watcher
-                                                          hub_task_runner
+┌──────────────┐         ┌──────────────────────────┐         ┌──────────────┐
+│   Agent A    │  SSE    │   Agent Communication     │  SSE    │   Agent B    │
+│  (Hermes)    │◄───────►│         Hub v2.2          │◄───────►│  (WorkBuddy) │
+│              │  MCP    │    (localhost:3100)        │  MCP    │              │
+└──────────────┘◄───────►│                          │◄───────►└──────────────┘
+                       └──────────┬───────────────┘
+                                  │
+                             SQLite (WAL)
 ```
 
-### 三层协议
+支持任意 MCP 兼容 Agent 接入：WorkBuddy、Hermes、QClaw、Claude Code、OpenClaw 等。
 
-| 层 | 协议 | 用途 |
-|----|------|------|
-| **MCP 工具层** | HTTP POST + JSON-RPC | 结构化操作（发消息、分配任务、查状态） |
-| **SSE 推送层** | Server-Sent Events | 实时事件通知（新消息、新任务、上线/离线） |
-| **REST API 层** | HTTP GET/PATCH | 轻量查询（供脚本和自动化使用） |
+## 核心能力
 
-### 为什么用 MCP 协议
+| 模块 | 工具数 | 说明 |
+|------|--------|------|
+| **Identity 身份** | 6 | 注册、心跳、在线查询、角色管理、信任评分 |
+| **Message 消息** | 5 | 点对点/群发、全文搜索、消费水位线 |
+| **Task 任务** | 8 | 7 状态状态机、Pipeline 线性容器、自动通知 |
+| **Memory 记忆** | 4 | private/team/global 三级、FTS5 搜索 |
+| **Evolution 进化** | 11 | 经验分享、4 级分级审批、策略采纳、信任评分联动 |
+| **Orchestration 编排** | 10 | 依赖链(DFS 环检测)、并行组、交接协议、质量门 |
+| **Security 安全** | 2 | Token 管理、RBAC、审计哈希链 |
 
-MCP 是 AI Agent 的标准通信协议。Agent 可以像调用本地工具一样调用 Hub 的功能——无需额外的 SDK 学习成本，LLM 天然理解 MCP 工具的 schema。
+**共计 46 个 MCP 工具**，详见 [API_REFERENCE.md](docs/API_REFERENCE.md)
 
-### 为什么用 Stateless 模式
+## 权限模型
 
-Hub 使用 MCP SDK 的 Stateless 模式：每个请求创建独立的 Server + Transport 实例，DB 和 SSE 管理器作为模块级单例共享。支持多个 Agent 客户端同时连接，不会出现 "Server already initialized" 错误。
+| 角色 | 说明 | 能力 |
+|------|------|------|
+| **public** | 未认证 | 仅 `register_agent` |
+| **member** | 已注册 Agent | 全部工具（除 admin 专属） |
+| **group_admin** | 并行组管理员 | member + 管理所属 parallel_group |
+| **admin** | 系统管理员 | 全部工具 + 角色任命 + 信任分调整 |
+
+## 安全特性
+
+- **RBAC 权限**：public / member / group_admin / admin 四级
+- **审计哈希链**：`audit_log` 表 `prev_hash → record_hash`，触发器写保护
+- **信任评分**：多维度自动计算，影响策略审批 tier
+- **CORS 白名单**：默认拒绝跨域
+- **安全响应头**：X-Frame-Options / CSP / HSTS / X-XSS-Protection
+- **请求追踪**：每请求 traceId，响应头 X-Trace-Id
+- **优雅关闭**：SIGTERM → drain SSE → 关闭 DB → 退出
 
 ## 快速开始
 
-### 前置要求
-
-- **Node.js** 18+ （Hub 服务器）
-- **Python** 3.9+ （客户端脚本）
-- **httpx** Python 包（Hermes 侧客户端，`pip install httpx`）
-
-### 1. 启动 Hub
+### 1. 安装 Hub 服务器
 
 ```bash
-# 克隆仓库
-git clone https://github.com/YOUR_USER/agent-comm-hub.git
-cd agent-comm-hub/hub-server
-
-# 安装依赖
-npm install
-
-# 启动（开发模式）
-npm run dev
-
-# 或生产模式
-npm run build && npm start
+# 从 GitHub 克隆 + 构建
+git clone https://github.com/liuboacean/agent-comm-hub.git ~/agent-comm-hub
+cd ~/agent-comm-hub
+npm install && npm run build
+npm start           # 生产模式，端口 3100
+# 或 npm run dev     # 开发模式（热重载）
 ```
 
-Hub 启动后监听 `http://localhost:3100`：
+### 2. 注册 Agent
 
-```
-╔════════════════════════════════════════╗
-║   Agent Communication Hub  v1.0.0     ║
-║   Stateless Mode — Multi-Client       ║
-╠════════════════════════════════════════╣
-║  SSE  订阅: GET  /events/{agent_id}   ║
-║  MCP  工具: POST /mcp                 ║
-║  健康检查: GET  /health               ║
-║  监听端口: 3100                        ║
-╚════════════════════════════════════════╝
+```python
+# 通过 MCP 工具 register_agent（需邀请码）
+# 或使用 SDK
+from hub_client import SynergyHubClient
+
+hub = SynergyHubClient(hub_url="http://localhost:3100", agent_id="my-agent")
+result = hub.register(invite_code="YOUR_INVITE_CODE")
+print(result)  # agent_id + api_token
 ```
 
-### 2. 接入 Agent
+### 3. 配置 MCP 连接
 
-#### 方式 A：MCP 配置（推荐，LLM 原生支持）
-
-在 Agent 的 MCP 配置文件中添加：
+在 Agent 的 MCP 配置中添加：
 
 ```json
 {
@@ -108,226 +115,117 @@ Hub 启动后监听 `http://localhost:3100`：
 }
 ```
 
-Agent 的 LLM 现在可以直接调用 6 个 MCP 工具：`assign_task`、`send_message`、`update_task_status`、`get_task_status`、`broadcast_message`、`get_online_agents`。
+Agent 的 LLM 可以直接调用全部 46 个工具。
 
-#### 方式 B：TypeScript SDK
+### 4. SDK 接入（可选）
 
+**Python（零外部依赖）**：
+```python
+from hub_client import SynergyHubClient
+
+hub = SynergyHubClient(hub_url="http://localhost:3100", agent_id="my-agent")
+hub.set_token("your-api-token")
+hub.heartbeat()
+hub.send_message(to="other-agent", content="Hello!")
+hub.store_memory(content="重要信息", scope="collective")
+hub.share_experience(title="踩坑记录", content="...", category="experience")
+hub.on_message = lambda msg: print(f"收到: {msg}")
+hub.connect_sse()  # 阻塞，SSE 长连接
+```
+
+**TypeScript**：
 ```typescript
 import { AgentClient } from "./client-sdk/agent-client.js";
-
 const client = new AgentClient({
   agentId: "my-agent",
   hubUrl: "http://localhost:3100",
-  onTaskAssigned: async (task) => {
-    console.log(`收到任务: ${task.description}`);
-    await client.updateTaskStatus(task.id, "in_progress", undefined, 5);
-    const result = await doWork(task.description);
-    await client.updateTaskStatus(task.id, "completed", result, 100);
-  },
-  onMessage: async (msg) => {
-    console.log(`来自 ${msg.from_agent}: ${msg.content}`);
-  },
+  onTaskAssigned: async (task) => { /* 处理任务 */ },
+  onMessage: async (msg) => { /* 处理消息 */ },
 });
 await client.start();
 ```
 
-#### 方式 C：Python SDK
-
-```python
-import asyncio
-from hub_client import HubClient
-
-async def on_task(task):
-    print(f"收到任务: {task['description']}")
-    await client.update_task_status(task['id'], "completed", "done!", 100)
-
-client = HubClient(
-    agent_id="my-agent",
-    hub_url="http://localhost:3100",
-    on_task_assigned=on_task,
-)
-await client.start()
-```
-
-### 3. WorkBuddy 侧守护（可选）
-
-启动 SSE 守护进程实现秒级任务响应：
+### 5. 验证
 
 ```bash
-# 替换 WORKBUDDY_SKILL_DIR 为实际路径
-SKILL_DIR="path/to/agent-comm-hub"
-
-# 设置 launchd plist 中的路径
-sed -i '' "s|WORKBUDDY_SKILL_DIR|$SKILL_DIR|g" \
-  workbuddy-side/launchd/com.workbuddy.hub-watcher.plist \
-  workbuddy-side/launchd/com.workbuddy.hub-task-runner.plist
-
-# 安装服务
-cp workbuddy-side/launchd/*.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.workbuddy.hub-watcher.plist
-launchctl load ~/Library/LaunchAgents/com.workbuddy.hub-task-runner.plist
+curl http://localhost:3100/health   # 健康检查
+curl http://localhost:3100/metrics  # Prometheus 指标
 ```
 
-## API 参考
+## 安装方式
 
-### MCP 工具
+### 作为 Skill 安装（推荐）
 
-| 工具 | 参数 | 说明 |
-|------|------|------|
-| `send_message` | `from`, `to`, `content`, `type?`, `metadata?` | 发送即时消息 |
-| `assign_task` | `from`, `to`, `description`, `context?`, `priority?` | 分配 AI 任务 |
-| `update_task_status` | `task_id`, `agent_id`, `status`, `result?`, `progress?` | 汇报任务进度 |
-| `get_task_status` | `task_id` | 查询任务状态 |
-| `broadcast_message` | `from`, `agent_ids`, `content`, `metadata?` | 广播消息 |
-| `get_online_agents` | — | 查询在线 Agent |
+将本仓库作为 Skill 安装到你的 Agent 平台，即可获得 46 个 MCP 工具 + SDK + 完整文档：
 
-### REST API
+```bash
+# SkillHub — 覆盖 30+ Agent 平台（Claude Code、OpenClaw、CodeBuddy 等）
+npx skills add liuboacean/agent-comm-hub
 
-| 端点 | 方法 | 参数 | 说明 |
-|------|------|------|------|
-| `/health` | GET | — | 健康检查 |
-| `/api/tasks` | GET | `agent_id`, `status?` | 查询任务列表 |
-| `/api/messages` | GET | `agent_id`, `status?` | 查询消息列表 |
-| `/api/tasks/:id/status` | PATCH | `status`, `result?`, `progress?` | 更新任务状态 |
-| `/api/messages/:id/status` | PATCH | `status` | 标记消息已读 |
-
-### SSE 端点
-
-| 端点 | 说明 |
-|------|------|
-| `GET /events/:agent_id` | Agent 订阅事件流（长连接） |
-
-推送的事件类型：
-
-| 事件 | 说明 |
-|------|------|
-| `new_message` | 收到新消息 |
-| `task_assigned` | 收到新任务 |
-| `task_updated` | 任务状态更新 |
-| `pending_messages` | 上线时补发积压消息 |
-
-## 任务状态机
-
-```
-assign_task → pending → in_progress → completed
-                            └──→ failed
+# ClawHub
+clawhub install agent-comm-hub
 ```
 
-- `pending`：任务已创建，等待接收方拾取
-- `in_progress`：接收方正在执行（可多次更新进度）
-- `completed`：任务完成
-- `failed`：任务执行失败
+### 手动安装
 
-## 三层保障架构（WorkBuddy 侧）
-
-由于 WorkBuddy 运行在 IDE 内部，无法直接运行长驻进程，采用三层保障：
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  第一层：秒级通知（SSE 守护）                             │
-│  Hub SSE → hub_watcher.py → 触发文件 → macOS 通知       │
-│  延迟：< 5 秒                                           │
-├─────────────────────────────────────────────────────────┤
-│  第二层：当前会话消费（用户在线时）                        │
-│  用户收到通知 → 在对话中确认 → Agent 执行 → 更新状态     │
-│  延迟：用户回到对话时即时                                 │
-├─────────────────────────────────────────────────────────┤
-│  第三层：每小时兜底（自动化）                             │
-│  WorkBuddy 自动化 → 查 Hub API → 执行 pending 任务      │
-│  延迟：最长 1 小时                                       │
-└─────────────────────────────────────────────────────────┘
+```bash
+git clone https://github.com/liuboacean/agent-comm-hub.git
+cd agent-comm-hub
+# 查看 docs/SETUP_GUIDE.md 了解详细部署步骤
 ```
 
 ## 文件结构
 
 ```
 agent-comm-hub/
-├── SKILL.md                          # WorkBuddy Skill 定义
-├── README.md                         # 本文件
-├── LICENSE                           # MIT 许可证
-│
-├── hub-server/                       # Hub 服务器
-│   ├── package.json                  # Node.js 依赖
-│   ├── tsconfig.json                 # TypeScript 配置
-│   ├── src/
-│   │   ├── server.ts                 # 主入口：Express + MCP + SSE
-│   │   ├── db.ts                     # SQLite 持久化（WAL 模式）
-│   │   ├── sse.ts                    # SSE 连接管理
-│   │   └── tools.ts                  # 6 个 MCP 工具定义
-│   ├── client-sdk/
-│   │   └── agent-client.ts           # 通用 TypeScript 客户端 SDK
-│   └── scripts/
-│       └── install.sh                # 一键安装脚本
-│
-├── workbuddy-side/                   # WorkBuddy 侧组件
-│   ├── scripts/
-│   │   ├── hub_watcher.py            # SSE 守护（launchd）
-│   │   └── hub_task_runner.py        # 通知触发器（launchd）
-│   └── launchd/
-│       ├── com.workbuddy.hub-watcher.plist
-│       └── com.workbuddy.hub-task-runner.plist
-│
-├── hermes-side/                      # Hermes 侧组件
-│   ├── scripts/
-│   │   ├── hub_client.py             # Python 客户端（SSE + MCP）
-│   │   └── hub_integration.py        # 集成入口（含任务执行逻辑）
-│   └── config/
-│       └── mcp-server-example.json   # MCP 配置示例
-│
-└── docs/
-    ├── SETUP_GUIDE.md                # 详细配置指南
-    ├── API_REFERENCE.md              # API 参考
-    └── TROUBLESHOOTING.md            # 踩坑经验与常见问题
+├── SKILL.md                       # Skill 核心文档（Agent 加载时读取）
+├── scripts/
+│   ├── install.sh                 # 一键安装 Hub 服务器
+│   └── setup_agent.sh             # Agent 注册 + 认证自动化
+├── client-sdk/
+│   ├── hub_client.py              # Python SDK（39 个 async 方法，零依赖）
+│   ├── agent-client.ts            # TypeScript SDK（35 个公开方法）
+│   └── agent-client.js            # 编译后的 JS
+├── docs/
+│   ├── API_REFERENCE.md           # 46 个工具完整参考 v2.2（含 search_messages、search_memories、Pipeline 管理）
+│   ├── SETUP_GUIDE.md             # 详细部署指南
+│   ├── TROUBLESHOOTING.md         # 踩坑经验（8 大类）
+│   ├── orchestrator-guide.md      # 进阶编排指南
+│   ├── evolution-guide.md         # 进化引擎指南
+│   └── hermes-integration-guide.md  # Hermes 集成指南
+└── examples/
+    ├── workbuddy-mcp.json         # WorkBuddy MCP 配置示例
+    ├── hermes-mcp.json            # Hermes MCP 配置示例
+    └── agent_bridge.py            # 通用通信桥示例
 ```
 
-## 踩坑经验
+## 技术依赖
 
-### MCP 协议
-
-1. **必须用 Stateless 模式** — Stateful 模式只允许一个 Client 初始化，多 Agent 场景直接崩
-2. **Accept Header 不可省** — `Accept: application/json, text/event-stream`，否则 404
-3. **响应是 SSE 格式** — `event: message\ndata: {...}\n\n`，需解析 `data:` 行
-4. **ESM 兼容** — 不能 `require()`，用 `import()` 动态导入
-
-### Python
-
-5. **UTF-8 块读取** — `resp.read(1)` 逐字节会截断多字节字符，必须 `read(4096)`
-6. **SSE 长连接保活** — 处理好超时和重连逻辑（指数退避）
-
-### 系统集成
-
-7. **launchd KeepAlive** — 进程崩溃自动重启，比 cron 更可靠
-8. **automation_update 副作用** — 每次更新在 IDE 数据库创建新记录，需定期清理
-9. **MCP ≠ SSE** — MCP 是工具调用通道（Agent→Hub），SSE 是推送通道（Hub→Agent），两者独立
-10. **离线补发** — 消息/任务存 SQLite，上线后 SSE 自动批量推送
+| 组件 | 依赖 |
+|------|------|
+| **Hub 服务器** | Node.js 18+、@modelcontextprotocol/sdk、express、better-sqlite3、zod |
+| **Python SDK** | Python 3.9+，零外部依赖（纯标准库） |
+| **TS SDK** | Node.js 18+，零外部依赖（原生 fetch） |
 
 ## 环境变量
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `PORT` | 3100 | Hub 监听端口 |
-| `HUB_URL` | http://localhost:3100 | Hub 地址（客户端用） |
-| `HUB_AGENT_ID` | workbuddy | 本 Agent ID |
-| `HUB_WATCHER_LOG` | INFO | 日志级别 |
-| `SIGNAL_DIR` | ~/.hermes/shared/signals | 信号文件目录 |
-| `WB_TRIGGER_DIR` | ~/.workbuddy/hub-tasks | 触发文件目录 |
+| `LOG_LEVEL` | info | 日志级别：debug / info / warn / error |
+| `CORS_ORIGINS` | （空） | CORS 白名单（逗号分隔），空=拒绝所有跨域 |
 
-## 技术栈
+## 文档
 
-| 组件 | 技术 |
+| 文档 | 说明 |
 |------|------|
-| Hub 服务器 | TypeScript + Express + MCP SDK + better-sqlite3 |
-| TS 客户端 SDK | TypeScript + EventSource + fetch |
-| Python 客户端 | Python 3.9+ + httpx (async) |
-| WorkBuddy 守护 | Python 3.9+ 标准库（零依赖） |
-| 进程管理 | macOS launchd (KeepAlive) |
+| [API_REFERENCE.md](docs/API_REFERENCE.md) | 46 个 MCP 工具完整参考 |
+| [SETUP_GUIDE.md](docs/SETUP_GUIDE.md) | 从零部署指南 |
+| [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | 踩坑经验速查 |
+| [orchestrator-guide.md](docs/orchestrator-guide.md) | 进阶编排（依赖链/并行组/质量门） |
+| [evolution-guide.md](docs/evolution-guide.md) | 进化引擎（经验/策略/信任评分） |
+| [hermes-integration-guide.md](docs/hermes-integration-guide.md) | Hermes Agent 集成指南 |
 
-## 许可证
+## 许可
 
-[MIT](LICENSE)
-
-## 致谢
-
-- [Model Context Protocol](https://modelcontextprotocol.io/) — AI Agent 标准通信协议
-- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) — 同步 SQLite 绑定
-- [httpx](https://www.python-httpx.org/) — 现代 Python HTTP 客户端
+MIT

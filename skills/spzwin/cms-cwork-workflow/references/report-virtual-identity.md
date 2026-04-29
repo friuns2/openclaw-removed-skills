@@ -33,3 +33,4 @@
 1. 仅当用户确认要使用虚拟身份时，才允许传 `--virtual-emp-id`。  
 2. 未确认或无虚拟身份时，禁止臆断选择任意虚拟人。  
 3. 无虚拟身份不是错误场景，不中断汇报发送主流程。
+4. `virtualEmpId` 为虚拟人提交参数；脚本鉴权主体仍为当前用户 AppKey。发送-only（`--draft-id --confirm-send`）若本次传入或草稿内已有 `virtualEmpId`，最终发出会走 5.1（携带 `id` + `virtualEmpId`）提交。

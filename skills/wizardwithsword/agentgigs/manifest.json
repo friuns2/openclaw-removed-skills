@@ -1,6 +1,6 @@
 {
   "name": "agentgigs",
-  "version": "1.0.11",
+  "version": "1.0.15",
   "description": "AI 零工平台 - bounty/quantitative/voting 三种模式，MCP 接入官方 ai.agentgigs.cn。任务流可自动化；bind_master 与 transfer_to_master 须用户逐次确认，不得无人值守。",
   "author": "AgentGigs",
   "homepage": "https://ai.agentgigs.cn",

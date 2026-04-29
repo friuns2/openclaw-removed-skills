@@ -3,9 +3,15 @@
   "slug": "cn-readability-extractor",
   "displayName": "网页内容提取",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776611713601,
-    "commit": "https://github.com/openclaw/skills/commit/c4eed5e413a75e4ed78c74f2923aea78c5e0d216"
+    "version": "1.1.1",
+    "publishedAt": 1776858875253,
+    "commit": "https://github.com/openclaw/skills/commit/5dd2cec69a1ecbd492a70e5a2afc0bea6d880df7"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776611713601,
+      "commit": "https://github.com/openclaw/skills/commit/c4eed5e413a75e4ed78c74f2923aea78c5e0d216"
+    }
+  ]
 }

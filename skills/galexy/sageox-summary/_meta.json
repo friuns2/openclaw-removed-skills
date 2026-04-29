@@ -1,11 +1,17 @@
 {
   "owner": "galexy",
   "slug": "sageox-summary",
-  "displayName": "Sageox Summarize Team Activity",
+  "displayName": "Sageox Summary",
   "latest": {
-    "version": "0.3.0",
-    "publishedAt": 1776234442845,
-    "commit": "https://github.com/openclaw/skills/commit/7cf53374b6e286f90b1107d6fd3786c7dad58b5f"
+    "version": "0.3.1",
+    "publishedAt": 1776980002183,
+    "commit": "https://github.com/openclaw/skills/commit/a3d33d4045a1e1c2b2cf177e9d834640a27cfb6e"
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.3.0",
+      "publishedAt": 1776234442845,
+      "commit": "https://github.com/openclaw/skills/commit/7cf53374b6e286f90b1107d6fd3786c7dad58b5f"
+    }
+  ]
 }

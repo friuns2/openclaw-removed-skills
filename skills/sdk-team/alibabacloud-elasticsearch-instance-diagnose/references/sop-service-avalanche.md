@@ -113,26 +113,26 @@ Intermittent timeouts
 
 ```bash
 # 1) Control plane
-aliyun elasticsearch DescribeInstance --region <region> --InstanceId <id>
+aliyun elasticsearch describe-instance --region <region> --instance-id <id>
 # status active → usually OK at CP layer
 
 # 2) CMS CPU last ~5 minutes (points exist?)
-aliyun cms DescribeMetricList \
-  --Namespace "acs_elasticsearch" \
-  --MetricName "NodeCPUUtilization" \
-  --Dimensions '[{"instanceId":"<id>"}]' \
-  --StartTime "<5_min_ago_ms>" \
-  --EndTime "<now_ms>" \
-  --Period 60
+aliyun cms describe-metric-list \
+  --namespace "acs_elasticsearch" \
+  --metric-name "NodeCPUUtilization" \
+  --dimensions '[{"instanceId":"<id>"}]' \
+  --start-time "<5_min_ago_ms>" \
+  --end-time "<now_ms>" \
+  --period 60
 # Points on both data nodes → likely alive at process level
 # No points on a node → suspect real loss / agent gap
 
 # 3) Leave events in INSTANCELOG
-aliyun elasticsearch ListSearchLog \
-  --region <region> --InstanceId <id> \
+aliyun elasticsearch list-search-log \
+  --region <region> --instance-id <id> \
   --type INSTANCELOG \
   --query "removed OR left OR disconnect" \
-  --beginTime "<start_ms>" --endTime "<end_ms>"
+  --begin-time "<start_ms>" --end-time "<end_ms>"
 # empty → no classic "node left" story
 ```
 
@@ -143,32 +143,32 @@ CMS CPU **absent** + leave logs → **real offline** → [sop-cluster-health.md]
 
 ```bash
 # 1) CPU trend (~30m) — when did it cross ~80%?
-aliyun cms DescribeMetricList \
-  --Namespace "acs_elasticsearch" \
-  --MetricName "NodeCPUUtilization" \
-  --Dimensions '[{"instanceId":"<id>"}]' \
-  --StartTime "<30_min_ago_ms>" --EndTime "<now_ms>" --Period 60
+aliyun cms describe-metric-list \
+  --namespace "acs_elasticsearch" \
+  --metric-name "NodeCPUUtilization" \
+  --dimensions '[{"instanceId":"<id>"}]' \
+  --start-time "<30_min_ago_ms>" --end-time "<now_ms>" --period 60
 
 # 2) Search pool rejects
-aliyun cms DescribeMetricList \
-  --Namespace "acs_elasticsearch" \
-  --MetricName "SearchThreadpoolRejected" \
-  --Dimensions '[{"instanceId":"<id>"}]' \
-  --StartTime "<30_min_ago_ms>" --EndTime "<now_ms>" --Period 60
+aliyun cms describe-metric-list \
+  --namespace "acs_elasticsearch" \
+  --metric-name "SearchThreadpoolRejected" \
+  --dimensions '[{"instanceId":"<id>"}]' \
+  --start-time "<30_min_ago_ms>" --end-time "<now_ms>" --period 60
 
 # 3) Write pool rejects (ingest also melting?)
-aliyun cms DescribeMetricList \
-  --Namespace "acs_elasticsearch" \
-  --MetricName "WriteThreadpoolRejected" \
-  --Dimensions '[{"instanceId":"<id>"}]' \
-  --StartTime "<30_min_ago_ms>" --EndTime "<now_ms>" --Period 60
+aliyun cms describe-metric-list \
+  --namespace "acs_elasticsearch" \
+  --metric-name "WriteThreadpoolRejected" \
+  --dimensions '[{"instanceId":"<id>"}]' \
+  --start-time "<30_min_ago_ms>" --end-time "<now_ms>" --period 60
 
 # 4) "all shards failed" in INSTANCELOG
-aliyun elasticsearch ListSearchLog \
-  --region <region> --InstanceId <id> \
+aliyun elasticsearch list-search-log \
+  --region <region> --instance-id <id> \
   --type INSTANCELOG \
   --query "shards" \
-  --beginTime "<start_ms>" --endTime "<end_ms>"
+  --begin-time "<start_ms>" --end-time "<end_ms>"
 ```
 
 **Example “confirmed” triad:**
@@ -182,11 +182,11 @@ aliyun elasticsearch ListSearchLog \
 **3.1 Index from rejected / slow paths**
 
 ```bash
-aliyun elasticsearch ListSearchLog \
-  --region <region> --InstanceId <id> \
+aliyun elasticsearch list-search-log \
+  --region <region> --instance-id <id> \
   --type INSTANCELOG \
   --query "rejected" \
-  --beginTime "<start_ms>" --endTime "<end_ms>"
+  --begin-time "<start_ms>" --end-time "<end_ms>"
 # path like "/my-index/_search" → hot index
 ```
 
@@ -371,29 +371,29 @@ T+26m: users report "node offline"
 ## Appendix: quick commands
 
 ```bash
-aliyun elasticsearch DescribeInstance --region <region> --InstanceId <id>
+aliyun elasticsearch describe-instance --region <region> --instance-id <id>
 
-aliyun cms DescribeMetricList --Namespace "acs_elasticsearch" \
-  --MetricName "NodeCPUUtilization" \
-  --Dimensions '[{"instanceId":"<id>"}]' \
-  --StartTime "<5_min_ago_ms>" --EndTime "<now_ms>" --Period 60
+aliyun cms describe-metric-list --namespace "acs_elasticsearch" \
+  --metric-name "NodeCPUUtilization" \
+  --dimensions '[{"instanceId":"<id>"}]' \
+  --start-time "<5_min_ago_ms>" --end-time "<now_ms>" --period 60
 
-aliyun elasticsearch ListSearchLog --region <region> --InstanceId <id> \
+aliyun elasticsearch list-search-log --region <region> --instance-id <id> \
   --type INSTANCELOG --query "removed OR left OR disconnect" \
-  --beginTime "<start_ms>" --endTime "<end_ms>"
+  --begin-time "<start_ms>" --end-time "<end_ms>"
 
-aliyun cms DescribeMetricList --Namespace "acs_elasticsearch" \
-  --MetricName "SearchThreadpoolRejected" \
-  --Dimensions '[{"instanceId":"<id>"}]' \
-  --StartTime "<start_ms>" --endTime "<end_ms>" --Period 60
+aliyun cms describe-metric-list --namespace "acs_elasticsearch" \
+  --metric-name "SearchThreadpoolRejected" \
+  --dimensions '[{"instanceId":"<id>"}]' \
+  --start-time "<start_ms>" --end-time "<end_ms>" --period 60
 
-aliyun elasticsearch ListSearchLog --region <region> --InstanceId <id> \
+aliyun elasticsearch list-search-log --region <region> --instance-id <id> \
   --type INSTANCELOG --query "shards" \
-  --beginTime "<start_ms>" --endTime "<end_ms>"
+  --begin-time "<start_ms>" --end-time "<end_ms>"
 
-aliyun elasticsearch ListSearchLog --region <region> --InstanceId <id> \
+aliyun elasticsearch list-search-log --region <region> --instance-id <id> \
   --type INSTANCELOG --query "rejected" \
-  --beginTime "<start_ms>" --endTime "<end_ms>"
+  --begin-time "<start_ms>" --end-time "<end_ms>"
 
 curl -sS --connect-timeout 10 --max-time 30 \
   -u "${ES_USERNAME:-elastic}:${ES_PASSWORD}" \

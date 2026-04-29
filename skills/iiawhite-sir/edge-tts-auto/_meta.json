@@ -1,0 +1,11 @@
+{
+  "owner": "iiawhite-sir",
+  "slug": "edge-tts-auto",
+  "displayName": "edge-tts-auto",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776528475071,
+    "commit": "https://github.com/openclaw/skills/commit/4e8522eddb36ae41186c12edd4a5fa669c574785"
+  },
+  "history": []
+}

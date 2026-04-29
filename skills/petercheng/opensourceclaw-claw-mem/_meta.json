@@ -1,11 +1,17 @@
 {
   "owner": "petercheng",
   "slug": "opensourceclaw-claw-mem",
-  "displayName": "claw-mem: Three-Tier Memory",
+  "displayName": "Skill",
   "latest": {
-    "version": "2.0.1",
-    "publishedAt": 1776423979730,
-    "commit": "https://github.com/openclaw/skills/commit/4ff544c12097de88d5e66c8b62d3884a2ae7c79f"
+    "version": "2.4.1",
+    "publishedAt": 1777422085788,
+    "commit": "https://github.com/openclaw/skills/commit/e9472e5bd507c4d2ef69c0efe4e28d3785326874"
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.0.1",
+      "publishedAt": 1776423979730,
+      "commit": "https://github.com/openclaw/skills/commit/4ff544c12097de88d5e66c8b62d3884a2ae7c79f"
+    }
+  ]
 }

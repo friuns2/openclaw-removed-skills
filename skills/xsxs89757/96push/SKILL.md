@@ -57,6 +57,9 @@ python3 {baseDir}/scripts/96push.py plat-sets --pid 3
 ### Create Content
 
 ```bash
+# content type can be omitted when --files clearly indicates image/video
+# video files (.mp4/.mov/.avi/.mkv/.webm/.m4v/.flv/.wmv) are inferred as --type video
+
 # article — needs title + markdown (or content as HTML)
 python3 {baseDir}/scripts/96push.py create --type article --title "标题" --markdown "# 内容" --desc "摘要"
 
@@ -68,6 +71,7 @@ python3 {baseDir}/scripts/96push.py create --type graph_text --title "图集" --
 
 # video — needs title + files (1 video URL), desc strongly recommended
 python3 {baseDir}/scripts/96push.py create --type video --title "视频" --files '["video_url"]' --desc "视频描述"
+python3 {baseDir}/scripts/96push.py create --title "视频" --files '["https://example.com/video.mp4"]' --desc "视频描述"
 ```
 
 ### Update / Delete Content
@@ -82,6 +86,9 @@ python3 {baseDir}/scripts/96push.py delete-article --id 42
 ```bash
 # simple mode — just account IDs (uses default/empty settings)
 python3 {baseDir}/scripts/96push.py publish --type article --id 42 --accounts "1,5,8"
+python3 {baseDir}/scripts/96push.py publish --type video --id 42 --accounts "1,5,8"
+
+# if --type is omitted, the script reads content detail and infers article/graph_text/video
 
 # advanced mode — full settings per account (see platform settings reference)
 python3 {baseDir}/scripts/96push.py publish --type article --id 42 --accounts-json '[{"id":1,"platName":"微信公众号","settings":{"publishType":"publish","origin":false}},{"id":5,"platName":"知乎","settings":{"topic":"AI/科技"}}]'
@@ -149,6 +156,13 @@ The publish command triggers browser automation that takes 30-60 seconds to comp
 
 
 ### By Content Type
+
+**Type selection rule**:
+
+- If the user wants to create or publish a video, use `--type video` explicitly whenever possible.
+- If `--type` is omitted, the CLI now infers the type from `--files` or existing content detail.
+- If `--type article` is passed together with video/image `files`, the CLI treats the media files as authoritative and avoids creating/publishing the content as an article.
+- Never create article content with video URLs in `files`; video URLs must be video content.
 
 **Article (文章)**:
 

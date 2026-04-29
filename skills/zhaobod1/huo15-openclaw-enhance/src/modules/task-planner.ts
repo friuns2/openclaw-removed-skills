@@ -112,16 +112,15 @@ export function registerTaskPlanner(api: OpenClawPluginApi) {
   api.registerTool( (
     (ctx: OpenClawPluginToolContext) => ({
       name: "enhance_plan_task",
-      description:
-        "将复杂目标分解为可执行的子任务列表。适用场景：用户请求完成复杂任务、制定执行计划、分析问题根因。输入越详细，分解越准确。",
+      description: "将复杂目标分解为可执行子任务列表（用于规划/分析/反思）",
       parameters: Type.Object({
-        goal: Type.String({ description: "用户想要完成的目标或解决的问题" }),
+        goal: Type.String({ description: "目标或问题描述" }),
         constraints: Type.Optional(
-          Type.String({ description: "任何约束条件，如：时间限制、技术栈偏好、预算等" }),
+          Type.String({ description: "约束条件（时间/技术栈等）" }),
         ),
         mode: Type.Optional(
           Type.Union([Type.Literal("plan"), Type.Literal("analyze"), Type.Literal("reflect")], {
-            description: "plan: 任务分解 / analyze: 问题分析 / reflect: 反思总结",
+            description: "plan|analyze|reflect",
             default: "plan",
           }),
         ),
@@ -165,7 +164,7 @@ export function registerTaskPlanner(api: OpenClawPluginApi) {
   );
 
   // ── Hook: before_prompt_build — 自动触发规划 ──
-  api.on("before_prompt_build" as any, (event: any, ctx: any): any => {
+  api.on("before_prompt_build", (event: any, ctx: any) => {
     const query: string = (event as any)?.prompt ?? "";
     const agentId = (ctx?.agentId ?? "main") as string;
 

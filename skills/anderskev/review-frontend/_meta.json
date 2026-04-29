@@ -3,9 +3,15 @@
   "slug": "review-frontend",
   "displayName": "Review Frontend",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775870095841,
-    "commit": "https://github.com/openclaw/skills/commit/9c0b38f01eb3da9ef2708a4b8d32d0cc2576e778"
+    "version": "1.0.1",
+    "publishedAt": 1776831320157,
+    "commit": "https://github.com/openclaw/skills/commit/6bdae6fcd27b22d2c0a41ee1423a5c87532a14e9"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775870095841,
+      "commit": "https://github.com/openclaw/skills/commit/9c0b38f01eb3da9ef2708a4b8d32d0cc2576e778"
+    }
+  ]
 }

@@ -1,149 +1,149 @@
 # agentic-commerce-news
 
-> Agentic Commerce 每周产品快报 — 搜索过去一周大V（VC、企业家、AI领袖）推荐的 Agentic Commerce 相关创业产品和动态，生成结构化新闻简报。
+> Agentic Commerce Weekly Briefing — scans the past 7 days of X/Twitter, industry media, and VC announcements for startups, products, funding rounds, and opinions endorsed by influential voices (VCs, founders, AI leaders) in the agentic commerce space, then produces a structured news briefing.
 
 ## What it does
 
-这是一个新闻聚合类 skill，专注于 **Agentic Commerce**（AI Agent 代人购物）这个快速演化的赛道。每次触发时，它会：
+A news aggregation skill focused on **agentic commerce** — the rapidly evolving space where AI agents shop, compare, check out, and pay on behalf of humans. On every invocation, it:
 
-1. 并行发起 10+ 条不同角度的 WebSearch 查询（过去 7 天窗口）
-2. 过滤出有大V / 机构背书的创业产品和动态
-3. 按 9 层 Agentic Commerce Stack 分类（品牌发现→支付→消费端 Agent→全栈平台）
-4. 生成按事件类型分组的卡片（融资 / 产品发布 / 大V观点 / 合作 / 报告）
-5. 附速览汇总表 + 本周趋势洞察
+1. Launches 10+ parallel WebSearch queries across different angles, scoped to the past 7 days
+2. Filters results to items with credible VC / institutional / platform endorsement
+3. Classifies each item into the 9-layer Agentic Commerce Stack (Brand Discovery → Payments → Consumer Agent → Full-Stack Platform)
+4. Generates cards grouped by event type (funding / product launch / founder quote / partnership / report)
+5. Appends a summary table and weekly trend takeaways
 
 ## When it triggers
 
-- 用户输入 `/agentic-commerce-news`
-- 用户提到 "agentic commerce 新闻"、"AI commerce 最新动态"、"agent shopping 本周新产品" 等关键词
-- 用户说类似 "帮我看看 agentic commerce 这周有什么新动态" 的话
-- 用户要求设置定时任务推送 agentic commerce 动态
+- User types `/agentic-commerce-news`
+- User mentions keywords like "agentic commerce news", "AI commerce updates", "agent shopping this week"
+- User asks things like "what's new in agentic commerce this week?" or "who's funding AI shopping startups?"
+- User asks to set up a scheduled/recurring digest on agentic commerce
 
-## Scheduling（定时任务）
+## Scheduling
 
-支持三种运行方式，根据你的环境选择：
+Three ways to run this on a schedule, depending on your environment:
 
-| 环境 | 命令 | 说明 |
-|------|------|------|
-| Claude Code 当前会话 | `CronCreate` 工具 | 会话内定时，不持久化 |
-| Claude Code 持久化 | `/schedule` skill | 在 claude.ai 云端运行，长期生效 |
-| OpenClaw | `openclaw cron add` | 7×24 后台运行 |
+| Environment | Command | Notes |
+|-------------|---------|-------|
+| Claude Code (session) | `CronCreate` tool | In-session only, not persisted across restarts |
+| Claude Code (persistent) | `/schedule` skill | Runs on claude.ai infrastructure, survives restarts |
+| OpenClaw | `openclaw cron add` | 24/7 background execution |
 
-### 示例：每天早上 8 点定时推送（Claude Code）
+### Example: Daily 8am digest in Claude Code
 
-对 Claude 说：
-> 设置一个定时任务，每天早上 8 点运行 agentic-commerce-news 推送给我
+Say to Claude:
+> "Set up a daily task to run agentic-commerce-news at 8am."
 
-Claude 会用 `CronCreate` 创建 `"3 8 * * *"` 规则（8:03am，避开整点）。
+Claude will use `CronCreate` with `"3 8 * * *"` (8:03am — nudged a few minutes off the round hour to avoid API pile-ups).
 
-### 示例：OpenClaw 持久化定时
+### Example: OpenClaw persistent schedule
 
 ```bash
 openclaw cron add \
   --name "Agentic Commerce Daily" \
   --cron "3 8 * * *" \
-  --tz "Asia/Shanghai" \
-  --message "运行 agentic-commerce-news skill，搜索过去一周 agentic commerce 领域的最新动态" \
+  --tz "America/New_York" \
+  --message "Run the agentic-commerce-news skill to surface the past week's agentic commerce activity" \
   --channel <your-channel> \
   --to "<your-id>"
 ```
 
 ## Quality Gates
 
-- 只收录过去 7 天的动态
-- 必须有大V / 机构背书（VC 投资、推文推荐、官方报告、平台合作）
-- 必须附原文链接
-- 最少 5 条（淡周可少，严禁用旧新闻充数）
-- 排除纯广告 / PR 内容
+- Only items from the past 7 days qualify
+- Every item must have credible endorsement (VC investment, public recommendation by a recognized figure, inclusion in a major report, or official platform partnership)
+- Every item must include a source link
+- Minimum 5 items (a quiet week is OK — do not pad with stale news)
+- Exclude pure PR / sponsored content
 
 ## Output Format
 
 ```
-## Agentic Commerce 周报（4月8日 - 4月15日）
-> 本周 8 条值得关注的动态
+## Agentic Commerce Weekly Briefing (Apr 8 – Apr 15)
+> 8 noteworthy signals from the past week
 
-### 融资动态
-### ProductName（融资 $XM）— 一句话摘要
-**时间：** 4月12日
-**背书：** 谁投的
-**核心内容：**
-- 要点 1
-- 要点 2
-**所属层级：** Payment Infrastructure
-原文链接：https://...
+### Funding
+### ProductName (raised $XM) — one-line summary
+**Date:** Apr 12
+**Endorsement:** who invested
+**Key points:**
+- point 1
+- point 2
+**Layer:** Payment Infrastructure
+Source: https://...
 
-### 产品发布
+### Product Launches
 ...
 
-### 大V观点
+### Founder / VC Opinions
 ...
 
-## 本周速览
+## At a Glance
 
-| 日期 | 公司/人物 | 事件类型 | 一句话摘要 | 层级 |
-|------|----------|----------|-----------|------|
+| Date | Company / Person | Event Type | One-line Summary | Layer |
+|------|------------------|-----------|-------------------|-------|
 | ... | ... | ... | ... | ... |
 
-## 本周趋势
+## Weekly Takeaways
 1. ...
 2. ...
 ```
 
 ## Installation
 
-### Option A: 本地手动安装（Claude Code）
+### Option A: Manual local install (Claude Code)
 
 ```bash
-# 克隆到 ~/.claude/skills/
+# Copy into ~/.claude/skills/
 cp -r agentic-commerce-news ~/.claude/skills/
 
-# 验证 frontmatter
+# Verify frontmatter
 cat ~/.claude/skills/agentic-commerce-news/SKILL.md | head -5
 ```
 
-重启 Claude Code 会话后即可使用。
+Restart your Claude Code session to pick it up.
 
-### Option B: 从 .skill 包安装
+### Option B: Install from .skill package
 
 ```bash
-# 解压 .skill 文件到 skills 目录
+# Unzip the .skill bundle into the skills directory
 unzip agentic-commerce-news.skill -d ~/.claude/skills/
 ```
 
-### Option C: 发布到 ClawHub（OpenClaw 生态）
+### Option C: Publish to ClawHub (OpenClaw ecosystem)
 
 ```bash
-# 确保 openclaw CLI 已安装并登录
+# Ensure openclaw CLI is installed and logged in
 openclaw auth login
 
-# 发布
+# Publish
 openclaw publish ./agentic-commerce-news
 ```
 
-发布前请确保：
-- `SKILL.md` 的 `name` 字段和目录名一致
-- `description` 字段清晰描述触发场景
-- README.md 包含使用示例
+Before publishing, make sure:
+- The `name` field in `SKILL.md` matches the directory name
+- The `description` field clearly states when the skill should trigger
+- README.md includes usage examples
 
 ## Dependencies
 
-- Claude Code ≥ 1.0（需要 `WebSearch` 工具）
-- （可选）`CronCreate` 工具或 `openclaw cron` — 定时任务场景
-- **无需** API key 或外部依赖
+- Claude Code ≥ 1.0 (requires the `WebSearch` tool)
+- (Optional) `CronCreate` tool or `openclaw cron` — for scheduled execution
+- **No** API keys or external services required
 
 ## Customization
 
-如果你想调整搜索策略：
+To adjust the search strategy:
 
-1. 修改 `SKILL.md` 的 Phase 1 部分，增加/替换 WebSearch 查询模板
-2. 修改 Phase 3 的分类表，增加行业细分
-3. 修改 Phase 4 的卡片格式，调整输出风格
+1. Edit the Phase 1 section of `SKILL.md` to add or replace WebSearch query templates
+2. Edit the Phase 3 classification table to introduce new vertical segments
+3. Edit the Phase 4 card format to tweak output style
 
-如果你想调整时间窗口（比如改成 3 天或 30 天）：
+To change the time window (e.g., 3 days or 30 days instead of 7):
 
-- 修改 `## Time Window` 章节的 "past 7 days" 描述
-- 调整搜索查询中的 `this week` / `today` 等时间关键词
+- Update the `## Time Window` section's "past 7 days" phrasing
+- Adjust the `this week` / `today` keywords in the search queries
 
 ## License
 
-MIT — 可自由使用、修改、分发。
+MIT — free to use, modify, and distribute.

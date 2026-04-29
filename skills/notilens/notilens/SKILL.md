@@ -1,7 +1,7 @@
 ---
 name: notilens
-description: Send real-time push notifications to your phone or team via NotiLens during AI agent task execution — task lifecycle events, errors, completions, metric tracking, and custom alerts.
-version: 0.1.0
+description: Send real-time alerts to NotiLens from any script, app, or AI agent — task lifecycle events, errors, completions, metric tracking, and custom alerts.
+version: 0.2.0
 metadata:
   openclaw:
     requires:
@@ -15,9 +15,9 @@ metadata:
     homepage: https://www.notilens.com
 ---
 
-# NotiLens — Push Notifications for AI Agents
+# NotiLens — Real-time Alerts
 
-NotiLens delivers real-time push notifications to your phone or team when AI agents start tasks, make progress, hit errors, or finish. No polling — instant alerts.
+NotiLens delivers real-time push notifications to your phone or team when tasks start, make progress, hit errors, or finish. No polling — instant alerts.
 
 Get your `NOTILENS_TOKEN` and `NOTILENS_SECRET` from your topic settings at https://www.notilens.com.
 
@@ -39,7 +39,7 @@ Content-Type: application/json
 | `title`         | string  | yes      | Short heading shown on the notification |
 | `message`       | string  | yes      | Notification body text |
 | `type`          | string  | yes      | `info` \| `success` \| `warning` \| `urgent` |
-| `agent`         | string  | yes      | Name of the agent or workflow sending the event |
+| `agent`         | string  | yes      | Name identifying the source (app, script, agent, etc.) |
 | `task_id`       | string  | no       | Task label for grouping related events |
 | `run_id`        | string  | no       | Unique ID for this specific run, e.g. `run_1714000000000_a3f2` |
 | `is_actionable` | boolean | no       | Set `true` when the event needs human attention |
@@ -52,17 +52,17 @@ Content-Type: application/json
 
 ## Standard Events and When to Fire Them
 
-Use these canonical event names for consistency across agents:
+Use these canonical event names for consistency across sources:
 
 | Event              | `type`    | When to fire |
 |--------------------|-----------|--------------|
 | `task.queued`      | `info`    | Task is queued before a worker picks it up |
-| `task.started`     | `info`    | Agent begins executing the task |
+| `task.started`     | `info`    | Execution begins |
 | `task.progress`    | `info`    | Meaningful checkpoint during a long task |
 | `task.paused`      | `warning` | Task is pausing (waiting on I/O, rate limit, etc.) |
 | `task.waiting`     | `warning` | Task is blocked waiting for an external resource |
 | `task.resumed`     | `info`    | Task resumed after a pause or wait |
-| `task.loop`        | `warning` | Agent detected it is repeating the same step (loop risk) |
+| `task.loop`        | `warning` | Same step is repeating — possible loop |
 | `task.retry`       | `warning` | Task is being retried after a failure |
 | `task.error`       | `urgent`  | Non-fatal error occurred, task continues |
 | `task.completed`   | `success` | Task finished successfully |
@@ -71,11 +71,11 @@ Use these canonical event names for consistency across agents:
 | `task.cancelled`   | `warning` | Task was cancelled before completion |
 | `task.stopped`     | `info`    | Task was stopped intentionally (not an error) |
 | `task.terminated`  | `urgent`  | Task was forcibly terminated |
-| `input.required`   | `warning` | Agent needs human input to continue |
-| `input.approved`   | `success` | Human approved the agent's request |
-| `input.rejected`   | `warning` | Human rejected the agent's request |
-| `output.generated` | `success` | Agent produced output (file, report, result, etc.) |
-| `output.failed`    | `urgent`  | Agent failed to produce expected output |
+| `input.required`   | `warning` | Needs human input to continue |
+| `input.approved`   | `success` | Human approved the request |
+| `input.rejected`   | `warning` | Human rejected the request |
+| `output.generated` | `success` | Output produced (file, report, result, etc.) |
+| `output.failed`    | `urgent`  | Failed to produce expected output |
 
 You may also use any custom event name appropriate to your workflow (e.g. `order.placed`, `deploy.started`, `pipeline.complete`).
 
@@ -100,7 +100,7 @@ Attach numeric or string metrics to any event's `meta` object. NotiLens surfaces
 | Key            | Description |
 |----------------|-------------|
 | `retry_count`  | Number of retries so far |
-| `loop_count`   | Number of times a loop was detected |
+| `loop_count`   | Number of loop iterations |
 | `error_count`  | Number of non-fatal errors encountered |
 | `pause_count`  | Number of times the task paused |
 | `wait_count`   | Number of times the task waited |
@@ -131,7 +131,7 @@ example:       run_1714000000000_a3f2
 
 ## Loop Detection
 
-Fire `task.loop` when your agent detects it is repeating the same step without making progress. Include the loop count in `meta` so the user can see how many times the loop has occurred.
+Fire `task.loop` when the same step is repeating. Include the loop count in `meta`.
 
 ```bash
 curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
@@ -139,21 +139,18 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "task.loop",
-    "title": "my-agent | scraper | task.loop",
-    "message": "Same page returned 5 times in 60s — possible infinite loop.",
+    "title": "my-app | scraper | task.loop",
+    "message": "Same page returned 5 times — possible infinite loop.",
     "type": "warning",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "scraper",
     "run_id": "run_1714000000000_a3f2",
     "is_actionable": true,
     "meta": {
-      "loop_count": 5,
-      "loop_window_s": 60
+      "loop_count": 5
     }
   }'
 ```
-
-A common threshold: fire `task.loop` after the same logical step has been repeated 10+ times within 60 seconds.
 
 ## Examples
 
@@ -166,10 +163,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "task.queued",
-    "title": "my-agent | data-pipeline | task.queued",
+    "title": "my-app | data-pipeline | task.queued",
     "message": "Data pipeline job queued.",
     "type": "info",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "data-pipeline",
     "run_id": "run_1714000000000_a3f2"
   }'
@@ -180,10 +177,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "task.started",
-    "title": "my-agent | data-pipeline | task.started",
+    "title": "my-app | data-pipeline | task.started",
     "message": "Starting nightly data pipeline run.",
     "type": "info",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "data-pipeline",
     "run_id": "run_1714000000000_a3f2",
     "meta": { "queue_ms": 1240 }
@@ -195,10 +192,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "task.completed",
-    "title": "my-agent | data-pipeline | task.completed",
+    "title": "my-app | data-pipeline | task.completed",
     "message": "Pipeline finished. Processed 4,218 records in 47s.",
     "type": "success",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "data-pipeline",
     "run_id": "run_1714000000000_a3f2",
     "meta": {
@@ -219,10 +216,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "task.failed",
-    "title": "my-agent | data-pipeline | task.failed",
+    "title": "my-app | data-pipeline | task.failed",
     "message": "Database connection timed out after 3 retries.",
     "type": "urgent",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "data-pipeline",
     "run_id": "run_1714000000000_a3f2",
     "is_actionable": true,
@@ -245,10 +242,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "task.paused",
-    "title": "my-agent | api-sync | task.paused",
+    "title": "my-app | api-sync | task.paused",
     "message": "Rate limit hit — waiting 30s before resuming.",
     "type": "warning",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "api-sync",
     "run_id": "run_1714000000000_b7c1",
     "meta": { "pause_count": 1, "wait_reason": "rate_limit" }
@@ -260,10 +257,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "task.resumed",
-    "title": "my-agent | api-sync | task.resumed",
+    "title": "my-app | api-sync | task.resumed",
     "message": "Resuming after rate limit window.",
     "type": "info",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "api-sync",
     "run_id": "run_1714000000000_b7c1",
     "meta": { "pause_ms": 31200, "pause_count": 1 }
@@ -278,10 +275,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "input.required",
-    "title": "my-agent | approval needed",
-    "message": "Agent is about to delete 83 records. Please confirm.",
+    "title": "my-app | approval needed",
+    "message": "About to delete 83 records. Please confirm.",
     "type": "warning",
-    "agent": "my-agent",
+    "agent": "my-app",
     "is_actionable": true,
     "open_url": "https://dashboard.example.com/approve/123"
   }'
@@ -295,10 +292,10 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   -H "X-NOTILENS-KEY: $NOTILENS_SECRET" \
   -d '{
     "event": "output.generated",
-    "title": "my-agent | report-gen | output.generated",
+    "title": "my-app | report-gen | output.generated",
     "message": "Monthly report ready. 24 pages, 3 charts.",
     "type": "success",
-    "agent": "my-agent",
+    "agent": "my-app",
     "task_id": "report-gen",
     "download_url": "https://storage.example.com/reports/2026-04.pdf",
     "meta": {
@@ -309,22 +306,22 @@ curl -s -X POST "https://hook.notilens.com/webhook/$NOTILENS_TOKEN/send" \
   }'
 ```
 
-## Usage Guidance for Agents
+## Usage Guidance
 
 - **Always fire `task.started`** when beginning a significant task so the user knows work has begun.
 - **Fire `task.completed` or `task.failed`** at every terminal state — never leave a started task without a closing event.
 - **Generate a `run_id`** at task start (`run_{unix_ms}_{random_hex4}`) and include it on every event for that run.
 - **Include timing in `meta`** on terminal events (`task.completed`, `task.failed`, `task.timeout`) — `total_duration_ms` and `active_ms` at minimum.
 - **Include counters in `meta`** whenever they are non-zero: `retry_count`, `error_count`, `loop_count`, `pause_count`, `wait_count`.
-- **Use `input.required` with `is_actionable: true`** whenever the agent needs a human decision before continuing.
-- **Fire `task.loop`** if the same logical step repeats 10+ times in 60 seconds. Include `loop_count` and `loop_window_s` in `meta`.
+- **Use `input.required` with `is_actionable: true`** whenever a human decision is needed before continuing.
+- **Fire `task.loop`** when the same logical step is repeating. Include `loop_count` in `meta`.
 - **Keep `message` concise and informative** — include counts, durations, or key values (e.g. "Processed 1,240 rows in 3.2s — 2 errors").
 - **Use `task_id`** consistently across all events for the same logical task so NotiLens can group them.
 - **Do not spam** — avoid sending `task.progress` more than once every few seconds for fast-running tasks.
 
 ## Configuration
 
-Set these environment variables before running your agent:
+Set these environment variables before running:
 
 ```bash
 export NOTILENS_TOKEN=your_topic_token

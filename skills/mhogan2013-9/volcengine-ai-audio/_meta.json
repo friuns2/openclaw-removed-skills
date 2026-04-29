@@ -1,0 +1,11 @@
+{
+  "owner": "mhogan2013-9",
+  "slug": "volcengine-ai-audio",
+  "displayName": "Volcengine Ai Audio",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776230302034,
+    "commit": "https://github.com/openclaw/skills/commit/1bab7fde8237158b5f02dc75937933f5abc58711"
+  },
+  "history": []
+}

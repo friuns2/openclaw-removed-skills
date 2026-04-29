@@ -3,9 +3,15 @@
   "slug": "mirantis",
   "displayName": "Mirantis",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775560008453,
-    "commit": "https://github.com/openclaw/skills/commit/2e1830d1beaa52907d935f2dbfacc062a3bca80e"
+    "version": "1.0.1",
+    "publishedAt": 1776898962646,
+    "commit": "https://github.com/openclaw/skills/commit/5e17b0f5405d2ee9f42cda5e1a4bcdfdcd69269e"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775560008453,
+      "commit": "https://github.com/openclaw/skills/commit/2e1830d1beaa52907d935f2dbfacc062a3bca80e"
+    }
+  ]
 }

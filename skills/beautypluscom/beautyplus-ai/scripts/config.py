@@ -6,8 +6,8 @@ WAPI_ENDPOINT = "https://webapi-beautyplus.pixocial.com"
 # GID cache (persistent on disk, no TTL in this skill)
 GID_CACHE_FILE = "~/.cache/beautyplus/gid_cache.json"
 
-VERSION = "v1.0.0"
-USER_AGENT = "beautyplus-web-skill-v1.0.0"
+VERSION = "v1.0.1"
+USER_AGENT = "beautyplus-web-skill-v1.0.1"
 
 # HTTP(S) input download (run-task --input URL and resolve-input --url); overridable via env.
 URL_DOWNLOAD_MAX_BYTES_DEFAULT = 100 * 1024 * 1024
@@ -51,9 +51,6 @@ def url_download_timeout_tuple() -> tuple[int, int]:
 # Region map (overwritten by server config when fetched)
 REGIONS = {
 }
-
-# Invoke presets (overwritten by server config when fetched)
-INVOKE = {}
 
 # Optional app parameter for /ai/token_policy, can be overridden by /skill/config.json.
 TOKEN_POLICY_APP = None

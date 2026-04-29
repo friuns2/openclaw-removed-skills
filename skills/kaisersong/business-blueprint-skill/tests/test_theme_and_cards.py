@@ -174,6 +174,13 @@ class TestHtmlThemePropagation:
         assert 'background-size' in content
         assert '40px' in content
 
+    def test_html_viewer_defaults_to_freeflow_when_no_standard_template(self, tmp_path: Path) -> None:
+        target = tmp_path / "freeflow.html"
+        export_html_viewer(MINIMAL_BP, target)
+        content = target.read_text(encoding="utf-8")
+        assert "自由流布局" in content
+        assert "泳道流程" not in content
+
 
 # ─── Semantic Color Tests ─────────────────────────────────────────
 

@@ -1,0 +1,11 @@
+{
+  "owner": "earl-chen",
+  "slug": "chrome-markdown2pdf",
+  "displayName": "Chrome Markdown to PDF",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776332604851,
+    "commit": "https://github.com/openclaw/skills/commit/d8e933e54a0e983c679d783b4a01a9004aed0e97"
+  },
+  "history": []
+}

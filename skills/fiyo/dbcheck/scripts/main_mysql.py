@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
+#
+# Copyright (c) 2024 DBCheck Contributors
+# sdfiyon@gmail.com
+#
+# This file is part of DBCheck, an open-source database health inspection tool.
+# DBCheck is released under the MIT License.
+# See LICENSE or visit https://opensource.org/licenses/MIT for full license text.
+#
 from version import __version__ as VER
 
 # 磁盘采集时忽略的外接 ISO / Media 挂载点前缀
@@ -47,6 +55,154 @@ import shutil
 import paramiko
 
 importlib.reload(sys)
+
+# ── i18n setup for CLI ─────────────────────────────────────────────
+try:
+    from i18n import get_lang
+    _MYSQL_LANG = get_lang()
+except Exception:
+    _MYSQL_LANG = 'zh'
+
+def _t(key):
+    try:
+        from i18n import t as _tt
+        return _tt(key, _MYSQL_LANG)
+    except Exception:
+        return key
+
+# ── Markdown → Word 渲染器 ─────────────────────────────────────────────────
+import re
+
+def _render_markdown_to_doc(doc, text, default_size=11, ch8_prefix=False):
+    """
+    将 Markdown 文本渲染为 Word 段落，支持：
+    - **加粗**、*斜体*、`行内代码`
+    - ## 二级标题（ch8_prefix=True 时自动加 8.X 序号）→ Heading 2
+    - ### 三级标题 → Heading 3（无序号）
+    - - /*/• 列表项 → bullet paragraph
+    - > 引用块 → indented paragraph
+    - [text](url) → text（去掉链接）
+    """
+    CODE_FONT = 'Courier New'
+    lines = text.strip().split('\n')
+    in_code_block = False
+    code_buf = []
+    _h2_seq = 0  # 用于 ## 标题的 8.X 序号
+
+    def _add_run(para, md_text, size):
+        """解析 md_text 中的 **bold**、*italic*、`code` 并添加 Run"""
+        # 先处理行内代码（优先级最高）
+        parts = re.split(r'(``[^`]+``|`[^`]+`)', md_text)
+        for part in parts:
+            if re.match(r'`[^`]+`', part):
+                run = para.add_run(part.strip('`'))
+                run.font.name = CODE_FONT
+                run.font.size = Pt(size - 1)
+                run.font.color.rgb = None
+            else:
+                sub_parts = re.split(r'(\*\*[^*]+\*\*|\*[^*]+\*)', part)
+                for sp in sub_parts:
+                    if sp.startswith('**') and sp.endswith('**'):
+                        run = para.add_run(sp[2:-2])
+                        run.bold = True
+                        run.font.size = Pt(size)
+                    elif sp.startswith('*') and sp.endswith('*'):
+                        run = para.add_run(sp[1:-1])
+                        run.italic = True
+                        run.font.size = Pt(size)
+                    elif sp:
+                        # 处理 [text](url) 链接
+                        link_text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', sp)
+                        run = para.add_run(link_text)
+                        run.font.size = Pt(size)
+
+    for raw_line in lines:
+        line = raw_line.strip()
+
+        # 代码块开始/结束
+        if line.startswith('```'):
+            if not in_code_block:
+                in_code_block = True
+                code_buf = []
+                continue
+            else:
+                in_code_block = False
+                code_p = doc.add_paragraph()
+                code_p.style = 'Quote'
+                code_p.paragraph_format.left_indent = Cm(0.5)
+                for cl in code_buf:
+                    cp = code_p.add_run(cl)
+                    cp.font.name = CODE_FONT
+                    cp.font.size = Pt(9)
+                code_p.add_run().font.size = Pt(9)
+                code_buf = []
+                continue
+
+        if in_code_block:
+            code_buf.append(raw_line)
+            continue
+
+        # 空行 → 跳过（不生成空段落，避免多余间距）
+        if not line:
+            continue
+
+        # 二级标题
+        m = re.match(r'^##\s+(.+)', line)
+        if m:
+            heading_text = m.group(1)
+            if ch8_prefix:
+                _h2_seq += 1
+                heading_text = f'8.{_h2_seq} {heading_text}'
+            h = doc.add_heading(heading_text, level=2)
+            for run in h.runs:
+                run.font.size = Pt(12)
+            continue
+
+        # 三级标题
+        m = re.match(r'^###\s+(.+)', line)
+        if m:
+            h = doc.add_heading(m.group(1), level=3)
+            for run in h.runs:
+                run.font.size = Pt(11)
+            continue
+
+        # 一级标题（少见）
+        m = re.match(r'^#\s+(.+)', line)
+        if m:
+            h = doc.add_heading(m.group(1), level=1)
+            for run in h.runs:
+                run.font.size = Pt(13)
+            continue
+
+        # 引用块
+        if line.startswith('>'):
+            q = doc.add_paragraph()
+            q.paragraph_format.left_indent = Cm(1)
+            q.paragraph_format.first_line_indent = Cm(-0.5)
+            _add_run(q, line.lstrip('>').strip(), default_size)
+            continue
+
+        # 列表项
+        m = re.match(r'^([-*•])\s+(.+)', line)
+        if m:
+            bp = doc.add_paragraph(style='List Bullet')
+            _add_run(bp, m.group(2), default_size)
+            continue
+
+        # 序号列表
+        m = re.match(r'^\d+\.\s+(.+)', line)
+        if m:
+            op = doc.add_paragraph(style='List Number')
+            _add_run(op, m.group(1), default_size)
+            continue
+
+        # 水平线（---），直接跳过不渲染
+        if re.match(r'^[-*_]{3,}\s*$', line):
+            continue
+
+        # 普通段落
+        p = doc.add_paragraph()
+        _add_run(p, line, default_size)
 
 # 内置SQL模板配置
 SQL_TEMPLATES_CONTENT = """
@@ -143,7 +299,7 @@ class RemoteSystemInfoCollector:
                 self.ssh_client.connect(hostname=self.host, port=self.port, username=self.username, password=self.password, timeout=10)
             return True
         except Exception as e:
-            print(f"SSH连接失败 {self.host}:{self.port}: {e}")
+            print(_t("mysql_cli_remote_ssh_fail").format(host=self.host, port=self.port, e=e))
             return False
     
     def disconnect(self):
@@ -166,7 +322,7 @@ class RemoteSystemInfoCollector:
             error = stderr.read().decode('utf-8').strip()
             return output, error
         except Exception as e:
-            print(f"执行命令失败: {command}, 错误: {e}")
+            print(_t("mysql_cli_remote_cmd_fail").format(cmd=command, e=e))
             return "", str(e)
     
     def get_cpu_info(self):
@@ -209,7 +365,7 @@ class RemoteSystemInfoCollector:
                 'max_frequency': round(max_frequency, 2)
             }
         except Exception as e:
-            print(f"获取CPU信息失败: {e}")
+            print(_t("mysql_cli_remote_cpu_fail").format(e=e))
             return {}
     
     def get_memory_info(self):
@@ -255,9 +411,9 @@ class RemoteSystemInfoCollector:
                 return memory_info
             return {}
         except Exception as e:
-            print(f"获取内存信息失败: {e}")
+            print(_t("mysql_cli_remote_mem_fail").format(e=e))
             return {}
-    
+
     def get_disk_info(self):
         """
         通过远程 Shell 命令采集磁盘使用信息。
@@ -313,10 +469,10 @@ class RemoteSystemInfoCollector:
                         })
             return disk_data
         except Exception as e:
-            print(f"获取磁盘信息失败: {e}")
+            print(_t("mysql_cli_remote_disk_fail").format(e=e))
             return []
         except Exception as e:
-            print(f"获取磁盘信息失败: {e}")
+            print(_t("mysql_cli_remote_disk_fail").format(e=e))
             return []
 
     def get_mysql_datadir(self):
@@ -334,7 +490,7 @@ class RemoteSystemInfoCollector:
                 return {'datadir': output.strip()}
             return {}
         except Exception as e:
-            print(f"获取MySQL datadir失败: {e}")
+            print(_t("mysql_cli_remote_datadir_fail").format(e=e))
             return {}
 
     def get_system_info(self):
@@ -409,7 +565,7 @@ class LocalSystemInfoCollector:
                 'max_frequency': round(cpu_freq.max, 2) if cpu_freq else 'N/A'
             }
         except Exception as e:
-            print(f"获取CPU信息失败: {e}")
+            print(_t("mysql_cli_local_cpu_fail").format(e=e))
             return {}
 
     def get_memory_info(self):
@@ -437,12 +593,13 @@ class LocalSystemInfoCollector:
                 'swap_usage_percent': swap.percent
             }
         except Exception as e:
-            print(f"获取内存信息失败: {e}")
+            print("获取内存信息失败: %s" % str(e))
             return {}
 
     def get_disk_info(self):
         """
         采集本机磁盘分区信息，并额外检查常见 MySQL 数据目录。
+
 
         遍历所有已挂载分区（跳过 loop 设备和无文件系统类型的分区），
         同时检测 /var/lib/mysql、/data/mysql、/usr/local/mysql/data
@@ -481,8 +638,7 @@ class LocalSystemInfoCollector:
                         }
                     except Exception: pass
             return disk_info
-        except Exception as e:
-            print(f"获取磁盘信息失败: {e}")
+        except Exception:
             return {}
 
     def get_system_info(self):
@@ -634,7 +790,7 @@ def get_host_disk_usage():
                         })
         return disk_data
     except Exception as e:
-        print(f"获取磁盘使用率失败: {str(e)}")
+        print(_t("mysql_cli_host_disk_fail").format(e=str(e)))
         return []
 
 class WordTemplateGenerator:
@@ -649,6 +805,13 @@ class WordTemplateGenerator:
         self.doc = Document()
         self.inspector_name = inspector_name
         self._setup_document()
+
+    def _t(self, key):
+        try:
+            from i18n import t
+            return t(key, _MYSQL_LANG)
+        except Exception:
+            return key
 
     def _setup_document(self):
         """
@@ -685,52 +848,106 @@ class WordTemplateGenerator:
 
     def _add_title_page(self):
         """
-        生成报告封面页。
+        生成专业报告封面页。
 
-        包含标题（MySQL数据库健康巡检报告）和一个 8 行 2 列的信息表，
-        表格中使用 Jinja2 模板变量填充：数据库名称、服务器地址、MySQL版本、
-        服务器主机名、实例启动时间、巡检人员、服务器平台、报告生成时间。
+        布局：顶部 Logo + 标题区 → 装饰线 → 信息表格 → 底部页脚
+        表格中使用 Jinja2 模板变量填充。
         封面末尾插入分页符。
         """
-        title = self.doc.add_heading('MySQL数据库健康巡检报告', 0)
+        # ── Logo 图片 ──────────────────────────────────────────────
+        logo_path = os.path.join(os.path.dirname(__file__), 'dbcheck_logo.png')
+        if os.path.exists(logo_path):
+            logo_para = self.doc.add_paragraph()
+            logo_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            logo_run = logo_para.add_run()
+            logo_run.add_picture(logo_path, width=Cm(3.5))
+
+        # ── 报告标题 ────────────────────────────────────────────────
+        title = self.doc.add_paragraph()
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        title_run = title.runs[0]
-        title_run.font.size = Pt(20)
+        title_run = title.add_run(self._t('report.fallback_mysql_version').replace('MySQL Version', 'MySQL'))
+        title_run.font.size = Pt(28)
         title_run.font.bold = True
+        title_run.font.color.rgb = RGBColor(15, 75, 135)  # 深蓝色
+
+        # 副标题
+        subtitle = self.doc.add_paragraph()
+        subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        sub_run = subtitle.add_run('Database Health Inspection Report')
+        sub_run.font.size = Pt(14)
+        sub_run.font.color.rgb = RGBColor(100, 100, 100)
+        sub_run.font.italic = True
+
         self.doc.add_paragraph()
+
+        # ── 装饰分隔线 ─────────────────────────────────────────────
+        line_para = self.doc.add_paragraph()
+        line_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        line_run = line_para.add_run('━' * 50)
+        line_run.font.color.rgb = RGBColor(15, 75, 135)
+        line_run.font.size = Pt(8)
+
+        self.doc.add_paragraph()
+
+        # ── 信息表格 ────────────────────────────────────────────────
         table = self.doc.add_table(rows=8, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.autofit = False
-        table.columns[0].width = Cm(4)
-        table.columns[1].width = Cm(10)
-        cells = table.rows[0].cells
-        cells[0].text = "数据库名称"
-        cells[1].text = "{{ co_name[0]['CO_NAME'] }}"
-        cells = table.rows[1].cells
-        cells[0].text = "服务器地址"
-        cells[1].text = "{{ ip[0]['IP'] }}:{{ port[0]['PORT'] }}"
-        cells = table.rows[2].cells
-        cells[0].text = "MySQL版本"
-        cells[1].text = "{{ myversion[0]['version'] }}"
-        cells = table.rows[3].cells
-        cells[0].text = "服务器主机名"
-        cells[1].text = "{{ system_info.hostname }}"
-        cells = table.rows[4].cells
-        cells[0].text = "实例启动时间"
-        cells[1].text = "{% if instancetime %}{{ instancetime[0]['started_at'] }}{% else %}N/A{% endif %}"
-        cells = table.rows[5].cells
-        cells[0].text = "巡检人员"
-        cells[1].text = "{{ inspector_name }}"
-        cells = table.rows[6].cells
-        cells[0].text = "服务器平台"
-        cells[1].text = "{% if platform_info and platform_info|length > 0 %}{% for item in platform_info %}{% if item.variable_name == 'version_compile_os' %}{{ item.variable_value }}{% endif %}{% endfor %}{% else %}N/A{% endif %}"
-        cells = table.rows[7].cells
-        cells[0].text = "报告生成时间"
-        cells[1].text = "{{ report_time }}"
-        for row in table.rows:
-            for cell in row.cells:
-                cell.paragraphs[0].runs[0].font.size = Pt(11)
-                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
+        table.columns[0].width = Cm(4.5)
+        table.columns[1].width = Cm(11)
+
+        # 表头颜色
+        header_color = RGBColor(15, 75, 135)
+
+        info_data = [
+            (self._t('report.fallback_db_name'), "{{ co_name[0]['CO_NAME'] }}"),
+            (self._t('report.fallback_server_addr'), "{{ ip[0]['IP'] }}:{{ port[0]['PORT'] }}"),
+            (self._t('report.fallback_mysql_version'), "{{ myversion[0]['version'] }}"),
+            (self._t('report.fallback_hostname'), "{{ system_info.hostname }}"),
+            (self._t('report.fallback_start_time'), "{% if instancetime %}{{ instancetime[0]['started_at'] }}{% else %}N/A{% endif %}"),
+            (self._t('report.fallback_inspector'), "{{ inspector_name }}"),
+            (self._t('report.fallback_platform'), "{% if platform_info and platform_info|length > 0 %}{% for item in platform_info %}{% if item.variable_name == 'version_compile_os' %}{{ item.variable_value }}{% endif %}{% endfor %}{% else %}N/A{% endif %}"),
+            (self._t('report.fallback_report_time'), "{{ report_time }}"),
+        ]
+
+        for i, (label, value) in enumerate(info_data):
+            cells = table.rows[i].cells
+            cells[0].text = label
+            cells[1].text = value
+            # 标签列样式
+            para0 = cells[0].paragraphs[0]
+            para0.runs[0].font.size = Pt(11)
+            para0.runs[0].font.bold = True
+            para0.runs[0].font.color.rgb = header_color
+            para0.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            # 值列样式
+            para1 = cells[1].paragraphs[0]
+            para1.runs[0].font.size = Pt(11)
+            para1.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            # 交替背景色
+            if i % 2 == 0:
+                for cell in cells:
+                    from docx.oxml import OxmlElement
+                    shd = OxmlElement('w:shd')
+                    shd.set(qn('w:fill'), 'F0F5FA')
+                    cell._tc.get_or_add_tcPr().append(shd)
+
+        self.doc.add_paragraph()
+
+        # ── 底部页脚 ────────────────────────────────────────────────
+        footer_para = self.doc.add_paragraph()
+        footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        footer_run = footer_para.add_run('━' * 50)
+        footer_run.font.color.rgb = RGBColor(15, 75, 135)
+        footer_run.font.size = Pt(8)
+
+        footer_info = self.doc.add_paragraph()
+        footer_info.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        footer_info_run = footer_info.add_run('DBCheck Database Inspector  |  Powered by Intelligent Analysis')
+        footer_info_run.font.size = Pt(9)
+        footer_info_run.font.color.rgb = RGBColor(120, 120, 120)
+
         self.doc.add_page_break()
 
     def _add_summary_section(self):
@@ -740,27 +957,27 @@ class WordTemplateGenerator:
         包含一个 2 行 2 列的状态表（总体健康状态、发现问题数量）
         以及健康总结段落，所有值均使用 Jinja2 模板变量占位。
         """
-        heading = self.doc.add_heading('1. 健康状态概览', level=1)
+        heading = self.doc.add_heading('1. ' + self._t('report.fallback_health_overview'), level=1)
         heading_run = heading.runs[0]
         heading_run.font.size = Pt(14)
         heading_run.font.bold = True
         table = self.doc.add_table(rows=2, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(10)
         cells = table.rows[0].cells
-        cells[0].text = "总体健康状态"
+        cells[0].text = self._t('report.fallback_overall_health')
         cells[1].text = "{{ health_status }}"
         cells = table.rows[1].cells
-        cells[0].text = "发现问题数量"
-        cells[1].text = "{{ problem_count }} 个"
+        cells[0].text = self._t('report.fallback_issue_count')
+        cells[1].text = "{{ problem_count }}"
         for row in table.rows:
             for cell in row.cells:
                 cell.paragraphs[0].runs[0].font.size = Pt(11)
                 cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
         self.doc.add_paragraph()
-        p = self.doc.add_paragraph("健康总结: ")
+        p = self.doc.add_paragraph(self._t("report.fallback_health_summary") + ": ")
         p.add_run("{{ health_summary[0]['health_summary'] }}").bold = True
         p.runs[0].font.size = Pt(11)
         p.runs[1].font.size = Pt(11)
@@ -781,7 +998,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=2, cols=4)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         for i in range(4):
             table.columns[i].width = Cm(3.5)
@@ -807,7 +1024,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=2, cols=4)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         for i in range(4):
             table.columns[i].width = Cm(3.5)
@@ -833,7 +1050,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=1, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.columns[0].width = Cm(8)
@@ -874,7 +1091,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=5, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(10)
@@ -905,7 +1122,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=5, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(10)
@@ -936,7 +1153,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=5, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(10)
@@ -979,7 +1196,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=2, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(10)
@@ -1001,7 +1218,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=3, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(10)
@@ -1026,7 +1243,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=3, cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(10)
@@ -1063,7 +1280,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=1, cols=4)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(4)
         table.columns[1].width = Cm(3)
@@ -1096,7 +1313,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=1, cols=6)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(2)
         table.columns[1].width = Cm(2)
@@ -1148,7 +1365,7 @@ class WordTemplateGenerator:
         sub_heading_run.font.size = Pt(12)
         sub_heading_run.font.bold = True
         table = self.doc.add_table(rows=1, cols=5)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.autofit = False
         table.columns[0].width = Cm(3)
         table.columns[1].width = Cm(3)
@@ -1202,233 +1419,6 @@ class WordTemplateGenerator:
             p.add_run(note)
             p.runs[0].font.size = Pt(10)
 
-class SimpleCrypto:
-    """简单加密解密工具类 - 基于 XOR + SHA256 密钥 + Base64 编码实现对称加密"""
-
-    def __init__(self, secret="ODB_SECRET_2024"):
-        """
-        初始化加密工具。
-
-        :param secret: 加密用的原始密钥字符串，默认为 "ODB_SECRET_2024"，
-                       会被编码为 bytes 并通过 SHA256 派生实际加密密钥
-        """
-        self.secret = secret.encode('utf-8')
-
-    def _xor_encrypt_decrypt(self, data, key):
-        """
-        使用 XOR 对数据进行加密或解密（XOR 可逆，加解密使用同一方法）。
-
-        :param data: 需要处理的字节数据（bytes）
-        :param key: 加密/解密使用的密钥字节（bytes），循环重复使用
-        :return: 经过 XOR 处理后的字节数据（bytes）
-        """
-        key_len = len(key)
-        result = bytearray()
-        for i, byte in enumerate(data):
-            result.append(byte ^ key[i % key_len])
-        return bytes(result)
-
-    def encrypt(self, text):
-        """
-        加密文本字符串。
-
-        流程：UTF-8 编码 → SHA256 派生 32 字节密钥 → XOR 加密 → Base64 编码。
-
-        :param text: 需要加密的明文字符串
-        :return: Base64 编码后的密文字符串
-        """
-        data = text.encode('utf-8')
-        key = hashlib.sha256(self.secret).digest()[:32]
-        encrypted = self._xor_encrypt_decrypt(data, key)
-        return base64.b64encode(encrypted).decode('utf-8')
-
-    def decrypt(self, token):
-        """
-        解密 Base64 编码的密文字符串。
-
-        流程：Base64 解码 → SHA256 派生 32 字节密钥 → XOR 解密 → UTF-8 解码。
-
-        :param token: Base64 编码的密文字符串
-        :return: 解密后的明文字符串
-        :raises ValueError: 解密过程中发生异常时抛出，包含具体错误信息
-        """
-        try:
-            encrypted = base64.b64decode(token.encode('utf-8'))
-            key = hashlib.sha256(self.secret).digest()[:32]
-            decrypted = self._xor_encrypt_decrypt(encrypted, key)
-            return decrypted.decode('utf-8')
-        except Exception as e:
-            raise ValueError(f"解密失败: {e}")
-
-class LicenseValidator:
-    """许可证验证类 - 负责许可证文件的创建、读取、解密和有效性验证"""
-
-    def __init__(self):
-        """
-        初始化许可证验证器。
-
-        设置许可证文件路径（mysql_inspector.lic）、试用期天数（36500 天，约 100 年），
-        创建 SimpleCrypto 加密实例，并调用 _init_license_system() 确保许可证文件存在。
-        """
-        self.license_file = "mysql_inspector.lic"
-        self.trial_days = 36500
-        self.crypto = SimpleCrypto()
-        self._init_license_system()
-
-    def _parse_datetime(self, date_string):
-        """
-        解析日期时间字符串，兼容 Python 3.6 及以上版本。
-
-        优先使用 Python 3.7+ 的 datetime.fromisoformat()，
-        若不支持则手动解析 ISO 格式（含 'T' 分隔符）或空格分隔格式。
-
-        :param date_string: ISO 格式的日期时间字符串，如 "2026-01-01T00:00:00"
-        :return: datetime 对象；解析失败时返回当前时间
-        """
-        try:
-            return datetime.fromisoformat(date_string)
-        except AttributeError:
-            try:
-                if 'T' in date_string:
-                    date_part, time_part = date_string.split('T')
-                    year, month, day = map(int, date_part.split('-'))
-                    time_parts = time_part.split(':')
-                    hour, minute = int(time_parts[0]), int(time_parts[1])
-                    second = int(time_parts[2].split('.')[0]) if len(time_parts) > 2 else 0
-                    return datetime(year, month, day, hour, minute, second)
-                else:
-                    date_part, time_part = date_string.split(' ')
-                    year, month, day = map(int, date_part.split('-'))
-                    hour, minute, second = map(int, time_part.split(':'))
-                    return datetime(year, month, day, hour, minute, second)
-            except Exception as e:
-                print(f"日期解析错误: {e}")
-                return datetime.now()
-
-    def _format_datetime(self, dt):
-        """
-        将 datetime 对象格式化为 ISO 格式字符串（兼容 Python 3.6）。
-
-        :param dt: datetime 对象
-        :return: 格式为 "YYYY-MM-DDTHH:MM:SS" 的字符串
-        """
-        return dt.strftime('%Y-%m-%dT%H:%M:%S')
-
-    def _init_license_system(self):
-        """
-        初始化许可证系统。
-
-        检查许可证文件是否存在，若不存在则自动调用 _create_trial_license() 创建。
-        """
-        if not os.path.exists(self.license_file):
-            self._create_trial_license()
-
-    def _create_trial_license(self):
-        """
-        创建永久许可证文件（试用期为 100 年）。
-
-        许可证数据包含：类型（PERMANENT）、创建时间、过期时间、机器 ID、数字签名。
-        数据序列化为 JSON 后通过 SimpleCrypto 加密，写入 license_file。
-        若过期时间年份超过 9999 则自动修正为 9999-12-31 或 2099-12-31。
-        """
-        create_time = datetime.now()
-        try:
-            expire_time = create_time + timedelta(days=self.trial_days)
-            if expire_time.year > 9999:
-                expire_time = datetime(9999, 12, 31)
-                print("⚠️  许可证日期超出范围，已调整为9999-12-31")
-        except OverflowError:
-            expire_time = datetime(2099, 12, 31)
-            print("⚠️  许可证日期溢出，已调整为2099-12-31")
-        license_data = {
-            "type": "PERMANENT",
-            "create_time": self._format_datetime(create_time),
-            "expire_time": self._format_datetime(expire_time),
-            "machine_id": self._get_machine_id(),
-            "signature": self._generate_signature("PERMANENT")
-        }
-        encrypted_data = self.crypto.encrypt(json.dumps(license_data))
-        with open(self.license_file, 'w') as f:
-            f.write(encrypted_data)
-
-    def _get_machine_id(self):
-        """
-        获取当前主机的唯一标识符。
-
-        通过组合主机名、操作系统名称和版本号生成字符串，
-        再取 MD5 哈希的前 16 位作为机器 ID。
-
-        :return: 16 位十六进制机器 ID 字符串；获取失败时返回 "unknown_machine"
-        """
-        try:
-            machine_info = f"{platform.node()}-{platform.system()}-{platform.release()}"
-            return hashlib.md5(machine_info.encode()).hexdigest()[:16]
-        except:
-            return "unknown_machine"
-
-    def _generate_signature(self, license_type):
-        """
-        根据许可证类型生成数字签名。
-
-        签名数据由许可证类型、当前日期和固定密钥拼接而成，
-        使用 SHA256 哈希生成最终签名。
-
-        :param license_type: 许可证类型字符串，"PERMANENT" 或其他值
-        :return: SHA256 哈希的十六进制字符串
-        """
-        if license_type == "PERMANENT":
-            key = "ODB2024PERM"
-        else:
-            key = "ODB2024TRL"
-        signature_data = f"{license_type}-{datetime.now().strftime('%Y%m%d')}-{key}"
-        return hashlib.sha256(signature_data.encode()).hexdigest()
-
-    def _verify_signature(self, license_data):
-        """
-        验证许可证数据中的数字签名是否有效。
-
-        重新生成预期签名并与许可证中的签名对比。
-
-        :param license_data: 解密后的许可证数据字典，需包含 "type" 和 "signature" 字段
-        :return: 签名匹配返回 True，不匹配或发生异常返回 False
-        """
-        try:
-            expected_signature = self._generate_signature(license_data["type"])
-            return license_data["signature"] == expected_signature
-        except:
-            return False
-
-    def validate_license(self):
-        """
-        验证许可证文件的完整性和有效性。
-
-        依次执行：文件存在性检查 → 读取并解密 → 签名验证 → 过期时间检查。
-
-        :return: 三元组 (is_valid, message, remaining_days)
-                 - is_valid (bool): 许可证是否有效
-                 - message (str): 验证结果描述信息
-                 - remaining_days (int): 剩余有效天数（永久版固定返回 99999）
-        """
-        try:
-            if not os.path.exists(self.license_file):
-                return False, "许可证文件不存在", 0
-            with open(self.license_file, 'r') as f:
-                encrypted_data = f.read().strip()
-            decrypted_data = self.crypto.decrypt(encrypted_data)
-            license_data = json.loads(decrypted_data)
-            if not self._verify_signature(license_data):
-                return False, "许可证签名无效", 0
-            expire_time = self._parse_datetime(license_data["expire_time"])
-            remaining_days = (expire_time - datetime.now()).days
-            if remaining_days < 0:
-                return False, "许可证已过期", 0
-            license_type = license_data.get("type", "PERMANENT")
-            if license_type == "PERMANENT":
-                return True, "永久版许可证有效", 99999
-            else:
-                return True, f"{license_type}版许可证有效，剩余 {remaining_days} 天", remaining_days
-        except Exception as e:
-            return False, f"许可证验证失败: {str(e)}", 0
 
 def getlogger():
     """
@@ -1518,8 +1508,8 @@ class ExcelTemplateManager:
             for col, width in enumerate(column_widths, 1):
                 ws.column_dimensions[openpyxl.utils.get_column_letter(col)].width = width
             example_data = [
-                [1, "生产数据库", "192.168.1.100", 3306, "root", "password", "mysql",
-                 "192.168.1.100", 22, "root", "ssh_password", "/path/to/private_key", "主数据库"],
+                [1, "生产数据库", "localhost", 3306, "root", "password", "mysql",
+                 "localhost", 22, "root", "ssh_password", "/path/to/private_key", "主数据库"],
                 [2, "测试数据库", "localhost", 3306, "test_user", "test123", "test_db",
                  "", 22, "", "", "", "测试环境"],
             ]
@@ -1676,50 +1666,50 @@ def input_db_info():
     :return: 包含数据库连接信息的字典（含 SSH 信息字段）；
              用户放弃输入或连接验证失败且不重试时返回 None
     """
-    print("\n请输入数据库连接信息:")
-    host = input("主机地址 [localhost]: ").strip() or "localhost"
-    port_input = input("端口 [3306]: ").strip()
+    print("\n" + _t("cli_db_info_title"))
+    host = input(_t("cli_db_host").format(default="localhost")).strip() or "localhost"
+    port_input = input(_t("cli_db_port").format(default=3306)).strip()
     if not port_input:
         port = 3306
     else:
         try:
             port = int(port_input)
         except ValueError:
-            print("⚠️  端口输入无效，使用默认值3306")
+            print("⚠️  " + _t("cli_db_port_invalid").format(default=3306))
             port = 3306
-    user = input("用户名 [root]: ").strip() or "root"
+    user = input(_t("cli_db_user").format(default="root")).strip() or "root"
     import getpass
-    password = getpass.getpass("密码: ").strip()
-    db_name = input("数据库名称(用于报告标识) [MySQL_Server]: ").strip() or "MySQL_Server"
-    print("\n🔐 系统信息收集配置:")
-    print("如需获取系统信息（CPU、内存、磁盘等），请配置SSH连接")
-    enable_ssh = input("是否配置SSH连接? (y/n) [n]: ").strip().lower()
+    password = getpass.getpass(_t("cli_db_password")).strip()
+    db_name = input(_t("cli_db_name").format(default="MySQL_Server")).strip() or "MySQL_Server"
+    print("\n" + _t("cli_ssh_config_title"))
+    print(_t("cli_ssh_config_note"))
+    enable_ssh = input(_t("cli_ssh_enable")).strip().lower()
     ssh_info = {}
     if enable_ssh in ['y', 'yes']:
-        ssh_host = input(f"SSH主机地址 [{host}]: ").strip() or host
-        ssh_port_input = input("SSH端口 [22]: ").strip()
+        ssh_host = input(_t("cli_ssh_host").format(default=host)).strip() or host
+        ssh_port_input = input(_t("cli_ssh_port").format(default=22)).strip()
         if not ssh_port_input:
             ssh_port = 22
         else:
             try:
                 ssh_port = int(ssh_port_input)
             except ValueError:
-                print("⚠️  SSH端口输入无效，使用默认值22")
+                print("⚠️  " + _t("cli_ssh_port_invalid").format(default=22))
                 ssh_port = 22
-        ssh_user = input("SSH用户名 [root]: ").strip() or "root"
-        auth_choice = input("SSH认证方式: 1.密码 2.密钥文件 [1]: ").strip()
+        ssh_user = input(_t("cli_ssh_user").format(default="root")).strip() or "root"
+        auth_choice = input(_t("cli_ssh_auth_method")).strip()
         if auth_choice == '2':
-            ssh_key_file = input("SSH私钥文件路径: ").strip()
+            ssh_key_file = input(_t("cli_ssh_key_path")).strip()
             ssh_password = ""
             if not os.path.exists(ssh_key_file):
-                print(f"❌ 密钥文件不存在: {ssh_key_file}")
-                retry = input("是否重新输入? (y/n) [y]: ").strip().lower()
+                print(_t("cli_ssh_key_not_exist").format(path=ssh_key_file))
+                retry = input(_t("cli_retry_yes")).strip().lower()
                 if retry in ['', 'y', 'yes']:
                     return input_db_info()
                 else:
                     ssh_key_file = ""
         else:
-            ssh_password = getpass.getpass("SSH密码: ").strip()
+            ssh_password = getpass.getpass(_t("cli_ssh_password")).strip()
             ssh_key_file = ""
         ssh_info = {
             'ssh_host': ssh_host,
@@ -1728,20 +1718,20 @@ def input_db_info():
             'ssh_password': ssh_password,
             'ssh_key_file': ssh_key_file
         }
-    print(f"\n🔍 正在验证MySQL连接 {host}:{port}...")
+    print("\n🔍 " + _t("mysql_cli_verifying_mysql").format(host=host, port=port))
     try:
         conn = pymysql.connect(host=host, port=port, user=user, password=password, charset='utf8mb4', connect_timeout=10)
         conn.close()
-        print(f"✅ 成功连接到MySQL {host}:{port}")
+        print("✅ " + _t("mysql_cli_mysql_success").format(host=host, port=port))
     except Exception as e:
-        print(f"❌ MySQL连接失败: {e}")
-        retry = input("是否重新输入? (y/n) [n]: ").strip().lower()
+        print("❌ " + _t("mysql_cli_mysql_fail").format(e=e))
+        retry = input(_t("mysql_cli_retry_no")).strip().lower()
         if retry == 'y':
             return input_db_info()
         else:
             return None
     if ssh_info:
-        print(f"🔍 正在验证SSH连接 {ssh_info['ssh_host']}:{ssh_info['ssh_port']}...")
+        print("\n" + _t("mysql_cli_verifying_ssh").format(host=ssh_info["ssh_host"], port=ssh_info["ssh_port"]))
         try:
             collector = RemoteSystemInfoCollector(
                 host=ssh_info['ssh_host'], port=ssh_info['ssh_port'], username=ssh_info['ssh_user'],
@@ -1749,12 +1739,12 @@ def input_db_info():
                 key_file=ssh_info['ssh_key_file'] if ssh_info['ssh_key_file'] else None
             )
             if collector.connect():
-                print(f"✅ 成功连接到SSH {ssh_info['ssh_host']}:{ssh_info['ssh_port']}")
+                print("\u2705 " + _t("cli_ssh_success"))
                 collector.disconnect()
             else:
-                print(f"❌ SSH连接失败")
+                print("\u274c " + _t("cli_ssh_fail_no_msg"))
         except Exception as e:
-            print(f"❌ SSH连接失败: {e}")
+            print("\u274c " + _t("cli_ssh_fail").format(e=e))
     db_info = {'name': db_name, 'ip': host, 'port': port, 'user': user, 'password': password}
     db_info.update(ssh_info)
     return db_info
@@ -1770,19 +1760,19 @@ def show_main_menu():
     :return: 用户选择的菜单项字符串（"1"/"2"/"3"/"4"）
     """
     print("\n" + "=" * 60)
-    print("            DBCheck - MySQL 巡检工具 " + VER)
+    print("            " + _t("mysql_cli_banner") + " " + VER)
     print("=" * 60)
-    print("1. 单机巡检")
-    print("2. 批量巡检(从Excel导入)")
-    print("3. 创建Excel配置模板")
-    print("4. 退出")
+    print(_t("mysql_cli_menu_item1"))
+    print(_t("mysql_cli_menu_item2"))
+    print(_t("mysql_cli_menu_item3"))
+    print(_t("mysql_cli_menu_item4"))
     print("=" * 60)
     while True:
-        choice = input("请选择巡检模式 (1-4): ").strip()
+        choice = input(_t("mysql_cli_choose_prompt")).strip()
         if choice in ['1', '2', '3', '4']:
             return choice
         else:
-            print("❌ 无效选择，请输入1-4之间的数字")
+            print("\u274c " + _t("mysql_cli_invalid_choice"))
 
 class getData(object):
     """数据采集类 - 负责连接 MySQL 数据库并执行全量巡检 SQL，同步采集系统信息和风险分析"""
@@ -1802,7 +1792,6 @@ class getData(object):
         :param ssh_info: SSH 连接信息字典（可选），含 ssh_host、ssh_port、ssh_user、
                          ssh_password、ssh_key_file 字段；为空则使用本地采集模式
         """
-        self.label = str(infos.label)
         self.H = ip
         self.P = int(port)
         self.user = user
@@ -1814,6 +1803,14 @@ class getData(object):
             print(f"❌ 数据库连接失败: {e}")
             self.conn_db2 = None
         self.context = {}
+
+    def _t(self, key):
+        try:
+            from i18n import t
+            return t(key, _MYSQL_LANG)
+        except Exception:
+            return key
+
     def print_progress_bar(self, iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
         """
         在终端打印文字版进度条（覆盖当前行）。
@@ -1847,7 +1844,7 @@ class getData(object):
                         传入空字符串或文件路径时从文件加载
         :return: 包含所有巡检结果的 context 字典；连接异常或读取模板失败时返回当前已有内容
         """
-        print("\n开始巡检...")
+        print("\n" + _t("mysql_cli_starting"))
         total_steps = 15
         current_step = 0
         cfg = configparser.RawConfigParser()
@@ -1881,18 +1878,18 @@ class getData(object):
             mysql_version = version_result[0] if version_result else "Unknown"
             cursor_ver.close()
             self.context.update({"myversion": [{'version': mysql_version}]})
-            self.context.update({"health_summary": [{'health_summary': '运行良好'}]})
+            self.context.update({"health_summary": [{'health_summary': self._t("report.running_ok")}]})
         except Exception as e:
             print(f"❌ 获取版本信息失败: {e}")
             self.context.update({"myversion": [{'version': 'Unknown'}]})
-            self.context.update({"health_summary": [{'health_summary': '运行良好'}]})
+            self.context.update({"health_summary": [{'health_summary': self._t("report.running_ok")}]})
         try:
             cursor2 = self.conn_db2.cursor()
             variables_items = list(cfg.items("variables"))
             for i, (name, stmt) in enumerate(variables_items):
                 try:
                     current_step = int((i / len(variables_items)) * total_steps)
-                    self.print_progress_bar(current_step, total_steps, prefix='巡检进度:', suffix=f'步骤 {i+1}/{len(variables_items)}')
+                    self.print_progress_bar(current_step, total_steps, prefix=_t('mysql_cli_progress_prefix'), suffix=_t('mysql_cli_progress_step').format(i=i+1, total=len(variables_items)))
                     cursor2.execute(stmt.replace('\n', ' ').replace('\r', ' '))
                     result = [dict((cursor2.description[i][0], value) for i, value in enumerate(row)) for row in cursor2.fetchall()]
                     self.context[name] = result
@@ -1906,17 +1903,17 @@ class getData(object):
             if 'cursor2' in locals():
                 cursor2.close()
         current_step = total_steps - 2
-        self.print_progress_bar(current_step, total_steps, prefix='巡检进度:', suffix='收集系统信息')
+        self.print_progress_bar(current_step, total_steps, prefix=_t('mysql_cli_progress_prefix'), suffix=_t('mysql_cli_sysinfo_suffix'))
         try:
             if self.ssh_info and self.ssh_info.get('ssh_host'):
-                print(f"\n🔍 通过SSH收集系统信息: {self.ssh_info['ssh_host']}")
+                print("\n🔍 " + _t("cli_ssh_collecting").format(host=self.ssh_info['ssh_host']))
                 collector = RemoteSystemInfoCollector(
                     host=self.ssh_info['ssh_host'], port=self.ssh_info.get('ssh_port', 22),
                     username=self.ssh_info.get('ssh_user', 'root'),
                     password=self.ssh_info.get('ssh_password'), key_file=self.ssh_info.get('ssh_key_file')
                 )
             else:
-                print(f"\n🔍 收集本地系统信息")
+                print("\n🔍 " + _t("mysql_cli_local_collecting"))
                 collector = LocalSystemInfoCollector()
             system_info = collector.get_system_info()
             if isinstance(system_info.get('disk'), dict):
@@ -1933,16 +1930,16 @@ class getData(object):
                 ssh_datadir = system_info.get('mysql_datadir', '')
                 if ssh_datadir:
                     self.context['datadir'] = [{'Value': ssh_datadir}]
-                    print(f"\n✅ 通过SSH获取MySQL datadir: {ssh_datadir}")
+                    print("\n" + _t("mysql_cli_datadir_found").format(path=ssh_datadir))
         except Exception as e:
-            print(f"\n❌ 收集系统信息失败: {e}")
+            print("\n❌ " + _t("mysql_cli_sysinfo_fail").format(e=e))
             self.context.update({"system_info": {
                 'hostname': '未知', 'platform': '未知', 'boot_time': '未知',
                 'cpu': {}, 'memory': {},
                 'disk_list': [{'device': '/dev/sda1', 'mountpoint': '/', 'fstype': 'ext4', 'total_gb': 0, 'used_gb': 0, 'free_gb': 0, 'usage_percent': 0}]
             }})
         current_step = total_steps - 1
-        self.print_progress_bar(current_step, total_steps, prefix='巡检进度:', suffix='分析风险和建议')
+        self.print_progress_bar(current_step, total_steps, prefix=_t('mysql_cli_progress_prefix'), suffix=_t('mysql_cli_risk_suffix'))
         self.context.update({"auto_analyze": []})
         try:
             # 使用增强智能分析模块（15+ 条规则）
@@ -1989,13 +1986,53 @@ class getData(object):
             )
             if advisor.enabled:
                 label = self.context.get('co_name', [{}])[0].get('CO_NAME', 'MySQL')
-                print(f"\n🤖 正在调用 AI 诊断（{advisor.backend} / {advisor.model}）...")
-                ai_advice = advisor.diagnose('mysql', label, self.context, issues)
+                print("\n🤖 " + _t("mysql_cli_ai_calling").format(backend=advisor.backend, model=advisor.model))
+                ai_advice = advisor.diagnose('mysql', label, self.context, issues, lang=_MYSQL_LANG)
                 self.context['ai_advice'] = ai_advice
         except Exception as e:
+            print(f"AI 诊断异常: {e}")
+            import traceback; traceback.print_exc()
             self.context['ai_advice'] = ''
 
-        self.print_progress_bar(total_steps, total_steps, prefix='巡检进度:', suffix='完成')
+        # ── 慢查询深度分析（P2）──────────────────────────────
+        self.context['slow_query_result'] = None
+        try:
+            from slow_query_analyzer import get_slow_query_analyzer, MySQLSlowQueryAnalyzer
+            if self.conn_db2:
+                analyzer = MySQLSlowQueryAnalyzer()
+                ai_advisor = None
+                # 尝试复用已有的 AI advisor（如果启用了）
+                try:
+                    from analyzer import AIAdvisor
+                    import json as _json
+                    cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_config.json')
+                    ai_cfg = {}
+                    if os.path.exists(cfg_path):
+                        with open(cfg_path, 'r', encoding='utf-8') as f:
+                            ai_cfg = _json.load(f)
+                    ai_advisor = AIAdvisor(
+                        backend=ai_cfg.get('backend'),
+                        api_key=ai_cfg.get('api_key'),
+                        api_url=ai_cfg.get('api_url'),
+                        model=ai_cfg.get('model')
+                    )
+                except Exception:
+                    pass
+                print("\n\U0001f50d " + _t('mysql_cli_slow_query_analyzing'))
+                result = analyzer.analyze(self.conn_db2, ai_advisor=ai_advisor, lang=_MYSQL_LANG)
+                self.context['slow_query_result'] = result.to_dict()
+                if result.is_empty():
+                    print("  \u2139\ufe0f  " + _t('mysql_cli_slow_query_ps_unavailable'))
+                else:
+                    print("  \u2705  " + _t('mysql_cli_slow_query_ok').format(
+                        count=len(result.top_sql_by_latency)))
+        except ImportError:
+            # slow_query_analyzer 模块不存在时静默跳过
+            pass
+        except Exception as e:
+            print(f"\u26a0\ufe0f 慢查询深度分析失败: {e}")
+
+        self.print_progress_bar(total_steps, total_steps, prefix=_t('mysql_cli_progress_prefix'), suffix=_t('mysql_cli_complete_suffix'))
         return self.context
 
 class saveDoc(object):
@@ -2014,6 +2051,39 @@ class saveDoc(object):
         self.ofile = ofile
         self.ifile = ifile
         self.inspector_name = inspector_name
+        try:
+            from i18n import get_lang
+            self._lang = get_lang()
+        except Exception:
+            self._lang = 'zh'
+
+    def _t(self, key):
+        try:
+            from i18n import t
+            return t(key, self._lang)
+        except Exception:
+            return key
+
+    def _set_cell_bg(self, cell, hex_color):
+        from docx.oxml.ns import nsdecls
+        from docx.oxml import parse_xml
+        try:
+            shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>')
+            cell._tc.get_or_add_tcPr().append(shading)
+        except Exception:
+            pass
+
+    def _set_table_header(self, table, header_bg='336699'):
+        """设置表格表头行样式（蓝色背景+白色粗体居中），需在表头文本设置完成后调用"""
+        hdr = table.rows[0].cells
+        for cell in hdr:
+            self._set_cell_bg(cell, header_bg)
+            for para in cell.paragraphs:
+                for run in para.runs:
+                    run.bold = True
+                    run.font.color.rgb = RGBColor(255, 255, 255)
+                    run.font.size = Pt(9)
+                para.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     def contextsave(self):
         """
@@ -2033,7 +2103,7 @@ class saveDoc(object):
             for key in required_keys:
                 if key not in self.context:
                     if key == 'health_summary':
-                        self.context[key] = [{'health_summary': '运行良好'}]
+                        self.context[key] = [{'health_summary': self._t("report.running_ok")}]
                     elif key == 'auto_analyze':
                         self.context[key] = []
                     elif key == 'myversion':
@@ -2041,7 +2111,7 @@ class saveDoc(object):
                     elif key == 'system_info':
                         self.context[key] = {}
                     else:
-                        self.context[key] = [{'placeholder': '数据缺失'}]
+                        self.context[key] = [{'placeholder': self._t("report.data_missing")}]
 
             if 'disk_list' not in self.context['system_info'] or not self.context['system_info']['disk_list']:
                 self.context['system_info']['disk_list'] = [{
@@ -2060,13 +2130,13 @@ class saveDoc(object):
             self.context.update({"problem_count": problem_count})
 
             if problem_count == 0:
-                health_status = "优秀"
+                health_status = self._t("report.health_excellent")
             elif problem_count <= 3:
-                health_status = "良好"
+                health_status = self._t("report.health_good")
             elif problem_count <= 6:
-                health_status = "一般"
+                health_status = self._t("report.health_fair")
             else:
-                health_status = "需关注"
+                health_status = self._t("report.health_attention")
             self.context.update({"health_status": health_status})
 
             # 尝试使用 docxtpl 正常渲染
@@ -2085,7 +2155,8 @@ class saveDoc(object):
                 cutoff_idx = None
                 for i, para in enumerate(doc2.paragraphs):
                     t = para.text.strip()
-                    if t.startswith('7.') and '报告说明' in t:
+                    # 找到旧的"7. 报告说明"段落位置（通过检测第7章标题模式）
+                    if t.startswith('7.') and (self._t('report.notes_chapter') in t or '报告说明' in t or 'Report Notes' in t):
                         cutoff_idx = i
                         break
                 if cutoff_idx is not None:
@@ -2094,35 +2165,167 @@ class saveDoc(object):
                     for para in list(body.iterchildren())[cutoff_idx:]:
                         body.remove(para)
 
+                # 翻译 auto_analyze 中的中文值 -> 英文翻译
+                _MYSQL_RISK_KEY_MAP = {
+                    '高风险': 'report.risk_high',
+                    '中风险': 'report.risk_mid',
+                    '低风险': 'report.risk_low',
+                    '建议': 'report.risk_suggest',
+                }
+                _MYSQL_PRIORITY_MAP = {
+                    '高': 'report.severity_high',
+                    '中': 'report.severity_mid',
+                    '低': 'report.severity_low',
+                }
+                _MYSQL_OWNER_MAP = {
+                    'DBA': 'report.pg_fallback_owner_dba',
+                    '系统管理员': 'report.pg_fallback_owner_sysadmin',
+                }
+                _MYSQL_COL1_MAP = {
+                    '连接数使用率': 'Connection Usage Rate',
+                    '长时间运行的 SQL': 'Long Running SQL',
+                    '慢查询日志未开启': 'Slow Query Log Not Enabled',
+                    'binlog 未开启': 'binlog Not Enabled',
+                    'binlog 永不过期': 'binlog Never Expires',
+                    'InnoDB 缓冲池偏小': 'InnoDB Buffer Pool Too Small',
+                    '查询缓存已开启（不建议）': 'Query Cache Enabled (Not Recommended)',
+                    '表锁等待比例过高': 'High Table Lock Wait Ratio',
+                    '异常中止连接数较多': 'Many Aborted Connections',
+                    'root 用户允许所有主机连接': 'Root User Allows Remote Connections',
+                    '复制线程异常': 'Replication Thread Abnormal',
+                    '主从复制延迟过高': 'Replica Lag Too High',
+                    '表缓存命中率低': 'Low Table Cache Hit Rate',
+                    '系统内存使用率': 'System Memory Usage',
+                    'innodb_flush_log_at_trx_commit=0': 'innodb_flush_log_at_trx_commit=0',
+                    '数据库字符集非 UTF8': 'Database Charset Not UTF8',
+                }
+                _MYSQL_COL3_DESC_MAP = {
+                    '历史最大连接数使用率高达 ': 'Historical max connection usage rate reached ',
+                    '（': ' (',
+                    '），极有可能出现拒绝连接': '), very likely to reject new connections',
+                    '连接数使用率达 ': 'Connection usage rate reached ',
+                    '），建议提前关注': '), recommend proactive monitoring',
+                    '发现 ': 'Found ',
+                    ' 个执行超过 60 秒的 SQL，可能导致锁等待和性能下降': ' SQL(s) running over 60 seconds, may cause lock waits and performance degradation',
+                    '个执行超过 60 秒的 SQL，可能导致锁等待和性能下降': ' SQL(s) running over 60 seconds, may cause lock waits and performance degradation',
+                    '慢查询日志已关闭，无法追踪性能问题，建议开启': 'Slow query log is disabled, cannot trace performance issues, recommend enabling',
+                    'binlog 未开启，无法实现基于时间点的数据恢复，生产环境建议开启': 'binlog is not enabled, point-in-time recovery not possible, recommend enabling in production',
+                    'binlog 未开启': 'binlog is not enabled',
+                    'expire_logs_days=0 表示 binlog 永不自动清理，可能导致磁盘耗尽': 'expire_logs_days=0 means binlog never auto-cleanup, may exhaust disk space',
+                    'innodb_buffer_pool_size 仅 ': 'innodb_buffer_pool_size is only ',
+                    '，建议设置为物理内存的 50%~70%': ', recommend setting to 50%~70% of physical memory',
+                    'query_cache 在高并发场景下会造成严重锁竞争，MySQL 8.0 已彻底移除，建议关闭': 'query_cache causes severe lock contention in high concurrency scenarios, removed in MySQL 8.0, recommend disabling',
+                    '表锁等待比例达 ': 'Table lock wait ratio reached ',
+                    '（等待次数 ': ' (wait count ',
+                    '），存在大量锁竞争': '), heavy lock contention exists',
+                    '累计中止连接数达 ': 'Cumulative aborted connections reached ',
+                    '，可能存在连接池配置异常或网络问题': ', possible connection pool misconfiguration or network issues',
+                    '数据库用户 ': 'Database user ',
+                    ' 未设置密码，存在严重安全风险': ' has no password set, serious security risk',
+                    "root@'%' 允许从任意主机登录，存在严重安全风险，建议限制为本地": "root@'%' allows login from any host, serious security risk, recommend restricting to localhost",
+                    '复制状态异常：IO线程=': 'Replication status abnormal: IO thread=',
+                    '，SQL线程=': ', SQL thread=',
+                    '从库延迟 ': 'Replica lag ',
+                    ' 秒，数据同步滞后，读操作可能读到旧数据': ' seconds, data sync lagging, read operations may get stale data',
+                    '已打开表数(': 'Opened tables (',
+                    ') 接近 table_open_cache(': ') close to table_open_cache(',
+                    '），可能频繁开关文件句柄': '), may frequently open/close file handles',
+                    '系统内存使用率 ': 'System memory usage ',
+                    '，超过 90% 可能触发 OOM Killer': ', over 90% may trigger OOM Killer',
+                    '，建议关注内存增长趋势': ', recommend monitoring memory growth trend',
+                    '磁盘 ': 'Disk ',
+                    ' 使用率 ': ' usage ',
+                    '，可能导致数据库写入失败': ', may cause database write failures',
+                    '，建议及时清理或扩容': ', recommend cleaning up or expanding capacity',
+                    '设置为 0 时 MySQL 崩溃可能丢失最多 1 秒的事务，生产环境建议设为 1': 'Setting to 0 may lose up to 1 second of transactions when MySQL crashes, recommend setting to 1 in production',
+                    '当前字符集为 ': 'Current charset is ',
+                    '，建议统一使用 utf8mb4 以支持 emoji 和多语言': ', recommend using utf8mb4 for emoji and multilingual support',
+                }
+                _MYSQL_FIX_SQL_DESC_MAP = {
+                    '-- 需在 my.cnf 中添加：': '-- Need to add in my.cnf:',
+                    '-- 然后重启 MySQL': '-- Then restart MySQL',
+                    '-- 建议修改 my.cnf：': '-- Recommend editing my.cnf:',
+                    '-- 根据实际内存调整': '-- Adjust based on actual memory',
+                    '# 根据实际内存调整': '# Adjust based on actual memory',
+                    '-- 或在线调整（MySQL 5.7+）：': '-- Or adjust online (MySQL 5.7+):',
+                    '-- 4G': '-- 4G',
+                    '-- 排查锁等待来源：': '-- Investigate lock wait source:',
+                    '-- 查看详情：': '-- View details:',
+                    '-- 检查 interactive_timeout / wait_timeout 设置：': '-- Check interactive_timeout / wait_timeout settings:',
+                    '-- 清理旧 binlog：': '-- Clean up old binlog:',
+                    '-- 查看数据库占用：': '-- Check database space usage:',
+                    '-- 修改 my.cnf：': '-- Edit my.cnf:',
+                    '-- collation-server = utf8mb4_unicode_ci': '-- collation-server = utf8mb4_unicode_ci',
+                    'DROP USER \'root\'@\'%\';': 'DROP USER \'root\'@\'%\';',
+                    'CREATE USER \'root\'@\'localhost\' IDENTIFIED BY \'强密码请替换\';': 'CREATE USER \'root\'@\'localhost\' IDENTIFIED BY \'strong_password_here\';',
+                    '强密码请替换': 'strong_password_here',
+                    'GRANT ALL PRIVILEGES ON *.* TO \'root\'@\'localhost\' WITH GRANT OPTION;': 'GRANT ALL PRIVILEGES ON *.* TO \'root\'@\'localhost\' WITH GRANT OPTION;',
+                }
+                for item in self.context.get('auto_analyze', []):
+                    col1 = item.get('col1', '')
+                    if col1 in _MYSQL_COL1_MAP:
+                        item['col1'] = self._t(_MYSQL_COL1_MAP[col1])
+                    col2 = item.get('col2', '')
+                    if col2 in _MYSQL_RISK_KEY_MAP:
+                        item['col2'] = self._t(_MYSQL_RISK_KEY_MAP[col2])
+                    col4 = item.get('col4', '')
+                    if col4 in _MYSQL_PRIORITY_MAP:
+                        item['col4'] = self._t(_MYSQL_PRIORITY_MAP[col4])
+                    col5 = item.get('col5', '')
+                    if col5 in _MYSQL_OWNER_MAP:
+                        item['col5'] = self._t(_MYSQL_OWNER_MAP[col5])
+                    if self._lang != 'zh':
+                        # 处理动态 col1（包含变量）的中文片段
+                        col1 = item.get('col1', '')
+                        if col1:
+                            col1 = col1.replace('用户 ', 'User ').replace(' 空密码', ' empty password')
+                            col1 = col1.replace('磁盘空间紧张 (', 'Disk space critical (').replace('磁盘空间预警 (', 'Disk space warning (').replace(') ', ') ')
+                            item['col1'] = col1
+                        col3 = item.get('col3', '')
+                        if col3:
+                            for zh_frag, en_frag in _MYSQL_COL3_DESC_MAP.items():
+                                col3 = col3.replace(zh_frag, en_frag)
+                            item['col3'] = col3
+                        fix_sql = item.get('fix_sql', '')
+                        if fix_sql:
+                            for zh_frag, en_frag in _MYSQL_FIX_SQL_DESC_MAP.items():
+                                fix_sql = fix_sql.replace(zh_frag, en_frag)
+                            item['fix_sql'] = fix_sql
+
                 auto_analyze = self.context.get('auto_analyze', [])
-                high_risk = [i for i in auto_analyze if i.get('col2') == '高风险']
-                mid_risk  = [i for i in auto_analyze if i.get('col2') == '中风险']
-                low_risk  = [i for i in auto_analyze if i.get('col2') in ('低风险', '建议')]
+                high_risk = [i for i in auto_analyze if i.get('col2') == self._t('report.risk_high')]
+                mid_risk  = [i for i in auto_analyze if i.get('col2') == self._t('report.risk_mid')]
+                low_risk  = [i for i in auto_analyze if i.get('col2') in (self._t('report.risk_low'), self._t('report.risk_suggest'))]
 
                 # 第 7 章 风险与建议
-                h7 = doc2.add_heading('7. 风险与建议', level=1)
+                h7 = doc2.add_heading('7. ' + self._t("report.risk_chapter"), level=1)
 
                 p = doc2.add_paragraph()
-                p.add_run('本次共检测到 ')
+                p.add_run(self._t("report.detected_prefix"))
                 if high_risk:
-                    r = p.add_run(f'{len(high_risk)} 项高风险'); r.bold = True; r.font.color.rgb = RGBColor(0xC0,0x00,0x00)
+                    r = p.add_run(self._t("report.high_risk_n").format(n=len(high_risk)))
+                    r.bold = True; r.font.color.rgb = RGBColor(0xC0,0x00,0x00)
                 if mid_risk:
-                    r = p.add_run(f' {len(mid_risk)} 项中风险'); r.bold = True; r.font.color.rgb = RGBColor(0xFF,0x78,0x00)
+                    r = p.add_run(self._t("report.mid_risk_n").format(n=len(mid_risk)))
+                    r.bold = True; r.font.color.rgb = RGBColor(0xFF,0x78,0x00)
                 if low_risk:
-                    r = p.add_run(f' {len(low_risk)} 项低风险/建议'); r.bold = True; r.font.color.rgb = RGBColor(0x37,0x86,0x10)
-                p.add_run(f'，共计 {len(auto_analyze)} 项问题。')
+                    r = p.add_run(self._t("report.low_risk_n").format(n=len(low_risk)))
+                    r.bold = True; r.font.color.rgb = RGBColor(0x37,0x86,0x10)
+                p.add_run(self._t("report.detected_suffix").format(c=len(auto_analyze)))
 
-                # 7.1 问题明细
                 if auto_analyze:
-                    doc2.add_heading('7.1 问题明细', level=2)
+                    doc2.add_heading('7.1 ' + self._t('report.risk_detail_chapter'), level=2)
                     col_w = [Cm(0.8), Cm(3.2), Cm(1.5), Cm(4.0), Cm(1.0), Cm(1.5), Cm(4.0)]
                     tbl = doc2.add_table(rows=1+len(auto_analyze), cols=7)
-                    tbl.style = 'Light Grid Accent 1'
-                    hdrs = ['序号','风险项','等级','详细描述','优先级','负责人','修复建议']
+                    tbl.style = 'Table Grid'
+                    hdrs = [self._t('report.col_seq'), self._t('report.col_risk_item'), self._t('report.col_level'), self._t('report.col_desc'), self._t('report.col_priority'), self._t('report.col_owner'), self._t('report.col_fix')]
                     for j,(cell,ht) in enumerate(zip(tbl.rows[0].cells, hdrs)):
                         cell.text = ht
+                        self._set_cell_bg(cell, '336699')
                         cell.paragraphs[0].runs[0].bold = True
                         cell.paragraphs[0].runs[0].font.size = Pt(9)
+                        cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                        cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                         cell.width = col_w[j]
                     for idx,item in enumerate(auto_analyze,1):
                         row = tbl.rows[idx].cells
@@ -2139,18 +2342,17 @@ class saveDoc(object):
                                 for run in para.runs: run.font.size = Pt(9)
                             cell.width = col_w[j]
                         lvl = item.get('col2','')
-                        cm = {'高风险':RGBColor(0xC0,0x00,0x00),'中风险':RGBColor(0xFF,0x78,0x00),
-                              '低风险':RGBColor(0x37,0x86,0x10),'建议':RGBColor(0x00,0x70,0xC0)}
+                        cm = {self._t('report.risk_high'):RGBColor(0xC0,0x00,0x00),self._t('report.risk_mid'):RGBColor(0xFF,0x78,0x00),self._t('report.risk_low'):RGBColor(0x37,0x86,0x10),self._t('report.risk_suggest'):RGBColor(0x00,0x70,0xC0)}
                         if lvl in cm:
                             row[2].paragraphs[0].runs[0].font.color.rgb = cm[lvl]
                             row[2].paragraphs[0].runs[0].bold = True
                 else:
-                    doc2.add_paragraph('✅ 未发现明显风险项，MySQL 数据库运行状态良好。')
+                    doc2.add_paragraph(self._t('report.no_risk_found'))
 
                 # 7.2 修复速查
                 fix_items = [i for i in auto_analyze if i.get('fix_sql','').strip()]
                 if fix_items:
-                    doc2.add_heading('7.2 修复速查', level=2)
+                    doc2.add_heading('7.2 ' + self._t('report.fix_chapter'), level=2)
                     for idx,item in enumerate(fix_items,1):
                         p = doc2.add_paragraph()
                         p.add_run(f'{idx}. [{item.get("col1")}] {item.get("col3","")[:60]}').bold = True
@@ -2159,36 +2361,26 @@ class saveDoc(object):
                         if qp.runs: qp.runs[0].font.size = Pt(9)
 
                 # 第 8 章 AI 智能诊断建议
-                ai_advice = self.context.get('ai_advice','').strip()
-                doc2.add_heading('8. AI 智能诊断建议', level=1)
+                ai_advice = self.context.get('ai_advice', '').strip()
+                doc2.add_heading('8. ' + self._t('report.ai_chapter'), level=1)
                 if ai_advice:
                     p = doc2.add_paragraph()
-                    p.add_run('🤖 以下建议由 AI 大模型基于本次巡检数据自动生成，仅供参考，'
-                              '实际操作请结合业务场景谨慎评估。').italic = True
+                    p.add_run(self._t('report.ai_disclaimer')).italic = True
                     doc2.add_paragraph()
-                    for line in ai_advice.split('\n'):
-                        line = line.strip()
-                        if not line:
-                            doc2.add_paragraph()
-                        elif line.startswith(('- ','* ','• ')):
-                            bp = doc2.add_paragraph(style='List Bullet')
-                            bp.add_run(line[2:]).font.size = Pt(11)
-                        else:
-                            np = doc2.add_paragraph(line)
-                            if np.runs: np.runs[0].font.size = Pt(11)
+                    _render_markdown_to_doc(doc2, ai_advice, default_size=11, ch8_prefix=True)
                 else:
                     p = doc2.add_paragraph()
-                    p.add_run('💡 AI 诊断未启用。如需开启，请在 Web UI「AI 诊断设置」中配置 AI 后端（支持 DeepSeek / OpenAI / Ollama）。').italic = True
+                    p.add_run(self._t('report.ai_disabled')).italic = True
 
                 # 第 9 章 报告说明
-                doc2.add_heading('9. 报告说明', level=1)
+                doc2.add_heading('9. ' + self._t('report.notes_chapter'), level=1)
                 notes = [
-                    "1. 本报告基于 MySQL 数据库实时状态生成，反映了生成时刻的数据库健康状况",
-                    "2. 报告中空白的项表示未能获取到相关数据，可能是由于权限限制或该功能未启用",
-                    "3. 磁盘信息仅显示主要分区的使用率，如需查看完整磁盘信息请使用系统命令 'df -h'",
-                    "4. 巡检结果仅供参考，实际运维中请结合具体业务场景进行分析",
-                    "5. 建议定期进行数据库巡检，及时发现并解决潜在问题",
-                    f"6. AI 诊断功能（若启用）生成的建议仅供参考，不构成专业 DBA 意见"
+                    self._t("report.note_1"),
+                    self._t("report.note_2"),
+                    self._t("report.note_3"),
+                    self._t("report.note_4"),
+                    self._t("report.note_5"),
+                    self._t("report.note_6")
                 ]
                 for note in notes:
                     doc2.add_paragraph(note)
@@ -2206,7 +2398,7 @@ class saveDoc(object):
                 return self._fallback_render()
 
         except Exception as e:
-            print(f"❌ 生成Word文档失败: {e}")
+            print(f"{self._t('report.fallback_render_fail')}: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -2226,25 +2418,25 @@ class saveDoc(object):
         """
         try:
             doc = Document()
-            title = doc.add_heading('MySQL数据库健康巡检报告', 0)
+            title = doc.add_heading(self._t('report.mysql_title'), 0)
             title.alignment = WD_ALIGN_PARAGRAPH.CENTER
             title_run = title.runs[0]
             title_run.font.size = Pt(20)
             title_run.font.bold = True
             doc.add_paragraph()
             table = doc.add_table(rows=8, cols=2)
-            table.style = 'Light Grid Accent 1'
+            table.style = 'Table Grid'
             table.columns[0].width = Cm(4)
             table.columns[1].width = Cm(10)
             data_map = [
-                ("数据库名称", self.context.get('co_name', [{}])[0].get('CO_NAME', 'N/A')),
-                ("服务器地址", f"{self.context.get('ip', [{}])[0].get('IP', 'N/A')}:{self.context.get('port', [{}])[0].get('PORT', 'N/A')}"),
-                ("MySQL版本", self.context.get('myversion', [{}])[0].get('version', 'N/A')),
-                ("服务器主机名", self.context.get('system_info', {}).get('hostname', 'N/A')),
-                ("实例启动时间", self.context.get('instancetime', [{}])[0].get('started_at', 'N/A') if self.context.get('instancetime') else 'N/A'),
-                ("巡检人员", self.inspector_name),
-                ("服务器平台", self._get_platform_info()),
-                ("报告生成时间", self.context.get('report_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+                (self._t("report.fallback_db_name"), self.context.get('co_name', [{}])[0].get('CO_NAME', 'N/A')),
+                (self._t("report.fallback_server_addr"), f"{self.context.get('ip', [{}])[0].get('IP', 'N/A')}:{self.context.get('port', [{}])[0].get('PORT', 'N/A')}"),
+                (self._t("report.fallback_mysql_version"), self.context.get('myversion', [{}])[0].get('version', 'N/A')),
+                (self._t("report.fallback_hostname"), self.context.get('system_info', {}).get('hostname', 'N/A')),
+                (self._t("report.fallback_start_time"), self.context.get('instancetime', [{}])[0].get('started_at', 'N/A') if self.context.get('instancetime') else 'N/A'),
+                (self._t("report.fallback_inspector"), self.inspector_name),
+                (self._t("report.fallback_platform"), self._get_platform_info()),
+                (self._t("report.fallback_report_time"), self.context.get('report_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             ]
             for i, (label, value) in enumerate(data_map):
                 cells = table.rows[i].cells
@@ -2255,116 +2447,244 @@ class saveDoc(object):
                         for run in paragraph.runs:
                             run.font.size = Pt(11)
             doc.add_page_break()
-            doc.add_heading('1. 健康状态概览', level=1)
-            table = doc.add_table(rows=2, cols=2)
-            table.style = 'Light Grid Accent 1'
-            table.columns[0].width = Cm(4)
-            table.columns[1].width = Cm(10)
-            cells = table.rows[0].cells
-            cells[0].text = "总体健康状态"
-            cells[1].text = self.context.get('health_status', 'N/A')
+            doc.add_heading('1. ' + self._t('report.fallback_health_overview'), level=1)
+            col_w = [Cm(4), Cm(10)]
+            table = doc.add_table(rows=3, cols=2)
+            table.style = 'Table Grid'
+            hdr = table.rows[0].cells
+            hdr_texts = [self._t("report.fallback_item_col"), self._t("report.fallback_value_col")]
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
+            # 第1行数据
             cells = table.rows[1].cells
-            cells[0].text = "发现问题数量"
-            cells[1].text = f"{self.context.get('problem_count', 0)} 个"
+            cells[0].text = self._t("report.fallback_overall_health")
+            cells[1].text = self.context.get('health_status', 'N/A')
+            for j, c in enumerate(cells):
+                c.width = col_w[j]
+                for para in c.paragraphs:
+                    for run in para.runs:
+                        run.font.size = Pt(9)
+            # 第2行数据
+            cells = table.rows[2].cells
+            cells[0].text = self._t("report.fallback_issue_count")
+            cells[1].text = f"{self.context.get('problem_count', 0)}"
+            for j, c in enumerate(cells):
+                c.width = col_w[j]
+                for para in c.paragraphs:
+                    for run in para.runs:
+                        run.font.size = Pt(9)
             doc.add_paragraph()
-            p = doc.add_paragraph("健康总结: ")
-            p.add_run(self.context.get('health_summary', [{}])[0].get('health_summary', '运行良好')).bold = True
+            p = doc.add_paragraph(self._t("report.fallback_health_summary") + ": ")
+            p.add_run(self.context.get('health_summary', [{}])[0].get('health_summary', self._t('report.running_ok'))).bold = True
 
-            doc.add_heading('2. 系统资源检查', level=1)
+            doc.add_heading('2. ' + self._t('report.fallback_system_check'), level=1)
             cpu = self.context.get('system_info', {}).get('cpu', {})
             mem = self.context.get('system_info', {}).get('memory', {})
-            doc.add_heading('2.1 CPU信息', level=2)
+            doc.add_heading('2.1 ' + self._t('report.fallback_cpu_info'), level=2)
+            col_w = [Cm(3.5), Cm(3.5), Cm(3.5), Cm(3.5)]
             table = doc.add_table(rows=2, cols=4)
-            table.style = 'Light Grid Accent 1'
+            table.style = 'Table Grid'
             hdr = table.rows[0].cells
-            hdr[0].text, hdr[1].text, hdr[2].text, hdr[3].text = 'CPU使用率', '物理核心数', '逻辑核心数', '当前频率(GHz)'
+            hdr_texts = [
+                self._t('report.fallback_cpu_usage'),
+                self._t('report.fallback_physical_cores'),
+                self._t('report.fallback_logical_cores'),
+                self._t('report.fallback_freq_ghz')
+            ]
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
             row = table.rows[1].cells
             row[0].text = f"{cpu.get('usage_percent', 'N/A')}%"
             row[1].text = str(cpu.get('physical_cores', 'N/A'))
             row[2].text = str(cpu.get('logical_cores', 'N/A'))
             freq = cpu.get('current_frequency', 0)
             row[3].text = f"{freq/1000:.2f}" if isinstance(freq, (int, float)) and freq > 100 else str(freq)
+            for j, c in enumerate(row):
+                c.width = col_w[j]
+                for para in c.paragraphs:
+                    for run in para.runs:
+                        run.font.size = Pt(9)
             doc.add_paragraph()
-            doc.add_heading('2.2 内存信息', level=2)
+
+            doc.add_heading('2.2 ' + self._t('report.fallback_memory_info'), level=2)
+            col_w = [Cm(3.5), Cm(3.5), Cm(3.5), Cm(3.5)]
             table = doc.add_table(rows=2, cols=4)
-            table.style = 'Light Grid Accent 1'
+            table.style = 'Table Grid'
             hdr = table.rows[0].cells
-            hdr[0].text, hdr[1].text, hdr[2].text, hdr[3].text = '总内存(GB)', '已使用(GB)', '可用内存(GB)', '使用率'
+            hdr_texts = [
+                self._t('report.fallback_total_gb'),
+                self._t('report.fallback_used_gb'),
+                self._t('report.fallback_available_gb'),
+                self._t('report.fallback_usage_pct')
+            ]
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
             row = table.rows[1].cells
             row[0].text = f"{mem.get('total_gb', 'N/A')}"
             row[1].text = f"{mem.get('used_gb', 'N/A')}"
             row[2].text = f"{mem.get('available_gb', 'N/A')}"
             row[3].text = f"{mem.get('usage_percent', 'N/A')}%"
+            for j, c in enumerate(row):
+                c.width = col_w[j]
+                for para in c.paragraphs:
+                    for run in para.runs:
+                        run.font.size = Pt(9)
             doc.add_paragraph()
-            doc.add_heading('2.3 磁盘信息', level=2)
+
+            doc.add_heading('2.3 ' + self._t('report.fallback_disk_info'), level=2)
             disk_list = self.context.get('system_info', {}).get('disk_list', [])
+            col_w = [Cm(7), Cm(7)]
             table = doc.add_table(rows=1+len(disk_list), cols=2)
-            table.style = 'Light Grid Accent 1'
-            table.columns[0].width = Cm(8)
-            table.columns[1].width = Cm(4)
+            table.style = 'Table Grid'
             hdr = table.rows[0].cells
-            hdr[0].text, hdr[1].text = '挂载点', '使用率'
+            hdr_texts = [self._t('report.fallback_mountpoint'), self._t('report.fallback_usage_pct')]
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
             for i, disk in enumerate(disk_list, 1):
                 cells = table.rows[i].cells
                 cells[0].text = disk.get('mountpoint', 'N/A')
                 cells[1].text = f"{disk.get('usage_percent', 0):.2f}%"
+                for j, c in enumerate(cells):
+                    c.width = col_w[j]
+                    for para in c.paragraphs:
+                        for run in para.runs:
+                            run.font.size = Pt(9)
 
-            doc.add_heading('3. MySQL配置检查', level=1)
-            doc.add_heading('3.1 连接配置', level=2)
+
+            doc.add_heading('3. ' + self._t('report.fallback_mysql_config'), level=1)
+            doc.add_heading('3.1 ' + self._t('report.fallback_conn_config'), level=2)
             self._add_config_table(doc, [
-                ('最大连接数', 'max_connections'), ('当前连接数', 'current_connections'),
-                ('交互超时', 'interactive_timeout'), ('文件打开限制', 'open_files_limit')
+                (self._t('report.fallback_max_connections'), 'max_connections'),
+                (self._t('report.fallback_current_connections'), 'current_connections'),
+                (self._t('report.fallback_interactive_timeout'), 'interactive_timeout'),
+                (self._t('report.fallback_open_files_limit'), 'open_files_limit')
             ])
-            doc.add_heading('3.2 内存配置', level=2)
+            doc.add_heading('3.2 ' + self._t('report.fallback_memory_config'), level=2)
             self._add_config_table(doc, [
-                ('InnoDB缓冲池', 'innodb_buffer_pool_size'), ('排序缓冲区', 'sort_buffer_size'),
-                ('连接缓冲区', 'join_buffer_size'), ('线程缓存', 'thread_cache_size')
+                (self._t('report.fallback_innodb_buffer_pool'), 'innodb_buffer_pool_size'),
+                (self._t('report.fallback_sort_buffer'), 'sort_buffer_size'),
+                (self._t('report.fallback_join_buffer'), 'join_buffer_size'),
+                (self._t('report.fallback_thread_cache'), 'thread_cache_size')
             ])
-            doc.add_heading('3.3 日志配置', level=2)
+            doc.add_heading('3.3 ' + self._t('report.fallback_log_config'), level=2)
             self._add_config_table(doc, [
-                ('慢查询日志', 'slow_query_log'), ('Binlog保留天数', 'expire_logs_days'),
-                ('InnoDB日志文件大小', 'innodb_log_file_size'), ('日志刷新设置', 'innodb_flush_log_at_trx_commit')
+                (self._t('report.fallback_slow_query_log'), 'slow_query_log'),
+                (self._t('report.fallback_binlog_days'), 'expire_logs_days'),
+                (self._t('report.fallback_innodb_log_size'), 'innodb_log_file_size'),
+                (self._t('report.fallback_flush_log'), 'innodb_flush_log_at_trx_commit')
             ])
 
-            doc.add_heading('4. 性能分析', level=1)
-            doc.add_heading('4.1 QPS检查', level=2)
-            self._add_config_table(doc, [('总查询数', 'queries')], col1_width=4, col2_width=10)
-            doc.add_heading('4.2 锁信息', level=2)
+            doc.add_heading('4. ' + self._t('report.fallback_perf_analysis'), level=1)
+            doc.add_heading('4.1 ' + self._t('report.fallback_qps_check'), level=2)
+            self._add_config_table(doc, [(self._t('report.fallback_total_queries'), 'queries')], col1_width=4, col2_width=10)
+            doc.add_heading('4.2 ' + self._t('report.fallback_lock_info'), level=2)
             self._add_config_table(doc, [
-                ('立即锁表', 'table_locks_immediate'), ('等待锁表', 'table_locks_waited')
+                (self._t('report.fallback_lock_immediate'), 'table_locks_immediate'),
+                (self._t('report.fallback_lock_waited'), 'table_locks_waited')
             ], col1_width=4, col2_width=10)
-            doc.add_heading('4.3 异常连接', level=2)
+            doc.add_heading('4.3 ' + self._t('report.fallback_abnormal_conn'), level=2)
             aborted = self.context.get('aborted_connections', [])
+            col_w = [Cm(7), Cm(7)]
             table = doc.add_table(rows=3, cols=2)
-            table.style = 'Light Grid Accent 1'
+            table.style = 'Table Grid'
             hdr = table.rows[0].cells
-            hdr[0].text, hdr[1].text = '异常类型', '值'
+            hdr_texts = [self._t('report.fallback_abnormal_type'), 'Value']
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
             cells = table.rows[1].cells
-            cells[0].text = '异常客户端连接'
+            cells[0].text = self._t('report.fallback_abnormal_client')
             cells[1].text = aborted[0]['Value'] if len(aborted) > 0 else 'N/A'
+            for c, w in zip(cells, col_w): c.width = w
             cells = table.rows[2].cells
-            cells[0].text = '异常连接尝试'
+            cells[0].text = self._t('report.fallback_abnormal_attempt')
             cells[1].text = aborted[1]['Value'] if len(aborted) > 1 else 'N/A'
+            for c, w in zip(cells, col_w): c.width = w
 
-            doc.add_heading('5. 数据库信息', level=1)
-            doc.add_heading('5.1 数据库大小', level=2)
+            doc.add_heading('5. ' + self._t('report.fallback_db_info'), level=1)
+            doc.add_heading('5.1 ' + self._t('report.fallback_db_size'), level=2)
             db_size = self.context.get('db_size', [])
+            col_w = [Cm(3.5), Cm(3.5), Cm(3.5), Cm(3.5)]
             table = doc.add_table(rows=1+len(db_size), cols=4)
-            table.style = 'Light Grid Accent 1'
+            table.style = 'Table Grid'
             hdr = table.rows[0].cells
-            hdr[0].text, hdr[1].text, hdr[2].text, hdr[3].text = '数据库名', '表行数', '数据大小(MB)', '索引大小(MB)'
+            hdr_texts = [
+                self._t('report.fallback_dbname'),
+                self._t('report.fallback_table_rows'),
+                self._t('report.fallback_data_size_mb'),
+                self._t('report.fallback_index_size_mb')
+            ]
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
             for i, db in enumerate(db_size, 1):
                 cells = table.rows[i].cells
                 cells[0].text = str(db.get('Database_name', ''))
                 cells[1].text = str(db.get('No_of_rows', ''))
                 cells[2].text = str(db.get('Size_data_MB', ''))
                 cells[3].text = str(db.get('Size_index_MB', ''))
-            doc.add_heading('5.2 当前进程列表', level=2)
+                for j, c in enumerate(cells):
+                    c.width = col_w[j]
+                    for para in c.paragraphs:
+                        for run in para.runs:
+                            run.font.size = Pt(9)
+
+            doc.add_heading('5.2 ' + self._t('report.fallback_processlist'), level=2)
             proc = self.context.get('processlist', [])
+            col_w = [Cm(2.3), Cm(2.3), Cm(2.3), Cm(2.3), Cm(2.3), Cm(2.3)]
             table = doc.add_table(rows=1+min(len(proc), 20), cols=6)
-            table.style = 'Light Grid Accent 1'
+            table.style = 'Table Grid'
             hdr = table.rows[0].cells
-            hdr[0].text, hdr[1].text, hdr[2].text, hdr[3].text, hdr[4].text, hdr[5].text = 'ID', '用户', '数据库', '状态', '命令', '时间'
+            hdr_texts = [
+                self._t('report.fallback_process_id'),
+                self._t('report.fallback_process_user'),
+                self._t('report.fallback_process_db'),
+                self._t('report.fallback_process_state'),
+                self._t('report.fallback_process_command'),
+                self._t('report.fallback_process_time')
+            ]
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
             for i, p in enumerate(proc[:20], 1):
                 cells = table.rows[i].cells
                 cells[0].text = str(p.get('Id', ''))
@@ -2373,14 +2693,34 @@ class saveDoc(object):
                 cells[3].text = str(p.get('State', ''))
                 cells[4].text = str(p.get('Command', ''))
                 cells[5].text = str(p.get('Time', ''))
+                for j, c in enumerate(cells):
+                    c.width = col_w[j]
+                    for para in c.paragraphs:
+                        for run in para.runs:
+                            run.font.size = Pt(9)
 
-            doc.add_heading('6. 安全信息', level=1)
-            doc.add_heading('6.1 数据库用户信息', level=2)
+            doc.add_heading('6. ' + self._t('report.fallback_security_info'), level=1)
+            doc.add_heading('6.1 ' + self._t('report.fallback_db_users'), level=2)
             users = self.context.get('mysql_users', [])
+            col_w = [Cm(2.8), Cm(2.8), Cm(2.8), Cm(2.8), Cm(2.8)]
             table = doc.add_table(rows=1+len(users), cols=5)
-            table.style = 'Light Grid Accent 1'
+            table.style = 'Table Grid'
             hdr = table.rows[0].cells
-            hdr[0].text, hdr[1].text, hdr[2].text, hdr[3].text, hdr[4].text = '用户名', '主机', '授权权限', '认证插件', '账户锁定'
+            hdr_texts = [
+                self._t('report.fallback_username'),
+                self._t('report.fallback_host'),
+                self._t('report.fallback_privileges'),
+                self._t('report.fallback_auth_plugin'),
+                self._t('report.fallback_account_locked')
+            ]
+            for j, (cell, ht) in enumerate(zip(hdr, hdr_texts)):
+                cell.text = ht
+                self._set_cell_bg(cell, '336699')
+                cell.paragraphs[0].runs[0].bold = True
+                cell.paragraphs[0].runs[0].font.size = Pt(9)
+                cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cell.width = col_w[j]
             for i, u in enumerate(users, 1):
                 cells = table.rows[i].cells
                 cells[0].text = str(u.get('col1', ''))
@@ -2388,40 +2728,156 @@ class saveDoc(object):
                 cells[2].text = str(u.get('col3', ''))
                 cells[3].text = str(u.get('col4', ''))
                 cells[4].text = str(u.get('col5', ''))
+                for j, c in enumerate(cells):
+                    c.width = col_w[j]
+                    for para in c.paragraphs:
+                        for run in para.runs:
+                            run.font.size = Pt(9)
 
-            doc.add_heading('7. 风险与建议', level=1)
+            doc.add_heading('7. ' + self._t('report.fallback_risk_chapter'), level=1)
 
             # ── 7.1 概览统计 ──
+            # 翻译 auto_analyze 中的中文值 -> 英文翻译
+            _MYSQL_RISK_KEY_MAP = {
+                '高风险': 'report.risk_high',
+                '中风险': 'report.risk_mid',
+                '低风险': 'report.risk_low',
+                '建议': 'report.risk_suggest',
+            }
+            _MYSQL_PRIORITY_MAP = {
+                '高': 'report.severity_high',
+                '中': 'report.severity_mid',
+                '低': 'report.severity_low',
+            }
+            _MYSQL_OWNER_MAP = {
+                'DBA': 'report.pg_fallback_owner_dba',
+                '系统管理员': 'report.pg_fallback_owner_sysadmin',
+            }
+            _MYSQL_COL3_DESC_MAP = {
+                '历史最大连接数使用率高达 ': 'Historical max connection usage rate reached ',
+                '（': ' (',
+                '），极有可能出现拒绝连接': '), very likely to reject new connections',
+                '连接数使用率达 ': 'Connection usage rate reached ',
+                '），建议提前关注': '), recommend proactive monitoring',
+                '发现 ': 'Found ',
+                ' 个执行超过 60 秒的 SQL，可能导致锁等待和性能下降': ' SQL(s) running over 60 seconds, may cause lock waits and performance degradation',
+                '个执行超过 60 秒的 SQL，可能导致锁等待和性能下降': ' SQL(s) running over 60 seconds, may cause lock waits and performance degradation',
+                '慢查询日志已关闭，无法追踪性能问题，建议开启': 'Slow query log is disabled, cannot trace performance issues, recommend enabling',
+                'binlog 未开启，无法实现基于时间点的数据恢复，生产环境建议开启': 'binlog is not enabled, point-in-time recovery not possible, recommend enabling in production',
+                'binlog 未开启': 'binlog is not enabled',
+                'expire_logs_days=0 表示 binlog 永不自动清理，可能导致磁盘耗尽': 'expire_logs_days=0 means binlog never auto-cleanup, may exhaust disk space',
+                'innodb_buffer_pool_size 仅 ': 'innodb_buffer_pool_size is only ',
+                '，建议设置为物理内存的 50%~70%': ', recommend setting to 50%~70% of physical memory',
+                'query_cache 在高并发场景下会造成严重锁竞争，MySQL 8.0 已彻底移除，建议关闭': 'query_cache causes severe lock contention in high concurrency scenarios, removed in MySQL 8.0, recommend disabling',
+                '表锁等待比例达 ': 'Table lock wait ratio reached ',
+                '（等待次数 ': ' (wait count ',
+                '），存在大量锁竞争': '), heavy lock contention exists',
+                '累计中止连接数达 ': 'Cumulative aborted connections reached ',
+                '，可能存在连接池配置异常或网络问题': ', possible connection pool misconfiguration or network issues',
+                '数据库用户 ': 'Database user ',
+                ' 未设置密码，存在严重安全风险': ' has no password set, serious security risk',
+                "root@'%' 允许从任意主机登录，存在严重安全风险，建议限制为本地": "root@'%' allows login from any host, serious security risk, recommend restricting to localhost",
+                '复制状态异常：IO线程=': 'Replication status abnormal: IO thread=',
+                '，SQL线程=': ', SQL thread=',
+                '从库延迟 ': 'Replica lag ',
+                ' 秒，数据同步滞后，读操作可能读到旧数据': ' seconds, data sync lagging, read operations may get stale data',
+                '已打开表数(': 'Opened tables (',
+                ') 接近 table_open_cache(': ') close to table_open_cache(',
+                '），可能频繁开关文件句柄': '), may frequently open/close file handles',
+                '系统内存使用率 ': 'System memory usage ',
+                '，超过 90% 可能触发 OOM Killer': ', over 90% may trigger OOM Killer',
+                '，建议关注内存增长趋势': ', recommend monitoring memory growth trend',
+                '磁盘 ': 'Disk ',
+                ' 使用率 ': ' usage ',
+                '，可能导致数据库写入失败': ', may cause database write failures',
+                '，建议及时清理或扩容': ', recommend cleaning up or expanding capacity',
+                '设置为 0 时 MySQL 崩溃可能丢失最多 1 秒的事务，生产环境建议设为 1': 'Setting to 0 may lose up to 1 second of transactions when MySQL crashes, recommend setting to 1 in production',
+                '当前字符集为 ': 'Current charset is ',
+                '，建议统一使用 utf8mb4 以支持 emoji 和多语言': ', recommend using utf8mb4 for emoji and multilingual support',
+            }
+            _MYSQL_FIX_SQL_DESC_MAP = {
+                '-- 需在 my.cnf 中添加：': '-- Need to add in my.cnf:',
+                '-- 然后重启 MySQL': '-- Then restart MySQL',
+                '-- 建议修改 my.cnf：': '-- Recommend editing my.cnf:',
+                '-- 根据实际内存调整': '-- Adjust based on actual memory',
+                '# 根据实际内存调整': '# Adjust based on actual memory',
+                '-- 或在线调整（MySQL 5.7+）：': '-- Or adjust online (MySQL 5.7+):',
+                '-- 4G': '-- 4G',
+                '-- 排查锁等待来源：': '-- Investigate lock wait source:',
+                '-- 查看详情：': '-- View details:',
+                '-- 检查 interactive_timeout / wait_timeout 设置：': '-- Check interactive_timeout / wait_timeout settings:',
+                '-- 清理旧 binlog：': '-- Clean up old binlog:',
+                '-- 查看数据库占用：': '-- Check database space usage:',
+                '-- 修改 my.cnf：': '-- Edit my.cnf:',
+                '-- collation-server = utf8mb4_unicode_ci': '-- collation-server = utf8mb4_unicode_ci',
+                'DROP USER \'root\'@\'%\';': 'DROP USER \'root\'@\'%\';',
+                'CREATE USER \'root\'@\'localhost\' IDENTIFIED BY \'强密码请替换\';': 'CREATE USER \'root\'@\'localhost\' IDENTIFIED BY \'strong_password_here\';',
+                '强密码请替换': 'strong_password_here',
+                'GRANT ALL PRIVILEGES ON *.* TO \'root\'@\'localhost\' WITH GRANT OPTION;': 'GRANT ALL PRIVILEGES ON *.* TO \'root\'@\'localhost\' WITH GRANT OPTION;',
+            }
+            for item in self.context.get('auto_analyze', []):
+                col2 = item.get('col2', '')
+                if col2 in _MYSQL_RISK_KEY_MAP:
+                    item['col2'] = self._t(_MYSQL_RISK_KEY_MAP[col2])
+                col4 = item.get('col4', '')
+                if col4 in _MYSQL_PRIORITY_MAP:
+                    item['col4'] = self._t(_MYSQL_PRIORITY_MAP[col4])
+                col5 = item.get('col5', '')
+                if col5 in _MYSQL_OWNER_MAP:
+                    item['col5'] = self._t(_MYSQL_OWNER_MAP[col5])
+                if self._lang != 'zh':
+                    col3 = item.get('col3', '')
+                    if col3:
+                        for zh_frag, en_frag in _MYSQL_COL3_DESC_MAP.items():
+                            col3 = col3.replace(zh_frag, en_frag)
+                        item['col3'] = col3
+                    fix_sql = item.get('fix_sql', '')
+                    if fix_sql:
+                        for zh_frag, en_frag in _MYSQL_FIX_SQL_DESC_MAP.items():
+                            fix_sql = fix_sql.replace(zh_frag, en_frag)
+                        item['fix_sql'] = fix_sql
+
             auto_analyze = self.context.get('auto_analyze', [])
-            high_risk  = [i for i in auto_analyze if i.get('col2') == '高风险']
-            mid_risk   = [i for i in auto_analyze if i.get('col2') == '中风险']
-            low_risk   = [i for i in auto_analyze if i.get('col2') in ('低风险', '建议')]
+            high_risk  = [i for i in auto_analyze if i.get('col2') == self._t('report.risk_high')]
+            mid_risk   = [i for i in auto_analyze if i.get('col2') == self._t('report.risk_mid')]
+            low_risk   = [i for i in auto_analyze if i.get('col2') in (self._t('report.risk_low'), self._t('report.risk_suggest'))]
             p = doc.add_paragraph()
-            p.add_run('本次共检测到 ').bold = False
+            p.add_run(self._t('report.fallback_detected_prefix')).bold = False
             if high_risk:
-                run_h = p.add_run(f'{len(high_risk)} 项高风险')
+                run_h = p.add_run(f'{len(high_risk)}' + self._t('report.fallback_high_risk_n'))
                 run_h.bold = True; run_h.font.color.rgb = RGBColor(0xC0, 0x00, 0x00)
             if mid_risk:
-                run_m = p.add_run(f' {len(mid_risk)} 项中风险')
+                run_m = p.add_run(f' {len(mid_risk)}' + self._t('report.fallback_mid_risk_n'))
                 run_m.bold = True; run_m.font.color.rgb = RGBColor(0xFF, 0x78, 0x00)
             if low_risk:
-                run_l = p.add_run(f' {len(low_risk)} 项低风险/建议')
+                run_l = p.add_run(f' {len(low_risk)}' + self._t('report.fallback_low_risk_n'))
                 run_l.bold = True; run_l.font.color.rgb = RGBColor(0x37, 0x86, 0x10)
-            p.add_run(f'，共计 {len(auto_analyze)} 项问题。')
+            p.add_run(self._t('report.fallback_detected_suffix2').format(c=len(auto_analyze)))
 
             # ── 7.2 风险明细表格 ──
             if auto_analyze:
-                doc.add_heading('7.1 问题明细', level=2)
+                doc.add_heading('7.1 ' + self._t('report.fallback_issue_detail'), level=2)
                 # 列：序号、风险项、等级、详细描述、优先级、负责人、修复建议
                 col_widths = [Cm(0.8), Cm(3.2), Cm(1.5), Cm(4.0), Cm(1.0), Cm(1.5), Cm(4.0)]
                 tbl = doc.add_table(rows=1 + len(auto_analyze), cols=7)
-                tbl.style = 'Light Grid Accent 1'
+                tbl.style = 'Table Grid'
                 hdr = tbl.rows[0].cells
-                headers = ['序号', '风险项', '等级', '详细描述', '优先级', '负责人', '修复建议']
+                headers = [
+                    self._t('report.fallback_seq'),
+                    self._t('report.fallback_risk_item'),
+                    self._t('report.fallback_level'),
+                    self._t('report.fallback_desc'),
+                    self._t('report.fallback_priority'),
+                    self._t('report.fallback_owner'),
+                    self._t('report.fallback_fix_suggest')
+                ]
                 for j, (cell, hdr_text) in enumerate(zip(hdr, headers)):
                     cell.text = hdr_text
+                    self._set_cell_bg(cell, '336699')
                     cell.paragraphs[0].runs[0].bold = True
                     cell.paragraphs[0].runs[0].font.size = Pt(9)
+                    cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+                    cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
                     cell.width = col_widths[j]
                 for idx, item in enumerate(auto_analyze, 1):
                     row = tbl.rows[idx].cells
@@ -2432,7 +2888,7 @@ class saveDoc(object):
                     row[4].text = item.get('col4', '')
                     row[5].text = item.get('col5', '')
                     fix_sql = item.get('fix_sql', '').strip()
-                    row[6].text = fix_sql if fix_sql else '—'
+                    row[6].text = fix_sql if fix_sql else self._t('report.fallback_fix_sql_placeholder')
                     for j, cell in enumerate(row):
                         for para in cell.paragraphs:
                             for run in para.runs:
@@ -2440,57 +2896,51 @@ class saveDoc(object):
                         cell.width = col_widths[j]
                     # 等级颜色
                     level = item.get('col2', '')
-                    color_map = {'高风险': RGBColor(0xC0, 0x00, 0x00),
-                                 '中风险': RGBColor(0xFF, 0x78, 0x00),
-                                 '低风险': RGBColor(0x37, 0x86, 0x10),
-                                 '建议':   RGBColor(0x00, 0x70, 0xC0)}
+                    color_map = {
+                        self._t('report.risk_high'): RGBColor(0xC0, 0x00, 0x00),
+                        self._t('report.risk_mid'): RGBColor(0xFF, 0x78, 0x00),
+                        self._t('report.risk_low'): RGBColor(0x37, 0x86, 0x10),
+                        self._t('report.risk_suggest'): RGBColor(0x00, 0x70, 0xC0)
+                    }
                     if level in color_map:
                         row[2].paragraphs[0].runs[0].font.color.rgb = color_map[level]
                         row[2].paragraphs[0].runs[0].bold = True
             else:
-                doc.add_paragraph('✅ 未发现明显风险项，MySQL 数据库运行状态良好。')
+                doc.add_paragraph(self._t('report.fallback_no_risk_found'))
 
             # ── 7.3 修复速查 ──
             fix_items = [i for i in auto_analyze if i.get('fix_sql', '').strip()]
             if fix_items:
-                doc.add_heading('7.2 修复速查', level=2)
+                doc.add_heading('7.2 ' + self._t('report.fallback_fix_chapter'), level=2)
                 for idx, item in enumerate(fix_items, 1):
                     p = doc.add_paragraph()
                     p.add_run(f'{idx}. [{item.get("col1")}] {item.get("col3")[:60]}').bold = True
                     code_p = doc.add_paragraph(item.get('fix_sql', '').strip())
                     code_p.style = 'Quote'
-                    code_p.runs[0].font.size = Pt(9)
+                    if code_p.runs:
+                        code_p.runs[0].font.size = Pt(9)
 
             # ── 8. AI 智能诊断建议 ──
             ai_advice = self.context.get('ai_advice', '').strip()
-            doc.add_heading('8. AI 智能诊断建议', level=1)
+            doc.add_heading('8. ' + self._t('report.fallback_ai_chapter'), level=1)
             if ai_advice:
                 p = doc.add_paragraph()
-                p.add_run('🤖 以下建议由 AI 大模型基于本次巡检数据自动生成，仅供参考，实际操作请结合业务场景谨慎评估。').italic = True
+                p.add_run(self._t('report.fallback_ai_disclaimer')).italic = True
                 doc.add_paragraph()
-                # 分段渲染：保留列表格式
-                for line in ai_advice.split('\n'):
-                    line = line.strip()
-                    if not line:
-                        doc.add_paragraph()
-                    elif line.startswith(('- ', '* ', '• ')):
-                        p = doc.add_paragraph(style='List Bullet')
-                        p.add_run(line[2:]).font.size = Pt(11)
-                    else:
-                        doc.add_paragraph(line).runs[0].font.size = Pt(11)
+                _render_markdown_to_doc(doc, ai_advice, default_size=11, ch8_prefix=True)
             else:
                 p = doc.add_paragraph()
-                p.add_run('💡 AI 诊断未启用。如需开启，请在 Web UI「AI 诊断设置」中配置 AI 后端（支持 DeepSeek / OpenAI / Ollama）。').italic = True
+                p.add_run(self._t('report.ai_disabled')).italic = True
 
             # ── 9. 报告说明 ──
-            doc.add_heading('9. 报告说明', level=1)
+            doc.add_heading('9. ' + self._t('report.fallback_notes_chapter'), level=1)
             notes = [
-                "1. 本报告基于 MySQL 数据库实时状态生成，反映了生成时刻的数据库健康状况",
-                "2. 报告中空白的项表示未能获取到相关数据，可能是由于权限限制或该功能未启用",
-                "3. 磁盘信息仅显示主要分区的使用率，如需查看完整磁盘信息请使用系统命令 'df -h'",
-                "4. 巡检结果仅供参考，实际运维中请结合具体业务场景进行分析",
-                "5. 建议定期进行数据库巡检，及时发现并解决潜在问题",
-                f"6. AI 诊断功能（若启用）生成的建议仅供参考，不构成专业 DBA 意见"
+                self._t("report.fallback_note_1"),
+                self._t("report.fallback_note_2"),
+                self._t("report.fallback_note_3"),
+                self._t("report.fallback_note_4"),
+                self._t("report.fallback_note_5"),
+                self._t("report.fallback_note_6")
             ]
             for note in notes:
                 doc.add_paragraph(note)
@@ -2531,11 +2981,13 @@ class saveDoc(object):
         :param col2_width: 第 2 列宽度（cm），默认 10
         """
         table = doc.add_table(rows=1+len(items), cols=2)
-        table.style = 'Light Grid Accent 1'
+        table.style = 'Table Grid'
         table.columns[0].width = Cm(col1_width)
         table.columns[1].width = Cm(col2_width)
         hdr = table.rows[0].cells
-        hdr[0].text, hdr[1].text = '配置项', '当前值'
+        hdr[0].text = self._t('report.fallback_item_col')
+        hdr[1].text = self._t('report.fallback_value_col')
+        self._set_table_header(table)
         for i, (label, key) in enumerate(items, 1):
             cells = table.rows[i].cells
             cells[0].text = label
@@ -2576,9 +3028,9 @@ def print_banner():
   ██║  ██║██╔══██╗██║     ██╔══██║██╔══╝  ██║     ██╔═██╗
   ██████╔╝██████╔╝╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
   ╚═════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝{RESET}
-{GREEN}{BOLD}              🐬  DBCheck - MySQL 巡检工具  {VER}{RESET}
+{GREEN}{BOLD}              🐬  {_t("mysql_cli_banner_title")}  {VER}{RESET}
 {DIM}  ──────────────────────────────────────────────────────────{RESET}
-{YELLOW}  支持单机巡检 / 批量巡检 / Word报告 / SSH系统采集{RESET}
+{YELLOW}  {_t("mysql_cli_banner_subtitle")}{RESET}
 {DIM}  ──────────────────────────────────────────────────────────{RESET}
 """
     print(art)
@@ -2597,27 +3049,27 @@ def check_license():
         validator = LicenseValidator()
         is_valid, message, remaining_days = validator.validate_license()
         if not is_valid:
-            print(f"❌ {message}")
-            print(f"📁 许可证文件位置: {validator.license_file}")
-            retry = input("是否尝试重新创建许可证? (y/n) [y]: ").strip().lower()
+            print(_t("mysql_cli_license_fail").format(message=message))
+            print(_t("mysql_cli_license_file_pos").format(path=validator.license_file))
+            retry = input(_t("mysql_cli_recreate_license_prompt")).strip().lower()
             if retry in ['', 'y', 'yes']:
                 validator._create_trial_license()
                 is_valid, message, remaining_days = validator.validate_license()
                 if is_valid:
-                    print(f"✅ {message}")
+                    print(_t("mysql_cli_license_pos").format(message=message))
                     return
                 else:
-                    print(f"❌ 重新创建许可证失败: {message}")
+                    print(_t("mysql_cli_license_recreate_fail").format(message=message))
                     sys.exit(1)
             else:
-                print("请联系管理员获取有效许可证")
+                print(_t("mysql_cli_license_contact"))
                 sys.exit(1)
         else:
-            print(f"✅ {message}")
+            print(_t("mysql_cli_license_pos").format(message=message))
             print()
     except Exception as e:
-        print(f"❌ 许可证检查异常: {e}")
-        print("程序将继续运行，但部分功能可能受限")
+        print(_t("mysql_cli_license_exception").format(e=e))
+        print(_t("mysql_cli_license_continue"))
 
 def single_inspection():
     """
@@ -2626,7 +3078,7 @@ def single_inspection():
     调用 input_db_info() 进行交互式连接信息输入，
     输入有效后调用 run_inspection() 执行巡检并生成报告。
     """
-    print("\n=== 单机巡检模式 ===")
+    print("\n=== " + _t("mysql_cli_single_mode") + " ===")
     db_info = input_db_info()
     if not db_info:
         return
@@ -2641,32 +3093,32 @@ def batch_inspection():
     逐一调用 run_inspection() 完成每个数据库的巡检，
     最终汇总输出成功 / 失败统计。
     """
-    print("\n=== 批量巡检模式 ===")
+    print("\n=== " + _t("mysql_cli_batch_mode") + " ===")
     excel_manager = ExcelTemplateManager()
     if not os.path.exists(excel_manager.template_file):
-        print("❌ Excel模板文件不存在，请先创建模板")
-        create_template = input("是否立即创建Excel模板? (y/n) [y]: ").strip().lower()
+        print("\u274c " + _t("mysql_cli_excel_not_exist"))
+        create_template = input(_t("mysql_cli_create_template_now")).strip().lower()
         if create_template in ['', 'y', 'yes']:
             excel_manager.create_template()
         return
     db_list = excel_manager.read_template()
     if not db_list:
         return
-    print(f"\n📋 即将巡检以下 {len(db_list)} 个数据库:")
+    print("\n\U0001f4cb " + _t("mysql_cli_will_inspect_n").format(n=len(db_list)))
     for i, db in enumerate(db_list, 1):
-        ssh_info = " (含系统信息)" if db.get('ssh_host') and (db.get('ssh_password') or db.get('ssh_key_file')) else ""
+        ssh_info = " " + _t("cli_ssh_suffix") if db.get("ssh_host") and (db.get("ssh_password") or db.get("ssh_key_file")) else ""
         print(f"  {i}. {db['name']} - {db['ip']}:{db['port']}{ssh_info}")
-    confirm = input("\n是否开始批量巡检? (y/n) [y]: ").strip().lower()
+    confirm = input("\n" + _t("mysql_cli_confirm_batch")).strip().lower()
     if confirm in ['', 'y', 'yes']:
         total_dbs = len(db_list)
         success_count = 0
         for i, db_info in enumerate(db_list, 1):
-            print(f"\n[{i}/{total_dbs}] 开始巡检 {db_info['name']}...")
+            print("\n[" + str(i) + "/" + str(total_dbs) + "] " + _t("mysql_cli_start_inspect_n").format(name=db_info["name"]))
             if run_inspection(db_info):
                 success_count += 1
-        print(f"\n=== 批量巡检完成 ===")
-        print(f"成功巡检: {success_count}/{total_dbs} 个数据库")
-        print(f"报告输出目录: reports/")
+        print("\n=== " + _t("mysql_cli_batch_done") + " ===")
+        print(_t("mysql_cli_success_count").format(s=success_count, t=total_dbs))
+        print(_t("mysql_cli_report_dir"))
 
 def create_excel_template():
     """
@@ -2675,7 +3127,7 @@ def create_excel_template():
     实例化 ExcelTemplateManager 并调用其 create_template() 方法，
     在当前目录生成 mysql_batch_template.xlsx 文件。
     """
-    print("\n=== 创建Excel配置模板 ===")
+    print("\n=== " + _t("mysql_cli_create_excel") + " ===")
     excel_manager = ExcelTemplateManager()
     excel_manager.create_template()
 
@@ -2694,10 +3146,10 @@ def create_word_template(inspector_name="Jack"):
         generator = WordTemplateGenerator(inspector_name)
         doc = generator.create_template()
         doc.save(template_path)
-        print(f"✅ Word模板已创建: {template_path}")
+        print(_t("mysql_cli_word_template_ok").format(path=template_path))
         return template_path
     except Exception as e:
-        print(f"❌ 创建Word模板失败: {e}")
+        print(_t("mysql_cli_word_template_fail").format(e=e))
         import traceback
         traceback.print_exc()
         return None
@@ -2733,7 +3185,7 @@ def run_inspection(db_info):
             'ssh_password': db_info.get('ssh_password', ''),
             'ssh_key_file': db_info.get('ssh_key_file', '')
         }
-    inspector_name = input("巡检人员（默认 Jack）: ").strip() or "Jack"
+    inspector_name = input(_t("mysql_cli_inspector_prompt")).strip() or "Jack"
     ifile = create_word_template(inspector_name)
     if not ifile:
         return False
@@ -2741,19 +3193,19 @@ def run_inspection(db_info):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    file_name = f"MySQL巡检报告_{label_name}_{timestamp}.docx"
+    file_name = _t("mysql_cli_report_filename").format(name=label_name, ts=timestamp) + ".docx"
     ofile = os.path.join(dir_path, file_name)
     try:
-        print(f"🔍 正在测试连接 {ip}:{port}...")
+        print("\U0001f50d " + _t("mysql_cli_testing_connection").format(ip=ip, port=port))
         conn_test = pymysql.connect(host=ip, port=int(port), user=user, password=password, connect_timeout=10, charset='utf8mb4')
         cursor = conn_test.cursor()
         cursor.execute("SELECT VERSION()")
         version = cursor.fetchone()[0]
         cursor.close()
         conn_test.close()
-        print(f"📊 数据库版本: MySQL {version}")
+        print("\U0001f4ca " + _t("mysql_cli_version").format(ver=version))
     except Exception as e:
-        print(f"❌ 连接测试失败: {e}")
+        print("\u274c " + _t("mysql_cli_conn_fail").format(e=e))
         return False
     data = getData(ip, port, user, password, ssh_info)
     if data is None or data.conn_db2 is None:
@@ -2767,7 +3219,7 @@ def run_inspection(db_info):
     savedoc = saveDoc(context=ret, ofile=ofile, ifile=ifile, inspector_name=inspector_name)
     success = savedoc.contextsave()
     if success:
-        print(f"✅ 报告已生成: {file_name}")
+        print("\u2705 " + _t("mysql_cli_report_ok").format(fname=file_name))
         try:
             if os.path.exists(ifile):
                 os.remove(ifile)
@@ -2775,7 +3227,7 @@ def run_inspection(db_info):
             pass
         return True
     else:
-        print(f"❌ 报告生成失败: {label_name}")
+        print("\u274c " + _t("mysql_cli_report_fail").format(name=label_name))
         return False
 
 def main():
@@ -2812,17 +3264,17 @@ def main():
         elif choice == '3':
             create_excel_template()
         elif choice == '4':
-            print("\n感谢使用 DBCheck MySQL 数据库巡检工具！")
+            print("\n" + _t("mysql_cli_thanks"))
             break
         if choice != '4':
-            continue_choice = input("\n是否返回主菜单? (y/n) [y]: ").strip().lower()
+            continue_choice = input("\n" + _t("mysql_cli_back_menu")).strip().lower()
             if continue_choice in ['', 'y', 'yes']:
                 continue
             else:
-                print("\n感谢使用 DBCheck MySQL 数据库巡检工具！")
+                print("\n" + _t("mysql_cli_thanks"))
                 break
-    end_time = time.time()
-    print(f"\n程序运行总耗时: {end_time - start_time:.2f}秒")
+        end_time = time.time()
+        print("\n" + _t("mysql_cli_total_time").format(t=end_time - start_time))
 
 if __name__ == '__main__':
     main()

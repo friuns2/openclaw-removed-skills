@@ -1,73 +1,85 @@
 # CLAUDE.md
 
-**项目：huo15-knowledge-base** — LLM 驱动的结构化知识库
+**项目：huo15-knowledge-base** — Karpathy LLM Knowledge Base
 
 ## 背景
 
-基于 Andrej Karpathy 的 LLM Knowledge Bases 方案：
-- 用 LLM 作为"研究图书馆员"，主动编译和维护 Markdown 知识库
-- 绕过传统 RAG 的向量数据库，用人类可读的 Wiki 代替黑盒 embedding
-- 核心创新：**Compilation Step** — LLM 读取 raw/ 原始文档，生成结构化 wiki
-
-## 架构
+Karpathy 方案：不用向量数据库，用 LLM 做"研究图书馆员"，把原始文档**增量地**编译并维护进一个**人类可读的 Wiki 百科**。LLM 全职做：摘要、交叉引用、index、log、lint。
 
 ```
-raw/   → 原始文档入库（按日期分目录）
-wiki/  → LLM 编译后的百科全书（Markdown）
-cache/ → 临时缓存
+raw/        ← 原始素材（只读）
+  ↓ LLM 编译（按 wiki/SCHEMA.md 规范）
+wiki/       ← 原子条目 + 强双链 + 三件套（index/log/SCHEMA）
+  ↓ obsidian-sync
+Obsidian Vault（可选） vault/知识库/<scope>/
 ```
 
-**Agent 隔离**: 每个企微 Agent 的数据存在 `~/.openclaw/agents/{agent-id}/agent/kb/`，技能代码共享。
+**核心原则（v2.6.0 起严格执行）**：
+- 一个 wiki 页 = 一个概念（不是"一篇文章 = 一页"）
+- 一篇 raw 文档应该影响 5-15 个 wiki 页（创建少量 + 更新大量）
+- 任何概念第一次提到必须 `[[]]` 双链
+- 每次 ingest/compile/ask/lint 都写 log.md，每次 compile 都重建 index.md
+- `kb-ask` 用 LLM 合成答案 + 引用，不是 grep——并且可以把答案归档回 wiki（"explorations compound"）
 
-## 脚本体系
+**v2.7.0 schema 升级**（对齐 LLM Wiki v2）：
+- **Typed Relations**：frontmatter `relations:` 字段把 `[[]]` 双链按 uses/depends-on/extends/part-of/contradicts/supersedes/superseded-by/related 类型化
+- **Confidence**：每条 wiki 带 0.0-1.0 可信度；≥0.9 才能 stable，<0.5 必须 TODO 注释
+- **Supersession**：新事实推翻旧事实 → 双向 supersedes/superseded-by 标注，不删旧条目（保留证据链）
+- **kb-graph** 按关系类型给 Mermaid 边上不同箭头；**kb-lint** 校验关系合法性 + 双向一致性 + 信度/状态匹配；**kb-index** 标 ✅🟡⚡🚧；**kb-ask** 优先采信高 confidence + 自动跳新页
 
-本技能有两套脚本，开发时请注意区分：
+## 架构原则
 
-### 主脚本（kb-* 前缀，推荐使用）
-| 脚本 | 作用 |
-|------|------|
-| `kb-ingest` | 文档入库（支持 URL/文件/文本，自动抓取）|
-| `kb-compile` | 编译 raw → wiki（调用 LLM）|
-| `kb-search` | 搜索 wiki + Obsidian vault |
-| `kb-lint` | 自动体检 + 可选 LLM 深度分析 |
-| `kb-fetch` | 独立网页抓取工具（纯 Python stdlib）|
-| `kb-llm.py` | LLM API 调用器（从 models.json 加载凭证）|
-| `kb-sync` | 桥接 memory-evolution（可选）|
+- **双作用域**：
+  - `agent` 作用域：每个 Agent 数据在 `~/.openclaw/agents/{agent-id}/agent/kb/`（默认，私有）
+  - `shared` 作用域：跨 Agent 共享数据在 `~/.openclaw/kb/shared/`（通过 `--scope shared` 写入）
+- **代码共享**：Skill 代码在技能目录，所有 Agent 共用
+- **纯 Markdown**：不用数据库，wiki 是纯 .md 文件
+- **无硬编码凭证**：LLM 凭据从 `models.json` 运行时加载
+- **共享 KB 的对接**：@huo15/openclaw-enhance 会把 `~/.openclaw/kb/shared/wiki/` 注册为龙虾 memory 的 corpus（corpus="kb"），使 `memory_search` 能同时搜到共享知识库内容，而无需单独调用 `kb-search`
 
-### 辅助脚本
-| 脚本 | 作用 |
-|------|------|
-| `activate.sh` | 为 Agent 初始化 kb/ 数据目录 |
-| `env.sh` | 加载环境变量（source 使用）|
-| `obsidian-sync.sh` | 同步 wiki → Obsidian vault |
-| `init.sh` | 已弃用，转发到 activate.sh |
-
-### 遗留脚本（*.sh，保留兼容）
-`compile.sh`、`ingest.sh`、`search.sh`、`lint.sh`、`index.sh` — 这些是 Agent 隔离架构之前的版本，操作技能源码目录而非 Agent 数据目录。保留以兼容旧工作流，新开发请使用 kb-* 脚本。
-
-## 配置加载链路
+## 三层记忆/知识库协调
 
 ```
-~/.openclaw/agents/{agent-id}/agent/models.json   → LLM 凭证（provider, apiKey）
-技能目录/config.json                                → 技能配置（Obsidian, 编译参数）
-环境变量 AGENT_DIR                                   → Agent 上下文检测
+L1 龙虾原生 memory（~/.openclaw/memory/*.sqlite, per-agent）
+    ├── L2 enhance 结构化记忆（短规则，enhance-memory.sqlite，corpus="enhance"）
+    └── L3 共享知识库（长文档，~/.openclaw/kb/shared/wiki/, corpus="kb")
 ```
 
-- `models.json` 由 OpenClaw 运行时管理，代码中不硬编码凭证
-- `config.json` 从 `config.example.json` 复制生成
-- 所有 kb-* 脚本通过 `AGENT_DIR` 定位数据目录，默认 `~/.openclaw/agents/main/agent`
+**内容归属判断**：
+- **一句话能说清 + 关于「怎么做」** → L2 enhance_memory_store
+- **整篇文档 + 关于「是什么」** → L3 kb-ingest --scope shared
+- **Agent 个人实验性笔记** → L3 kb-ingest（默认 agent scope，不会被其它 agent 看到）
+
+## 脚本清单
+
+**核心（kb-* 前缀）：**
+- `kb-ingest` — 入库，支持 URL/文件/文本，自动抓取；自动写 log.md
+- `kb-compile` — 调用 LLM，raw → wiki；用外置 prompt（scripts/prompts/compile.md）+ 注入 SCHEMA + 现有 wiki 列表；编译后自动重建 index.md
+- `kb-ask` — **合成式问答**：候选页 → LLM → 带 [[]] 引用的答案；`--save` 归档为新条目
+- `kb-search` — 关键词搜索 wiki + Obsidian vault
+- `kb-index` — 扫 wiki/，按 concepts 分组生成 wiki/index.md
+- `kb-log` — 追加 log.md（事件 ingest/compile/ask/lint），支持 `--tail N`
+- `kb-lint` — 体检：frontmatter / 断链 / stub / orphan / stale / 缺出处
+- `kb-graph` — 生成 graph.mermaid（Mermaid 知识图谱）
+- `kb-fetch` — 独立网页抓取（Python stdlib）
+- `kb-llm.py` — LLM API 调用器（从 models.json 加载）
+
+**模板与 prompt：**
+- `templates/wiki-schema.md` — 首次激活时种入 `wiki/SCHEMA.md`，是给 LLM 看的图书馆员守则
+- `scripts/prompts/compile.md` — kb-compile 的外置 prompt（Karpathy librarian 模式）
+
+**Obsidian（可选）：**
+- `obsidian-sync.sh` — wiki → vault 同步；支持 `--scope agent|shared` / `--shared` / `--all-scopes`
+  - agent scope  → `vault/知识库/agent/`
+  - shared scope → `vault/知识库/shared/`
+
+**其他（已废弃/合并）：**
+- `compile.sh`, `ingest.sh`, `search.sh`, `lint.sh` — 废弃，勿用
+- `init.sh`, `activate.sh` — 被 kb-ingest 自动激活取代
 
 ## 开发规范
 
-- 所有数据存 Markdown，纯文本友好
-- LLM 调用通过 OpenClaw API，不硬编码模型
-- 配置通过 `config.json`，敏感信息不上传
-- 与 memory-evolution 通过 `memory/reference/` 类型桥接
-- Python 脚本仅用标准库（urllib, html.parser, json, re），无第三方依赖
-
-## 已知局限
-
-- `kb-compile` 的 prompt 大小受 LLM token 限制，大量文档需分批
-- Obsidian CLI 为可选依赖，未安装时降级为 grep 搜索
-- `kb-sync --to-memory` 方向暂未实现（单向桥接）
-- 遗留 *.sh 脚本的路径仍指向技能源码目录，不适用于 Agent 隔离场景
+- Python 脚本仅用标准库，无第三方依赖
+- LLM 调用走 `kb-llm.py`，不直接调用 API
+- 配置走 `config.json`，敏感信息不上传
+- 核心脚本不超过 200 行

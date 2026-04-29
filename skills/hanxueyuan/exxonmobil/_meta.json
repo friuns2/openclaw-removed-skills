@@ -1,0 +1,11 @@
+{
+  "owner": "hanxueyuan",
+  "slug": "exxonmobil",
+  "displayName": "Exxonmobil",
+  "latest": {
+    "version": "1.0.5",
+    "publishedAt": 1776238621653,
+    "commit": "https://github.com/openclaw/skills/commit/b2ba2022c8449cb9c2999708596c47947997a896"
+  },
+  "history": []
+}

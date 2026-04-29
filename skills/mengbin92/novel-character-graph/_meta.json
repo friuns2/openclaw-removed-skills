@@ -1,11 +1,17 @@
 {
   "owner": "mengbin92",
   "slug": "novel-character-graph",
-  "displayName": "Novel Character Relationship Graph",
+  "displayName": "Novel Character Graph",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776397160638,
-    "commit": "https://github.com/openclaw/skills/commit/33d9d11dde7e192d7ee47cdc2aceace23505c3ba"
+    "version": "1.0.2",
+    "publishedAt": 1777211682076,
+    "commit": "https://github.com/openclaw/skills/commit/dd77b4ee515465e60ed6aa5ee9759860f6449ea6"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776397160638,
+      "commit": "https://github.com/openclaw/skills/commit/33d9d11dde7e192d7ee47cdc2aceace23505c3ba"
+    }
+  ]
 }

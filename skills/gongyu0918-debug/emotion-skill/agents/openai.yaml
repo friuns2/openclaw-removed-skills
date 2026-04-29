@@ -1,7 +1,7 @@
 interface:
   display_name: "情绪.skill / Emotion Skill"
-  short_description: "面向 Coding Agent 的情绪感知编排层，按用户状态调整验证强度、线程优先级和收口策略"
-  default_prompt: "Use $emotion-skill for coding-agent turns to detect urgency, frustration, skepticism, confusion, caution, or satisfaction, then adjust routing, verification depth, reply style, and post-success guard behavior. This skill only guides coding-task orchestration."
+  short_description: "Positive routing for coding agents under pressure: evidence first, scope protected, progress visible, closeout guarded."
+  default_prompt: "Use $emotion-skill on coding-agent turns when the user asks for evidence, repeats a failed bug, protects scope, waits through a delay, or wants closeout. Apply guidance.system_prompt_addendum first, then response_constraints, routing, progress cadence, action-named state deltas, and satisfaction_lock. Keep raw labels and emotion_vector out of the model prompt unless host_capabilities.include_raw_emotion is explicitly enabled for audit."
 
 policy:
   allow_implicit_invocation: true

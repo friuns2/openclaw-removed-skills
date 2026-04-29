@@ -1,0 +1,11 @@
+{
+  "owner": "sdk-team",
+  "slug": "alibabacloud-dsc-audit",
+  "displayName": "Alibabacloud Dsc Audit",
+  "latest": {
+    "version": "0.0.2",
+    "publishedAt": 1777027869472,
+    "commit": "https://github.com/openclaw/skills/commit/80fe38f23ef4e569d0f08b6ac96316c3a27ccffc"
+  },
+  "history": []
+}

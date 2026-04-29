@@ -3,11 +3,16 @@
   "slug": "career-planner-china",
   "displayName": "中国大陆职业规划师",
   "latest": {
-    "version": "2.0.0",
-    "publishedAt": 1776542604532,
-    "commit": "https://github.com/openclaw/skills/commit/b7fb23fd1fb4bbc50c9f7ebc72a59eecefa4c086"
+    "version": "2.0.118+6460",
+    "publishedAt": 1777406485172,
+    "commit": "https://github.com/openclaw/skills/commit/f83ecb77ca011216d03f4f76670c76d8bc44db4f"
   },
   "history": [
+    {
+      "version": "2.0.0",
+      "publishedAt": 1776542604532,
+      "commit": "https://github.com/openclaw/skills/commit/b7fb23fd1fb4bbc50c9f7ebc72a59eecefa4c086"
+    },
     {
       "version": "1.0.0",
       "publishedAt": 1776479774211,

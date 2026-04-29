@@ -1,0 +1,11 @@
+{
+  "owner": "henryczq",
+  "slug": "mao-selected-works",
+  "displayName": "《毛选》1-7卷文本查询",
+  "latest": {
+    "version": "1.0.1",
+    "publishedAt": 1775645124898,
+    "commit": "https://github.com/openclaw/skills/commit/39e52c36359260080d1f5ce809680e0dd409db37"
+  },
+  "history": []
+}

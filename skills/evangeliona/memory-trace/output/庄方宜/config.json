@@ -1,0 +1,25 @@
+{
+  "soulpod_version": "0.1.0",
+  "created_at": "2026-04-23",
+  "model_preference": {
+    "provider": "openrouter",
+    "model": "auto",
+    "temperature": 0.7,
+    "max_tokens": 512
+  },
+  "rag": {
+    "enabled": false,
+    "strategy": "keyword",
+    "top_k": 3,
+    "note": "Phase 3 后升级为向量检索"
+  },
+  "conversation": {
+    "max_history": 20,
+    "save_transcript": true,
+    "transcript_dir": "conversations/"
+  },
+  "tts_provider": "minimax",
+  "minimax_voice_id": "female-chengshu",
+  "voice_description": "成熟女性音色，温柔知性，成熟稳重，适合内敛博学的女性学者角色",
+  "edge_voice": "zh-HK-HiuGaaiNeural"
+}

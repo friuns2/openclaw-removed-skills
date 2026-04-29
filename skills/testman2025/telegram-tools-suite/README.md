@@ -37,7 +37,8 @@ Quick Start | 快速入口: Install with `pip install -e .`; CLI help `python -m
 7. Start business command | 启动业务命令：
    - 监控：`python3 -m tg_monitor_kit monitor`
    - 搜索：`python3 -m tg_monitor_kit search`
-   - 加群（单轮）：`python3 -m tg_monitor_kit join --once`
+  - 加群（单轮）：`ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit join --once`
+  - 定时群发：`ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit send-schedule`
 
 ## Command List (Recommended) | 命令一览（推荐）
 Execute in the project root directory (if `pip install -e .` is installed, you can directly use `tg-monitor`; otherwise use `PYTHONPATH=src python3 -m tg_monitor_kit`): | 在项目根目录执行（已 `pip install -e .` 时可直接用 `tg-monitor`；否则使用 `PYTHONPATH=src python3 -m tg_monitor_kit`）：
@@ -46,7 +47,8 @@ Execute in the project root directory (if `pip install -e .` is installed, you c
 |--------|--------|------|
 | `monitor` | Whitelist group keyword monitoring, hit notification, 18:00 daily Excel summary | 白名单群关键词监控、命中推送、每日 18:00 Excel 汇总 |
 | `search` | Keyword-based supergroup search, scheduled daily, export to configured directory | 关键词搜超级群、按配置定时、导出到可配置目录 |
-| `join` | Batch join groups from list file; default is one-shot only. Persistent mode requires `TG_ENABLE_PERSISTENT_JOIN=true` | 从清单文件批量加群；默认仅单轮执行。长驻模式需设置 `TG_ENABLE_PERSISTENT_JOIN=true` |
+| `join` | Batch join groups from list file; requires `ENABLE_HIGH_RISK_OPERATIONS=true`. Persistent mode additionally requires `TG_ENABLE_PERSISTENT_JOIN=true` | 从清单文件批量加群；需先设置 `ENABLE_HIGH_RISK_OPERATIONS=true`。长驻模式还需 `TG_ENABLE_PERSISTENT_JOIN=true` |
+| `send-schedule` | Multi-task scheduled message sending by JSON config file; requires `ENABLE_HIGH_RISK_OPERATIONS=true` | 通过 JSON 配置执行多任务定时群发；需先设置 `ENABLE_HIGH_RISK_OPERATIONS=true` |
 | `groups` | List joined groups/channels | 列出已加入群/频道 |
 | `members --group "group name"` | Group member list | 群成员列表 |
 | `history --group "group name" [--limit N]` | Recent messages | 最近消息 |
@@ -67,6 +69,7 @@ tg-monitor monitor
 - `src/tg_monitor_kit/monitoring/`：群监控入口（CLI `monitor` 使用）
 - `src/tg_monitor_kit/search/`：群搜索入口（CLI `search` 使用）
 - `src/tg_monitor_kit/join/`：批量加群入口（CLI `join` 使用）
+- `src/tg_monitor_kit/send/`：定时群发入口（CLI `send-schedule` 使用）
 - `src/tg_monitor_kit/tools/`：查询类工具命令（`account-info` / `members` / `history`）
 
 ## Command Input Matrix | 命令与用户输入要求
@@ -81,6 +84,7 @@ tg-monitor monitor
 | `monitor` | Yes | `config/target_groups.txt` | 文件为空会拒绝启动 |
 | `search` | Yes | `config/group_search_keywords.txt` / `config/group_search.json` | 关键词和定时参数可配置 |
 | `join [--once]` | Yes | `join_targets.txt` / env `TG_JOIN_LIST_FILE` | 每行一个目标，支持链接/用户名 |
+| `send-schedule` | Yes | `config/scheduled_tasks.json` | 仅支持 JSON 多任务配置；`interval_hours` 不小于 0.5；任务数最多 20 |
 
 ## Keyword Monitoring (monitor) — Feature Summary | 关键词监控（monitor）— 功能摘要
 - Listen to whitelist groups from `config/target_groups.txt` (or env `TG_TARGET_GROUPS_FILE`); monitor will not start when the list is empty. | 监听白名单群来自 `config/target_groups.txt`（或环境变量 `TG_TARGET_GROUPS_FILE`）；名单为空时监控不会启动。
@@ -103,26 +107,33 @@ tg-monitor monitor
 
 ### Startup Failure Troubleshooting | 启动失败排查
 1. Long time no connection: Check proxy and network. | 长时间未连接：查代理与网络。
-2. `database is locked`: Close other scripts occupying the same session, **do not run** `monitor`, `search` and `join` **at the same time**. | `database is locked`：关闭其它占用同一会话的脚本，**勿同时**跑 `monitor`、`search` 与 `join`。
+2. `database is locked`: Long-running commands now use isolated temporary session copies. If lock errors still appear (usually after abnormal exits), stop stale Python processes and retry. | `database is locked`：长驻命令已改为临时会话副本隔离；若仍出现锁冲突（多见于异常退出后），请先结束残留 Python 进程再重试。
 3. `tg_monitor.lock`: Reject the second instance when there is already a monitoring instance; you can manually delete the lock file after abnormal exit (confirm no process is occupied). `join` uses `tg_join_from_list.lock`. | `tg_monitor.lock`：已有监控实例时拒绝第二实例；异常退出可手动删除锁文件（确认无进程占用）。`join` 使用 `tg_join_from_list.lock`。
 4. `file is not a database`: Back up and delete the damaged `.session` / journal, then `auth` → `login`. | `file is not a database`：备份并删除损坏的 `.session` / journal，再 `auth` → `login`。
 
 ## Group Search (search) — Feature Summary | 群搜索（search）— 功能摘要
 - Keyword list is read from `config/group_search_keywords.txt` (or env `TG_GROUP_SEARCH_KEYWORDS_FILE`). | 关键词从 `config/group_search_keywords.txt` 读取（或环境变量 `TG_GROUP_SEARCH_KEYWORDS_FILE`）。
 - Schedule/search/output parameters are read from `config/group_search.json` (or env `TG_GROUP_SEARCH_SETTINGS_FILE`). | 定时/搜索/导出参数从 `config/group_search.json` 读取（或环境变量 `TG_GROUP_SEARCH_SETTINGS_FILE`）。
-- **Do not** run at the same time as `monitor`. | **不要**与 `monitor` 同时运行。
+- Uses isolated temporary session copies at runtime, reducing lock contention with other long-running commands. | 运行时使用独立临时会话副本，降低与其它长驻命令的会话锁冲突。
 
 ## Batch Group Joining (join) — Feature Summary | 批量加群（join）— 功能摘要
 - Place the list file **`join_targets.txt`** in the project root (or specify the absolute path or path relative to the project root through the environment variable **`TG_JOIN_LIST_FILE`**), one target per line: public group `@username` / `username`, `https://t.me/username`, `https://t.me/+invitation hash`, `https://t.me/joinchat/...`, etc. Empty lines and lines starting with `#` are ignored; duplicate targets are deduplicated. | 在项目根放置清单文件 **`join_targets.txt`**（或通过环境变量 **`TG_JOIN_LIST_FILE`** 指定绝对路径或相对项目根的路径），每行一个目标：公开群 `@username` / `username`、`https://t.me/username`、`https://t.me/+邀请哈希`、`https://t.me/joinchat/...` 等。空行与 `#` 开头行忽略；同一目标会去重。
-- Persistent mode is disabled by default. Set `TG_ENABLE_PERSISTENT_JOIN=true` to enable scheduled looping. | 长驻模式默认关闭。需显式设置 `TG_ENABLE_PERSISTENT_JOIN=true` 才会按计划循环执行。
+- Persistent mode is disabled by default. Set `ENABLE_HIGH_RISK_OPERATIONS=true TG_ENABLE_PERSISTENT_JOIN=true` to enable scheduled looping. | 长驻模式默认关闭。需显式设置 `ENABLE_HIGH_RISK_OPERATIONS=true TG_ENABLE_PERSISTENT_JOIN=true` 才会按计划循环执行。
 - Hard limits: join interval must be >= 30 minutes, and joins per round must be <= 20; startup is rejected when violated. | 硬限制：加群间隔必须 >= 30 分钟，且每轮加群数 <= 20；超限会拒绝启动。
 - After each round, push success/already in group/failure statistics to favorites (`NOTIFY_TARGET = me`). It will automatically wait and retry when encountering `FloodWait`. | 每轮结束后向收藏夹（`NOTIFY_TARGET = me`）推送成功/已在群/失败统计。遇 `FloodWait` 会自动等待后重试。
 - **Risk Control**: Batch joining groups may trigger Telegram rate limiting or violate terms of service, please control the list content and frequency by yourself; invalid invitation links, requiring administrator review, full group capacity, etc. will be recorded as failures. | **风控**：批量加群
 
+## Scheduled Messaging (send-schedule) — Feature Summary | 定时群发（send-schedule）— 功能摘要
+- Task source is fixed to `config/scheduled_tasks.json`, with top-level key `tasks` as an array. | 任务来源固定为 `config/scheduled_tasks.json`，顶层键为 `tasks` 数组。
+- Required fields per task: `name`, `target_group_id`, `message`, `interval_hours`. | 单任务必填字段：`name`、`target_group_id`、`message`、`interval_hours`。
+- Limits: `interval_hours >= 0.5`, and total tasks per run <= 20. | 限制：`interval_hours >= 0.5`，单次启动最多 20 个任务。
+- Scheduler runs independently from `monitor`, and logs all trigger times in Beijing time. | 调度进程与 `monitor` 独立运行，触发日志统一按北京时间输出。
+- Start command: `ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit send-schedule`. | 启动命令：`ENABLE_HIGH_RISK_OPERATIONS=true python3 -m tg_monitor_kit send-schedule`。
+
 ## High-Risk Safeguards | 高风险能力保护
-- `join` 默认仅允许单轮模式（`--once`）；长驻模式需设置 `TG_ENABLE_PERSISTENT_JOIN=true`。 | `join` is one-shot by default; persistent mode requires `TG_ENABLE_PERSISTENT_JOIN=true`.
-- `scheduled_send.py` 需要先设置 `TG_RISK_ACK=I_UNDERSTAND`，否则拒绝发送。 | `scheduled_send.py` requires `TG_RISK_ACK=I_UNDERSTAND` before sending.
-- `scheduled_send.py` 发送间隔必须 >= 30 分钟，且单次最多 20 个任务。 | `scheduled_send.py` enforces >=30 minutes interval and max 20 tasks.
+- `join` 与 `send-schedule` 均要求显式设置 `ENABLE_HIGH_RISK_OPERATIONS=true` 才可运行。 | Both `join` and `send-schedule` require explicit `ENABLE_HIGH_RISK_OPERATIONS=true`.
+- `join` 默认仅允许单轮模式（`--once`）；长驻模式还需设置 `TG_ENABLE_PERSISTENT_JOIN=true`。 | `join` is one-shot by default; persistent mode additionally requires `TG_ENABLE_PERSISTENT_JOIN=true`.
+- `send-schedule` 使用 `config/scheduled_tasks.json`；`interval_hours` 不能小于 0.5，且任务数不能超过 20。 | `send-schedule` reads `config/scheduled_tasks.json`; `interval_hours` must be >= 0.5 and tasks <= 20.
 
 ## Stop Long-Running Tasks | 如何停止长驻任务
 - 前台运行：按 `Ctrl+C`。 | Foreground run: press `Ctrl+C`.

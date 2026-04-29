@@ -3,11 +3,16 @@
   "slug": "cms-cwork-workflow",
   "displayName": "工作协同官方skill",
   "latest": {
-    "version": "1.0.9",
-    "publishedAt": 1776672961866,
-    "commit": "https://github.com/openclaw/skills/commit/4a287a9f643c1f50550f3800dce8e4cb5c35b546"
+    "version": "1.0.12",
+    "publishedAt": 1776940324010,
+    "commit": "https://github.com/openclaw/skills/commit/3a0e2f7a06b70bc5c68687009cd91194bbe3a83c"
   },
   "history": [
+    {
+      "version": "1.0.9",
+      "publishedAt": 1776672961866,
+      "commit": "https://github.com/openclaw/skills/commit/4a287a9f643c1f50550f3800dce8e4cb5c35b546"
+    },
     {
       "version": "1.0.7",
       "publishedAt": 1775724257436,

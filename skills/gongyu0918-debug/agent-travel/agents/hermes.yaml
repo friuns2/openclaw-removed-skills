@@ -1,7 +1,7 @@
 interface:
   display_name: "Agent Travel"
-  short_description: "Progressive-disclosure travel hints for Hermes / 面向 Hermes 的渐进式外出学习提示"
-  default_prompt: "Use $agent-travel as a progressive-disclosure skill, keep travel small-scope by default, avoid loading large references unless invoked, and store only advisory-only hints for the next relevant turn. / 把 $agent-travel 当成 progressive-disclosure skill 使用，默认 travel 保持小范围，未触发时不要加载大参考文件，并且只为下一次相关回合存储 advisory-only 提示。"
+  short_description: "Hermes scheduled research notes with local acceptance"
+  default_prompt: "Use $agent-travel as a progressive-disclosure skill for Hermes scheduled, task-end, or explicit research windows. Generate a small redacted query plan first, keep large references unloaded until needed, and store only advisory-only hints for the next relevant turn."
 
 policy:
   allow_implicit_invocation: false

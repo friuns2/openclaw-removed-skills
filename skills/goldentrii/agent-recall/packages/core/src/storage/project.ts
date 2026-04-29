@@ -11,18 +11,15 @@ import type { ProjectInfo } from "../types.js";
 
 const execFileAsync = promisify(execFile);
 
-let _cachedProject: string | null = null;
-
 /**
  * Auto-detect project slug from environment, git, or cwd.
+ * No caching — each call re-detects from the current environment.
+ * Use AGENT_RECALL_PROJECT env var for a stable override across calls.
  */
 export async function detectProject(): Promise<string> {
-  if (_cachedProject) return _cachedProject;
-
-  // 1. Env var
+  // 1. Env var — stable explicit override
   if (process.env.AGENT_RECALL_PROJECT) {
-    _cachedProject = process.env.AGENT_RECALL_PROJECT;
-    return _cachedProject;
+    return process.env.AGENT_RECALL_PROJECT;
   }
 
   // 2. Git repo name (async)
@@ -31,13 +28,13 @@ export async function detectProject(): Promise<string> {
     const remote = stdout.trim();
     if (remote) {
       const name = path.basename(remote, ".git");
-      if (name) { _cachedProject = name; return name; }
+      if (name) return name;
     }
   } catch {
     try {
       const { stdout } = await execFileAsync("git", ["rev-parse", "--show-toplevel"], { timeout: 3000 });
       const root = stdout.trim();
-      if (root) { _cachedProject = path.basename(root); return _cachedProject; }
+      if (root) return path.basename(root);
     } catch {
       // fall through
     }
@@ -49,15 +46,38 @@ export async function detectProject(): Promise<string> {
   if (fs.existsSync(pkgPath)) {
     try {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-      if (pkg.name) { _cachedProject = pkg.name.replace(/^@[^/]+\//, "") as string; return _cachedProject!; }
+      if (pkg.name) return (pkg.name as string).replace(/^@[^/]+\//, "");
     } catch {
       // fall through
     }
   }
 
-  // 4. Basename of cwd
-  _cachedProject = path.basename(cwd);
-  return _cachedProject;
+  // 4. Basename of cwd — but check if it looks like the home directory username
+  const candidate = path.basename(cwd);
+  const homeDir = process.env.HOME ?? process.env.USERPROFILE ?? "";
+  const homeBasename = homeDir ? path.basename(homeDir) : "";
+
+  if (candidate && candidate !== homeBasename) {
+    return candidate;
+  }
+
+  // 5. cwd resolved to home dir username — try package.json in parent dirs
+  let searchDir = cwd;
+  for (let i = 0; i < 3; i++) {
+    const pkg = path.join(searchDir, "package.json");
+    if (fs.existsSync(pkg)) {
+      try {
+        const parsed = JSON.parse(fs.readFileSync(pkg, "utf-8"));
+        if (parsed.name) return (parsed.name as string).replace(/^@[^/]+\//, "");
+      } catch { /* fall through */ }
+    }
+    const parent = path.dirname(searchDir);
+    if (parent === searchDir) break;
+    searchDir = parent;
+  }
+
+  // 6. Final fallback: use the directory name even if it matches username
+  return candidate || "default";
 }
 
 /**
@@ -68,6 +88,17 @@ export async function resolveProject(project: string | undefined): Promise<strin
     return await detectProject();
   }
   return project;
+}
+
+/**
+ * Returns true if a filename is a journal entry (legacy or smart-named).
+ * Excludes log/capture files and index files.
+ */
+function isJournalFile(f: string): boolean {
+  if (!f.endsWith(".md")) return false;
+  if (f === "index.md") return false;
+  if (f.includes("-log.md") || f.includes("--capture--")) return false;
+  return /^\d{4}-\d{2}-\d{2}/.test(f);
 }
 
 /**
@@ -83,14 +114,12 @@ export function listAllProjects(): ProjectInfo[] {
     for (const slug of dirs) {
       const jDir = path.join(projectsDir, slug, "journal");
       if (fs.existsSync(jDir)) {
-        const files = fs.readdirSync(jDir).filter((f) =>
-          /^\d{4}-\d{2}-\d{2}\.md$/.test(f)
-        );
+        const files = fs.readdirSync(jDir).filter(isJournalFile);
         if (files.length > 0) {
           files.sort().reverse();
           projects.set(slug, {
             slug,
-            lastEntry: files[0].replace(".md", ""),
+            lastEntry: files[0].slice(0, 10),
             entryCount: files.length,
           });
         }
@@ -110,14 +139,12 @@ export function listAllProjects(): ProjectInfo[] {
           const slug = parts[parts.length - 1] || entry;
 
           if (!projects.has(slug)) {
-            const files = fs.readdirSync(journalPath).filter((f) =>
-              /^\d{4}-\d{2}-\d{2}\.md$/.test(f)
-            );
+            const files = fs.readdirSync(journalPath).filter(isJournalFile);
             if (files.length > 0) {
               files.sort().reverse();
               projects.set(slug, {
                 slug,
-                lastEntry: files[0].replace(".md", ""),
+                lastEntry: files[0].slice(0, 10),
                 entryCount: files.length,
               });
             }

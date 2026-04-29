@@ -7,26 +7,49 @@ description: Use when diagnosing, configuring, fixing, tuning, or setting up any
 
 Operate, diagnose, configure, and fix OpenClaw installations. You have direct filesystem access — use it to read config, search docs, and make safe edits.
 
+**Source:** https://github.com/rendrag-git/openclaw-admin-skill
+
+## Scope & Safety
+
+This skill operates **locally only** on the user's OpenClaw installation. Before acting, observe these rails:
+
+- **Never open `~/.openclaw/secrets.json` or `~/.openclaw/.env`.** Reference them by path when explaining config, but do not read their contents into the conversation, tool output, logs, or any external destination. If a diagnostic genuinely requires a secret value, ask the user to paste the specific field.
+- **Never transmit config, env, secrets, session data, or agent workspace contents to any external service** (web fetches, paste sites, third-party APIs, remote agents). Local commands and user-approved doc lookups only.
+- **Require explicit user confirmation before any of:**
+  - writing to `~/.openclaw/openclaw.json` beyond a single validated `openclaw config set`
+  - `openclaw gateway restart` / `stop` / service reinstall
+  - rotating, deleting, or overwriting tokens, OAuth profiles, or plugin credentials
+  - deleting agents, sessions, plugins, or cron jobs
+  - any `rm`, `mv`, or destructive git/systemd action touching OpenClaw state
+- **Back up before editing.** Use the Safe Config Editing Workflow below for any `openclaw.json` change — never batch-write the whole file.
+- **Read-only investigation is fine without asking** (status commands, log tailing, config validation, grepping docs).
+- **Agent sessions and workspaces may contain user conversations, prompts, and PII.** Listing them (names, timestamps, sizes, file paths) is fine without asking. Before reading the *contents* of any file under `~/.openclaw/agents/<id>/sessions/` or an agent workspace, ask the user first — explain what you're looking for and why so they can approve, narrow the scope, or point you at the right session (they may not know which one without your help). Never quote or summarize session bodies in external fetches, cross-agent messages, or any destination outside this conversation, even after approval.
+
 ## Key Paths
 
 | What | Path |
 |------|------|
 | **Config** | `~/.openclaw/openclaw.json` (JSON5 — comments + trailing commas OK) |
-| **Env vars** | `~/.openclaw/.env` |
-| **Secrets** | `~/.openclaw/secrets.json` |
+| **Env vars** | `~/.openclaw/.env` — **do not open; reference by path only** (see Scope & Safety) |
+| **Secrets** | `~/.openclaw/secrets.json` — **do not open; reference by path only** (see Scope & Safety) |
 | **Agent workspaces** | `~/.openclaw/agents/<agentId>/` |
 | **Sessions** | `~/.openclaw/agents/<agentId>/sessions/` |
 | **Extensions** | `~/.openclaw/extensions/` (+ paths in `plugins.load.paths`) |
-| **Docs (~500 files)** | `~/.npm-global/lib/node_modules/openclaw/docs/` |
-| **Docs manifest** | `~/.npm-global/lib/node_modules/openclaw/docs/docs.json` |
-| **CLI binary** | `~/.npm-global/bin/openclaw` |
-| **Managed skills** | `~/.npm-global/lib/node_modules/openclaw/skills/` |
+| **Local docs (shipped subset)** | `<npm-prefix>/lib/node_modules/openclaw/docs/` — recent npm builds ship only a small `reference/` subset (templates, etc.), not the full docset. See "Finding the Right Doc" below. |
+| **CLI binary** | `<npm-prefix>/bin/openclaw` (find with `which openclaw`) |
+| **Managed skills** | `<npm-prefix>/lib/node_modules/openclaw/skills/` |
 | **Hooks** | `~/.openclaw/hooks/` |
 | **Custom scripts** | `~/.openclaw/bin/` |
 
 ## Diagnostic Ladder
 
-Run these in order when something is broken:
+Always start by checking the installed version so you know which docs/behavior apply:
+
+```bash
+openclaw --version                 # record this — docs and flags drift between builds
+```
+
+Then run these in order when something is broken:
 
 ```bash
 openclaw status                    # channel health + recent errors
@@ -58,8 +81,30 @@ openclaw logs --follow                     # then reproduce the issue
 
 ## Finding the Right Doc
 
-The docs directory has ~500 markdown files with consistent frontmatter:
+**First, always check the version** so you read docs that match the installed build:
+```bash
+openclaw --version
+```
 
+Recent npm builds do NOT ship the full docset locally — only a small `reference/` subset (templates, etc.) under `<npm-prefix>/lib/node_modules/openclaw/docs/`. For anything beyond templates, use one of these three sources (in order of convenience):
+
+1. **Online docs** — https://docs.openclaw.ai/
+   Fastest lookup. Rendered, searchable. Use WebFetch when you need a specific page.
+
+2. **Full source docs on GitHub** — https://github.com/openclaw/openclaw/tree/main/docs
+   Authoritative source. Browse the tree or fetch raw markdown via WebFetch, e.g.:
+   `https://raw.githubusercontent.com/openclaw/openclaw/main/docs/<path>.md`
+   Cross-check the tag/commit against `openclaw --version` if behavior seems off.
+
+3. **Offline / full local copy** — clone the repo when you need grep-able full docs:
+   ```bash
+   git clone https://github.com/openclaw/openclaw.git ~/src/openclaw
+   # then grep the local tree:
+   grep -rl "your search term" ~/src/openclaw/docs/ --include="*.md"
+   ```
+   Pull/refresh before relying on it; check out the tag matching your installed version if you need an exact match.
+
+Docs use consistent frontmatter — search the `read_when` and `summary` fields to find the right page:
 ```yaml
 ---
 summary: "One-line description"
@@ -69,12 +114,7 @@ title: "Page Title"
 ---
 ```
 
-**To find docs for a problem**, grep the `read_when` and `summary` fields:
-```bash
-grep -rl "your search term" ~/.npm-global/lib/node_modules/openclaw/docs/ --include="*.md"
-```
-
-**Key doc directories:**
+**Key doc directories (in the online/GitHub/cloned tree):**
 - `cli/` — command reference (one file per command)
 - `gateway/` — config reference, troubleshooting, security
 - `channels/` — per-platform setup guides

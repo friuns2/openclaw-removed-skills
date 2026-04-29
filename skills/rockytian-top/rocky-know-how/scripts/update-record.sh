@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# 更新经验脚本 - v2.8.3
+# 更新经验脚本 - v3.3.0
 # 替换已有经验的解决方案
 # ============================================================
 
@@ -20,6 +20,36 @@ EXP_ID="$1"
 NEW_SOLUTION="$2"
 NEW_PREVENTION="$3"
 NEW_TAGS="${4:-update}"
+
+# 校验：经验ID不能为空且格式正确
+if [ -z "$EXP_ID" ]; then
+    echo "❌ 错误: 经验ID不能为空"
+    exit 1
+fi
+if ! echo "$EXP_ID" | grep -qE '^EXP-[0-9]+-[0-9]+$'; then
+    echo "❌ 错误: 经验ID格式无效: $EXP_ID (期望 EXP-YYYYMMDD-NNN)"
+    exit 1
+fi
+
+# 校验：新方案不能为空
+if [ -z "$NEW_SOLUTION" ]; then
+    echo "❌ 错误: 新解决方案不能为空"
+    exit 1
+fi
+
+# 校验：预防措施不能为空
+if [ -z "$NEW_PREVENTION" ]; then
+    echo "❌ 错误: 预防措施不能为空"
+    exit 1
+fi
+
+# 校验：路径穿越检测
+for val in "$EXP_ID" "$NEW_SOLUTION" "$NEW_PREVENTION" "$NEW_TAGS"; do
+    if [[ "$val" == *../* || "$val" == *..\\\\* ]]; then
+        echo "❌ 错误: 参数包含非法字符"
+        exit 1
+    fi
+done
 
 if [ ! -f "$ERRORS_FILE" ]; then
     echo "错误: 经验文件不存在: $ERRORS_FILE"
@@ -75,3 +105,4 @@ fi
 
 echo "✅ 经验已更新: $EXP_ID"
 echo "新方案: $NEW_SOLUTION"
+echo "新预防: $NEW_PREVENTION"

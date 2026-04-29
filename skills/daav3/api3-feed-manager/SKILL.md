@@ -5,7 +5,7 @@ description: Discover, activate, fund, and maintain Api3 data feeds permissionle
 
 # Api3 Feed Manager
 
-This skill is the oracle-enablement layer for agent-built projects that needing reliable, decentralized, onchain data feeds. Api3 provide provably decentralised feeds that have supported over $1B, and can be activated entirely permissionlessly by agents.
+This skill is the oracle-enablement layer for agent-built projects that need reliable, decentralized, onchain data feeds.
 
 It is designed to let agents:
 - find the correct Api3 feed
@@ -136,10 +136,43 @@ Aim to return structured results containing:
 
 ## Current implementation status
 
-This is the initial skill skeleton.
+Current honest state:
+- feed discovery and readiness inspection: implemented
+- exact guarded `buySubscription(...)` execution: implemented
+- execution modes:
+  - `direct`
+  - `wrapper` when exact wrapper calldata is derivable safely
+  - `auto`
+- machine-usable funding state classification: implemented
+  - `not-needed`
+  - `executable`
+  - `browser-assisted`
+  - `unsupported`
+- browser-assisted funding should stay automatable where safe
+  - use `browser-plan` to produce the exact Market flow
+  - if the required UI is reachable, execute that plan with the browser tool instead of downgrading to a vague manual handoff
+  - after any funding execution, re-run feed readiness before claiming the feed is ready for downstream oracle or EVK steps
+- browser-assisted funding planning: implemented via `browser-plan`
 
-Near-term implementation priorities:
-1. feed discovery adapter
-2. feed status/runway inspection
-3. activation/top-up execution wrapper
-4. maintenance mode
+Still not universal:
+- not every funding path is exact onchain-executable yet
+- some flows still require browser-assisted automation
+- unsupported cases must still fail closed and be reported explicitly
+
+Current priorities:
+1. broaden executable funding coverage beyond the first exact family
+2. keep browser-assisted flows automatable where safe
+3. preserve explicit state classification instead of overclaiming support
+4. improve maintenance-mode and multi-feed workflows
+
+## Downstream EVK canary handoff
+
+When this skill hands off to downstream EVK deployment tooling or canary execution:
+- require a signer-backed dry-run before any real send
+- treat multi-transaction deployment plans as sequential, not parallel
+- if later transactions depend on contracts created earlier in the same plan, wait for each receipt before sending the next transaction
+- if funding landed through the `browser-assisted` branch, execute the returned `browser-plan` when the Market flow is reachable and then re-run readiness before continuing
+- do not collapse `fundingExecutionClassification.state` into a generic “ready”; preserve the exact branch all the way into downstream reporting
+- do not assume `real-send ready` means “safe to fire blind”, it only means the plan has executable payloads and still needs a final operator check
+- if downstream EVK work needs proof of real borrowability, treat that as a separate post-deploy milestone rather than equating deployment success with borrowability
+- if the operator intentionally wants a duplicate or near-duplicate market attempt, require `duplicatePolicy: "warn-only"` so the planner keeps the path deployable and emits an explicit warning instead of silently bypassing duplicate protection

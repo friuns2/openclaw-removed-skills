@@ -1,159 +1,140 @@
-#!/bin/bash
-# Audio PT Auto-Reply - Automatic Installation Script
-# Detects architecture, downloads Piper, voice models, and dependencies
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
 
-set -e
-
-echo "🎙️  Audio PT Auto-Reply - Smart Installation"
-echo "=============================================="
-echo ""
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Detect architecture
-ARCH=$(uname -m)
-OS=$(uname -s)
-
-echo -e "${BLUE}[1/6] Detecting system...${NC}"
-echo "  Architecture: $ARCH"
-echo "  OS: $OS"
-echo ""
-
-# Set Piper download URL based on architecture
-case $ARCH in
-  arm64|aarch64)
-    PIPER_URL="https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_arm64.tar.gz"
-    PIPER_FILE="piper_arm64.tar.gz"
-    echo -e "${GREEN}✓ ARM64 detected (Raspberry Pi, Apple Silicon)${NC}"
-    ;;
-  x86_64|amd64)
-    PIPER_URL="https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_x86_64.tar.gz"
-    PIPER_FILE="piper_x86_64.tar.gz"
-    echo -e "${GREEN}✓ x86_64 detected (Intel/AMD)${NC}"
-    ;;
-  *)
-    echo -e "${RED}✗ Unsupported architecture: $ARCH${NC}"
-    exit 1
-    ;;
-esac
-
-# Setup paths
-WORKSPACE="${HOME}/.openclaw/workspace"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE="${WORKSPACE:-${HOME}/.openclaw/workspace}"
 PIPER_DIR="${WORKSPACE}/piper"
-VOICES_DIR="${PIPER_DIR}"
-SKILL_DIR="${WORKSPACE}/skills/audio-ptbr-autoreply"
-VENV="${WORKSPACE}/venv"
+VENV_DIR="${SCRIPT_DIR}/.venv"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
-echo ""
-echo -e "${BLUE}[2/6] Creating directories...${NC}"
-mkdir -p "$PIPER_DIR"
-mkdir -p "$VOICES_DIR"
-mkdir -p "$(dirname $SKILL_DIR)"
-echo -e "${GREEN}✓ Directories created${NC}"
+PIPER_VERSION="v1.2.0"
 
-echo ""
-echo -e "${BLUE}[3/6] Installing Python dependencies...${NC}"
-
-# Check for required system tools
-for cmd in python3 pip ffmpeg; do
-  if ! command -v $cmd &> /dev/null; then
-    echo -e "${YELLOW}⚠ $cmd not found. Installing...${NC}"
-    if [[ "$OS" == "Linux" ]]; then
-      sudo apt-get update && sudo apt-get install -y $cmd
-    elif [[ "$OS" == "Darwin" ]]; then
-      brew install $cmd
-    fi
-  fi
-done
-
-# Install Python dependencies
-python3 -m pip install --upgrade pip setuptools wheel > /dev/null 2>&1
-python3 -m pip install -q transformers torch torchaudio anthropic
-
-if [ -d "$VENV" ]; then
-  source "$VENV/bin/activate"
-  python -m pip install -q transformers torch torchaudio anthropic
-  deactivate
-fi
-
-echo -e "${GREEN}✓ Python dependencies installed${NC}"
-
-echo ""
-echo -e "${BLUE}[4/6] Downloading Piper TTS...${NC}"
-
-if [ -f "$PIPER_DIR/piper/piper" ]; then
-  echo -e "${GREEN}✓ Piper already installed${NC}"
-else
-  echo "  Downloading from: $PIPER_URL"
-  cd "$PIPER_DIR"
-  wget -q "$PIPER_URL" -O "$PIPER_FILE"
-  tar xzf "$PIPER_FILE"
-  rm "$PIPER_FILE"
-  chmod +x "$PIPER_DIR/piper/piper"
-  echo -e "${GREEN}✓ Piper installed successfully${NC}"
-fi
-
-echo ""
-echo -e "${BLUE}[5/6] Downloading voice models (this may take a while)...${NC}"
-
-# Voice models with their URLs
-declare -A VOICES=(
+declare -A VOICE_URLS=(
   ["pt_BR-jeff-medium.onnx"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/jeff/medium/pt_BR-jeff-medium.onnx"
   ["pt_BR-jeff-medium.onnx.json"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/jeff/medium/pt_BR-jeff-medium.onnx.json"
   ["pt_BR-cadu-medium.onnx"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx"
   ["pt_BR-cadu-medium.onnx.json"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx.json"
   ["pt_BR-faber-medium.onnx"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx"
   ["pt_BR-faber-medium.onnx.json"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx.json"
-  ["pt_BR-miro-high.onnx"]="https://huggingface.co/TarcisoAmorim/piper-pt_BR-miro-high/resolve/main/model.onnx"
-  ["pt_BR-miro-high.onnx.json"]="https://huggingface.co/TarcisoAmorim/piper-pt_BR-miro-high/resolve/main/config.json"
+  ["pt_BR-miro-high.onnx"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/miro/high/pt_BR-miro-high.onnx"
+  ["pt_BR-miro-high.onnx.json"]="https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/miro/high/pt_BR-miro-high.onnx.json"
 )
 
-cd "$VOICES_DIR"
-for voice_file in "${!VOICES[@]}"; do
-  if [ ! -f "$voice_file" ]; then
-    echo "  Downloading $voice_file..."
-    wget -q "${VOICES[$voice_file]}" -O "$voice_file" || echo -e "${YELLOW}⚠ Failed to download $voice_file${NC}"
+info() { printf '%s\n' "$*"; }
+fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+
+have_cmd() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+download_to() {
+  local url="$1"
+  local dest="$2"
+  if have_cmd curl; then
+    curl -fsSL "$url" -o "$dest"
+  elif have_cmd wget; then
+    wget -q "$url" -O "$dest"
+  else
+    fail "Neither curl nor wget is installed. Install one of them and rerun."
   fi
-done
+}
 
-echo -e "${GREEN}✓ Voice models ready${NC}"
+detect_piper_archive() {
+  local arch os file
+  arch="$(uname -m)"
+  os="$(uname -s)"
 
-echo ""
-echo -e "${BLUE}[6/6] Finalizing setup...${NC}"
+  case "$arch" in
+    arm64|aarch64) file="piper_arm64.tar.gz" ;;
+    x86_64|amd64) file="piper_x86_64.tar.gz" ;;
+    *) fail "Unsupported architecture: ${arch}" ;;
+  esac
 
-# Make scripts executable
-chmod +x "$SKILL_DIR/scripts/"*.py 2>/dev/null || true
-chmod +x "$SKILL_DIR/scripts/"*.sh 2>/dev/null || true
+  case "$os" in
+    Linux|Darwin) ;;
+    *) fail "Unsupported operating system: ${os}" ;;
+  esac
 
-# Create config directory if needed
-mkdir -p "$(dirname $WORKSPACE/.audio_pt_voice_config)"
+  printf 'https://github.com/rhasspy/piper/releases/download/%s/%s\n' "$PIPER_VERSION" "$file"
+}
 
-echo -e "${GREEN}✓ Setup complete!${NC}"
+check_os_dependencies() {
+  have_cmd "$PYTHON_BIN" || fail "python3 is required but not found."
+  have_cmd ffmpeg || fail "ffmpeg is required but not found."
+  have_cmd tar || fail "tar is required but not found."
+  if ! have_cmd curl && ! have_cmd wget; then
+    fail "curl or wget is required but neither is installed."
+  fi
+}
 
-echo ""
-echo "=============================================="
-echo -e "${GREEN}✅ Installation successful!${NC}"
-echo "=============================================="
-echo ""
-echo "📝 Next steps:"
-echo "  1. Restart OpenClaw: openclaw gateway restart"
-echo "  2. Try voice commands:"
-echo "     /voz list        - Show available voices"
-echo "     /voz jeff        - Use Jeff voice"
-echo "     /voz miro        - Use Miro (feminine)"
-echo ""
-echo "💡 Tips:"
-echo "  • Send audio message → Receive voice reply"
-echo "  • Say 'texto' for text mode"
-echo "  • Use /voz command to change voices"
-echo ""
-echo "📊 Installation Summary:"
-echo "  Piper: $PIPER_DIR"
-echo "  Voices: $VOICES_DIR"
-echo "  Config: $WORKSPACE/.audio_pt_voice_config"
-echo ""
+create_venv() {
+  info "[1/5] Creating local virtualenv"
+  "$PYTHON_BIN" -m venv "$VENV_DIR"
+  "${VENV_DIR}/bin/python" -m pip install --upgrade pip setuptools wheel
+  "${VENV_DIR}/bin/pip" install -r "${SCRIPT_DIR}/requirements.txt"
+  if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+    info "ANTHROPIC_API_KEY detected; installing optional Anthropic dependency"
+    "${VENV_DIR}/bin/pip" install -r "${SCRIPT_DIR}/requirements-optional.txt"
+  fi
+}
+
+install_piper() {
+  info "[2/5] Installing Piper into ${PIPER_DIR}"
+  mkdir -p "$PIPER_DIR"
+  if [[ -x "${PIPER_DIR}/piper/piper" ]]; then
+    info "Piper already present"
+    return 0
+  fi
+
+  local archive_url archive_path
+  archive_url="$(detect_piper_archive)"
+  archive_path="${PIPER_DIR}/piper.tar.gz"
+  download_to "$archive_url" "$archive_path"
+  tar -xzf "$archive_path" -C "$PIPER_DIR"
+  rm -f "$archive_path"
+  chmod +x "${PIPER_DIR}/piper/piper"
+}
+
+install_voices() {
+  info "[3/5] Downloading PT-BR voice models"
+  mkdir -p "$PIPER_DIR"
+  local name url
+  for name in "${!VOICE_URLS[@]}"; do
+    url="${VOICE_URLS[$name]}"
+    if [[ -f "${PIPER_DIR}/${name}" ]]; then
+      info "  - ${name} already present"
+    else
+      info "  - downloading ${name}"
+      download_to "$url" "${PIPER_DIR}/${name}"
+    fi
+  done
+}
+
+write_default_config() {
+  info "[4/5] Writing default voice config"
+  mkdir -p "$WORKSPACE"
+  if [[ ! -f "${WORKSPACE}/.audio_pt_voice_config.json" ]]; then
+    cat > "${WORKSPACE}/.audio_pt_voice_config.json" <<'JSON'
+{"voice":"jeff"}
+JSON
+  fi
+}
+
+run_health_check() {
+  info "[5/5] Running health check"
+  "${VENV_DIR}/bin/python" "${SCRIPT_DIR}/health_check.py"
+}
+
+main() {
+  check_os_dependencies
+  create_venv
+  install_piper
+  install_voices
+  write_default_config
+  run_health_check
+  info "Install complete."
+  info "Restart OpenClaw after installation if needed."
+}
+
+main "$@"

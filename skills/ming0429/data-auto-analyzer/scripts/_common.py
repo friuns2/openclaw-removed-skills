@@ -9,19 +9,51 @@ warnings.filterwarnings("ignore")
 
 
 def load_file(path):
-    """统一读取 xlsx/xls/csv 文件，自动识别编码"""
+    """统一读取 xlsx/xls/csv 文件，自动识别编码，自动剔除汇总行"""
     ext = os.path.splitext(path)[1].lower()
+    df = None
     if ext in (".xlsx", ".xlsm"):
-        return pd.read_excel(path, engine="openpyxl")
-    if ext == ".xls":
-        return pd.read_excel(path, engine="xlrd")
-    if ext == ".csv":
+        df = pd.read_excel(path, engine="openpyxl")
+    elif ext == ".xls":
+        df = pd.read_excel(path, engine="xlrd")
+    elif ext == ".csv":
         for enc in ("utf-8", "utf-8-sig", "gbk", "gb2312"):
             try:
-                return pd.read_csv(path, encoding=enc)
+                df = pd.read_csv(path, encoding=enc)
+                break
             except Exception:
                 continue
-    raise ValueError(f"不支持的格式: {ext}")
+    if df is None:
+        raise ValueError(f"不支持的格式: {ext}")
+    return _drop_summary_rows(df)
+
+
+def _drop_summary_rows(df):
+    """识别并剔除报表中的汇总/合计/总计/小计/平均行"""
+    summary_markers = {
+        "汇总", "合计", "总计", "小计", "平均", "均值", "求和",
+        "total", "sum", "subtotal", "summary", "avg", "average", "mean",
+        "总合", "总和"
+    }
+
+    def is_summary_row(row):
+        for v in row.values:
+            if pd.isna(v):
+                continue
+            s = str(v).strip().lower()
+            if s in summary_markers:
+                return True
+            # 多人名堆叠：超过 5 个逗号且无空格，很可能是汇总行
+            if s.count(",") >= 5 and len(s) > 20 and " " not in s:
+                return True
+        return False
+
+    before = len(df)
+    mask = df.apply(is_summary_row, axis=1)
+    if mask.any():
+        df = df[~mask].reset_index(drop=True)
+        print(f"  [自动清理] 移除 {before - len(df)} 行汇总/合计类数据")
+    return df
 
 
 # 常见列名识别规则

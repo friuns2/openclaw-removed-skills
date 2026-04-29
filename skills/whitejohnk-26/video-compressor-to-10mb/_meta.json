@@ -1,0 +1,11 @@
+{
+  "owner": "whitejohnk-26",
+  "slug": "video-compressor-to-10mb",
+  "displayName": "Video Compressor To 10mb",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776229868634,
+    "commit": "https://github.com/openclaw/skills/commit/8b50a7a1ef8a0ea4a4c39e385cff12b35031a33a"
+  },
+  "history": []
+}

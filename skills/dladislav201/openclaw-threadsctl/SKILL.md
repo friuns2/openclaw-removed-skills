@@ -15,6 +15,7 @@ This skill is model-agnostic. It can be used with `OpenAI Codex`, `Gemini`, or a
 - `THREADS_SERVICE_URL` and `THREADS_SERVICE_API_KEY` are configured for the CLI
 - At least one working OpenClaw text model is configured
 - Optional: an image generation provider such as `Gemini` if the user wants help creating images before posting
+- Run `threadsctl` from `/opt/threads-service-ts/threads-service` on the server where the service is deployed
 
 ## Use when
 
@@ -38,7 +39,9 @@ This skill is model-agnostic. It can be used with `OpenAI Codex`, `Gemini`, or a
 8. Show concise summaries of results and include IDs only when useful.
 9. If a command fails, surface the real error and explain the likely next step.
 10. If the user wants a new image created, handle image generation separately before publishing.
-11. Only publish image posts after you have a final reachable `media_url`.
+11. Prefer `--file` for images generated locally by OpenClaw under `/root/.openclaw/media/...`.
+12. Use `--media-url` only when the image is already hosted at a reachable public URL.
+13. Run `threadsctl` commands from default dir `/opt/threads-service-ts/threads-service`(if user run threadsctl service there) so the deployed wrapper and Docker setup are used.
 
 ## Commands
 
@@ -68,7 +71,9 @@ threadsctl draft publish --id draft_xxx --actor "OpenClaw"
 ### Direct publish
 
 ```bash
+cd /opt/threads-service-ts/threads-service
 threadsctl publish text --account main-brand --text "Hello from Threads" --confirmed
+threadsctl publish image --account main-brand --file "/root/.openclaw/media/tool-image-generation/image-1---real-file.jpg" --text "Caption" --alt-text "Alt text" --confirmed
 threadsctl publish image --account main-brand --media-url "https://example.com/image.jpg" --text "Caption" --alt-text "Alt text" --confirmed
 ```
 
@@ -87,6 +92,7 @@ Use when the user clearly wants an immediate post.
 Example:
 
 ```bash
+cd /opt/threads-service-ts/threads-service
 threadsctl publish text --account main-brand --text "Launching today" --confirmed
 ```
 
@@ -102,11 +108,19 @@ threadsctl draft create --account main-brand --type text --text "Launching today
 
 ### Image generation plus publish
 
-If the user wants a brand new image, first use the configured image generation provider. After that, publish only when a final hosted image URL is available.
+If the user wants a brand new image, first use the configured image generation provider. If OpenClaw saved the file locally under `/root/.openclaw/media/...`, publish it with `--file`.
 
-Example publish step:
+Preferred publish step for local OpenClaw output:
 
 ```bash
+cd /opt/threads-service-ts/threads-service
+threadsctl publish image --account main-brand --file "/root/.openclaw/media/tool-image-generation/generated-image.jpg" --text "Launching today" --alt-text "Product launch image" --confirmed
+```
+
+Hosted-image fallback:
+
+```bash
+cd /opt/threads-service-ts/threads-service
 threadsctl publish image --account main-brand --media-url "https://example.com/generated-image.jpg" --text "Launching today" --alt-text "Product launch image" --confirmed
 ```
 
@@ -131,6 +145,7 @@ threadsctl auth connect-url --label client-two
 - Do not pass `--confirmed` unless immediate publishing is intended.
 - Do not hide command errors.
 - Do not assume an image generation provider is configured unless the environment actually supports it.
+- Do not pass local filesystem paths to `--media-url`.
 
 ## Output style
 

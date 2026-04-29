@@ -1,29 +1,21 @@
 #!/bin/bash
 # env.sh — 加载知识库环境变量
-# 用法: source env.sh
+# 用法: source env.sh [--scope agent|shared]
+# 或: KB_SCOPE=shared source env.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# 检测 Agent 上下文
-# AGENT_DIR 应该在 OpenClaw 运行时设置
-# 如果没有设置，尝试从路径推断
-if [ -z "$AGENT_DIR" ]; then
-  # 尝试从当前路径推断
-  if [[ "$PWD" =~ agents/([^/]+)/ ]]; then
-    AGENT_DIR="$HOME/.openclaw/agents/${BASH_REMATCH[1]}/agent"
-  else
-    AGENT_DIR="$HOME/.openclaw/agents/main/agent"
-  fi
-fi
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/kb-scope.sh"
+kb_parse_scope "$@"
 
 export KB_ROOT="$SKILL_ROOT"
-export KB_DATA_DIR="${AGENT_DIR}/kb"
 export KB_RAW_DIR="${KB_DATA_DIR}/raw"
 export KB_WIKI_DIR="${KB_DATA_DIR}/wiki"
 export KB_CACHE_DIR="${KB_DATA_DIR}/cache"
 
-# 读取知识库配置（JSON）
+# 读取全局配置（Obsidian + shared_kb）
 KB_CONFIG="$SKILL_ROOT/config.json"
 if [ -f "$KB_CONFIG" ]; then
   OBSIDIAN_ENABLED=$(python3 -c "
@@ -40,14 +32,20 @@ with open('$KB_CONFIG') as f:
 v = cfg.get('obsidian', {}).get('vault_path', '')
 print(v if v else '')
 " 2>/dev/null || echo "")
-  export OBSIDIAN_ENABLED OBSIDIAN_VAULT
+  SHARED_KB_ENABLED=$(python3 -c "
+import json
+with open('$KB_CONFIG') as f:
+    cfg = json.load(f)
+print('true' if cfg.get('shared_kb', {}).get('enabled', True) else 'false')
+" 2>/dev/null || echo "true")
+  export OBSIDIAN_ENABLED OBSIDIAN_VAULT SHARED_KB_ENABLED
 fi
 
-# 添加 skill scripts 到 PATH
 export PATH="$SCRIPT_DIR:$PATH"
 
-echo "✅ 知识库环境已加载"
+echo "✅ 知识库环境已加载（scope=$KB_SCOPE）"
 echo "   KB_DATA_DIR: $KB_DATA_DIR"
-echo "   KB_RAW_DIR: $KB_RAW_DIR"
+echo "   KB_RAW_DIR:  $KB_RAW_DIR"
 echo "   KB_WIKI_DIR: $KB_WIKI_DIR"
-echo "   OBSIDIAN: ${OBSIDIAN_ENABLED:-false} ${OBSIDIAN_VAULT:+ → vault: $OBSIDIAN_VAULT}"
+echo "   SHARED_KB:   ${SHARED_KB_ENABLED:-true}  (${HOME}/.openclaw/kb/shared)"
+echo "   OBSIDIAN:    ${OBSIDIAN_ENABLED:-false} ${OBSIDIAN_VAULT:+→ vault: $OBSIDIAN_VAULT}"

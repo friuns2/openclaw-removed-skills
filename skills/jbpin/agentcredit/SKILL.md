@@ -109,9 +109,13 @@ Loans are designed for **fast repayment** — borrow, use, repay within hours. T
 
 ## Authentication
 
-Write operations require EIP-191 signatures proving wallet ownership:
-- Register: sign `AgentCredit:register:<wallet_lowercase>`
-- Request loan: sign `AgentCredit:request_loan:<wallet_lowercase>:<amountUsdc>`
+Write operations require EIP-191 signatures with server-issued nonces for replay protection:
+
+1. **Get a nonce**: `GET /auth/nonce?wallet=<addr>&action=register|request_loan` — returns a single-use nonce valid for 5 minutes
+2. **Sign the message** (include the nonce):
+   - Register: sign `AgentCredit:register:<wallet_lowercase>:<nonce>`
+   - Request loan: sign `AgentCredit:request_loan:<wallet_lowercase>:<amountUsdc>:<nonce>`
+3. **Send request** with `signature` and `nonce` in the body
 
 Read operations and repayments do not require signatures.
 

@@ -1,0 +1,26 @@
+{
+  "database_path": "index/search.sqlite",
+  "chunk_size": 1024,
+  "chunk_overlap": 100,
+  "search": {
+    "default_limit": 8,
+    "hybrid_candidate_limit": 24
+  },
+  "rag": {
+    "api": {
+      "provider": "openai_compatible",
+      "base_url": "",
+      "api_key_env": "MAO_SKILL_API_KEY"
+    },
+    "enabled": false,
+    "build_embeddings_on_index": false,
+    "embedding": {
+      "model": "BAAI/bge-m3",
+      "batch_size": 64
+    },
+    "rerank": {
+      "enabled": false,
+      "model": "BAAI/bge-reranker-v2-m3"
+    }
+  }
+}

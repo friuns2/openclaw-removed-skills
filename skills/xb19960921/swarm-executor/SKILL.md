@@ -1,350 +1,336 @@
 ---
-name: parallel-task-executor
-description: "并行子任务执行器 - 大任务自动拆分、并行spawn子agent、超时检查+进度恢复、结果汇总。基于实战验证：130个PDF→40个框架，效率提升3-6倍。触发词：并行执行、批量任务、大任务拆分、parallel execution、batch processing、spawn agents。"
+name: swarm-coordinator
+description: Coordinate multi-agent swarm execution with a lightweight Pub/Sub protocol, standardized SwarmCommand messages, token-budget control, agent status tracking, negotiation, fallback, and completion gates. Use when building or reviewing multi-agent coordination, swarm execution, task delegation, agent handoff, token quota governance, Redis/in-memory PubSub orchestration, role-based agent teams, or safe parallel AI workflows.
+version: "1.1.0"
+last_updated: "2026-04-25"
+changelog: "ClawHub-ready release: generalized public wording, added execution workflow, safety boundaries, gates, failure handling, validation checklist, and test prompts."
 ---
 
-# 并行子任务执行器
+# Swarm Coordinator
 
-> AI干大事会超时？那就拆开干，并行干，超时继续干。
+Swarm Coordinator is a lightweight coordination skill for multi-agent execution. It helps an agent design, validate, and operate a swarm workflow using:
 
-## 核心理念
+- standardized `SwarmCommand` messages
+- Redis or in-memory Pub/Sub coordination
+- token-budget governance and downgrade rules
+- agent status tracking
+- negotiation and conflict resolution
+- assignment, completion, and failure notifications
 
-**痛点**：AI处理大任务（100+文件、批量分析、多步骤流程）容易超时或质量下降。
+Use it when the task is not “one agent answers once”, but **multiple agents must coordinate without losing control of cost, state, ownership, or completion criteria**.
 
-**解法**：
-1. **拆分**：大任务 → N个子任务（每个≤5分钟）
-2. **并行**：同时spawn 3-5个子agent
-3. **监控**：实时检查进度，超时自动继续
-4. **汇总**：结果聚合 + 完成度报告
-
-**实战验证**：
-- 130个PDF → 40个框架（今天上午实战）
-- 7+1批次并行，效率提升3-6倍
-- 640个知识库文件健康检查，20秒完成
-
----
-
-## 适用场景
-
-- 批量文件处理（100+文件）
-- 多维度调研（6个并行Agent）
-- 大规模数据分析
-- 多步骤Pipeline执行
-- 任何会超时的"大任务"
+This skill is intentionally control-oriented: a swarm is only valuable when parallelism improves throughput or quality without causing duplicated work, hidden queue drift, or uncontrolled token spend.
 
 ---
 
-## 执行流程
+## When to Use
 
-### Phase 0: 任务分析（入口）
+Use this skill for:
 
-**先判断任务类型**：
+- multi-agent task delegation or swarm execution
+- role-based AI teams, agent crews, or collaborative agent workflows
+- Pub/Sub task coordination with Redis or memory queues
+- designing a standard command protocol between agents
+- assigning roles, budgets, deadlines, and dependencies
+- tracking task state across multiple agents
+- negotiating conflicts between agents
+- enforcing token quota and fallback behavior
+- reviewing whether a swarm workflow can converge safely
 
-| 任务特征 | 拆分策略 | 并行数 |
-|---------|---------|--------|
-| 文件批量处理 | 每批5-10个文件 | 5 |
-| 多维度调研 | 每维度1个agent | 6 |
-| Pipeline多阶段 | 每阶段1个agent | 3 |
-| 大数据分析 | 每批100条数据 | 5 |
-| 复杂推理 | 每个推理分支1个agent | 3 |
-
-**输入格式**：
-```
-任务描述：[具体任务]
-总数量：[文件数/数据量/步骤数]
-单任务耗时：[预估每个子任务耗时]
-```
-
-**输出确认**：
-```
-拆分策略：每批5个文件，共27批
-并行数：同时spawn 5个子agent
-预估总时间：27批 × 5分钟 ÷ 5并行 = 27分钟
-确认执行？(y/n)
-```
+Do not use it for simple single-agent tasks. If one agent can complete the job directly, avoid swarm overhead.
 
 ---
 
-### Phase 1: 任务拆分
+## Core Principle
 
-**自动拆分逻辑**：
+A swarm is useful only if it improves throughput or quality **without causing coordination chaos**.
+
+Always protect four invariants:
+
+1. **Single task owner** — every task has one accountable owner at a time.
+2. **Explicit state** — each command has status, deadline, budget, dependencies, and result.
+3. **Bounded cost** — token budget and downgrade rules are part of the protocol.
+4. **Verifiable completion** — completion requires artifacts, tests, review, or an explicit result field.
+
+If any invariant is missing, the swarm can drift, duplicate work, or burn tokens.
+
+---
+
+## Default Workflow
+
+### Step 1: Decide whether swarm is justified
+
+Use swarm only when at least one is true:
+
+- task can be split into independent subtasks
+- different agents have clearly different roles
+- review/verification must be separated from implementation
+- latency can be reduced through parallel work
+- negotiation is needed because constraints conflict
+
+If not, keep it single-agent.
+
+### Step 2: Define roles and ownership
+
+Specify:
+
+```text
+commander / coordinator
+executor(s)
+reviewer / auditor
+monitor / verifier
+fallback owner
 ```
-总数量 = N
-单任务耗时 = T分钟
-超时阈值 = 5分钟（硬性限制）
 
-每批数量 = floor(5分钟 / T分钟)
-总批次数 = ceil(N / 每批数量)
-并行数 = min(5, 总批次数)
-```
+Each task should have one current `assigned_to`. Multiple reviewers are allowed, but multiple executors writing the same artifact are not unless explicitly coordinated.
 
-**生成任务队列**：
+### Step 3: Create a SwarmCommand
+
+A command must include:
+
 ```json
 {
-  "batches": [
-    {"id": 1, "items": ["file1", "file2", "file3", "file4", "file5"]},
-    {"id": 2, "items": ["file6", "file7", "file8", "file9", "file10"]},
-    ...
-  ],
-  "parallel_count": 5,
-  "timeout_per_batch": 300000,
-  "progress_file": "parallel-progress.json"
+  "command_id": "cmd_12345678",
+  "timestamp": "2026-04-25T12:00:00Z",
+  "sender": {"type": "coordinator", "id": "001"},
+  "target": {"type": "developer", "id": "003"},
+  "command": {
+    "action": "develop",
+    "module": "login",
+    "requirements": ["JWT auth", "tests"],
+    "output_format": "python_code"
+  },
+  "metadata": {
+    "priority": "high",
+    "token_budget": 1500,
+    "deadline": "2026-04-25T13:00:00Z",
+    "dependencies": []
+  },
+  "negotiation": {
+    "allowed": true,
+    "timeout": 300
+  }
 }
 ```
 
-**保存进度文件**：`parallel-progress.json`
+Prefer using `coordinator/swarm_protocol.py` for deterministic command creation and validation. If your project has its own agent taxonomy, map local role names to the protocol roles instead of hard-coding private labels in prompts.
+
+### Step 4: Validate before publish
+
+Before publishing to Redis or memory queue, validate:
+
+- schema format
+- known sender / target role
+- priority is one of `low | medium | high | critical`
+- token budget is positive and within tier quota
+- dependencies exist or are intentionally empty
+- deadline is realistic
+- completion gate is clear
+
+If validation fails, do not publish. Return validation errors and ask for correction or auto-fix safe fields.
+
+### Step 5: Publish, subscribe, and track state
+
+Use:
+
+```python
+from coordinator.pubsub import PubSubCoordinator
+from coordinator.swarm_protocol import SwarmProtocol
+
+protocol = SwarmProtocol()
+coordinator = PubSubCoordinator(use_redis=True)
+
+command = protocol.create_command(
+    agent_type="developer",
+    command={"action": "analyze", "module": "performance"},
+    priority="high",
+    token_budget=2000,
+)
+
+valid, errors = protocol.validate_command(command)
+if valid:
+    coordinator.publish("tasks", command.to_dict())
+else:
+    print(errors)
+```
+
+Track state transitions:
+
+```text
+pending → assigned → in_progress → completed / failed / cancelled
+```
+
+No command should remain `in_progress` forever. Use deadline or heartbeat timeout to trigger fallback.
+
+### Step 6: Collect result and close the loop
+
+Completion should include:
+
+- `success: true/false`
+- output or artifact path
+- tests/review/verification result when applicable
+- token usage
+- failure reason if failed
+- next action recommendation
+
+If result is missing required artifacts, mark as incomplete instead of completed.
+
+---
+
+## Token Budget and Downgrade Rules
+
+Use token budget as a control mechanism, not just metadata.
+
+Recommended rules:
+
+| Condition | Action |
+|---|---|
+| budget remaining > 40% | continue normal execution |
+| budget remaining 20-40% | compress context and reduce parallel agents |
+| budget remaining < 20% | downgrade model/tier or require coordinator approval |
+| budget exceeded | stop publishing new subtasks and request confirmation |
+| repeated failure | lower concurrency and route to reviewer/monitor |
+
+For local implementation, use `coordinator/token_budget.py` if available.
+
+---
+
+## Negotiation Rules
+
+Allow negotiation when:
+
+- two agents propose conflicting plans
+- deadline and token budget cannot both be satisfied
+- a dependency is blocked
+- an agent lacks capability or context
+
+Negotiation output should be a decision, not endless discussion:
+
 ```json
 {
-  "total_batches": 27,
-  "completed_batches": [],
-  "failed_batches": [],
-  "current_batch": 0,
-  "start_time": "2026-04-18T13:00:00Z"
+  "decision": "assign_to_developer_then_review_by_auditor",
+  "reason": "developer owns implementation; auditor reviews risk",
+  "budget_adjustment": 500,
+  "deadline_adjustment": null,
+  "blocked": false
 }
 ```
 
----
-
-### Phase 2: 并行执行
-
-**执行策略**：
-```
-while (未完成的批次 > 0):
-  可并行数 = min(parallel_count, 未完成批次数)
-  
-  spawn 可并行数 个子agent:
-    - 每个子agent负责一个批次
-    - 超时设置：5分钟
-    - 输出保存到：results/batch-{id}.json
-  
-  等待所有子agent完成或超时
-  
-  检查进度：
-    - 成功 → 记录到completed_batches
-    - 超时/失败 → 记录到failed_batches（稍后重试）
-  
-  更新progress文件
-  
-  展示进度条：
-    [████████████░░░░░░░░] 15/27 (55.6%) | 预计剩余12分钟
-```
-
-**spawn子agent的参数**：
-```
-{
-  "task": "处理batch-{id}的文件",
-  "items": [...],
-  "timeout_seconds": 300,
-  "output_path": "results/batch-{id}.json"
-}
-```
+If negotiation exceeds timeout, coordinator decides or escalates to human.
 
 ---
 
-### Phase 3: 进度监控（实时）
+## Failure Handling
 
-**监控指标**：
-- 完成批次数 / 总批次数
-- 成功率 = completed / (completed + failed)
-- 预估剩余时间
-- 当前活跃agent数
+Handle these failures explicitly:
 
-**进度展示**：
-```
-并行执行中...
-┌──────────────────────────────┐
-│ [████████████░░░░░░░░] 15/27 │
-│ 完成率：55.6%                │
-│ 成功：15  失败：0  待处理：12 │
-│ 预估剩余：12分钟              │
-│ 活跃agent：5                 │
-└──────────────────────────────┘
-```
+| Failure | Response |
+|---|---|
+| invalid command | reject before publish; return schema errors |
+| target unavailable | reroute to fallback owner |
+| dependency blocked | keep pending; notify coordinator |
+| budget exceeded | pause or downgrade; do not silently continue |
+| deadline missed | mark failed or escalate |
+| duplicate owner | choose one owner; cancel duplicate assignment |
+| incomplete result | reopen task with missing artifact list |
+| repeated failure | reduce concurrency; route to reviewer/monitor |
 
-**超时处理**：
-```
-子agent超时 → 记录到failed_batches
-策略：
-1. 首次超时 → 稍后重试（降级策略）
-2. 二次超时 → 标记为"需人工介入"
-3. 更新progress文件（断点续传）
-```
+Never let failures become silent queue drift.
 
 ---
 
-### Phase 4: 断点续传（恢复）
+## Safety Boundaries
 
-**恢复机制**：
-```
-检查parallel-progress.json是否存在？
-- 存在 → 读取进度，从未完成的批次继续
-- 不存在 → 从Phase 0重新开始
+Ask for human confirmation before swarm actions that are:
 
-恢复逻辑：
-1. 读取completed_batches和failed_batches
-2. 未完成的批次 = 总批次 - completed - failed
-3. 从未完成批次继续执行Phase 2
-```
+- destructive: delete data, remove files, reset state
+- public: publish, message external users, send email
+- costly: paid API calls, high-token parallel execution, cloud deployment
+- irreversible: production migrations, permission changes, credential rotation
+- ambiguous: unclear task owner, conflicting requirements, missing acceptance criteria
 
-**恢复场景**：
-- 用户中断（Ctrl+C）
-- 网络断开
-- 主agent超时
-- 系统重启
-
-**恢复确认**：
-```
-发现上次执行进度：
-- 已完成：15批
-- 失败：2批（将重试）
-- 待处理：10批
-从上次进度继续？(y/n)
-```
+Swarm coordination amplifies mistakes. High-risk actions need stronger gates than single-agent execution.
 
 ---
 
-### Phase 5: 结果汇总
+## Output Format
 
-**汇总策略**：
-```
-读取所有results/batch-{id}.json
+When using this skill, return:
 
-合并逻辑：
-1. 成功结果 → 合并到final-results.json
-2. 失败结果 → 记录到failed-items.json
-3. 统计分析 → 生成汇总报告
+```markdown
+## Swarm Plan
+- Goal:
+- Swarm justified? yes/no + reason
+- Agents and roles:
+- Ownership model:
 
-输出：
-- total_processed: 总处理数
-- success_count: 成功数
-- failed_count: 失败数
-- success_rate: 成功率
-- execution_time: 总耗时
-- parallel_efficiency: 并行效率提升倍数
+## Commands
+| command_id | target | action | budget | dependencies | gate |
+|---|---|---|---:|---|---|
+
+## Coordination Flow
+pending → assigned → in_progress → completed/failed
+
+## Budget / Downgrade
+- Total budget:
+- Per-agent budget:
+- Downgrade trigger:
+
+## Failure / Fallback
+- Main risks:
+- Fallback owner:
+- Escalation condition:
+
+## Verification
+- Required artifacts:
+- Tests / review:
+- Done criteria:
 ```
 
-**汇总报告格式**：
-```
-并行执行完成！
-┌──────────────────────────────┐
-│ 总批次：27                   │
-│ 成功：25  失败：2            │
-│ 成功率：92.6%                │
-│ 总耗时：27分钟               │
-│ 并行效率：5倍（vs串行135分钟）│
-│ 失败项已保存到failed-items.json │
-└──────────────────────────────┘
-```
+For code-facing tasks, also mention which files or APIs to use.
 
 ---
 
-## 实战案例
+## Bundled Resources
 
-### 案例1：130个PDF → 40个框架（知识沉淀）
-```
-任务：分析130个行业研究PDF，生成40个框架
-拆分：7+1批次（每批5-8个行业）
-并行：spawn 5个子agent同时处理
-结果：效率提升3-6倍，全部完成
-```
+Use these resources when needed:
 
-### 案例2：640个文件健康检查（知识库体检）
-```
-任务：扫描640个Markdown文件，检测空壳、断链
-拆分：无需拆分（单文件处理快）
-并行：内置并行处理（ThreadPoolExecutor）
-结果：20秒完成，健康分56.4
-```
+- `coordinator/swarm_protocol.py` — deterministic SwarmCommand creation, validation, assignment, completion, negotiation helpers.
+- `schemas/swarm_command.json` — JSON Schema for command validation.
+- `tests/test_swarm_protocol.py` — regression tests for protocol behavior.
+- `test-prompts.json` — Darwin-style prompts for future skill regression evaluation.
 
-### 案例3：6维度人物调研（女娲蒸馏）
-```
-任务：调研某人物的著作、对话、表达、他者、决策、时间线
-拆分：6个维度 → 6个并行agent
-并行：spawn 6个子agent同时搜索
-结果：效率提升6倍
-```
+Read or run them when modifying the protocol implementation.
 
 ---
 
-## 参数配置
+## Validation Checklist
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `parallel_count` | 5 | 同时spawn的子agent数量 |
-| `timeout_per_batch` | 300秒 | 每批次超时阈值 |
-| `max_retries` | 2 | 失败批次最大重试次数 |
-| `progress_file` | parallel-progress.json | 进度保存文件 |
-| `results_dir` | results/ | 结果保存目录 |
+Before calling a swarm workflow ready, check:
 
-**动态调整**：
-- 复杂任务 → 降低parallel_count（避免资源争抢）
-- 简单任务 → 提高parallel_count（提升效率）
-- 网络不稳定 → 降低timeout_per_batch（快速失败重试）
-
----
-
-## 错误处理
-
-### 子agent失败
-- 首次失败 → 重试（降级策略）
-- 二次失败 → 标记为"需人工介入"
-- 保存失败原因到failed-items.json
-
-### 主agent中断
-- Ctrl+C → 保存进度，下次恢复
-- 网络断开 → 自动恢复
-- 超时 → 保存进度，提示用户继续
-
-### 结果合并失败
-- JSON解析失败 → 跳过该批次，记录错误
-- 文件不存在 → 检查是否子agent未完成
+- [ ] Every task has exactly one current owner.
+- [ ] Every command validates against schema.
+- [ ] Budget and deadline are explicit.
+- [ ] Dependencies are declared.
+- [ ] Completion gate is explicit.
+- [ ] Failure fallback is defined.
+- [ ] High-risk actions require confirmation.
+- [ ] Tests or review exist for important outputs.
+- [ ] No open-ended negotiation loop remains.
 
 ---
 
-## 性能对比（实战验证）
+## Quality Bar
 
-| 任务 | 串行耗时 | 并行耗时 | 效率提升 | 实战日期 |
-|------|---------|---------|---------|---------|
-| 130个PDF分析 | 135分钟 | 27分钟 | **5倍** | 2026-04-18 |
-| 640个文件检查 | 120秒 | 20秒 | **6倍** | 2026-04-18 |
-| 6维度调研 | 30分钟 | 5分钟 | **6倍** | 2026-04-18 |
+A good swarm plan should reduce confusion, not add bureaucracy.
 
-**今天实战数据（2026-04-18）**：
-- 输入：130个行业研究PDF
-- 输出：40个行业分析框架
-- 策略：7+1批次并行（每批5-8个行业）
-- 并行数：5个子agent同时spawn
-- 总耗时：27分钟
-- 成功率：100%
+It succeeds when:
 
-**性能基准测试**：
-| 并行数 | 130个PDF耗时 | CPU占用 | 内存占用 |
-|--------|-------------|---------|---------|
-| 1（串行） | 135分钟 | 10% | 200MB |
-| 3 | 45分钟 | 25% | 400MB |
-| 5 | 27分钟 | 40% | 600MB |
-| 10 | 18分钟 | 70% | 1.2GB |
+- agents know exactly what they own
+- coordinator can see state and budget
+- failures route to a clear fallback
+- completion is verifiable
+- token use stays bounded
+- parallelism improves throughput without oscillation
 
-**推荐配置**：
-- 简单任务：parallel_count=5
-- 复杂任务：parallel_count=3
-- 性能优先：parallel_count=10（需要足够内存）
-
----
-
-## 与竞品差异
-
-| 功能 | CrewAI | AutoGen | **我们** |
-|------|--------|---------|---------|
-| 自动拆分 | ❌ | ❌ | ✅ |
-| 断点续传 | ❌ | ❌ | ✅ |
-| 进度可视化 | ❌ | ❌ | ✅ |
-| 超时自动继续 | ❌ | ❌ | ✅ |
-| 失败重试 | ❌ | ✅ | ✅ |
-
----
-
-## 最后
-
-大任务不是AI的敌人，只是需要拆开干。
-并行执行 + 断点续传 + 进度监控 = AI也能干大事。
+If the swarm adds agents without improving control, do not use swarm.

@@ -1,79 +1,11 @@
-# Amazon Keyword API Skill
+> 公共参考见 [`_common.md`](./_common.md)：CLI 调用模板、Domain 表、错误码、返回结构、限流约束。本文档只描述 Amazon 关键词接口独有的参数与字段。
 
-## 基本信息
-- **名称**: amazon-keyword
-- **描述**: Sorftime 亚马逊关键词数据查询工具，支持关键词查询、拓展、反查、排名追踪等功能
-- **激活条件**: 当用户提到亚马逊关键词研究、ABA关键词、关键词排名、ASIN反查关键词时自动激活
-- **依赖**: sorftime-cli 已全局安装并配置有效Account-SK
 
----
+# Amazon 关键词接口（12 个）
 
-## 前置配置
+**本文件接口**：KeywordQuery、KeywordRequest、KeywordSearchResults、KeywordSearchResultTrend、KeywordExtends、CategoryRequestKeyword、ASINRequestKeywordv2、KeywordProductRanking、ASINKeywordRanking、FavoriteKeyword、ChangeFavoriteKeyword、GetFavoriteKeyword
 
-### 1. 安装sorftime-cli
-```bash
-npm install -g sorftime-cli
-```
-
-### 2. 配置账户
-```bash
-# 添加账户
-sorftime add <profile-name> <your-account-sk>
-
-# 切换到默认账户
-sorftime use <profile-name>
-```
-
----
-
-## Domain参数说明
-
-| domain值 | 站点代码 | 站点名称 | 备注 |
-|---------|---------|---------|------|
-| 1 | us | 美国站 | 支持所有关键词功能 |
-| 2 | gb | 英国站 | 支持所有关键词功能 |
-| 3 | de | 德国站 | 支持所有关键词功能 |
-| 4 | fr | 法国站 | 支持所有关键词功能 |
-| 6 | ca | 加拿大站 | 不支持KeywordQuery |
-| 7 | jp | 日本站 | 支持所有关键词功能 |
-| 8 | es | 西班牙站 | 支持所有关键词功能 |
-| 9 | it | 意大利站 | 支持所有关键词功能 |
-| 10 | mx | 墨西哥站 | 支持所有关键词功能 |
-| 11 | ae | 阿联酋站 | 支持所有关键词功能 |
-| 12 | au | 澳大利亚站 | 支持所有关键词功能 |
-| 13 | br | 巴西站 | 支持所有关键词功能 |
-| 14 | sa | 沙特站 | 支持所有关键词功能 |
-
-**注意**: 5 (in/印度站) 不在关键词接口支持列表中
-
----
-
-## 通用返回结构
-
-```json
-{
-  "Code": 0,
-  "Message": null,
-  "Data": {},
-  "RequestLeft": 9999,
-  "RequestConsumed": 1,
-  "RequestCount": 1
-}
-```
-
----
-
-## 重要说明
-
-1. **ABA关键词**: 大部分关键词接口仅支持Amazon Brand Analytics (ABA) 关键词
-2. **历史数据**: 美国站支持最长近两年数据，其他站点仅近30天数据
-3. **FR/IT限制**: FR、IT两站的关键词趋势数据仅支持2025年1月起
-4. **词库限制**: 单个收藏夹最多只能收藏2000个关键词
-5. **API词库**: API的词库（收藏夹）和Sorftime专业版的收藏夹不互通
-
----
-
-## 接口列表
+**站点限制**：domain 5 (in/印度站) 不在关键词接口支持列表中。
 
 ### 一、关键词基础查询
 
@@ -86,13 +18,17 @@ sorftime use <profile-name>
   | pattern | Object | 是 | 查询模式，见KeywordQueryPatternObject |
   | pageIndex | Integer | 否 | 查询第几页，默认1 |
   | pageSize | Integer | 否 | 每页条数，最小20，默认20，最大200 |
+- **KeywordQueryPatternObject结构**:
+  | 字段 | 类型 | 必填 | 说明 |
+  |------|------|------|------|
+  | keyword | String | 是 | 查询的关键词（ABA词），支持模糊匹配 |
 - **使用示例**:
   ```bash
   # 查询热门关键词（第1页，50条）
-  sorftime api KeywordQuery '{"pattern": {}, "pageIndex": 1, "pageSize": 50}' --domain 1
-  
+  sorftime api KeywordQuery '{"pattern": {"keyword": "water"}, "pageIndex": 1, "pageSize": 50}' --domain 1
+
   # 查询第2页
-  sorftime api KeywordQuery '{"pattern": {}, "pageIndex": 2, "pageSize": 50}' --domain 1
+  sorftime api KeywordQuery '{"pattern": {"keyword": "water"}, "pageIndex": 2, "pageSize": 50}' --domain 1
   ```
 
 ---
@@ -347,18 +283,6 @@ sorftime use <profile-name>
    - FR、IT：关键词趋势从2025年1月开始
 3. **词库管理**: API词库与Sorftime专业版不互通
 4. **分页查询**: 每页最多200条数据，建议合理设置pageSize
-
----
-
-## 常见错误
-
-| 错误码 | 说明 | 解决方案 |
-|--------|------|----------|
-| 0 | 成功 | - |
-| 401 | 认证失败 | 检查Account-SK是否有效 |
-| 403 | 权限不足 | 检查套餐权限或请求次数 |
-| 429 | 请求频率超限 | 降低请求速度，等待1分钟后重试 |
-| 500 | 服务器内部错误 | 稍后重试，或联系Sorftime客服 |
 
 ---
 

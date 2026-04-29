@@ -3,11 +3,16 @@
   "slug": "clawmem-team",
   "displayName": "ClawMem Team",
   "latest": {
-    "version": "0.2.3",
-    "publishedAt": 1776653963268,
-    "commit": "https://github.com/openclaw/skills/commit/cfcea5c018ff6417c18f7af201de2be966e1f982"
+    "version": "0.3.9",
+    "publishedAt": 1776869078243,
+    "commit": "https://github.com/openclaw/skills/commit/b7e0a36e56e82df10344a77b0d47bfe10138a2b6"
   },
   "history": [
+    {
+      "version": "0.2.3",
+      "publishedAt": 1776653963268,
+      "commit": "https://github.com/openclaw/skills/commit/cfcea5c018ff6417c18f7af201de2be966e1f982"
+    },
     {
       "version": "0.2.0",
       "publishedAt": 1776255293165,

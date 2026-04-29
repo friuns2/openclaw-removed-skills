@@ -1,0 +1,11 @@
+{
+  "owner": "daririnch",
+  "slug": "dcl-skill-auditor",
+  "displayName": "DCL Skill Auditor — Pre-Install Security Scanner",
+  "latest": {
+    "version": "1.0.2",
+    "publishedAt": 1776049374613,
+    "commit": "https://github.com/openclaw/skills/commit/d3a3dc1613db98bc55f480f19cf63cb8cb2b17ec"
+  },
+  "history": []
+}

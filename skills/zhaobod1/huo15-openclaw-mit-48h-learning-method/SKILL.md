@@ -1,6 +1,6 @@
 ---
 name: huo15-openclaw-mit-48h-learning-method
-version: 2.2.0
+version: 2.2.1
 description: 麻省理工学院48小时学习法技能（青岛火一五信息科技有限公司）。使用 NotebookLM CLI 实现 MIT 研究生 Ihtesham Ali 的三问学习框架：
   1. 问心智模型：领域内专家共享的 5 个基本思维框架
   2. 问专家分歧：在哪 3 个问题上根本不同意

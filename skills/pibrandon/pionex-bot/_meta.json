@@ -1,0 +1,11 @@
+{
+  "owner": "pibrandon",
+  "slug": "pionex-bot",
+  "displayName": "pionex-bot",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776327177891,
+    "commit": "https://github.com/openclaw/skills/commit/5cffdd5af16e87d5bc78e89386e79523ebc9a546"
+  },
+  "history": []
+}

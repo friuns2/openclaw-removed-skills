@@ -3,9 +3,15 @@
   "slug": "perfect-gym-solutions-sa",
   "displayName": "Perfect Gym Solutions Sa",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775597859287,
-    "commit": "https://github.com/openclaw/skills/commit/bb9dea450d30332cdb660f4b3a2d81fa020a75d4"
+    "version": "1.0.1",
+    "publishedAt": 1776899105855,
+    "commit": "https://github.com/openclaw/skills/commit/f9d3f929406573ff72ecf5b69fd9ac7dcf20dc9b"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775597859287,
+      "commit": "https://github.com/openclaw/skills/commit/bb9dea450d30332cdb660f4b3a2d81fa020a75d4"
+    }
+  ]
 }

@@ -9,21 +9,38 @@
 ### A. 中国专利公布公告（**优先**，官方站点）
 
 1. **站点**：[国家知识产权局 中国专利公布公告](http://epub.cnipa.gov.cn/)（**仅** `epub.cnipa.gov.cn`）。
-2. **工具**（本仓库 `tools/`）：**`cnipa_epub_search.py`** —— **一步**完成公布站检索与结果解析（Playwright 过站点 WAF）；结果页 HTML **仅在内存中处理，不落盘**。成功时终端含 **`EPUB_NOTE:`**（说明未落盘及字节数）与 **`EPUB_HITS_JSON:`** 一行（JSON 数组：标题、公开号、链接、**`abstract`** 等）。
-3. **执行方式**（Step 5 在读完本文件后**先尝试**）：
+2. **工具**（本仓库 `tools/`）：**`cnipa_epub_search.py`** —— **一步**完成公布站检索与结果解析（Playwright 过站点 WAF）；结果页 HTML **仅在内存中处理，不落盘**。成功时终端含 **`EPUB_NOTE:`**（ASCII，如 `html_bytes=… disk=0`）与 **`EPUB_HITS_JSON:`** 一行（JSON 数组：标题、公开号、链接、**`abstract`** 等）。
+3. **国知局检索词（生成阶段必做，须在拼 Bash 之前完成）**
+
+   - **拆分责任在 Agent**：在**生成/构造命令阶段**，从本案技术方案、专利点或用户主题中归纳 **2～8 个与方案相关度高的检索单位**，**仅用 ASCII 空格分隔**，再写入 `cnipa_epub_search.py` 的参数。每一单位宜为 **有检索意义的语义块**，例如：**专业术语**、**名词短语**、**名动组合（如「批量调度」「异构调度」）**、**业内固定搭配**；**不要**拆成过碎的单字、泛义双字（如单独 `检索`、`增强`、`系统`、`方法` 等泛词），也**不要**把无关联词硬凑成一串。
+   - **禁止**把**无空格的一整句长中文**当作**唯一**参数（例如不要：`".../cnipa_epub_search.py" "知识库检索增强大语言模型"`）。长串在公布站单框内易被当作整句 AND，**极易 0 条**。
+   - **Agent 执行时**：**每一轮 `Bash` 只传一个**检索单位（一个词块一句参数）；**2～8 个单位须对应 2～8 次**独立调用，**禁止**在一次工具调用里把多个词块同时作为多个 argv 传给 `cnipa_epub_search.py`（脚本虽支持多词单次进程内合并，**仅供本地/人工**；Agent 为控时、降单次 Playwright 链路与 IDE/终端超时风险，**必须**拆进程）。
+   - 示意（须按本案替换；**三次调用、每次一词**）：
+
+     ```bash
+     python3 …/cnipa_epub_search.py 知识库
+     python3 …/cnipa_epub_search.py 检索增强
+     python3 …/cnipa_epub_search.py 大语言模型
+     ```
+
+   - **脚本不做**自动分词或自动拆长中文；若确需**整句一次** AND 检索，改用 **`cnipa_epub_crawler.py`** 单传一句。
+
+4. **执行方式**（Step 5 在读完本文件后**先尝试**）：
 
    ```bash
    pip install -r tools/requirements-cnipa.txt
    python -m playwright install chromium
-   python3 ${CLAUDE_SKILL_DIR}/tools/cnipa_epub_search.py "<中文关键词或技术短语>"
+   # Agent：对上一节每个检索单位各执行一次（示例仅展示首轮）
+   python3 ${CLAUDE_SKILL_DIR}/tools/cnipa_epub_search.py 词甲
    ```
 
-   - **`cnipa_epub_search.py`** 会按命令行中的**空白**（含连续空格）自动拆成多个检索词，**一词一查**后再合并去重（**stderr** 可出现 **`EPUB_MERGE:`**）；用于缓解公布站单框多词「同时包含」易 0 条的问题。若只需单次整句检索，传**不含空白**的一串参数，或使用 `cnipa_epub_crawler.py`。
-   - 成功时 **stdout 仅一行** **`EPUB_HITS_JSON:`** + JSON 数组（UTF-8，含中文 `abstract`）；**`EPUB_MERGE:`** / **`EPUB_NOTE:`** 等在 **stderr**。解析命中时请以 **stdout 该行 JSON 为准**，勿因 stderr 日志或终端编码导致误判「未命中」而不必要地降级 WebSearch。Windows 若乱码见 **`INSTALL.md`**（`chcp 65001` / `PYTHONUTF8=1`）。
+   - **合并责任在 Agent**：每次调用解析 **stdout** 上**唯一一行** **`EPUB_HITS_JSON:`** 后的 JSON 数组；在推理中按 **`pub_number`** 为主键去重合并（无则 **`link`**，再否则可用标题前缀），得到**一份**总表后再写入查新笔记与 1.1。
+   - **`cnipa_epub_search.py`** 若人工单次传入多词，会按空白拆段、进程内**一段一查**并去重（**stderr** 可出现 **`EPUB_MERGE:`**）；与 Agent **分多次调用**策略无关。
+   - 成功时 **stdout 仅一行** **`EPUB_HITS_JSON:`** + JSON 数组（UTF-8，含中文 `abstract`）；**`EPUB_MERGE:`** / **`EPUB_NOTE:`** / **`EPUB_HINT:`** 等在 **stderr** 且为 **ASCII**（减轻 PowerShell 把中文 stderr 当成错误流）。解析命中时请以 **stdout 该行 JSON 为准**，勿因 stderr 或终端编码误判「未命中」而不必要地降级 WebSearch。Windows 乱码与 PowerShell 注意见 **`INSTALL.md`**（`chcp 65001` / `PYTHONUTF8=1`、勿滥用 `2>&1`）。
    - 将 JSON 中**可核验**的公开号、标题、**国知局站点内详情链接**写入查新笔记与 1.1（见下 **`abstract` 必用**）。
    - **降级条件**（满足任一则进入 **B**）：命令非 0 退出、超时、无 Playwright、**`EPUB_HITS_JSON` 为空数组**、或条目经人工核对明显与主题无关。
 
-4. **`abstract` 字段（国知局条目，规定必用）**
+5. **`abstract` 字段（国知局条目，规定必用）**
 
    若 **`EPUB_HITS_JSON`** 中某项含非空的 **`abstract`**（解析自公布站结果页摘要），对**该条专利**须同时遵守：
 
@@ -32,7 +49,7 @@
    - **正文呈现**：交底书 1.1 中**不得**大段逐字粘贴官方摘要（避免抄袭与超字数）；应**消化后**用**自己的话**压缩为「方案概括 + 应用 + 缺点/局限」；查新笔记可保留稍长的摘录供自用核对，但须标注来源于公布站摘要。
    - **缺失时**：若某条 JSON **无** `abstract` 或为空（旧版页面 / 表格布局未解析到等），须在查新笔记中注明「该条无摘要字段」，并改用**详情页**或 **Google Patents** 等可核验来源补全理解后再写 1.1，**不得**留空理由含糊带过。
 
-5. **链接与著录**：国知局详情 URL 以脚本输出为准；**禁止编造**；若仅能从公布站得到公开号，可再配 **Google Patents** 稳定页 `https://patents.google.com/patent/CN…/en` 作为**补充**公开源（仍须打开校验）。
+6. **链接与著录**：国知局详情 URL 以脚本输出为准；**禁止编造**；若仅能从公布站得到公开号，可再配 **Google Patents** 稳定页 `https://patents.google.com/patent/CN…/en` 作为**补充**公开源（仍须打开校验）。
 
 ### B. Google 学术与 Google Patents（**降级 / 补充**）
 

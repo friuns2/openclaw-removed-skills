@@ -2,40 +2,44 @@
   "id": "reflexio-embedded",
   "name": "Reflexio Embedded",
   "description": "Reflexio-style user profile and playbook extraction using Openclaw's native memory engine, hooks, and sub-agents — no Reflexio server required.",
-  "version": "0.1.0",
+  "skills": ["./skills"],
   "configSchema": {
     "type": "object",
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
       "dedup": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "properties": {
-          "shallow_threshold": { "type": "number" },
-          "full_threshold": { "type": "number" },
-          "top_k": { "type": "integer" }
-        }
+          "shallow_threshold": { "type": "number", "default": 0.4 },
+          "full_threshold": { "type": "number", "default": 0.75 },
+          "top_k": { "type": "integer", "default": 5 }
+        },
+        "default": { "shallow_threshold": 0.4, "full_threshold": 0.75, "top_k": 5 }
       },
       "ttl_sweep": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "properties": {
-          "on_bootstrap": { "type": "boolean" }
-        }
+          "on_bootstrap": { "type": "boolean", "default": true }
+        },
+        "default": { "on_bootstrap": true }
       },
       "consolidation": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "properties": {
-          "cron": { "type": "string" }
-        }
+          "threshold_hours": { "type": "integer", "default": 24 }
+        },
+        "default": { "threshold_hours": 24 }
       },
       "extraction": {
         "type": "object",
-        "additionalProperties": true,
+        "additionalProperties": false,
         "properties": {
-          "subagent_timeout_seconds": { "type": "integer" }
-        }
+          "subagent_timeout_seconds": { "type": "integer", "default": 120 }
+        },
+        "default": { "subagent_timeout_seconds": 120 }
       }
     }
   }

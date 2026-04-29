@@ -10,10 +10,10 @@ Beep · 小喇叭 CLI
 import sys
 from pathlib import Path
 
-# 添加包路径
-package_dir = Path(__file__).parent
-if str(package_dir) not in sys.path:
-    sys.path.insert(0, str(package_dir))
+# 添加包路径（beep-skills 父目录，使 audio_announcement 包可导入）
+_skill_root = Path(__file__).parent.parent
+if str(_skill_root) not in sys.path:
+    sys.path.insert(0, str(_skill_root))
 
 from audio_announcement import announce, receive, task, complete, error, AnnouncementHelper, __version__
 

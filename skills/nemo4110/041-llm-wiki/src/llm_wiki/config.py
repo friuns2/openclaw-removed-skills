@@ -40,6 +40,28 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "link_weight": 0.2,
         "enable_link_traversal": True,
     },
+    "linking": {
+        "enabled": True,
+        "light_mode": {
+            "top_k": 5,
+            "min_score": 0.3,
+            "auto_link": True,
+            "keyword_weight": 0.6,
+            "vector_weight": 0.0,
+            "link_weight": 0.4,
+        },
+        "deep_mode": {
+            "top_k": 10,
+            "min_score": 0.2,
+            "max_backward_updates": 5,
+            "require_diff_review": True,
+            "strategies_allowed": [
+                "link_only",
+                "append_related",
+                "append_section",
+            ],
+        },
+    },
 }
 
 

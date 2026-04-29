@@ -1,216 +1,218 @@
 # 情绪.skill / Emotion Skill
 
-[English README](./README.md)
+[English](./README.md) · [GitHub](https://github.com/gongyu0918-debug/emotion-skill-qingxu-skill) · `clawhub install emotion-skill`
 
-面向 Coding Agent 的情绪感知编排层。
+给 Coding Agent 用的正向路由层：用户变急、变谨慎、开始要证据、反复说没修好时，它把这些信号翻译成可执行的 system prompt 和宿主路由策略。
 
-这个仓库会读取最新用户消息，以及可选的历史对话、运行时信号和用户画像，然后输出优先级、验证强度、回复风格、收口模式、review pass 提示这些工作模式信号。
+它的重点是“读懂状态后改善执行”，不是把负面情绪向量继续塞给模型。
 
-## 仓库里有什么
+![Python](https://img.shields.io/badge/python-3.9%2B-3776AB)
+![Dependencies](https://img.shields.io/badge/dependencies-standard%20library-2E7D32)
+![Runtime](https://img.shields.io/badge/runtime-no%20network-455A64)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-- `SKILL.md`：skill 定义和完整输入契约
-- `scripts/emotion_engine.py`：规则引擎和 CLI
-- `scripts/alignment_test.py`：回归样例集
-- `scripts/ablation_test.py`：skill 与静态基线的对比评测
-- `scripts/smoke_test.py`：带本地历史和随机社区工作流的场景烟测
-- `scripts/independent_audit.py`：独立契约与宿主画像边界审计
-- `scripts/marketplace_tag_audit.py`：ClawHub 市场标签回归、评测与烟测
-- `scripts/minimal_host_adapter.py`：带宿主本地画像复用的最小可用适配器
-- `demo/local_history_event.json`：真实感 demo payload
-- `references/`：设计说明、案例、提示词参考
+## 为什么值得装
 
-## 适合什么场景
+Coding Agent 常在这些时刻掉质量：
 
-- Coding Agent 面对赶时间、重复失败、用户质疑、边界保护、成功后收口这类对话
-- 宿主侧能调用本地 Python 脚本，并消费 JSON 输出
+- 用户说同一个 bug 还在，Agent 继续解释。
+- 用户要依据，Agent 继续猜。
+- 用户要求只改一个文件，Agent 顺手动了旁边配置。
+- 用户说已经好了，Agent 又开新改动。
+- 长时间没反馈后，用户变短变硬，Agent 没读出来。
 
-## 市场定位
+这个 skill 把这些信号转成 host 可消费的路由字段和正向 `system_prompt_addendum`。raw affect 默认留在内部，审计时再显式打开。
 
-- repository debugging
-- coding-agent 编排
-- 验证强度控制
-- 队列、线程、heartbeat 协调
-- 成功后的稳定收口
+## 它改变什么
 
-## 核心输入
-
-引擎接收一个 JSON payload。最常用的字段有：
-
-- `message`
-- `history`
-- `runtime`
-- `user_profile`
-- `last_state`
-- `llm_semantic`
-- `posthoc_semantic`
-- `calibration_state`
-
-完整字段说明和示例放在 [SKILL.md](./SKILL.md)。
-
-## 核心输出
-
-先接这两个：
-
-- `overlay_prompt`：当前这一轮的紧凑运行时提示
-- `routing.thread_interface`：队列模式、主线程偏好、heartbeat 行为、并行度、进度更新间隔
-
-常用补充输出：
-
-- `guidance`
-- `memory_update`
-- `posthoc_plan`
-- `prompts`
+| 用户信号 | 宿主行为 |
+|---|---|
+| “这个还没修好” | 提高验证强度，留在主线程，缩短进度更新间隔 |
+| “先给我依据” | 先给命令、日志、测试或校验点，再给结论 |
+| “只改这个文件” | 收紧范围，保护配置，说明回滚路径 |
+| “路径对不上” | 先复述目标，再给一个可纠正的默认路径 |
+| “已经好了，收口” | 进入 guard mode，做回归检查，停止扩 scope |
 
 ## 安装
 
-环境要求：
+从 ClawHub 安装：
 
-- Python `3.9+`
-- 无第三方依赖
+```bash
+clawhub install emotion-skill
+cd skills/emotion-skill
+python scripts/download_smoke.py
+```
 
-先拉仓库：
+从 GitHub 安装：
 
 ```bash
 git clone https://github.com/gongyu0918-debug/emotion-skill-qingxu-skill.git
 cd emotion-skill-qingxu-skill
+python scripts/download_smoke.py
 ```
 
-如果你想按 Codex 风格作为本地 skill 使用，可以复制到本地 skills 目录。
+环境要求：
 
-macOS / Linux:
+- Python `3.9+`
+- 只用标准库
+- 运行时引擎不发网络请求
+
+## 30 秒试跑
 
 ```bash
-cp -r emotion-skill-qingxu-skill ~/.codex/skills/emotion-skill
+python scripts/emotion_engine.py host \
+  --message "这个问题还没修好，先给我依据，再继续改。" \
+  --pretty
 ```
 
-PowerShell:
-
-```powershell
-Copy-Item -LiteralPath .\emotion-skill-qingxu-skill -Destination $HOME\.codex\skills\emotion-skill -Recurse -Force
-```
-
-## 快速开始
-
-先用单条消息做烟测：
-
-```bash
-python scripts/emotion_engine.py run --message "先给我依据，别瞎猜" --pretty
-```
-
-再跑仓库自带的本地历史 demo：
-
-```bash
-python scripts/emotion_engine.py run --input demo/local_history_event.json --pretty
-```
-
-再用完整 payload 跑一轮：
-
-```bash
-python scripts/emotion_engine.py run --input path/to/turn.json --pretty
-```
-
-如果你想直接接一个带宿主本地画像的最小宿主：
-
-```bash
-python scripts/minimal_host_adapter.py --event demo/local_history_event.json --store-dir .demo-store --pretty
-```
-
-最小 payload 示例：
+默认 host 输出面向生产提示词：
 
 ```json
 {
-  "message": "这个问题还没修好，先给我依据，再继续改。",
-  "history": [
-    {"role": "assistant", "text": "我觉得已经定位到根因了"}
-  ],
-  "runtime": {
-    "response_delay_seconds": 20,
-    "unresolved_turns": 3,
-    "bug_retries": 2,
-    "same_issue_mentions": 2
+  "mode": "skeptical",
+  "route_reasons": ["repeat_failure_pressure", "evidence_requested"],
+  "response_constraints": ["show_basis_first", "name_verification_steps"],
+  "guidance": {
+    "system_prompt_addendum": "用户希望先看到依据。回复以校验点、命令或日志片段开头，再给结论和下一步。",
+    "tone": "evidence_first"
+  },
+  "routing": {
+    "reply_style": "evidence_then_act",
+    "verification_level": "high",
+    "queue_mode": "collect",
+    "prefer_main_thread": true
   }
 }
 ```
 
-## 接入路径
+默认输出里没有 raw `labels`，没有 raw `emotion_vector`，也没有 `falling_trust` 这类负向状态词。
 
-1. 每轮用户消息都调用一次 `emotion_engine.py`。
-2. 把 `overlay_prompt` 插进当前这轮 prompt，作为紧凑的动态前置提示。
-3. 把 `routing.thread_interface` 接到队列、主线程选择、heartbeat 和进度节奏控制。
-4. 当 `analysis.semantic_pass` 是 `fast` 时，再补跑模型语义判断，并把结果按 `llm_semantic` 回填。
-5. 如果你需要跨轮自适应，就把 `memory_update` 里的有限字段复用到宿主自有的本地画像里。
+## Host 契约
 
-## 它重点优化哪些状态
+真实接入优先使用 `host` 输出。关键字段：
 
-| 状态 | 主要行为变化 | 价值 |
-|---|---|---|
-| `urgent` | 抢主线程，缩短进度更新间隔 | 更快给出第一个有效动作 |
-| `frustrated` | 先修再解释 | 降低漂移，减少废话 |
-| `skeptical` | 先给依据和校验点 | 降低盲改和误诊 |
-| `cautious` | 收紧 scope，优先安全路径 | 降低越界修改 |
-| `satisfied` | 进入 guard mode | 降低成功后的回归风险 |
+- `guidance.system_prompt_addendum`：给宿主 LLM 的正向行动提示。
+- `response_constraints`：下一轮回复的紧凑约束。
+- `routing.reply_style`：回复姿态，例如 `evidence_then_act`、`repair_then_explain`、`verify_then_act`。
+- `routing.verification_level`：动手前的检查强度。
+- `routing.queue_mode`：继续收集、引导当前任务，或打断队列。
+- `routing.progress_update_interval_sec`：长任务进度节奏。
+- `satisfaction_lock`：成功后的收口守护。
+- `interaction_state`：面向 host 的正向轴：clarity、trust、engagement。
+- `state.state_delta`：动作命名的跨轮变化，比如 `needs_evidence_first`。
+- `memory.should_persist`：是否建议宿主合并画像更新。
 
-## 语言覆盖
+完整 `run` 命令保留 diagnostics、features、prompts、calibration 字段，给研究和回归测试用。
 
-当前特化校准重点覆盖：
+## Raw Affect 显式开启
 
-- 中文
-- 英文
+生产 host 应该把 `guidance.system_prompt_addendum`、`response_constraints`、`routing` 喂给模型。
 
-其他语言当前主要走通用路径，依赖标点强度、重复、延迟压力、多轮未解决压力和命令式结构。
+审计工具可以请求内部状态：
 
-## 产品边界
+```json
+{
+  "message": "先给精确失败路径。",
+  "host_capabilities": {
+    "include_raw_emotion": true
+  }
+}
+```
 
-- 运行时适配层放在宿主侧
-- 跨轮自适应通过宿主自有本地画像复用 `memory_update` 的有限字段
-- 下方评测数字来自仓库内置的精选样例
-- 第一轮判断在带有 `runtime` 和 `history` 时更稳
-- 市场定位就是 coding-agent 编排层
+开启后会增加：
 
-## 当前状态
+- `diagnostics.internal.labels`
+- `diagnostics.internal.emotion_vector`
+- `diagnostics.internal.state_delta`
+- `diagnostics.internal.mode_scores`
 
-我在这个仓库里的本地运行结果：
+## 反馈闭环
 
-- alignment regression：`50/50`
-- curated ablation harness：`201/201`
-- 同一套评分下的静态基线：`6/201`
-- 场景烟测：`ok`
-- 独立审计：`ok`
-- ClawHub 标签审计：`ok`
-- feature gate 审计：`ok`
+宿主可以把上一轮路由效果带进下一轮：
 
-这些数字更适合解读成回归覆盖率和规则稳定性，不适合直接当成线上 A/B 结论。
+```json
+{
+  "runtime": {
+    "last_routing_outcome": {
+      "mode_was": "skeptical",
+      "user_followed_up_with": "still broken"
+    }
+  }
+}
+```
 
-ClawHub 发布包只带运行时所需子集。更重的回归、审计和校准资产继续留在 GitHub 仓库。
+这样不用训练模型，也能让路由器知道上一轮策略有没有起作用。
 
-## 仓库结构
+## 持久化边界
 
-ClawHub 发布包内：
+核心引擎无状态。它返回 JSON，不发网络请求；只有传入 `--output` 时才写文件。
 
-- [SKILL.md](./SKILL.md)：skill 定义和完整契约
-- [scripts/emotion_engine.py](./scripts/emotion_engine.py)：运行时引擎
-- [scripts/minimal_host_adapter.py](./scripts/minimal_host_adapter.py)：带宿主本地画像的最小宿主适配器
-- [demo/local_history_event.json](./demo/local_history_event.json)：真实本地历史 demo payload
-- [references/examples.md](./references/examples.md)：案例输入输出
+最小宿主适配器可以在 `--store-dir` 下维护三个宿主文件：
 
-GitHub 仓库内额外保留：
+- `user_profile.json`
+- `last_state.json`
+- `calibration_state.json`
 
-- [scripts/alignment_test.py](./scripts/alignment_test.py)：回归样例集
-- [scripts/ablation_test.py](./scripts/ablation_test.py)：评测脚本
-- [scripts/smoke_test.py](./scripts/smoke_test.py)：场景烟测
-- [scripts/independent_audit.py](./scripts/independent_audit.py)：独立校验
-- [scripts/marketplace_tag_audit.py](./scripts/marketplace_tag_audit.py)：市场标签审计
-- [scripts/posthoc_calibration_pack.py](./scripts/posthoc_calibration_pack.py)：冷启动 posthoc pack 构建器
+用 `--no-persist` 做只读预览。用 `--ignore-bad-store` 跳过损坏的本地 store，从空值继续。
 
-## 下一步
+## 验证
 
-- 给短句命令式中文补更严格的误判测试
-- 给常见 Agent Runtime 补宿主适配器
-- 补完整的 demo payload 和安装演示
-- 把特化校准从中英文扩到更多语言
+发布包冒烟：
+
+```bash
+python scripts/download_smoke.py
+```
+
+完整仓库验证：
+
+```bash
+python scripts/alignment_test.py
+python scripts/ablation_test.py
+python scripts/smoke_test.py --seed 20260424 --strict
+python scripts/independent_audit.py
+python scripts/marketplace_tag_audit.py
+python scripts/feature_gate_audit.py
+python scripts/bundle_manifest_check.py
+```
+
+当前本地结果：
+
+- alignment regression: `70/70`
+- ablation harness: `333/333`
+- strict smoke: `ok`
+- independent audit: `ok`
+- marketplace scope audit: `ok`
+- feature gate audit: `ok`
+- download smoke: `ok`
+- bundle manifest check: `ok`
+
+## 发布包
+
+ClawHub 发布包只带运行时需要的文件：
+
+- `SKILL.md`
+- `README.md`
+- `README.zh-CN.md`
+- `CHANGELOG.md`
+- `agents/openai.yaml`
+- `scripts/emotion_engine.py`
+- `scripts/minimal_host_adapter.py`
+- `scripts/download_smoke.py`
+- `demo/local_history_event.json`
+- `references/examples.md`
+- `references/model-prompts.md`
+- `references/emotion-value-model.md`
+- `references/emotion-policy-matrix.md`
+- `references/integration-openclaw-hermes.md`
+
+完整 GitHub 仓库保留更重的回归、审计和校准文件。
+
+## 适合谁
+
+- 需要在高压对话里稳定输出的 Coding Agent。
+- 需要路由字段、进度节奏和验证强度控制的宿主。
+- 想做 emotion-aware 行为，并把 raw 情绪信号保留在 audit 模式的团队。
 
 ## License
 
-ClawHub 发布包遵循平台统一的 `MIT-0` 条款。
-
-GitHub 仓库继续以 [LICENSE](./LICENSE) 文件为准。
+MIT. See the [GitHub repository license](https://github.com/gongyu0918-debug/emotion-skill-qingxu-skill/blob/main/LICENSE).

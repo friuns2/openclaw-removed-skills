@@ -1,0 +1,11 @@
+{
+  "owner": "peand-rover",
+  "slug": "editor-job",
+  "displayName": "Editor Job",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776229297480,
+    "commit": "https://github.com/openclaw/skills/commit/44c2d15481da6d94f4987393ecf1c62ba83e25ab"
+  },
+  "history": []
+}

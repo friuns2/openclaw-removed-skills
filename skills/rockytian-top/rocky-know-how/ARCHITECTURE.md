@@ -1,4 +1,4 @@
-# 🏗️ rocky-know-how 完整架构设计 (v2.8.8)
+# 🏗️ rocky-know-how 完整架构设计 (v3.4.8)
 
 > 技能插件的所有流程架构、组件关系、数据流、部署拓扑总览
 
@@ -511,7 +511,7 @@ esac
 | 组件 | 用途 | 配置 |
 |------|------|------|
 | Embedding API | `http://localhost:1234/v1/embeddings` | 默认端口 |
-| 模型 | `text-embedding-qwen3-embedding-0.6b` | 约 400MB |
+| 模型 | `text-embedding-bge-large-zh-v1.5` | 1024维，中文优化 |
 | 降级策略 | 检测失败 → 自动切关键词搜索 | 无感切换 |
 
 ### 3. 与 NapCat QQ 机器人
@@ -658,6 +658,6 @@ console.log(`[rocky-know-how] event=${event.type} sessionKey=${sessionKey}`);
 
 ---
 
-**最后更新**: 2026-04-24 v2.8.8  
+**最后更新**: 2026-04-24 v2.9.1  
 **维护人**: 大颖 (fs-daying)  
 **状态**: ✅ 生产就绪，架构稳定

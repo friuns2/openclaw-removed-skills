@@ -1,0 +1,11 @@
+{
+  "owner": "dsewell-583h0",
+  "slug": "trim-video",
+  "displayName": "Trim Video",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776228588135,
+    "commit": "https://github.com/openclaw/skills/commit/77a1adc1caf06594f70b35ead89807356db5bf0e"
+  },
+  "history": []
+}

@@ -1,0 +1,14 @@
+File: 鲁Y78X92-吴晓东-交强险保单.pdf
+Text len: 1801
+
+保险费合计 segment, yen at 28:
+  context: ?? 6 6 5 . 0 0 ????????? 1 %??? 6 . 6 5 
+  n_digits=4: NO MATCH
+  n_digits=3: MATCHED 6 6 5 . 0 0 -> val=665.0
+  n_digits=2: NO MATCH
+
+当年应缴 segment, yen at 5:
+  context: ?? 9 0 0 . 0 0 ? ???? ?? 0 . 0 0 ? ??? ?
+  n_digits=4: NO MATCH
+  n_digits=3: MATCHED 9 0 0 . 0 0 -> val=900.0
+  n_digits=2: NO MATCH

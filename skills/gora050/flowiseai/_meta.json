@@ -3,9 +3,15 @@
   "slug": "flowiseai",
   "displayName": "Flowiseai",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775639217711,
-    "commit": "https://github.com/openclaw/skills/commit/1170c2343b35880e681f72b3d93e6b9b8cfb4bff"
+    "version": "1.0.1",
+    "publishedAt": 1776899204968,
+    "commit": "https://github.com/openclaw/skills/commit/e6e32851b1731017bf1fe0e02b128828c66864a8"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775639217711,
+      "commit": "https://github.com/openclaw/skills/commit/1170c2343b35880e681f72b3d93e6b9b8cfb4bff"
+    }
+  ]
 }

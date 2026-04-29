@@ -1,11 +1,12 @@
 ---
 name: draft-cli
-version: "1.5.10"
+version: "1.6.0"
 description: >
   Manage and interact with "Draft" pages and documents using the @innosage/draft-cli.
-  Use this skill whenever the user explicitly asks to read, create, list, patch, append, publish, or review comments on a "Draft page", "Draft doc", or via the "Draft CLI" (e.g., "my draft page named 'Founder Sync'", "publish this Draft page", "read public comments on this Draft preview URL", "Draft CLI").
-  This connects to the Draft PWA (draft.innosage.co) via a local daemon to read or modify living documents.
-  DO NOT use this skill for generalized writing tasks where "draft" is used as a verb (e.g., "draft an email", "draft a response") or when referring to local markdown/text files with "draft" in the name (e.g., "draft.md", "investor_update_draft.md"). Only use when interacting with the actual InnoSage Draft web application or Draft CLI tool.
+  This is the canonical Draft operational skill and the main public mental model for `draft` and `draft page ...`.
+  Use this skill whenever the user explicitly asks to read, create, list, patch, append, publish, or review comments on a Draft page/doc, or asks about the Draft CLI itself.
+  This connects to the Draft PWA via a local daemon to read or modify living documents.
+  DO NOT use this skill when "draft" is just a verb or when the request is about local markdown/text files rather than the actual InnoSage Draft app or CLI.
   When triggered, ALWAYS follow the "Connection First" operational pattern: check status before any other command, and start the background server if it is not running.
 metadata:
   clawdis:
@@ -43,16 +44,22 @@ This skill requires specific permissions to interact with the Draft PWA and your
 
 Before running Draft CLI commands, ensure `draft` is available on your PATH (see Install panel).
 
-### Operational Pattern: Check Connection First for Live Page Commands
+Non-trigger reminder:
+- DO NOT use this skill for generalized writing tasks where "draft" is used as a verb (for example `draft an email` or `draft a response`).
+
+### Operational Pattern: Check Connection First for Draft Page Commands
 
 Exception:
 - `draft public-comments ...` is a hosted read path and does **not** require the local daemon, browser pairing, or a `draft status` handshake.
-- Use the daemon-first pattern for `draft page ...` and other live Draft page transport commands.
+- This skill is the default operational surface for `draft` and `draft page ...`.
+- Use `draft-review-loop` for local-first review workflows where workspace markdown remains the source of truth.
 
 To ensure a stable session, you MUST follow this sequence before executing any live Draft page command (like `page ls`, `page cat`, `page create`, `page append`, `page patch`, etc.):
 
 1.  **Check Status**: Start with `draft status --json` unless the user explicitly wants human-readable output.
-2.  **Handle Daemon Offline**: If status reports `DAEMON_OFFLINE`, run `draft start-server`.
+2.  **Handle Daemon Offline**: If status reports `DAEMON_OFFLINE`, choose the right startup lane:
+    - default/current SSOT: `draft start-server` for headless `v2`
+    - legacy browser-backed compatibility: `draft start-server --runtime v1_DEPRECATED`
 3.  **Handle Browser Missing**: If status reports `BROWSER_NOT_CONNECTED`, run `draft daemon [url]` (the currently implemented pairing/retarget command) to re-open or re-pair the browser tab.
 4.  **Verify**: Run `draft status --json` again and only proceed once the state is `READY`.
 5.  **Respect Environment URLs**: The `--app <url>` argument defaults to production (`https://draft.innosage.co/`). Only pass a staging or development URL when the user explicitly asks for that environment.
@@ -62,10 +69,13 @@ To ensure a stable session, you MUST follow this sequence before executing any l
 # 1. Start with machine-readable status
 draft status --json
 
-# 2a. If the daemon is offline, start it
+# 2a. If the daemon is offline and you want the default headless runtime
 draft start-server
 
-# 2b. If the daemon is running but the browser is missing, pair a tab
+# 2b. If the daemon is offline and you explicitly need the legacy browser-backed runtime
+draft start-server --runtime v1_DEPRECATED
+
+# 2c. If the daemon is running but the browser is missing, pair a tab
 draft daemon
 
 # 3. Confirm the live path is ready
@@ -73,32 +83,45 @@ draft status --json
 ```
 
 > [!IMPORTANT]
-> The Draft CLI uses one daemon and one active browser-backed session at a time. `draft start-server` starts the daemon, but it does not by itself prove that the browser paired successfully. Always trust `draft status` over startup copy before issuing read/write commands.
-> For agent lifecycle control, prefer `draft start-server` and `draft stop-server`. Keep `draft daemon` as the active pairing/retarget command when status shows no browser or when you need to retarget the connected tab.
+> `draft start-server` now defaults to headless `v2`, which is the current Draft runtime SSOT.
+> This skill is the canonical page-domain Draft skill.
+> `draft daemon` is not a general lifecycle command anymore; treat it as the browser pair/retarget command when status shows no browser or when you need to retarget the connected tab.
 
-### Hosted Read Pattern for Public Page Comments
+## Public Comment Retrieval
 
 Public comments are stored in a hosted sidecar store and read directly from the hosted API.
 For these commands:
 
+- Do not start with `draft status`.
+- Do not require `draft start-server`.
+- Do **not** require a paired browser tab.
+
+### Hosted Read Pattern for Public Page Comments
+
+- `draft public-comments ...` is a hosted read path.
 - Do **not** start with `draft status`.
 - Do **not** require `draft start-server`.
-- Do **not** require a paired browser tab.
+- Canonical preview URL example:
+
+```bash
+draft public-comments list --url 'https://draft.innosage.co/#/preview/<page_id>?mode=static'
+draft public-comments list --page-id <page_id>
+```
 
 Preferred commands:
 
 ```bash
 # URL-first path
-draft public-comments list --url 'https://draft.innosage.co/#/preview/<page_id>?mode=static'
+draft public-comments list --url '<published_or_preview_url>' --json
 
 # Page-ID path
-draft public-comments list --page-id <page_id>
+draft public-comments list --page-id <page_id> --json
 
 # Explicit snapshot pin only when needed
 draft public-comments list --page-id <page_id> --publish-version <published_at_iso>
 
 # Inspect one comment in detail
-draft public-comments get <comment_id> --url 'https://draft.innosage.co/#/preview/<page_id>?mode=static'
+draft public-comments get <comment_id> --json
 ```
 
 Resolution behavior:
@@ -134,7 +157,7 @@ Prefer the JSON workflow for branching and retries:
 Treat `draft status` as the authoritative diagnosis step before retrying a failed command.
 
 - `DAEMON_OFFLINE`: the local daemon is not running.
-  Run `draft start-server`, then re-run `draft status`.
+  Run `draft start-server` for headless `v2`, or `draft start-server --runtime v1_DEPRECATED` if the task explicitly requires the legacy browser-backed session, then re-run `draft status`.
 - `BROWSER_NOT_CONNECTED`: the daemon is running, but no Draft browser tab is paired.
   Run `draft daemon` (pairing/retarget), then re-run `draft status`.
 - `REQUEST_TIMEOUT`: the connected browser session did not respond in time.
@@ -149,13 +172,14 @@ Treat `draft status` as the authoritative diagnosis step before retrying a faile
 Preferred recovery sequence:
 
 - If `draft status` says `DAEMON_OFFLINE`, run `draft start-server`, then re-check `draft status`.
+- If the task explicitly depends on the legacy browser-backed session, run `draft start-server --runtime v1_DEPRECATED`, then re-check `draft status`.
 - If `draft status` says `BROWSER_NOT_CONNECTED`, run `draft daemon` to re-open or re-pair the browser tab, then re-check `draft status`.
 - If a live command returns `REQUEST_TIMEOUT`, do not retry blindly. Run `draft status` first.
 - If `draft status` or a mutation error indicates `EDITOR_NOT_READY`, mount a real page route in the connected tab (`https://draft.innosage.co/#/page/<id>`), then re-run `draft status --json` before retrying writes.
   If needed, use `draft page ls --json` to discover the page ID before route-mounting.
 - Do not treat `draft page create` as the primary `EDITOR_NOT_READY` fix. Recover editor readiness first, then run the intended command.
 - If the daemon looks stuck or the wrong tab is attached, run `draft stop-server`, then restart with `draft start-server`.
-- If the user explicitly wants staging or another environment, reuse the same URL consistently for both `draft start-server --app [url]` and `draft daemon [url]`.
+- If the user explicitly wants staging or another environment, reuse the same URL consistently for both `draft start-server --app [url]` and `draft daemon [url]`. Add `--runtime v1_DEPRECATED` when the workflow explicitly needs the legacy browser-backed lane.
 - If `draft status --json` shows `READY` but the connected `clients[].origin` does not match the requested environment, stop the server and reconnect to the requested URL before making changes.
 - In CI or headless sessions, browser auto-launch may be skipped. Treat that as a diagnosis cue, then pair from a desktop session and verify with `draft status --json`.
 
@@ -352,31 +376,31 @@ cat patch.diff | draft page patch <id>
 > draft page cat <id> | sed '1,4d' | sed '$d' | sed 's/ \[:: User Note: [^:]* :\]//g' > /tmp/before.md
 > ```
 
-### Inserting and Managing Images
+## Image Insertion and Management
 
 You can use the CLI to insert images from local files, update their alignment or width, and delete them.
 To insert an image into a page:
 
 ```bash
 # Insert an image with default alignment (left) and default width
-draft page insert-image <id> /path/to/local/image.png --json
+draft page insert-image <page_id> /path/to/local/image.png --json
 
 # Insert an image with specific alignment and width
-draft page insert-image <id> /path/to/local/image.jpg --align center --width 500 --json
+draft page insert-image <page_id> /path/to/local/image.jpg --align center --width 500 --json
 ```
 
-The output JSON will include a `local_id` (e.g., `local_id: "img-abc1234"`). **Save this `local_id`**, as it is required to update or delete the image.
+The output JSON will include a `local_id` (e.g., `local_id: "img-abc1234"`). Save the returned `local_id`, as it is required to update or delete the image.
 
 To update the alignment or width of an existing image block:
 
 ```bash
-draft page update-image <id> <local_id> --align right --json
+draft page update-image <page_id> <local_id> --align right --json
 ```
 
 To delete an existing image block:
 
 ```bash
-draft page delete-image <id> <local_id> --json
+draft page delete-image <page_id> <local_id> --json
 ```
 
 ## Common Workflows
@@ -386,8 +410,9 @@ Always follow the connection-first pattern, then read the page before modifying 
 ```bash
 # 1. Check/Start Connection
 draft status --json
-# (if needed: draft start-server && draft status --json)
-# (if browser missing: draft daemon && draft status --json)
+# (if needed for default headless v2: draft start-server && draft status --json)
+# (if needed for legacy browser-backed mode: draft start-server --runtime v1_DEPRECATED && draft status --json)
+# (if browser missing in a browser-backed workflow: draft daemon && draft status --json)
 
 # 2. Read
 draft page ls --json
@@ -454,8 +479,10 @@ diff -u /tmp/before.md /tmp/after.md > /tmp/patch.diff ; cat /tmp/patch.diff | d
 
 **4. Switching Tabs/Context**
 The Draft daemon is intentionally single-session. If you need to connect to a different browser tab or recover from a stale pairing:
-  1. Stop the running server with `draft stop-server`.
-  2. Run `draft start-server` again to generate a new token and open a new locked tab.
+1. Stop the running server with `draft stop-server`.
+2. Restart the correct runtime lane:
+   `draft start-server` for default headless `v2`, or `draft start-server --runtime v1_DEPRECATED` for the legacy browser-backed session.
+3. If the browser-backed lane is in use, run `draft daemon` to pair or retarget the tab.
 
 **5. Using Staging or Another Environment**
 Only do this when the user explicitly asks for a non-production Draft environment.
@@ -463,7 +490,7 @@ Only do this when the user explicitly asks for a non-production Draft environmen
 ```bash
 draft status --json
 draft stop-server
-draft start-server --app https://markdown-editor-staging.web.app/
+draft start-server --runtime v1_DEPRECATED --app https://markdown-editor-staging.web.app/
 draft status --json
 draft daemon https://markdown-editor-staging.web.app/
 draft status --json
@@ -472,11 +499,11 @@ draft status --json
 **6. Publishing a Page**
 
 ```bash
-# 1. Stop any existing server to ensure a clean start in local mode
+# 1. Stop any existing server to ensure a clean start in the legacy browser-backed lane
 draft stop-server
 
-# 2. Connect in local mode (safest for publish)
-draft start-server
+# 2. Connect in the explicit browser-backed compatibility mode
+draft start-server --runtime v1_DEPRECATED
 draft daemon
 draft status --json # Verify READY state before proceeding
 

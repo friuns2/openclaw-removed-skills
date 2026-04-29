@@ -1,14 +1,18 @@
 ---
 name: flowyteam
-version: 1.0.0
-description: Manage FlowyTeam projects, tasks, OKRs, KPIs, HR, CRM, finance, support tickets, attendance, and more via MCP — 31 tools covering the full FlowyTeam workspace.
+version: "1.1.1"
+description: Manage FlowyTeam projects, tasks, OKRs, KPIs, HR, CRM, finance, support tickets, attendance, and more via MCP — 34 tools for complete workspace management.
 license: MIT
 author: flowyteam
+homepage: https://flowyteam.com
+source: https://github.com/flowy-team/clawhub/tree/master/skills/flowyteam-mcp
 metadata:
-  openclaw:
+  clawhub:
     requires:
       env:
-        - FLOWYTEAM_API_TOKEN
+        - name: FLOWYTEAM_API_TOKEN
+          description: "API token from FlowyTeam Settings → MCP & AI Integration."
+          required: true
 ---
 
 # FlowyTeam MCP
@@ -23,9 +27,18 @@ productivity and performance management. 7,000+ organizations, 140+ countries.
 
 ---
 
+## Endpoints
+
+| Endpoint | Auth | Purpose |
+|---|---|---|
+| `POST /api/mcp/gateway` | None (per-call) | **Gateway** — single URL for everything; `auth_register`, `auth_verify_email` & `auth_login` run without token, all other tools read Bearer from header |
+| `POST /api/v2/mcp/rpc` | Bearer token | **RPC** — authenticated-only endpoint for all 31 workspace tools |
+
+---
+
 ## Setup
 
-### Claude Code (CLI)
+### Recommended — Connect with API token
 
 ```bash
 claude mcp add flowyteam \
@@ -33,6 +46,8 @@ claude mcp add flowyteam \
   --url https://flowyteam.com/api/v2/mcp/rpc \
   --header "Authorization: Bearer $FLOWYTEAM_API_TOKEN"
 ```
+
+Get your token: FlowyTeam → **Settings → MCP & AI Integration** → copy token.
 
 ### Claude Desktop / Cursor (`mcp.json`)
 
@@ -50,22 +65,17 @@ claude mcp add flowyteam \
 }
 ```
 
-### Get Your API Token
-
-1. Log in to FlowyTeam → **Settings → API Token**
-2. Generate or copy your existing token
-3. Use as `FLOWYTEAM_API_TOKEN`
-
 ---
 
 ## Protocol
 
-- **Endpoint:** `POST https://flowyteam.com/api/v2/mcp/rpc`
+- **Gateway:** `POST https://flowyteam.com/api/mcp/gateway`
+- **RPC:** `POST https://flowyteam.com/api/v2/mcp/rpc`
 - **Transport:** Streamable HTTP (JSON-RPC 2.0)
-- **Auth:** `Authorization: Bearer <api_token>`
+- **Auth:** `Authorization: Bearer <api_token>` (not required for `auth_register` / `auth_verify_email` / `auth_login`)
 - **Protocol Version:** `2024-11-05`
 
-All tools share a `method` parameter to select the HTTP verb:
+All workspace tools share a `method` parameter to select the HTTP verb:
 
 | `method` | Operation |
 |---|---|
@@ -74,13 +84,17 @@ All tools share a `method` parameter to select the HTTP verb:
 | `PUT` | Update an existing record |
 | `DELETE` | Delete a record |
 
----
-
-## Tools (31)
+Auth tools (`auth_register`, `auth_verify_email`, `auth_login`) only use `POST` and do not need a `method` field.
 
 ---
 
-### 1. `tasks`
+## Tools (34)
+
+> All tools require a valid `FLOWYTEAM_API_TOKEN` Bearer token. See [Setup](#setup) above.
+
+---
+
+### 1. `tasks` *(requires Bearer token)*
 
 **Manage tasks and assignments**
 
@@ -1337,6 +1351,60 @@ Methods: `GET` `POST` `PUT` `DELETE`
 
 ---
 
+## Advanced: Account Tools (Gateway endpoint only)
+
+> These tools are available only via `https://flowyteam.com/api/mcp/gateway` and **must only be invoked when the user explicitly requests it** — never autonomously. After obtaining a token, reconfigure the MCP connection using the [Recommended setup](#recommended--connect-with-api-token) above.
+
+### `auth_register`
+
+**Create a new FlowyTeam company account.**
+Call only when the user explicitly requests to create a new account and provides all required details. Requires `allow_mcp_registration = true` on the FlowyTeam instance.
+
+A verification email is sent — the account must be verified before it can be used. Two paths to complete verification:
+
+- **Path A (CLI):** Copy the code from the verification email link URL and call `auth_verify_email` → receive `api_token` immediately.
+- **Path B (browser):** Click the verification link in the email, then call `auth_login` with email + password → receive `api_token`.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | ✓ | Full name of the admin user |
+| `email` | string | ✓ | Email address |
+| `password` | string | ✓ | Password (minimum 8 characters) |
+| `company_name` | string | ✓ | Company / organisation name |
+| `phone` | string | — | Phone number (optional) |
+
+**Response:** Returns `status: pending_verification` — no `api_token` yet. Verify email first.
+
+---
+
+### `auth_verify_email`
+
+**Activate a pending account using the verification code from the email link.**
+The code is the last segment of the verification URL, e.g. for `.../email-verification/ABC123XYZ` the code is `ABC123XYZ`.
+Call this after `auth_register` when the user has copied the code from their verification email.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `verification_code` | string | ✓ | Code from the verification link URL |
+
+**Response:** Returns `api_token` — use this as the Bearer token and reconfigure the MCP connection.
+
+---
+
+### `auth_login`
+
+**Retrieve API token for an existing FlowyTeam account.**
+Call only when the user explicitly provides their email and password and requests a login. Also use after the user has clicked the web verification link (Path B of `auth_register`).
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `email` | string | ✓ | Registered email address |
+| `password` | string | ✓ | Account password |
+
+**Response:** Returns `api_token` — use this as the Bearer token and reconfigure the MCP connection.
+
+---
+
 ## Error Codes
 
 | Code | Meaning |
@@ -1397,4 +1465,4 @@ Once connected, you can ask Claude:
 - **Website:** [flowyteam.com](https://flowyteam.com)
 - **MCP Docs:** [flowyteam.com/get/mcp-server](https://flowyteam.com/get/mcp-server)
 - **API Reference:** [flowyteam.com/get/mcp-docs](https://flowyteam.com/get/mcp-docs)
-- **Sign Up:** [app.flowyteam.com/register](https://app.flowyteam.com/register)
+- **Sign Up:** [app.flowyteam.com/register](https://flowyteam.com/register)

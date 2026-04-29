@@ -1,0 +1,11 @@
+{
+  "owner": "wu-uk",
+  "slug": "exoplanet-detection-period-transit-least-squares",
+  "displayName": "transit-least-squares",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1776229689965,
+    "commit": "https://github.com/openclaw/skills/commit/046bc78baad06434cd601f384365448ffcd0505f"
+  },
+  "history": []
+}

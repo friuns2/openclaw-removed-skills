@@ -1,0 +1,11 @@
+{
+  "owner": "xiongzhp",
+  "slug": "chemical-recognition",
+  "displayName": "αExtractor",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776528348328,
+    "commit": "https://github.com/openclaw/skills/commit/a7514514d805b270c30d97dc15ddab4f5ee44038"
+  },
+  "history": []
+}

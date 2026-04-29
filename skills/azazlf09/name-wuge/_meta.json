@@ -3,9 +3,15 @@
   "slug": "name-wuge",
   "displayName": "姓名五格数理测算",
   "latest": {
-    "version": "2.2.2",
-    "publishedAt": 1776611049626,
-    "commit": "https://github.com/openclaw/skills/commit/087a230d0c70310abb149f33849fc98a2ab74e4a"
+    "version": "2.7.0",
+    "publishedAt": 1776836553905,
+    "commit": "https://github.com/openclaw/skills/commit/868efa74b12b2a3a27743dd2dee4114049fb3e4c"
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.2.2",
+      "publishedAt": 1776611049626,
+      "commit": "https://github.com/openclaw/skills/commit/087a230d0c70310abb149f33849fc98a2ab74e4a"
+    }
+  ]
 }

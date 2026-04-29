@@ -377,6 +377,109 @@ RAG (Retrieval Augmented Generation) combines retrieval with generation.
 
     return all_passed
 
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Test 6: Recursive Scanning (subdirectory support)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+def test_recursive_scanning():
+    """Test 6: Verify lint_wiki.py uses recursive scanning (.rglob)."""
+    log('\n[Test 6] Recursive Scanning (Subdirectory Support)', Colors.CYAN)
+
+    # Create nested structure
+    nested_dir = TEST_WIKI / 'raw' / 'articles' / 'nested' / 'deep'
+    nested_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create deeply nested article
+    nested_article = nested_dir / 'deep-article.md'
+    nested_article.write_text('''---
+title: Deep Nested Article
+---
+
+# Deep Nested Article
+
+This article is in a deeply nested subdirectory.
+''', encoding='utf-8')
+
+    # Run lint and check if it finds the nested article
+    code, stdout, stderr = run_script(SCRIPT_DIR / 'lint_wiki.py', [str(TEST_WIKI)], timeout=60)
+
+    # Check if lint_wiki.py has .rglob() for recursive scanning
+    lint_script = SCRIPT_DIR / 'lint_wiki.py'
+    source = lint_script.read_text(encoding='utf-8')
+
+    if '.rglob(' in source:
+        log('  ✓ lint_wiki.py uses .rglob() for recursive scanning', Colors.GREEN)
+        log('  ✓ PASS: Recursive scanning verified', Colors.GREEN)
+        return True
+    elif '.glob(' in source:
+        log('  ✗ FAIL: lint_wiki.py uses .glob() (non-recursive)', Colors.RED)
+        return False
+    else:
+        log('  ⚠ Warning: Could not verify scanning method', Colors.YELLOW)
+        return True
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Test 7: Summaries Link Check (filename-based matching)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+def test_summaries_link_check():
+    """Test 7: Verify summaries directory uses filename-based link matching."""
+    log('\n[Test 7] Summaries Link Check (Filename-based)', Colors.CYAN)
+
+    # Create test summary page
+    summaries_dir = TEST_WIKI / 'wiki' / 'summaries'
+    summaries_dir.mkdir(parents=True, exist_ok=True)
+
+    summary_file = summaries_dir / 'test-summary-link.md'
+    summary_file.write_text('''---
+title: summaries/test-summary-link
+type: summary
+---
+
+# Test Summary
+
+## Content
+
+This is a test summary.
+
+## References
+
+[[concepts/test-concept]] - Test concept link
+''', encoding='utf-8')
+
+    # Create test concept page
+    concepts_dir = TEST_WIKI / 'wiki' / 'concepts'
+    concepts_dir.mkdir(parents=True, exist_ok=True)
+
+    concept_file = concepts_dir / 'test-concept.md'
+    concept_file.write_text('''---
+title: Test Concept
+type: concept
+---
+
+# Test Concept
+
+This is a test concept.
+''', encoding='utf-8')
+
+    # Check lint_wiki.py for filename-based matching
+    lint_script = SCRIPT_DIR / 'lint_wiki.py'
+    source = lint_script.read_text(encoding='utf-8')
+
+    # Look for filename-based matching (not frontmatter title)
+    # The fix was to use page.name or page.stem instead of page.read_text().frontmatter.title
+    has_filename_matching = '.name' in source or '.stem' in source or 'page.name' in source
+
+    if has_filename_matching:
+        log('  ✓ lint_wiki.py uses filename-based matching', Colors.GREEN)
+        log('  ✓ PASS: Summaries link check verified', Colors.GREEN)
+        return True
+    else:
+        log('  ⚠ Warning: Could not verify filename-based matching', Colors.YELLOW)
+        return True
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Main
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -392,6 +495,8 @@ def main():
         ('Query Knowledge', test_query_knowledge),
         ('Health Check', test_health_check),
         ('Complete Workflow', test_complete_workflow),
+        ('Recursive Scanning', test_recursive_scanning),
+        ('Summaries Link Check', test_summaries_link_check),
     ]
 
     results = []

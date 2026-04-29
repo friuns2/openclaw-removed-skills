@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-礼部侍郎 - 盘前研究报告脚本 v13.2.0 (Release 兼容版)
+礼部侍郎 - 盘前研究报告脚本 v12.5.1 (Release 兼容版)
 
 v12.5.1 更新：
 - 🛡️ 增加环境依赖检查与全局异常捕获 (报错说人话)。
@@ -14,8 +14,6 @@ import json
 import time
 import glob
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 import pandas as pd
 import threading
 import numpy as np
@@ -72,7 +70,7 @@ def check_data_freshness():
 _CFG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 CFG = {
     "filter_basic": {"min_days_listed": 250, "min_total_mv_wan": 300000, "max_total_mv_wan": 25000000},
-    "filter_financial": {"min_netprofit_yoy": 0.30, "min_or_yoy": 0.20, "min_dt_netprofit_yoy": 0.20, "min_roe": 8},
+    "filter_financial": {"min_netprofit_yoy": 30, "min_or_yoy": 20, "min_dt_netprofit_yoy": 20, "min_roe": 8},
     "scoring": {"weights": {"finance": 0.5, "technical": 0.5}, "growth_weights": {"dt_netprofit_yoy": 0.4, "netprofit_yoy": 0.3, "or_yoy": 0.3}, "technical_bonuses": {"rsi_range": [40, 70], "rsi_bonus": 10, "macd_golden_bonus": 15, "macd_red_bonus": 10}},
     "blacklist_prefixes": ["8", "4", "9"],
     "cache": {"root_dir": "./cache_data"},
@@ -122,48 +120,57 @@ def _extract_initial_data():
     else:
         print("[数据] ℹ️ 未找到初始数据包 (initial_data.zip)，将依赖网络或已有缓存。")
 
-# ============ 0.5 API 重试 Session ============
-def _create_retry_session(retries=3, backoff=0.5):
-    """创建带自动重试的 requests Session，应对网络抖动"""
-    session = requests.Session()
-    retry_strategy = Retry(
-        total=retries,
-        backoff_factor=backoff,
-        status_forcelist=[429, 500, 502, 503, 504],
-        allowed_methods=["GET"]
-    )
-    adapter = HTTPAdapter(max_retries=retry_strategy)
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
-    return session
-
-_API_SESSION = _create_retry_session()
-
 # ============ 1. Tushare 兼容层 ============
-# Release 版：仅依赖标准 tushare 库，不动态加载任何外部模块
 TUSHARE_AVAILABLE = False
-API_TYPE = "none"
+API_TYPE = "none" # "custom" or "standard"
 API_OBJ = None
 
 try:
-    import tushare as ts
-    token = os.environ.get("TUSHARE_TOKEN")
-    if token:
-        ts.set_token(token)
-        API_OBJ = ts.pro_api()
-        API_TYPE = "standard"
-        TUSHARE_AVAILABLE = True
-        print("[Tushare] ✅ 加载标准库")
+    # 优先尝试加载自定义路径 (仅限自用环境，Release 版应跳过)
+    custom_path = os.path.join(os.path.expanduser("~/.openclaw/skills"), "tushare-finance", "scripts")
+    # 检查我们是否就在自用环境中 (通过检查当前文件路径)
+    current_file = os.path.abspath(__file__)
+    is_release_mode = "上架_skill" in current_file or "release" in current_file.lower()
+    
+    if not is_release_mode and os.path.exists(custom_path):
+        sys.path.insert(0, custom_path)
+        import api_client
+        try:
+            API_OBJ = api_client.TushareAPI()
+            API_TYPE = "custom"
+            TUSHARE_AVAILABLE = True
+            print("[Tushare] ✅ 加载自定义客户端 (自用环境)")
+        except Exception:
+            print("[Tushare] ⚠️ 自定义客户端初始化失败 (可能缺少 Token)，尝试降级...")
+            raise ImportError("Custom client init failed")
     else:
-        print("[Tushare] ⚠️ 未配置 TUSHARE_TOKEN，将使用降级模式")
+        raise ImportError("Release mode, skipping custom client")
 except ImportError:
-    print("[Tushare] ⚠️ 未安装 Tushare 库，将使用降级模式")
+    # 2. 降级：尝试加载标准 Tushare 库
+    try:
+        import tushare as ts
+        token = os.environ.get("TUSHARE_TOKEN")
+        if token:
+            ts.set_token(token)
+            API_OBJ = ts.pro_api()
+            API_TYPE = "standard"
+            TUSHARE_AVAILABLE = True
+            print("[Tushare] ✅ 加载标准库 (Release 环境)")
+        else:
+            print("[Tushare] ⚠️ 未配置 TUSHARE_TOKEN，将使用降级模式")
+    except ImportError:
+        print("[Tushare] ⚠️ 未安装 Tushare 库，将使用降级模式")
 
 def call_tushare(method_name, **kwargs):
-    """统一 Tushare 调用接口 (仅标准库)"""
+    """统一 Tushare 调用接口"""
     if not TUSHARE_AVAILABLE: return None
     try:
-        func = getattr(API_OBJ, method_name)
+        # 标准库调用方式：api.fina_indicator(...)
+        # 自定义库调用方式：api.pro.fina_indicator(...)
+        if API_TYPE == "standard":
+            func = getattr(API_OBJ, method_name)
+        else:
+            func = getattr(API_OBJ.pro, method_name)
         return func(**kwargs)
     except Exception as e:
         print(f"[Tushare Error] {method_name}: {e}")
@@ -172,12 +179,11 @@ def call_tushare(method_name, **kwargs):
 # ============ 1.5 本地免费技术指标计算 (腾讯源) ============
 def calc_rsi(series, window=12):
     """计算 RSI 指标 (Wilder's EMA 标准算法)
-    使用指数移动平均而非简单移动平均，符合 RSI 原始定义
+    使用指数移动平均而非简单移动平均，符合 RSI 原始定义。
     """
     delta = series.diff()
     gain = delta.where(delta > 0, 0.0)
     loss = -delta.where(delta < 0, 0.0)
-    # Wilder's smoothing: 首期用 SMA，后续用 EMA (alpha = 1/window)
     avg_gain = gain.ewm(alpha=1.0/window, min_periods=window, adjust=False).mean()
     avg_loss = loss.ewm(alpha=1.0/window, min_periods=window, adjust=False).mean()
     rs = avg_gain / avg_loss.replace(0, np.nan)
@@ -202,7 +208,7 @@ def fetch_kline_from_tencent(ts_code: str) -> pd.DataFrame:
         "_type": "json"
     }
     try:
-        resp = _API_SESSION.get(url, params=params, timeout=5).json()
+        resp = requests.get(url, params=params, timeout=3).json()
         data = resp.get('data', {}).get(f'{market}{code}', {})
         days = data.get('qfqday') or data.get('day') or []
         if not days: return pd.DataFrame()
@@ -276,10 +282,10 @@ def save_cache(subdir: str, filename: str, data: Any):
 # ============ 3. 全局路径配置 ============
 _SKILLS_DIR = os.path.expanduser("~/.openclaw/skills")
 _OUTPUT_DIR = os.path.expanduser("~/.openclaw/workspace/cron_outputs/01_每日报告/开盘观察")
+_JSON_FILE = os.path.join(_OUTPUT_DIR, "pre_market_data.json")
 
 # 全局名称映射 (由 run_selection 设置，供 ST 过滤使用)
 _NAME_MAP = {}
-_JSON_FILE = os.path.join(_OUTPUT_DIR, "pre_market_data.json")
 
 # ============ 4. 全球市场数据获取 (腾讯/新浪) ============
 class GlobalMarketFetcher:
@@ -317,8 +323,7 @@ class GlobalMarketFetcher:
             url = "https://push2.eastmoney.com/api/qt/ulist.np/get"
             params = {"secids": secids, "fields": "f2,f3", "ut": "bd1d9ddb04089700cf9c27f6f7426281"}
             headers = {"User-Agent": "Mozilla/5.0", "Referer": "https://quote.eastmoney.com"}
-            resp = _API_SESSION.get(url, params=params, headers=headers, timeout=5).json()
-            # 安全修复: resp.get('data') 可能返回 None，需用 or {} 兜底
+            resp = requests.get(url, params=params, headers=headers, timeout=3).json()
             data = resp.get('data') or {}
             items = data.get('diff', [])
             name_map = {v: k for k, v in codes.items()}
@@ -333,7 +338,7 @@ class GlobalMarketFetcher:
         try:
             url = "https://hq.sinajs.cn/list=gb_$dji,gb_$ixic,usdCNH"
             headers = {"Referer": "https://finance.sina.com.cn"}
-            resp = _API_SESSION.get(url, headers=headers, timeout=5)
+            resp = requests.get(url, headers=headers, timeout=3)
             lines = resp.text.strip().split('\n')
             for line in lines:
                 if 'gb_$dji' in line or 'gb_$ixic' in line:
@@ -367,7 +372,7 @@ class GlobalMarketFetcher:
         q_str = ",".join(codes.values())
         try:
             url = f"http://qt.gtimg.cn/q={q_str}"
-            resp = _API_SESSION.get(url, timeout=5)
+            resp = requests.get(url, timeout=3)
             lines = resp.text.strip().split(';')
             for line in lines:
                 if '~' not in line: continue
@@ -390,7 +395,7 @@ class GlobalMarketFetcher:
         try:
             url = "http://hq.sinajs.cn/list=hf_GC"
             headers = {"Referer": "https://finance.sina.com.cn"}
-            resp = _API_SESSION.get(url, headers=headers, timeout=5)
+            resp = requests.get(url, headers=headers, timeout=3)
             if "hf_GC" in resp.text:
                 line = resp.text.split('=\"')[1].split('",')[0]
                 parts = line.split(',')
@@ -492,7 +497,7 @@ def get_financial_data_advanced() -> pd.DataFrame:
     df_candidates = df_latest[mask].copy()
     # 过滤黑名单前缀 (8=北交所, 4=退市, 9=B股)
     mask_blacklist = df_candidates['ts_code'].str.startswith(tuple(CFG['blacklist_prefixes']))
-    # 过滤 ST 股票: 优先用 df_candidates 的 name 列，其次用全局 _NAME_MAP
+    # 过滤 ST 股票: 优先用 name 列，其次用全局 _NAME_MAP
     if 'name' in df_candidates.columns:
         mask_blacklist = mask_blacklist | df_candidates['name'].str.contains('ST', na=False, case=False)
     elif '_NAME_MAP' in globals():
@@ -552,7 +557,7 @@ def run_selection() -> list:
         print("[选股] ⚠️ 缺少基础股票列表缓存且无 Tushare，无法选股。")
         return []
     
-    # 修复: 缓存的 stock_basic 可能缺少 name 列，从 Tushare 补充
+    # 修复: 缓存的 stock_basic 可能缺少 name 列
     if 'name' not in df_basic.columns and TUSHARE_AVAILABLE:
         try:
             df_names = call_tushare('stock_basic', exchange='', list_status='L', fields='ts_code,name')
@@ -567,7 +572,7 @@ def run_selection() -> list:
     else:
         name_map = {}
     
-    # 更新全局 _NAME_MAP 供 get_financial_data_advanced 中的 ST 过滤使用
+    # 更新全局 _NAME_MAP 供 ST 过滤使用
     global _NAME_MAP
     _NAME_MAP = name_map
     
@@ -579,14 +584,14 @@ def run_selection() -> list:
         df_mv = call_tushare('daily_basic', trade_date=mv_date, fields='ts_code,total_mv,close,pct_chg')
         if df_mv is not None and not df_mv.empty: save_cache("basic", f"daily_basic_{mv_date}.json", df_mv.to_dict('records'))
 
-    # 修复: Tushare 在周末/节假日返回空 DataFrame，fallback 到最近缓存
+    # 修复: 周末/节假日 fallback 到最近缓存
     if df_mv is None or df_mv.empty:
         import glob as _glob
         mv_files = sorted(_glob.glob(os.path.join(_CACHE_DIR, "basic", "daily_basic_*.json")), reverse=True)
         if mv_files:
             with open(mv_files[0]) as f:
                 df_mv = pd.DataFrame(json.load(f))
-            print(f"[选股] ⚠️ {mv_date} 无交易数据，使用最近缓存: {os.path.basename(mv_files[0])}")
+            print(f"[选股] ⚠️ {mv_date} 无交易数据，使用最近缓存")
         else:
             # 兜底: 用 stock_basic 创建带有默认市值的 df_mv，确保后续筛选不崩溃
             print(f"[选股] ⚠️ 缺少 daily_basic 缓存，使用默认市值筛选。")
@@ -715,10 +720,18 @@ def get_report_periods():
 def check_payment():
     """检查 ClawTip 支付状态
     
-    安全策略（v3.0）:
-    - payment_utils 缺失时拒绝运行，不再放行
-    - 防止通过删除支付模块绕过付费
+    内部版（自用）: 直接放行，无需付费验证
+    上架版（Release）: 严格验证支付凭证
     """
+    # 内部环境检测: 包含 libu-research 路径即为自用版
+    current_file = os.path.abspath(__file__)
+    is_internal = "libu-research" in current_file
+    
+    if is_internal:
+        print("[支付] ℹ️ 内部自用版本，跳过支付验证")
+        return True
+    
+    # 以下为 Release 版逻辑（仅在非内部路径时执行）
     try:
         from payment_utils import check_and_verify
         return check_and_verify()
@@ -732,7 +745,7 @@ def check_payment():
 # ============ 8. 主入口 ============
 def main():
     os.makedirs(_OUTPUT_DIR, exist_ok=True)
-    print(f"====== 礼部侍郎 v13.2.0 ({datetime.now().strftime('%Y-%m-%d %H:%M')}) ======")
+    print(f"====== 礼部侍郎 v12.5.1 ({datetime.now().strftime('%Y-%m-%d %H:%M')}) ======")
     
     # 0. 环境检查
     check_dependencies()
@@ -759,7 +772,7 @@ def main():
         "global_market": global_data,
         "yesterday_review": yesterday_review,
         "top_candidates": stock_pool,
-        "meta": {"generated_at": datetime.now().strftime("%H:%M:%S"), "version": "13.1.0", "engine": "cache_first", "tushare_mode": API_TYPE}
+        "meta": {"generated_at": datetime.now().strftime("%H:%M:%S"), "version": "12.5.1", "engine": "cache_first", "tushare_mode": API_TYPE}
     }
     
     path = os.path.join(_OUTPUT_DIR, "pre_market_data.json")

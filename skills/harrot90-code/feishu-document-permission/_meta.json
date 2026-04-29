@@ -1,0 +1,11 @@
+{
+  "owner": "harrot90-code",
+  "slug": "feishu-document-permission",
+  "displayName": "Feishu Document Permission",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1776332125919,
+    "commit": "https://github.com/openclaw/skills/commit/a3486c1dc0ed0d7ad70663d87d1ccca38201b5ef"
+  },
+  "history": []
+}

@@ -54,6 +54,7 @@ import { journalSearch } from "./journal-search.js";
 import { recallInsight } from "./recall-insight.js";
 import { getRoot } from "../types.js";
 import { ensureDir } from "../storage/fs-utils.js";
+import { stem, expandQuery } from "../helpers/normalize.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -78,9 +79,19 @@ export interface SmartRecallResultItem {
   title: string;
   excerpt: string;
   score: number;
+  /** Human-readable confidence: "high", "medium", "low", "weak" */
+  confidence: string;
   room?: string;
   date?: string;
   severity?: string;
+}
+
+/** Convert raw RRF score to a readable label. */
+function scoreLabel(score: number): string {
+  if (score >= 0.10) return "high";
+  if (score >= 0.05) return "medium";
+  if (score >= 0.03) return "low";
+  return "weak";
 }
 
 export interface SmartRecallResult {
@@ -139,13 +150,30 @@ function ebbinghaus(days: number, S: number): number {
   return Math.exp(-days / S);
 }
 
-/** Keyword overlap ratio between query and text. */
+/** Keyword overlap ratio between query and text, with stemming + synonym expansion. */
 function keywordExactness(query: string, text: string): number {
-  const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
-  if (words.length === 0) return 0;
+  const rawWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  if (rawWords.length === 0) return 0;
+
+  // Expand query with stems + synonyms
+  const expandedQuery = expandQuery(rawWords);
+
+  // Stem the text words for matching
+  const textWords = text.toLowerCase().split(/\s+/)
+    .filter(w => w.length > 2)
+    .map(w => stem(w));
+  const textSet = new Set(textWords);
+
+  // Also check raw text for direct substring matches (preserves old behavior)
   const textLower = text.toLowerCase();
-  const matches = words.filter((w) => textLower.includes(w));
-  return matches.length / words.length;
+
+  // Count matches: expanded query word found in stemmed text OR as substring
+  const matches = expandedQuery.filter(w =>
+    textSet.has(w) || textLower.includes(w)
+  );
+
+  // Score relative to ORIGINAL query length (not expanded), capped at 1.0
+  return Math.min(1.0, matches.length / rawWords.length);
 }
 
 /**
@@ -179,14 +207,16 @@ function readFeedbackLog(): FeedbackEntry[] {
   try { return JSON.parse(fs.readFileSync(p, "utf-8")); } catch { return []; }
 }
 
-function processFeedback(feedback: RecallFeedback[], query: string): void {
+function processFeedback(feedback: RecallFeedback[], query: string): FeedbackEntry[] {
   ensureDir(path.dirname(feedbackLogPath()));
   const log = readFeedbackLog();
   const date = new Date().toISOString().slice(0, 10);
   for (const f of feedback) {
     log.push({ query, id: f.id, title: f.title ?? "", useful: f.useful, date });
   }
-  fs.writeFileSync(feedbackLogPath(), JSON.stringify(log.slice(-200), null, 2), "utf-8");
+  const updated = log.slice(-1000);
+  fs.writeFileSync(feedbackLogPath(), JSON.stringify(updated, null, 2), "utf-8");
+  return updated;
 }
 
 /** Count positive and negative feedback for a result item. Query-aware. */
@@ -241,13 +271,13 @@ function applyRRF(
 // ---------------------------------------------------------------------------
 
 export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallResult> {
-  if (input.feedback && input.feedback.length > 0) {
-    processFeedback(input.feedback, input.query);
-  }
+  // Process feedback first; reuse the returned log to avoid a second disk read
+  const feedbackLog = (input.feedback && input.feedback.length > 0)
+    ? processFeedback(input.feedback, input.query)
+    : readFeedbackLog();
 
   const limit = input.limit ?? 10;
-  const feedbackLog = readFeedbackLog();
-  const queryWords = input.query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  const queryWords = expandQuery(input.query.toLowerCase().split(/\s+/).filter((w) => w.length > 2));
   const sourcesQueried: string[] = [];
 
   // Candidate buckets — each source scores its items internally, then RRF merges
@@ -260,7 +290,7 @@ export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallR
   // Ebbinghaus decay is minimal for palace (S=9999); salience already
   // incorporates access recency via recordAccess().
   try {
-    const palaceResults = await palaceSearch({ query: input.query, project: input.project });
+    const palaceResults = await palaceSearch({ query: input.query, project: input.project, limit: limit * 2 });
     sourcesQueried.push("palace");
 
     for (const r of palaceResults.results) {
@@ -273,13 +303,22 @@ export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallR
       const salience = Math.max(0.4, r.salience);
       const internalScore = keyScore * 0.65 + salience * 0.35;
 
+      // Try to extract a date from the excerpt (many palace entries have ### YYYY-MM-DD headers)
+      let palaceDate: string | undefined;
+      const datePattern = r.excerpt.match(/(\d{4}-\d{2}-\d{2})/);
+      if (datePattern) {
+        palaceDate = datePattern[1];
+      }
+
       palaceItems.push({
         id,
         source: "palace",
         title,
         excerpt: r.excerpt,
         score: internalScore,
+        confidence: scoreLabel(internalScore),
         room: r.room,
+        date: palaceDate,
       });
     }
   } catch { /* palace may not be initialized */ }
@@ -292,6 +331,7 @@ export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallR
       query: input.query,
       project: input.project,
       include_palace: false,
+      limit: Math.ceil(limit * 1.5),
     });
     sourcesQueried.push("journal");
 
@@ -311,6 +351,7 @@ export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallR
         title,
         excerpt: r.excerpt,
         score: internalScore,
+        confidence: scoreLabel(internalScore),
         date: r.date,
       });
     }
@@ -338,12 +379,14 @@ export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallR
       const confirmation = Math.min(1.0, Math.log2(i.confirmed + 1) / 3);
       const internalScore = relevance * 0.40 + exactness * 0.35 + confirmation * 0.25;
 
+      const rawExcerpt = `[${i.severity}] ${i.applies_when.join(", ")}`;
       insightItems.push({
         id,
         source: "insight",
         title: i.title,
-        excerpt: `[${i.severity}] ${i.applies_when.join(", ")}`,
+        excerpt: rawExcerpt.length > 300 ? rawExcerpt.slice(0, 300) + "..." : rawExcerpt,
         score: internalScore,
+        confidence: scoreLabel(internalScore),
         severity: i.severity,
       });
     }
@@ -360,6 +403,26 @@ export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallR
   applyRRF(palaceItems, rrfMap);
   applyRRF(journalItems, rrfMap);
   applyRRF(insightItems, rrfMap);
+
+  // ── 4.5. Hot-window recency boost ──────────────────────────────────────
+  // Very recent items get a score multiplier. In active project work,
+  // the most recent context is almost always the most relevant.
+  // This supplements Ebbinghaus decay (which handles medium-term) with
+  // an ultra-short-term boost.
+  // Palace items have date: undefined — they are timeless and unaffected.
+  for (const entry of rrfMap.values()) {
+    if (entry.item.date) {
+      const hoursAgo = (Date.now() - new Date(entry.item.date).getTime()) / (1000 * 60 * 60);
+      if (hoursAgo < 6) {
+        entry.score *= 3.0;
+      } else if (hoursAgo < 24) {
+        entry.score *= 2.0;
+      } else if (hoursAgo < 72) {
+        entry.score *= 1.3;
+      }
+      // > 72 hours: no boost (normal decay handles it)
+    }
+  }
 
   // ── 5. Apply Beta feedback multiplier ────────────────────────────────────
   // betaUtility returns [0,1]; ×2 normalizes so neutral (0.5) = ×1.0.
@@ -384,7 +447,7 @@ export async function smartRecall(input: SmartRecallInput): Promise<SmartRecallR
     const key = item.excerpt.toLowerCase().replace(/\s+/g, " ").trim();
     if (seen.has(key)) continue;
     seen.add(key);
-    deduped.push({ ...item, score });
+    deduped.push({ ...item, score, confidence: scoreLabel(score) });
   }
 
   // ── 7. Final sort and return ──────────────────────────────────────────────

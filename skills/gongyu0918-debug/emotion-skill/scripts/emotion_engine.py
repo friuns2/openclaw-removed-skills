@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import os
 import re
 import sys
+import tempfile
 from datetime import datetime
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -12,7 +15,10 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 
+# Internal affect axes are converted to positive interaction axes before they
+# reach the default host contract.
 STATE_DIMS = ("urgency", "frustration", "clarity", "satisfaction", "trust", "engagement")
+INTERACTION_DIMS = ("clarity", "trust", "engagement")
 EMOTION_DIMS = ("urgency", "frustration", "confusion", "skepticism", "satisfaction", "cautiousness", "openness")
 DIMS = STATE_DIMS
 DEFAULT_BASELINE = {
@@ -29,6 +35,39 @@ DEFAULT_PERSONA_TRAITS = {
     "openness": 0.5,
     "assertiveness": 0.4,
 }
+SCHEMA_VERSION = "1.2.0"
+MAX_DEGRADATION_REASONS = 32
+LABEL_ORDER = ("urgent", "frustrated", "confused", "skeptical", "cautious", "exploratory", "satisfied", "neutral")
+LABEL_ORDER_INDEX = {label: index for index, label in enumerate(LABEL_ORDER)}
+STATE_SHIFT_ALIASES = {
+    "rising_frustration": "needs_concrete_unblock",
+    "rising_urgency": "needs_priority_action",
+    "falling_trust": "needs_evidence_first",
+    "falling_clarity": "needs_alignment_check",
+    "rising_satisfaction": "ready_for_closeout",
+    "satisfaction_drop": "needs_stabilization",
+    "changed": "needs_recheck",
+    "stable": "stable",
+    "new_turn": "new_turn",
+}
+ROUTE_REASON_ENUM = {
+    "runtime_priority",
+    "urgent_pressure",
+    "repeat_failure_pressure",
+    "evidence_requested",
+    "scope_guard_requested",
+    "low_clarity",
+    "post_success_guard",
+    "stall_risk",
+    "needs_concrete_unblock",
+    "needs_priority_action",
+    "needs_evidence_first",
+    "needs_alignment_check",
+    "needs_stabilization",
+    "ready_for_closeout",
+    "task_specific",
+}
+RAW_HOST_CAPABILITY_KEYS = ("include_raw_emotion", "include_internal_diagnostics")
 
 ANGER_TERMS = {
     "气死", "烦", "垃圾", "离谱", "扯", "蠢", "废物", "火大", "崩溃", "受不了", "妈的",
@@ -36,8 +75,10 @@ ANGER_TERMS = {
 }
 URGENCY_TERMS = {
     "快", "赶紧", "立刻", "马上", "现在", "别停", "直接", "先处理",
-    "asap", "urgent", "immediately", "right now", "hurry",
+    "asap", "urgent", "immediately", "right now", "hurry", "prioritize this", "high urgency",
+    "pick up where you left off", "progress feedback", "blocks my workflow",
 }
+SOFT_URGENCY_TERMS = {"for several minutes", "forty minutes"}
 RUSH_TYPO_TERMS = {
     "pls", "plz", "plss", "urgnt", "stcuk", "brokn", "fixx", "fiex", "hlp", "tmrw", "rn",
     "w我", "n你", "t他", "d的", "b不",
@@ -61,17 +102,31 @@ FRUSTRATION_TERMS = {
     "resets itself", "drops the earlier context", "interrupt mid-response", "core workflow break", "workflow break",
     "crawls", "no retry logic", "no append mode", "no error handling", "reminder disappears", "failed renames",
     "disappears right after the notification", "dead state", "tool result missing", "tool_result missing", "sign-in loop", "activation loop",
-    "silently broke for days", "nobody noticed", "shared context",
+    "silently broke for days", "nobody noticed", "shared context", "painfully slow", "feels broken", "file handling is wrong",
+    "sit there forever", "return an error", "return anything", "silent hang", "silent hangs", "wasting time",
+    "pass locally but fail ci", "freezes when i ask", "forty minutes and nothing", "stuck in a loop",
+    "feels worse", "damaged project files", "harder to trust", "brick a working install",
+    "say so", "one thing i need it for", "health monitor gets stuck", "everything is silent",
+    "defeats the whole point", "defeats the whole point of automated workflows", "trigger path stays silent",
+    "same failure", "already tried", "same error again", "still will not activate", "already paid",
+    "does not execute", "heartbeat simply does not execute", "blocks my workflow", "cannot see them",
+    "progress feedback", "hanging on the same step", "silent failure on every hook", "generic reinstall",
+    "not another generic reinstall", "created a new file from scratch", "instead of modifying the existing one",
+    "what exactly is blocking",
 }
 STALL_TERMS = {
     "卡住", "卡死", "没反应", "一直转", "卡这", "hang", "hung", "stuck", "stall",
     "spinner", "loading", "timeout", "no response", "stops responding",
     "for hours", "activating for hours", "activating", "cannot use", "hangs installing", "installing packages for hours", "fails silently",
+    "freeze", "freezes", "freezing", "sit there forever", "silent hang", "silent hangs", "minutes and nothing",
 }
 CONFUSION_TERMS = {
     "啥情况", "不懂", "看不懂", "迷糊", "不知道", "不清楚", "分不清", "到底哪里", "哪一步",
     "confused", "unclear", "cannot tell", "can't tell", "not sure which", "which one", "what exactly is wrong",
     "logged in but", "resets itself", "drops the earlier context", "interrupt mid-response", "path resolution", "quoting", "escaping",
+    "what that thing was", "no idea what that thing was", "special character handling", "dies here",
+    "nothing changes", "get redirected back", "what exactly is blocking", "exact failing step",
+    "token fetch fails after login",
 }
 SATISFACTION_TERMS = {
     "好了", "可以", "不错", "满意", "谢谢", "太好了", "解决了",
@@ -84,22 +139,30 @@ CONTINUE_TERMS = {
 BLOCKING_TERMS = {
     "阻塞", "卡住发布", "卡住我今天的发布", "发布", "上线", "卡住进度",
     "blocking", "blocked", "blocks productive use", "severely impacts", "regression", "ship today", "release",
-    "core workflow break", "workflow break",
+    "core workflow break", "workflow break", "cannot use the extension", "stuck in a loop", "kills the core workflow",
+    "blocks my workflow", "blocks workflow", "cannot see them",
 }
 CAUTION_TERMS = {
     "小心", "稳一点", "谨慎", "别搞砸", "不要搞砸", "千万别", "别出事", "别弄坏", "注意边界",
     "护栏", "保护文件", "稳定路径", "降级路径", "迁移说明", "回滚", "guardrail", "guardrails",
     "careful", "be careful", "don't break", "do not break", "safely", "stable path", "protected files", "downgrade path", "migration note", "rollback",
+    "handle the error gracefully", "recover safely", "wipe my setup", "session exposure path", "recover from bad tool calls", "bad tool calls",
+    "keep the architecture modular", "architecture modular", "one method", "keep the handoff path scoped", "handoff path scoped",
+    "missing tool result", "silently ending the turn",
 }
 BOUNDARY_TERMS = {
     "只改", "只动", "只碰", "别碰", "不要动", "不能动", "不可改", "先别动", "不要删", "别删",
     "保护文件", "repo-wide changes", "任何破坏性操作", "destructive", "before any more edits", "before another change",
     "only change", "touch only", "leave it alone", "do not touch", "must not change", "keep within", "anything destructive",
+    "before i wipe my setup", "session exposure path", "show the plan before another change", "keep the handoff path scoped", "architecture modular", "one method",
 }
 ASSURANCE_TERMS = {
     "验证", "确认", "检查一下", "过一遍", "保险一点", "稳一点", "最稳", "保守一点",
     "verify", "verify first", "double check", "check first", "safest", "safe path", "conservative",
     "check that path", "before another workaround", "before telling me to", "精确定位", "失败路径", "show the plan", "exact failing step", "exact failing point", "failure path",
+    "handle the error gracefully", "recover safely", "before i wipe my setup", "session exposure path", "recover from bad tool calls", "bad tool calls", "scan the file",
+    "show the plan before another change", "keep the handoff path scoped", "exact detection path",
+    "missing tool result", "silently ending the turn",
 }
 SKEPTICISM_TERMS = {
     "你确定", "确定吗", "真的吗", "靠谱吗", "有把握吗", "凭什么", "依据", "证据", "给我证据",
@@ -117,6 +180,13 @@ SKEPTICISM_TERMS = {
     "missing tool result", "tool result", "tool_result", "dead state", "shared context", "path handling", "file path",
     "special character handling", "path resolution", "quoting", "escaping", "ground the answer in the repo",
     "ground the answer in the codebase", "blind assumption", "monitoring failed", "nobody noticed", "no alert",
+    "ci rules", "pass locally but fail ci", "wasting time", "session exposure path", "what the session layer misses", "file handling is wrong",
+    "harder to trust", "reliable fix", "feedback when commands fail", "automatic execution never fires", "hooks work manually", "wsl", "silent hangs are useless", "blind patch",
+    "correct git bash configuration", "git bash configuration", "health monitor gets stuck", "everything is silent", "say so",
+    "current settings", "fixed it for some people", "compare that path with",
+    "same failure", "regression still open", "why is the regression still open", "logs and configs ready",
+    "generic reinstall", "not another generic reinstall", "concrete root cause",
+    "created a new file from scratch", "instead of modifying the existing one",
 }
 SPECULATION_TERMS = {
     "猜的", "瞎猜", "脑补", "臆测", "别猜", "别编", "编的", "猜出来", "靠猜", "乱猜",
@@ -124,7 +194,7 @@ SPECULATION_TERMS = {
     "unchecked assumptions", "assumption", "assumptions", "fabricated", "made up", "hallucinated",
     "only analyzed", "fraction of the codebase", "part of the codebase", "part of the repo",
     "based on assumptions", "stop speculating", "repo-grounded", "grounded in the repo",
-    "guess wrong", "guessing again", "keep guessing", "ungrounded", "blind assumption",
+    "guess wrong", "guessing again", "keep guessing", "ungrounded", "blind assumption", "guessing my ci rules",
     "ground the answer in the repo", "ground the answer in the codebase",
 }
 CONTEXT_LOSS_TERMS = {
@@ -133,7 +203,7 @@ CONTEXT_LOSS_TERMS = {
     "fresh session", "forgets this rule", "forgets my rules", "forgets everything", "no memory of the previous session",
     "fallback workspace", "agent_home", "no prior session workspace", "context plumbing", "projectid = null",
     "workspaceid = null", "actual dialogue just vanishes", "dialogue just vanishes",
-    "previous session", "previous sessions", "stayed idle", "held off", "nothing changed in this session",
+    "previous session", "previous sessions", "stayed idle", "held off", "nothing changed in this session", "nothing changes", "get redirected back",
     "forgot the edits", "forgot edits", "survived compaction",
     "drops the earlier context", "interrupt mid-response", "shared context",
 }
@@ -144,7 +214,11 @@ EXECUTION_PLUMBING_TERMS = {
     "stale-socket", "stale socket", "gateway timeout", "timeout after 30000ms", "connected but receives nothing",
     "then silence", "no cron/jobs.json file", "action send requires a target", "gateway healthy", "cron status --json",
     "cron list --json", "health monitor restarts", "socket connected", "still no events", "tool_result", "tool result",
-    "tool_use", "missing tool result", "non-existent tool", "dead state",
+    "tool_use", "missing tool result", "non-existent tool", "dead state", "ci rules", "pass locally but fail ci",
+    "wsl2", "wsl", "session exposure path", "sign in again", "config page resets", "logged in but",
+    "automatic execution never fires", "hooks work manually", "trigger path", "automated workflows",
+    "does not execute", "heartbeat simply does not execute", "isolatedsession", "lightcontext",
+    "ai session cannot see", "cannot see them",
 }
 HEDGE_TERMS = {
     "不一定", "未必", "可能", "也许", "大概", "应该", "恐怕", "我怀疑", "我觉得未必", "我不太认同",
@@ -161,6 +235,7 @@ EXPLORATION_TERMS = {
     "两个方案", "两种方案", "两条路径", "两种方式", "两个方向", "对比", "差异", "最短修复路径",
     "brainstorm", "options", "tradeoff", "tradeoffs", "design", "architecture", "compare", "compare against", "compare both", "compare the two paths",
     "feasibility", "suggest", "direction", "directions", "ideas", "two ways", "two paths", "two options", "differences", "what changed", "shortest fix path", "which path",
+    "pick one stable path", "logs and configs ready",
 }
 COMMAND_TERMS = {"修", "改", "做", "上", "给我", "继续", "直接", "fix", "ship", "do it", "change", "implement", "patch"}
 VAGUE_TERMS = {"随便", "差不多", "大概", "something", "whatever", "somehow"}
@@ -170,6 +245,7 @@ TASK_OBJECT_TERMS = {
     "extension", "remote ssh", "ssh", "auth", "cron job", "packages", "tool result", "tool_use", "dead state",
     "shared context", "codebase", "repo", "file path", "special character", "path resolution", "quoting", "escaping",
     "activation", "sign-in", "login", "monitoring", "alert", "notification",
+    "ci", "wsl2", "wsl", "session exposure", "file handling",
 }
 SUCCESS_TERMS = {
     "完成", "成功", "通过", "跑通", "通了", "稳了", "搞定", "done", "fixed", "resolved", "green", "passed", "works now", "working now",
@@ -181,13 +257,15 @@ MISSED_EXPECTATION_TERMS = {
     "silent failure", "stays silent", "nothing happened", "should have fired", "should have run", "was supposed to alert", "showed up late", "works manually",
     "goes quiet", "too quiet", "no alert at all", "manual refresh", "suddenly appears", "running but nothing works", "overdue",
     "reminder disappears", "disappears right after the notification", "resets itself", "core workflow break", "failed renames",
-    "silently broke for days", "nobody noticed",
+    "silently broke for days", "nobody noticed", "return an error", "return anything", "feedback when commands fail",
+    "say so", "everything is silent", "health monitor gets stuck", "reopen the app", "defeats the whole point", "trigger path stays silent",
 }
 TECHNICAL_TERMS = {
     "bug", "traceback", "stack", "stacktrace", "api", "hook", "plugin", "queue", "thread", "prompt",
     "workflow", "agent", "router", "mcp", "session", "heartbeat", "schema", "deploy", "cron", "logs",
     "test", "tests", "failing", "报错", "线程", "路由", "工作流", "接口", "脚本", "配置", "回归", "日志", "测试", "错误",
     "tool result", "tool_result", "tool_use", "shared context", "codebase", "repo", "file path", "path resolution", "quoting", "escaping",
+    "ci", "wsl2",
 }
 
 PUNCT_RUN_PATTERN = re.compile(r"[!?！？]{2,}|\.{3,}|…{2,}|。{2,}")
@@ -206,12 +284,12 @@ SOFT_CORRECTION_PATTERN = re.compile(r"(但|但是|不过|只是|然而|but|howe
 EVIDENCE_REQUEST_PATTERN = re.compile(
     r"(exact failing (?:step|point)|failure path|failing step|failing point|real failure|show (?:me )?(?:what changed|the plan|your limits)|"
     r"which setting|what changed|exact basis|missing tool result|tool_result|shared context|file path|special character handling|path resolution|"
-    r"quoting|escaping|ground the answer in the (?:repo|codebase)|给我依据|先给依据|先说依据|失败路径|精确步骤|精确失败点|具体哪一步|surface the failure clearly)",
+    r"quoting|escaping|session exposure path|detection path|exact detection path|what the session layer misses|scan the file|why it dies here|ground the answer in the (?:repo|codebase)|给我依据|先给依据|先说依据|失败路径|精确步骤|精确失败点|具体哪一步|surface the failure clearly)",
     re.IGNORECASE,
 )
 COMPARISON_REQUEST_PATTERN = re.compile(
     r"(two ways|two paths|two options|compare (?:the )?(?:two )?(?:paths|options|versions|approaches)|compare .* against|"
-    r"difference|differences|tradeoffs?|what changed|downgrade path|migration note|shortest fix path|which path|"
+    r"compare .* with|compare (?:that|this|the )?path with|pick one stable path|difference|differences|tradeoffs?|what changed|downgrade path|migration note|shortest fix path|which path|"
     r"两个方案|两种方案|两条路径|两种方式|最短修复路径|"
     r"两个方向|对比|比较一下|取舍|差异)",
     re.IGNORECASE,
@@ -219,11 +297,12 @@ COMPARISON_REQUEST_PATTERN = re.compile(
 GUARDRAIL_REQUEST_PATTERN = re.compile(
     r"(stable path|guardrails?|protected files?|before another change|before any more edits|repo-wide changes|anything destructive|"
     r"destructive|scope tight|keep the scope tight|verify (?:that|the)? path|downgrade path|migration note|shortest fix path|只改|别碰|保护文件|"
-    r"稳定路径|护栏|回滚|降级路径|迁移说明|先验证|再动手)",
+    r"稳定路径|护栏|回滚|降级路径|迁移说明|先验证|再动手|handle the error gracefully|recover safely|before i wipe my setup|session exposure path|"
+    r"show the plan before another change|keep the handoff path scoped|keep the architecture modular|architecture modular|one method)",
     re.IGNORECASE,
 )
 EXPLICIT_CONFUSION_PATTERN = re.compile(
-    r"(confused|unclear|cannot tell|can't tell|not sure which|what exactly is wrong|which state|which one|迷糊|为什么会这样|不清楚|不知道|看不懂|分不清|到底哪里|哪一步)",
+    r"(confused|unclear|cannot tell|can't tell|not sure which|what exactly is wrong|what exactly is blocking|exact failing step|which state|which one|what that thing was|no idea what that thing was|why it dies here|dies here|迷糊|为什么会这样|不清楚|不知道|看不懂|分不清|到底哪里|哪一步)",
     re.IGNORECASE,
 )
 CLAIMED_RESOLUTION_PATTERN = re.compile(r"(fixed|resolved|done|solved|passed|green|works now|好了|解决了|完成了|跑通了|通过|通过了)")
@@ -234,7 +313,13 @@ STILL_BROKEN_PATTERN = re.compile(
 
 
 def clamp(value: float, low: float = 0.0, high: float = 1.0) -> float:
-    return max(low, min(high, value))
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return low
+    if not math.isfinite(number):
+        return low
+    return max(low, min(high, number))
 
 
 def load_json_file(path: str | None) -> Any:
@@ -246,10 +331,30 @@ def load_json_file(path: str | None) -> Any:
     return json.loads(file_path.read_text(encoding="utf-8"))
 
 
+def require_json_object(value: Any, source: str) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    value_type = type(value).__name__
+    raise ValueError(f"Top-level JSON object required: {source} got {value_type}")
+
+
 def dump_json(data: Any, pretty: bool) -> str:
     if pretty:
         return json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True)
     return json.dumps(data, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+
+
+def atomic_write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=path.parent, delete=False) as handle:
+            handle.write(text)
+            tmp_path = Path(handle.name)
+        os.replace(tmp_path, path)
+    finally:
+        if tmp_path and tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)
 
 
 def normalize_text(text: str) -> str:
@@ -276,6 +381,7 @@ def count_token_terms(text: str, terms: set[str]) -> int:
 
 def count_hybrid_terms(text: str, terms: set[str]) -> int:
     norm = normalize_text(text)
+    compact_norm = norm.replace(" ", "")
     tokens = set(re.findall(r"[a-z']+|[\u4e00-\u9fff]+", norm))
     hits = 0
     for term in terms:
@@ -283,7 +389,8 @@ def count_hybrid_terms(text: str, terms: set[str]) -> int:
         if re.fullmatch(r"[a-z']+", term_norm):
             hits += 1 if term_norm in tokens else 0
         else:
-            hits += 1 if term_norm in norm else 0
+            compact_term = term_norm.replace(" ", "")
+            hits += 1 if term_norm in norm or compact_term in compact_norm else 0
     return hits
 
 
@@ -369,7 +476,144 @@ def clamp_dict(raw: Any, keys: tuple[str, ...], defaults: dict[str, float] | Non
     return base
 
 
+def mark_degraded(diagnostics: dict[str, Any], reason: str) -> None:
+    reasons = diagnostics.setdefault("degradation_reasons", [])
+    if reason not in reasons:
+        reasons.append(reason)
+    diagnostics["degraded"] = True
+
+
+def as_mapping(value: Any, diagnostics: dict[str, Any], reason: str) -> dict[str, Any]:
+    if value is None:
+        return {}
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped:
+            try:
+                parsed = json.loads(stripped)
+            except json.JSONDecodeError:
+                mark_degraded(diagnostics, reason)
+                return {}
+            if isinstance(parsed, dict):
+                mark_degraded(diagnostics, f"{reason}.parsed_from_json_string")
+                return parsed
+    mark_degraded(diagnostics, reason)
+    return {}
+
+
+def normalize_string_list(value: Any, diagnostics: dict[str, Any], reason: str) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, (list, tuple)):
+        mark_degraded(diagnostics, reason)
+        return []
+    result: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            mark_degraded(diagnostics, f"{reason}.contains_non_string")
+            continue
+        text = item.strip()
+        if text:
+            result.append(text)
+    return result
+
+
+def canonicalize_labels(labels: list[str]) -> list[str]:
+    ordered = unique_labels([str(label).strip() for label in labels if str(label).strip()])
+    return sorted(ordered, key=lambda label: (LABEL_ORDER_INDEX.get(label, len(LABEL_ORDER_INDEX)), label))
+
+
+def normalize_history(value: Any, diagnostics: dict[str, Any]) -> list[dict[str, str]]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        mark_degraded(diagnostics, "history_not_list")
+        return []
+    normalized: list[dict[str, str]] = []
+    for index, item in enumerate(value):
+        if not isinstance(item, dict):
+            mark_degraded(diagnostics, f"history_item_{index}_not_mapping")
+            continue
+        role = item.get("role", "")
+        if role is None:
+            role = ""
+        elif not isinstance(role, str):
+            mark_degraded(diagnostics, f"history_item_{index}_role_not_string")
+            role = str(role) if isinstance(role, (int, float, bool)) else ""
+        text = item.get("text")
+        if text is None:
+            text = item.get("content")
+        if text is None:
+            text = ""
+        elif not isinstance(text, str):
+            mark_degraded(diagnostics, f"history_item_{index}_text_not_string")
+            text = str(text) if isinstance(text, (int, float, bool)) else ""
+        if not role and not text:
+            continue
+        normalized.append({
+            "role": role.strip(),
+            "text": text,
+        })
+    return normalized
+
+
+def finalize_degradation_reasons(diagnostics: dict[str, Any]) -> list[str]:
+    reasons = unique_labels([str(reason).strip() for reason in diagnostics.get("degradation_reasons", []) if str(reason).strip()])
+    if len(reasons) > MAX_DEGRADATION_REASONS:
+        overflow = len(reasons) - (MAX_DEGRADATION_REASONS - 2)
+        reasons = reasons[: MAX_DEGRADATION_REASONS - 2] + ["degradation_reasons_truncated", f"...+{overflow} more"]
+    diagnostics["degradation_reasons"] = reasons
+    diagnostics["degraded"] = bool(reasons) or bool(diagnostics.get("degraded"))
+    return reasons
+
+
+def normalize_payload(payload: Any) -> tuple[dict[str, Any], dict[str, Any]]:
+    diagnostics: dict[str, Any] = {"degraded": False, "degradation_reasons": []}
+    if not isinstance(payload, dict):
+        mark_degraded(diagnostics, "payload_not_mapping")
+        payload = {}
+    normalized = dict(payload)
+    message = normalized.get("message", "")
+    if message is None:
+        message = ""
+    elif not isinstance(message, str):
+        mark_degraded(diagnostics, "message_coerced_to_string")
+        message = str(message)
+    normalized["message"] = message
+    normalized["context"] = as_mapping(normalized.get("context"), diagnostics, "context_not_mapping")
+    normalized["runtime"] = as_mapping(normalized.get("runtime"), diagnostics, "runtime_not_mapping")
+    user_profile = as_mapping(normalized.get("user_profile"), diagnostics, "user_profile_not_mapping")
+    if user_profile:
+        user_profile = dict(user_profile)
+        user_profile["baseline"] = as_mapping(user_profile.get("baseline"), diagnostics, "user_profile.baseline_not_mapping")
+        user_profile["persona_traits"] = as_mapping(user_profile.get("persona_traits"), diagnostics, "user_profile.persona_traits_not_mapping")
+        user_profile["big5"] = as_mapping(user_profile.get("big5"), diagnostics, "user_profile.big5_not_mapping")
+        user_profile["affective_prior"] = as_mapping(user_profile.get("affective_prior"), diagnostics, "user_profile.affective_prior_not_mapping")
+    normalized["user_profile"] = user_profile
+    last_state = as_mapping(normalized.get("last_state"), diagnostics, "last_state_not_mapping")
+    if last_state:
+        last_state = dict(last_state)
+        last_state["vector"] = as_mapping(last_state.get("vector"), diagnostics, "last_state.vector_not_mapping")
+        last_state["emotion_vector"] = as_mapping(last_state.get("emotion_vector"), diagnostics, "last_state.emotion_vector_not_mapping")
+    normalized["last_state"] = last_state
+    for key in ("llm_semantic", "review_semantic", "posthoc_semantic"):
+        semantic = as_mapping(normalized.get(key), diagnostics, f"{key}_not_mapping")
+        if semantic:
+            semantic = dict(semantic)
+            semantic["vector"] = as_mapping(semantic.get("vector"), diagnostics, f"{key}.vector_not_mapping")
+            semantic["emotion_vector"] = as_mapping(semantic.get("emotion_vector"), diagnostics, f"{key}.emotion_vector_not_mapping")
+            semantic["labels"] = canonicalize_labels(normalize_string_list(semantic.get("labels"), diagnostics, f"{key}.labels_not_list"))
+        normalized[key] = semantic
+    normalized["calibration_state"] = as_mapping(normalized.get("calibration_state"), diagnostics, "calibration_state_not_mapping")
+    normalized["host_capabilities"] = as_mapping(normalized.get("host_capabilities"), diagnostics, "host_capabilities_not_mapping")
+    normalized["history"] = normalize_history(normalized.get("history"), diagnostics)
+    return normalized, diagnostics
+
+
 def combine_named_vectors(weighted_vectors: list[tuple[dict[str, Any], float]], dims: tuple[str, ...]) -> dict[str, float]:
+    """Combine partial vectors with independent per-dimension weighted averages."""
     totals = {dim: 0.0 for dim in dims}
     weight_sum = {dim: 0.0 for dim in dims}
     for vector, weight in weighted_vectors:
@@ -403,11 +647,13 @@ def derive_persona_traits(user_profile: dict[str, Any]) -> tuple[dict[str, float
             "openness": round(clamp(big5["openness"]), 4),
             "assertiveness": round(clamp(0.1 + 0.8 * big5["extraversion"]), 4),
         }
-    explicit = clamp_dict(user_profile.get("persona_traits"), tuple(DEFAULT_PERSONA_TRAITS.keys()))
+    explicit_raw = user_profile.get("persona_traits")
+    explicit = clamp_dict(explicit_raw, tuple(DEFAULT_PERSONA_TRAITS.keys()))
+    explicit_mapping = explicit_raw if isinstance(explicit_raw, dict) else {}
     if any(value > 0 for value in explicit.values()):
         source = "persona_traits"
         persona_traits = {
-            key: round(explicit[key] if key in user_profile.get("persona_traits", {}) else persona_traits[key], 4)
+            key: round(explicit[key] if key in explicit_mapping else persona_traits[key], 4)
             for key in DEFAULT_PERSONA_TRAITS
         }
     return persona_traits, source
@@ -471,10 +717,13 @@ def max_similarity(text: str, candidates: list[str]) -> float:
 
 
 def parse_hour_window(raw: Any) -> tuple[int, int]:
-    if isinstance(raw, (list, tuple)) and len(raw) >= 2:
-        start = int(raw[0])
-        end = int(raw[1])
-    else:
+    try:
+        if isinstance(raw, (list, tuple)) and len(raw) >= 2:
+            start = int(raw[0])
+            end = int(raw[1])
+        else:
+            start, end = 9, 22
+    except (TypeError, ValueError):
         start, end = 9, 22
     return max(0, min(23, start)), max(0, min(23, end))
 
@@ -489,7 +738,7 @@ def hour_in_window(hour: int | None, start: int, end: int) -> bool | None:
     return hour >= start or hour < end
 
 
-def infer_local_hour(payload: dict[str, Any], timezone_name: str | None) -> int | None:
+def infer_local_hour(payload: dict[str, Any], timezone_name: str | None, diagnostics: dict[str, Any]) -> int | None:
     context = payload.get("context") or {}
     runtime = payload.get("runtime") or {}
     explicit_hour = context.get("local_hour")
@@ -499,36 +748,38 @@ def infer_local_hour(payload: dict[str, Any], timezone_name: str | None) -> int 
         try:
             return max(0, min(23, int(explicit_hour)))
         except (TypeError, ValueError):
+            mark_degraded(diagnostics, "local_hour_invalid")
             return None
     if not timezone_name:
         return None
     try:
         tz = ZoneInfo(timezone_name)
     except Exception:
+        mark_degraded(diagnostics, "timezone_unavailable")
         return None
     now_iso = context.get("now_iso") or runtime.get("now_iso")
+    if not now_iso:
+        return None
     try:
-        if now_iso:
-            dt = datetime.fromisoformat(str(now_iso).replace("Z", "+00:00"))
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=tz)
-            else:
-                dt = dt.astimezone(tz)
+        dt = datetime.fromisoformat(str(now_iso).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=tz)
         else:
-            dt = datetime.now(tz)
+            dt = dt.astimezone(tz)
         return int(dt.hour)
     except Exception:
+        mark_degraded(diagnostics, "now_iso_invalid")
         return None
 
 
-def load_user_profile(payload: dict[str, Any]) -> dict[str, Any]:
+def load_user_profile(payload: dict[str, Any], diagnostics: dict[str, Any]) -> dict[str, Any]:
     user_profile = payload.get("user_profile") or {}
-    baseline = user_profile.get("baseline") or {}
+    baseline = as_mapping(user_profile.get("baseline"), diagnostics, "user_profile.baseline_not_mapping")
     persona_traits, persona_source = derive_persona_traits(user_profile)
     affective_prior, affective_prior_source, affective_prior_weight = derive_affective_prior(user_profile, persona_traits, persona_source)
     timezone_name = user_profile.get("timezone") or payload.get("context", {}).get("timezone")
     work_start, work_end = parse_hour_window(user_profile.get("work_hours_local") or user_profile.get("work_hours"))
-    local_hour = infer_local_hour(payload, timezone_name)
+    local_hour = infer_local_hour(payload, timezone_name, diagnostics)
     in_work_window = hour_in_window(local_hour, work_start, work_end)
     baseline_delay = max(12.0, float(baseline.get("response_delay_seconds", DEFAULT_BASELINE["response_delay_seconds"]) or DEFAULT_BASELINE["response_delay_seconds"]))
     baseline_politeness = clamp(float(baseline.get("politeness", DEFAULT_BASELINE["politeness"]) or DEFAULT_BASELINE["politeness"]))
@@ -558,11 +809,11 @@ def load_user_profile(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def build_features(payload: dict[str, Any]) -> dict[str, Any]:
+def build_features(payload: dict[str, Any], diagnostics: dict[str, Any]) -> dict[str, Any]:
     message = str(payload.get("message") or "")
     history = payload.get("history") or []
     runtime = payload.get("runtime") or {}
-    user_profile = load_user_profile(payload)
+    user_profile = load_user_profile(payload, diagnostics)
     language = detect_language(message)
     norm_message = normalize_text(message)
     recent_users = recent_user_messages(history)
@@ -593,6 +844,7 @@ def build_features(payload: dict[str, Any]) -> dict[str, Any]:
 
     anger_hits = count_terms(message, ANGER_TERMS)
     urgency_hits = count_terms(message, URGENCY_TERMS)
+    soft_urgency_hits = count_terms(message, SOFT_URGENCY_TERMS)
     rush_typo_hits = count_hybrid_terms(message, RUSH_TYPO_TERMS)
     textism_hits = count_token_terms(message, TEXTISM_TERMS)
     nonstandard_spelling_hits = count_token_terms(message, NONSTANDARD_SPELLING_TERMS)
@@ -703,6 +955,18 @@ def build_features(payload: dict[str, Any]) -> dict[str, Any]:
     background_tasks_running = float(runtime.get("background_tasks_running", 0) or 0)
     same_issue_mentions = float(runtime.get("same_issue_mentions", 0) or 0)
     contradiction_signal = clamp(float(runtime.get("contradiction_signal", 0) or 0))
+    raw_last_outcome = runtime.get("last_routing_outcome")
+    if raw_last_outcome is None:
+        last_routing_outcome: dict[str, Any] = {}
+    elif isinstance(raw_last_outcome, dict):
+        last_routing_outcome = raw_last_outcome
+    else:
+        mark_degraded(diagnostics, "runtime.last_routing_outcome_not_mapping")
+        last_routing_outcome = {}
+    outcome_text = normalize_text(str(last_routing_outcome.get("user_followed_up_with") or last_routing_outcome.get("result") or ""))
+    last_outcome_success = 1.0 if outcome_text in {"thanks", "works", "resolved", "success", "accepted", "done"} or CLAIMED_RESOLUTION_PATTERN.search(outcome_text) else 0.0
+    last_outcome_retry = 1.0 if outcome_text in {"still broken", "same issue", "failed", "not fixed", "retry"} or STILL_BROKEN_PATTERN.search(outcome_text) else 0.0
+    last_outcome_complaint = 1.0 if outcome_text in {"explicit_complaint", "complaint", "bad", "worse"} else 0.0
     resolution_claimed = 1.0 if CLAIMED_RESOLUTION_PATTERN.search(norm_last_assistant) else 0.0
     resolution_mismatch = 1.0 if resolution_claimed and STILL_BROKEN_PATTERN.search(norm_message) else 0.0
 
@@ -716,7 +980,12 @@ def build_features(payload: dict[str, Any]) -> dict[str, Any]:
         + (stall_ratio * 0.14)
         + (repeat_similarity * 0.12)
         + (resolution_mismatch * 0.08)
+        + (last_outcome_retry * 0.2)
+        + (last_outcome_complaint * 0.16)
+        - (last_outcome_success * 0.08)
     )
+    if soft_urgency_hits and (delay_pressure >= 0.34 or stall_hits >= 1 or blocking_hits >= 1 or frustration_hits >= 1 or stuck_pressure >= 0.42):
+        urgency_hits += soft_urgency_hits
     background_pressure = clamp((queue_depth * 0.2) + (background_tasks_running * 0.15))
     politeness_delta = clamp(polite_ratio - user_profile["baseline"]["politeness"] + 0.15)
     terseness_delta = clamp(short_burst - user_profile["baseline"]["terseness"] + 0.15)
@@ -777,6 +1046,10 @@ def build_features(payload: dict[str, Any]) -> dict[str, Any]:
         evidence.append("guardrail_request")
     if resolution_mismatch:
         evidence.append("resolution_mismatch")
+    if last_outcome_retry or last_outcome_complaint:
+        evidence.append("last_routing_outcome_retry")
+    if last_outcome_success:
+        evidence.append("last_routing_outcome_success")
     if guard_hits:
         evidence.append("guard_terms")
     if blocking_hits:
@@ -910,6 +1183,10 @@ def build_features(payload: dict[str, Any]) -> dict[str, Any]:
         "contradiction_signal": contradiction_signal,
         "resolution_claimed": resolution_claimed,
         "resolution_mismatch": resolution_mismatch,
+        "last_routing_outcome": last_routing_outcome,
+        "last_outcome_success": last_outcome_success,
+        "last_outcome_retry": last_outcome_retry,
+        "last_outcome_complaint": last_outcome_complaint,
         "delay_pressure": round(delay_pressure, 4),
         "stuck_pressure": round(stuck_pressure, 4),
         "background_pressure": round(background_pressure, 4),
@@ -994,12 +1271,12 @@ def build_interaction_state(state_vector: dict[str, float]) -> dict[str, float]:
 
 def build_mode_scores(emotion_vector: dict[str, float], features: dict[str, Any]) -> dict[str, float]:
     return {
-        "urgent": round(clamp(emotion_vector["urgency"] * 1.04 + 0.08 * features["delay_pressure"] + 0.1 * features["blocking_ratio"] + 0.08 * features["missed_expectation_ratio"] + 0.06 * features["typing_chaos"] + 0.05 * features["textism_pressure"] + 0.04 * features["command_ratio"] + 0.04 * features["directness_delta"] + 0.08 * features["stall_ratio"] + 0.04 * features["tempo_pause_pressure"] + 0.04 * features["execution_plumbing_ratio"] - 0.03 * features["evidence_request"] - 0.04 * features["guardrail_request"]), 4),
-        "frustrated": round(clamp(emotion_vector["frustration"] * 1.14 + 0.12 * features["stuck_pressure"] + 0.08 * features["missed_expectation_ratio"] + 0.08 * features["context_loss_ratio"] + 0.08 * features["execution_plumbing_ratio"] + 0.06 * features["resolution_mismatch"] + 0.08 * features["abrupt_delta"] + 0.06 * features["delay_pressure"] + 0.08 * features["dismissive_pressure"] + 0.04 * features["tempo_pause_pressure"] + 0.06 * features["contradiction_signal"] + 0.04 * features["soft_correction"] + 0.04 * features["guardrail_request"]), 4),
-        "confused": round(clamp(emotion_vector["confusion"] * 0.92 + 0.06 * clamp(features["confusion_hits"] / 2.0) + 0.1 * features["explicit_confusion_request"] + 0.03 * features["vague_ratio"] - 0.1 * features["goal_specificity"] - 0.12 * features["speculation_ratio"] - 0.08 * features["context_loss_ratio"] - 0.08 * features["execution_plumbing_ratio"] - 0.06 * features["contradiction_signal"] - 0.08 * features["evidence_request"] - 0.08 * features["comparison_request"] - 0.08 * features["guardrail_request"]), 4),
+        "urgent": round(clamp(emotion_vector["urgency"] * 1.04 + 0.08 * features["delay_pressure"] + 0.1 * features["blocking_ratio"] + 0.08 * features["missed_expectation_ratio"] + 0.06 * features["typing_chaos"] + 0.05 * features["textism_pressure"] + 0.04 * features["command_ratio"] + 0.04 * features["directness_delta"] + 0.08 * features["stall_ratio"] + 0.04 * features["tempo_pause_pressure"] + 0.04 * features["execution_plumbing_ratio"] + 0.04 * clamp(features["same_issue_mentions"] / 3.0) - 0.03 * features["evidence_request"] - 0.04 * features["guardrail_request"]), 4),
+        "frustrated": round(clamp(emotion_vector["frustration"] * 1.14 + 0.12 * features["stuck_pressure"] + 0.08 * features["missed_expectation_ratio"] + 0.08 * features["context_loss_ratio"] + 0.08 * features["execution_plumbing_ratio"] + 0.08 * features["stall_ratio"] + 0.06 * features["resolution_mismatch"] + 0.08 * features["abrupt_delta"] + 0.06 * features["delay_pressure"] + 0.08 * features["dismissive_pressure"] + 0.04 * features["tempo_pause_pressure"] + 0.06 * features["contradiction_signal"] + 0.04 * features["soft_correction"] + 0.04 * features["guardrail_request"]), 4),
+        "confused": round(clamp(emotion_vector["confusion"] * 0.92 + 0.06 * clamp(features["confusion_hits"] / 2.0) + 0.1 * features["explicit_confusion_request"] + 0.08 * features["explicit_confusion_request"] * features["evidence_request"] + 0.03 * features["vague_ratio"] - 0.1 * features["goal_specificity"] - 0.12 * features["speculation_ratio"] - 0.08 * features["context_loss_ratio"] - 0.08 * features["execution_plumbing_ratio"] - 0.06 * features["contradiction_signal"] - 0.08 * features["evidence_request"] - 0.08 * features["comparison_request"] - 0.08 * features["guardrail_request"]), 4),
         "skeptical": round(clamp(emotion_vector["skepticism"] * 1.08 + 0.12 * features["speculation_ratio"] + 0.08 * features["context_loss_ratio"] + 0.1 * features["execution_plumbing_ratio"] + 0.08 * features["resolution_mismatch"] + 0.06 * features["contradiction_signal"] + 0.06 * features["stuck_pressure"] + 0.04 * features["delay_pressure"] + 0.04 * features["goal_specificity"] + 0.05 * features["dismissive_pressure"] + 0.18 * features["evidence_request"]), 4),
         "satisfied": round(clamp(emotion_vector["satisfaction"] + 0.1 * features["guard_ratio"] + 0.08 * features["success_ratio"] + 0.08 * features["continue_ratio"] + 0.06 * features["resolution_claimed"]), 4),
-        "cautious": round(clamp(emotion_vector["cautiousness"] * 1.1 + 0.06 * features["goal_specificity"] + 0.04 * features["polite_ratio"] + 0.08 * features["assurance_ratio"] + 0.06 * features["boundary_ratio"] + 0.16 * features["guardrail_request"]), 4),
+        "cautious": round(clamp(emotion_vector["cautiousness"] * 1.1 + 0.06 * features["goal_specificity"] + 0.04 * features["polite_ratio"] + 0.08 * features["assurance_ratio"] + 0.06 * features["boundary_ratio"] + 0.06 * features["context_loss_ratio"] + 0.04 * features["contradiction_signal"] + 0.16 * features["guardrail_request"]), 4),
         "exploratory": round(clamp(emotion_vector["openness"] * 1.08 + 0.06 * features["explore_ratio"] + 0.04 * features["technical_ratio"] + 0.22 * features["comparison_request"] + 0.04 * features["goal_specificity"]), 4),
         "neutral": 0.22,
     }
@@ -1047,7 +1324,7 @@ def build_emotionality_metrics(emotion_vector: dict[str, float], features: dict[
 def build_posthoc_shadow(payload: dict[str, Any], features: dict[str, Any], confirmed: dict[str, Any], analysis: dict[str, Any], posthoc_plan: dict[str, Any]) -> dict[str, Any]:
     review_semantic = load_review_semantic(payload)
     source_vector = clamp_dict(review_semantic.get("emotion_vector"), EMOTION_DIMS) if review_semantic.get("emotion_vector") else confirmed["emotion_vector"]
-    source_labels = unique_labels(list(review_semantic.get("labels") or [])) if review_semantic.get("labels") else confirmed["labels"]
+    source_labels = canonicalize_labels(list(review_semantic.get("labels") or [])) if review_semantic.get("labels") else canonicalize_labels(confirmed["labels"])
     metrics = build_emotionality_metrics(source_vector, features)
     dominant_axis = max(EMOTION_DIMS, key=lambda dim: float(source_vector.get(dim, 0.0)))
     available = bool(review_semantic.get("emotion_vector") or review_semantic.get("labels"))
@@ -1149,6 +1426,7 @@ def build_weight_schedule(payload: dict[str, Any], features: dict[str, Any]) -> 
         "agreement_confidence": round(agreement_confidence, 4),
         "effective_consistency": round(effective_consistency, 4),
         "consistency_shift": round(consistency_shift, 4),
+        "weight_model": "independent_signal_weights",
         "screen_weight": screen_weight,
         "screen_semantic_weight": screen_semantic_weight,
         "prior_weight": prior_weight,
@@ -1161,9 +1439,24 @@ def build_weight_schedule(payload: dict[str, Any], features: dict[str, Any]) -> 
 
 def infer_labels(emotion_vector: dict[str, float], features: dict[str, Any]) -> list[str]:
     labels: list[str] = []
-    if emotion_vector["urgency"] >= 0.62 or features["blocking_ratio"] >= 0.25 or features["missed_expectation_ratio"] >= 0.34 or (features["typing_chaos"] >= 0.42 and (features["delay_pressure"] >= 0.4 or features["urgency_hits"] >= 1)) or (features["textism_pressure"] >= 0.34 and (features["delay_pressure"] >= 0.34 or features["urgency_hits"] >= 1)) or (features["delay_pressure"] >= 0.5 and (features["command_ratio"] >= 0.34 or features["directness_delta"] >= 0.34)) or (features["delay_pressure"] >= 0.8 and (features["stall_ratio"] >= 0.25 or features["stuck_pressure"] >= 0.8)) or (features["stuck_pressure"] >= 0.9 and (features["delay_pressure"] >= 0.45 or features["same_issue_mentions"] >= 1 or features["stall_ratio"] >= 0.25)) or (features["short_burst"] >= 0.75 and features["urgency_hits"] >= 1 and features["frustration_hits"] >= 1):
+    if emotion_vector["urgency"] >= 0.62 or features["blocking_ratio"] >= 0.25 or features["missed_expectation_ratio"] >= 0.34 or (features["typing_chaos"] >= 0.42 and (features["delay_pressure"] >= 0.4 or features["urgency_hits"] >= 1)) or (features["textism_pressure"] >= 0.34 and (features["delay_pressure"] >= 0.34 or features["urgency_hits"] >= 1)) or (features["delay_pressure"] >= 0.5 and (features["command_ratio"] >= 0.34 or features["directness_delta"] >= 0.34)) or (features["delay_pressure"] >= 0.8 and (features["stall_ratio"] >= 0.25 or features["stuck_pressure"] >= 0.8)) or (features["stuck_pressure"] >= 0.9 and (features["delay_pressure"] >= 0.45 or features["same_issue_mentions"] >= 1 or features["stall_ratio"] >= 0.25)) or (features["stuck_pressure"] >= 0.78 and features["delay_pressure"] >= 0.55 and (features["frustration_ratio"] >= 0.25 or features["stall_ratio"] >= 0.25)) or (features["stall_ratio"] >= 0.25 and features["delay_pressure"] >= 0.45 and emotion_vector["urgency"] >= 0.34) or (features["short_burst"] >= 0.75 and features["urgency_hits"] >= 1 and features["frustration_hits"] >= 1) or (features["missed_expectation_ratio"] >= 0.28 and features["delay_pressure"] >= 0.45 and (features["same_issue_mentions"] >= 1 or features["frustration_ratio"] >= 0.75)) or (features["explicit_confusion_request"] >= 1.0 and features["evidence_request"] >= 1.0 and features["goal_specificity"] <= 0.18 and features["unresolved_turns"] >= 2):
         labels.append("urgent")
-    if emotion_vector["frustration"] >= 0.6 or features["frustration_ratio"] >= 0.32 or features["missed_expectation_ratio"] >= 0.34 or features["context_loss_ratio"] >= 0.34 or features["execution_plumbing_ratio"] >= 0.34 or features["resolution_mismatch"] >= 0.5 or features["stall_ratio"] >= 0.5 or (features["abrupt_delta"] >= 0.35 and features["delay_pressure"] >= 0.45) or (features["dismissive_pressure"] >= 0.38 and (features["delay_pressure"] >= 0.28 or features["stuck_pressure"] >= 0.42 or features["resolution_mismatch"] >= 0.5)) or (features["stuck_pressure"] >= 0.8 and (features["frustration_ratio"] >= 0.25 or features["stall_ratio"] >= 0.25 or features["delay_pressure"] >= 0.35)) or ((features["contradiction_signal"] >= 0.4 or features["soft_correction"] >= 0.8) and features["same_issue_mentions"] >= 1 and (features["skepticism_ratio"] >= 0.25 or features["speculation_ratio"] >= 0.25 or features["context_loss_ratio"] >= 0.25)) or (features["speculation_ratio"] >= 0.75 and (features["delay_pressure"] >= 0.28 or features["contradiction_signal"] >= 0.28 or features["stuck_pressure"] >= 0.28)) or (features["skepticism_ratio"] >= 0.3 and features["stuck_pressure"] >= 0.52 and features["contradiction_signal"] >= 0.28):
+    if emotion_vector["frustration"] >= 0.6 or features["frustration_ratio"] >= 0.32 or features["missed_expectation_ratio"] >= 0.34 or features["context_loss_ratio"] >= 0.34 or features["execution_plumbing_ratio"] >= 0.34 or features["resolution_mismatch"] >= 0.5 or features["stall_ratio"] >= 0.5 or (features["stall_ratio"] >= 0.25 and features["delay_pressure"] >= 0.42 and (features["urgency_hits"] >= 1 or features["missed_expectation_ratio"] >= 0.25 or features["same_issue_mentions"] >= 1)) or (features["abrupt_delta"] >= 0.35 and features["delay_pressure"] >= 0.45) or (features["dismissive_pressure"] >= 0.38 and (features["delay_pressure"] >= 0.28 or features["stuck_pressure"] >= 0.42 or features["resolution_mismatch"] >= 0.5)) or (features["stuck_pressure"] >= 0.8 and (features["frustration_ratio"] >= 0.25 or features["stall_ratio"] >= 0.25 or features["delay_pressure"] >= 0.35)) or ((features["contradiction_signal"] >= 0.4 or features["soft_correction"] >= 0.8) and features["same_issue_mentions"] >= 1 and (features["skepticism_ratio"] >= 0.25 or features["speculation_ratio"] >= 0.25 or features["context_loss_ratio"] >= 0.25)) or (features["speculation_ratio"] >= 0.75 and (features["delay_pressure"] >= 0.28 or features["contradiction_signal"] >= 0.28 or features["stuck_pressure"] >= 0.28)) or (features["skepticism_ratio"] >= 0.3 and features["stuck_pressure"] >= 0.52 and features["contradiction_signal"] >= 0.28):
+        labels.append("frustrated")
+    if "urgent" not in labels and (
+        (features["urgency_hits"] >= 1 and (features["goal_specificity"] >= 0.25 or features["guardrail_request"] >= 1.0 or features["command_ratio"] >= 0.25))
+        or (features["delay_pressure"] >= 0.6 and (features["frustration_ratio"] >= 0.25 or features["stuck_pressure"] >= 0.55 or features["same_issue_mentions"] >= 1))
+        or (features["frustration_ratio"] >= 0.75 and features["same_issue_mentions"] >= 1 and features["delay_pressure"] >= 0.4)
+        or (features["frustration_ratio"] >= 0.5 and features["same_issue_mentions"] >= 1 and features["delay_pressure"] >= 0.35 and features["stuck_pressure"] >= 0.7)
+        or features["blocking_ratio"] >= 0.25
+    ):
+        labels.append("urgent")
+    if "frustrated" not in labels and (
+        features["blocking_ratio"] >= 0.25
+        or (features["execution_plumbing_ratio"] >= 0.25 and (features["task_object_ratio"] >= 0.25 or features["same_issue_mentions"] >= 1))
+        or (features["frustration_ratio"] >= 0.25 and (features["stuck_pressure"] >= 0.45 or features["delay_pressure"] >= 0.42))
+        or (features["missed_expectation_ratio"] >= 0.25 and (features["evidence_request"] >= 1.0 or features["technical_ratio"] >= 0.15))
+    ):
         labels.append("frustrated")
     confused_signal = (
         emotion_vector["confusion"] >= 0.58
@@ -1193,17 +1486,31 @@ def infer_labels(emotion_vector: dict[str, float], features: dict[str, Any]) -> 
         labels.append("confused")
     if "confused" not in labels and features["confusion_hits"] >= 2 and features["context_loss_ratio"] >= 0.25 and emotion_vector["urgency"] <= 0.42:
         labels.append("confused")
-    if emotion_vector["skepticism"] >= 0.42 or features["skepticism_ratio"] >= 0.32 or features["speculation_ratio"] >= 0.25 or features["context_loss_ratio"] >= 0.25 or features["execution_plumbing_ratio"] >= 0.25 or (features["hedge_ratio"] >= 0.34 and (features["contradiction_signal"] >= 0.25 or features["speculation_ratio"] >= 0.25 or features["evidence_request"] >= 1.0)) or features["resolution_mismatch"] >= 0.5 or features["contradiction_signal"] >= 0.45 or features["evidence_request"] >= 1.0 or (features["dismissive_pressure"] >= 0.42 and (features["hedge_ratio"] >= 0.2 or features["contradiction_signal"] >= 0.25 or features["goal_specificity"] >= 0.28)):
+    if "confused" not in labels and features["confusion_hits"] >= 2 and features["execution_plumbing_ratio"] >= 0.34 and features["goal_specificity"] <= 0.18 and emotion_vector["urgency"] <= 0.45:
+        labels.append("confused")
+    if "confused" not in labels and features["confusion_hits"] >= 1 and features["evidence_request"] >= 1.0 and features["contradiction_signal"] >= 0.18 and features["goal_specificity"] <= 0.24:
+        labels.append("confused")
+    if "confused" not in labels and features["confusion_hits"] >= 1 and features["evidence_request"] >= 1.0 and features["skepticism_ratio"] >= 0.25 and features["contradiction_signal"] >= 0.18:
+        labels.append("confused")
+    if emotion_vector["skepticism"] >= 0.42 or features["skepticism_ratio"] >= 0.32 or features["speculation_ratio"] >= 0.25 or features["context_loss_ratio"] >= 0.25 or features["execution_plumbing_ratio"] >= 0.25 or (features["hedge_ratio"] >= 0.34 and (features["contradiction_signal"] >= 0.25 or features["speculation_ratio"] >= 0.25 or features["evidence_request"] >= 1.0)) or features["resolution_mismatch"] >= 0.5 or features["contradiction_signal"] >= 0.45 or features["evidence_request"] >= 1.0 or (features["dismissive_pressure"] >= 0.42 and (features["hedge_ratio"] >= 0.2 or features["contradiction_signal"] >= 0.25 or features["goal_specificity"] >= 0.28)) or (features["missed_expectation_ratio"] >= 0.25 and features["contradiction_signal"] >= 0.24 and features["delay_pressure"] >= 0.5):
+        labels.append("skeptical")
+    if "skeptical" not in labels and (
+        features["skepticism_ratio"] >= 0.25
+        or (features["questions"] >= 1 and features["stuck_pressure"] >= 0.5)
+        or (features["evidence_request"] >= 1.0 and features["task_object_ratio"] >= 0.3)
+    ):
         labels.append("skeptical")
     if emotion_vector["satisfaction"] >= 0.6 or (features["guard_ratio"] >= 0.3 and (features["success_ratio"] >= 0.3 or features["satisfaction_hits"] >= 1 or features["resolution_claimed"] >= 0.5)) or ((features["satisfaction_hits"] >= 1 or features["resolution_claimed"] >= 0.5 or features["success_hits"] >= 1) and features["continue_ratio"] >= 0.25):
         labels.append("satisfied")
-    if emotion_vector["cautiousness"] >= 0.42 or features["caution_ratio"] >= 0.3 or features["boundary_ratio"] >= 0.3 or features["assurance_ratio"] >= 0.3 or features["guardrail_request"] >= 1.0:
+    if emotion_vector["cautiousness"] >= 0.42 or features["caution_ratio"] >= 0.3 or features["boundary_ratio"] >= 0.3 or features["assurance_ratio"] >= 0.3 or features["guardrail_request"] >= 1.0 or (features["context_loss_ratio"] >= 0.25 and features["speculation_ratio"] >= 0.25) or (features["context_loss_ratio"] >= 0.25 and features["evidence_request"] >= 1.0 and features["contradiction_signal"] >= 0.25):
         labels.append("cautious")
     if (emotion_vector["openness"] >= 0.4 or features["comparison_request"] >= 1.0) and emotion_vector["urgency"] <= 0.72 and emotion_vector["frustration"] <= 0.72:
         labels.append("exploratory")
+    if "exploratory" not in labels and features["explore_ratio"] >= 0.3 and (features["comparison_request"] >= 1.0 or features["evidence_request"] >= 1.0 or features["guardrail_request"] >= 1.0) and emotion_vector["frustration"] <= 0.72:
+        labels.append("exploratory")
     if not labels:
         labels.append("neutral")
-    return unique_labels(labels)
+    return canonicalize_labels(labels)
 
 
 def initial_screen(features: dict[str, Any]) -> dict[str, Any]:
@@ -1369,8 +1676,14 @@ def dominant_mode(emotion_vector: dict[str, float], features: dict[str, Any], sc
     skeptical_gap = scores["confused"] - scores["skeptical"]
     if (scores["satisfied"] >= 0.24 and features["guard_ratio"] >= 0.3 and (features["satisfaction_hits"] >= 1 or features["success_hits"] >= 1 or features["resolution_claimed"] >= 0.5)) or (scores["satisfied"] >= 0.28 and features["continue_ratio"] >= 0.25 and (features["satisfaction_hits"] >= 1 or features["resolution_claimed"] >= 0.5 or features["success_hits"] >= 1)) or (scores["satisfied"] >= 0.62 and emotion_vector["frustration"] <= 0.42):
         return "satisfied"
-    if scores["cautious"] >= 0.34 and (features["caution_ratio"] >= 0.25 or features["boundary_ratio"] >= 0.25 or features["assurance_ratio"] >= 0.25) and scores["urgent"] - scores["cautious"] <= 0.18 and (features["evidence_request"] == 0.0 or scores["skeptical"] <= scores["cautious"] + 0.06):
+    if scores["cautious"] >= 0.34 and (features["caution_ratio"] >= 0.25 or features["boundary_ratio"] >= 0.25 or features["assurance_ratio"] >= 0.25) and scores["urgent"] - scores["cautious"] <= 0.18 and (features["evidence_request"] == 0.0 or scores["skeptical"] <= scores["cautious"] + 0.06) and not (features["evidence_request"] >= 1.0 and (features["same_issue_mentions"] >= 1 or features["frustration_hits"] >= 1 or features["stall_ratio"] >= 0.25)):
         return "cautious"
+    if scores["confused"] >= 0.18 and features["explicit_confusion_request"] >= 1.0 and features["evidence_request"] >= 1.0 and features["goal_specificity"] <= 0.18 and features["unresolved_turns"] >= 2 and scores["urgent"] <= 0.32:
+        return "confused"
+    if features["comparison_request"] >= 1.0 and scores["exploratory"] >= 0.3 and features["frustration_ratio"] == 0.0 and scores["exploratory"] >= scores["skeptical"] - 0.14:
+        return "exploratory"
+    if scores["frustrated"] >= 0.42 and features["stuck_pressure"] >= 0.8 and features["delay_pressure"] >= 0.5 and features["frustration_ratio"] >= 0.25 and features["urgency_hits"] == 0 and features["blocking_ratio"] < 0.25 and features["comparison_request"] == 0.0:
+        return "frustrated"
     if scores["skeptical"] >= 0.34 and features["evidence_request"] >= 1.0 and scores["urgent"] - scores["skeptical"] <= 0.14:
         return "skeptical"
     if scores["skeptical"] >= 0.34 and features["skepticism_ratio"] >= 0.25 and (features["evidence_request"] >= 1.0 or features["contradiction_signal"] >= 0.3 or features["stuck_pressure"] >= 0.6) and scores["frustrated"] - scores["skeptical"] <= 0.1:
@@ -1381,6 +1694,10 @@ def dominant_mode(emotion_vector: dict[str, float], features: dict[str, Any], sc
         return "cautious"
     if scores["urgent"] >= 0.5 and (features["urgency_hits"] >= 1 or features["rush_typo_hits"] >= 1 or features["textism_hits"] >= 1):
         return "urgent"
+    if features["urgency_hits"] >= 1 and features["blocking_ratio"] >= 0.25 and scores["urgent"] >= scores["frustrated"] - 0.12:
+        return "urgent"
+    if scores["confused"] >= 0.24 and features["explicit_confusion_request"] >= 1.0 and features["goal_specificity"] <= 0.18 and features["evidence_request"] == 0.0 and features["comparison_request"] == 0.0 and features["guardrail_request"] == 0.0 and scores["confused"] >= scores["skeptical"] - 0.04:
+        return "confused"
     if scores["confused"] >= 0.16 and ((features["explicit_confusion_request"] >= 1.0 and features["questions"] >= 1) or (features["confusion_hits"] >= 1 and features["questions"] >= 1 and scores["urgent"] - scores["confused"] <= 0.24)):
         return "confused"
     if features["vague_ratio"] >= 0.3 and features["hedge_ratio"] >= 0.3 and features["goal_specificity"] <= 0.18 and emotion_vector["urgency"] <= 0.45 and emotion_vector["frustration"] <= 0.42:
@@ -1391,6 +1708,8 @@ def dominant_mode(emotion_vector: dict[str, float], features: dict[str, Any], sc
         return "frustrated"
     if features["stall_ratio"] >= 0.6 and features["stuck_pressure"] >= 0.8 and features["blocking_ratio"] < 0.25 and scores["frustrated"] >= scores["urgent"] - 0.05:
         return "frustrated"
+    if scores["urgent"] >= 0.5 and features["blocking_ratio"] >= 0.25 and features["delay_pressure"] >= 0.85 and scores["urgent"] >= scores["frustrated"] - 0.04:
+        return "urgent"
     if scores["frustrated"] >= 0.42 and scores["frustrated"] >= scores["urgent"] - 0.08 and (features["stuck_pressure"] >= 0.72 or features["delay_pressure"] >= 0.45 or features["frustration_ratio"] >= 0.25 or features["blocking_ratio"] >= 0.25):
         return "frustrated"
     if scores["urgent"] >= 0.72 and (features["blocking_ratio"] >= 0.25 or scores["urgent"] - max(scores["frustrated"], scores["skeptical"], scores["cautious"]) >= 0.08):
@@ -1498,7 +1817,7 @@ def confirm_state(payload: dict[str, Any], features: dict[str, Any], screen: dic
     )
     return {
         "dominant_mode": mode,
-        "labels": unique_labels(labels),
+        "labels": canonicalize_labels(labels),
         "confidence": round(confidence, 4),
         "ttl_seconds": ttl,
         "vector": {dim: round(clamp(vector[dim]), 4) for dim in DIMS},
@@ -1522,13 +1841,13 @@ def build_consistency_snapshot(payload: dict[str, Any], screen: dict[str, Any]) 
             "label_overlap": 0.0,
             "vector_alignment": 0.0,
             "axis_overlap": 0.0,
-            "screen_labels": screen.get("labels", []),
+            "screen_labels": canonicalize_labels(screen.get("labels", [])),
             "posthoc_labels": [],
         }
     screen_vector = clamp_dict(screen.get("emotion_vector"), EMOTION_DIMS)
     posthoc_vector = clamp_dict(review_semantic.get("emotion_vector"), EMOTION_DIMS)
-    screen_labels = unique_labels(screen.get("labels", []))
-    posthoc_labels = unique_labels(list(review_semantic.get("labels") or []))
+    screen_labels = canonicalize_labels(screen.get("labels", []))
+    posthoc_labels = canonicalize_labels(list(review_semantic.get("labels") or []))
     label_overlap = label_overlap_score(screen_labels, posthoc_labels)
     vector_alignment = vector_alignment_score(screen_vector, posthoc_vector, EMOTION_DIMS)
     axis_overlap = axis_overlap_score(screen_vector, posthoc_vector, EMOTION_DIMS)
@@ -1783,13 +2102,13 @@ def build_routing(features: dict[str, Any], confirmed: dict[str, Any], predictio
     prefer_main_thread = bool(mode in {"urgent", "frustrated"} or skeptical_priority or emotion_vector["urgency"] >= 0.56 or emotion_vector["frustration"] >= 0.54 or emotion_vector["confusion"] >= 0.62 or emotion_vector["skepticism"] >= 0.58 or vector["clarity"] <= 0.4 or stall_risk >= 0.62 or features["delay_pressure"] >= 0.6)
     defer_heartbeat = bool(prefer_main_thread or mode in {"urgent", "frustrated"} or frustration_risk >= 0.62 or stall_risk >= 0.62)
     allow_parallel = bool(complexity >= 0.72 and not prefer_main_thread and mode in {"exploratory", "neutral"})
-    progress_interval = 10 if frustration_risk >= 0.75 else 15 if mode in {"urgent", "frustrated"} or skeptical_priority or stall_risk >= 0.68 else 20 if complexity >= 0.62 or mode == "skeptical" else 35
+    progress_interval = 10 if frustration_risk >= 0.75 else 15 if mode in {"urgent", "frustrated"} or skeptical_priority or stall_risk >= 0.68 else 20 if complexity >= 0.62 or mode in {"skeptical", "cautious"} or features["guardrail_request"] >= 1.0 else 35
     if mode == "urgent":
         reply_style, verification_level, hermes_personality = "act_then_brief", "high", "concise"
     elif mode == "frustrated":
         reply_style, verification_level, hermes_personality = "repair_then_explain", "high", "concise"
     elif mode == "confused":
-        reply_style, verification_level, hermes_personality = "explain_then_act", "medium", "teacher"
+        reply_style, verification_level, hermes_personality = "explain_then_act", "high" if features["evidence_request"] >= 1.0 or features["unresolved_turns"] >= 2 or features["same_issue_mentions"] >= 1 else "medium", "teacher"
     elif mode == "skeptical":
         reply_style, verification_level, hermes_personality = "evidence_then_act", "very_high" if skeptical_priority else "high", "analytical"
     elif mode == "satisfied":
@@ -1824,9 +2143,212 @@ def build_routing(features: dict[str, Any], confirmed: dict[str, Any], predictio
     }
 
 
+def has_vector_signal(raw: Any, dims: tuple[str, ...]) -> bool:
+    return isinstance(raw, dict) and any(dim in raw and raw.get(dim) is not None for dim in dims)
+
+
+def significant_vector_delta(current: dict[str, Any], previous: dict[str, Any], dims: tuple[str, ...], floor: float = 0.05) -> dict[str, float]:
+    deltas: dict[str, float] = {}
+    for dim in dims:
+        try:
+            delta = float(current.get(dim, 0.0)) - float(previous.get(dim, 0.0))
+        except (TypeError, ValueError):
+            continue
+        rounded = round(delta, 4)
+        if abs(rounded) >= floor:
+            deltas[dim] = rounded
+    return deltas
+
+
+def build_state_delta(payload: dict[str, Any], confirmed: dict[str, Any]) -> dict[str, Any]:
+    last_state = payload.get("last_state") or {}
+    previous_vector_raw = last_state.get("vector") if isinstance(last_state, dict) else {}
+    previous_emotion_raw = last_state.get("emotion_vector") if isinstance(last_state, dict) else {}
+    has_interaction = has_vector_signal(previous_vector_raw, STATE_DIMS)
+    has_emotion = has_vector_signal(previous_emotion_raw, EMOTION_DIMS)
+    if not has_interaction and not has_emotion:
+        return {
+            "available": False,
+            "dominant_shift": "new_turn",
+            "emotion": {},
+            "interaction": {},
+        }
+
+    previous_vector = clamp_dict(previous_vector_raw, STATE_DIMS)
+    previous_emotion = clamp_dict(previous_emotion_raw, EMOTION_DIMS)
+    interaction_delta = significant_vector_delta(confirmed["vector"], previous_vector, INTERACTION_DIMS)
+    emotion_delta = significant_vector_delta(confirmed["emotion_vector"], previous_emotion, EMOTION_DIMS)
+    if emotion_delta.get("frustration", 0.0) >= 0.12:
+        dominant_shift = "needs_concrete_unblock"
+    elif emotion_delta.get("urgency", 0.0) >= 0.12:
+        dominant_shift = "needs_priority_action"
+    elif emotion_delta.get("skepticism", 0.0) >= 0.12 or interaction_delta.get("trust", 0.0) <= -0.12:
+        dominant_shift = "needs_evidence_first"
+    elif emotion_delta.get("confusion", 0.0) >= 0.12 or interaction_delta.get("clarity", 0.0) <= -0.12:
+        dominant_shift = "needs_alignment_check"
+    elif emotion_delta.get("satisfaction", 0.0) >= 0.12:
+        dominant_shift = "ready_for_closeout"
+    elif emotion_delta.get("satisfaction", 0.0) <= -0.12:
+        dominant_shift = "needs_stabilization"
+    elif not interaction_delta and not emotion_delta:
+        dominant_shift = "stable"
+    else:
+        dominant_shift = "changed"
+    return {
+        "available": True,
+        "dominant_shift": dominant_shift,
+        "emotion": emotion_delta,
+        "interaction": interaction_delta,
+    }
+
+
+def validate_route_reasons(reasons: list[str]) -> list[str]:
+    valid: list[str] = []
+    for reason in unique_labels(reasons):
+        if reason in ROUTE_REASON_ENUM:
+            valid.append(reason)
+    return valid[:6]
+
+
+def build_route_reasons(
+    features: dict[str, Any],
+    confirmed: dict[str, Any],
+    prediction: dict[str, Any],
+    routing: dict[str, Any],
+    state_delta: dict[str, Any],
+) -> list[str]:
+    mode = confirmed["dominant_mode"]
+    labels = set(confirmed.get("labels") or [])
+    emotion_vector = confirmed["emotion_vector"]
+    reasons: list[str] = []
+    if routing["thread_interface"]["queue_mode"] in {"steer", "interrupt"}:
+        reasons.append("runtime_priority")
+    if mode == "urgent" or emotion_vector["urgency"] >= 0.64 or features.get("delay_pressure", 0.0) >= 0.42:
+        reasons.append("urgent_pressure")
+    if mode == "frustrated" or prediction["frustration_risk"] >= 0.62 or features.get("bug_retries", 0.0) >= 1:
+        reasons.append("repeat_failure_pressure")
+    if mode == "skeptical" or "skeptical" in labels or features.get("evidence_request", 0.0) >= 1.0:
+        reasons.append("evidence_requested")
+    if mode == "cautious" or "cautious" in labels or features.get("guardrail_request", 0.0) >= 1.0:
+        reasons.append("scope_guard_requested")
+    if mode == "confused" or emotion_vector["confusion"] >= 0.58:
+        reasons.append("low_clarity")
+    if mode == "satisfied" or prediction["guard_needed"]:
+        reasons.append("post_success_guard")
+    if prediction["stall_risk"] >= 0.62 or features.get("stall_ratio", 0.0) >= 0.25:
+        reasons.append("stall_risk")
+    if state_delta.get("dominant_shift") in {"needs_concrete_unblock", "needs_evidence_first", "needs_alignment_check", "needs_stabilization", "needs_priority_action"}:
+        reasons.append(str(state_delta["dominant_shift"]))
+    if features.get("goal_specificity", 0.0) >= 0.48:
+        reasons.append("task_specific")
+    return validate_route_reasons(reasons)
+
+
+def build_satisfaction_lock(features: dict[str, Any], confirmed: dict[str, Any], prediction: dict[str, Any]) -> dict[str, Any]:
+    mode = confirmed["dominant_mode"]
+    emotion_vector = confirmed["emotion_vector"]
+    active = bool(mode == "satisfied" or prediction["guard_needed"] or features.get("success_ratio", 0.0) >= 0.34)
+    if not active:
+        return {
+            "active": False,
+            "reason": "inactive",
+            "allowed_actions": [],
+            "blocked_actions": [],
+        }
+    if features.get("guard_ratio", 0.0) >= 0.34:
+        reason = "post_success_guard"
+    elif emotion_vector["satisfaction"] >= 0.5:
+        reason = "user_satisfied"
+    elif features.get("resolution_claimed", 0.0) >= 1.0:
+        reason = "resolution_claimed"
+    else:
+        reason = "guard_needed"
+    return {
+        "active": True,
+        "reason": reason,
+        "allowed_actions": ["summarize_result", "run_regression_check", "prepare_handoff"],
+        "blocked_actions": ["expand_scope", "start_new_refactor", "change_config_without_request"],
+    }
+
+
+def build_response_constraints(
+    confirmed: dict[str, Any],
+    routing: dict[str, Any],
+    prediction: dict[str, Any],
+    satisfaction_lock: dict[str, Any],
+) -> list[str]:
+    mode = confirmed["dominant_mode"]
+    constraints: list[str] = []
+    if mode == "urgent":
+        constraints.extend(["lead_with_action", "keep_first_reply_short", "progress_update_required"])
+    elif mode == "frustrated":
+        constraints.extend(["repair_before_explain", "avoid_repeating_failed_path", "progress_update_required"])
+    elif mode == "skeptical":
+        constraints.extend(["show_basis_first", "name_verification_steps", "avoid_guessing"])
+    elif mode == "cautious":
+        constraints.extend(["verify_before_editing", "keep_scope_tight", "protect_user_boundaries"])
+    elif mode == "confused":
+        constraints.extend(["explain_next_step", "ask_at_most_one_question"])
+    elif mode == "satisfied":
+        constraints.extend(["guard_mode", "avoid_scope_expansion", "close_with_regression_check"])
+    else:
+        constraints.extend(["state_recommendation_first", "expand_only_when_useful"])
+    if routing["verification_level"] in {"high", "very_high"}:
+        constraints.append("include_check_result")
+    if prediction["next_update_deadline_sec"] <= 20:
+        constraints.append("progress_update_required")
+    if satisfaction_lock["active"]:
+        constraints.extend(["avoid_scope_expansion", "close_with_regression_check"])
+    return unique_labels(constraints)[:8]
+
+
+def build_system_prompt_addendum(features: dict[str, Any], confirmed: dict[str, Any], prediction: dict[str, Any]) -> str:
+    mode = confirmed["dominant_mode"]
+    language = features["language"]
+    if language == "zh":
+        if mode in {"urgent", "frustrated"}:
+            return "用户已经多次尝试。先确认当前障碍点的最小复现路径，再给出一个带明确成功判据的下一步。保持进度可见。"
+        if mode == "skeptical":
+            return "用户希望先看到依据。回复以校验点、命令或日志片段开头，再给结论和下一步。"
+        if mode == "confused":
+            return "用户需要目标对齐。先用一句话复述你理解的目标，再给一个可纠正的默认路径。"
+        if mode == "cautious":
+            return "默认保护现有可工作状态。任何变更前先说明范围、校验点和回滚路径。"
+        if mode == "satisfied" or prediction["guard_needed"]:
+            return "保留当前可工作状态。优先做回归检查、交付说明和收口，避免扩展 scope。"
+        return "给出一个具体建议，说明下一步和验证方式。"
+    if mode in {"urgent", "frustrated"}:
+        return "The user has retried this path. Confirm the smallest reproducible blocking point, then give one next action with a clear success criterion. Keep progress visible."
+    if mode == "skeptical":
+        return "The user wants evidence before more changes. Start with a verification point, command, or log excerpt, then give the conclusion and next step."
+    if mode == "confused":
+        return "The user needs goal alignment. Restate the target in one sentence, then give one correctable default path."
+    if mode == "cautious":
+        return "Protect the current working state by default. Before any change, name the scope, verification point, and rollback path."
+    if mode == "satisfied" or prediction["guard_needed"]:
+        return "Preserve the working state. Prioritize regression checks, handoff notes, and closeout before adding scope."
+    return "Give one concrete recommendation, the next step, and the verification method."
+
+
+def guidance_tone(mode: str) -> str:
+    if mode in {"urgent", "frustrated"}:
+        return "concise_and_concrete"
+    if mode == "skeptical":
+        return "evidence_first"
+    if mode == "cautious":
+        return "careful_and_bounded"
+    if mode == "confused":
+        return "alignment_first"
+    if mode == "satisfied":
+        return "guarded_closeout"
+    return "direct_and_useful"
+
+
 def build_guidance(features: dict[str, Any], confirmed: dict[str, Any], prediction: dict[str, Any]) -> dict[str, Any]:
     mode = confirmed["dominant_mode"]
     language = features["language"]
+    system_prompt_addendum = build_system_prompt_addendum(features, confirmed, prediction)
+    tone = guidance_tone(mode)
     should_probe = prediction["probe_needed"]
     allow_emotion_hook = bool(should_probe and mode not in {"urgent", "frustrated", "skeptical"} and prediction["frustration_risk"] < 0.7)
     if not should_probe:
@@ -1835,6 +2357,8 @@ def build_guidance(features: dict[str, Any], confirmed: dict[str, Any], predicti
             "allow_emotion_hook": False,
             "probe_style": "none",
             "hook_mode": "none",
+            "tone": tone,
+            "system_prompt_addendum": system_prompt_addendum,
             "soft_probe_seed": "",
             "question": "",
             "reason": "state already clear enough",
@@ -1906,6 +2430,8 @@ def build_guidance(features: dict[str, Any], confirmed: dict[str, Any], predicti
         "allow_emotion_hook": allow_emotion_hook,
         "probe_style": probe_style,
         "hook_mode": hook_mode,
+        "tone": tone,
+        "system_prompt_addendum": system_prompt_addendum,
         "soft_probe_seed": soft_probe_seed if allow_emotion_hook else "",
         "question": question,
         "reason": "clarity is low or frustration risk is rising",
@@ -2023,7 +2549,7 @@ def build_model_prompts(payload: dict[str, Any], screen: dict[str, Any], confirm
     latest = str(payload.get("message") or "").strip()[:160]
     history = payload.get("history") or []
     runtime = payload.get("runtime") or {}
-    user_profile = load_user_profile(payload)
+    user_profile = load_user_profile(payload, {"degraded": False, "degradation_reasons": []})
     history_excerpt = [{"r": item.get("role", ""), "t": str(item.get("text") or item.get("content") or "")[:80]} for item in history[-3:]]
     profile_hint = {
         "tz": user_profile["timezone"],
@@ -2084,27 +2610,37 @@ def build_model_prompts(payload: dict[str, Any], screen: dict[str, Any], confirm
 
 
 def run_pipeline(payload: dict[str, Any]) -> dict[str, Any]:
-    features = build_features(payload)
+    normalized_payload, diagnostics = normalize_payload(payload)
+    features = build_features(normalized_payload, diagnostics)
     profile_state = build_profile_state(features)
     constraint_signals = build_constraint_signals(features)
-    weight_schedule = build_weight_schedule(payload, features)
+    weight_schedule = build_weight_schedule(normalized_payload, features)
     screen = initial_screen(features)
-    confirmed = confirm_state(payload, features, screen, weight_schedule)
-    consistency_snapshot = build_consistency_snapshot(payload, screen)
-    memory_update = build_memory_update(payload, features, confirmed, weight_schedule, consistency_snapshot)
+    confirmed = confirm_state(normalized_payload, features, screen, weight_schedule)
+    consistency_snapshot = build_consistency_snapshot(normalized_payload, screen)
+    memory_update = build_memory_update(normalized_payload, features, confirmed, weight_schedule, consistency_snapshot)
     prediction = predict_state(features, confirmed)
     analysis = build_analysis_plan(features, screen, confirmed, prediction)
     routing = build_routing(features, confirmed, prediction)
+    state_delta = build_state_delta(normalized_payload, confirmed)
+    route_reasons = build_route_reasons(features, confirmed, prediction, routing, state_delta)
+    satisfaction_lock = build_satisfaction_lock(features, confirmed, prediction)
+    response_constraints = build_response_constraints(confirmed, routing, prediction, satisfaction_lock)
     guidance = build_guidance(features, confirmed, prediction)
     posthoc_plan = build_posthoc_plan(features, confirmed, analysis, weight_schedule)
-    posthoc_shadow = build_posthoc_shadow(payload, features, confirmed, analysis, posthoc_plan)
+    posthoc_shadow = build_posthoc_shadow(normalized_payload, features, confirmed, analysis, posthoc_plan)
     collection_stack = build_collection_stack(weight_schedule, features, posthoc_plan)
     overlay_prompt = render_overlay(features, confirmed, prediction, routing, analysis)
     debug_overlay_prompt = render_debug_overlay(features, confirmed, prediction, routing, analysis)
-    prompts = build_model_prompts(payload, screen, confirmed, routing, prediction, analysis, weight_schedule, posthoc_plan)
+    prompts = build_model_prompts(normalized_payload, screen, confirmed, routing, prediction, analysis, weight_schedule, posthoc_plan)
     prompts["overlay_prompt"] = overlay_prompt
     prompts["debug_overlay_prompt"] = debug_overlay_prompt
+    degradation_reasons = finalize_degradation_reasons(diagnostics)
     return {
+        "schema_version": SCHEMA_VERSION,
+        "degraded": bool(diagnostics["degraded"]),
+        "degradation_reasons": degradation_reasons,
+        "host_capabilities": normalized_payload.get("host_capabilities", {}),
         "profile_state": profile_state,
         "memory_update": memory_update,
         "constraint_signals": constraint_signals,
@@ -2121,6 +2657,10 @@ def run_pipeline(payload: dict[str, Any]) -> dict[str, Any]:
         "prediction": prediction,
         "analysis": analysis,
         "routing": routing,
+        "route_reasons": route_reasons,
+        "response_constraints": response_constraints,
+        "state_delta": state_delta,
+        "satisfaction_lock": satisfaction_lock,
         "guidance": guidance,
         "overlay_prompt": overlay_prompt,
         "debug_overlay_prompt": debug_overlay_prompt,
@@ -2131,11 +2671,11 @@ def run_pipeline(payload: dict[str, Any]) -> dict[str, Any]:
 def parse_payload(args: argparse.Namespace) -> dict[str, Any]:
     payload: dict[str, Any] = {}
     if args.input:
-        payload.update(load_json_file(args.input) or {})
+        payload.update(require_json_object(load_json_file(args.input) or {}, f"--input {args.input}"))
     elif not sys.stdin.isatty():
         stdin_text = sys.stdin.read().strip()
         if stdin_text:
-            payload.update(json.loads(stdin_text))
+            payload.update(require_json_object(json.loads(stdin_text), "stdin"))
     if args.message:
         payload["message"] = args.message
     if args.history_file:
@@ -2154,22 +2694,34 @@ def parse_payload(args: argparse.Namespace) -> dict[str, Any]:
         payload.setdefault("review_semantic", legacy_review)
     if getattr(args, "calibration_file", None):
         payload["calibration_state"] = load_json_file(args.calibration_file)
+    if getattr(args, "include_raw_emotion", False):
+        host_capabilities = dict(payload.get("host_capabilities") or {})
+        host_capabilities["include_raw_emotion"] = True
+        payload["host_capabilities"] = host_capabilities
     return payload
 
 
 def select_output(command: str, full: dict[str, Any]) -> Any:
+    contract = {
+        "schema_version": full["schema_version"],
+        "degraded": full["degraded"],
+        "degradation_reasons": full["degradation_reasons"],
+    }
+    if command == "host":
+        return build_host_output(full)
     if command == "screen":
-        return {"features": full["features"], "initial_screen": full["initial_screen"]}
+        return {**contract, "features": full["features"], "initial_screen": full["initial_screen"]}
     if command == "confirm":
-        return {"confirmed_state": full["confirmed_state"], "weight_schedule": full["weight_schedule"], "consistency_snapshot": full["consistency_snapshot"]}
+        return {**contract, "confirmed_state": full["confirmed_state"], "weight_schedule": full["weight_schedule"], "consistency_snapshot": full["consistency_snapshot"]}
     if command == "predict":
-        return {"prediction": full["prediction"], "analysis": full["analysis"]}
+        return {**contract, "prediction": full["prediction"], "analysis": full["analysis"]}
     if command == "route":
-        return {"routing": full["routing"]}
+        return {**contract, "routing": full["routing"]}
     if command == "guide":
-        return {"guidance": full["guidance"]}
+        return {**contract, "guidance": full["guidance"]}
     if command == "posthoc":
         return {
+            **contract,
             "collection_stack": full["collection_stack"],
             "review_plan": full["review_plan"],
             "posthoc_plan": full["posthoc_plan"],
@@ -2181,14 +2733,98 @@ def select_output(command: str, full: dict[str, Any]) -> Any:
             "posthoc_reflection_prompt": full["prompts"]["posthoc_reflection_prompt"],
         }
     if command == "overlay":
-        return {"overlay_prompt": full["overlay_prompt"], "debug_overlay_prompt": full["debug_overlay_prompt"]}
+        return {**contract, "overlay_prompt": full["overlay_prompt"], "debug_overlay_prompt": full["debug_overlay_prompt"]}
     return full
+
+
+def raw_emotion_requested(full: dict[str, Any]) -> bool:
+    capabilities = full.get("host_capabilities") or {}
+    return any(bool(capabilities.get(key)) for key in RAW_HOST_CAPABILITY_KEYS)
+
+
+def build_host_state_delta(state_delta: dict[str, Any]) -> dict[str, Any]:
+    dominant_shift = str(state_delta.get("dominant_shift", "changed"))
+    interaction_delta = dict(state_delta.get("interaction") or {})
+    interaction_needs: list[str] = []
+    if interaction_delta.get("clarity", 0.0) <= -0.05:
+        interaction_needs.append("alignment_check")
+    if interaction_delta.get("trust", 0.0) <= -0.05:
+        interaction_needs.append("evidence_first")
+    if interaction_delta.get("engagement", 0.0) <= -0.05:
+        interaction_needs.append("keep_progress_visible")
+    return {
+        "available": bool(state_delta.get("available")),
+        "dominant_shift": STATE_SHIFT_ALIASES.get(dominant_shift, dominant_shift),
+        "interaction": {
+            "changed": bool(interaction_delta),
+            "needs": unique_labels(interaction_needs),
+        },
+    }
+
+
+def build_host_output(full: dict[str, Any]) -> dict[str, Any]:
+    confirmed = full["confirmed_state"]
+    routing = full["routing"]
+    thread_interface = routing["thread_interface"]
+    memory_update = full["memory_update"]
+    emotion_vector = clamp_dict(confirmed.get("emotion_vector"), EMOTION_DIMS)
+    interaction_state = clamp_dict(confirmed.get("interaction_state"), INTERACTION_DIMS)
+    output = {
+        "schema_version": full["schema_version"],
+        "degraded": full["degraded"],
+        "degradation_reasons": full["degradation_reasons"],
+        "mode": confirmed["dominant_mode"],
+        "confidence": confirmed["confidence"],
+        "overlay_prompt": full["overlay_prompt"],
+        "route_reasons": full["route_reasons"],
+        "response_constraints": full["response_constraints"],
+        "satisfaction_lock": full["satisfaction_lock"],
+        "interaction_state": interaction_state,
+        "routing": {
+            "reply_style": routing["reply_style"],
+            "verification_level": routing["verification_level"],
+            "queue_mode": thread_interface["queue_mode"],
+            "prefer_main_thread": thread_interface["prefer_main_thread"],
+            "defer_heartbeat": thread_interface["defer_heartbeat"],
+            "allow_parallel_subagents": thread_interface["allow_parallel_subagents"],
+            "max_parallel_subagents": thread_interface["max_parallel_subagents"],
+            "progress_update_interval_sec": thread_interface["progress_update_interval_sec"],
+        },
+        "guidance": {
+            "should_probe": full["guidance"]["should_probe"],
+            "hook_mode": full["guidance"]["hook_mode"],
+            "probe_style": full["guidance"]["probe_style"],
+            "tone": full["guidance"]["tone"],
+            "system_prompt_addendum": full["guidance"]["system_prompt_addendum"],
+            "question": full["guidance"]["question"],
+            "soft_probe_seed": full["guidance"]["soft_probe_seed"],
+        },
+        "state": {
+            "interaction_state": interaction_state,
+            "state_delta": build_host_state_delta(full["state_delta"]),
+        },
+        "memory": {
+            "should_persist": memory_update["should_persist"],
+            "host_profile_update_recommended": memory_update["host_profile_update_recommended"],
+            "proposed_calibration_state": memory_update["proposed_calibration_state"],
+        },
+    }
+    if raw_emotion_requested(full):
+        output["diagnostics"] = {
+            "internal": {
+                "labels": confirmed["labels"],
+                "emotion_vector": emotion_vector,
+                "state_delta": full["state_delta"],
+                "mode_scores": confirmed.get("mode_scores", {}),
+            }
+        }
+    return output
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Emotion-aware routing and prompt overlay engine.")
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for name in ("screen", "confirm", "predict", "route", "guide", "posthoc", "overlay", "run"):
+    for name in ("host", "screen", "confirm", "predict", "route", "guide", "posthoc", "overlay", "run"):
         sub = subparsers.add_parser(name)
         sub.add_argument("--input", help="Path to a JSON payload.")
         sub.add_argument("--message", help="Latest user message.")
@@ -2199,6 +2835,7 @@ def build_parser() -> argparse.ArgumentParser:
         sub.add_argument("--review-file", help="Path to review_semantic JSON.")
         sub.add_argument("--posthoc-file", help="Path to posthoc_semantic JSON.")
         sub.add_argument("--calibration-file", help="Path to calibration_state JSON.")
+        sub.add_argument("--include-raw-emotion", action="store_true", help="Include internal raw affect diagnostics in host output.")
         sub.add_argument("--output", help="Path to write JSON output.")
         sub.add_argument("--pretty", action="store_true", help="Pretty-print JSON.")
     return parser
@@ -2213,13 +2850,18 @@ def main() -> int:
         parser.exit(2, f"{exc}\n")
     except json.JSONDecodeError as exc:
         parser.exit(2, f"Invalid JSON input: {exc}\n")
+    except ValueError as exc:
+        parser.exit(2, f"{exc}\n")
     if not payload.get("message"):
         parser.error("A message is required via --message, --input, or stdin JSON.")
     full = run_pipeline(payload)
     selected = select_output(args.command, full)
     rendered = dump_json(selected, args.pretty)
     if args.output:
-        Path(args.output).write_text(rendered, encoding="utf-8")
+        try:
+            atomic_write_text(Path(args.output), rendered)
+        except OSError as exc:
+            parser.exit(2, f"Could not write output {args.output}: {exc}\n")
     else:
         print(rendered)
     return 0

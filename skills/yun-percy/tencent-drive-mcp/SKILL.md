@@ -1,7 +1,7 @@
 ---
 name: weiyun
 version: "1.0.3"
-description: "微云网盘 MCP 接口完整技能。包含目录列表查询（weiyun.list）、按分类拉取文件列表（weiyun.list_by_category）、批量下载（weiyun.download）、批量删除（weiyun.delete）、文件上传（weiyun.upload）、生成分享外链（weiyun.gen_share_link）、重命名文件（weiyun.rename_file）、重命名目录（weiyun.rename_dir）、技能版本检查更新（check_skill_update）九个 MCP Tool 的使用指南。其中上传功能提供了微云 FTN 上传协议所需的特殊 SHA1 分块计算算法（纯 Python 实现），支持获取 SHA1 内部寄存器中间状态（h0-h4 小端序输出）。当用户提到微云上传、MCP 上传、block_sha_list 计算、FTN 上传、微云文件管理、weiyun.list、weiyun.list_by_category、weiyun.download、weiyun.delete、weiyun.upload、weiyun.gen_share_link、weiyun.rename_file、weiyun.rename_dir、check_skill_update 时触发。"
+description: "微云网盘 MCP 接口完整技能。包含目录列表查询（weiyun.list）、按分类拉取文件列表（weiyun.list_by_category）、批量下载（weiyun.download）、批量删除（weiyun.delete）、文件上传（weiyun.upload）、生成分享外链（weiyun.gen_share_link）、重命名文件（weiyun.rename_file）、重命名目录（weiyun.rename_dir）、创建文件夹（weiyun.create_dir）、移动文件夹（weiyun.move_dir）、移动文件（weiyun.move_file）、技能版本检查更新（check_skill_update）十二个 MCP Tool 的使用指南。其中上传功能提供了微云 FTN 上传协议所需的特殊 SHA1 分块计算算法（纯 Python 实现），支持获取 SHA1 内部寄存器中间状态（h0-h4 小端序输出）。当用户提到微云上传、MCP 上传、block_sha_list 计算、FTN 上传、微云文件管理、weiyun.list、weiyun.list_by_category、weiyun.download、weiyun.delete、weiyun.upload、weiyun.gen_share_link、weiyun.rename_file、weiyun.rename_dir、weiyun.create_dir、weiyun.move_dir、weiyun.move_file、check_skill_update 时触发。"
 ---
 
 # 微云网盘 MCP 技能
@@ -47,7 +47,7 @@ JSON 格式数据返回，返回参数示例：
 
 ## 功能概述
 
-提供微云（Weiyun）网盘通过 MCP 协议进行文件管理的完整能力，包含 **9 个 MCP Tool**：
+提供微云（Weiyun）网盘通过 MCP 协议进行文件管理的完整能力，包含 **12 个 MCP Tool**：
 
 | Tool 名称 | 功能 | 说明 |
 |-----------|------|------|
@@ -59,16 +59,21 @@ JSON 格式数据返回，返回参数示例：
 | `weiyun.gen_share_link` | 生成分享外链 | 为文件或目录生成分享短链接，支持设置分享密码 |
 | `weiyun.rename_file` | 重命名文件 | 重命名微云网盘中的文件 |
 | `weiyun.rename_dir` | 重命名目录 | 重命名微云网盘中的目录 |
+| `weiyun.create_dir` | 创建文件夹 | 在微云网盘中创建文件夹 |
+| `weiyun.move_dir` | 移动文件夹 | 移动微云网盘中的文件夹到目标目录 |
+| `weiyun.move_file` | 移动文件 | 移动微云网盘中的文件到目标目录 |
 | `check_skill_update` | 技能版本检查更新 | 检查当前 Skill 版本是否为最新，获取更新指令 |
 
 **核心架构原则**：文件哈希计算和 `block_sha_list` 生成**必须在客户端/本地完成**。服务端只接收预计算好的哈希值，不会接收原始文件数据来计算哈希。这种设计是为了防止海量请求打爆服务器的存储和 CPU。
 
 ## 触发场景
 
-- 使用微云 MCP 工具进行文件管理（查询、下载、删除、上传、分享、重命名）
+- 使用微云 MCP 工具进行文件管理（查询、下载、删除、上传、分享、重命名、创建文件夹、移动文件/目录）
 - **上传文件到微云**：优先使用 `scripts/upload_to_weiyun.py` 一键完成，无需手动计算参数或调用 MCP
 - 按分类（文档、图片、视频等）查找微云文件（`weiyun.list_by_category` Tool）
 - 重命名微云文件或目录（`weiyun.rename_file`、`weiyun.rename_dir` Tool）
+- 在微云中创建文件夹（`weiyun.create_dir` Tool）
+- 移动微云文件或目录到其他位置（`weiyun.move_file`、`weiyun.move_dir` Tool）
 - 实现或调试微云 MCP 文件上传（`weiyun.upload` Tool）
 - 计算 `block_sha_list`、`check_sha`、`check_data` 等上传参数
 - 理解微云两阶段上传协议（预上传 → 分片上传）
@@ -76,6 +81,8 @@ JSON 格式数据返回，返回参数示例：
 - 调试 FTN 上传错误或 SHA1 校验不匹配问题
 
 ## 接口一览
+
+**注意** : 所有接口请求时都**务必**要在 `req_header` 字段中携带上报数据，详见下方「数据上报」章节
 
 ### 1. weiyun.list — 目录列表查询
 
@@ -92,6 +99,7 @@ JSON 格式数据返回，返回参数示例：
 | asc | bool | 否 | true-升序，false-降序（默认） |
 | dir_key | string | 否 | 要查询的目录 key（hex 编码），为空则使用 token 绑定的 dirkey |
 | pdir_key | string | 否 | 要查询的父目录 key（hex 编码），为空则使用 token 绑定的 pdirkey |
+| req_header | ReqHeader | 推荐 | 请求信息头，用于数据上报（含 `qua` 和 `version`） |
 
 **响应**：返回 `pdir_key`（父目录 key）、`dir_list`（目录列表）、`file_list`（文件列表）、`finish_flag`（是否拉取完毕）。
 
@@ -240,7 +248,60 @@ JSON 格式数据返回，返回参数示例：
 
 **响应**：返回 `error`（错误信息，成功时为空）。
 
-### 9. check_skill_update — 技能版本检查更新
+### 9. weiyun.create_dir — 创建文件夹
+
+在微云网盘中创建文件夹，需要提供父目录 key 和文件夹名称。
+
+**请求参数**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| pdir_key | string | 否 | 父目录 key（hex 编码），在此目录下创建新文件夹。为空则使用 token 绑定的目录 |
+| dir_name | string | **是** | 新文件夹名称 |
+
+**响应**：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| dir_key | string | 新创建的目录 key（hex 编码） |
+| dir_name | string | 创建后的目录名（可能被自动改名，如存在同名目录） |
+| error | string | 错误信息，成功时为空 |
+
+### 10. weiyun.move_dir — 移动文件夹
+
+移动微云网盘中的文件夹到目标目录，需要提供源目录 key 和目标目录 key。
+
+**请求参数**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| dir_key | string | **是** | 待移动的目录 key（hex 编码） |
+| src_pdir_key | string | **是** | 源父目录 key（hex 编码），即当前所在的目录 |
+| dst_pdir_key | string | **是** | 目标父目录 key（hex 编码），即要移动到的目录 |
+| dir_name | string | 否 | 目录名称，移动时可选填用于冲突处理 |
+
+**响应**：返回 `error`（错误信息，成功时为空）。
+
+**⚠️ 关键**：`src_pdir_key` 和 `dst_pdir_key` 都需要使用 `weiyun.list` 响应中**顶层的 `pdir_key`** 或对应目录的 `dir_key`，不能传空字符串。
+
+### 11. weiyun.move_file — 移动文件
+
+移动微云网盘中的文件到目标目录，需要提供文件 ID、源目录 key 和目标目录 key。
+
+**请求参数**：
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| file_id | string | **是** | 待移动的文件唯一标识符 |
+| src_pdir_key | string | **是** | 源父目录 key（hex 编码），即文件当前所在的目录 |
+| dst_pdir_key | string | **是** | 目标父目录 key（hex 编码），即要移动到的目录 |
+| filename | string | 否 | 文件名称，移动时可选填用于冲突处理 |
+
+**响应**：返回 `error`（错误信息，成功时为空）。
+
+**⚠️ 关键**：`src_pdir_key` 和 `dst_pdir_key` 都需要使用 `weiyun.list` 响应中**顶层的 `pdir_key`** 或对应目录的 `dir_key`，不能传空字符串。
+
+### 12. check_skill_update — 技能版本检查更新
 
 检查当前 Skill 版本是否为最新，如有新版本则返回更新指令。
 
@@ -513,12 +574,94 @@ python3 scripts/upload_to_weiyun.py /path/to/file --pdir_key <pdir_key>
   count = 50
 ```
 
+### 工作流 7：创建文件夹
+
+```
+# 1. 先查目录获取 pdir_key（如果要在子目录下创建）
+调用 weiyun.list → 记住响应顶层 pdir_key 或目标子目录的 dir_key
+
+# 2. 创建文件夹
+调用 weiyun.create_dir，参数：
+  pdir_key = "<目标父目录的 pdir_key>"（为空则在 token 绑定的根目录下创建）
+  dir_name = "<新文件夹名称>"
+```
+
+**响应**：返回新创建目录的 `dir_key` 和 `dir_name`（可能因同名被自动改名）。
+
+### 工作流 8：移动文件或目录
+
+```
+# 1. 先查源目录获取文件/目录信息
+调用 weiyun.list，查询源目录 → 找到目标文件的 file_id 或目录的 dir_key，记住响应顶层 pdir_key 作为 src_pdir_key
+
+# 2. 查目标目录获取 dst_pdir_key
+调用 weiyun.list，查询目标目录 → 记住响应顶层的 pdir_key 作为 dst_pdir_key
+
+# 3a. 移动文件
+调用 weiyun.move_file，参数：
+  file_id = "<file_id>"
+  src_pdir_key = "<源目录的 pdir_key>"
+  dst_pdir_key = "<目标目录的 pdir_key>"
+
+# 3b. 移动目录
+调用 weiyun.move_dir，参数：
+  dir_key = "<要移动的目录 dir_key>"
+  src_pdir_key = "<源父目录的 pdir_key>"
+  dst_pdir_key = "<目标父目录的 pdir_key>"
+```
+
+**⚠️ 关键**：`src_pdir_key` 和 `dst_pdir_key` 不能为空，必须通过 `weiyun.list` 获取正确的目录 key。
+
 ## 认证机制
 
 所有 MCP 工具需要通过 `WyHeader` HTTP 头传递 `mcp_token`：
 
 ```
 WyHeader: mcp_token=<token>
+```
+
+
+
+## 数据上报
+
+为了方便微云官方进行问题故障定位，MCP 客户端在调用每个接口时，**应在请求体的 `req_header` 字段中携带上报数据**。
+
+### ReqHeader 字段说明
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `qua` | string | 推荐 | 用户设备信息，格式：`{平台}_{平台版本}_{渠道}_{渠道方版本}`，如 `MAC_15.4.1_CODEBUDDY_4.8.1` |
+| `version` | string | 推荐 | skill 的版本号，如 `1.0.3`，取自本文件顶部 frontmatter 的 `version` 字段 |
+
+### qua 规则（客户端实时采集）
+
+QUA 是一个字符串，由设备信息拼接而成：
+
+```
+{平台}_{平台版本}_{渠道}_{渠道方版本}
+```
+
+- **平台**：检测当前操作系统类型（`MAC` / `WINDOWS` / `LINUX`）
+- **平台版本**：获取操作系统版本号（如 macOS `15.4.1`，Windows `10.0.19045`）
+- **渠道**：MCP 客户端的产品名称（如 `CODEBUDDY`、`WORKBUDDY`）
+- **渠道方版本**：MCP 客户端（IDE 插件）的版本号
+
+| 平台 | QUA 示例 |
+|------|---------|
+| macOS | `MAC_15.4.1_CODEBUDDY_4.8.1` |
+| Windows | `WINDOWS_10.0.19045_WORKBUDDY_4.8.1` |
+| Linux | `LINUX_6.1.0_CODEBUDDY_4.8.1` |
+
+### 请求示例
+
+```json
+{
+  "limit": 50,
+  "req_header": {
+    "qua": "MAC_15.4.1_CODEBUDDY_4.8.1",
+    "version": "1.0.3"
+  }
+}
 ```
 
 ## 常见问题
@@ -544,5 +687,8 @@ WyHeader: mcp_token=<token>
 19. **重命名文件/目录**：先调用 `weiyun.list` 获取 `file_id`/`dir_key`、`dir_name` 和顶层 `pdir_key`，再调用 `weiyun.rename_file` 或 `weiyun.rename_dir`（重命名目录时需额外传 `src_dir_name` 即原目录名）
 20. **按分类查找文件**：使用 `weiyun.list_by_category`，通过 `category_id` 或 `lib_id` 指定分类，支持 `server_version` 续拉。该接口需要同时携带真实微云 cookie 和 `mcp_token`
 21. **生成带密码的分享链接**：在调用 `weiyun.gen_share_link` 时设置 `passwd` 参数即可创建加密分享
+22. **创建文件夹**：调用 `weiyun.create_dir`，传入 `pdir_key`（父目录 key）和 `dir_name`（文件夹名称）。`pdir_key` 为空时在 token 绑定的根目录下创建。返回的 `dir_name` 可能因同名冲突被自动改名
+23. **移动文件/目录**：使用 `weiyun.move_file` 或 `weiyun.move_dir`。需要先通过 `weiyun.list` 分别获取源目录和目标目录的 `pdir_key`，填入 `src_pdir_key` 和 `dst_pdir_key`。两个 key 都不能为空
+24. **移动操作的目录 key 获取**：`src_pdir_key` 来自文件/目录当前所在位置的 `weiyun.list` 响应顶层 `pdir_key`；`dst_pdir_key` 来自目标位置的 `weiyun.list` 响应顶层 `pdir_key` 或目标目录的 `dir_key`
 
 

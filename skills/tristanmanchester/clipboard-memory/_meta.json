@@ -3,9 +3,15 @@
   "slug": "clipboard-memory",
   "displayName": "Clipboard Memory",
   "latest": {
-    "version": "1.3.1",
-    "publishedAt": 1776763625308,
-    "commit": "https://github.com/openclaw/skills/commit/0074332558b5de444f3590f3897afe9190c18dd2"
+    "version": "1.3.3",
+    "publishedAt": 1777184724158,
+    "commit": "https://github.com/openclaw/skills/commit/1377e790ed7ab19a382699b8f4a18f2b7fa43f82"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.3.1",
+      "publishedAt": 1776763625308,
+      "commit": "https://github.com/openclaw/skills/commit/0074332558b5de444f3590f3897afe9190c18dd2"
+    }
+  ]
 }

@@ -1,13 +1,12 @@
 # Openclaw-Embedded Prompts
 
-LLM prompt templates used by Flow C sub-agents and the consolidation cron job.
+LLM prompt templates used by Flow C sub-agents and consolidation.
 
 ## Files
 
 - `profile_extraction.md` — extract durable user facts from a transcript
 - `playbook_extraction.md` — extract procedural rules from correction+confirmation patterns
-- `shallow_dedup_pairwise.md` — decide how to handle a new candidate vs its top-1 neighbor
-- `full_consolidation.md` — consolidate a cluster of 2-10 similar items
+- `full_consolidation.md` — consolidate a cluster of similar items into individual facts
 
 ## Format
 

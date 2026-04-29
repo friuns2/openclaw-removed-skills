@@ -3,6 +3,8 @@ name: simplelogin-cli
 description: Create and manage SimpleLogin email aliases from the command line. Protect your real email with secure, private aliases.
 license: MIT
 metadata:
+  clawdbot:
+    emoji: "📧"
   openclaw:
     emoji: "📧"
     os: ["linux", "darwin", "win32"]

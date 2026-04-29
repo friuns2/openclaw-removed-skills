@@ -1,4 +1,4 @@
-# rocky-know-how 安装配置指南 (v2.8.6)
+# rocky-know-how 安装配置指南 (v2.9.1)
 
 ## 版本要求
 - OpenClaw: 2026.4.21+（支持 4 个 Hook 事件）
@@ -64,7 +64,7 @@ install.sh 已自动添加 Hook，无需手动操作。
 
 ### 关键参数说明
 
-| 参数 | 说明 | v2.8.6 新增 |
+| 参数 | 说明 | v2.9.1 新增 |
 |------|------|------------|
 | `handler` | Hook 处理器路径（支持 `~` 展开） | ✅ OPENCLAW_STATE_DIR 支持 |
 | `events` | 4 个事件列表 | ✅ 固定 |
@@ -136,7 +136,7 @@ grep -A 2 "最近（最近7天）" ~/.openclaw/.learnings/memory.md
 
 ---
 
-## 🌐 多 workspace 支持 (v2.8.6+)
+## 🌐 多 workspace 支持 (v2.9.1+)
 
 如果使用多个 workspace（如 `xiaoying/`、`xiaoduo/`），Handler 会自动检测 `OPENCLAW_STATE_DIR` 环境变量，监听对应 workspace 的 `.learnings/` 目录。
 
@@ -166,7 +166,7 @@ grep -A 2 "最近（最近7天）" ~/.openclaw/.learnings/memory.md
 
 ---
 
-## 🔒 安全特性 (v2.8.6)
+## 🔒 安全特性 (v2.9.1)
 
 | 特性 | 说明 | 影响版本 |
 |------|------|----------|
@@ -221,6 +221,7 @@ bash ~/.openclaw/skills/rocky-know-how/scripts/archive.sh --auto
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
+| **3.3.0** | 2026-04-25 | 🔒 安全修复 - 路径穿越/选项注入/并发锁/输入校验
 | **2.8.3** | 2026-04-24 | 🔒 安全加固 (H1/H2) + M1 路径检测；Bug #4 修复 (memory.md 压缩)；脚本全面优化 |
 | 2.8.2 | 2026-04-24 | 🔐 并发锁、Hook 路径动态化、标签对齐、阈值调整、数据清理 |
 | 2.8.1 | 2026-04-23 | 正则转义防注入、输入验证、Hook 自动配置 |
@@ -253,6 +254,6 @@ bash ~/.openclaw/skills/rocky-know-how/scripts/uninstall.sh
 
 ---
 
-**最新更新**: 2026-04-24 01:15  
-**版本**: 2.8.3  
+**最新更新**: 2026-04-25 15:29  
+**版本**: 3.4.8  
 **状态**: ✅ 生产就绪

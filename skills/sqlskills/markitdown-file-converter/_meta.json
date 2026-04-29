@@ -1,0 +1,11 @@
+{
+  "owner": "sqlskills",
+  "slug": "markitdown-file-converter",
+  "displayName": "Markitdown File Converter",
+  "latest": {
+    "version": "1.0.0",
+    "publishedAt": 1775746438596,
+    "commit": "https://github.com/openclaw/skills/commit/6f5a71a0b8e00b918e50c610766c00fad7fa5f3f"
+  },
+  "history": []
+}

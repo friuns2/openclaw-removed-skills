@@ -78,7 +78,7 @@ Send `!key` here to receive your personal free API key.
 
 **📖 Usage:**
 ```bash
-export DIGEN_API_KEY="dg_xxxxx_your_key"
+export DIGEN_API_KEY="ak_xxxxx_your_key"
 clawhub install digen-ai-free
 ```
 

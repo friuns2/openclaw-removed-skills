@@ -5,16 +5,22 @@ import sys, json
 def parse_pk(line):
     if not line.strip(): return None
     parts = line.split("|")
-    if len(parts) < 8: return None
-    return {"pk": parts[0], "cnt": int(parts[1]), "fid": parts[2], "fcat": parts[3],
-            "fstatus": parts[4], "notified": parts[5], "fraw": parts[6], "nc": int(parts[7])}
+    if len(parts) < 9: return None
+    pk_val = parts[0]
+    # v4.4: if pk is empty but there's content, it's a format-invalid PK that was stripped
+    has_content = len(parts) >= 7 and parts[6].strip()
+    return {"pk": pk_val, "cnt": int(parts[1]), "fid": parts[2], "fcat": parts[3],
+            "fstatus": parts[4], "notified": parts[5], "fraw": parts[6], "nc": int(parts[7]),
+            "pk_stripped": (pk_val == "" and has_content),
+            "source_file": parts[8]}
 
 def parse_cat(line):
     if not line.strip(): return None
     parts = line.split("|")
-    if len(parts) < 7: return None
+    if len(parts) < 8: return None
     return {"cat": parts[0], "cnt": int(parts[1]), "fid": parts[2],
-            "fstatus": parts[3], "notified": parts[4], "fraw": parts[5], "nc": int(parts[6])}
+            "fstatus": parts[3], "notified": parts[4], "fraw": parts[5], "nc": int(parts[6]),
+            "source_file": parts[7]}
 
 def calc_trigger(notified, nc, cnt, threshold=2):
     if notified is None:
@@ -42,20 +48,7 @@ def check_pk_format_invalid(line, is_pk_entry):
     """
     if not is_pk_entry:
         return False
-    # For PK entries that have data but no valid PK, raw_md should contain a Pattern-Key
-    # This is heuristic: if count >= threshold but source==category, PK was invalid
     return False  # Logic moved to distill.sh; here we just flag based on context
-
-def parse_pk(line):
-    if not line.strip(): return None
-    parts = line.split("|")
-    if len(parts) < 8: return None
-    pk_val = parts[0]
-    # v4.4.8: if pk is empty but there's content, it's a format-invalid PK that was stripped
-    has_content = len(parts) >= 7 and parts[6].strip()
-    return {"pk": pk_val, "cnt": int(parts[1]), "fid": parts[2], "fcat": parts[3],
-            "fstatus": parts[4], "notified": parts[5], "fraw": parts[6], "nc": int(parts[7]),
-            "pk_stripped": (pk_val == "" and has_content)}
 
 pk_agg_path = sys.argv[1]
 cat_agg_path = sys.argv[2]
@@ -67,12 +60,18 @@ cat_agg = []
 try:
     with open(pk_agg_path) as f:
         pk_agg = [l for l in f.read().splitlines() if l.strip()]
-except: pass
+except FileNotFoundError:
+    print(f"Warning: pk_agg file not found: {pk_agg_path}", file=sys.stderr)
+except Exception as e:
+    print(f"Warning: error reading pk_agg: {e}", file=sys.stderr)
 
 try:
     with open(cat_agg_path) as f:
         cat_agg = [l for l in f.read().splitlines() if l.strip()]
-except: pass
+except FileNotFoundError:
+    print(f"Warning: cat_agg file not found: {cat_agg_path}", file=sys.stderr)
+except Exception as e:
+    print(f"Warning: error reading cat_agg: {e}", file=sys.stderr)
 
 patterns = []
 fallback = []
@@ -87,7 +86,8 @@ for line in pk_agg:
         "source": "pattern_key", "first_entry_id": e["fid"],
         "first_category": e["fcat"], "first_status": e["fstatus"],
         "notified": null_to_none(n_val), "notification_count": e["nc"],
-        "notification_trigger": trig, "raw_md": e["fraw"]
+        "notification_trigger": trig, "raw_md": e["fraw"],
+        "first_file": e.get("source_file", "")
     }
     if e["pk_stripped"]:
         obj["pk_format_invalid"] = True
@@ -106,7 +106,8 @@ for line in cat_agg:
         "source": "category", "first_entry_id": e["fid"],
         "first_category": e["cat"], "first_status": e["fstatus"],
         "notified": null_to_none(n_val), "notification_count": e["nc"],
-        "notification_trigger": trig, "raw_md": e["fraw"]
+        "notification_trigger": trig, "raw_md": e["fraw"],
+        "first_file": e.get("source_file", "")
     }
     if e["cnt"] >= threshold:
         patterns.append(obj)

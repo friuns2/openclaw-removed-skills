@@ -7,9 +7,10 @@ Usage: python3 create_draft.py "<标题>" "<正文HTML>"
   CHAPIMG1_URL ~ CHAPIMG6_URL -> 章节微信URL
 """
 import sys, os, json, urllib.request, urllib.parse, shutil, re
+from html.parser import HTMLParser
 
-APPID = 'wx89c939070fc20789'
-APPSECRET = '6cb9a52250e39cb52bc61d9f5b520066'
+APPID = os.environ.get('WECHAT_APPID', '')
+APPSECRET = os.environ.get('WECHAT_APPSECRET', '')
 UPLOAD_IMG_URL = 'https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token={token}'
 ADD_MATERIAL_URL = 'https://api.weixin.qq.com/cgi-bin/material/add_material?access_token={token}&type=image'
 DRAFT_URL = 'https://api.weixin.qq.com/cgi-bin/draft/add?access_token={token}'
@@ -21,6 +22,18 @@ def get_access_token():
     if d.get('errcode'):
         raise Exception(f'token失败: {d}')
     return d['access_token']
+
+def download_img(url, filepath):
+    """下载网络图片到本地文件"""
+    import ssl
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    with urllib.request.urlopen(url, timeout=30, context=ctx) as r:
+        data = r.read()
+    with open(filepath, 'wb') as f:
+        f.write(data)
+    print(f'  下载: {url[:60]} -> {filepath}')
 
 def upload_img_file(token, filepath):
     """uploadimg: 上传图片，返回永久URL (mmbiz.qpic.cn)"""
@@ -100,257 +113,252 @@ def clean_title_from_body(html, title):
     return html
 
 def beautify_html(html):
-    """给HTML内容添加专业排版样式并重构内容结构，增加视觉层次"""
-    css = """
-    <style>
-    body, section {
-        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif !important;
-        font-size: 17px !important;
-        line-height: 2 !important;
-        letter-spacing: 0.3px !important;
-        color: #3a3a3a !important;
-    }
-    p {
-        margin: 14px 0 !important;
-        line-height: 2 !important;
-        text-align: justify !important;
-    }
-    p:last-of-type { margin-bottom: 20px !important; }
-    h2 {
-        font-size: 22px !important;
-        font-weight: 800 !important;
-        color: #fff !important;
-        background: linear-gradient(135deg, #e07b2a 0%, #c96a1a 100%) !important;
-        padding: 12px 16px !important;
-        margin: 32px 0 16px !important;
-        border-radius: 10px !important;
-        line-height: 1.4 !important;
-        box-shadow: 0 3px 10px rgba(224,123,42,0.25) !important;
-        letter-spacing: 0.5px !important;
-    }
-    h3 {
-        font-size: 18px !important;
-        font-weight: 700 !important;
-        color: #e07b2a !important;
-        background: linear-gradient(to right, #fff8f0, #fffaf5) !important;
-        padding: 10px 14px !important;
-        margin: 24px 0 12px !important;
-        border-left: 5px solid #e07b2a !important;
-        border-radius: 0 8px 8px 0 !important;
-        line-height: 1.5 !important;
-        box-shadow: 0 2px 8px rgba(224,123,42,0.1) !important;
-    }
-    strong, b {
-        font-weight: 700 !important;
-        color: #d44a0a !important;
-        background: linear-gradient(transparent 60%, #ffe0b2 60%) !important;
-        padding: 0 2px !important;
-    }
-    em, i {
-        font-style: normal !important;
-        color: #888 !important;
-    }
-    img {
-        max-width: 100% !important;
-        height: auto !important;
-        display: block !important;
-        margin: 18px auto !important;
-        border-radius: 10px !important;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.1) !important;
-    }
-    ul {
-        padding-left: 20px !important;
-        margin: 12px 0 !important;
-    }
-    ul li {
-        margin: 8px 0 !important;
-        line-height: 1.9 !important;
-        list-style: none !important;
-        padding-left: 20px !important;
-        position: relative !important;
-    }
-    ul li::before {
-        content: "👉 " !important;
-        position: absolute !important;
-        left: 0 !important;
-    }
-    ol {
-        padding-left: 24px !important;
-        margin: 12px 0 !important;
-    }
-    ol li {
-        margin: 8px 0 !important;
-        line-height: 1.9 !important;
-        font-weight: 500 !important;
-    }
-    blockquote {
-        border-left: 5px solid #4caf50 !important;
-        background: #f6ffed !important;
-        padding: 14px 18px !important;
-        margin: 18px 0 !important;
-        border-radius: 0 10px 10px 0 !important;
-        color: #555 !important;
-        font-size: 16px !important;
-        line-height: 1.9 !important;
-    }
-    blockquote strong { color: #2e7d32 !important; background: none !important; }
-    hr {
-        border: none !important;
-        text-align: center !important;
-        margin: 28px 0 !important;
-        color: #ccc !important;
-        font-size: 14px !important;
-        letter-spacing: 8px !important;
-    }
-    </style>
-    """
-    if '<style>' in html or '<style ' in html:
-        html = re.sub(r'(</style>)', css + '\n</style>', html, count=1)
-        return html
-    html = restructure_content(html)
-    html = highlight_content(html)
-    html = convert_lists(html)
-    if '<head>' in html:
-        html = html.replace('<head>', '<head>' + css)
-    else:
-        html = css + html
+    """给HTML内容添加专业排版样式（先替换闭标签，再替换开标签，避免部分匹配问题）"""
+    body_style = (
+        "font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','LXGW WenKai',"
+        "'Noto Serif SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;"
+        "font-size:17px;line-height:2;letter-spacing:0.5px;color:#2c2c2c;text-align:justify;"
+        "-webkit-font-smoothing:antialiased;"
+    )
+    p_style = "font-size:17px;line-height:2;text-indent:2em;margin:16px 0;color:#2c2c2c;"
+    p_first_style = "font-size:17px;line-height:2;margin:16px 0;color:#2c2c2c;"
+    h2_style = (
+        "font-size:20px;font-weight:800;color:#fff;"
+        "background:linear-gradient(135deg,#e07b2a,#c96a1a);"
+        "padding:14px 18px;margin:36px 0 20px 0;border-radius:12px;line-height:1.5;"
+        "box-shadow:0 4px 15px rgba(224,123,42,0.3);letter-spacing:1px;text-align:center;"
+    )
+    h3_style = (
+        "font-size:17px;font-weight:700;color:#c96a1a;"
+        "background:linear-gradient(to right,#fff8f0,#fffaf5);"
+        "padding:12px 16px;margin:28px 0 16px 0;border-left:5px solid #e07b2a;"
+        "border-radius:0 10px 10px 0;line-height:1.6;box-shadow:0 2px 10px rgba(224,123,42,0.12);"
+    )
+    strong_style = "font-weight:700;color:#d44a0a;background:#ffe0b2;padding:0 3px;border-radius:3px;"
+    em_style = "font-style:normal;color:#888;background:#f5f5f5;padding:2px 6px;border-radius:4px;"
+    img_style = "max-width:100%;height:auto;display:block;margin:20px auto;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);"
+    blockquote_style = (
+        "border-left:5px solid #4caf50;"
+        "background:linear-gradient(135deg,#f6ffed,#fff);"
+        "padding:16px 20px;margin:20px 0;border-radius:0 12px 12px 0;"
+        "color:#555;font-size:16px;line-height:2;"
+        "box-shadow:0 3px 12px rgba(76,175,80,0.15);"
+    )
+    hr_style = "border:none;text-align:center;margin:32px 0;color:#ccc;font-size:14px;letter-spacing:12px;"
+
+    p_count = [0]
+
+    # 第一步：先把所有结束标签转成特殊占位符（避免部分匹配）
+    html = html.replace('</p>', '\x00PEND\x00')
+    html = html.replace('</h2>', '\x00H2END\x00')
+    html = html.replace('</h3>', '\x00H3END\x00')
+    html = html.replace('</strong>', '\x00STRONGEND\x00')
+    html = html.replace('</b>', '\x00BEND\x00')
+    html = html.replace('</em>', '\x00EMEND\x00')
+    html = html.replace('</i>', '\x00IEND\x00')
+    html = html.replace('</blockquote>', '\x00BQEND\x00')
+    html = html.replace('</ul>', '\x00ULEND\x00')
+    html = html.replace('</ol>', '\x00OLEND\x00')
+    html = html.replace('</li>', '\x00LIEND\x00')
+    html = html.replace('</body>', '\x00BODYEND\x00')
+    html = html.replace('</section>', '\x00SECTIONEND\x00')
+
+    # 第二步：处理开始标签
+    # p标签（计数器）
+    def replace_p_start(m):
+        p_count[0] += 1
+        style = p_first_style if p_count[0] == 1 else p_style
+        return f'<p style="{style}">'
+    html = re.sub(r'<p>', replace_p_start, html)
+
+    # h2/h3
+    html = re.sub(r'<h2>', f'<h2 style="{h2_style}">', html)
+    html = re.sub(r'<h3>', f'<h3 style="{h3_style}">', html)
+
+    # 装饰h2内容
+    html = re.sub(r'>([^<]+)\x00H2END\x00', r'>◆ \1 ◆</h2>', html)
+    # 装饰h3内容
+    html = re.sub(r'>([^<]+)\x00H3END\x00', r'>📍 \1</h3>', html)
+
+    # img
+    def replace_img(m):
+        tag = m.group(0)
+        if 'style=' in tag:
+            return re.sub(r'style="[^"]*"', f'style="{img_style}"', tag)
+        return tag.replace('<img ', f'<img style="{img_style}" ', 1)
+    html = re.sub(r'<img[^>]+/?>', replace_img, html)
+
+    # strong/b/em/i
+    html = re.sub(r'<(strong|b)([^>]*)>', lambda m: f'<{m.group(1)}{m.group(2)} style="{strong_style}">', html)
+    html = re.sub(r'<(em|i)([^>]*)>', lambda m: f'<{m.group(1)}{m.group(2)} style="{em_style}">', html)
+
+    # blockquote
+    html = re.sub(r'<blockquote>', f'<blockquote style="{blockquote_style}">', html)
+    html = re.sub(r'\x00BQEND\x00', '💡 </blockquote>', html)
+
+    # hr
+    html = re.sub(r'<hr\b', f'<hr style="{hr_style}"', html)
+
+    # body/section
+    html = re.sub(r'<body([^>]*)>', f'<body\\1 style="{body_style}">', html)
+    html = re.sub(r'<section([^>]*)>', f'<section\\1 style="{body_style}">', html)
+
+    # 第三步：恢复结束标签
+    html = html.replace('\x00PEND\x00', '</p>')
+    html = html.replace('\x00H2END\x00', '</h2>')
+    html = html.replace('\x00H3END\x00', '</h3>')
+    html = html.replace('\x00STRONGEND\x00', '</strong>')
+    html = html.replace('\x00BEND\x00', '</b>')
+    html = html.replace('\x00EMEND\x00', '</em>')
+    html = html.replace('\x00IEND\x00', '</i>')
+    html = html.replace('\x00BQEND\x00', '</blockquote>')
+    html = html.replace('\x00ULEND\x00', '</ul>')
+    html = html.replace('\x00OLEND\x00', '</ol>')
+    html = html.replace('\x00LIEND\x00', '</li>')
+    html = html.replace('\x00BODYEND\x00', '</body>')
+    html = html.replace('\x00SECTIONEND\x00', '</section>')
+
     return html
 
 
+def _get_text_content(html):
+    """提取HTML片段的纯文本内容（用于判断语义）"""
+    return re.sub(r'<[^>]+>', '', html).strip()
+
+
 def restructure_content(html):
-    """将连续长段落拆分成带结构的小节，增加小标题"""
+    """将连续长段落拆分成带结构的小节，增加小标题（不破坏现有标签结构）"""
     def make_subheading(m):
         p_content = m.group(1)
-        text = re.sub(r'<[^>]+>', '', p_content).strip()
+        text = _get_text_content(p_content)
         if len(text) < 60:
             return m.group(0)
-        if re.search(r'[一二三四五六七八九十][.、]|[0-9]+[.、]', text) or re.search(r'[必吃|必去|推荐|攻略|打卡|收藏]', text):
-            short_title = text[:20].strip()
-            if len(text) > 50:
-                return f'<h3>{short_title}</h3><p>{p_content.strip()}</p>'
-        lead_words = ['美食推荐', '必吃清单', '景点攻略', '交通指南', '住宿推荐', '实用信息', '注意事项', '亮点', '特色']
+        lead_words = ['美食推荐', '必吃清单', '景点攻略', '交通指南', '住宿推荐',
+                      '实用信息', '注意事项', '亮点', '特色', '必吃', '必去',
+                      '推荐', '攻略', '打卡', '收藏']
         for w in lead_words:
-            if text.startswith(w) and len(text) > 40:
-                return f'<h3>{text[:20]}</h3><p>{p_content.strip()}</p>'
+            if w in text:
+                inner_text = _get_text_content(p_content)[:18]
+                return f'<h3>{inner_text}</h3><p>{p_content.strip()}</p>'
         return m.group(0)
-    result = re.sub(r'(<p[^>]*>.*?</p>)', make_subheading, html, flags=re.DOTALL)
+    # 严格匹配：只匹配普通的纯文本p标签（不含嵌套标签）
+    result = re.sub(r'<p>([^<]+)</p>', make_subheading, html)
     return result
 
 
 def highlight_content(html):
-    """给关键信息加粗高亮：数字、感受词"""
-    # 数字+量词
-    html = re.sub(
-        r'([0-9]+[多个几半]+[^\s\.,;!?]{0,5}|[0-9]+[\.。][0-9]+[^\s\.,;!?]{0,3}|[一二三四五六七八九十百千万]+[天个人家店种道条公里米层座个口])',
-        r'<strong>\1</strong>', html
-    )
-    # 感受词
-    for word in ['好吃到哭', '绝绝子', '太香了', '爆火', '出片', '宝藏', 'yyds', '封神', '天花板', '绝了', '无敌', '超级赞', '强烈推荐', '必去', '必吃', '值得', '私藏', '隐藏', '小众', '美到窒息']:
-        html = html.replace(word, f'<strong>{word}</strong>')
+    """给关键信息加粗高亮（仅处理纯文本节点，避免破坏标签结构）"""
+    def replace_in_text(m):
+        text = m.group(1)
+        for word in ['好吃到哭', '绝绝子', '太香了', '爆火', '出片', '宝藏', 'yyds',
+                     '封神', '天花板', '绝了', '无敌', '超级赞', '强烈推荐',
+                     '必去', '必吃', '值得', '私藏', '隐藏', '小众', '美到窒息']:
+            if word in text and f'<strong>{word}</strong>' not in text:
+                text = text.replace(word, f'<strong>{word}</strong>')
+        def repl_num(m2):
+            num_text = m2.group(0)
+            return f'<strong>{num_text}</strong>'
+        text = re.sub(
+            r'[0-9]+[多个几半]+[^\s\.,;!?]{0,5}|[0-9]+[\.。][0-9]+[^\s\.,;!?]{0,3}',
+            repl_num, text
+        )
+        return text
+    # 只处理标签之间的纯文本：>text<
+    html = re.sub(r'>([^<]+)<', replace_in_text, html)
     return html
 
 
 def convert_lists(html):
-    """将纯文本列表转换成带图标的<ul>列表"""
+    """将纯文本列表转换成带图标的<ul>列表（仅处理裸文本行）"""
     def make_list(m):
         prefix = m.group(1)
         items_text = m.group(2)
         items = re.split(r'[、，,]\s*', items_text)
         items = [it.strip() for it in items if it.strip() and len(it) > 1]
-        clean_items = [f'<li>{it}</li>' for it in items if not re.match(r'^<[^>]+>', it)]
+        clean_items = []
+        for it in items:
+            if re.match(r'^<[^>]+>', it):
+                continue
+            clean_items.append(f'<li>👉 {it}</li>')
         if len(clean_items) >= 2:
             return f'{prefix}<ul>{"".join(clean_items)}</ul>'
         return m.group(0)
     html = re.sub(
-        r'^([\s\n]*[<p>]*)([\d一二三四五六七八九十]+[.、)）][^<\n]{10,}(?:[、，,][^<\n]{5,}){2,})',
+        r'^([\s\n]*)([\d\u4e00-\u9fff]+[.、)）][^<\n]{5,}(?:[、，,][^<\n]{3,}){2,})',
         make_list, html, flags=re.MULTILINE
     )
     return html
 
 
 def inject_emoji(html):
-    """自动给HTML段落注入emoji关键词"""
+    """自动给HTML段落注入emoji，按内容语义在段落开头添加"""
     emoji_map = [
         ('美食', '🍜'), ('小吃', '🥟'), ('甜品', '🍰'), ('火锅', '🍲'),
         ('烧烤', '🍖'), ('烤肉', '🥩'), ('海鲜', '🦐'), ('寿司', '🍣'),
         ('咖啡', '☕'), ('奶茶', '🧋'), ('面包', '🥖'),
         ('蔬菜', '🥦'), ('沙拉', '🥗'), ('素菜', '🥬'),
         ('肉', '🥩'), ('鸡', '🍗'), ('鱼', '🐟'), ('蛋', '🥚'),
+        ('茶', '🍵'), ('早茶', '🍵'), ('点心', '🥮'),
         ('旅行', '🧳'), ('旅游', '🗺️'), ('景点', '🏞️'), ('攻略', '📝'),
         ('打卡', '📍'), ('拍照', '📸'), ('酒店', '🏨'), ('民宿', '🏠'),
         ('出行', '✈️'), ('航班', '🛫'), ('火车', '🚄'), ('自驾', '🚗'),
         ('春天', '🌸'), ('樱花', '🌸'), ('桃花', '🌸'), ('油菜花', '🌼'),
         ('日出', '🌅'), ('日落', '🌇'), ('星空', '🌌'), ('海边', '🏖️'),
         ('雪山', '🏔️'), ('森林', '🌲'), ('草原', '🌿'),
-        ('健康', '💪'), ('养生', '🌿'),
-        ('推荐', '✅'), ('必吃', '🔥'), ('人气', '🔥'), ('热门', '🔥'),
+        ('古镇', '🏘️'), ('城市', '🏙️'), ('乡村', '🏡'),
+        ('文化', '🎎'), ('历史', '📜'), ('传统', '🏮'),
+        ('活动', '🎉'), ('节日', '🎊'), ('广交会', '🏛️'),
+        ('推荐', '✅'), ('必吃', '🔥'), ('必去', '🔥'), ('人气', '🔥'), ('热门', '🔥'),
+        ('好吃到哭', '😋'), ('绝绝子', '👏'), ('太香了', '🤤'), ('爆火', '📈'),
+        ('出片', '📷'), ('宝藏', '💎'), ('yyds', '🏆'), ('封神', '👑'),
+        ('天花板', '🏆'), ('绝了', '👍'), ('无敌', '💪'), ('超级赞', '🙌'),
+        ('强烈推荐', '💯'), ('值得', '✨'), ('私藏', '💎'),
+        ('隐藏', '🔮'), ('小众', '🌟'), ('美到窒息', '😍'),
         ('避坑', '⚠️'), ('注意', '❗'), ('提醒', '🔔'),
         ('实用', '💡'), ('技巧', '💡'), ('指南', '📖'),
-        ('好处', '👍'), ('特色', '✨'),
-        ('城市', '🏙️'), ('乡村', '🏡'), ('古镇', '🏘️'),
-        ('文化', '🎎'), ('历史', '📜'), ('传统', '🏮'),
-        ('活动', '🎉'), ('节日', '🎊'),
-        ('广州', '🏙️'), ('广交会', '🏛️'),
-        ('茶', '🍵'), ('早茶', '🍵'), ('点心', '🥮'),
+        ('好处', '👍'), ('特色', '✨'), ('亮点', '💡'),
+        ('惊喜', '😲'), ('满足', '😊'), ('幸福', '🥰'),
+        ('排队', '⏳'), ('性价比', '💰'), ('免费', '🆓'),
     ]
     emoji_chars = set(e for _, e in emoji_map)
-    
-    def add_emoji(line):
-        # 如果已有emoji不重复加
-        if any(c in line for c in emoji_chars):
+
+    def add_emoji_to_line(line):
+        """如果行内已有emoji则不重复添加，找到第一个关键词对应的emoji插入行首"""
+        if any(c in emoji_chars for c in line):
             return line
         for kw, emo in emoji_map:
             if kw in line:
-                # 在段落/标题/列表标签的内容前面加emoji
-                m = re.match(r'(<(?:p|h[1-6]|li)[^>]*>)(.*)', line)
-                if m:
-                    return m.group(1) + emo + ' ' + m.group(2)
-                break
+                return emo + ' ' + line
         return line
-    
-    # 把HTML分成标签和文本块，只对块级元素内的文本加emoji
-    result = []
-    i = 0
-    while i < len(html):
-        if html[i:i+2] == '</':
-            # 结束标签
-            m = re.match(r'</([a-zA-Z]+)>', html[i:])
-            if m:
-                result.append(html[i:i+len(m.group(0))])
-                i += len(m.group(0))
-                continue
-        elif html[i] == '<':
-            # 开始标签或自闭合
-            m = re.match(r'<[a-zA-Z][^>]*/?>', html[i:])
-            if m:
-                result.append(html[i:i+len(m.group(0))])
-                i += len(m.group(0))
-                continue
-        else:
-            # 文本节点：找到下一个标签的位置
-            next_tag = html.find('<', i)
-            if next_tag == -1:
-                text = html[i:]
-                i = len(html)
-            else:
-                text = html[i:next_tag]
-                i = next_tag
-            if text.strip():
-                # 检查文本中是否有关键词
-                for kw, emo in emoji_map:
-                    if kw in text:
-                        emoji_added = False
-                        for kk, ee in emoji_map:
-                            if ee in text:
-                                text = text.replace(kk, '').strip()
-                                text = ee + ' ' + text
-                                emoji_added = True
-                        if not emoji_added:
-                            text = emo + ' ' + text.strip()
-                        break
-            if text:
-                result.append(text)
-    return ''.join(result)
+
+    def process_tag(match):
+        """处理带内容的标签块（p/h2/h3/li/blockquote等），在内部文本前加emoji"""
+        tag = match.group(1)  # 标签名
+        attrs = match.group(2)  # 属性
+        content = match.group(3)  # 内容
+        inner_text = re.sub(r'<[^>]+>', '', content)
+        text = inner_text.strip()
+        if text and any(kw for kw, _ in emoji_map if kw in text):
+            for kw, emo in emoji_map:
+                if kw in text:
+                    # 把emoji插入到标签开始后的第一个文本节点
+                    new_content = re.sub(
+                        r'([^<]*?)(' + re.escape(kw) + r')',
+                        r'\1' + emo + r' \2',
+                        content, count=1
+                    )
+                    return f'<{tag}{attrs}>{new_content}</{tag}>'
+        return match.group(0)
+
+    # 只对特定正文标签注入emoji（避免污染样式标签）
+    content_tags = ('p', 'h2', 'h3', 'li', 'blockquote', 'div', 'section')
+    for t in content_tags:
+        html = re.sub(
+            rf'<({t})([^>]*)>(.*?)</{t}>',
+            process_tag,
+            html, flags=re.DOTALL
+        )
+    return html
 
 def main():
     if len(sys.argv) < 3:
@@ -389,6 +397,18 @@ def main():
 
     print(f'\n上传 {len(img_paths)} 张图片...')
 
+    # 处理网络图片URL：先下载到本地，再上传
+    url_to_local = {}
+    for url in set(re.findall(r'https?://[^\s"\'<>]+\.(?:jpg|jpeg|png|gif|webp)', html_content)):
+        fname = os.path.basename(url.split('?')[0])
+        local_path = f'/tmp/{fname}'
+        try:
+            download_img(url, local_path)
+            url_to_local[url] = local_path
+            img_paths.append(local_path)
+        except Exception as e:
+            print(f'  下载失败 {url}: {e}')
+
     # 上传每张图片并建立本地路径->URL的映射
     path_to_url = {}
     for path in img_paths:
@@ -396,6 +416,12 @@ def main():
         fname = os.path.basename(path)
         print(f'  {fname} -> {url[:60]}')
         path_to_url[path] = url
+
+    # 替换HTML中的网络图片URL为下载后的本地路径（准备上传）
+    for url, local_path in url_to_local.items():
+        if url in html_content:
+            html_content = html_content.replace(url, local_path)
+            print(f'  替换网络URL -> 本地路径: {os.path.basename(local_path)}')
 
     # 替换HTML中的所有本地图片路径为上传后的URL
     for local_path, url in path_to_url.items():
@@ -422,7 +448,10 @@ def main():
         thumb_media_id = upload_material(token, cover_path[0])
         print(f'  thumb_media_id: {thumb_media_id}')
     else:
-        thumb_media_id = path_to_url.get(img_paths[0], '')
+        print(f'\n无封面图，使用chap1作为永久素材...')
+        # 用add_material上传第一张图作为封面
+        thumb_media_id = upload_material(token, img_paths[0])
+        print(f'  thumb_media_id: {thumb_media_id}')
 
     # 去除正文中的标题重复
     print('\n清理标题重复...')

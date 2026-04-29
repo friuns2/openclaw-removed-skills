@@ -1,11 +1,17 @@
 {
   "owner": "taleintervenor",
   "slug": "sjtu-slurm-skill",
-  "displayName": "Sjtu Hpc",
+  "displayName": "SJTU SLURM Skill",
   "latest": {
-    "version": "0.2.1",
-    "publishedAt": 1776737860437,
-    "commit": "https://github.com/openclaw/skills/commit/86700f1e3fc451110dd082663ee881fd05c88ba9"
+    "version": "0.2.3",
+    "publishedAt": 1777361538183,
+    "commit": "https://github.com/openclaw/skills/commit/ebd7474f6086fad00f98b8c892dbc2abbf4c72e5"
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.2.1",
+      "publishedAt": 1776737860437,
+      "commit": "https://github.com/openclaw/skills/commit/86700f1e3fc451110dd082663ee881fd05c88ba9"
+    }
+  ]
 }

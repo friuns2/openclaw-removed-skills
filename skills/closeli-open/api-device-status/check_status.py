@@ -14,7 +14,7 @@ API_KEY 获取优先级：
 网关地址获取优先级：
   1. 环境变量 AI_GATEWAY_HOST
   2. 配置文件 ~/.openclaw/.env 中的 AI_GATEWAY_HOST
-  3. 默认值 https://ai-open-gateway.closeli.cn
+  3. 默认值 https://ai-open.icloseli.com
 
 TLS 证书验证：
   默认启用。设置环境变量 AI_GATEWAY_VERIFY_SSL=false 可禁用（仅限开发环境）。
@@ -35,7 +35,7 @@ except ImportError:
     sys.exit(1)
 
 # 默认网关地址
-DEFAULT_API_HOST = "https://ai-open-gateway.closeli.cn"
+DEFAULT_API_HOST = "https://ai-open.icloseli.com"
 
 
 def load_env_file():
@@ -162,7 +162,16 @@ def main():
     api_host = get_api_host()
     verify_ssl = get_verify_ssl()
 
-    device_ids = [d.strip() for d in args.device_ids.split(",") if d.strip()]
+    # 2.5 自动修正 device_id 大小写（XXXXS_ → xxxxS_）
+    raw_ids = [d.strip() for d in args.device_ids.split(",") if d.strip()]
+    device_ids = []
+    for did in raw_ids:
+        if did.upper().startswith("XXXXS_"):
+            fixed = "xxxxS_" + did[6:]
+            print(f"⚠️ 已自动修正 device_id 大小写: {did} → {fixed}", file=sys.stderr)
+            device_ids.append(fixed)
+        else:
+            device_ids.append(did)
 
     # 3. 获取设备名称映射
     name_map = get_device_name_map(api_key, api_host, verify_ssl)

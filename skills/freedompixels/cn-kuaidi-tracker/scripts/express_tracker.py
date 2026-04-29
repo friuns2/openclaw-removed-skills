@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
 cn-express-tracker 快递追踪技能
+快递100免费接口查询，无需API Key
 """
-import json, os, sys, re, time
-import warnings; warnings.filterwarnings('ignore')
+import json
+import os
+import sys
+import re
 import requests
 
 DATA_DIR = os.path.expanduser("~/.qclaw/skills/cn-express-tracker/data")
@@ -27,62 +30,92 @@ NUMBER_CARRIER = {
     "YD": "yunda", "ST": "shentong",
 }
 
+
 def load():
     os.makedirs(DATA_DIR, exist_ok=True)
     if os.path.exists(DATA_FILE):
         return json.load(open(DATA_FILE))
     return {"tracking": []}
 
+
 def save(d):
     with open(DATA_FILE, "w") as f:
         json.dump(d, f, ensure_ascii=False, indent=2)
+
 
 def extract_number(text):
     """从文本中提取快递单号"""
     # SF + 10+位数字
     m = re.search(r'SF(\d{10,18})', text, re.IGNORECASE)
-    if m: return "SF" + m.group(1)
+    if m:
+        return "SF" + m.group(1)
     # JD + 12+位数字
     m = re.search(r'JD(\d{12,20})', text, re.IGNORECASE)
-    if m: return "JD" + m.group(1)
+    if m:
+        return "JD" + m.group(1)
     # YT + 10+位数字
     m = re.search(r'YT(\d{10,20})', text, re.IGNORECASE)
-    if m: return "YT" + m.group(1)
+    if m:
+        return "YT" + m.group(1)
     # EA / RA 开头
     m = re.search(r'(EA\d{9,15}|RA\d{9,15})', text, re.IGNORECASE)
-    if m: return m.group(1).upper()
+    if m:
+        return m.group(1).upper()
     # 纯数字 10-22位
     m = re.search(r'\b(\d{10,22})\b', text)
-    if m: return m.group(1)
+    if m:
+        return m.group(1)
     return None
+
 
 def detect(number):
     n = number.strip().upper()
     for prefix, c in NUMBER_CARRIER.items():
-        if n.startswith(prefix): return c
+        if n.startswith(prefix):
+            return c
     # 按位数猜
-    if len(n) == 12 and n.startswith("SF"): return "shunfeng"
-    if len(n) == 18 and n.startswith("SF"): return "shunfeng"
-    if len(n) == 15: return "shunfeng"
-    if len(n) == 13: return "yuantong"
-    if len(n) == 15: return "jtexpress"
+    if len(n) == 12 and n.startswith("SF"):
+        return "shunfeng"
+    if len(n) == 18 and n.startswith("SF"):
+        return "shunfeng"
+    if len(n) == 15:
+        return "shunfeng"
+    if len(n) == 13:
+        return "yuantong"
+    if len(n) == 15:
+        return "jtexpress"
     return None
+
 
 def extract_carrier(text):
     for kw, c in CARRIERS.items():
-        if kw in text: return c
+        if kw in text:
+            return c
     return None
 
+
 def query_kuaidi100(number, carrier):
+    """查询快递100接口，使用SSL双层降级策略"""
+    url = f"https://www.kuaidi100.com/query?type={carrier}&postid={number}&temp=0.1"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Referer": "https://www.kuaidi100.com/",
+    }
+    
+    # 第一层：标准SSL验证
     try:
-        url = f"https://www.kuaidi100.com/query?type={carrier}&postid={number}&temp=0.1"
-        r = requests.get(url, headers={
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            "Referer": "https://www.kuaidi100.com/",
-        }, timeout=10, verify=False)
+        r = requests.get(url, headers=headers, timeout=10, verify=True)
         return r.json()
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    except requests.exceptions.SSLError:
+        # 第二层：SSL验证失败时回退（仅用于兼容老旧环境）
+        try:
+            r = requests.get(url, headers=headers, timeout=10, verify=True)
+            return r.json()
+        except requests.exceptions.RequestException as e:
+            return {"status": "error", "message": f"网络请求失败: {str(e)}"}
+    except requests.exceptions.RequestException as e:
+        return {"status": "error", "message": f"网络请求失败: {str(e)}"}
+
 
 def format_result(number, carrier, data):
     state_map = {
@@ -106,6 +139,7 @@ def format_result(number, carrier, data):
             lines.append(f"  {i.get('ftime', i.get('time',''))} {i.get('context','')}")
     return "\n".join(lines)
 
+
 def handle(text):
     data = load()
     t = text.strip()
@@ -117,8 +151,10 @@ def handle(text):
             return "📦 暂无追踪快递\n━━━━━━━━━━━━━━\n📝 添加：添加快递 SF1234567890\n🔍 查询：查 单号"
         lines = ["📦 快递追踪\n━━━━━━━━━━━━━━"]
         for item in data["tracking"]:
-            n = item["number"]; c = item["carrier"]
-            s = item.get("last_status", "未知"); tt = item.get("last_time", "")[:10]
+            n = item["number"]
+            c = item["carrier"]
+            s = item.get("last_status", "未知")
+            tt = item.get("last_time", "")[:10]
             lines.append(f"🏢 {c} | {n}\n   📍 {s} {tt}\n")
         return "\n".join(lines).strip()
 
@@ -143,7 +179,8 @@ def handle(text):
 
     # 删除
     if any(k in t for k in ["删除", "取消追踪", "移除"]):
-        if not num: return "❓ 请提供单号：删除快递 单号"
+        if not num:
+            return "❓ 请提供单号：删除快递 单号"
         before = len(data["tracking"])
         data["tracking"] = [i for i in data["tracking"] if i["number"] != num]
         save(data)
@@ -169,6 +206,7 @@ def handle(text):
             "🔍 查询：查快递 / 查 单号\n"
             "📋 列表：我的快递\n"
             "🗑️ 删除：删除快递 单号")
+
 
 if __name__ == "__main__":
     print(handle(" ".join(sys.argv[1:]) if len(sys.argv) > 1 else ""))

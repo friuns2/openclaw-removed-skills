@@ -26,18 +26,136 @@
 
 ## 简介
 
-**火一五·克劳德·龙虾增强插件** 是 [OpenClaw](https://github.com/nicepkg/openclaw) 的非侵入式增强插件，借鉴 Claude Code 的优秀设计模式，为你的龙虾 AI Agent 注入结构化记忆、工具安全守卫、提示词工程、工作流自动化和可视化仪表盘等能力。
+**火一五·克劳德·龙虾增强插件 v5.7.8** 是 [OpenClaw 2026.4.24+](https://github.com/openclaw/openclaw) 的**非侵入式**增强插件，对标 Claude Code 的 Agent Harness 体验 + 设计能力套件 + 开发辅助套件；**所有能力重叠处都以龙虾为准**，绝不复制或覆盖龙虾原生功能。
 
-完全通过 OpenClaw 插件 API 实现，**不修改任何核心代码**，一键安装即可使用。
-(非龙虾开发)
+完全通过公共 Plugin SDK 实现，**不修改任何核心代码**，一键安装即可使用。
+（非龙虾团队开发）
+
+### v5.7.8 全面适配 openclaw 2026.4.24（2026-04-26 同日）
+
+| 维度 | 改动 |
+|---|---|
+| `peerDependencies.openclaw` | `^2026.4.22` → **`^2026.4.24`** |
+| `build.openclawVersion` | `2026.4.11` → **`2026.4.24`** |
+| `compat.pluginApi` | `>=2026.4.11` → **`>=2026.4.24`** |
+| `api.on(...as any)` 14 处 → **0 处** | 全部改成 typed hook，让 SDK PluginHookHandlerMap[K] 自动推断 event/ctx |
+| `(event: any, ctx: any)` 5 处 → **0 处** | 同上 |
+| `openclaw.plugin.json` 加 3 字段 | `enabledByDefault: true` / `uiHints` / `activation.onAgentHarnesses` |
+| 修隐藏 bug | self-check.ts 的 `PluginHookBeforeAgentReplyResult.handled` 必填问题之前被 `as any` 屏蔽，现在 typecheck 强制修对 |
+
+### v5.7.7 session-lifecycle：接入 openclaw 4.22 五个 hook 闭环 session 生命周期（2026-04-26 同日）
+
+跑了完整 SOP 第 1+2 步后发现 **openclaw 4.22 暴露 29 个 hook，enhance 只用了 4 个**。落地最高 ROI 的 5 个 hook：
+
+| Hook | 行为 |
+|---|---|
+| `session_start` | idle > 30min 时插入"🚀 会话开始/续启"章节占位 |
+| `session_end` | 加"🏁 会话结束"章节 + flush in_progress todo 到 project memory |
+| `before_reset` | reset 前抢救最近 3 章节 + 全部未完成 todo 到 decision memory + 推 notification |
+| `subagent_spawned` / `subagent_ended` | 派生/结束自动落 chapter（跟 enhance_spawn_task 闭环）|
+
+防 noise factory 三层防御：30 秒 dedup + 低 importance + 专用 tag（吸收 v5.7.1 教训）。
+
+### v5.7.5 skill-recommender：按需求挑 skill / 推荐未装 / 给自建规划（2026-04-26 同日）
+
+调研：反编译 Claude Desktop 发现 skill auto-discovery 本质是 `"Available skills: ${list}."` 注入到 system prompt。enhance 改成**按需工具**避免每轮 prompt 占 schema：
+
+工具 `enhance_skill_recommend(query, ...)` 三段式输出：
+
+| 段 | 内容 | 触发条件 |
+|---|---|---|
+| 🎯 已装 skill | 按相关度排序 + 召唤建议 | 命中 ≥ threshold |
+| 📦 ClawHub 未装候选 | 11 个 huo15-* + `openclaw skills install <slug>` | 默认包含 |
+| 🛠️ 自建规划 | slug + frontmatter 模板 + 触发词 + 内容大纲 + 红线 #3 提醒 | 已装命中 < threshold |
+
+实测精度：
+
+| 查询 | 命中 | 分数 |
+|---|---|---|
+| "帮我 review 这个 PR" | huo15-openclaw-code-review | 0.60 |
+| "代码简化" | huo15-openclaw-simplify | 1.00 |
+| "做安全审查" | huo15-openclaw-security-review | 0.96 |
+
+关键修复：扫 `~/.openclaw/workspace-*/skills/`（WeCom 多 agent 隔离的子工作区）— 用户机器实测扫到 **56 个 skill 跨 27 个路径**。
+
+### v5.7.4 config-doctor 扩展：扫已装插件 bare pluginApi（2026-04-26 同日）
+
+用户反馈："提示插件要求 2026.2.24，但是我的 openclaw 已经是 2026.4.22" — 这是**其它插件**的 `compat.pluginApi` 写成 bare 字符串（精确匹配）导致 openclaw 启动失败。enhance 主动扫所有装的 plugin package.json，检测违规并给 fix 命令。
+
+实测命中：
+- `~/.openclaw/extensions/tips/package.json` v1.0.0 → `pluginApi: "2026.4.11"`（bare）
+- `~/.openclaw/node_modules/@huo15/huo15-huihuoyun-odoo/package.json` v1.2.0 → `pluginApi: "2026.2.24"`（bare）
+
+### v5.7.3 config-doctor（2026-04-26 同日，继 v5.7.2）
+
+直击高频反馈"装上插件还是 'Context limit exceeded'"。**这不是 enhance 的锅**，是 openclaw 自身配置陷阱：
+
+- **缺失 `agents.defaults.compaction.reserveTokensFloor`** — openclaw 4.22 把字段从顶层 `compaction.*` 挪到嵌套路径，老用户配置文件没自动迁移 → 用 4.22 默认值（很小） → 长 session 必爆
+- **某 model maxTokens ≥ contextWindow/2** — 例如 MiniMax-M2.7 默认 maxTokens=131072 / contextWindow=204800，每轮预留输出吃 64% budget → 剩 73k 给 input/tools/memory/history 几轮必爆
+
+**新增 `enhance_config_doctor` 模块（tier=1，minimal 也启用）**：
+
+- 启动期 sync 读 `~/.openclaw/openclaw.json` 检查上述两类陷阱
+- 发现问题：log warn + 推仪表盘通知 + 给可粘贴 fix 命令（python3 inline JSON 改写，**不调 child_process**，**不擅自改用户配置**）
+- 工具 `enhance_config_doctor` 按需重检（修完用来确认 ✅）
+
+### v5.7.2 hardening（2026-04-26 同日，继 v5.7.1）
+
+对全代码库做了一次审计，修 4 类潜在 bug + 升 peerDep `^2026.4.22`：
+
+- **进程内 Map LRU 上限** — `mode-gate` / `session-recap` 之前跨 session 永不清，多 agent 场景会泄漏；现在加 200/200/500 三档 cap + FIFO 淘汰
+- **safety_log / notifications 启动期 TTL** — `getDb()` 自动清 90 天前旧记录
+- **memory corpus tag 黑名单** — `auto-compact / auto-checkpoint / audit / internal` 永不召回，防御未来 noise hook
+- **enhance_memory_store 拒收保留 tag** — 用户/agent 显式滥用保留词时立即报错
+
+### v5.7.1 hot-fix（2026-04-26）
+
+**修：删除把每次 auto-compact 事件作为 decision 类记忆插入的 `before_compaction` hook。**
+
+- 之前实测单 agent 24h 积累 **613 条全为噪音**（tag=auto-compact），关键词命中率 0.43-0.51 普遍过 0.5 阈值，把真正的决策记忆挤出 prompt 上下文
+- 新增工具 `enhance_memory_purge` — 按 `tag` / `category` / `contentLike` 批量清理，`dry_run` 默认 true（仅预览匹配数）
+- 历史噪音清理一行：`enhance_memory_purge tag="auto-compact" dry_run=false`，或 `sqlite3 ~/.openclaw/memory/enhance-memory.sqlite "DELETE FROM memories WHERE tags LIKE '%auto-compact%'; VACUUM;"`
+
+### v5.7 新特性（2026-04-25）
+
+**📜 历史会话搜索 — 照搬 Claude Desktop 实现**
+
+> 反编译参考 `/Applications/Claude.app/Contents/Resources/app.asar` 里的 `transcriptSearchWorker.js`（94 行官方实现）— 发现 Claude Desktop 不用 SQL FTS5，纯流式扫 JSONL + indexOf。直接搬到 openclaw 的 `~/.openclaw/agents/<agent>/sessions/*.jsonl`。
+
+| 工具 | 用途 | 实测性能 |
+|------|------|---------|
+| `enhance_transcript_search` | 全文搜历史会话，找『我上次怎么做的』 | 79 个 session 中扫 30 个 → **3-5 ms** 找到 5 hits |
+
+参数：`query` 必填；可选 `agentId / limit (1-50) / includeReset / caseSensitive`。
+
+模块 `tier=2`（balanced/full 默认启用，minimal 下不暴露）。
+
+### v5.6 新特性（2026-04-24）
+
+**针对 long session 提早爆 context 的容量优化**
+
+| 配置项 | 暴露工具数 (v5.7) | 适用场景 |
+|--------|-----------|---------|
+| `toolTier: "minimal"` | 10 | 上下文极紧 / 最小核心模式（记忆、状态栏、章节、模式、spawn） |
+| `toolTier: "balanced"` *(默认)* | 19 | 多数日常会话 — 加 todo / 章节标记 / 定时任务桥 / **transcript-search** |
+| `toolTier: "full"` | 27 | 需要工作流自动化 / safety / session-recap / skill-doctor 时 |
+
+- **工具分层（toolTier）** — 按需暴露 schema，每轮 prompt 减负
+- **Workflow 5→2 工具合并** — 用 `action=` 派发器收敛同类操作
+- **26 个工具描述压缩 -62%** — 每轮 prompt 节省约 1400 token
+
+> ⚠️ 如果你的 `~/.openclaw/openclaw.json` 中 `compaction.reserveTokensFloor` ≥ 100000，请改回 **20000**（>205k 总窗会让每次压缩都失败）。这是 openclaw 配置项，与本插件无关。
+
 ### 核心特性
 
-- **多 Agent 隔离** — 完美适配 WeCom 插件的动态 Agent 功能，每个企微用户/群组拥有独立的记忆空间、安全日志和工作流
-- **结构化记忆系统** — 借鉴 Claude Code auto-memory，按 user/project/feedback/reference/decision 五类分类存储
-- **工具安全守卫** — 借鉴 Claude Code 权限系统，可配置规则拦截危险工具调用并记录审计日志
-- **提示词增强** — 借鉴 Claude Code systemPromptSections，自动注入任务分类、质量指引和记忆上下文
-- **工作流自动化** — 借鉴 Claude Code hooks 事件驱动，通过触发词自动注入行为指令
-- **增强仪表盘** — Web UI 实时查看记忆/安全/工作流状态，支持按 Agent 筛选
+- **多 Agent 隔离** — 完美适配 WeCom 插件的动态 Agent 功能，每个企微用户/群组拥有独立的记忆、任务、章节、宠物与定时工作流
+- **结构化记忆（corpus supplement）** — 按 user/project/feedback/reference/decision 五类分类存储，**通过 `registerMemoryCorpusSupplement` 并入龙虾 `memory` 搜索结果**，不自建第二套向量库
+- **工具安全补丁** — 仅作为**观察员**存在（尊重龙虾原生 `tools.allow/deny`），统计错误分类、给出退避建议，从不擅自重试或硬拦截
+- **提示词增强** — 仅保留 `qualityGuidelines`，其它早已由龙虾系统提示词覆盖，不重复
+- **任务/章节/模式闸门** — Claude Code TodoWrite / mark_chapter / plan-explore 的龙虾化实现；模式闸门在 `before_tool_call` 阻止计划/探索模式误触写操作
+- **状态栏 / 技能巡检 / 子任务孵化** — 一行看全当前状态；诊断技能目录缺失；把"现在不该做"的副作用登记为延期任务
+- **定时任务桥** — 登记工作流时返回一条 `openclaw cron add` 命令，**调度归龙虾**，插件只负责触发时装填上下文
+- **增强仪表盘（含小火苗宠物）** — Web UI 实时查看记忆 / 任务 / 章节 / 定时 / 宠物状态，支持按 Agent 筛选
 
 ---
 
@@ -57,21 +175,50 @@ openclaw restart
 
 ---
 
-## 功能模块
+## 功能模块（v5.6.0 全量，标注分层）
 
-| 模块 | 说明 | Agent 工具 |
-|------|------|-----------|
-| **结构化记忆** | 按类型分类存储记忆，按 Agent 隔离 | `enhance_memory_store` `enhance_memory_search` `enhance_memory_review` |
-| **工具安全** | 可配置的工具调用拦截规则 + 审计日志 | `enhance_safety_log` `enhance_safety_rules` |
-| **提示词增强** | 自动注入任务分类、质量指引、记忆上下文 | 自动（通过 hook） |
-| **工作流自动化** | 触发词驱动的行为指令注入 | `enhance_workflow_define` `enhance_workflow_list` `enhance_workflow_delete` |
-| **仪表盘** | Web UI 查看系统状态 | `http://localhost:18789/plugins/enhance/` |
+> 标注 `[L1/L2/L3]` 的是工具模块，分别在 minimal / balanced / full 三档下暴露给模型；非工具模块（仪表盘 / 提示词 / kb-corpus / 自检）一律常驻。
+
+| 模块 | 分层 | 说明 | Agent 工具 |
+|------|------|------|-----------|
+| **分类记忆（并入龙虾搜索）** | L1 | user/project/feedback/reference/decision 五类；作为 corpus supplement 与龙虾 `memory` 合并排名 | `enhance_memory_store` `enhance_memory_search` `enhance_memory_review` |
+| **状态栏** | L1 | 一行/详情/json 三格式快照（模式、任务、记忆、宠物、通知） | `enhance_statusline` |
+| **子任务派发** | L1 | 返回可粘贴的 `openclaw agent` CLI 命令，跨 agent 派发 | `enhance_spawn_task` |
+| **模式闸门** | L1 | plan / explore / normal；前两种下 `before_tool_call` 阻止写操作；含 ExitPlanMode 审批 | `enhance_set_mode` `enhance_current_mode` `enhance_exit_plan_mode` |
+| **章节标记** | L2 | session 级「mark_chapter」 | `enhance_mark_chapter` `enhance_chapter_list` |
+| **任务追踪** | L2 | Claude Code TodoWrite 语义；SQLite 持久化；会警告多 in_progress | `enhance_todo_write` `enhance_todo_update` `enhance_todo_list` |
+| **定时任务桥** | L2 | 返回 `openclaw cron add` CLI 命令，尊重龙虾原生 cron-cli | `enhance_loop_register` `enhance_loop_list` `enhance_loop_disable` |
+| **历史会话搜索（v5.7）** | L2 | 流式扫 `~/.openclaw/agents/<agent>/sessions/*.jsonl`，照搬 Claude Desktop 算法（无索引、无新表） | `enhance_transcript_search` |
+| **工作流自动化（v5.6 合并）** | L3 | 触发词 → 行为指令注入；CRUD 收敛到单工具（action 派发） | `enhance_workflow` `enhance_task` |
+| **工具安全观察** | L3 | 错误分类（429/5xx/网络）+ 指数退避建议；不拦截，不重试 | `enhance_safety_log` `enhance_retry_status` `enhance_safety_rules` |
+| **任务规划** | L3 | 把多步任务拆解保存为 plan 工件 | `enhance_task_plan` |
+| **会话回顾（75min idle）** | L3 | idle 自动 prependContext「上次到这儿」 | `enhance_session_recap` |
+| **技能巡检** | L3 | 只读检查 11 个增强技能安装状态 + 给出 clawhub 修复命令 | `enhance_skill_doctor` |
+| **技能安装器** | L1 | 返回 11 个配套 skill 的一键安装 CLI 命令（不执行） | `enhance_install_skills` |
+| **记忆整合** | L1 | hook 注入：把命中的记忆与查询条件合成上下文片段 | `enhance_memory_consolidate` |
+| **提示词增强** | — | 追加 `qualityGuidelines`，其它已由龙虾系统提示词覆盖 | 自动（hook 注入） |
+| **共享知识库语料** | — | 桥接 `~/.openclaw/kb/shared/` 到龙虾 `memory_search`（corpus="kb"） | 自动（corpus supplement） |
+| **输出自检** | — | 空响应/错误关键词检查 | 自动（after-response hook） |
+| **增强仪表盘** | — | Web UI：记忆 / 任务 / 章节 / 定时 / 孵化子任务 / 小火苗 | `http://localhost:18789/plugins/enhance/` |
+
+## 与龙虾原生的关系（设计契约）
+
+| 能力 | 龙虾原生 | enhance 策略 |
+|------|---------|--------------|
+| 记忆向量库（LanceDB） | ✅ 龙虾负责 | **enhance 不自建**；改为 corpus supplement 并入搜索 |
+| 记忆系统提示词 | ✅ 龙虾负责 | enhance 只在段落底部追加一行工具说明（如果龙虾提供 `registerMemoryPromptSupplement`） |
+| 工具 allow/deny | ✅ 龙虾负责 | enhance 只**观察**结果、做错误分类；不拦截 |
+| 任务清单 / 计划文件 | ⚠️ 无对应原语 | enhance 独立实现（SQLite），语义对齐 Claude Code |
+| Cron 调度 | ✅ 龙虾 cron-cli | enhance 不管理调度；只在触发时注入 instructions |
+| 技能安装 | ✅ ClawHub | enhance 只读巡检，不擅自安装 |
 
 ---
 
 ## 增强技能
 
-安装时会自动注入 4 个增强技能到 `workspace/skills/`：
+安装时会自动注入 8 个增强技能到 `workspace/skills/`（4 个工作流 + 4 个设计）：
+
+### 工作流模式
 
 | 技能 | 说明 | 灵感来源 |
 |------|------|---------|
@@ -79,6 +226,15 @@ openclaw restart
 | `huo15-openclaw-explore-mode` | 深度探索模式 — 只读调研代码库/系统/话题后再给出结论 | Claude Code Explore Agent |
 | `huo15-openclaw-verify-mode` | 验证检查模式 — 检查工作成果、运行测试、验证假设 | Claude Code Verification Agent |
 | `huo15-openclaw-memory-curator` | 记忆整理 — 定期审查记忆、提取洞察、清理过期条目 | Claude Code auto-memory |
+
+### 设计能力（v5.4 新增）
+
+| 技能 | 说明 | 灵感来源 |
+|------|------|---------|
+| `huo15-openclaw-frontend-design` | 高保真 Web UI 原型 + 5 美学流派 + 反 AI Slop 硬红线 + Junior/Full 两趟渲染 | Anthropic frontend-design skill |
+| `huo15-openclaw-design-director` | 设计方向顾问 — 5 流派 × 20 哲学 → 3 方向反差对比 + 强制推荐 | huashu-design 方向选型模式 |
+| `huo15-openclaw-brand-protocol` | 品牌规范抓取 — Ask/Search/Download/Verify/Codify 5 步 → brand-spec.md | huashu Brand Protocol 5-step |
+| `huo15-openclaw-design-critique` | 5 维设计评审 — 美学/可用性/品牌/内容/实现 + Keep/Fix/Quick Wins 三分类 | Web Design review 社区共识 |
 
 ---
 
@@ -94,6 +250,7 @@ openclaw restart
       "enhance": {
         "enabled": true,
         "config": {
+          "toolTier": "balanced",
           "memory": {
             "enabled": true,
             "autoCapture": true,
@@ -120,6 +277,16 @@ openclaw restart
   }
 }
 ```
+
+### `toolTier`（v5.6 新增）
+
+| 取值 | 工具数 | 暴露的工具模块 | 适用场景 |
+|------|--------|----------------|----------|
+| `"minimal"` | 10 | 记忆 + 状态栏 + spawn + 模式 + 章节安装器 + integrator | 上下文紧 / 长会话 / 极简核心 |
+| `"balanced"` *(默认)* | 19 | minimal + todo + 章节标记 + 定时任务桥 + **transcript-search (v5.7)** | 多数日常使用 |
+| `"full"` | 27 | 全部，含 workflow / safety / task-planner / session-recap / skill-doctor | 工作流自动化 / 完整 harness |
+
+修改 `toolTier` 后需要 `openclaw restart` 才能生效。
 
 ### 安全规则配置
 
@@ -168,6 +335,10 @@ openclaw restart
 | 工作流 | 17 个生命周期事件 | 触发词驱动 + before_prompt_build 注入 |
 
 ---
+
+## 版本历史
+
+见 [CHANGELOG.md](./CHANGELOG.md)。
 
 ## License
 

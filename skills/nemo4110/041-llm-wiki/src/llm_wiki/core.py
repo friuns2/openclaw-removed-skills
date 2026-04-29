@@ -223,9 +223,23 @@ class WikiManager:
 
     def _merge_content(self, old: str, new: str) -> str:
         """智能合并内容"""
-        # 简单实现：在相关部分追加
-        # 更复杂的实现可以分析结构并合并
-        return old + "\n\n## 更新\n\n" + new
+        # 延迟导入避免循环依赖
+        from .merge import ContentMerger, MergeStrategy
+        merger = ContentMerger(self)
+        # 构造一个临时页面对象用于合并
+        temp_page = WikiPage(
+            title="temp",
+            content=old,
+            frontmatter={"updated": datetime.now().strftime('%Y-%m-%d')},
+            path=self.wiki_dir / "temp.md",
+        )
+        # 尝试 APPEND_SECTION 策略，追加为"补充说明"章节
+        result = merger.append_after_section(
+            old,
+            "## 补充说明",
+            new,
+        )
+        return result
 
 
 def find_wiki_root(start_path: Path = None) -> Optional[Path]:

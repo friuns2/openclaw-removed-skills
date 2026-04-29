@@ -82,6 +82,7 @@ Important files:
 
 - `profile.json`
 - `state.json`
+- `prompt_sync_state.json`
 - `service.json` in `~/.follow_scoutx/` for local endpoint override
 - `prompts/digest_intro.md`
 - `prompts/summarize_content.md`
@@ -99,7 +100,9 @@ Run:
 python3 scripts/follow_scoutx.py configure
 ```
 
-This creates the local directory and prompt files if they do not exist yet.
+This creates the local directory and syncs bundled prompt files into the local prompt directory.
+If an older bundled prompt already exists locally, the script updates it automatically and stores a backup under `~/.follow_scoutx/prompts/backups/`.
+If the user has manually customized a local prompt after a previous sync, keep that customized file instead of overwriting it.
 
 ### 2. Gather preferences through conversation
 
@@ -236,6 +239,7 @@ This returns one JSON payload containing:
 - a strict output contract for the final message
 
 Use this path when OpenClaw should produce the final message text with LLM help.
+Even on this path, every selected item must still render as its own numbered entry; do not collapse item 4..n into "more updates" style placeholders.
 
 ### 5.2 Deliver the raw deterministic digest
 
@@ -253,8 +257,40 @@ Important behavior:
 - X and podcast first-party content are also read from centrally prepared public feeds
 - Follow ScoutX does not maintain a separate message cache
 - every preview or delivery run fetches fresh data from the configured selected public feeds before filtering and formatting it
-- if both first-party sources and ScoutX curated media are selected, recurring OpenClaw delivery should create two message jobs: one for `--message-group first_party` and one for `--message-group scoutx`
-- by default, `max_items` is split across message groups; use `--max-first-party-items` and `--max-scoutx-items` when the user wants separate caps
+- if any selected feed fails to load, default behavior should be to continue with a partial digest but explicitly mark the run as partial and expose `failed_source_types` plus `errors`; use `FOLLOW_SCOUTX_ALLOW_PARTIAL_FEEDS=0` or omit partial mode only when you explicitly want hard failure behavior
+- if both first-party sources and ScoutX curated media are selected, recurring OpenClaw delivery should still default to one cron job; the final digest should render one section per message group inside the same delivery
+- `max_items` is still split logically across message groups; use `--max-first-party-items` and `--max-scoutx-items` when the user wants separate caps
+- if the rendered digest is too long for the delivery channel, split it into multiple sequential messages before delivery, especially for Feishu
+
+### 5.2.1 Validation and Acceptance
+
+When the user asks to validate, inspect, or accept a digest run, prefer the raw JSON outputs:
+
+```bash
+python3 scripts/follow_scoutx.py preview --json
+python3 scripts/follow_scoutx.py deliver --json
+```
+
+For validation, only rely on raw fields such as:
+
+- `profile.preferences`
+- `groups[*].group_id`
+- `groups[*].item_count`
+- `stats.group_counts`
+- `items[*].title`
+- `items[*].source_type`
+- `delivery.message_count` or the returned `messages` array length
+- `errors`
+
+Do not invent secondary labels or content judgments such as:
+
+- `AI相关: ✅/⚠️/❌`
+- `边界内容`
+- `每日热点导览`
+- `当前无 AI 相关内容`
+
+If the user explicitly asks for an acceptance verdict, derive it only from the raw counts, titles, and delivery results. Do not replace the script's output with your own semantic classifier.
+If `status` is `partial` or `errors` is non-empty, report that the run degraded and name the failed sources; do not misreport it as a clean filtering result.
 
 ### 5.3 Show the recommended OpenClaw cron command
 
@@ -293,7 +329,8 @@ Use this after:
 ### 6. Recurring delivery in OpenClaw
 
 For OpenClaw recurring delivery, prefer the native channel flow instead of shell cron + inbox.
-Because the platform's inbox/system parser may re-interpret markdown incorrectly, default recurring delivery should use the deterministic `deliver` command and return its stdout verbatim as the agent's final answer. OpenClaw should then announce that final answer to the configured channel.
+Use the deterministic `deliver --json` path by default for English or when the output can safely stay close to the source text.
+If the user's preferred language is `zh-CN` or `bilingual` and first-party sources (`x` or `podcast`) are enabled, prefer `prepare-digest` so the agent can generate localized summaries that actually respect `config.language`.
 
 For OpenClaw, `delivery.method=stdout` is a local skill preference: it means `follow_scoutx.py deliver` writes the digest to stdout. It is not the Feishu transport. Feishu transport still requires OpenClaw cron delivery via `--announce --channel feishu --to <target>`.
 
@@ -307,7 +344,7 @@ openclaw cron add \
   --cron "0 9 * * *" \
   --agent main \
   --session main \
-  --system-event "Run `python3 scripts/follow_scoutx.py deliver`, then return the command output verbatim as your final answer. Do not rewrite, summarize, or reformat it." \
+  --system-event "Run `python3 scripts/follow_scoutx.py deliver --json`, then send each returned message chunk in order without rewriting. Use the last chunk as your final answer." \
   --exact \
   --timeout-seconds 120
 ```
@@ -320,7 +357,7 @@ openclaw cron add \
   --cron "0 9 * * *" \
   --session isolated \
   --agent main \
-  --message "Run `FOLLOW_SCOUTX_FEED_URL=https://input.reai.group/v1/public/feed python3 /root/work/follow-scoutx/scripts/follow_scoutx.py deliver`, then return the command output verbatim as your final answer. Do not rewrite, summarize, or reformat it." \
+  --message "Run `FOLLOW_SCOUTX_FEED_URL=https://input.reai.group/v1/public/feed FOLLOW_SCOUTX_DELIVERY_CHANNEL_HINT=feishu python3 /root/work/follow-scoutx/scripts/follow_scoutx.py deliver --json`, then send each returned message chunk in order without rewriting. Use the last chunk as your final answer." \
   --announce \
   --channel feishu \
   --to "ou_xxx" \
@@ -329,18 +366,25 @@ openclaw cron add \
   --timeout-seconds 180
 ```
 
+If the user wants Chinese output for first-party sources, the generated cron command should switch from `deliver --json` to `prepare-digest` and instruct the agent to write the final digest in `config.language` rather than returning raw source text.
+
 Important:
 
 - default recurring delivery should require an explicit Feishu target
 - for current-chat delivery, use `install-openclaw-cron --main-session-system-event --apply` so OpenClaw sends a system event to the main session instead of hard-coding a target
+- if `delivery.channel=feishu`, do not use `--main-session-system-event`; Feishu delivery must use explicit `--channel feishu --to <target>`
 - `install-openclaw-cron --apply` refuses `channel=last` by default; use `--allow-channel-last` only for internal compatibility testing after manually verifying this OpenClaw installation can reliably route `last`
 - for Feishu, always pass `--channel feishu --to <target>` with a raw `ou_...` user open_id or `oc_...` group chat_id
-- when both message groups are selected, `show-openclaw-cron` and `install-openclaw-cron` should output/create two cron jobs so first-party sources and ScoutX curated media are pushed separately
+- when both message groups are selected, `show-openclaw-cron` and `install-openclaw-cron` should still default to one cron job; the digest body should use grouped sections instead of separate jobs
 - OpenClaw cron has no name-based update; if replacing a previously installed job, use `install-openclaw-cron --replace-existing --apply`, which lists jobs with `openclaw cron list --json` and removes matching generated names by id before creating the replacement
-- use `deliver` as the default recurring delivery path
+- use `deliver` as the default recurring delivery path for English or near-source deterministic output
+- if `language` is `zh-CN` or `bilingual` and first-party sources are enabled, prefer `prepare-digest` so first-party summaries are localized instead of staying in raw English
+- if `language=zh-CN` and `prepare-digest` is used, localize first-party item titles and summary paragraphs into Chinese instead of only translating section labels
 - use `prepare-digest` only when you explicitly need prompt-controlled LLM remixing and have confirmed the platform path does not re-parse or rewrite the result
+- if `prepare-digest` is used, keep one numbered entry per selected item and never fold trailing items into catch-all text such as `更多动态`
 - keep inbox/file output only as fallback or debugging
 - after user confirmation, prefer `install-openclaw-cron --apply` instead of asking the user to copy a cron command manually
+- for validation and acceptance, prefer `preview --json` / `deliver --json` and quote raw fields instead of adding your own `AI相关`-style annotations
 
 ## `/follow-scoutx` Setup Flow
 

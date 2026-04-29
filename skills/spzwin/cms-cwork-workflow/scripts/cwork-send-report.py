@@ -16,9 +16,6 @@ Usage:
   # 2) 用户确认后，仅凭汇报 id 发出（5.27）
   python3 scripts/cwork-send-report.py --draft-id <汇报id> --confirm-send
 
-  # 3) 一步：保存并发出（需显式确认）
-  python3 scripts/cwork-send-report.py --title "..." --content "..." --receivers "张三" --confirm-send
-
 Auth:
   --app-key (required, injected by cms-auth-skills)
 """
@@ -123,8 +120,32 @@ def parse_args():
         help="汇报 id：更新已有草稿；与 --confirm-send 单独使用时仅执行 5.27 发出",
     )
     p.add_argument(
+        "--confirm-save-draft",
+        dest="confirm_save_draft",
+        action="store_true",
+        help="显式确认允许保存/更新草稿（安全护栏：未确认不执行 5.23）",
+    )
+    p.add_argument(
         "--confirm-send", dest="confirm_send", action="store_true",
         help="用户已预览完整草稿并同意发出后，再指定此参数才会调用 5.27",
+    )
+    p.add_argument(
+        "--test-mode",
+        dest="test_mode",
+        action="store_true",
+        help="测试/调试模式：默认仅允许接收人为当前用户本人",
+    )
+    p.add_argument(
+        "--current-user-name",
+        dest="current_user_name",
+        default=None,
+        help="当前发起用户姓名（test-mode 下用于默认接收人及校验）",
+    )
+    p.add_argument(
+        "--allow-external-test-receivers",
+        dest="allow_external_test_receivers",
+        action="store_true",
+        help="test-mode 下允许接收人为非当前用户（高风险，需显式开启）",
     )
     p.add_argument(
         "--report-level-json", dest="report_level_json", default=None,
@@ -413,6 +434,36 @@ def load_report_level_json(path: str) -> list[dict]:
     return data
 
 
+def _validate_report_level_list_nodes(report_level_list: list[dict] | None) -> dict | None:
+    """校验节点至少包含人员/分组/部门其一，返回首个错误信息。"""
+    if not isinstance(report_level_list, list):
+        return None
+    for idx, node in enumerate(report_level_list, start=1):
+        if not isinstance(node, dict):
+            continue
+        users = node.get("levelUserList")
+        groups = node.get("groupIdList")
+        # 后端字段在不同环境可能命名不同，统一兼容常见部门字段。
+        depts = (
+            node.get("deptIdList")
+            or node.get("departmentIdList")
+            or node.get("deptIds")
+            or node.get("departmentIds")
+        )
+        if users or groups or depts:
+            continue
+        node_name = str(node.get("nodeName") or f"节点{idx}")
+        return {
+            "index": idx,
+            "nodeName": node_name,
+            "message": (
+                f"{node_name}缺少审批对象：请至少补充人员(levelUserList)、分组(groupIdList)或部门"
+                "（deptIdList/departmentIdList）其一；若暂不需要该节点，请删除该节点后重试。"
+            ),
+        }
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Upload files
 # ---------------------------------------------------------------------------
@@ -486,11 +537,15 @@ def build_save_draft_kwargs(
         template_id = str(template_raw) if template_raw is not None else None
         plan_raw = args.plan_id if args.plan_id is not None else detail.get("planId")
         plan_id = str(plan_raw) if plan_raw is not None else None
-        business_unit_raw = (
-            args.business_unit_id
-            if args.business_unit_id is not None
-            else detail.get("businessUnitId")
-        )
+        # 接口约定：传 businessUnitId 时会忽略 reportLevelList。
+        # 因此当用户显式提供 --report-level-json 时，不应再继承草稿中的 businessUnitId，
+        # 否则会出现“流程节点设置成功但服务端不生效”的假象。
+        if args.business_unit_id is not None:
+            business_unit_raw = args.business_unit_id
+        elif args.report_level_json:
+            business_unit_raw = None
+        else:
+            business_unit_raw = detail.get("businessUnitId")
         business_unit_id = str(business_unit_raw) if business_unit_raw is not None else None
         virtual_emp_raw = (
             args.virtual_emp_id
@@ -552,6 +607,8 @@ def save_draft_full(client, kwargs: dict) -> str | None:
     draft_id = kwargs.pop("draft_id", None)
     try:
         result = client.save_draft(draft_id=draft_id, **kwargs)
+        if isinstance(result, str):
+            return result if result else None
         rid = result.get("id")
         return str(rid) if rid is not None else None
     except CWorkError as e:
@@ -683,10 +740,22 @@ def main():
         if args.title is not None or args.content is not None:
             print(json.dumps({
                 "success": False,
-                "error": "发送-only 模式请勿再传 --title/--content；仅需 --draft-id 与 --confirm-send",
+                "error": (
+                    "发送-only 模式请勿再传 --title/--content；"
+                    "仅需 --draft-id 与 --confirm-send（可选 --virtual-emp-id 用于发送前覆盖虚拟人）"
+                ),
             }, ensure_ascii=False), file=sys.stderr)
             sys.exit(1)
     else:
+        if not args.confirm_save_draft:
+            print(json.dumps({
+                "success": False,
+                "error": (
+                    "【安全拦截】保存/更新草稿前必须显式确认。"
+                    "请先征得用户同意后重试，并添加 --confirm-save-draft。"
+                ),
+            }, ensure_ascii=False), file=sys.stderr)
+            sys.exit(1)
         if not args.title or args.content is None:
             print(json.dumps({
                 "success": False,
@@ -698,12 +767,98 @@ def main():
 
     if send_only:
         try:
+            detail = client.get_draft_detail(args.draft_id)
+        except CWorkError as e:
+            print(json.dumps({
+                "success": False,
+                "step": "get_draft_detail",
+                "error": str(e),
+                "reportId": args.draft_id,
+            }, ensure_ascii=False), file=sys.stderr)
+            sys.exit(1)
+
+        effective_virtual_emp_id = (
+            str(args.virtual_emp_id)
+            if args.virtual_emp_id is not None
+            else (
+                str(detail.get("virtualEmpId"))
+                if detail.get("virtualEmpId") is not None
+                else None
+            )
+        )
+
+        # 虚拟人提交场景：改走 5.1 submit(id=草稿id) 以确保 virtualEmpId 在最终发出时参与判定。
+        if effective_virtual_emp_id is not None:
+            main = detail.get("main")
+            content_html = detail.get("contentHtml")
+            if not main or content_html is None:
+                print(json.dumps({
+                    "success": False,
+                    "step": "submit_report_5_1",
+                    "error": "草稿详情缺少 main 或 contentHtml，无法提交",
+                    "reportId": args.draft_id,
+                }, ensure_ascii=False), file=sys.stderr)
+                sys.exit(1)
+
+            report_level_list = _report_level_param_from_detail(detail.get("reportLevelList")) or []
+            node_validation_error = _validate_report_level_list_nodes(report_level_list)
+            if node_validation_error:
+                print(json.dumps({
+                    "success": False,
+                    "step": "validate_report_level_list",
+                    "error": node_validation_error["message"],
+                    "nodeIndex": node_validation_error["index"],
+                    "nodeName": node_validation_error["nodeName"],
+                }, ensure_ascii=False, indent=2), file=sys.stderr)
+                sys.exit(1)
+
+            try:
+                result = client.submit_report(
+                    main=main,
+                    content_html=content_html,
+                    report_id=args.draft_id,
+                    business_unit_id=detail.get("businessUnitId"),
+                    content_type=effective_body_content_type(args, detail),
+                    type_id=int(detail.get("typeId") or 9999),
+                    grade=detail.get("grade") or "一般",
+                    privacy_level=detail.get("privacyLevel") or "非涉密",
+                    plan_id=str(detail.get("planId")) if detail.get("planId") is not None else None,
+                    template_id=detail.get("templateId"),
+                    accept_emp_id_list=_emp_ids_from_detail(detail.get("acceptEmployeeList")),
+                    copy_emp_id_list=_emp_ids_from_detail(detail.get("copyEmployeeList")),
+                    report_level_list=report_level_list,
+                    file_vo_list=_file_vos_from_detail(detail.get("fileList")),
+                    virtual_emp_id=effective_virtual_emp_id,
+                )
+                report_id = result.get("id") if isinstance(result, dict) else None
+                print(json.dumps({
+                    "success": True,
+                    "reportId": str(report_id) if report_id is not None else str(args.draft_id),
+                    "submitted": True,
+                    "virtualEmpId": effective_virtual_emp_id,
+                    "submitApi": "report_record_submit_5_1",
+                    "message": "已通过 5.1 提交草稿并按 virtualEmpId 发出",
+                }, ensure_ascii=False, indent=2))
+                sys.exit(0)
+            except CWorkError as e:
+                print(json.dumps({
+                    "success": False,
+                    "step": "submit_report_5_1",
+                    "error": str(e),
+                    "reportId": args.draft_id,
+                    "virtualEmpId": effective_virtual_emp_id,
+                }, ensure_ascii=False), file=sys.stderr)
+                sys.exit(1)
+
+        try:
             ok = client.submit_draft(args.draft_id)
             print(json.dumps({
                 "success": bool(ok),
                 "reportId": args.draft_id,
                 "submitted": bool(ok),
-                "message": "已通过 5.27 将草稿转为正式汇报" if ok else "5.27 返回未成功",
+                "virtualEmpId": None,
+                "submitApi": "draft_submit_5_27",
+                "message": "已通过 5.27 将草稿转为正式汇报（无 virtualEmpId）" if ok else "5.27 返回未成功",
             }, ensure_ascii=False, indent=2))
             sys.exit(0 if ok else 1)
         except CWorkError as e:
@@ -755,6 +910,38 @@ def main():
 
     receiver_names = split_cli_name_list(args.receivers)
     cc_names = split_cli_name_list(args.cc_names)
+    if args.test_mode and not receiver_names and args.current_user_name:
+        receiver_names = [args.current_user_name.strip()]
+    if args.test_mode and not receiver_names:
+        print(json.dumps({
+            "success": False,
+            "step": "validate_test_receivers",
+            "error": (
+                "test-mode 下必须指定接收人；建议传 --current-user-name 以默认发给本人，"
+                "或显式设置 --receivers 为测试账号。"
+            ),
+        }, ensure_ascii=False), file=sys.stderr)
+        sys.exit(1)
+    if (
+        args.test_mode
+        and args.current_user_name
+        and not args.allow_external_test_receivers
+    ):
+        me = args.current_user_name.strip()
+        non_self = [n for n in receiver_names if n.strip() and n.strip() != me]
+        if non_self:
+            print(json.dumps({
+                "success": False,
+                "step": "validate_test_receivers",
+                "error": (
+                    "test-mode 默认仅允许发送给当前用户本人。"
+                    "如确需外发，请显式添加 --allow-external-test-receivers 并先获用户确认。"
+                ),
+                "currentUserName": me,
+                "externalReceivers": non_self,
+            }, ensure_ascii=False, indent=2), file=sys.stderr)
+            sys.exit(1)
+
     receiver_nonempty = bool(receiver_names)
     cc_nonempty = bool(cc_names)
 
@@ -793,6 +980,16 @@ def main():
         cc_names_nonempty=cc_nonempty,
         new_uploads=new_uploads,
     )
+    node_validation_error = _validate_report_level_list_nodes(kwargs.get("report_level_list"))
+    if node_validation_error:
+        print(json.dumps({
+            "success": False,
+            "step": "validate_report_level_list",
+            "error": node_validation_error["message"],
+            "nodeIndex": node_validation_error["index"],
+            "nodeName": node_validation_error["nodeName"],
+        }, ensure_ascii=False, indent=2), file=sys.stderr)
+        sys.exit(1)
     saved_report_id = save_draft_full(client, kwargs)
 
     if not saved_report_id:
@@ -818,6 +1015,14 @@ def main():
         args, confirmed, cc_confirmed, file_vos, from_api_detail=fresh_detail,
     )
     preview["success"] = True
+    preview["identityContext"] = {
+        "virtualEmpIdProvided": bool(args.virtual_emp_id),
+        "senderAuthMode": "default_app_key",
+        "note": (
+            "当前脚本仅使用用户 AppKey 鉴权；virtualEmpId 作为业务字段透传。"
+            "是否以虚拟员工展示由服务端规则决定。"
+        ),
+    }
     # draftId：历史 JSON 键名，值为汇报 id，与 reportId / draftDetail.id 相同（非草稿箱记录 id）
     preview["draftId"] = saved_report_id
 

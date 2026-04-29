@@ -22,7 +22,7 @@ All runtime data is stored in `$DATA_DIR`, separated from skill code.
   cache/      # API response cache
   configs/    # Config files (including Service Account JSON keys)
   logs/       # Execution logs
-  venv/       # Python virtual environment
+  venv/       # Python virtual environment (managed by uv)
 ```
 
 **Directory separation principle**:
@@ -100,11 +100,23 @@ Detailed browser commands, classification tables, and templates: see [references
 
 ### Phase 1: Select Data Source & Collect Data
 
-**1a. Initialize directories**:
+**1a. Initialize directories & Python environment**:
 ```bash
 DATA_DIR=".skills-data/google-analytics-and-search-improve"
-mkdir -p "$DATA_DIR"/{data,analysis,charts,scripts,cache,logs,tmp}
+mkdir -p "$DATA_DIR"/{data,analysis,charts,scripts,cache,logs,tmp,configs}
 ```
+
+Set up a Python 3.12 virtual environment via `uv` and install dependencies (only needed once):
+```bash
+uv venv "$DATA_DIR/venv" --python 3.12
+uv pip install -p "$DATA_DIR/venv" -r skills/google-analytics-and-search-improve/scripts/pyproject.toml
+```
+
+> **IMPORTANT**: All Python script executions in this skill MUST activate the venv first, then use `python` directly. Never use the system Python.
+> ```bash
+> source "$DATA_DIR/venv/bin/activate"
+> python scripts/xxx.py ...
+> ```
 
 **1b. Ask user to choose data source**:
 
@@ -114,7 +126,7 @@ mkdir -p "$DATA_DIR"/{data,analysis,charts,scripts,cache,logs,tmp}
 | **B. Manual CSV export** | User exports CSV from GA4/GSC web consoles | Zero config, simplest |
 | **C. Browser audit only** | Visit site directly, no GA4/GSC data | Quick technical checks |
 
-**Mode A**: Check `$DATA_DIR/.env` for required config. If missing, guide user to fill in `SITE_URL`, `GSC_SITE_URL`, `GA4_PROPERTY_ID`. Place Service Account JSON key in `$DATA_DIR/configs/`. Run collection scripts to save data to `$DATA_DIR/data/`.
+**Mode A**: Check `$DATA_DIR/.env` for required config. If missing, guide user to fill in `SITE_URL`, `GSC_SITE_URL`, `GA4_PROPERTY_ID`. Place Service Account JSON key in `$DATA_DIR/configs/` (scripts auto-discover it via `utils.py`). Run collection scripts to save data to `$DATA_DIR/data/`.
 
 **Mode B**: Send export instructions to user. After receiving CSV files in `$DATA_DIR/data/`, proceed to Phase 2-3.
 
@@ -235,6 +247,7 @@ Check items detailed in the "Technical Issues" checklist in [references/metrics-
 Run audit scripts against the checklist in [references/SEO-GEO-Optimization-Checklist.md](references/SEO-GEO-Optimization-Checklist.md):
 
 ```bash
+source "$DATA_DIR/venv/bin/activate"
 set -a; source "$DATA_DIR/.env"; set +a
 python scripts/seo_audit.py --url "$SITE_URL" --sitemap -o "$DATA_DIR/analysis/seo_audit.json"
 python scripts/geo_audit.py --url "$SITE_URL" --sitemap -o "$DATA_DIR/analysis/geo_audit.json"
@@ -261,6 +274,32 @@ Follow the report template in [references/report-template.md](references/report-
 
 Save the report to `$DATA_DIR/analysis/improvement-report.md`.
 
+## User Persona Analysis
+
+> **When to use**: When the user wants to understand who their users are, build data-driven user personas, or get recommendations for product iteration based on user profiling.
+
+This skill supports a complete data-driven user persona analysis workflow. Instead of following the standard Phase 0-6 improvement pipeline, use the dedicated persona analysis flow:
+
+**Steps**:
+
+1. **Collect persona data** — run GA4 demographics, behavioral, and acquisition presets plus GSC query data. The persona-specific presets include: `demographics_age`, `demographics_gender`, `demographics_geo`, `demographics_language`, `demographics_interests`, `new_vs_returning`. Combine with existing presets (`device_breakdown`, `user_behavior`, `landing_pages`, `user_acquisition`, `top_pages`) and custom queries for time patterns and cross-segments.
+
+2. **Segment & cluster** — apply behavioral, channel, demographic, and intent-based segmentation strategies to identify 3-5 distinct user groups.
+
+3. **Build persona cards** — for each group, construct a data-backed persona with demographics, behavioral fingerprint, journey patterns, needs, and product iteration opportunities.
+
+4. **Validate & extract insights** — cross-validate segments, analyze acquisition efficiency, engagement quality, conversion potential, and retention signals.
+
+5. **Generate iteration recommendations** — map each persona to specific product, content, UX, and marketing recommendations.
+
+**Write analysis scripts** in `$DATA_DIR/scripts/` to process all persona raw data, produce segmented profiles, and generate persona charts. Save charts to `$DATA_DIR/charts/persona_*.png`.
+
+**Output**: User persona report with persona cards, cross-persona comparison, and actionable recommendations. Save to `$DATA_DIR/analysis/user-persona-report.md`.
+
+Full methodology, data collection commands, segmentation strategies, persona card template, visualization requirements, and report structure: see [references/user-persona-analysis-reference.md](references/user-persona-analysis-reference.md).
+
+---
+
 ## Companion Skills
 
 - SEO implementation → `seo-geo`
@@ -277,3 +316,4 @@ Save the report to `$DATA_DIR/analysis/improvement-report.md`.
 | [references/data-visualization-guide.md](references/data-visualization-guide.md) | Chart generation patterns, type selection, per-phase chart requirements, CJK font support |
 | [references/website-reconnaissance-reference.md](references/website-reconnaissance-reference.md) | Browser commands, website type classification, analysis dimensions, goal profile templates |
 | [references/report-template.md](references/report-template.md) | Phase 6 final report Markdown template |
+| [references/user-persona-analysis-reference.md](references/user-persona-analysis-reference.md) | User persona analysis: five-dimension model, segmentation strategies, persona card template, GA4 demographics presets, visualization requirements, iteration recommendations |

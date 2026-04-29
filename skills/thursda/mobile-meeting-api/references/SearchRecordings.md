@@ -1,4 +1,4 @@
-i# 查询录制列表 - SearchRecordings<a name="ZH-CN_TOPIC_0212714556"></a>
+# 查询录制列表 - SearchRecordings<a name="ZH-CN_TOPIC_0212714556"></a>
 
 ## 描述<a name="section17948858131615"></a>
 

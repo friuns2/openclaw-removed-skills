@@ -1,6 +1,6 @@
 {
   "name": "spectyra",
-  "version": "1.0.23",
+  "version": "1.0.25",
   "displayName": "Spectyra",
   "description": "Local companion for OpenClaw. Install @spectyra/local-companion, run spectyra-companion start, use spectyra/* models. Dashboard: http://127.0.0.1:4111/dashboard",
   "author": "Spectyra",
@@ -15,7 +15,7 @@
   "categories": ["integration"],
   "openclaw": {
     "minVersion": "0.1.0",
-    "version": "1.0.23"
+    "version": "1.0.25"
   },
   "setup": {
     "type": "config-merge",

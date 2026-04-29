@@ -3,9 +3,15 @@
   "slug": "validis",
   "displayName": "Validis",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1775574238473,
-    "commit": "https://github.com/openclaw/skills/commit/cdc956ff28c422eee1bc65187b962e117b109874"
+    "version": "1.0.1",
+    "publishedAt": 1776895940736,
+    "commit": "https://github.com/openclaw/skills/commit/d85e86ecb7f10712c46559314c9edd3a6964e715"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1775574238473,
+      "commit": "https://github.com/openclaw/skills/commit/cdc956ff28c422eee1bc65187b962e117b109874"
+    }
+  ]
 }

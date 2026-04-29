@@ -1,0 +1,11 @@
+{
+  "owner": "wu-uk",
+  "slug": "exoplanet-detection-period-box-least-squares",
+  "displayName": "box-least-squares",
+  "latest": {
+    "version": "0.1.0",
+    "publishedAt": 1776229618351,
+    "commit": "https://github.com/openclaw/skills/commit/ab5d8fc2192947e7cbccaec470d330f667fd07aa"
+  },
+  "history": []
+}

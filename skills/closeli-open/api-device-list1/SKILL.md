@@ -1,6 +1,6 @@
 ---
 name: api-device-list
-description: "Closeli 设备列表查询接口。用于获取当前账号下的设备列表，返回设备名称、MAC、IMEI 等基础信息。Use when: 需要查看账号下有哪些设备，或在调用其他设备接口前先获取设备标识。⚠ 安全要求：必须设置 AI_GATEWAY_API_KEY 环境变量，使用最小权限凭证，环境变量请前往APP中AI设置页获取。"
+description: "Closeli Device List Query API. Used to retrieve the device list under the current account and return basic information such as device name, MAC, and IMEI. Use when: You need to see which devices are under the account, or obtain device identifiers before calling other device APIs. ⚠ Security requirement: You must set the AI_GATEWAY_API_KEY environment variable and use least-privilege credentials. The environment variable can be obtained from the AI settings page in the app."
 metadata:
   openclaw:
     requires:
@@ -10,125 +10,126 @@ metadata:
     primaryEnv: "AI_GATEWAY_API_KEY"
 ---
 
-# 设备列表查询接口
+# Device List Query API
 
-`POST /api/device/list` 用于查询当前认证用户绑定的所有设备列表。该接口无需请求体，设备列表由 api_key 自动关联。
+`POST /api/device/list` is used to query all devices bound to the currently authenticated user. This API does not require a request body. The device list is automatically associated through the api_key.
 
-## ⚠️ 展示规则（MUST 严格遵守）
+## ⚠️ Display Rules (MUST Be Strictly Followed)
 
-脚本输出 JSON 格式的结构化数据，这是预期行为。以下展示规则是给 agent 的格式化指令：agent MUST 解析脚本输出的 JSON，按下述规则转换为用户友好的格式后再展示，MUST NOT 直接展示原始 JSON。
+The script outputs structured data in JSON format, which is the expected behavior. The following display rules are formatting instructions for the agent: the agent MUST parse the JSON output from the script and convert it into a user-friendly format according to the rules below before displaying it, and MUST NOT display the raw JSON directly.
 
-1. 当 `code == 0` 且 `data` 非空时，以表格展示：
+1. When `code == 0` and `data` is not empty, display it as a table:
 
-| MAC 地址 | 设备名称 |
+| MAC Address | Device Name |
 |----------|----------|
-| aabbccddeeff | 客厅摄像机 |
+| aabbccddeeff | Living Room Camera |
 
-关键规则：device_id MUST 去掉 `xxxxS_` 前缀再展示为 MAC 地址。表头 MUST 写"MAC 地址"，不要写"设备 ID"。
+Key rule: `device_id` MUST remove the `xxxxS_` prefix before being displayed as the MAC address. The table header MUST be written as "MAC Address" and MUST NOT be written as "Device ID".
 
-2. 当 `data` 为空数组时，回复："当前账户下没有绑定任何设备。"
-3. 当 `code != 0` 时，回复："接口调用失败，错误码 {code}，原因：{message}"
+2. When `data` is an empty array, reply: "There are no devices bound under the current account."
+3. When `code != 0`, reply: "API call failed, error code {code}, reason: {message}"
 
-## 前置依赖
+## Prerequisites
 
-脚本依赖 httpx。如果未安装，脚本会提示 `python3 -m pip install httpx`。
+The script depends on httpx. If it is not installed, the script will prompt `python3 -m pip install httpx`.
 
-## 配置声明
+## Configuration Declaration
 
-本 skill 依赖以下配置项，agent 和用户 MUST 在运行前确认已正确配置。
+This skill depends on the following configuration items. The agent and user MUST confirm that they are correctly configured before running.
 
-### 必需配置
+### Required Configuration
 
-| 配置项 | 传递方式 | 说明 |
+| Configuration Item | Delivery Method | Description |
 |--------|----------|------|
-| AI_GATEWAY_API_KEY | 环境变量（推荐）、`~/.openclaw/.env`（fallback）、命令行 `--api-key` | API 密钥，用于接口鉴权。脚本按此优先级自动获取 |
+| AI_GATEWAY_API_KEY | Environment variable (recommended), `~/.openclaw/.env` (fallback), command line `--api-key` | API key used for API authentication. The script automatically retrieves it according to this priority order |
 
-### 可选配置
+### Optional Configuration
 
-| 配置项 | 传递方式 | 默认值 | 说明 |
+| Configuration Item | Delivery Method | Default Value | Description |
 |--------|----------|--------|------|
-| AI_GATEWAY_HOST | 环境变量、`~/.openclaw/.env` | `https://ai-open-gateway.closeli.cn` | 网关地址 |
-| AI_GATEWAY_VERIFY_SSL | 环境变量 | true | 设为 false 可禁用 TLS 证书验证（仅限开发环境） |
-| AI_GATEWAY_NO_ENV_FILE | 环境变量 | false | 设为 true 可禁用 `~/.openclaw/.env` fallback 读取（生产环境推荐） |
+| AI_GATEWAY_HOST | Environment variable, `~/.openclaw/.env` | `https://ai-open.icloseli.com` | Gateway address |
+| AI_GATEWAY_VERIFY_SSL | Environment variable | true | Set to false to disable TLS certificate verification (development environments only) |
+| AI_GATEWAY_NO_ENV_FILE | Environment variable | false | Set to true to disable fallback loading from `~/.openclaw/.env` (recommended for production environments) |
 
-### Fallback 配置路径
+### Fallback Configuration Path
 
-脚本默认会读取 `~/.openclaw/.env` 文件作为 fallback 配置源。该文件为所有 skill 共享，格式为 `KEY=VALUE`（每行一条）。生产环境 MUST 设置 `AI_GATEWAY_NO_ENV_FILE=true` 禁用此 fallback，改为通过环境变量直接传递所有配置。
+By default, the script reads the `~/.openclaw/.env` file as the fallback configuration source. This file is shared by all skills and uses the format `KEY=VALUE` (one entry per line). In production environments, you MUST set `AI_GATEWAY_NO_ENV_FILE=true` to disable this fallback and instead pass all configuration directly through environment variables.
 
-## 安全注意事项
+## Security Notes
 
-- 共享凭证文件 `~/.openclaw/.env` 可被同一用户下所有 skill 读取。生产环境 MUST 通过环境变量传递 API_KEY，MUST NOT 依赖共享凭证文件
-- TLS 证书验证默认启用，MUST NOT 在生产环境禁用（禁用会导致中间人攻击风险，攻击者可截获 API_KEY 和设备数据）
-- 使用前 MUST 确认 AI_GATEWAY_HOST 指向可信域名
-- MUST 使用最小权限的 API_KEY，避免复用高权限凭证。本 skill 仅需设备列表查询权限
+- The shared credential file `~/.openclaw/.env` can be read by all skills under the same user. In production environments, you MUST pass the API_KEY through environment variables and MUST NOT rely on the shared credential file
+- TLS certificate verification is enabled by default and MUST NOT be disabled in production environments (disabling it introduces man-in-the-middle attack risks, allowing attackers to intercept the API_KEY and device data)
+- Before use, you MUST confirm that AI_GATEWAY_HOST points to a trusted domain
+- You MUST use a least-privilege API_KEY and avoid reusing high-privilege credentials. This skill only requires device list query permission
 
-## 网络访问声明
+## Network Access Declaration
 
-本 skill 仅访问以下端点（均为 AI_GATEWAY_HOST 下的路径）：
+This skill only accesses the following endpoints (all are paths under AI_GATEWAY_HOST):
 
-| 端点 | 方法 | 用途 |
+| Endpoint | Method | Purpose |
 |------|------|------|
-| /api/device/list | POST | 查询用户绑定的设备列表 |
+| /api/device/list | POST | Query the list of devices bound to the user |
 
-脚本不访问任何其他网络资源。
+The script does not access any other network resources.
 
-## 快速开始
+## Quick Start
 
 ```bash
 python3 list_devices.py
 ```
 
-## 认证方式
+## Authentication Method
 
-使用 Bearer Token 认证，脚本自动在请求头中携带 `Authorization: Bearer <api_key>`。
+Bearer Token authentication is used. The script automatically carries `Authorization: Bearer <api_key>` in the request header.
 
-## 请求格式
+## Request Format
 
-### 请求头
+### Request Headers
 
-| 参数名 | 类型 | 必填 | 说明 |
+| Parameter Name | Type | Required | Description |
 |--------|------|------|------|
-| Content-Type | string | 是 | `application/json` |
-| Authorization | string | 是 | `Bearer <api_key>`，32 位十六进制字符串 |
+| Content-Type | string | Yes | `application/json` |
+| Authorization | string | Yes | `Bearer <api_key>`, a 32-character hexadecimal string |
 
-### 请求体
+### Request Body
 
-无需请求体。
+No request body is required.
 
-## 响应格式
+## Response Format
 
 ```json
 {
   "code": 0,
   "message": "success",
-  "request_id": "<32位请求追踪ID>",
+  "request_id": "<32-character request trace ID>",
   "data": [
     {
       "device_id": "xxxxS_aabbccddeeff",
-      "device_name": "客厅摄像机"
+      "device_name": "Living Room Camera"
     }
   ]
 }
 ```
 
-### data 字段（设备数组）
+### `data` Field (Device Array)
 
-| 参数名 | 类型 | 说明 |
+| Parameter Name | Type | Description |
 |--------|------|------|
-| device_id | string | 设备 ID，格式: `xxxxS_<mac地址>`，后续接口均使用此格式 |
-| device_name | string | 设备名称，用户自定义的设备别名 |
+| device_id | string | Device ID, format: `xxxxS_<mac_address>`. All subsequent device APIs use this format |
+| device_name | string | Device name, a user-defined device alias |
 
-## 错误码
+## Error Codes
 
-| 错误码 | HTTP 状态码 | 说明 |
+| Error Code | HTTP Status Code | Description |
 |--------|------------|------|
-| 1001 | 401 | 未提供 api_key（缺少 Authorization 头或格式不正确） |
-| 1002 | 401 | api_key 无效或已禁用 |
-| 3001 | 502 | 网关内部服务调用失败 |
-| 3004 | 502 | 网关内部服务调用失败 |
-| 5000 | 500 | 内部错误 |
+| 1001 | 401 | api_key not provided (missing Authorization header or incorrect format) |
+| 1002 | 401 | api_key is invalid or disabled |
+| 3001 | 502 | Internal gateway service call failed |
+| 3004 | 502 | Internal gateway service call failed |
+| 5000 | 500 | Internal error |
 
-## 注意事项
+## Notes
 
-- device_id 格式为 `xxxxS_<mac>`，是后续所有设备相关接口的标识符
-- 全局请求超时为 120 秒
+- The `device_id` format is `xxxxS_<mac>`, which is the identifier used by all subsequent device-related APIs
+- **IMPORTANT**: `device_id` is case-sensitive. The prefix MUST be lowercase `xxxxS_`, NOT uppercase `XXXXS_`. The script will auto-correct the case, but the agent SHOULD always pass the correct lowercase format
+- The global request timeout is 120 seconds

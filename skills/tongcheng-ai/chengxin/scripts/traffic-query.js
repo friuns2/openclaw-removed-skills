@@ -7,11 +7,12 @@
  *   node traffic-query.js --departure "北京" --destination "上海"
  *   node traffic-query.js --departure "北京" --destination "上海" --extra "明天"
  *   node traffic-query.js --departure "苏州" --destination "南京" --extra "自驾"
+ *   node traffic-query.js --departure "北京" --destination "上海" --extra "最早 最便宜"
  * 
  * 参数说明：
  *   --departure <城市>        出发地城市
  *   --destination <城市>      目的地城市
- *   --extra <补充信息>        额外信息（日期、偏好等）
+ *   --extra <补充信息>        额外信息（日期、时间偏好、价格偏好、交通方式偏好等）
  *   --channel <渠道>          通信渠道（webchat/wechat 等）
  *   --surface <界面>          交互界面（mobile/desktop/table/card）
  * 
@@ -35,7 +36,8 @@ const {
   format_flight_card,
   format_transfer_trip,
   format_bus_table,
-  format_bus_card
+  format_bus_card,
+  format_supplement_traffic
 } = require('./lib/formatters');
 
 // 交通 API 路径
@@ -106,11 +108,11 @@ function format_flight_result(flight_data, use_table = false, use_plain_link = f
   }
   
   const flights = flight_data.flightList;
+  const direct_flights = flights.filter((f) => !is_transfer_trip(f));
+  const transfer_flights = flights.filter(is_transfer_trip);
   let output = '\n✈️ **机票**\n\n';
 
   if (use_table) {
-    const direct_flights = flights.filter((f) => !is_transfer_trip(f));
-    const transfer_flights = flights.filter(is_transfer_trip);
     if (direct_flights.length > 0) {
       output += format_flight_table(direct_flights, use_plain_link);
     }
@@ -118,13 +120,18 @@ function format_flight_result(flight_data, use_table = false, use_plain_link = f
       output += format_transfer_trip(flight, use_plain_link);
     });
   } else {
-    flights.forEach((flight) => {
-      if (is_transfer_trip(flight)) {
-        output += format_transfer_trip(flight, use_plain_link);
-      } else {
-        output += format_flight_card(flight, use_plain_link);
-      }
+    direct_flights.forEach((flight) => {
+      output += format_flight_card(flight, use_plain_link);
     });
+    transfer_flights.forEach((flight) => {
+      output += format_transfer_trip(flight, use_plain_link);
+    });
+  }
+  
+  // 补偿交通（前往/离开机场的火车/汽车推荐）
+  const supplement_output = format_supplement_traffic(flight_data, use_plain_link);
+  if (supplement_output) {
+    output += supplement_output;
   }
   
   return output;
@@ -155,6 +162,17 @@ function format_bus_result(bus_data, use_table = false, use_plain_link = false) 
   return output;
 }
 
+
+/**
+ * 交通资源处理器配置（配置驱动，避免火车/机票/汽车三块重复 if）
+ * 保持输出顺序：火车 → 机票 → 汽车
+ */
+const RESOURCE_HANDLERS = [
+  { dataKey: 'trainDataList', listKey: 'trainList', formatter: format_train_result },
+  { dataKey: 'flightDataList', listKey: 'flightList', formatter: format_flight_result },
+  { dataKey: 'busDataList', listKey: 'busList', formatter: format_bus_result },
+];
+
 /**
  * 处理查询结果
  */
@@ -162,56 +180,32 @@ function handle_result(response_data, { print_success_once, format_options, prin
   const { use_table, use_plain_link } = format_options;
   const round_trip = is_round_trip(request_params?.extra);
 
-  const train_data_list = response_data?.trainDataList;
-  const flight_data_list = response_data?.flightDataList;
-  const bus_data_list = response_data?.busDataList;
-
   let has_output = false;
 
-  if (Array.isArray(train_data_list) && train_data_list.length > 0 && Array.isArray(train_data_list[0].trainList) && train_data_list[0].trainList.length > 0) {
-    print_success_once();
-    train_data_list.forEach((item, index) => {
-      if (item.desc && train_data_list.length > 1) {
-        console.log(`📌 ${item.desc}\n`);
-      }
-      if (item.trainList && item.trainList.length > 0) {
-        console.log(format_train_result(item, use_table, use_plain_link));
-        has_output = true;
-      }
-    });
-  }
-
-  if (Array.isArray(flight_data_list) && flight_data_list.length > 0 && Array.isArray(flight_data_list[0].flightList) && flight_data_list[0].flightList.length > 0) {
-    print_success_once();
-    flight_data_list.forEach((item, index) => {
-      if (item.desc && flight_data_list.length > 1) {
-        console.log(`📌 ${item.desc}\n`);
-      }
-      if (item.flightList && item.flightList.length > 0) {
-        console.log(format_flight_result(item, use_table, use_plain_link));
-        has_output = true;
-      }
-    });
-  }
-
-  if (Array.isArray(bus_data_list) && bus_data_list.length > 0 && Array.isArray(bus_data_list[0].busList) && bus_data_list[0].busList.length > 0) {
-    print_success_once();
-    bus_data_list.forEach((item, index) => {
-      if (item.desc && bus_data_list.length > 1) {
-        console.log(`📌 ${item.desc}\n`);
-      }
-      if (item.busList && item.busList.length > 0) {
-        console.log(format_bus_result(item, use_table, use_plain_link));
-        has_output = true;
-      }
-    });
-  }
+  RESOURCE_HANDLERS.forEach(({ dataKey, listKey, formatter }) => {
+    const data_list = response_data?.[dataKey];
+    const has_any = Array.isArray(data_list) && data_list.some(item =>
+      Array.isArray(item[listKey]) && item[listKey].length > 0
+    );
+    if (has_any) {
+      print_success_once();
+      data_list.forEach((item) => {
+        if (item.desc) {
+          console.log(`📌 ${item.desc}\n`);
+        }
+        if (item[listKey] && item[listKey].length > 0) {
+          console.log(formatter(item, use_table, use_plain_link));
+          has_output = true;
+        }
+      });
+    }
+  });
 
   if (!has_output) {
     print_no_match();
   } else {
     if (round_trip) {
-      console.log(ROUND_TRIP_PROMPTS.traffic);
+      console.log(ROUND_TRIP_PROMPTS.TRAFFIC);
     }
     console.log(MORE_CHOICES_PROMPT);
   }
@@ -229,7 +223,7 @@ const runner = create_query_runner({
   },
   validate: validate_params,
   handle_result: handle_result,
-  no_match_detail: NO_MATCH_DETAIL.traffic,
+  no_match_detail: NO_MATCH_DETAIL.TRAFFIC,
   usage_example: `  node traffic-query.js --departure "北京" --destination "上海"
   node traffic-query.js --departure "北京" --destination "上海" --extra "明天"`
 });

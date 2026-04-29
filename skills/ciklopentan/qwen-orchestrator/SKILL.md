@@ -8,10 +8,10 @@ description: >
   (4) web search via Qwen's built-in search, (5) "consult Qwen" or ask-qwen.sh.
 ---
 
-# Qwen Orchestrator v1.5.6
+# Qwen Orchestrator v1.5.8
 
 **What this is:** Browser automation that talks to Qwen Chat via Puppeteer.
-**Default runtime policy:** before sending a prompt, qwen-orchestrator must switch the Qwen mode selector to thinking mode when the selector is available.
+**Default runtime policy:** before sending a prompt, qwen-orchestrator must switch the Qwen model selector to `Qwen3.6-Max-Preview` and then switch the Qwen mode selector to thinking mode when those selectors are available.
 **What this is NOT:** A general AI router or multi-model orchestrator. It's one browser → one LLM.
 
 ## Execution
@@ -185,12 +185,14 @@ Session state in `.sessions/<name>.json` is trusted internal state.
   "domErrorIdleMs": 25000,
   "rateLimitMs": 5000,
   "maxContinueRounds": 30,
+  "preferredModel": "Qwen3.6-Max-Preview",
   "logToFile": true,
   "logPath": ".logs/qwen.log"
 }
 ```
 
 - `rateLimitMs`: client-side delay between prompt sends. Helps avoid accidental rapid-fire requests against Qwen. Set to `0` to disable.
+- `preferredModel`: model name that qwen-orchestrator should force before each prompt. Default: `Qwen3.6-Max-Preview`.
 
 ## Minimal Decision Rules
 
@@ -198,6 +200,7 @@ Session state in `.sessions/<name>.json` is trusted internal state.
 - If you need context across prompts → `--session NAME`
 - If you need a fresh Qwen thread inside an existing session namespace → `--new-chat`
 - If you need to close stored context → `--end-session`
+- Before sending a prompt → force the Qwen model selector to `Qwen3.6-Max-Preview` (or `.qwen.json.preferredModel`) if the selector exists; warn if it cannot be confirmed
 - Before sending a prompt → force the Qwen mode selector to thinking mode if the selector exists; warn if it cannot be confirmed
 - If you enable search → verify the Web Search toggle really became active; warn if it cannot be confirmed
 - Auth repair → stop daemon → `--visible --wait --dry-run`

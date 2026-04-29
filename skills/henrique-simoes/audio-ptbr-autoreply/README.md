@@ -1,237 +1,157 @@
-# 🎙️ Audio PT Auto-Reply - Premium Voice Interface
+# Audio PT Auto-Reply 🎙️🇧🇷
 
-**Brazilian Portuguese voice transcription + AI responses with Claude integration**
+Talk to your OpenClaw agent in Brazilian Portuguese, and get a voice reply back.
 
-> Just install the skill once. Everything else is automatic.
+That is the whole idea.
 
-## ✨ What's New
+You send an audio message.
+The skill transcribes it locally.
+Your OpenClaw agent answers.
+The answer comes back as audio. 🔊
 
-- ✅ **Zero-touch installation** - No manual downloads needed
-- ✅ **Claude integration** - Intelligent AI responses (optional)
-- ✅ **Auto-detection** - Works on ARM64, x86_64, Mac, Linux
-- ✅ **Health check** - Validates everything is working
-- ✅ **Production-ready** - Error handling, fallbacks, logging
+No big platform. No weird magic. Just a small, useful voice loop for people who would rather speak than type.
 
-## 🚀 Quick Start (Really Quick!)
+## Why this exists ✨
 
-### Step 1: Install the Skill
-```bash
-# Download from ClaWHub or your repository
-cd ~/.openclaw/skills
-unzip audio-ptbr-autoreply.zip
-cd audio-ptbr-autoreply
-```
+Typing is not always the best way to talk to an agent.
 
-### Step 2: Run the Installer (One Command!)
-```bash
-bash install.sh
-```
+Sometimes you are on your phone. Sometimes you are walking. Sometimes you are doing something else. Sometimes voice just feels more natural.
 
-That's it! The script will:
-- ✓ Detect your system (ARM64, x86_64, etc.)
-- ✓ Download Piper TTS automatically
-- ✓ Download 4 Brazilian Portuguese voice models
-- ✓ Install Python dependencies
-- ✓ Validate everything works
+Audio PT Auto-Reply gives OpenClaw a simple PT-BR voice workflow that feels closer to messaging a person than operating a tool.
 
-### Step 3: Restart OpenClaw
-```bash
-openclaw gateway restart
-```
+It is especially useful for Telegram-style interactions, accessibility workflows, quick mobile replies, and hands-busy situations.
 
-### Step 4: Verify Installation (Optional)
-```bash
-python3 health_check.py
-```
+## What it does 🧩
 
-## 🎤 How to Use
+Audio PT Auto-Reply adds a focused voice pipeline to OpenClaw:
 
-### Voice Commands
-```
-/voz jeff          👨 Use Jeff (masculine, clear)
-/voz cadu          👨 Use Cadu (masculine, warm)
-/voz faber         👨 Use Faber (masculine, balanced)
-/voz miro          👩 Use Miro (feminine, high quality)
-/voz feminina      👩 Auto-select feminine voice
-/voz masculina     👨 Auto-select masculine voice
-/voz listar        📋 List all voices
-```
+* 🎧 transcribes Brazilian Portuguese audio locally with `jonatasgrosman/wav2vec2-large-xlsr-53-portuguese`
+* 🧠 asks your local OpenClaw agent to generate a short reply by default
+* ☁️ can optionally use Anthropic only when `ANTHROPIC_API_KEY` is set
+* 🗣️ turns the answer into speech with local Piper voices
+* 🎚️ lets you choose voices with `/voz`
+* 🩺 includes a health check so setup problems are easier to find
 
-### Usage Modes
-| Action | What Happens |
-|--------|--------------|
-| Send audio message | Transcribes → Gets intelligent response → Sends audio reply |
-| Say "texto" | Response comes as text instead of audio |
-| Send text message | Works as normal (no audio processing) |
+## What it does not do 🚧
 
-## 🤖 Claude Integration (Optional)
+This skill is intentionally small and careful.
 
-For **intelligent, natural responses**, set your Claude API key:
+It does not request `sudo`.
+It does not install system packages behind your back.
+It does not modify other skills.
+It does not read unrelated files.
+It does not upload audio files to third-party services.
+It does not ship a public automatic audio hook that expands untrusted template values inside a shell command.
 
-```bash
-export ANTHROPIC_API_KEY="sk-your-api-key-here"
-```
+That last part matters.
 
-Without the API key, the skill still works using OpenClaw's agent for responses.
+Earlier hook-based builds were too easy to make risky because values like `{{MediaPath}}` could be expanded by the platform into a shell command before the skill code had a chance to validate them.
 
-### What's Different with Claude?
-- 🧠 More natural, context-aware responses
-- ⚡ Faster response times
-- 🎯 Better understanding of Portuguese slang & expressions
-- 🔒 Responses stay private (processed locally or via Anthropic)
+So this build keeps the useful part, the voice pipeline, and removes the risky public hook surface. Safer, cleaner, easier to review. 🛡️
 
-### Cost
-- Free tier available (check Anthropic pricing)
-- Each voice message = 1 API call
+## Privacy model 🔒
 
-## 📋 What Gets Installed
+By default, the skill is local-first:
 
-```
-~/.openclaw/workspace/
-├── piper/                        # TTS Engine
-│   ├── piper/piper              # Binary (auto-downloaded)
-│   ├── pt_BR-jeff-medium.onnx   # Voice models (auto-downloaded)
-│   ├── pt_BR-cadu-medium.onnx
-│   ├── pt_BR-faber-medium.onnx
-│   └── pt_BR-miro-high.onnx
-└── .audio_pt_voice_config       # Your voice preference
-```
+* audio transcription runs locally
+* speech synthesis runs locally
+* response generation uses the local OpenClaw CLI
+* audio files are not uploaded by this skill
 
-**Total size:** ~240MB (voice models)
+Optional external mode:
 
-## 🛠️ Troubleshooting
+* if `ANTHROPIC_API_KEY` is present, transcript text may be sent to Anthropic for response generation
+* audio is still not uploaded by this skill
+* unset `ANTHROPIC_API_KEY` to keep response generation local
 
-### Audio reply doesn't work
-```bash
-# Check health
-python3 health_check.py
+## Install ⚙️
 
-# Test transcription
-python3 scripts/transcribe.py /path/to/audio.wav
+Run:
 
-# Test synthesis
-python3 scripts/synthesize.py "Teste"
-```
-
-### Piper not found
-```bash
-# Reinstall Piper
-rm -rf ~/.openclaw/workspace/piper
-bash install.sh
-```
-
-### Claude API issues
-```bash
-# Check your API key
-echo $ANTHROPIC_API_KEY
-
-# Or use OpenClaw agent only
-export ANTHROPIC_API_KEY=""  # Unset to use OpenClaw
-```
-
-### Wrong voice being used
-```bash
-# Check current voice
-python3 scripts/voice_config.py get
-
-# Reset to default
-python3 scripts/voice_config.py set jeff
-```
-
-## 📊 Technical Details
-
-### Speech Recognition (ASR)
-- **Model:** wav2vec2-large-xlsr-53-portuguese
-- **License:** Apache 2.0 (Free)
-- **Best at:** Brazilian Portuguese slang, informal speech
-- **Also supports:** English
-- **Provider:** jonatasgrosman (HuggingFace)
-
-### Text-to-Speech (TTS)
-- **Engine:** Piper (by Rhasspy)
-- **Speed:** Real-time on ARM64 & x86_64
-- **Voices:** 3 masculine + 1 feminine (community)
-- **Quality:** Neural (not robotic)
-- **Format:** Opus OGG (Telegram optimized)
-- **License:** MIT (Free)
-
-### AI Response Generation
-- **Default:** OpenClaw Agent (included with your setup)
-- **Optional:** Claude API (requires ANTHROPIC_API_KEY)
-- **Both:** Fully compatible, easy to switch
-
-## 📦 System Requirements
-
-| Component | Minimum | Recommended |
-|-----------|---------|-------------|
-| Python | 3.8+ | 3.10+ |
-| RAM | 2GB | 4GB+ |
-| Storage | 300MB | 500MB |
-| Internet | Required (download only) | Required (download only) |
-
-**Supported OSes:**
-- ✅ Linux (Ubuntu, Debian, Raspberry Pi OS, etc.)
-- ✅ macOS (Intel & Apple Silicon)
-- ✅ Windows (via WSL2)
-
-## 🔄 Update & Uninstall
-
-### Update to latest
-```bash
-cd ~/.openclaw/skills/audio-ptbr-autoreply
-bash install.sh  # Re-runs, only installs missing pieces
-```
-
-### Uninstall completely
-```bash
-rm -rf ~/.openclaw/skills/audio-ptbr-autoreply
-rm -rf ~/.openclaw/workspace/piper
-rm ~/.openclaw/workspace/.audio_pt_voice_config
-```
-
-## 📝 File Structure
-
-```
-audio-ptbr-autoreply/
-├── install.sh                  # ⭐ Run this once!
-├── health_check.py             # Validate installation
-├── scripts/
-│   ├── transcribe.py           # ASR (audio → text)
-│   ├── synthesize.py           # TTS (text → audio)
-│   ├── voice_config.py         # Voice management
-│   ├── claude_adapter.py        # Claude integration
-│   └── process.sh              # Full workflow
-├── SKILL.md                    # Skill manifest
-└── README.md                   # This file
-```
-
-## 🙏 Credits
-
-**Built with open source:**
-- [wav2vec2-pt-br](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-portuguese) by jonatasgrosman
-- [Piper TTS](https://github.com/rhasspy/piper) by Rhasspy
-- [Claude API](https://www.anthropic.com/claude) by Anthropic (optional)
-
-**Voices:**
-- Jeff, Cadu, Faber: Piper Voices repository
-- Miro: Community contribution by TarcisoAmorim
-
-## 📞 Support
-
-- **Issue with installation?** Run `python3 health_check.py`
-- **Feature request?** Check the [repository](https://github.com)
-- **Found a bug?** Report it with `health_check.py` output
-
-## 📄 License
-
-MIT - Free to use, modify, and redistribute. No attribution required.
-
----
-
-**Ready to go?**
 ```bash
 bash install.sh
-openclaw gateway restart
-/voz jeff  # Set a voice
-# Send your first audio message! 🎤
 ```
+
+The installer creates a virtualenv inside the skill directory, installs Python dependencies there, downloads Piper, downloads PT-BR voices, writes the default voice config, and runs a health check.
+
+It expects these system dependencies to already exist:
+
+```text
+python3
+ffmpeg
+tar
+curl or wget
+```
+
+If something is missing, the installer stops and tells you what to install manually.
+
+## Use 🗣️
+
+List available voices:
+
+```bash
+/voz listar
+```
+
+Choose a voice:
+
+```bash
+/voz jeff
+/voz cadu
+/voz faber
+/voz miro
+/voz feminina
+/voz masculina
+```
+
+Process an audio file manually:
+
+```bash
+bash process.sh --audio-file /absolute/path/to/audio.ogg
+```
+
+When synthesis succeeds, the script prints a `MEDIA:` directive pointing to the generated voice reply.
+
+## Optional environment variables 🧰
+
+```text
+ANTHROPIC_API_KEY     Enables Anthropic response generation
+AUDIO_VOICE           Sets the default voice
+RESPONSE_TIMEOUT      Response timeout in seconds, default 30
+SYNTHESIS_TIMEOUT     Synthesis timeout in seconds, default 45
+WORKSPACE             Overrides the OpenClaw workspace path
+PYTHON_BIN            Overrides the Python executable used by install.sh
+```
+
+## Safety note for hooks 🛡️
+
+This public package does not register an automatic `message.audio.receive` hook.
+
+That is deliberate.
+
+Shell-templated hooks can become unsafe when the platform expands values like media paths, targets, or message IDs into a shell command string before your script receives them.
+
+For public distribution, the safer choice is to ship the voice pipeline without that hook. `LOCAL_HOOK_EXAMPLE.md` exists only for local operators who understand the risk and want to wire a hook manually in a controlled environment.
+
+## Files included 📦
+
+```text
+install.sh                         Installer with local virtualenv setup
+process.sh                         Main voice-processing entry point
+health_check.py                    Setup validation
+LOCAL_HOOK_EXAMPLE.md              Local-only hook notes
+requirements.txt                   Required Python dependencies
+requirements-optional.txt          Optional Anthropic dependency
+scripts/transcribe_universal.py    Local PT-BR transcription
+scripts/claude_adapter.py          OpenClaw or optional Anthropic response generation
+scripts/synthesize_universal.py    Piper TTS synthesis
+scripts/voice_config.py            Voice selection storage
+```
+
+## Good fit ✅
+
+Use this skill if you want a small Portuguese voice loop for OpenClaw, especially when you care about local transcription, local speech synthesis, and a public package that avoids unnecessary permission creep.
+
+It is not trying to be a full voice assistant platform.
+
+It is just a focused voice-reply helper: audio in, agent response, audio out. 🎙️→🧠→🔊

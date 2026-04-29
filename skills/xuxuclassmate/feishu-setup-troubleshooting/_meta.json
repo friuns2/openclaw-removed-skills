@@ -1,11 +1,17 @@
 {
   "owner": "xuxuclassmate",
   "slug": "feishu-setup-troubleshooting",
-  "displayName": "飞书/Lark 配置与排错",
+  "displayName": "Feishu/Lark Setup and Troubleshooting",
   "latest": {
-    "version": "1.2.0",
-    "publishedAt": 1776494699574,
-    "commit": "https://github.com/openclaw/skills/commit/253d374baed097a1275358f90e8cc24d32099fb8"
+    "version": "1.2.2",
+    "publishedAt": 1776836882242,
+    "commit": "https://github.com/openclaw/skills/commit/1ce4776275bd62f24f72e386ba39745f8f21fa5f"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.2.0",
+      "publishedAt": 1776494699574,
+      "commit": "https://github.com/openclaw/skills/commit/253d374baed097a1275358f90e8cc24d32099fb8"
+    }
+  ]
 }

@@ -1,44 +1,28 @@
 ---
 name: cn-trends-ai
-description: |
-  中文全平台热搜聚合。一键获取知乎、微博、百度、B站、抖音、头条6大平台热搜榜单。
-  中文优先，无需API Key，开箱即用。
-  当用户说"热搜"、"热点"、"今日热点"、"什么火"、"热搜榜"、"全平台热搜"时触发。
-  Keywords: 热搜, 热榜, 热点, 趋势, trending, hot search.
+version: "1.3.0"
+description: "获取知乎、微博、百度、B站实时热搜榜单。"
 ---
 
-# 中文全平台热搜聚合
+# 中文热搜聚合
 
-一站式获取中国主流平台实时热搜榜单。
+获取4大平台实时热搜。
 
-## 核心能力
+## 功能
+- 知乎热榜
+- 微博热搜
+- 百度热搜
+- B站排行榜
+- 统一格式输出、关键词过滤
 
-1. **多平台抓取** — 知乎、微博、百度、B站、抖音、头条
-2. **统一格式** — 所有平台热搜统一输出格式
-3. **AI 分析** — 对热搜进行分类和趋势评估
-4. **快速查看** — 一键获取，无需API Key
+## 用法
+python3 scripts/fetch_all_trends.py --all
+python3 scripts/fetch_all_trends.py --platform zhihu --limit 10
+python3 scripts/fetch_all_trends.py --all --keyword "AI" --json
 
-## 使用方式
+## 依赖
+- Python 3.7+
+- certifi（SSL证书验证）
 
-用户说"今天什么热点"或"热搜"时：
-
-```
-python3 scripts/fetch_all_trends.py
-```
-
-## 支持平台
-
-| 平台 | 数据源 | 更新频率 |
-|------|--------|----------|
-| 知乎 | 知乎热榜API | 实时 |
-| 微博 | 微博热搜API | 实时 |
-| 百度 | 百度热搜 | 实时 |
-| B站 | B站排行榜 | 每小时 |
-| 抖音 | 抖音热点 | 实时 |
-| 头条 | 今日头条热榜 | 实时 |
-
-## 注意事项
-
-- 所有数据来自公开接口，无需登录或API Key
-- 部分平台可能有反爬限制，脚本已设置合理的请求间隔
-- 建议配合 multi-platform-trend Skill 进行深度分析
+## 数据来源
+所有数据来自公开接口，无需登录，无需API Key。

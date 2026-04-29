@@ -4,16 +4,16 @@
 
 ### Basic Auth（默认）
 ```bash
-curl -u "admin:Harbor12345" "https://harbor.mycompany.com/api/v2.0/projects"
+curl -u "username:password" "https://harbor.example.com/api/v2.0/projects"
 ```
 
 ### Bearer Token（推荐）
 ```bash
 # 1. 获取 Token
-TOKEN=$(curl -s -X POST "https://harbor.mycompany.com/api/v2.0/tokens" \
-  -u "admin:Harbor12345" \
+TOKEN=$(curl -s -X POST "https://harbor.example.com/api/v2.0/tokens" \
+  -u "username:password" \
   -H "Content-Type: application/json" \
-  -d '{"principal":"admin","password":"Harbor12345"}' | jq -r '.token')
+  -d '{"principal":"username","password":"password"}' | jq -r '.token')
 
 # 2. 使用 Token
 curl -H "Authorization: Bearer $TOKEN" "https://harbor.mycompany.com/api/v2.0/projects"

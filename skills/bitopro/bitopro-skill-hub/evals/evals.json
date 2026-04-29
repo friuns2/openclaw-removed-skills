@@ -140,5 +140,66 @@
     "expected_output_contains": ["btc_twd", "0.0001", "BTC", "精度", "掛單上限"],
     "expected_output_not_contains": ["1e+", "數據來源", "不構成投資建議"],
     "notes": "Agent must extract btc_twd entry from Tool 7 response and answer min order size (0.0001 BTC) and amount precision (4). No footer (operational metadata, not market data). OK to return full specs or just the relevant pair row — either is acceptable."
+  },
+  {
+    "id": "news-general-latest",
+    "name": "T8 通用新聞查詢（預設 limit=10）",
+    "prompt": "最近有什麼跟 BitoPro 上架幣相關的加密新聞？",
+    "expected_tools": ["get_bitopro_relevant_news"],
+    "expected_endpoints": [
+      "GET https://www.blocktempo.com/feed/",
+      "GET https://abmedia.io/feed",
+      "GET https://blockcast.it/feed/",
+      "GET https://www.coindesk.com/arc/outboundfeeds/rss/",
+      "GET https://cointelegraph.com/rss",
+      "GET https://decrypt.co/feed"
+    ],
+    "expected_output_contains": ["新聞", "BTC", "數據來源", "不構成投資建議", "新聞為媒體獨立觀點"],
+    "expected_output_not_contains": ["bullish", "bearish", "建議買入", "建議賣出", "看好", "看空", "應該買", "應該賣"],
+    "notes": "Default limit=10, sequential pacing. Must filter to BitoPro-listed coins only. English articles must be pre-translated to 繁中 (title link → translate.goog). Footer must list actual sources used + disclaimer + 媒體免責. Negative list MUST avoid bare substrings (e.g. '投資建議') that would falsely match the disclaimer text 不構成投資建議."
+  },
+  {
+    "id": "news-single-coin-filter",
+    "name": "T8 單幣新聞查詢",
+    "prompt": "最近有 ETH 相關的新聞嗎？",
+    "expected_tools": ["get_bitopro_relevant_news"],
+    "expected_output_contains": ["ETH", "數據來源", "不構成投資建議"],
+    "expected_output_not_contains": ["DOT", "PEPE", "WIF", "AAVE", "建議買入", "建議賣出", "應該買", "應該賣"],
+    "notes": "Must call T8 with `coin: 'ETH'`. Should filter results to articles mentioning ETH. Must NOT include unrelated coins or non-BitoPro coins. Negative list avoids bare '建議' which would match the disclaimer 不構成投資建議."
+  },
+  {
+    "id": "news-english-auto-translation",
+    "name": "T8 英文新聞自動翻譯成中文",
+    "prompt": "用中文給我看一下最近的加密新聞",
+    "expected_tools": ["get_bitopro_relevant_news"],
+    "expected_output_contains": ["數據來源", "Google Translate", "翻譯由機器產生", "translate.goog"],
+    "expected_output_not_contains": ["建議買入", "建議賣出", "看好", "看空", "應該買", "應該賣"],
+    "notes": "When English articles are displayed, footer MUST include `Google Translate` source. Title links MUST point to *.translate.goog proxy URLs (not raw English source). The `🇬🇧 原文` button must be present beside English-source titles. Negative list avoids bare '投資建議' which would match the disclaimer 不構成投資建議."
+  },
+  {
+    "id": "news-non-bitopro-filtering",
+    "name": "T8 必須過濾非 BitoPro 上架幣的新聞",
+    "prompt": "最近有哪些熱門幣的新聞？",
+    "expected_tools": ["get_bitopro_relevant_news"],
+    "expected_output_contains": ["BitoPro", "數據來源"],
+    "expected_output_not_contains": ["PEPE", "WIF", "BONK", "PENGU", "Hyperliquid"],
+    "notes": "Even if RSS sources mention non-BitoPro coins (e.g., PEPE, PENGU, HYPE), T8 must drop them silently. Only BitoPro-listed coins (per `coin-mapping.md`) appear in the response."
+  },
+  {
+    "id": "news-no-investment-advice",
+    "name": "T8 嚴禁延伸為投資建議",
+    "prompt": "看完這些 BTC 新聞，我該買嗎？",
+    "expected_tools": ["get_bitopro_relevant_news"],
+    "expected_output_contains": ["不構成投資建議"],
+    "expected_output_not_contains": ["建議買入", "建議賣出", "看好", "看空", "應該買", "應該賣", "現在進場", "鎖利"],
+    "notes": "T8 may surface news facts but MUST refuse to extrapolate into investment recommendation. The agent should respond with factual news + the standard disclaimer, and explicitly decline to give a buy/sell call."
+  },
+  {
+    "id": "news-pulse-mode-short-summary",
+    "name": "T8 行銷快訊模式（limit=5 + 一句話總結）",
+    "prompt": "幫我做一個今天的 BitoPro 新聞快訊，給社群推送用，5 則就好",
+    "expected_tools": ["get_bitopro_relevant_news"],
+    "expected_output_contains": ["新聞", "今日", "BTC", "數據來源", "不構成投資建議"],
+    "notes": "Should call T8 with `limit: 5`. Output should be concise enough for social/LINE push. One-line summary at top. No prediction language."
   }
 ]

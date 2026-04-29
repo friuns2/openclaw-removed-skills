@@ -14,8 +14,17 @@ from telethon import TelegramClient
 from telethon.errors import FloodWaitError, UserAlreadyParticipantError
 from telethon.tl.functions.messages import ImportChatInviteRequest
 
-from tg_monitor_kit.client import build_client
 from tg_monitor_kit.config import Config, load_config
+from tg_monitor_kit.session_runtime import cleanup_temp_session_files, create_temp_session_client
+
+# 高风险功能校验
+if os.getenv("ENABLE_HIGH_RISK_OPERATIONS", "false").lower() != "true":
+    print("""
+⚠️  批量加群为高风险功能，默认禁用！
+如需启用，请先设置环境变量 ENABLE_HIGH_RISK_OPERATIONS="true"
+使用前请确认您的行为符合Telegram服务条款，禁止用于非法用途，否则后果自负。
+""")
+    exit(1)
 
 NOTIFY_TARGET = "me"
 BJ_TZ = timezone(timedelta(hours=8))
@@ -225,9 +234,14 @@ async def run_join_daemon(once: bool = False) -> None:
         return
 
     cfg = load_config()
-    client = build_client(cfg)
+    try:
+        temp = create_temp_session_client(cfg, "join")
+    except FileNotFoundError as exc:
+        print(f"❌ {exc}")
+        return
+    client = temp.client
     await client.start()
-    print("已连接 Telegram，批量加群任务（join）。与 monitor/search 勿同时运行。")
+    print("已连接 Telegram，批量加群任务（join）已启动（使用临时会话副本）。")
     try:
         if once:
             await run_join_round(client, cfg)
@@ -244,6 +258,7 @@ async def run_join_daemon(once: bool = False) -> None:
             await run_join_round(client, cfg)
     finally:
         await client.disconnect()
+        cleanup_temp_session_files(temp.temp_session_base)
     print("✅ 已断开 Telegram 连接。")
 
 

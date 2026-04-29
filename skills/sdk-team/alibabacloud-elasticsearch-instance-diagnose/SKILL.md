@@ -70,12 +70,31 @@ Collect signals from **Alibaba Cloud OpenAPI (control plane)** and the **Elastic
 
 All control-plane and CMS data collection for this skill uses the **Aliyun CLI**.
 
-**User-Agent (required)**: set a User-Agent for Alibaba Cloud API calls:
+> **[MUST] `elasticsearch` / `cms` — plugin-mode shell only (avoid legacy CLI)**  
+> Whenever the agent emits **executable** `aliyun` lines (chat, reproducibility exports, or copy-paste steps), use **plugin subcommands** (lowercase-hyphenated) and **kebab-case** flags — the same shape as `scripts/openapi_cli_collect.py` and [references/verification-method.md](references/verification-method.md).  
+> - **Do not** use legacy POP-style invocations: a **PascalCase verb** immediately after `elasticsearch` or `cms` on the same `aliyun` line (the old “action name = subcommand” style), or CamelCase flags like `--InstanceId`, `--Namespace`, `--StartTime` in **new** commands. Use plugin verbs only (`describe-instance`, `describe-metric-list`, …).  
+> - **Naming split:** `DescribeInstance`, `ListSearchLog`, `DescribeMetricList`, etc. are **OpenAPI action names** (PascalCase — docs, RAM, console). The token **after** `aliyun elasticsearch` or `aliyun cms` in a shell must be the **CLI plugin** name (`describe-instance`, `list-search-log`, `describe-metric-list`, …).  
+> - **Prefer** `python3 scripts/check_es_instance_health.py` for the standard control-plane + CMS bundle so subprocess calls stay aligned with this repo.  
+> - **CLI references:** [Elasticsearch CLI 中心](https://api.aliyun.com/api-tools/cli/elasticsearch/2017-06-13), [云监控 CLI 中心](https://api.aliyun.com/api-tools/cli/Cms/2019-01-01).
+
+**AI-Mode and plugin baseline (required)** — wrap every diagnosis session that runs `aliyun` OpenAPI/CMS commands:
+
 ```bash
-export ALIBABA_CLOUD_USER_AGENT="AlibabaCloud-Agent-Skills"
+aliyun configure ai-mode enable
+aliyun configure ai-mode set-user-agent --user-agent "AlibabaCloud-Agent-Skills/alibabacloud-elasticsearch-instance-diagnose"
+aliyun plugin update
+# … diagnosis: aliyun / python3 scripts/check_es_instance_health.py …
+aliyun configure ai-mode disable
 ```
 
-**CLI hardening (recommended)**: when authoring raw `aliyun` commands, add **`--connect-timeout 3 --read-timeout 10`** (increase `read-timeout` for large responses or CMS), consistent with the instance-management skill examples, to avoid indefinite hangs on network faults. If the global User-Agent is not set, add **`--user-agent AlibabaCloud-Agent-Skills`** per invocation. For **optional Elasticsearch probes** inside `check_es_instance_health.py` (when `ES_*` is set), the same knobs exist as **`--connect-timeout`** / **`--read-timeout`** on that script — they map to `curl` for engine calls only, not to the Aliyun OpenAPI client.
+> **`configure ai-mode` missing or failing:** Skip the wrapper above; use **`ALIBABA_CLOUD_USER_AGENT`** (next block). Log the CLI failure (e.g. subcommand unavailable). Whether the profile is **valid** is determined only by **`aliyun configure list`** and **`sts get-caller-identity`** — write **valid** / **validity**, not *vaild*.
+
+**User-Agent (required)**: set a User-Agent for Alibaba Cloud API calls:
+```bash
+export ALIBABA_CLOUD_USER_AGENT="AlibabaCloud-Agent-Skills/alibabacloud-elasticsearch-instance-diagnose"
+```
+
+**CLI hardening (recommended)**: when authoring raw `aliyun` commands, use **§2.1 MUST plugin shape** first, then add **`--connect-timeout 3 --read-timeout 10`** (increase `read-timeout` for large responses or CMS), consistent with the instance-management skill examples, to avoid indefinite hangs on network faults. If the global User-Agent is not set, add **`--user-agent AlibabaCloud-Agent-Skills/alibabacloud-elasticsearch-instance-diagnose`** per invocation. For **optional Elasticsearch probes** inside `check_es_instance_health.py` (when `ES_*` is set), the same knobs exist as **`--connect-timeout`** / **`--read-timeout`** on that script — they map to `curl` for engine calls only, not to the Aliyun OpenAPI client.
 
 Run before diagnosis:
 
@@ -149,14 +168,14 @@ export ES_PASSWORD="<elasticsearch-admin-password>"
 > Do not assume undeclared defaults or hardcode user-specific parameters.
 
 > **Boundary controls (MUST)**
-> - **`region-id` and `instance-id` must not be guessed** or taken from unverified defaults; if they disagree with `DescribeInstance` or the user’s explicit statement, reconfirm.
+> - **Region and `instance-id` must not be guessed** or taken from unverified defaults; if they disagree with `DescribeInstance` or the user’s explicit statement, reconfirm.
 > - **Do not** apply metrics, logs, or `DescribeInstance` conclusions from **instance A** to **instance B**; `ES_ENDPOINT` must match the instance under diagnosis (see **Pre-flight validation for Elasticsearch API** below).
 > - This skill is **read-only diagnosis**: **do not** invoke mutating control-plane APIs (create, resize, restart, delete instance, etc.). If the user requests a change, provide recommendations only; execution belongs in the console or an approved change workflow.
 
 | Parameter | Required | Description | Default |
 |-----------|----------|-------------|---------|
-| `instance-id` | Yes | Elasticsearch instance ID, e.g. `es-cn-xxxxx` | - |
-| `region-id` | Yes | Region ID, e.g. `cn-hangzhou` | - |
+| `instance-id` | Yes | Elasticsearch instance ID, e.g. `es-cn-xxxxx`. **`aliyun` flag is `--instance-id`** (not `--InstanceId`). | - |
+| `region` | Yes | Region ID (e.g. `cn-hangzhou`). **`aliyun` flag is `--region`** (not `--region-id`). | - |
 | `profile` | No | Aliyun CLI profile (explicit `--profile` recommended) | `default` |
 | `ES_ENDPOINT` | No | Elasticsearch endpoint (direct API access only) | - |
 | `ES_PASSWORD` | No | Elasticsearch admin password (direct API access only) | - |
@@ -168,6 +187,8 @@ export ES_PASSWORD="<elasticsearch-admin-password>"
 ## 5. End-to-end diagnostic workflow
 
 ### Agent hard rules (non-negotiable)
+
+> **Aliyun CLI shape:** For **`aliyun elasticsearch`** and **`aliyun cms`**, follow **§2.1 MUST (plugin mode only)** in every new executable command — do not resurrect legacy `DescribeInstance` / `ListSearchLog`-as-subcommand lines or `--InstanceId`-style flags in session exports or user-facing step lists (they drift from `openapi_cli_collect.py` and fail static checks).
 
 > **OpenAPI/CMS cannot replace MUST engine APIs.** For any **§5 MUST** table row or **`check_es_instance_health.py` rule-engine MUST**, Alibaba Cloud OpenAPI and CloudMonitor do **not** replace the listed Elasticsearch REST calls for engine-level root cause—when **feasibility** holds, run those `curl` endpoints (see §7); they are complementary layers, not interchangeable.
 >

@@ -1,43 +1,44 @@
 ---
 name: free-ai-video-generator-with-no-restrictions
-version: "1.0.0"
-displayName: "Free AI Video Generator With No Restrictions — Create Unlimited Videos Instantly"
+version: "1.0.1"
+displayName: "Free AI Video Generator With No Restrictions — Generate and Export AI Videos Free"
 description: >
-  Drop a concept, script, or idea and watch it transform into a fully realized video without paywalls, content blocks, or creative limits. This free-ai-video-generator-with-no-restrictions skill lets you produce videos across any genre, style, or subject — from cinematic short films to bold marketing content. Generate realistic scenes, animated sequences, or stylized visuals with no topic gatekeeping. Perfect for creators, marketers, educators, and storytellers who are tired of being told 'no'.
+  Get 1080p MP4 files from your text prompts or clips using this free-ai-video-generator-with-no-restrictions tool. It runs AI video generation on cloud GPUs, so your machine does zero heavy lifting. content creators and marketers can generating videos from text or clips with no watermarks or usage limits in roughly 1-2 minutes — supports MP4, MOV, WebM, AVI.
 metadata: {"openclaw": {"emoji": "🎬", "requires": {"env": ["NEMO_TOKEN"], "configPaths": ["~/.config/nemovideo/"]}, "primaryEnv": "NEMO_TOKEN", "variant": "control"}}
 ---
 
 ## Getting Started
 
-> Welcome to the only AI video generator that doesn't put a leash on your creativity — describe your scene, concept, or script and I'll turn it into video content with no topic restrictions or hidden limits. Drop your idea below and let's start generating!
+> Got a text prompts or clips for me? Send it over and I'll handle the AI video generation. Or just describe what you need.
 
 **Try saying:**
-- "Generate a gritty noir-style short film intro of a detective walking through a rainy city at night, with dramatic lighting and a voiceover monologue"
-- "Create a 60-second product promo video for an energy drink targeting extreme sports athletes — fast cuts, loud music energy, urban setting"
-- "Make an animated explainer video about the history of cryptocurrency with no sugar-coating — include the crashes, scandals, and controversies"
+- "generate a short text description like 'a sunset over a city skyline' into a 1080p MP4"
+- "generate a 30-second video from my script with no watermark"
+- "generating videos from text or clips with no watermarks or usage limits for content creators and marketers"
 
-### First-Time Connection
+### Automatic Setup
 
-When a user first opens this skill, connect to the processing backend automatically. Briefly let them know (e.g. "Setting up...").
+On first interaction, connect to the processing API before doing anything else. Show a brief status like "Setting things up...".
 
-**Authentication**: Check if `NEMO_TOKEN` is set in the environment. If it is, skip to step 2.
+**Token**: If `NEMO_TOKEN` environment variable is already set, use it and skip to **Session** below.
 
-1. **Obtain a free token**: Generate a random UUID as client identifier. POST to `https://mega-api-prod.nemovideo.ai/api/auth/anonymous-token` with header `X-Client-Id` set to that UUID. The response `data.token` is your NEMO_TOKEN — 100 free credits, valid 7 days.
-2. **Create a session**: POST to `https://mega-api-prod.nemovideo.ai/api/tasks/me/with-session/nemo_agent` with `Authorization: Bearer <token>`, `Content-Type: application/json`, and body `{"task_name":"project","language":"<detected>"}`. Store the returned `session_id` for all subsequent requests.
+**Free token**: Generate a UUID as client identifier, then POST to `https://mega-api-prod.nemovideo.ai/api/auth/anonymous-token` with header `X-Client-Id: <uuid>`. The response field `data.token` becomes your NEMO_TOKEN (100 credits, 7-day expiry).
 
-Keep setup communication brief. Don't display raw API responses or token values to the user.
+**Session**: POST to `https://mega-api-prod.nemovideo.ai/api/tasks/me/with-session/nemo_agent` with Bearer auth and body `{"task_name":"project"}`. Save `session_id` from the response.
 
-# Generate Any Video, Zero Rules, Zero Cost
+Confirm to the user you're connected and ready. Don't print tokens or raw JSON.
 
-Most video generation tools come loaded with fine print — banned topics, restricted styles, content filters that block legitimate creative work, and premium tiers that lock you out of the good stuff. This skill throws all of that out the window. Whether you're building a product demo, crafting a dramatic short film, producing educational content, or experimenting with something genuinely weird and original, you get full creative latitude from the first prompt.
+# Generate Text Prompts Or Clips Into Unrestricted Ai Videos
 
-Describe your scene in plain language and the skill interprets tone, pacing, visual style, and narrative structure to produce video output that matches your vision. You're not choosing from templates or clicking through dropdown menus — you're directing. The skill handles the heavy lifting of translating your words into motion.
+So here's how this works. You give me text prompts or clips and I AI video generation it through NemoVideo's backend. No local software, no plugins, no GPU on your end.
 
-This is built for people who create seriously. Filmmakers prototyping storyboards, social media managers who need volume without budget, indie game developers building cutscenes, or anyone who has ever been frustrated by AI tools that treat creativity like a liability. Bring your idea — no matter how niche, edgy, or unconventional — and generate without compromise.
+Tested it with a a short text description like 'a sunset over a city skyline' last week. Asked for generate a 30-second video from my script with no watermark and had a MP4 back in 1-2 minutes. 1080p quality, decent file size.
 
-## Prompt-to-Video Request Routing
+shorter prompts with clear scene descriptions produce more accurate results faster. That's about it.
 
-Every text prompt or image input you submit is parsed by the intent engine and dispatched to the optimal generative pipeline based on resolution target, style parameters, and render complexity.
+## Request Routing
+
+Your request is matched to one of several actions depending on what you typed.
 
 | User says... | Action | Skip SSE? |
 |-------------|--------|----------|
@@ -47,43 +48,44 @@ Every text prompt or image input you submit is parsed by the intent engine and d
 | "upload" / "上传" / user sends file | → §3.2 Upload | ✅ |
 | Everything else (generate, edit, add BGM…) | → §3.1 SSE | ❌ |
 
-## Cloud Render API Reference
+## Backend Processing
 
-The backend leverages a distributed GPU cluster running latent diffusion models with unrestricted generation policies, meaning your video requests process through uncapped inference nodes with no content throttling or frame-rate limits. Each API call returns a signed render job ID that streams your output frames progressively as the cloud pipeline completes each scene segment.
+The heavy lifting runs on NemoVideo's GPU cluster. You upload, the backend processes, you download. No local rendering needed.
 
-Skill attribution — read from this file's YAML frontmatter at runtime:
-- `X-Skill-Source`: `free-ai-video-generator-with-no-restrictions`
-- `X-Skill-Version`: from frontmatter `version`
-- `X-Skill-Platform`: detect from install path (`~/.clawhub/` → `clawhub`, `~/.cursor/skills/` → `cursor`, else `unknown`)
+Base URL: `https://mega-api-prod.nemovideo.ai`
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/tasks/me/with-session/nemo_agent` | POST | Start a new editing session. Body: `{"task_name":"project","language":"<lang>"}`. Returns `session_id`. |
+| `/run_sse` | POST | Send a user message. Body includes `app_name`, `session_id`, `new_message`. Stream response with `Accept: text/event-stream`. Timeout: 15 min. |
+| `/api/upload-video/nemo_agent/me/<sid>` | POST | Upload a file (multipart) or URL. |
+| `/api/credits/balance/simple` | GET | Check remaining credits (`available`, `frozen`, `total`). |
+| `/api/state/nemo_agent/me/<sid>/latest` | GET | Fetch current timeline state (`draft`, `video_infos`, `generated_media`). |
+| `/api/render/proxy/lambda` | POST | Start export. Body: `{"id":"render_<ts>","sessionId":"<sid>","draft":<json>,"output":{"format":"mp4","quality":"high"}}`. Poll status every 30s. |
+
+Accepted file types: mp4, mov, avi, webm, mkv, jpg, png, gif, webp, mp3, wav, m4a, aac.
+
+Headers are derived from this file's YAML frontmatter. `X-Skill-Source` is `free-ai-video-generator-with-no-restrictions`, `X-Skill-Version` comes from the `version` field, and `X-Skill-Platform` is detected from the install path (`~/.clawhub/` = `clawhub`, `~/.cursor/skills/` = `cursor`, otherwise `unknown`).
 
 **All requests** must include: `Authorization: Bearer <NEMO_TOKEN>`, `X-Skill-Source`, `X-Skill-Version`, `X-Skill-Platform`. Missing attribution headers will cause export to fail with 402.
 
-**API base**: `https://mega-api-prod.nemovideo.ai`
+### Error Codes
 
-**Create session**: POST `/api/tasks/me/with-session/nemo_agent` — body `{"task_name":"project","language":"<lang>"}` — returns `task_id`, `session_id`.
+- `0` — success, continue normally
+- `1001` — token expired or invalid; re-acquire via `/api/auth/anonymous-token`
+- `1002` — session not found; create a new one
+- `2001` — out of credits; anonymous users get a registration link with `?bind=<id>`, registered users top up
+- `4001` — unsupported file type; show accepted formats
+- `4002` — file too large; suggest compressing or trimming
+- `400` — missing `X-Client-Id`; generate one and retry
+- `402` — free plan export blocked; not a credit issue, subscription tier
+- `429` — rate limited; wait 30s and retry once
 
-**Send message (SSE)**: POST `/run_sse` — body `{"app_name":"nemo_agent","user_id":"me","session_id":"<sid>","new_message":{"parts":[{"text":"<msg>"}]}}` with `Accept: text/event-stream`. Max timeout: 15 minutes.
+### Reading the SSE Stream
 
-**Upload**: POST `/api/upload-video/nemo_agent/me/<sid>` — file: multipart `-F "files=@/path"`, or URL: `{"urls":["<url>"],"source_type":"url"}`
+Text events go straight to the user (after GUI translation). Tool calls stay internal. Heartbeats and empty `data:` lines mean the backend is still working — show "⏳ Still working..." every 2 minutes.
 
-**Credits**: GET `/api/credits/balance/simple` — returns `available`, `frozen`, `total`
-
-**Session state**: GET `/api/state/nemo_agent/me/<sid>/latest` — key fields: `data.state.draft`, `data.state.video_infos`, `data.state.generated_media`
-
-**Export** (free, no credits): POST `/api/render/proxy/lambda` — body `{"id":"render_<ts>","sessionId":"<sid>","draft":<json>,"output":{"format":"mp4","quality":"high"}}`. Poll GET `/api/render/proxy/lambda/<id>` every 30s until `status` = `completed`. Download URL at `output.url`.
-
-Supported formats: mp4, mov, avi, webm, mkv, jpg, png, gif, webp, mp3, wav, m4a, aac.
-
-### SSE Event Handling
-
-| Event | Action |
-|-------|--------|
-| Text response | Apply GUI translation (§4), present to user |
-| Tool call/result | Process internally, don't forward |
-| `heartbeat` / empty `data:` | Keep waiting. Every 2 min: "⏳ Still working..." |
-| Stream closes | Process final response |
-
-~30% of editing operations return no text in the SSE stream. When this happens: poll session state to verify the edit was applied, then summarize changes to the user.
+About 30% of edit operations close the stream without any text. When that happens, poll `/api/state` to confirm the timeline changed, then tell the user what was updated.
 
 ### Backend Response Translation
 
@@ -97,48 +99,26 @@ The backend assumes a GUI exists. Translate these into API actions:
 | "preview in timeline" | Show track summary |
 | "Export button" / "导出" | Execute export workflow |
 
-**Draft field mapping**: `t`=tracks, `tt`=track type (0=video, 1=audio, 7=text), `sg`=segments, `d`=duration(ms), `m`=metadata.
+Draft JSON uses short keys: `t` for tracks, `tt` for track type (0=video, 1=audio, 7=text), `sg` for segments, `d` for duration in ms, `m` for metadata.
 
+Example timeline summary:
 ```
 Timeline (3 tracks): 1. Video: city timelapse (0-10s) 2. BGM: Lo-fi (0-10s, 35%) 3. Title: "Urban Dreams" (0-3s)
 ```
 
-### Error Handling
+## Common Workflows
 
-| Code | Meaning | Action |
-|------|---------|--------|
-| 0 | Success | Continue |
-| 1001 | Bad/expired token | Re-auth via anonymous-token (tokens expire after 7 days) |
-| 1002 | Session not found | New session §3.0 |
-| 2001 | No credits | Anonymous: show registration URL with `?bind=<id>` (get `<id>` from create-session or state response when needed). Registered: "Top up credits in your account" |
-| 4001 | Unsupported file | Show supported formats |
-| 4002 | File too large | Suggest compress/trim |
-| 400 | Missing X-Client-Id | Generate Client-Id and retry (see §1) |
-| 402 | Free plan export blocked | Subscription tier issue, NOT credits. "Register or upgrade your plan to unlock export." |
-| 429 | Rate limit (1 token/client/7 days) | Retry in 30s once |
+**Quick edit**: Upload → "generate a 30-second video from my script with no watermark" → Download MP4. Takes 1-2 minutes for a 30-second clip.
 
-## Integration Guide
+**Batch style**: Upload multiple files in one session. Process them one by one with different instructions. Each gets its own render.
 
-Plugging this skill into your existing creative workflow is straightforward. If you're a content agency, you can pipe client briefs directly into the skill as structured prompts — include brand tone, target audience, visual references, and desired length. The skill reads context well, so the more specific your input, the more on-brand the output.
-
-For developers building content pipelines, the skill accepts plain-text prompts and returns video generation outputs that can be routed into post-production tools, social schedulers, or CMS platforms. Batch your prompts for high-volume campaigns without hitting the content restriction walls that plague other generators.
-
-If you're a solo creator using ClawHub directly, just treat each conversation as a video production session. Iterate on your prompt, request style adjustments, and refine until the output matches your vision. There's no session limit, no topic approval queue, and no waiting for a human moderator to greenlight your concept.
+**Iterative**: Start with a rough cut, preview the result, then refine. The session keeps your timeline state so you can keep tweaking.
 
 ## Quick Start Guide
 
-Getting your first video generated takes about thirty seconds. Start by describing what you want in one or two sentences — include the subject, the visual style you're imagining, and any mood or tone cues. Example: 'A slow-motion video of a street market at sunset, warm golden tones, documentary feel, no dialogue.'
+1. Send your text prompts or clips (drag and drop works)
+2. Tell me what you want: "generate a 30-second video from my script with no watermark"
+3. Wait 1-2 minutes for processing
+4. Download your MP4 file
 
-If you have a script or voiceover text, paste it in alongside your visual description. The skill will sync the visual pacing to match the spoken content. For animated content, mention the animation style upfront — 2D flat, cel-shaded, motion graphic, or photorealistic — so the output skews in the right direction from the start.
-
-Once you get your first output, iterate freely. Ask for a darker color grade, a faster cut rhythm, a different setting, or a tone shift from serious to satirical. This skill has no restrictions on how many times you revise or how far you push the concept.
-
-## Tips and Tricks
-
-The more specific your prompt, the sharper the output. Vague inputs like 'make a cool video' produce generic results — instead, describe the exact scene: location, time of day, character actions, camera movement, and emotional tone. Treat your prompt like a director's note to a cinematographer.
-
-Use genre references to anchor the visual style quickly. Saying 'shot like a 1970s grindhouse film' or 'aesthetic similar to a Studio Ghibli travel montage' gives the skill a concrete visual framework to build from without requiring you to describe every detail.
-
-For longer videos, break your concept into scenes and generate each one with a separate prompt. This gives you tighter control over pacing and continuity. Label each scene in your prompt ('Scene 2 of 4: the protagonist discovers the letter') so the skill maintains narrative context.
-
-Don't shy away from unconventional requests. This free-ai-video-generator-with-no-restrictions skill is specifically designed to handle the ideas that other tools reject — lean into that freedom and experiment with genres, tones, and subjects that you've never been able to explore before.
+That's it. No account needed for your first 100 credits. Supports MP4, MOV, WebM, AVI.

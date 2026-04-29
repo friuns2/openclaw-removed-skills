@@ -3,11 +3,16 @@
   "slug": "relic-soul-chip",
   "displayName": "Relic Soul Chip",
   "latest": {
-    "version": "1.4.0",
-    "publishedAt": 1776747928227,
-    "commit": "https://github.com/openclaw/skills/commit/447fbabeceb11d313524051686eba65a79076310"
+    "version": "2.1.1",
+    "publishedAt": 1777180163309,
+    "commit": "https://github.com/openclaw/skills/commit/5b5ffc3bbf4a18dc227fe7ee6cfb25e8114bfda6"
   },
   "history": [
+    {
+      "version": "1.4.0",
+      "publishedAt": 1776747928227,
+      "commit": "https://github.com/openclaw/skills/commit/447fbabeceb11d313524051686eba65a79076310"
+    },
     {
       "version": "0.1.3",
       "publishedAt": 1776363624465,

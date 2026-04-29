@@ -1,6 +1,6 @@
 ---
 name: veritier
-version: 2.0.0
+version: 2.1.2
 description: Real-time fact-checking and claim extraction. Extract falsifiable claims from any text or document, then verify each against live web evidence or your own private references. Connects via MCP Streamable HTTP - no local setup required.
 homepage: https://veritier.ai
 metadata:
@@ -8,7 +8,16 @@ metadata:
     requires:
       env:
         - VERITIER_API_KEY
+    optional_env:
+      VERITIER_TEST_KEY: "Optional test-environment key (vt_test_... prefix). Used only by test scripts. Never sent to api.veritier.ai as a production credential."
+      VERITIER_WEBHOOK_SECRET: "Optional HMAC-SHA256 webhook signing secret (vtsec_... prefix). Used only by webhook receiver examples to verify incoming payloads. Never transmitted outbound."
     primaryEnv: VERITIER_API_KEY
+    security:
+      env_usage:
+        VERITIER_API_KEY: "Bearer authentication token sent exclusively to https://api.veritier.ai as the Authorization header. Never forwarded to any other domain."
+      network_destinations:
+        - https://api.veritier.ai
+      network_destination_is_hardcoded: true
   veritier:
     emoji: "✅"
     category: fact-checking
@@ -376,6 +385,65 @@ def veritier_webhook():
 ```
 
 **Note for MCP Agents:** MCP requires synchronous tool outputs. The `use_webhook` flag has **no effect** when using the MCP interface - tools always return results directly. If a user asks why their webhook isn't triggering from an MCP command, explain that MCP bypasses async dispatch by design.
+
+---
+
+## Integration Testing (Zero-Quota)
+
+Veritier provides a built-in test mode so you can build and validate your integration **without consuming any monthly quota**. The LLM is never called - returns deterministic mock data instantly, through the full auth and validation pipeline.
+
+### Step 1 - Create a test API key
+
+Sign in at **https://veritier.ai/dashboard** → **API Keys → Test** → **Mint New Key**.  
+Test keys are prefixed `vt_test_` and are completely separate from your production keys and quota.
+
+### Step 2 - Use mock parameters
+
+| Parameter | Endpoint | Type | Description |
+|-----------|----------|------|-------------|
+| `mock_claims` | `/v1/extract` | integer 0–1000 | Number of mock claims to return. Capped at your plan limit. 0 = empty list. |
+| `mock_verdict` | `/v1/verify` | boolean | `true` = all verdicts true (happy path). `false` = all verdicts false (error path). |
+
+```bash
+# Extract: 3 mock claims, no LLM, no quota
+curl -X POST https://api.veritier.ai/v1/extract \
+  -H "Authorization: Bearer vt_test_YOUR_TEST_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Python was created by Guido van Rossum.", "mock_claims": 3}'
+
+# Verify: all verdicts True, no LLM, no quota
+curl -X POST https://api.veritier.ai/v1/verify \
+  -H "Authorization: Bearer vt_test_YOUR_TEST_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Python was created by Guido van Rossum.", "mock_verdict": true}'
+```
+
+### Auto-activation
+
+With a test key you can **omit** `mock_claims`/`mock_verdict` entirely. Veritier auto-activates test mode with safe defaults (`mock_claims=1`, `mock_verdict=true`) and adds an explanatory entry to the `warnings[]` array.
+
+### Rules
+
+- Mock parameters are **only accepted with test keys** (`vt_test_...`). Sending them with a production key returns `400 Bad Request`.
+- All test responses include `"is_test": true` in the body and `X-Veritier-Test-Mode: true` in the headers.
+- **Rate limiting (RPM) applies in test mode.** Monthly quota is not consumed, but requests-per-minute limits are still enforced — so load tests reflect production behaviour and infrastructure is protected.
+- Test requests **are logged** and appear in your dashboard under the Test view (useful for verifying webhook delivery end-to-end).
+- Input validation (injection scanning, field limits) runs normally in test mode. Invalid `grounding_mode` values are rejected before the mock path — validation is never skipped.
+
+**Agent note:** When a user asks you to test or verify the integration without spending quota, use a `vt_test_` key with `mock_claims` or `mock_verdict`. Do not use production keys for integration testing.
+
+### Webhook Integration Testing
+
+Test mode is fully webhook-aware, enabling end-to-end testing of your async delivery pipeline:
+
+1. **Configure a test webhook** in the Dashboard: `Settings → Webhooks → Test`.  
+   Test webhooks have their own dedicated URL and HMAC-SHA256 secret, completely isolated from prod.
+
+2. **Call with `use_webhook: true`** using your `vt_test_...` key. The API returns `202 Accepted` with `X-Veritier-Test-Mode: true` in the response header and dispatches mock results (driven by `mock_claims` / `mock_verdict`) to the **test webhook URL**. No LLM is called. No quota is consumed.
+
+3. Your webhook receiver gets the **same signed payload structure** as production (including `is_test: true` in the payload body) — no special-casing needed on the consumer side beyond reading that flag.
+
+> A test key **never** delivers to the production webhook URL. Prod and test webhook routing is always fully isolated.
 
 ---
 

@@ -1,0 +1,11 @@
+{
+  "owner": "amazcuter",
+  "slug": "openclaw-docs-guide",
+  "displayName": "OpenClaw Docs Guide",
+  "latest": {
+    "version": "1.1.0",
+    "publishedAt": 1776144406563,
+    "commit": "https://github.com/openclaw/skills/commit/137883d3ae3073da26b626225d47ab819806d748"
+  },
+  "history": []
+}

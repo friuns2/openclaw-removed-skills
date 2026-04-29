@@ -1,0 +1,62 @@
+{
+  "id": "odoo",
+  "name": "火一五·辉火云企业套件插件",
+  "description": "自然语言操作辉火云企业套件，77 个工具覆盖任务与指派、活动闭环（完成/改期）、日历（今日/改期/取消）、邮件（直发/模板）、内部动态 chatter（发评论/内部记录/历史）、附件/文档、关注者、CRM、项目/里程碑（新建/更新/标记完成）、工单闭环（改/关/派）、审批动作（通过/拒绝）、财务、库存、HR、知识库、批量更新、撤销上一步；内置跨渠道通知基座（NotificationBus）：企微/钉钉/飞书订阅辉火云消息与活动提醒，per-agent 偏好过滤（kind/优先级/静音时段），入站回复自动写回内部动态；v1.10 共享凭据：组织内配一次，全员跨渠道（企微/钉钉/飞书）@龙虾 自动复用同一套凭据，禁止重复询问；新增 odoo_whoami 查看当前凭据来源",
+  "version": "1.10.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "odoo": {
+        "type": "object",
+        "description": "辉火云企业套件 连接配置",
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "辉火云企业套件 系统地址，如 https://www.huo15.com"
+          },
+          "db": {
+            "type": "string",
+            "description": "数据库名称，如 huo15"
+          },
+          "username": {
+            "type": "string",
+            "description": "用户名（邮箱或登录名）"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码"
+          }
+        },
+        "required": ["url", "db", "username", "password"]
+      },
+      "sync": {
+        "type": "object",
+        "description": "通知同步配置",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "是否启用后台通知同步",
+            "default": true
+          },
+          "intervalSeconds": {
+            "type": "number",
+            "description": "轮询间隔（秒），默认 30",
+            "default": 30
+          },
+          "channels": {
+            "type": "array",
+            "description": "需要同步的通知类型",
+            "items": {
+              "type": "string",
+              "enum": ["todo", "activity", "message", "email", "calendar"]
+            },
+            "default": ["todo", "activity", "message"]
+          }
+        }
+      }
+    }
+  }
+}

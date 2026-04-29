@@ -1,11 +1,7 @@
 {
   "name": "web-publisher",
-  "version": "0.3.4",
-  "requiredEnvVars": [
-    "WEB_PUBLISHER_API_URL",
-    "WEB_PUBLISHER_USER_ID",
-    "WEB_PUBLISHER_API_KEY"
-  ],
+  "version": "0.5.0",
+  "requiredEnvVars": [],
   "requires": {
     "runtime": {
       "node": ">=18.0.0"
@@ -15,11 +11,36 @@
   },
   "skill": {
     "name": "web-publisher",
-    "version": "0.3.4",
+    "version": "0.5.0",
     "enabled": true,
     "autoInvoke": false
   },
   "commands": {
+    "login": {
+      "script": "./scripts/run.js",
+      "args": ["login"],
+      "description": "通过浏览器一次性绑定账号，凭证写入 ~/.web-publisher/credentials.json"
+    },
+    "logout": {
+      "script": "./scripts/run.js",
+      "args": ["logout"],
+      "description": "撤销远端 apiKey 并清除本地凭证"
+    },
+    "whoami": {
+      "script": "./scripts/run.js",
+      "args": ["whoami"],
+      "description": "查看当前账号、apiKey 摘要、微信公众号配置状态"
+    },
+    "wechat-config": {
+      "script": "./scripts/run.js",
+      "args": ["wechat", "config"],
+      "description": "生成一次性短链，在浏览器里填写微信 AppID / AppSecret"
+    },
+    "wechat-status": {
+      "script": "./scripts/run.js",
+      "args": ["wechat", "status"],
+      "description": "查询当前微信公众号配置状态"
+    },
     "publish": {
       "script": "./scripts/run.js",
       "args": ["publish"],
@@ -42,35 +63,37 @@
     }
   },
   "environment": {
-    "required": [
+    "required": [],
+    "optional": [
+      "WEB_PUBLISHER_TOOLS_URL",
       "WEB_PUBLISHER_API_URL",
       "WEB_PUBLISHER_USER_ID",
       "WEB_PUBLISHER_API_KEY"
-    ],
-    "optional": []
+    ]
   },
   "install": {
     "type": "config-only",
     "autoInstall": true,
     "riskLevel": "low",
-    "riskReason": "此 Skill 仅通过 HTTP API 调用远程服务，不安装任何第三方包，不执行本地命令。",
+    "riskReason": "此 Skill 仅通过 HTTP API 调用远程服务，不安装任何第三方包，不执行本地命令。凭证存储在 ~/.web-publisher/credentials.json (mode 0600)。",
     "requiresApproval": false
   },
   "dependencies": {
     "npm": [],
     "binaries": [],
-    "note": "Optional: npm install -g news-to-markdown for local extraction of Zhihu articles blocked on server."
+    "note": "No npm dependencies. URL 抓取 / 图片下载 / AI 改写 / 发布全部由服务端 (pipeline API) 完成，CLI 仅做凭证管理 + HTTP 调用。"
   },
   "permissions": {
     "filesystem": {
-      "read": [],
-      "write": []
+      "read": ["~/.web-publisher/credentials.json"],
+      "write": ["~/.web-publisher/credentials.json"]
     },
     "network": {
       "domains": [
+        "tools.siping.me",
         "<WEB_PUBLISHER_API_URL>"
       ],
-      "note": "Calls the user-configured remote Web Publisher API for article extraction and publishing"
+      "note": "Calls tools.siping.me for account onboarding and the user-configured pipeline API for publishing."
     }
   },
   "capabilities": {
@@ -78,14 +101,16 @@
       {
         "type": "api-credential-usage",
         "riskLevel": "medium",
-        "description": "使用用户的 API Key 调用远程发布服务",
+        "description": "使用用户的 API Key 调用远程发布服务，并把凭证写入本地文件",
         "risks": [
           "API Key 泄露可能导致未授权发布",
           "发布操作不可撤回（publish 模式）"
         ],
         "mitigations": [
           "默认使用 draft 模式，不自动发布",
-          "API Key 通过环境变量传递，不硬编码",
+          "凭证文件权限 0600，仅当前用户可读",
+          "AppSecret 永不进入对话上下文（在浏览器表单提交，AES-256-GCM 加密落库）",
+          "logout 命令可远端撤销 apiKey 并清理本地文件",
           "所有操作可在 tools.siping.me 审计"
         ]
       }

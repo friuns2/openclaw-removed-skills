@@ -3,11 +3,16 @@
   "slug": "workrally",
   "displayName": "WorkRally",
   "latest": {
-    "version": "2.2.0",
-    "publishedAt": 1776654908213,
-    "commit": "https://github.com/openclaw/skills/commit/73cd552c1458266bf020589367f899559aa3c9c4"
+    "version": "2.3.1",
+    "publishedAt": 1777039586748,
+    "commit": "https://github.com/openclaw/skills/commit/5ed7be39938ae76fe7212ada27299186566593ec"
   },
   "history": [
+    {
+      "version": "2.2.0",
+      "publishedAt": 1776654908213,
+      "commit": "https://github.com/openclaw/skills/commit/73cd552c1458266bf020589367f899559aa3c9c4"
+    },
     {
       "version": "2.1.0",
       "publishedAt": 1776251575047,

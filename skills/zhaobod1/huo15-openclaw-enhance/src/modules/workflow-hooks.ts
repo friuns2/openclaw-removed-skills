@@ -1,6 +1,9 @@
 /**
  * 模块4: 工作流自动化 — 增强版（多 Agent 隔离 + 条件分支 + 任务状态）
  *
+ * v5.6: 4 个工具合并为 1 个 dispatcher（enhance_workflow），仅保留任务管理
+ * 工具（enhance_task）独立。tool schema 数从 5 减到 2，per-turn 成本砍 ~60%。
+ *
  * P2 增强：
  * - 正则触发词（不只是 plain string includes）
  * - 时间条件（cron 风格：每天9点、周一上班等）
@@ -194,26 +197,20 @@ function ensureDir(openclawDir: string): void {
 export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: WorkflowConfig) {
   const openclawDir = resolveOpenClawHome(api);
 
-  // ── Tool: enhance_workflow_define ──
+  // ── Tool: enhance_workflow（v5.6 合并：define/list/delete/tasks 4合1）──
   api.registerTool(((ctx: any) => ({
-    name: "enhance_workflow_define",
-    description: [
-      "定义工作流自动化规则（多 Agent 隔离，支持条件分支）。",
-      "",
-      "触发条件支持：",
-      "  - keyword: 关键词匹配（默认）",
-      "  - regex: 正则表达式匹配",
-      "  - time_range: 时间范围，如 '09:00-17:30'",
-      "  - day_of_week: 星期几，如 ['monday','friday'] 或 ['weekday']",
-      "",
-      "示例（正则触发）：",
-      "  trigger: '帮我分析'",
-      "  condition: { type: 'regex', pattern: '帮我(分析|处理)' }",
-    ].join("\n"),
+    name: "enhance_workflow",
+    description: "工作流 CRUD 与任务看板；action=define/list/delete/tasks",
     parameters: Type.Object({
-      name: Type.String({ description: "工作流名称" }),
-      trigger: Type.String({ description: "触发词（plain string，支持正则标记 /pattern/flags）" }),
-      instructions: Type.String({ description: "触发后注入的行为指令" }),
+      action: Type.Union([
+        Type.Literal("define"),
+        Type.Literal("list"),
+        Type.Literal("delete"),
+        Type.Literal("tasks"),
+      ], { description: "操作：define 创建/更新；list 列出；delete 删除；tasks 看板" }),
+      name: Type.Optional(Type.String({ description: "工作流名（define/delete 必填）" })),
+      trigger: Type.Optional(Type.String({ description: "触发词，/regex/ 为正则" })),
+      instructions: Type.Optional(Type.String({ description: "触发后注入的指令" })),
       condition: Type.Optional(
         Type.Object({
           type: Type.Union([
@@ -234,88 +231,108 @@ export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: Workflow
     }),
     async execute(_id: string, params: Record<string, unknown>): Promise<any> {
       const agentId = (ctx?.agentId ?? DEFAULT_AGENT_ID).trim();
-      const allWorkflows = loadAllWorkflows(openclawDir);
-      const existing = allWorkflows.findIndex(
-        (w) => w.name === params.name && w.agent_id === agentId,
-      );
+      const action = String(params.action ?? "list");
 
-      const workflow: Workflow = {
-        id: existing >= 0 ? allWorkflows[existing].id : `wf_${Date.now()}`,
-        agent_id: agentId,
-        name: params.name as string,
-        trigger: params.trigger as string,
-        instructions: params.instructions as string,
-        enabled: true,
-        created_at: existing >= 0 ? allWorkflows[existing].created_at : new Date().toISOString(),
-      };
-
-      if (existing >= 0) {
-        allWorkflows[existing] = workflow;
-      } else {
-        allWorkflows.push(workflow);
+      if (action === "define") {
+        if (!params.name || !params.trigger || !params.instructions) {
+          return {
+            content: [{ type: "text" as const, text: "define 需要 name + trigger + instructions" }],
+          };
+        }
+        const allWorkflows = loadAllWorkflows(openclawDir);
+        const existing = allWorkflows.findIndex(
+          (w) => w.name === params.name && w.agent_id === agentId,
+        );
+        const workflow: Workflow = {
+          id: existing >= 0 ? allWorkflows[existing].id : `wf_${Date.now()}`,
+          agent_id: agentId,
+          name: params.name as string,
+          trigger: params.trigger as string,
+          instructions: params.instructions as string,
+          enabled: true,
+          created_at:
+            existing >= 0 ? allWorkflows[existing].created_at : new Date().toISOString(),
+        };
+        if (existing >= 0) allWorkflows[existing] = workflow;
+        else allWorkflows.push(workflow);
+        saveWorkflows(openclawDir, allWorkflows);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `已${existing >= 0 ? "更新" : "创建"}工作流「${params.name}」(agent: ${agentId})\n触发: "${params.trigger}"`,
+            },
+          ],
+        };
       }
-      saveWorkflows(openclawDir, allWorkflows);
 
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `已${existing >= 0 ? "更新" : "创建"}工作流「${params.name}」(agent: ${agentId})\n触发: "${params.trigger}"`,
-          },
-        ],
-      };
-    },
-  })) as any, { name: "enhance_workflow_define" });
-
-  // ── Tool: enhance_workflow_list ──
-  api.registerTool(((ctx: any) => ({
-    name: "enhance_workflow_list",
-    description: "列出当前 Agent 的所有工作流。",
-    parameters: Type.Object({}),
-    async execute(_id: string, _params: Record<string, unknown>): Promise<any> {
-      const agentId = (ctx?.agentId ?? DEFAULT_AGENT_ID).trim();
-      const workflows = loadWorkflows(openclawDir, agentId);
-      if (workflows.length === 0) {
-        return { content: [{ type: "text" as const, text: `暂无工作流 (agent: ${agentId})。` }] };
+      if (action === "list") {
+        const workflows = loadWorkflows(openclawDir, agentId);
+        if (workflows.length === 0) {
+          return {
+            content: [{ type: "text" as const, text: `暂无工作流 (agent: ${agentId})。` }],
+          };
+        }
+        const lines = workflows.map(
+          (w) => `${w.enabled ? "✅" : "⏸️"} ${w.name} (触发: "${w.trigger}")`,
+        );
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `工作流 (${workflows.length} 个)：\n\n${lines.join("\n\n")}`,
+            },
+          ],
+        };
       }
-      const lines = workflows.map(
-        (w) => `${w.enabled ? "✅" : "⏸️"} ${w.name} (触发: "${w.trigger}")`,
-      );
-      return {
-        content: [{ type: "text" as const, text: `工作流 (${workflows.length} 个)：\n\n${lines.join("\n\n")}` }],
-      };
-    },
-  })) as any, { name: "enhance_workflow_list" });
 
-  // ── Tool: enhance_workflow_delete ──
-  api.registerTool(((ctx: any) => ({
-    name: "enhance_workflow_delete",
-    description: "删除当前 Agent 的一个工作流。",
-    parameters: Type.Object({ name: Type.String({ description: "工作流名称" }) }),
-    async execute(_id: string, params: Record<string, unknown>): Promise<any> {
-      const agentId = (ctx?.agentId ?? DEFAULT_AGENT_ID).trim();
-      const allWorkflows = loadAllWorkflows(openclawDir);
-      const idx = allWorkflows.findIndex((w) => w.name === params.name && w.agent_id === agentId);
-      if (idx < 0) {
-        return { content: [{ type: "text" as const, text: `未找到「${params.name}」` }] };
+      if (action === "delete") {
+        if (!params.name) {
+          return { content: [{ type: "text" as const, text: "delete 需要 name" }] };
+        }
+        const allWorkflows = loadAllWorkflows(openclawDir);
+        const idx = allWorkflows.findIndex(
+          (w) => w.name === params.name && w.agent_id === agentId,
+        );
+        if (idx < 0) {
+          return { content: [{ type: "text" as const, text: `未找到「${params.name}」` }] };
+        }
+        allWorkflows.splice(idx, 1);
+        saveWorkflows(openclawDir, allWorkflows);
+        return { content: [{ type: "text" as const, text: `已删除「${params.name}」` }] };
       }
-      allWorkflows.splice(idx, 1);
-      saveWorkflows(openclawDir, allWorkflows);
-      return { content: [{ type: "text" as const, text: `已删除「${params.name}」` }] };
-    },
-  })) as any, { name: "enhance_workflow_delete" });
 
-  // ── Tool: enhance_task ──
+      if (action === "tasks") {
+        const allTasks = loadAllTasks(openclawDir).filter((t) => t.agentId === agentId);
+        const pending = allTasks.filter((t) => t.status === "pending");
+        const inProgress = allTasks.filter((t) => t.status === "in_progress");
+        const completed = allTasks.filter(
+          (t) => t.status === "completed" || t.status === "cancelled",
+        );
+        const lines = [
+          `📋 任务看板 (agent: ${agentId})`,
+          `🔴 进行中: ${inProgress.length} 个`,
+          `🟡 待处理: ${pending.length} 个`,
+          `✅ 已完成: ${completed.length} 个`,
+          "",
+          ...inProgress
+            .slice(0, 5)
+            .map((t) => `  🔴 ${t.id}: ${t.description} (${t.priority})`),
+          ...pending
+            .slice(0, 5)
+            .map((t) => `  🟡 ${t.id}: ${t.description} (${t.priority})`),
+        ];
+        return { content: [{ type: "text" as const, text: lines.filter(Boolean).join("\n") }] };
+      }
+
+      return { content: [{ type: "text" as const, text: `未知 action: ${action}` }] };
+    },
+  })) as any, { name: "enhance_workflow" });
+
+  // ── Tool: enhance_task ── （独立保留，task CRUD 与 workflow 是两个域）
   api.registerTool(((ctx: any) => ({
     name: "enhance_task",
-    description: [
-      "创建/更新/查询跨 session 的任务状态（支持 pending/in_progress/completed/cancelled）。",
-      "",
-      "示例：",
-      "  - 创建: action=create, description='完成 Odoo 迁移', priority=high",
-      "  - 更新: action=update, id=task_xxx, status=completed",
-      "  - 查询: action=list 或 action=get, id=task_xxx",
-    ].join("\n"),
+    description: "跨 session 任务 CRUD；action=create/update/list/get/delete",
     parameters: Type.Object({
       action: Type.Union([
         Type.Literal("create"),
@@ -394,9 +411,14 @@ export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: Workflow
         }
 
         case "list": {
-          const mine = allTasks.filter((t) => t.agentId === agentId && t.status !== "completed" && t.status !== "cancelled");
+          const mine = allTasks.filter(
+            (t) =>
+              t.agentId === agentId && t.status !== "completed" && t.status !== "cancelled",
+          );
           if (mine.length === 0) {
-            return { content: [{ type: "text" as const, text: `暂无进行中任务 (agent: ${agentId})` }] };
+            return {
+              content: [{ type: "text" as const, text: `暂无进行中任务 (agent: ${agentId})` }],
+            };
           }
           const lines = mine.map(
             (t) =>
@@ -404,7 +426,10 @@ export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: Workflow
           );
           return {
             content: [
-              { type: "text" as const, text: `进行中任务 (${mine.length} 个)：\n\n${lines.join("\n\n")}` },
+              {
+                type: "text" as const,
+                text: `进行中任务 (${mine.length} 个)：\n\n${lines.join("\n\n")}`,
+              },
             ],
           };
         }
@@ -428,7 +453,9 @@ export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: Workflow
         case "delete": {
           const taskId = params.id as string;
           const before = allTasks.length;
-          const remaining = allTasks.filter((t) => !(t.id === taskId && t.agentId === agentId));
+          const remaining = allTasks.filter(
+            (t) => !(t.id === taskId && t.agentId === agentId),
+          );
           saveTasks(openclawDir, remaining);
           return {
             content: [
@@ -446,38 +473,8 @@ export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: Workflow
     },
   })) as any, { name: "enhance_task" });
 
-  // ── Tool: enhance_workflow_tasks ──
-  api.registerTool(((ctx: any) => ({
-    name: "enhance_workflow_tasks",
-    description: "查看当前 Agent 所有工作流关联的任务进度。",
-    parameters: Type.Object({}),
-    async execute(_id: string, _params: Record<string, unknown>): Promise<any> {
-      const agentId = (ctx?.agentId ?? DEFAULT_AGENT_ID).trim();
-      const allTasks = loadAllTasks(openclawDir).filter((t) => t.agentId === agentId);
-      const pending = allTasks.filter((t) => t.status === "pending");
-      const inProgress = allTasks.filter((t) => t.status === "in_progress");
-      const completed = allTasks.filter((t) => t.status === "completed" || t.status === "cancelled");
-
-      const lines = [
-        `📋 任务看板 (agent: ${agentId})`,
-        `🔴 进行中: ${inProgress.length} 个`,
-        `🟡 待处理: ${pending.length} 个`,
-        `✅ 已完成: ${completed.length} 个`,
-        "",
-        ...inProgress.slice(0, 5).map(
-          (t) => `  🔴 ${t.id}: ${t.description} (${t.priority})`,
-        ),
-        ...pending.slice(0, 5).map(
-          (t) => `  🟡 ${t.id}: ${t.description} (${t.priority})`,
-        ),
-      ];
-
-      return { content: [{ type: "text" as const, text: lines.filter(Boolean).join("\n") }] };
-    },
-  })) as any, { name: "enhance_workflow_tasks" });
-
   // ── Hook: before_prompt_build — 增强版触发评估 ──
-  api.on("before_prompt_build" as any, (event: any, ctx: any): any => {
+  api.on("before_prompt_build", (event: any, ctx: any) => {
     const agentId = (ctx?.agentId ?? DEFAULT_AGENT_ID).trim();
     const userMessage: string = (event as any)?.prompt ?? "";
     if (!userMessage) return {};
@@ -521,7 +518,7 @@ export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: Workflow
 
     return {
       appendSystemContext: [
-        "\n\n## 工作流自动化（增强包 v2.1）",
+        "\n\n## 工作流自动化（增强包 v5.6）",
         `Agent: ${agentId}`,
         `时间: ${now.toISOString().slice(0, 16)} (${now.toLocaleDateString("zh-CN", { weekday: "long" })})`,
         "触发的工作流：",
@@ -530,5 +527,5 @@ export function registerWorkflowHooks(api: OpenClawPluginApi, _config?: Workflow
     };
   });
 
-  api.logger.info("[enhance] 工作流自动化增强版已加载（条件分支 + 任务状态 + 正则触发）");
+  api.logger.info("[enhance] 工作流自动化 v5.6 已加载（5→2 工具，条件分支 + 任务状态 + 正则触发）");
 }

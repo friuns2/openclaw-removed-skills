@@ -1,5 +1,5 @@
 #!/bin/bash
-# rocky-know-how 清理工具 v2.8.3
+# rocky-know-how 清理工具 v3.3.0
 # 用法: clean.sh [--test] [--old] [--reindex]
 
 SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -14,7 +14,16 @@ PROJECTS_DIR="$SHARED_DIR/projects"
 
 [ ! -f "$ERRORS_FILE" ] && echo "文件不存在" && exit 0
 
-MODE="${1:-info}"
+# P4 fix: 支持多选项参数解析（MODE + DRY_RUN flag）
+MODE="info"
+DRY_RUN=false
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+    --test|--old|--reindex|--test-dry-run) MODE="$arg" ;;
+    --info) MODE="info" ;;
+  esac
+done
 
 # 处理 --dry-run 别名（指向 --test-dry-run）
 if [ "$MODE" = "--dry-run" ]; then
@@ -24,7 +33,7 @@ fi
 case "$MODE" in
   --test*)
     CLEAN_DRY_RUN=false
-    if [ "$MODE" = "--test-dry-run" ]; then
+    if [ "$MODE" = "--test-dry-run" ] || $DRY_RUN; then
       CLEAN_DRY_RUN=true
     fi
     echo "=== 清理测试条目 $( $CLEAN_DRY_RUN && echo '(模拟)' || echo '(交互确认模式)') ==="
@@ -140,7 +149,7 @@ case "$MODE" in
     ;;
 
   --reindex)
-    echo "=== 重新编号 v2.8.3 ==="
+    echo "=== 重新编号 v3.3.0 ==="
     # P4 fix: 使用 mktemp 替代固定路径
     TEMP_FILE=$(mktemp /tmp/rocky-know-how.XXXXXX)
     TODAY=$(date +%Y%m%d)
@@ -161,8 +170,9 @@ case "$MODE" in
           echo "$current_block" >> "$TEMP_FILE"
         fi
         seq=$((seq+1))
-        orig_date=$(echo "$line" | sed 's/.*\[EXP-\([0-9]\{8\}\)-.*//')
-        title=$(echo "$line" | sed 's/^## \[EXP-[0-9]*-[0-9]*\] //')
+        orig_date=$(echo "$line" | sed -n 's/.*\[EXP-\([0-9]\{8\}\)-.*/\1/p')
+        [ -z "$orig_date" ] && orig_date="$TODAY"
+        title=$(echo "$line" | sed 's/^## \[EXP-[^]]*\] //')
         current_block="## [EXP-${orig_date}-$(printf '%03d' $seq)] ${title}"
       else
         current_block="$current_block"$'\n'"$line"
@@ -173,8 +183,12 @@ case "$MODE" in
       echo "$current_block" >> "$TEMP_FILE"
     fi
 
-    mv "$TEMP_FILE" "$ERRORS_FILE"
-    echo "✅ 已重新编号（原日期保留），共 $seq 条"
+    if $DRY_RUN; then
+      echo "[dry-run] 将重新编号（原日期保留），共 $seq 条"
+    else
+      mv "$TEMP_FILE" "$ERRORS_FILE"
+      echo "✅ 已重新编号（原日期保留），共 $seq 条"
+    fi
 
     # R5 fix: 更新 corrections/domains/projects 中的旧 EXP-ID 引用
     echo ""
@@ -190,8 +204,7 @@ case "$MODE" in
     for ref_file in "$CORRECTIONS_FILE" "$DOMAINS_DIR"/*.md "$PROJECTS_DIR"/*.md; do
       [ -f "$ref_file" ] || continue
       # 查找包含旧 EXP-ID 的行并输出提示
-      local ref_count
-      ref_count=$(grep -cE 'EXP-[0-9]{8}-[0-9]+' "$ref_file" 2>/dev/null || echo "0")
+      ref_count=$(grep -cE 'EXP-[0-9]{8}-[0-9]+' "$ref_file" 2>/dev/null | tr -d '\n' || echo "0")
       if [ "$ref_count" -gt 0 ]; then
         echo "  ⚠️ $(basename "$ref_file") 含 $ref_count 处 EXP-ID 引用，reindex 后可能需要手动更新"
         updated_refs=$((updated_refs + 1))
@@ -199,12 +212,15 @@ case "$MODE" in
     done
     [ $updated_refs -eq 0 ] && echo "  (无外部 EXP-ID 引用)"
 
-    # P3 fix: --reindex 后自动重建向量索引
-    # N3 fix: 硬编码路径，不接受外部参数，防止路径穿越
-    echo ""
-    echo "--- 重建向量索引 ---"
-    vector_reindex_all
-    echo "✅ 向量索引已重建"
+    # N3 fix: --reindex 后自动重建向量索引（dry-run 时跳过）
+    if $DRY_RUN; then
+      echo "[dry-run] 将跳过向量重建"
+    else
+      echo ""
+      echo "--- 重建向量索引 ---"
+      vector_reindex_all
+      echo "✅ 向量索引已重建"
+    fi
     ;;
 
   --old)

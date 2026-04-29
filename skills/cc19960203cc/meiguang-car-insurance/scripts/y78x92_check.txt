@@ -1,0 +1,11 @@
+File: 鲁Y78X92-吴晓东-交强险保单.pdf
+Text len: 1801
+has_amt=False, text used: plumber
+
+当年应缴 segment (first 300 chars):
+  '¥' at 5: '¥： 9 0 0 . 0 0 元 往年补缴 ¥： 0 . 0'
+  '元' at 20: '元 往年补缴 ¥： 0 . 0 0 元 滞纳金 ¥： 0 .'
+  garbled2(n=4): NO MATCH
+  garbled2(n=3): '9 0 0 . 0 0' -> digits=90000 -> 900.0 (in [200,600]: False)
+  garbled2(n=2): NO MATCH
+  Chinese number: NOT FOUND in '合计（人民币大写）：玖 佰 元 整 （¥： 9 0 0 . 0 0 元）\n司 务 税\n。 电 完税凭'

@@ -1,11 +1,17 @@
 {
   "owner": "liuboacean",
   "slug": "agent-comm-hub",
-  "displayName": "Agent Communication Hub",
+  "displayName": "Agent Comm Hub",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776410573575,
-    "commit": "https://github.com/openclaw/skills/commit/335561ffbf5740c6ef6100e33f54d5f527af5ead"
+    "version": "2.2.2",
+    "publishedAt": 1777344042031,
+    "commit": "https://github.com/openclaw/skills/commit/c71dfef14b30cffe64d00514dbc418144f791912"
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776410573575,
+      "commit": "https://github.com/openclaw/skills/commit/335561ffbf5740c6ef6100e33f54d5f527af5ead"
+    }
+  ]
 }

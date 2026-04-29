@@ -8,6 +8,7 @@ scaffold.py — 引导新的 Wiki 知识库目录树
 
 import sys
 import os
+import argparse
 from pathlib import Path
 from datetime import datetime
 
@@ -198,12 +199,13 @@ Quick grep: `grep "^## \\[" log.md | tail -5`
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 scaffold.py /path/to/wiki [Topic Name]")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="引导新的 Wiki 知识库目录树")
+    parser.add_argument("path", help="Wiki 根目录路径")
+    parser.add_argument("topic", nargs="?", default="Knowledge Base", help="Wiki 主题名称")
+    args = parser.parse_args()
 
-    wiki_root = Path(sys.argv[1]).resolve()
-    topic = sys.argv[2] if len(sys.argv) > 2 else "Knowledge Base"
+    wiki_root = Path(args.path).resolve()
+    topic = args.topic
 
     if not wiki_root.exists():
         wiki_root.mkdir(parents=True, exist_ok=True)

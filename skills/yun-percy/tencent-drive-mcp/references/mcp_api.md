@@ -339,6 +339,86 @@
 
 ---
 
+## Tool: weiyun.create_dir — 创建文件夹
+
+在微云网盘中创建文件夹，需要提供父目录 key 和文件夹名称。
+
+### 请求（McpCreateDirReq）
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| pdir_key | string | 否 | 父目录 key（hex 编码），在此目录下创建新文件夹。为空则使用 token 绑定的目录 |
+| dir_name | string | **是** | 新文件夹名称 |
+
+### 响应（McpCreateDirRsp）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| dir_key | string | 新创建的目录 key（hex 编码） |
+| dir_name | string | 创建后的目录名（可能被自动改名，如存在同名目录） |
+| error | string | 错误信息，操作失败时返回具体的错误描述 |
+
+### 注意事项
+
+- 如果 `pdir_key` 为空，使用 token 绑定的 `dirkey` 作为父目录
+- 如果目标目录下已存在同名文件夹，返回的 `dir_name` 可能会被自动改名
+
+---
+
+## Tool: weiyun.move_dir — 移动文件夹
+
+移动微云网盘中的文件夹到目标目录，需要提供源目录 key 和目标目录 key。
+
+### 请求（McpMoveDirReq）
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| dir_key | string | **是** | 待移动的目录 key（hex 编码） |
+| src_pdir_key | string | **是** | 源父目录 key（hex 编码），即当前所在的目录 |
+| dst_pdir_key | string | **是** | 目标父目录 key（hex 编码），即要移动到的目录 |
+| dir_name | string | 否 | 目录名称，移动时可选填用于冲突处理 |
+
+### 响应（McpMoveDirRsp）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| error | string | 错误信息，操作失败时返回具体的错误描述 |
+
+### 注意事项
+
+- **⚠️ `src_pdir_key` 和 `dst_pdir_key` 不可为空**，必须通过 `weiyun.list` 获取正确的目录 key
+- `src_pdir_key` 应使用 `weiyun.list` 响应中**顶层的 `pdir_key`** 字段值
+- `dst_pdir_key` 应使用目标目录的 `weiyun.list` 响应中**顶层的 `pdir_key`** 或目标目录的 `dir_key`
+
+---
+
+## Tool: weiyun.move_file — 移动文件
+
+移动微云网盘中的文件到目标目录，需要提供文件 ID、源目录 key 和目标目录 key。
+
+### 请求（McpMoveFileReq）
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| file_id | string | **是** | 待移动的文件唯一标识符 |
+| src_pdir_key | string | **是** | 源父目录 key（hex 编码），即文件当前所在的目录 |
+| dst_pdir_key | string | **是** | 目标父目录 key（hex 编码），即要移动到的目录 |
+| filename | string | 否 | 文件名称，移动时可选填用于冲突处理 |
+
+### 响应（McpMoveFileRsp）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| error | string | 错误信息，操作失败时返回具体的错误描述 |
+
+### 注意事项
+
+- **⚠️ `src_pdir_key` 和 `dst_pdir_key` 不可为空**，必须通过 `weiyun.list` 获取正确的目录 key
+- `src_pdir_key` 应使用文件当前所在目录的 `weiyun.list` 响应中**顶层的 `pdir_key`** 字段值
+- `dst_pdir_key` 应使用目标目录的 `weiyun.list` 响应中**顶层的 `pdir_key`** 或目标目录的 `dir_key`
+
+---
+
 ## Tool: check_skill_update — 技能版本检查更新
 
 检查当前 Skill 版本是否有新版本可用，返回最新版本号、发布说明和更新指令。

@@ -1,6 +1,6 @@
 ---
 name: libu-premarket
-version: 13.4.1
+version: 1.3.45
 description: 礼部侍郎 - A 股盘前作战地图。主力资金流向 + 财务排雷，每天开盘前 3 分钟给你一份实战级选股报告。
 author: ygbeyond
 license: MIT-0
@@ -20,7 +20,7 @@ license: MIT-0
 - 🌍 **全球市场概览** — A50 / 美股 / 港股 / 黄金 / 原油隔夜表现，一眼看清开盘情绪
 - 🔥 **昨日热点复盘** — 昨日主力净流入 Top 5 板块 + 热门个股回顾
 
-> 💡 **零配置开箱即用**：内置近期数据缓存，首次运行即可体验。不需要 Tushare Token，不需要任何密钥。
+> 💡 **零配置开箱即用**：首次运行即可体验。Lite 模式不需要 Tushare Token，不需要支付密钥。
 
 ---
 
@@ -67,9 +67,17 @@ python3 pre_market.py
 
 想获取 AI 选股和财务排雷？运行脚本后会自动创建支付订单，按提示完成支付即可解锁。首次使用需京东 App 扫码授权钱包（仅一次）。
 
-### 第 4 步：（可选）配置 Tushare Token
+### 第 4 步：（可选）环境变量配置
 
-想获取实时财务数据？在 [Tushare Pro](https://tushare.pro) 免费注册获取 Token，配置后数据更精准：
+**完整版支付**：解锁 AI 选股和财务排雷后，需配置京东 ClawTip 支付密钥：
+
+```bash
+export CLAWTIP_SM4_KEY="你的SM4密钥"
+```
+
+> 💡 该密钥由京东 ClawTip 开发者后台提供，仅完整版支付功能需要。
+
+**Tushare 实时数据**（可选）：在 [Tushare Pro](https://tushare.pro) 免费注册获取 Token：
 
 ```bash
 export TUSHARE_TOKEN="你的token"
@@ -119,13 +127,24 @@ export TUSHARE_TOKEN="你的token"
 }
 ```
 
----
+## 🤖 自动化 Cron 部署（推荐）
+
+如果你想让 Agent 每天自动运行并发送报告，请在 OpenClaw Cron 任务中按以下 **三步串行** 逻辑配置，**严禁并行执行**：
+
+1. **执行脚本**：使用 `exec` 工具运行 `python3 pre_market.py`。
+2. **验证数据**：读取生成的 `pre_market_data.json`，检查 `date` 字段是否为**今天**。如果不是，说明脚本未更新成功，需重试。
+3. **生成报告**：数据验证通过后，再让 Agent 读取 JSON 撰写报告。
+
+**推荐 Prompt 模板**：
+> "请先运行 `python3 pre_market.py`，读取 `pre_market_data.json` 确认 `date` 为今天。确认数据无误后，基于 JSON 内容撰写盘前报告并发送给我。"
+
+**避坑指南**：不要在 Cron 中让 Agent 同时读取 JSON，这会导致 Agent 读取到昨天的旧缓存。
 
 ## 🔄 数据更新
 
-- **首次运行**：自动解压内置 `initial_data.zip`（含近期财务/收盘数据）
-- **定期更新**：开发者每周/月发布新版 Skill，重新 `install` 即可刷新数据包
+- **首次运行**：自动从网络获取最新市场数据（需联网）
 - **本地缓存**：运行产生的数据保存在 `./cache_data/`，下次优先读取，秒级出报告
+- **定期更新**：开发者持续优化算法，`clawhub update libu-premarket` 即可获取最新版
 
 ---
 
@@ -133,7 +152,8 @@ export TUSHARE_TOKEN="你的token"
 
 - 本工具仅供数据参考，**不构成任何投资建议**。股市有风险，入市需谨慎。
 - 运行环境：Python 3.8+，依赖 `pandas`、`requests`、`numpy`、`gmssl`
-- 完整版支付依赖京东 ClawTip 微支付系统，支持单次 / 月度订阅
+- Lite 模式（免费）无需任何密钥配置
+- 完整版需配置 `CLAWTIP_SM4_KEY`（京东 ClawTip 支付密钥），支持单次 / 月度订阅
 
 ---
 
@@ -148,6 +168,15 @@ export TUSHARE_TOKEN="你的token"
 ---
 
 ## 📝 更新日志
+
+### v1.3.45 — 数据焕新
+- 📦 **数据包更新**：日线数据更新至 2026-04-24，收盘数据同步更新
+- 🔄 **脚本同步**：pre_market.py 与 config.json 从内部开发版本同步
+
+### v1.3.42 — 安全扫描修复
+- 🔧 **manifest.json**：新增 `optional_env_vars`，声明 `CLAWTIP_SM4_KEY` 和 `TUSHARE_TOKEN`
+- 📖 **SKILL.md**：补充环境变量说明，消除「零配置」与实际代码的不一致
+- 📦 **数据更新流程优化**：移除对不存在的 `initial_data.zip` 的文档引用，改为网络获取
 
 ### v13.4.0 — Lite 模式 + 核心安全重构
 - 🎁 **新增 Lite 模式**：无需配置密钥，免费运行获取全球市场概览与昨日复盘

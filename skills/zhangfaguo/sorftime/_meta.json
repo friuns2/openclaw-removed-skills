@@ -3,9 +3,15 @@
   "slug": "sorftime",
   "displayName": "sorftime",
   "latest": {
-    "version": "0.1.5",
-    "publishedAt": 1776253133537,
-    "commit": "https://github.com/openclaw/skills/commit/b34762a0db8586b2d1b2ef099e3649e2f2ce00ee"
+    "version": "0.1.8",
+    "publishedAt": 1777379875416,
+    "commit": "https://github.com/openclaw/skills/commit/cce3f1274784c4dd9ab563246a5f3000083501f4"
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.5",
+      "publishedAt": 1776253133537,
+      "commit": "https://github.com/openclaw/skills/commit/b34762a0db8586b2d1b2ef099e3649e2f2ce00ee"
+    }
+  ]
 }

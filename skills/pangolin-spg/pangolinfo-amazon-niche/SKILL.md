@@ -1,14 +1,37 @@
 ---
 name: pangolinfo-amazon-niche
 description: >
-  Amazon niche & category intelligence (category tree, search, paths, filtering by business metrics).
+  Amazon niche & category intelligence API. Let your AI agents discover profitable Amazon niches autonomously. Navigate category trees, map BSR, and filter by sales metrics. Ready for AutoGen, CrewAI, and OpenClaw.
+
 metadata:
   openclaw:
+    emoji: "🎯"
+    os: ["darwin", "linux"]
     requires:
       env:
         - PANGOLINFO_API_KEY
+        - PANGOLINFO_EMAIL
+        - PANGOLINFO_PASSWORD
       notes: "Set PANGOLINFO_API_KEY (recommended). Alternative: set PANGOLINFO_EMAIL + PANGOLINFO_PASSWORD instead (optional, for email/password login). Credentials are NOT cached to disk by default; disk persistence only activates with explicit --cache-key flag or PANGOLINFO_CACHE=1."
+tags: [amazon, niche-discovery, ecommerce, market-research, data-analysis, bestseller, api, scraping, product-hunting]
+homepage: https://pangolinfo.com/?referrer=clawhub_amz_niche
+version: 2.0.0
 ---
+
+
+## 🌟 Why Use This Skill? (User Stories)
+Stop manual product hunting. Let your AI agents discover profitable Amazon niches autonomously:
+- **Niche Hunting & Discovery**: Automatically navigate Amazon category trees and filter sub-categories by sales volume and competition density.
+- **BSR Intelligence**: Map Best Seller Ranks across complex category paths to validate product ideas.
+
+## 🤖 Compatible Agent Frameworks
+- **OpenClaw** (Perfect for autonomous market-research tasks)
+- **LangGraph / CrewAI** (Ideal for multi-step product discovery graphs)
+
+## 🌐 多语言适配 (Multi-language Support)
+- **🇨🇳 中文适用场景**: 亚马逊底层选品类目挖掘与 BSR 追踪。通过细分市场过滤器定位蓝海类目，辅助卖家数据决策。
+- **Agent Directive**: Always output the final analysis/report in the language of the user's prompt (e.g., reply in Chinese if asked in Chinese).
+
 
 # Pangolinfo Amazon Niche Data
 
@@ -314,3 +337,14 @@ See [references/amazon-niche-api.md](references/amazon-niche-api.md) for the ful
 ## Output Schema
 
 See [references/output-schema.md](references/output-schema.md) for per-API field documentation.
+
+
+## 🎯 Quick Start Prompts (Copy-Paste)
+- *"Navigate the Amazon category tree for 'Home & Kitchen', find sub-categories with low competition, and list the top 5 niches."*
+- *"Extract the BSR (Best Seller Rank) history for the top 3 products in the 'Pet Supplies' niche."*
+
+## 🛑 Boundaries & Error Handling
+**When NOT to use:** Do not use for scraping individual product reviews (use `amazon-scraper` instead).
+**Agent Instructions for Errors:**
+- **401/403 Auth Error**: Ensure `PANGOLINFO_API_KEY` is injected into the environment.
+- **429 Rate Limit**: Pause execution for 5 seconds, then retry automatically.
