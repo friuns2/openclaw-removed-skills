@@ -1,6 +1,6 @@
 # FEATURE_REQUESTS.md — Feature Requests
 
-> Managed by self-improvement-loop skill.
+> Managed by self-improvement-loop skill.When editing manually, keep the `## [ID] category` header format intact.
 
 ---
 

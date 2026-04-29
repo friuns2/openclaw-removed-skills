@@ -1,7 +1,8 @@
 #!/bin/bash
 # archive.sh — Self-improvement Hot/Cold ETL
-# v4.6 — silent 模式：dry-run 预览后自动执行
-# v4.6 新增：recurrence_count 由归档时统计历史 JSONL 计算，不依赖 AI
+# v4.6.3 — silent 模式：dry-run 预览后自动执行
+# v4.6.3 新增：recurrence_count 由归档时统计历史 JSONL 计算，不依赖 AI
+# v4.6.3 新增：--write-notified 用 Python 重写，支持 entry_id fallback + pending JSON 生成
 # 设计原则：「脚本做机械，AI 做语义」
 # Modes:
 #   --dry-run   — 只输出预览，不写入文件
@@ -23,8 +24,65 @@ if [ "$1" = "--write-notified" ]; then
     JSON_FILE="$2"
     [ -z "$JSON_FILE" ] && echo "Error: --write-notified requires JSON file" && exit 1
     [ ! -f "$JSON_FILE" ] && echo "Error: JSON file not found: $JSON_FILE" && exit 1
-    WRITE_NOTIFIED_PY="$WORKSPACE/scripts/self-improvement/write_notified.py"
-    python3 "$WRITE_NOTIFIED_PY" "$JSON_FILE" "$LEARNINGS_DIR"
+    WRITE_NOTIFIED_PY="$WORKSPACE/skills/self-improvement-loop/scripts/write_notified.py"
+    # v4.6.3: pass entry_id field to write_notified.py via a temp JSON with entry_id populated
+    # Read the distill-check JSON and inject entry_id from first_entry_id, then call write_notified.py
+    PENDING_DIR_ARG="$LEARNINGS_DIR/.pending_notifications"
+    python3 "$PENDING_DIR_ARG" "$JSON_FILE" "$LEARNINGS_DIR" "$WRITE_NOTIFIED_PY" - <<'PYEOF'
+import json, sys, subprocess, os
+
+pending_dir = sys.argv[1]
+json_file = sys.argv[2]
+learnings_dir = sys.argv[3]
+write_notified_py = sys.argv[4]
+
+with open(json_file) as f:
+    data = json.load(f)
+
+patterns = data.get("patterns", [])
+category_fallback = data.get("category_fallback", [])
+
+for entry in patterns + category_fallback:
+    name = entry.get("name", "")
+    count = entry.get("count", 1)
+    raw_md = entry.get("raw_md", "")
+    # v4.6.3: entry_id = first_entry_id (精确匹配 MD 标题), pattern_name = name (兼容旧版)
+    entry_id = entry.get("first_entry_id", "") or name
+    pattern_name = name
+    triggered = entry.get("notification_trigger", 0)
+    nc = entry.get("notification_count", 1)
+
+    if not triggered:
+        continue
+
+    # Escape raw_md for JSON string
+    raw_md_esc = json.dumps(raw_md)[1:-1]  # strip outer quotes from json.dumps
+    safe_name = "".join(c if c.isalnum() or c in "._-" else "_" for c in pattern_name)
+    ts = str(int(subprocess.check_output(["date", "+%s"]).strip()))
+    os.makedirs(pending_dir, exist_ok=True)
+    out_path = os.path.join(pending_dir, f"{ts}_{safe_name}.json")
+
+    notify_json = {
+        "entry_id": entry_id,
+        "pattern_name": pattern_name,
+        "count": count,
+        "notification_count": nc,  # v4.6.8: include nc for write_notified.py old mode
+        "raw_md": raw_md,
+        "action_taken": "pending",
+        "notified_at": subprocess.check_output(["date", "+%Y-%m-%dT%H:%M:%S+08:00"]).strip().decode()
+    }
+    with open(out_path, "w") as out:
+        json.dump(notify_json, out, ensure_ascii=False)
+
+    # Update MD file via write_notified.py
+    result = subprocess.run(
+        ["python3", write_notified_py, "--status", "active", "--notified", "1", "--nc", str(nc + 1), entry_id, learnings_dir],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        print(f"WARNING: write_notified failed for {entry_id}: {result.stderr}", file=sys.stderr)
+
+PYEOF
     exit $?
 fi
 
@@ -124,7 +182,7 @@ process_file() {
                             details=$(extract_field "$entry_lines" "Root Cause")
                             suggested_action=$(extract_field "$entry_lines" "How To Avoid Next Time")
                             tags_str=$(extract_meta "$entry_lines" "Tags")
-                            # recurrence_count: computed from historical archive JSONL (v4.6)
+                            # recurrence_count: computed from historical archive JSONL (v4.6.2)
                             local recurrence_count
                             recurrence_count=$(count_archived_occurrences "$pattern_key")
 
@@ -185,7 +243,7 @@ process_file() {
                 details=$(extract_field "$entry_lines" "Root Cause")
                 suggested_action=$(extract_field "$entry_lines" "How To Avoid Next Time")
                 tags_str=$(extract_meta "$entry_lines" "Tags")
-                # recurrence_count: computed from historical archive JSONL (v4.6)
+                # recurrence_count: computed from historical archive JSONL (v4.6.2)
                 local recurrence_count
                 recurrence_count=$(count_archived_occurrences "$pattern_key")
 
@@ -211,7 +269,9 @@ process_file() {
 
 # ── Collect all archive candidates ────────────────────────────
 PREVIEW_FILE="/tmp/archive-preview-$(date '+%Y%m%d').txt"
+LOG_FILE="/tmp/archive-log-$(date '+%Y%m%d').txt"
 > "$PREVIEW_FILE"
+> "$LOG_FILE"
 
 total_candidates=0
 for file in "$LEARNINGS_DIR/LEARNINGS.md" "$LEARNINGS_DIR/ERRORS.md" "$LEARNINGS_DIR/FEATURE_REQUESTS.md"; do
@@ -219,9 +279,9 @@ for file in "$LEARNINGS_DIR/LEARNINGS.md" "$LEARNINGS_DIR/ERRORS.md" "$LEARNINGS
     count=$(grep -c "^## \[" "$file" 2>/dev/null || echo 0)
     resolved_count=$( { grep -ciE "resolved|promoted" "$file" || true; } | tail -1 )
     if [ "$resolved_count" -gt 0 ] 2>/dev/null; then
-        echo ">>> $file ($resolved_count / $count entries will be archived)" >> "$PREVIEW_FILE"
+        echo "Archived $file ($resolved_count / $count entries will be archived)" >> "$LOG_FILE"
         process_file "$file" >> "$PREVIEW_FILE"
-        echo "" >> "$PREVIEW_FILE"
+        echo "" >> "$LOG_FILE"
         total_candidates=$(( total_candidates + resolved_count ))
     fi
 done
@@ -238,7 +298,7 @@ echo ""
 if [ "$total_candidates" -eq 0 ]; then
     echo "No resolved/promoted entries found. Nothing to archive."
     echo ""
-    cat "$PREVIEW_FILE"
+    cat "$LOG_FILE"
     echo ""
     echo "[DRY-RUN complete — no files modified]"
     exit 0
@@ -247,8 +307,8 @@ fi
 echo "Total entries to archive: $total_candidates"
 echo ""
 echo "--- PREVIEW (first 20 entries) ---"
-head -20 "$PREVIEW_FILE"
-if [ "$(wc -l < "$PREVIEW_FILE")" -gt 20 ]; then
+head -20 "$LOG_FILE"
+if [ "$(wc -l < "$LOG_FILE")" -gt 20 ]; then
     echo "... (truncated, $total_candidates entries total)"
 fi
 echo ""
@@ -261,7 +321,7 @@ fi
 # ── Execute: write JSONL ─────────────────────────────────────
 ARCHIVE_FILE="$ARCHIVE_DIR/$TODAY_MONTH.jsonl"
 touch "$ARCHIVE_FILE"
-cat "$PREVIEW_FILE" >> "$ARCHIVE_FILE"
+grep -E '^\{' "$PREVIEW_FILE" >> "$ARCHIVE_FILE"
 echo "Appended to $ARCHIVE_FILE"
 
 # ── Execute: remove archived entries from MD files ───────────
@@ -325,6 +385,16 @@ for file in "$LEARNINGS_DIR/LEARNINGS.md" "$LEARNINGS_DIR/ERRORS.md" "$LEARNINGS
         echo "Cleaned: $file"
     fi
 done
+
+# ── Clean up orphaned pending notification files (>7 days) ──
+PENDING_DIR="$LEARNINGS_DIR/.pending_notifications"
+if [ -d "$PENDING_DIR" ]; then
+    stale_count=$(find "$PENDING_DIR" -name "*.json" -mtime +7 -print 2>/dev/null | wc -l)
+    if [ "$stale_count" -gt 0 ]; then
+        find "$PENDING_DIR" -name "*.json" -mtime +7 -delete 2>/dev/null
+        echo "Removed $stale_count orphaned pending JSON files (>7 days)."
+    fi
+fi
 
 echo ""
 echo "=== Archive Complete ==="
