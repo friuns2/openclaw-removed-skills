@@ -1,0 +1,68 @@
+{
+  "schema_version": "paper-research-lens/1.0",
+  "paper_id": "<paper-id>",
+  "research_equation": {
+    "one_sentence_thesis": "<A works under C, T breaks C, M needs Y, so the paper builds Z>",
+    "valuable_paradigm": "<old success>",
+    "broken_assumption": "<hidden assumption>",
+    "hard_setting": "<realistic constraint>",
+    "borrowed_tool": "<neighboring method>",
+    "unavailable_mechanism": "<missing Y>",
+    "surrogate_mechanism": "<replacement Z>",
+    "claim_ids": ["C2.1", "C6.1"]
+  },
+  "direction_reconstruction": {
+    "starting_dissatisfaction": "<likely starting dissatisfaction>",
+    "almost_worked_transfer": "<method that almost transferred>",
+    "blocking_constraint": "<why it still failed>",
+    "replacement_logic": "<how Y was replaced by Z>",
+    "claim_ids": ["C6.1", "C7.1"]
+  },
+  "challenge_module_map": [
+    {
+      "challenge": "<challenge>",
+      "failure_mode": "<failure mode>",
+      "design_principle": "<design principle>",
+      "module": "<module>",
+      "ablation_or_evidence": "<evidence>",
+      "claim_ids": ["C7.1", "C17.2"]
+    }
+  ],
+  "module_lenses": [
+    {
+      "module": "<module>",
+      "failure_fixed": "<failure fixed>",
+      "ideal_unavailable_solution": "<ideal unavailable solution>",
+      "available_proxy": "<available proxy>",
+      "hidden_assumption": "<hidden assumption>",
+      "future_direction": "<next idea if the assumption breaks>",
+      "claim_ids": ["C14.1", "C23.1"]
+    }
+  ],
+  "citation_logic": [
+    {
+      "citation_cluster": "<citation cluster>",
+      "narrative_function": "<field anchor / limitation / ancestor / baseline / contrast>",
+      "assumption_inherited": "<assumption from prior work>",
+      "paper_move": "<how this paper modifies it>",
+      "claim_ids": ["C8.1"]
+    }
+  ],
+  "story_patterns": [
+    {
+      "pattern_name": "<replacement story / closed loop / empty cell>",
+      "formula": "<compact formula>",
+      "lesson": "<reusable lesson>",
+      "claim_ids": ["C20.1", "C23.1"]
+    }
+  ],
+  "boundary_directions": [
+    {
+      "title": "<future direction>",
+      "hidden_assumption": "<assumption>",
+      "what_breaks": "<what fails if it breaks>",
+      "new_direction": "<new mechanism or setting>",
+      "claim_ids": ["C21.1", "C23.1"]
+    }
+  ]
+}

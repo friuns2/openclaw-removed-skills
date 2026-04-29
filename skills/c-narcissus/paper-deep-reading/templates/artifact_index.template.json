@@ -1,9 +1,10 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "paper_id": "<paper_id>",
   "report": "report.md",
   "traceability_manifest": "traceability_manifest.json",
   "latex_paragraphs": "latex_paragraphs.json",
+  "research_lens": "research_lens.json",
   "source_package": "<optional source package path>",
   "pdfs": {
     "main": "<optional main pdf path>",
