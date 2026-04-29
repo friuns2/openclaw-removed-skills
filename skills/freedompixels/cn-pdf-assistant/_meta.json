@@ -1,11 +1,17 @@
 {
   "owner": "freedompixels",
   "slug": "cn-pdf-assistant",
-  "displayName": "PDF文档处理工具",
+  "displayName": "Cn Pdf Assistant",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776569938815,
-    "commit": "https://github.com/openclaw/skills/commit/8918a7cde771e03e76453681007198e9e9eb06d0"
+    "version": "1.2.0",
+    "publishedAt": 1777332657133,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776569938815,
+      "commit": "https://github.com/openclaw/skills/commit/8918a7cde771e03e76453681007198e9e9eb06d0"
+    }
+  ]
 }
