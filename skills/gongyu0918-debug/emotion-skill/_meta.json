@@ -1,11 +1,17 @@
 {
   "owner": "gongyu0918-debug",
   "slug": "emotion-skill",
-  "displayName": "Emotion Skill",
+  "displayName": "情绪.skill / Emotion Skill",
   "latest": {
-    "version": "0.5.1",
-    "publishedAt": 1776789996546,
-    "commit": "https://github.com/openclaw/skills/commit/42552e999f8add9a63e28d5ca32a7a826ae13e31"
+    "version": "1.2.2",
+    "publishedAt": 1777293869433,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.5.1",
+      "publishedAt": 1776789996546,
+      "commit": "https://github.com/openclaw/skills/commit/42552e999f8add9a63e28d5ca32a7a826ae13e31"
+    }
+  ]
 }
