@@ -44,15 +44,7 @@ def main():
 
     if not issues:
         print("[OK] All checks passed!")
-
-        # Quick test via API (no subprocess)
-        print("[TEST] Testing announcement...")
-        try:
-            from audio_announcement import receive
-            receive("System started", "zh")
-            print("[OK] Test complete!")
-        except Exception as e:
-            print(f"[WARN] Test failed: {e}")
+        print("[SKIP] Skipping test announcement (startup check should not broadcast)")
         return 0
     else:
         print("[ERROR] Issues found:")

@@ -1,11 +1,17 @@
 {
   "owner": "wililam",
   "slug": "beep-skills",
-  "displayName": "Beep - Small speaker",
+  "displayName": "Beep · 小喇叭",
   "latest": {
-    "version": "2.1.0-dev",
-    "publishedAt": 1776568026992,
-    "commit": "https://github.com/openclaw/skills/commit/6f379a9a78831a1b23dbe430e737e6b3e46c30cc"
+    "version": "2.2.1",
+    "publishedAt": 1777372998627,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.1.0-dev",
+      "publishedAt": 1776568026992,
+      "commit": "https://github.com/openclaw/skills/commit/6f379a9a78831a1b23dbe430e737e6b3e46c30cc"
+    }
+  ]
 }

@@ -4,8 +4,7 @@
 语音播报助手 - 跨平台简化集成
 自动选择最佳播报方案（pygame 优先，fallback 到 shell 脚本）
 
-版本: 2.1.0-dev
-优化: 稳定性 & 兼容性增强
+版本: 2.2.0
 """
 
 import os
@@ -34,17 +33,7 @@ def setup_logging(level=logging.INFO):
 
 logger = logging.getLogger(__name__)
 
-# 包内脚本路径
-try:
-    from importlib.resources import files as pkg_files
-    PACKAGE_DIR = pkg_files("audio_announcement")
-    ANNOUNCE_PYGAME_SCRIPT = str(PACKAGE_DIR.joinpath("scripts", "announce_pygame.py"))
-    ANNOUNCE_SH_SCRIPT = str(PACKAGE_DIR.joinpath("scripts", "announce.sh"))
-except Exception as e:
-    logger.warning(f"importlib.resources 不可用，使用回退路径: {e}")
-    script_dir = Path(__file__).parent / "scripts"
-    ANNOUNCE_PYGAME_SCRIPT = str(script_dir / "announce_pygame.py")
-    ANNOUNCE_SH_SCRIPT = str(script_dir / "announce.sh")
+__version__ = "2.2.0"
 
 # 用户配置目录
 CONFIG_DIR = Path.home() / ".config" / "audio-announcement"
@@ -53,6 +42,35 @@ CONFIG_FILE = CONFIG_DIR / "config.json"
 # 缓存目录
 CACHE_DIR = Path.home() / ".cache" / "audio-announcement"
 TEMP_DIR = Path(tempfile.gettempdir()) / "audio-announcement"
+
+# ============ 模块级常量 ============
+
+# 语言 → edge-tts 音色映射
+VOICES: Dict[str, str] = {
+    "zh": "zh-CN-XiaoxiaoNeural",
+    "en": "en-US-JennyNeural",
+    "ja": "ja-JP-NanamiNeural",
+    "ko": "ko-KR-SunHiNeural",
+    "es": "es-ES-ElviraNeural",
+    "fr": "fr-FR-DeniseNeural",
+    "de": "de-DE-KatjaNeural",
+}
+
+# 播报类型 → 语音前缀
+SPEAK_PREFIXES: Dict[str, str] = {
+    "task": "任务: ",
+    "complete": "完成: ",
+    "error": "警告: ",
+    "receive": "",
+}
+
+# 播报类型 → 日志前缀（降级为纯日志时使用）
+LOG_PREFIXES: Dict[str, str] = {
+    "receive": "[RECV]",
+    "task": "[TASK]",
+    "complete": "[DONE]",
+    "error": "[ERR]",
+}
 
 def retry(max_attempts=3, delay=1, backoff=2):
     """重试装饰器（用于网络调用）"""
@@ -80,7 +98,7 @@ class AnnouncementConfig:
     """播报配置（带验证）"""
     enabled: bool = True
     default_lang: str = "zh"
-    volume: float = 0.1  # 默认 10%，保护听力
+    volume: float = 0.25  # 默认 25% 音量
     async_default: bool = True
     cache_enabled: bool = True
     log_level: str = "INFO"  # 提高默认日志级别
@@ -409,31 +427,11 @@ def announce(type_: str, message: str, lang: Optional[str] = None,
     lang = lang or _config.default_lang
     async_ = async_ if async_ is not None else _config.async_default
     
-    # 音色映射（支持 voice_override 覆盖）
-    VOICES = {
-        "zh": "zh-CN-XiaoxiaoNeural",
-        "en": "en-US-JennyNeural",
-        "ja": "ja-JP-NanamiNeural",
-        "ko": "ko-KR-SunHiNeural",
-        "es": "es-ES-ElviraNeural",
-        "fr": "fr-FR-DeniseNeural",
-        "de": "de-DE-KatjaNeural",
-    }
-    # 优先使用配置中的 voice_override，否则按语言选择
-    if _config.voice_override:
-        voice = _config.voice_override
-    else:
-        voice = VOICES.get(lang, VOICES["zh"])
+    # 音色选择
+    voice = _config.voice_override or VOICES.get(lang, VOICES["zh"])
     
-    # 前缀（让播报更自然）
-    PREFIXES = {
-        "task": "任务: ",
-        "complete": "完成: ",
-        "error": "警告: ",
-        "receive": "",
-        "custom": ""
-    }
-    full_message = PREFIXES.get(type_, "") + message
+    # 拼接前缀 + 消息
+    full_message = SPEAK_PREFIXES.get(type_, "") + message
     
     # 生成临时文件
     timestamp = int(time.time() * 1000)
@@ -443,14 +441,14 @@ def announce(type_: str, message: str, lang: Optional[str] = None,
         # 步骤1: 生成音频（带重试）
         if not generate_audio(full_message, voice, safe_path_str(temp_file)):
             logger.error("音频生成失败，尝试降级方案...")
-            return _fallback_announce(type_, message, lang, async_)
+            return _fallback_announce(type_, message, lang)
         
         # 步骤2: 播放（多层降级）
-        success = _play_with_fallback(safe_path_str(temp_file), _config.volume, async_)
+        success = _play_with_fallback(safe_path_str(temp_file), _config.volume)
         
         if not success:
             logger.warning("所有播放方案失败，转为日志模式")
-            return _fallback_announce(type_, message, lang, async_)
+            return _fallback_announce(type_, message, lang)
         
         # 成功：异步清理临时文件
         if not async_:
@@ -469,9 +467,9 @@ def announce(type_: str, message: str, lang: Optional[str] = None,
         logger.error(f"播报异常: {e}", exc_info=True)
         _stats.record(False)
         # 异常时也尝试降级
-        return _fallback_announce(type_, message, lang, async_)
+        return _fallback_announce(type_, message, lang)
 
-def _play_with_fallback(audio_file: str, volume: float, async_: bool) -> bool:
+def _play_with_fallback(audio_file: str, volume: float) -> bool:
     """
     多层播放降级策略
     
@@ -496,7 +494,7 @@ def _play_with_fallback(audio_file: str, volume: float, async_: bool) -> bool:
     
     return False
 
-def _fallback_announce(type_: str, message: str, lang: str, async_: bool) -> bool:
+def _fallback_announce(type_: str, message: str, lang: str) -> bool:
     """
     最终降级：仅输出日志（不中断主流程）
     
@@ -504,19 +502,11 @@ def _fallback_announce(type_: str, message: str, lang: str, async_: bool) -> boo
         type_: 播报类型
         message: 消息内容
         lang: 语言
-        async_: 是否异步（兼容参数，此处无效）
     
     Returns:
         bool: 总是 True（静默处理）
     """
-    # 添加类型前缀
-    PREFIXES = {
-        "task": "🔊 任务",
-        "complete": "🔊 完成",
-        "error": "🔊 警告",
-        "receive": "🔊 收到",
-    }
-    prefix = PREFIXES.get(type_, "🔊")
+    prefix = LOG_PREFIXES.get(type_, "[LOG]")
     logger.info(f"{prefix}: {message} (语音播放失败，已降级为日志)")
     return True  # 静默成功，不影响主流程
 
@@ -539,21 +529,21 @@ def reload_config():
     return _config
 
 # ============ 快捷函数 ============
-def receive(msg: str, lang: Optional[str] = None) -> bool:
+def receive(msg: str, lang: Optional[str] = None, async_: Optional[bool] = None) -> bool:
     """收到消息"""
-    return announce("receive", msg, lang=lang)
+    return announce("receive", msg, lang=lang, async_=async_)
 
-def task(msg: str, lang: Optional[str] = None) -> bool:
+def task(msg: str, lang: Optional[str] = None, async_: Optional[bool] = None) -> bool:
     """任务进行中"""
-    return announce("task", msg, lang=lang)
+    return announce("task", msg, lang=lang, async_=async_)
 
-def complete(msg: str, lang: Optional[str] = None) -> bool:
+def complete(msg: str, lang: Optional[str] = None, async_: Optional[bool] = None) -> bool:
     """任务完成"""
-    return announce("complete", msg, lang=lang)
+    return announce("complete", msg, lang=lang, async_=async_)
 
-def error(msg: str, lang: Optional[str] = None) -> bool:
+def error(msg: str, lang: Optional[str] = None, async_: Optional[bool] = None) -> bool:
     """错误警告"""
-    return announce("error", msg, lang=lang)
+    return announce("error", msg, lang=lang, async_=async_)
 
 # ============ 环境自检 ============
 class EnvironmentChecker:
@@ -664,15 +654,15 @@ class EnvironmentChecker:
         if results["issues"]:
             logger.error("【严重问题】")
             for issue in results["issues"]:
-                logger.error(f"  ❌ {issue}")
+                logger.error(f"  [FAIL] {issue}")
         
         if results["warnings"]:
             logger.warning("【警告】")
             for warning in results["warnings"]:
-                logger.warning(f"  ⚠️ {warning}")
+                logger.warning(f"  [WARN]️ {warning}")
         
         if not results["issues"] and not results["warnings"]:
-            logger.info("✅ 环境检查通过，所有功能正常")
+            logger.info("[OK] 环境检查通过，所有功能正常")
 
 # ============ 高级助手类 ============
 class AnnouncementHelper:
@@ -758,7 +748,7 @@ class AnnouncementHelper:
 if __name__ == "__main__":
     setup_logging(logging.INFO)
     
-    print(f"[Beep · 小喇叭 v2.1.0-dev] Stability Enhanced")
+    print(f"[Beep · 小喇叭 v{__version__}]")
     print(f"平台: {sys.platform}")
     print(f"pygame 可用: {_has_pygame()}")
     print(f"配置: {_config}")
@@ -788,7 +778,7 @@ if __name__ == "__main__":
     helper.reload_config()
     print(f"   重载后音量: {helper.config.volume}")
     
-    print("\n✅ 测试完成")
+    print("\n[OK] 测试完成")
 
 # ============ 集成验证 ============
 
@@ -804,7 +794,7 @@ def verify_integration() -> bool:
     SEP = "=" * 60
     
     print(SEP)
-    print("Beep · 小喇叭  [Integration Verify]  v2.1.0-dev")
+    print("Beep · 小喇叭  [Integration Verify]  v" + __version__)
     print(SEP)
     
     # 1. 依赖检查
@@ -875,7 +865,7 @@ def verify_integration() -> bool:
     for name, func in tests:
         try:
             print(f"  Testing {name}...", end=" ", flush=True)
-            func()
+            func(f"测试{name}类型")
             print("[OK]")
         except Exception as e:
             print(f"[FAIL] {e}")
