@@ -1,8 +1,8 @@
-# 加豆AI鉴权检查
+# ClawAgent鉴权检查
 
-加豆AI授权流程，**必须按以下步骤执行**：
+ClawAgent授权流程，**必须按以下步骤执行**：
 
-> 💡 **说明**：授权成功后，Token 会配置到 `jiadouai` 服务，通过 mcporter 管理。
+> 💡 **说明**：授权成功后，Token 会配置到 `ClawAgent` 服务，通过 mcporter 管理。
 
 ## 第零步：检查并安装 mcporter（已安装则跳过）
 
@@ -61,17 +61,17 @@ bash ./setup.sh verify_token
 
 当第一步输出 `NOT_CONFIGURED` 时，向用户展示：
 
-> 🔑 **需要配置加豆AI Token**
+> 🔑 **需要配置ClawAgent Token**
 >
-> 请先获取您的加豆AI Token：
+> 请先获取您的ClawAgent Token：
 >
-> 1. 访问 [https://jiadouai.com](https://jiadouai.com) 登录并打开左侧菜单**龙虾**获取 Token
+> 1. 登录并打开系统左侧菜单**龙虾**获取 Token
 > 2. 复制您的 Token
 > 3. **直接将 Token 发送给我**，我会自动帮您配置
 >
 > ⚠️ Token 是您的私密凭证，请勿泄露给他人
 >
-> ✅ **提供 Token 后，我会自动保存并验证，验证通过后即可使用加豆AI的所有功能**
+> ✅ **提供 Token 后，我会自动保存并验证，验证通过后即可使用ClawAgent的所有功能**
 
 > ⛔ **AI 注意**：展示上方引导信息后，**必须停止等待**，不得自动执行任何配置命令。只有当用户在下一条新消息中提供了 Token 后，才能继续执行第二步。
 
@@ -80,8 +80,8 @@ bash ./setup.sh verify_token
 如果自动保存失败，可手动配置 Token：
 
 ```bash
-# 使用用户提供的 Token 写入 mcporter 配置（jiadouai）
-mcporter config add jiadouai "https://mcp.jiadouai.com/mcp" \
+# 使用用户提供的 Token 写入 mcporter ClawAgent
+mcporter config add ClawAgent "https://mcp.jiadouai.com/mcp" \
     --header "Authorization=<用户提供的Token>" \
     --transport http \
     --scope home
