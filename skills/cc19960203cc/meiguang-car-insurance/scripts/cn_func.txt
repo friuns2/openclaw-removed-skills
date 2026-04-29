@@ -1,0 +1,17 @@
+def chinese_num(s):
+    """Convert '叁佰陆拾元整' → 360. 简化版：遇到佰/佰时multiply cur by position."""
+    CN = {'零':0,'一':1,'二':1,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,
+          '十':10,'百':100,'佰':100,'仟':1000,'千':1000}
+    for noise in ['元整','元','整','（','）']:
+        s = s.replace(noise,'')
+    result = cur = 0
+    for ch in s:
+        if ch not in CN:
+            continue
+        v = CN[ch]
+        if v >= 10:
+            result += cur * v
+            cur = 0
+        else:
+            cur = cur * 10 + v
+    return result + cur

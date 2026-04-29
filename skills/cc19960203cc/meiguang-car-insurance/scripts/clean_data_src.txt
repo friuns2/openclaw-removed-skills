@@ -1,0 +1,127 @@
+def clean_data(data, text):
+    # ===== 保险公司名称清洗 =====
+    c = data.get("保险公司名称", "")
+    # 扩展坏前缀：字段名不是公司名的、长度不足的
+    bad_company_prefixes = (
+        "公司地址", "邮政编码", "服务电话", "签单日期", "保单号",
+        "公司名称", "公司", "投保人名称", "被保险人名称",
+        "投保人", "被保险人", "联系电话", "行驶证地址", "尊敬的客户",
+        "根据",
+    )
+    needs_fix = c.startswith(bad_company_prefixes) or not c or len(c) < 4
+    has_junk = bool(re.search(r"[0-9]{5,}", c))  # 5+ consecutive digits = phone
+    if needs_fix or has_junk:
+        # 智能截断优先级：
+        # 1. 先看有没有换行（pymupdf排版：公司在单独一行，下一行是地址/热线）
+        # 2. 再找空格后跟数字的情况（plumber热线格式："公司 全国统一热线:12345"）
+        # 3. 再找具体字段标签
+        newline_pos = c.find("\n")
+        space_digit_pos = None
+        for m in re.finditer(r"\s\d", c):
+            space_digit_pos = m.start()
+            break
+        field_stop_words = ["公司地址", "营业执照", "邮政编码", "服务热线", "投诉热线",
+                           "全国统一", "全国服务", "网址", "电子邮件", "注册地址"]
+        field_pos = len(c)
+        for w in field_stop_words:
+            idx = c.find(w)
+            if 0 <= idx < field_pos:
+                field_pos = idx
+        # 取最近的停靠点
+        stop_pos = len(c)
+        if newline_pos > 0:
+            stop_pos = newline_pos
+        else:
+            if space_digit_pos is not None:
+                stop_pos = space_digit_pos
+            else:
+                digit_match = re.search(r"\s*([0-9]{5,})", c)
+                if digit_match and digit_match.start() > 2:
+                    stop_pos = digit_match.end()
+                elif field_pos < stop_pos:
+                    stop_pos = field_pos
+        c = c[:stop_pos] if stop_pos > 0 else c
+        # 重新判断截断后是否有效
+        if c.startswith(bad_company_prefixes) or not c or len(c) < 4:
+            c = ""
+        data["保险公司名称"] = c
+    # 如果仍然是脏值，在全文中搜索公司关键词
+    c = data.get("保险公司名称", "")
+    if not c or c.startswith(bad_company_prefixes) or len(c) < 4:
+        for keyword, full_name in [
+            ("浙商财产保险", "浙商财产保险股份有限公司"),
+            ("太平洋财产保险", "中国太平洋财产保险股份有限公司"),
+            ("中国人民财产保险", "中国人民财产保险股份有限公司"),
+            ("亚太财产保险", "亚太财产保险有限公司"),
+            ("大地财产保险", "中国大地财产保险股份有限公司"),
+            ("华海", "华海财产保险股份有限公司"),
+        ]:
+            if keyword in text:
+                data["保险公司名称"] = full_name
+                break
+
+    # ===== 保险公司名称规范化：去掉支公司/分支机构后缀 =====
+    co = data.get("保险公司名称", "")
+    if co:
+        # 去掉"XX支公司"、"XX中心支公司"、"XX分公司"等后缀
+        suffixes = ["中心支公司", "支公司", "分公司"]
+        for suffix in suffixes:
+            if co.endswith(suffix):
+                co = co[:-len(suffix)].rstrip()
+                break
+        # 如果含"公司"关键词但有残留地名，定位到公司名边界
+        # 例如"浙商财产保险股份有限公司烟台市牟平" → 截断到"股份有限公司"之后
+        if "公司" in co and any(suffix in co for suffix in ["中心支公司", "支公司", "分公司"]) is False:
+            # 找到最后一个"公司"（公司名结束的位置）
+            last_co_idx = co.rfind("公司")
+            if last_co_idx > 5:  # 确保不是公司名本身的一部分
+                co = co[:last_co_idx + 2].rstrip()
+        data["保险公司名称"] = co
+
+    # 车牌号清洗
+    bad_plates = {"发动机号", "核定载质量", "使用性质", "车架号",
+                  "号牌号码", "保险期间", "VIN码"}
+    if data.get("车牌号码", "") in bad_plates:
+        m = re.search(rf"([{PROVINCES}][A-Z0-9]{{5,8}})", text)
+        data["车牌号码"] = m.group(1) if m else ""
+
+    # 使用性质清洗
+    valid_natures = set(NATURE_LIST)
+    if data.get("车辆使用性质", "") not in valid_natures:
+        m = re.search(rf"使用性质[：:\s]+({NATURE_PATTERN})", text)
+        if m:
+            data["车辆使用性质"] = m.group(1)
+        else:
+            data["车辆使用性质"] = ""
+
+    # 车架号二次校验（防止仍有漏网之鱼）
+    vin = data.get("车架号", "")
+    if vin and not is_valid_vin(vin):
+        # 在全文中找所有17位字母+数字组合，直接用第一个（不过滤checkdigit）
+        candidates = re.findall(r"\b([A-HJ-NP-Z0-9]{17})\b", text)
+        if candidates:
+            data["车架号"] = candidates[0]
+        else:
+            data["车架号"] = ""
+
+    # VIN→车辆型号兜底：PDF本身无厂牌型号字段时，通过VIN查询
+    if not data.get("车辆型号名称", "").strip():
+        vin_for_lookup = data.get("车架号", "")
+        if vin_for_lookup and len(vin_for_lookup) == 17:
+            # 按VIN查表
+            for v, m in VIN_MODEL_LOOKUP.items():
+                if vin_for_lookup.upper() == v.upper():
+                    data["车辆型号名称"] = m
+                    break
+
+    # 清理车辆型号尾部垃圾（如"核定载客 5人 核定载质量 0.000千克"）
+    vm = data.get("车辆型号名称", "")
+    if vm:
+        # 去掉尾部"核定载客 N人"或"核定载质量 ..."等字段标签碎片
+        vm = re.sub(r'\s*核定载客\s*[0-9０１２３４５６７８９]+\s*[人座个]*\s*核定载质量\s*[0-9.千克]*\s*$', '', vm)
+        vm = re.sub(r'\s*核定载客\s*[0-9０１２３４５６７８９]+\s*[人座个]*\s*$', '', vm)
+        vm = re.sub(r'\s*核定载质量\s*[0-9.千克]*\s*$', '', vm)
+        vm = re.sub(r'\s*绝对免赔额[：:\s]*[/0-9A-Za-z]*\s*$', '', vm)
+        data["车辆型号名称"] = vm.strip()
+
+    return data

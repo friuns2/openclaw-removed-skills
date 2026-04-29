@@ -1,11 +1,17 @@
 {
   "owner": "cc19960203cc",
   "slug": "meiguang-car-insurance",
-  "displayName": "美光车险PDF转Excel",
+  "displayName": "Meiguang Car Insurance",
   "latest": {
-    "version": "2.2.1",
-    "publishedAt": 1776773864804,
-    "commit": "https://github.com/openclaw/skills/commit/097f428aa2bde0fe1d5cb806b612bae5eab8b278"
+    "version": "5.1.1",
+    "publishedAt": 1777342513433,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.2.1",
+      "publishedAt": 1776773864804,
+      "commit": "https://github.com/openclaw/skills/commit/097f428aa2bde0fe1d5cb806b612bae5eab8b278"
+    }
+  ]
 }

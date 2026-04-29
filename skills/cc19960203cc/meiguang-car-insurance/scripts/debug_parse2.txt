@@ -1,0 +1,226 @@
+def parse_pdf(pdf_path):
+    data = {}
+    data["文件名"] = os.path.basename(pdf_path)
+    # ===== Step 1: pymupdf 文本（通用路径） =====
+    page_texts_pymupdf = []
+    try:
+        import pymupdf
+        with pymupdf.open(pdf_path) as doc:
+            for page in doc:
+                t = page.get_text()
+                if t and t.strip():
+                    page_texts_pymupdf.append(t)
+    except Exception:
+        pass
+
+    pymupdf_text = "\n".join(page_texts_pymupdf) if page_texts_pymupdf else ""
+
+    # ===== Step 2: pdfplumber 文本（浙商专用，也作为通用备选） =====
+    page_texts_plumber = []
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                t = page.extract_text()
+                if t and t.strip():
+                    page_texts_plumber.append(t)
+    except Exception:
+        pass
+
+    plumber_text = "\n".join(page_texts_plumber) if page_texts_plumber else ""
+
+    # ===== Step 3: 浙商PDF → 直接走pdfplumber+关键词映射，不依赖pymupdf公司名 =====
+    if "浙商财产保险" in plumber_text:
+        rt = route_type(plumber_text)
+        if rt in ("交强险", "需人工判断"):
+            return clean_data(parse_jiaoqiang(plumber_text, "浙商财产保险股份有限公司烟台市牟平支公司", pdf_path), plumber_text)
+        elif rt == "商业险":
+            return clean_data(parse_shangye(plumber_text, "浙商财产保险股份有限公司烟台市牟平支公司", pdf_path), plumber_text)
+        else:
+            return clean_data(parse_changxing(plumber_text, pdf_path), plumber_text, pdf_path)
+
+
+    # ===== Step 4 - PEBS商业险优先检测 =====
+    if "PEBS" in (pymupdf_text + plumber_text):
+        # Strip UTF-16 LE BOM from plumber_text (corrupts Chinese chars)
+        if plumber_text.startswith('\xff\xfe') or plumber_text.startswith('\ufeff'):
+            try:
+                bom_stripped = plumber_text.encode('utf-16', errors='replace').decode('utf-16-le', errors='replace').encode('utf-8', errors='replace').decode('utf-8', errors='replace')
+                if bom_stripped and len(bom_stripped) > 10:
+                    plumber_text = bom_stripped
+            except:
+                pass
+        _co = ""
+        for kw, full_name in [
+            ("太平洋", "中国太平洋财产保险股份有限公司"),
+            ("中国人民", "中国人民财产保险股份有限公司"),
+            ("亚太财产", "亚太财产保险有限公司"),
+        ]:
+            if kw in plumber_text:
+                _co = full_name
+                break
+        # 使用 pymupdf_text（正确提取中文），不用 plumber_text（有编码问题）
+        return clean_data(parse_shangye(pymupdf_text, _co or "中国太平洋财产保险股份有限公司", pdf_path), pymupdf_text, pdf_path)
+
+    # ===== Step 4b: 华海 PDF 前置检测（优先于 route_company，防止误识） =====
+    if "华海" in pymupdf_text or "华海" in plumber_text:
+        rt = route_type(pymupdf_text if pymupdf_text else plumber_text)
+        huanghai_company = "华海财产保险股份有限公司"
+        # 华海PDF: pymupdf 经常只读第一页就停止，第二页的保费数据读不到。
+        # pymupdf_text 可能含有 ¥ 但金额数字被截断（如 "¥           元）"）。
+        # 判断依据：pymupdf 里金额数字（4 3 9）是否存在。
+        _has_amount = bool(re.search(r"¥\s+[0-9]", pymupdf_text)) if pymupdf_text else False
+        text = plumber_text if (not _has_amount and plumber_text) else (pymupdf_text if pymupdf_text else plumber_text)
+        if rt in ("交强险", "需人工判断"):
+            data = parse_jiaoqiang(text, huanghai_company, pdf_path)
+            # 华海交强险：¥符号后数字在CID字体里，用garbled提取。
+            # 交强险 = 交强险保费（garbled，skip小于100的干扰项）+ 车船税（garbled + 中文数字兜底）。
+            # 不再以 parse_jiaoqiang 返回值作为判断依据，直接尝试garbled。
+            total = 0.0
+            count = 0
+            # 1. 交强险保费garbled
+            idx = text.find('保险费合计')
+            if idx >= 0:
+                segment = text[idx:idx+300]
+                for n_digits in [4, 3, 2]:
+                    garbled = re.search(
+                        r'¥[：:\s]*([0-9](?:\s*[0-9]){' + str(n_digits-1) + r'}\s*[.．]\s*[0-9]\s*[0-9])\s*元[）]?',
+                        segment
+                    )
+                    if garbled:
+                        digits = re.sub(r'[^\d]', '', garbled.group(1))
+                        if len(digits) >= 5:
+                            val = float(digits[:-2] + "." + digits[-2:])
+                            if val >= 100:
+                                total += val
+                                count += 1
+                                break
+            # 2. 当年应缴（车船税）garbled — 仅记录garbled_tax，不加入total
+            idx2 = text.find('当年应缴')
+            garbled_tax = None
+            if idx2 >= 0:
+                seg2 = text[idx2:idx2+300]
+                for n_digits in [4, 3, 2]:
+                    garbled2 = re.search(
+                        r'¥[：:\s]*([0-9](?:\s*[0-9]){' + str(n_digits-1) + r'}\s*[.．]\s*[0-9]\s*[0-9])\s*元[）]?',
+                        seg2
+                    )
+                    if garbled2:
+                        digits2 = re.sub(r'[^\d]', '', garbled2.group(1))
+                        if len(digits2) >= 5:
+                            val2 = float(digits2[:-2] + "." + digits2[-2:])
+                            garbled_tax = val2  # 不限范围，记录后break
+                            break
+            # 3. garbled_tax 强制覆盖车船税（parse_jiaoqiang的值可能是错的）
+            if garbled_tax is not None:
+                data["车船税"] = f"{garbled_tax:.2f}"
+            if count >= 1 and total > 0:
+                data["实收保费"] = f"{total:.2f}"
+            return clean_data(data, text, pdf_path)
+        elif rt == "商业险":
+            data = parse_shangye(text, huanghai_company, pdf_path)
+            # 华海商业险：¥符号后的数字在CID字体里，文字层读不到。
+            # 在"保险费合计"附近找 garbled 区（¥ X X X . X X）并清理提取。
+            # 支持2/3/4位整数部分（因为不知道是几百还是几千）
+            if not data.get("实收保费") or float(data.get("实收保费", "0") or "0") < 100:
+                idx = text.find('保险费合计')
+                if idx >= 0:
+                    segment = text[idx:idx+300]
+                    for n_digits in [4, 3, 2]:  # 尝试4/3/2位整数
+                        garbled = re.search(
+                            r'¥\s*([0-9](?:\s*[0-9]){' + str(n_digits-1) + r'}\s*[.．]\s*[0-9]\s*[0-9])',
+                            segment
+                        )
+                        if garbled:
+                            digits = re.sub(r'[^\d]', '', garbled.group(1))
+                            if len(digits) >= 5:
+                                val = float(digits[:-2] + "." + digits[-2:])
+                                if 300 <= val <= 3000:
+                                    data["实收保费"] = f"{val:.2f}"
+                                    break
+                # 兜底：300~3000范围最大数字
+                if not data.get("实收保费") or float(data.get("实收保费", "0") or "0") < 100:
+                    all_nums = re.findall(r"\d+\.\d{2}", text)
+                    valid = [float(n) for n in all_nums if 300 <= float(n) <= 3000]
+                    if valid:
+                        data["实收保费"] = f"{max(valid):.2f}"
+            return clean_data(data, text)
+        else:
+            return clean_data(parse_changxing(text, pdf_path), text, pdf_path)
+
+    # ===== Step 4: 通用路径：先用pymupdf，失败则fallback到pdfplumber =====
+    # 如果pymupdf返回空文本，直接用pdfplumber（pymupdf对这些PDF完全失效）
+    if not pymupdf_text and plumber_text:
+        text = plumber_text
+        company_check2 = ''
+        for kw, full_name in [
+            ("太平洋", "中国太平洋财产保险股份有限公司"),
+            ("中国人民", "中国人民财产保险股份有限公司"),
+            ("亚太财产", "亚太财产保险有限公司"),
+            ("大地财产", "中国大地财产保险股份有限公司"),
+            ("华海", "华海财产保险股份有限公司"),
+        ]:
+            if kw in plumber_text:
+                company_check2 = full_name
+                break
+        rt = route_type(text)
+        if rt in ("交强险", "需人工判断"):
+            return parse_jiaoqiang(text, company_check2, pdf_path)
+        elif rt == "商业险":
+            return parse_shangye(text, company_check2, pdf_path)
+        else:
+            return parse_changxing(text, pdf_path)
+
+    def looks_valid(company_val):
+        if not company_val or len(company_val) < 4:
+            return False
+        bad = ("公司地址", "邮政编码", "服务电话", "签单日期", "保单号", "公司名称", "公司")
+        return not company_val.startswith(bad)
+
+    text = pymupdf_text  # 默认用pymupdf
+    pymupdf_company = safe_extract(pymupdf_text, [
+        r"公司名称[：:]\s+([^\n]{2,30})(?=公司地址|营业执照|注册地址|联系电话|地址|$)",
+        r"公司名称[：:]\s+([^\n]{2,40})",
+    ])
+    if not looks_valid(pymupdf_company) and plumber_text:
+        # pymupdf公司名无效，但pdfplumber有内容 → 用pdfplumber并搜索公司关键词
+        text = plumber_text
+        company_check2 = ''
+        for kw, full_name in [
+            ("太平洋", "中国太平洋财产保险股份有限公司"),
+            ("中国人民", "中国人民财产保险股份有限公司"),
+            ("亚太财产", "亚太财产保险有限公司"),
+            ("大地财产", "中国大地财产保险股份有限公司"),
+            ("华海", "华海财产保险股份有限公司"),
+        ]:
+            if kw in plumber_text:
+                company_check2 = full_name
+                break
+        # 大地安行如意保最优先检测（防止被商业险/非车险路由截断）
+        if "大地财产" in text and ("安行如意保" in text or "团体意外险" in text):
+            return clean_data(parse_dadi_anyang(pymupdf_text, plumber_text), text, pdf_path)
+        rt = route_type(text)
+        if rt in ("交强险", "需人工判断"):
+            return clean_data(parse_jiaoqiang(text, company_check2, pdf_path), text, pdf_path)
+        elif rt == "商业险":
+            return clean_data(parse_shangye(text, company_check2, pdf_path), text, pdf_path)
+        else:
+            return clean_data(parse_changxing(text, pdf_path), text, pdf_path)
+
+    if not text:
+        return {}
+
+    # 路由判断（正常pymupdf路径）
+    company = route_company(text)
+    rt = route_type(text)
+    # 大地安行如意保最优先检测（防止被商业险/非车险路由截断）
+    if "大地财产" in text and ("安行如意保" in text or "团体意外险" in text):
+        data = parse_dadi_anyang(pymupdf_text, plumber_text)
+    elif rt == "商业险":
+        data = parse_shangye(text, company, pdf_path)
+    elif rt in ("交强险", "需人工判断"):
+        data = parse_jiaoqiang(text, company, pdf_path)
+    elif rt == "非车险":
+        data = parse_changxing(text, pdf_path)
+    else:
+        data = parse_changxing(text, pdf_path)
+    return clean_data(data, text, pdf_path)

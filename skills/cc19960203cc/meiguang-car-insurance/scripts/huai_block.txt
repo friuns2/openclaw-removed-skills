@@ -1,0 +1,80 @@
+1031:         _has_amount = bool(re.search(r"¥\s+[0-9]", pymupdf_text)) if pymupdf_text else False
+1032:         text = plumber_text if (not _has_amount and plumber_text) else (pymupdf_text if pymupdf_text else plumber_text)
+1033:         if rt in ("交强险", "需人工判断"):
+1034:             data = parse_jiaoqiang(text, huanghai_company)
+1035:             # 华海交强险：¥符号后数字在CID字体里，用garbled提取。
+1036:             # 交强险 = 交强险保费（garbled，skip小于100的干扰项）+ 车船税（garbled + 中文数字兜底）。
+1037:             # 不再以 parse_jiaoqiang 返回值作为判断依据，直接尝试garbled。
+1038:             total = 0.0
+1039:             count = 0
+1040:             # 1. 交强险保费garbled
+1041:             idx = text.find('保险费合计')
+1042:             if idx >= 0:
+1043:                 segment = text[idx:idx+300]
+1044:                 for n_digits in [4, 3, 2]:
+1045:                     garbled = re.search(
+1046:                         r'¥[：:\s]*([0-9](?:\s*[0-9]){' + str(n_digits-1) + r'}\s*[.．]\s*[0-9]\s*[0-9])\s*元[）]?',
+1047:                         segment
+1048:                     )
+1049:                     if garbled:
+1050:                         digits = re.sub(r'[^\d]', '', garbled.group(1))
+1051:                         if len(digits) >= 5:
+1052:                             val = float(digits[:-2] + "." + digits[-2:])
+1053:                             if val >= 100:
+1054:                                 total += val
+1055:                                 count += 1
+1056:                                 break
+1057:             # 2. 当年应缴（车船税）garbled
+1058:             idx2 = text.find('当年应缴')
+1059:             if idx2 >= 0:
+1060:                 seg2 = text[idx2:idx2+300]
+1061:                 for n_digits in [4, 3, 2]:
+1062:                     garbled2 = re.search(
+1063:                         r'¥[：:\s]*([0-9](?:\s*[0-9]){' + str(n_digits-1) + r'}\s*[.．]\s*[0-9]\s*[0-9])\s*元[）]?',
+1064:                         seg2
+1065:                     )
+1066:                     if garbled2:
+1067:                         digits2 = re.sub(r'[^\d]', '', garbled2.group(1))
+1068:                         if len(digits2) >= 5:
+1069:                             val2 = float(digits2[:-2] + "." + digits2[-2:])
+1070:                             if 200 <= val2 <= 600:
+1071:                                 total += val2
+1072:                                 count += 1
+1073:                                 break
+1074:                 # 3. 中文数字兜底：在原始text中（不限seg2）搜索合计附近
+1075:                 idx3 = text.find('合计（人民币大写）')
+1076:                 if idx3 < 0:
+1077:                     idx3 = text.find('合计（人民币大写', idx2)  # 在当年应缴之后
+1078:                 if idx3 < 0:
+1079:                     idx3 = text.find('合计（', idx2)
+1080:                 if idx3 < 0:
+1081:                     idx3 = text.find('合计', idx2)
+1082:                 if idx3 >= 0:
+1083:                     seg3 = text[idx3:idx3+80]
+1084:                     cn_match = re.search(r'[壹贰叁肆伍陆柒捌玖零][壹贰叁肆伍陆柒捌玖拾佰仟]*元整', seg3)
+1085:                     if cn_match:
+1086:                         tax = chinese_num(cn_match.group(0))
+1087:                         if tax > 0:
+1088:                             total += tax
+1089:             if count >= 1 and total > 0:
+1090:                 data["实收保费"] = f"{total:.2f}"
+1091:             return clean_data(data, text)
+1092:         elif rt == "商业险":
+1093:             data = parse_shangye(text, huanghai_company)
+1094:             # 华海商业险：¥符号后的数字在CID字体里，文字层读不到。
+1095:             # 在"保险费合计"附近找 garbled 区（¥ X X X . X X）并清理提取。
+1096:             # 支持2/3/4位整数部分（因为不知道是几百还是几千）
+1097:             if not data.get("实收保费") or float(data.get("实收保费", "0") or "0") < 100:
+1098:                 idx = text.find('保险费合计')
+1099:                 if idx >= 0:
+1100:                     segment = text[idx:idx+300]
+1101:                     for n_digits in [4, 3, 2]:  # 尝试4/3/2位整数
+1102:                         garbled = re.search(
+1103:                             r'¥\s*([0-9](?:\s*[0-9]){' + str(n_digits-1) + r'}\s*[.．]\s*[0-9]\s*[0-9])',
+1104:                             segment
+1105:                         )
+1106:                         if garbled:
+1107:                             digits = re.sub(r'[^\d]', '', garbled.group(1))
+1108:                             if len(digits) >= 5:
+1109:                                 val = float(digits[:-2] + "." + digits[-2:])
+1110:                                 if 300 <= val <= 3000:

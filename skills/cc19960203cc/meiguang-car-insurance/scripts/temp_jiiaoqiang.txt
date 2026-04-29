@@ -1,0 +1,60 @@
+1011:         huanghai_company = "华海财产保险股份有限公司"
+1012:         # 华海PDF: pymupdf 经常只读第一页就停止，第二页的保费数据读不到。
+1013:         # pymupdf_text 可能含有 ¥ 但金额数字被截断（如 "¥           元）"）。
+1014:         # 判断依据：pymupdf 里金额数字（4 3 9）是否存在。
+1015:         _has_amount = bool(re.search(r"¥\s+[0-9]", pymupdf_text)) if pymupdf_text else False
+1016:         text = plumber_text if (not _has_amount and plumber_text) else (pymupdf_text if pymupdf_text else plumber_text)
+1017:         if rt in ("交强险", "需人工判断"):
+1018:             data = parse_jiaoqiang(text, huanghai_company)
+1019:             # 华海交强险：¥符号后数字在CID字体里，用garbled提取。
+1020:             # 交强险 = 交强险保费 + 车船税。
+1021:             # 保险费合计：用garbled（格式：¥： 6 6 5 . 0 0 元））
+1022:             # 当年应缴：用中文大写（叁佰陆拾元整），避免CID字体3↔9、6↔0混淆问题。
+1023:             cur = data.get("实收保费", "")
+1024:             try:
+1025:                 cur_val = float(cur)
+1026:             except (ValueError, TypeError):
+1027:                 cur_val = 0.0
+1028:             if cur_val < 100:
+1029:                 total = 0.0
+1030:                 # 交强险保费：garbled提取
+1031:                 idx = text.find('保险费合计')
+1032:                 if idx >= 0:
+1033:                     segment = text[idx:idx+300]
+1034:                     for n_digits in [4, 3, 2]:
+1035:                         garbled = re.search(
+1036:                             r'¥[：:\s]*([0-9](?:\s*[0-9]){' + str(n_digits-1) + r'}\s*[.．]\s*[0-9]\s*[0-9])\s*元[）]?',
+1037:                             segment
+1038:                         )
+1039:                         if garbled:
+1040:                             digits = re.sub(r'[^\d]', '', garbled.group(1))
+1041:                             if len(digits) >= 5:
+1042:                                 val = float(digits[:-2] + "." + digits[-2:])
+1043:                                 if val >= 100:
+1044:                                     total += val
+1045:                                     break
+1046:                 # 车船税：从"合计（人民币大写）"提取中文数字（叁佰陆拾元整）
+1047:                 idx2 = text.find('合计（人民币大写）')
+1048:                 if idx2 >= 0:
+1049:                     seg2 = text[idx2:idx2+100]
+1050:                     # 匹配中文数字金额，格式：叁 佰 陆 拾 元 整
+1051:                     cn_match = re.search(r'[壹贰叁肆伍陆柒捌玖][拾佰仟万]*[零壹贰叁肆伍陆柒捌玖]*元整', seg2)
+1052:                     if cn_match:
+1053:                         cn_str = cn_match.group(0)
+1054:                         tax = chinese_to_number(cn_str)
+1055:                         if tax:
+1056:                             total += tax
+1057:                 if total > 0:
+1058:                     data["实收保费"] = f"{total:.2f}"
+1059:             return clean_data(data, text)
+1060:         elif rt == "商业险":
+1061:             data = parse_shangye(text, huanghai_company)
+1062:             # 华海商业险：¥符号后的数字在CID字体里，文字层读不到。
+1063:             # 在"保险费合计"附近找 garbled 区（¥ X X X . X X）并清理提取。
+1064:             # 支持2/3/4位整数部分（因为不知道是几百还是几千）
+1065:             if not data.get("实收保费") or float(data.get("实收保费", "0") or "0") < 100:
+1066:                 idx = text.find('保险费合计')
+1067:                 if idx >= 0:
+1068:                     segment = text[idx:idx+300]
+1069:                     for n_digits in [4, 3, 2]:  # 尝试4/3/2位整数
+1070:                         garbled = re.search(
