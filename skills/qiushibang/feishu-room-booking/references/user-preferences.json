@@ -1,30 +1,27 @@
 {
   "preferences": {
     "ou_3e543a7e7b42fcc8c1c654bb9c60f45b": {
-      "default_building": "丽金智地中心 B座",
-      "capacity_gte": 8,
-      "capacity_lte": 999,
-      "preferred_rooms": [
-        "F11-15(8)"
-      ],
-      "note": "偏好8人以上会议室",
-      "selection_history": [
-        {
-          "room": "F11-15(8)",
-          "building": "丽金智地中心 B座",
-          "time": "2026-04-17T16:05:40.179862"
+      "buildings": {
+        "丽金智地中心 西塔": {
+          "preferred_rooms": [
+            "F11-15",
+            "F11-07"
+          ]
         },
-        {
-          "room": "F11-15(8)",
-          "building": "丽金智地中心 B座",
-          "time": "2026-04-17T16:05:40.232104"
+        "紫金数码园4号楼": {
+          "preferred_rooms": [
+            "F4-08"
+          ]
         },
-        {
-          "room": "F11-15(8)",
-          "building": "丽金智地中心 B座",
-          "time": "2026-04-17T16:05:40.278039"
+        "丽金智地中心 B座": {
+          "preferred_rooms": [
+            "F11-01(8)",
+            "F11-07(8)",
+            "F11-08(8)",
+            "F11-15(8)"
+          ]
         }
-      ]
+      }
     }
   }
 }

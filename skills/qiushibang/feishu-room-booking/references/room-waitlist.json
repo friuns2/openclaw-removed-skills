@@ -1,3 +1,16 @@
 {
-  "pending": []
+  "pending": [
+    {
+      "event_id": "5671de25-9e24-4d31-8cf5-fb4a567b79c9_0",
+      "summary": "测试",
+      "start": "2026-04-29T17:00:00+08:00",
+      "end": "2026-04-29T17:30:00+08:00",
+      "building": "丽金智地中心 B座",
+      "capacity_gte": 8,
+      "attempted_rooms": [],
+      "attempts": 0,
+      "added_at": "2026-04-27T10:54:59.303836",
+      "status": "waiting"
+    }
+  ]
 }
