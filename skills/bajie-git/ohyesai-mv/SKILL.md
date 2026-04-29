@@ -11,7 +11,7 @@ metadata: {"clawdbot":{"emoji":"🎬","requires":{"bins":["curl","sleep"],"env":
 该技能允许用户上传音频并将其转化为具有特定视觉风格（如动漫、写实）和指定比例（横屏/竖屏）的音乐视频（MV）。
 
 ## 2. 预置条件与配置
-- **API Key 获取**: 引导用户前往 [https://dev.ohyesai.com](https://dev.ohyesai.com) 获取。
+- **API Key 获取**: 引导用户前往 [https://ohyesai.com](https://ohyesai.com) 获取。
 - **环境变量**: 必须配置 `OHEYSAI_API_KEY`。
 - **文件限制**: 音频文件大小不得超过 **50MB**。
 
@@ -28,12 +28,12 @@ metadata: {"clawdbot":{"emoji":"🎬","requires":{"bins":["curl","sleep"],"env":
 ## 4. 接口定义 (API Reference)
 
 ### 4.1 上传音频接口 (Upload)
-- **URL**: `POST https://dev.ohyesai.com/ohyesai-next/api/vio/skill/upload?apikey={{OHEYSAI_API_KEY}}`
+- **URL**: `POST https://ohyesai.com/ohyesai-next/api/vio/skill/upload?apikey={{OHEYSAI_API_KEY}}`
 - **Payload**: `multipart/form-data` (字段名: `file`)
 - **功能**: 将本地音频转换为 `audioFileId`。
 
 ### 4.2 提交任务接口 (Submit)
-- **URL**: `POST https://dev.ohyesai.com/ohyesai-next/api/vio/skill/mv-submit?apikey={{OHEYSAI_API_KEY}}`
+- **URL**: `POST https://ohyesai.com/ohyesai-next/api/vio/skill/mv-submit?apikey={{OHEYSAI_API_KEY}}`
 - **Request Body**:
   ```json
   {
@@ -45,7 +45,7 @@ metadata: {"clawdbot":{"emoji":"🎬","requires":{"bins":["curl","sleep"],"env":
 - **Response**: 返回 `taskId` (String)。
 
 ### 4.3 查询任务接口 (Query)
-- **URL**: `GET https://dev.ohyesai.com/ohyesai-next/api/vio/skill/mv-query?apikey={{OHEYSAI_API_KEY}}&taskId={{taskId}}`
+- **URL**: `GET https://ohyesai.com/ohyesai-next/api/vio/skill/mv-query?apikey={{OHEYSAI_API_KEY}}&taskId={{taskId}}`
 - **Response Structure**:
   ```json
   {
@@ -94,3 +94,8 @@ metadata: {"clawdbot":{"emoji":"🎬","requires":{"bins":["curl","sleep"],"env":
 > 5. (Internal/Loop) 调用 `/mv-query`，状态为 `RUNNING`。
 > 6. (Internal/Loop) 调用 `/mv-query`，状态变为 `SUCCESS`。
 > 7. (Output) 视频制作完成！您可以点击下方链接查看或下载：[视频链接]
+
+## 联系客服
+![联系客服](https://ohyesainext-public.tos-cn-beijing.volces.com/openclawCstomerServiceQr.jpeg)
+
+![联系客服](https://ohyesainext-public.tos-cn-beijing.volces.com/customerServiceQrCode.jpeg)
