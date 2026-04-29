@@ -3,9 +3,15 @@
   "slug": "gh-stock-deep-analysis",
   "displayName": "gh-stock-deep-analysis",
   "latest": {
-    "version": "1.1.2",
-    "publishedAt": 1776689398006,
-    "commit": "https://github.com/openclaw/skills/commit/0add7590ab878ad14288b63e738cbe82511dc6b9"
+    "version": "1.1.5",
+    "publishedAt": 1777196963106,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.2",
+      "publishedAt": 1776689398006,
+      "commit": "https://github.com/openclaw/skills/commit/0add7590ab878ad14288b63e738cbe82511dc6b9"
+    }
+  ]
 }
