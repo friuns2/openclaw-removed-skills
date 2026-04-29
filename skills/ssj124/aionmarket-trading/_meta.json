@@ -3,9 +3,15 @@
   "slug": "aionmarket-trading",
   "displayName": "Aionmarket Trading",
   "latest": {
-    "version": "1.0.2",
-    "publishedAt": 1776431682502,
-    "commit": "https://github.com/openclaw/skills/commit/e3750fbff5705c3bd024e2d92fc03dd189083973"
+    "version": "1.0.5",
+    "publishedAt": 1776946539235,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.2",
+      "publishedAt": 1776431682502,
+      "commit": "https://github.com/openclaw/skills/commit/e3750fbff5705c3bd024e2d92fc03dd189083973"
+    }
+  ]
 }

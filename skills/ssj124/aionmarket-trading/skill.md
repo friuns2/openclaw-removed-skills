@@ -4,14 +4,13 @@ description: |
   Core trading skill for AION Market prediction market agents.
   Provides agent setup, wallet binding, market search, automated pre-trade
   checks, risk-aware trading, order management, position monitoring, and
-  settlement redemption on Polymarket via the aionmarket-sdk Python package.
+  settlement workflows on Polymarket and Kalshi via the aionmarket-sdk Python package.
 
   Use when: an AI agent needs to register, configure wallets, search markets,
-  place or cancel trades, monitor positions, or redeem winnings on AION Market / Polymarket.
+  place or cancel trades, monitor positions, or run settlement-related flows on AION Market / Polymarket / Kalshi.
 metadata:
   author: "AION Market"
   version: "0.3.0"
-  tags: [polymarket, trading, prediction-market, aionmarket-sdk, ai-agent, yes-no-trade, risk-management]
   homepage: "https://aionmarket.com"
   docs: "https://docs.aionmarket.com"
   sdk: "aionmarket-sdk (PyPI)"
@@ -19,7 +18,7 @@ metadata:
 
 # Skill: aionmarket-trading
 
-Core trading operations for AI agents on AION Market / Polymarket.
+Core trading operations for AI agents on AION Market / Polymarket / Kalshi.
 This skill covers the **foundational** capabilities — agent lifecycle, wallet setup,
 market data, order execution, and position management.
 
@@ -39,18 +38,19 @@ market data, order execution, and position management.
 
 Before this skill can operate, the user **must** supply:
 
-| Secret                 | Where to set                           | Example                      |
-| ---------------------- | -------------------------------------- | ---------------------------- |
-| **Agent API Key**      | `AIONMARKET_API_KEY` env var or `.env` | `sk_live_Ab12Cd34...`        |
-| **Wallet Private Key** | `WALLET_PRIVATE_KEY` env var or `.env` | `0xabc123...` (64 hex chars) |
+| Secret                 | Where to set                           | Example                               |
+| ---------------------- | -------------------------------------- | ------------------------------------- |
+| **Agent API Key**      | `AIONMARKET_API_KEY` env var or `.env` | `sk_live_Ab12Cd34...`                 |
+| **Wallet Private Key** | `WALLET_PRIVATE_KEY` env var or `.env` | `0xabc123...` (64 hex chars, Polygon) |
+| **Solana Private Key** | `SOLANA_PRIVATE_KEY` env var or `.env` | `<base58-key>` (Kalshi optional)      |
 
-That's it. The skill will:
+The skill will:
 
-1. Derive the **wallet address** from the private key automatically
-2. Call Polymarket's CLOB auth endpoint to derive **API Key / Secret / Passphrase** using the private key signature
-3. Register the CLOB credentials with AION Market via `register_wallet_credentials()`
-4. Automatically check wallet readiness before trading: balance, gas, allowance, and market context
-5. Automatically approve allowance if needed and technically possible
+1. Derive wallet addresses from provided keys (Polygon and/or Solana)
+2. For Polymarket, call CLOB auth to derive **API Key / Secret / Passphrase** from private key signature
+3. Register Polymarket CLOB credentials with AION Market via `register_wallet_credentials()` when needed
+4. For Kalshi, use quote -> local sign -> submit flow via DFlow-backed endpoints
+5. Automatically check wallet readiness before trading: balance, gas/fees, allowance (Polymarket), and market context
 
 > **If the private key is missing, STOP and ask the user to provide it.**
 > Never guess, fabricate, or skip credential setup.
@@ -62,9 +62,10 @@ That's it. The skill will:
 
 - Python 3.9+
 - `aionmarket-sdk >= 0.1.2` installed (`pip install aionmarket-sdk`)
-- `py-clob-client` for order signing and credential derivation
+- `py-clob-client` for Polymarket order signing and credential derivation
 - Agent has been registered or will be registered as part of the flow
 - Polymarket CLOB credentials are derived automatically from private key via `py-clob-client`
+- Kalshi trading uses quote -> sign -> submit; position queries use the unified `get_current_positions(..., venue="kalshi")` endpoint
 - All SDK methods return plain dicts/lists; errors raise `ApiError`
 - **`get_markets()` returns events with nested `markets[]` sub-markets** — trading fields like `conditionId`, `clobTokenIds`, `outcomePrices` live on the sub-market, not the event
 
@@ -78,7 +79,7 @@ That's it. The skill will:
 4. **Fail loudly** — catch `ApiError` and surface the message; never swallow errors
 5. **Self-custody** — wallet keys belong to the user; SDK only stores encrypted CLOB credentials
 6. **Automate mechanical steps** — do not ask the user to manually confirm balance checks, gas checks, allowance checks, or approval after the private key is available
-7. **Verify execution independently** — if the wrapper response is weak, validate through Polymarket directly before reporting failure
+7. **Verify execution independently** — if the wrapper response is weak, validate through the corresponding venue (Polymarket or Kalshi) before reporting failure
 
 ---
 
@@ -90,7 +91,7 @@ Unless the user explicitly overrides them, the agent should use these defaults:
 - default buy size: `2` USDC
 - default behavior: auto-select a valid market candidate from the requested strategy scope
 - default pre-trade workflow: derive wallet, register wallet credentials, check balance, check gas, check allowance, auto-approve if needed, then trade
-- default post-trade workflow: query recent Polymarket trades and orders if the SDK result is generic, null, or ambiguous
+- default post-trade workflow: query recent venue-specific trades/orders (Polymarket orders or Kalshi positions/orders) if the SDK result is generic, null, or ambiguous
 
 The agent should ask the user only for information it cannot safely infer or execute itself.
 
@@ -101,13 +102,14 @@ The agent should ask the user only for information it cannot safely infer or exe
 ### MUST
 
 - Set `AIONMARKET_API_KEY` before any authenticated call
-- Register Polymarket CLOB credentials before live trading
-- Check wallet balance, gas balance, and relevant allowance before submitting any order
+- Register Polymarket CLOB credentials before live Polymarket trading
+- Check wallet balance, gas/fees, and relevant allowance before submitting any order
 - Call `get_market_context()` before placing any trade
 - Handle `ApiError` on every SDK call
 - Save the API key returned by `register_agent()` immediately — it is shown only once
-- Send a full signed order object and `walletAddress` with every trade
-- Verify downstream execution via Polymarket when SDK responses are incomplete
+- For Polymarket, send a full signed order object and `walletAddress` with every trade
+- For Kalshi, follow quote -> local sign -> submit and include `userPublicKey` when executing BUY flows
+- Verify downstream execution via the target venue when SDK responses are incomplete
 
 ### SHOULD
 
@@ -126,7 +128,7 @@ The agent should ask the user only for information it cannot safely infer or exe
 - Sharing or logging API keys, CLOB secrets, or private keys
 - Calling `cancel_all_orders()` without confirming with the user first
 - Making trades in markets the agent has not researched
-- Treating a wrapper `INTERNAL_ERROR` as final without checking whether Polymarket actually matched the order
+- Treating a wrapper `INTERNAL_ERROR` as final without checking whether the downstream venue actually accepted or matched the order
 
 ---
 
@@ -194,6 +196,7 @@ print(f"CLOB credentials derived successfully")
 2. `AIONMARKET_BASE_URL` environment variable
 3. Production default: `https://api.aionmarket.com/bvapi`
 
+
 Use the SDK's documented resolution order above. Do **not** hardcode a sandbox or staging URL in sample code unless that exact environment URL is the current one documented by AION Market.
 
 ---
@@ -239,7 +242,7 @@ me = client.get_me()
 print(f"Agent: {me['name']}, Status: {me['status']}")
 ```
 
-### Step 3 — Derive CLOB Credentials & Register Wallet
+### Step 3 — Derive Polymarket CLOB Credentials & Register Wallet
 
 The private key is used to call Polymarket's auth endpoint and derive CLOB credentials automatically.
 The user does **not** need to manually copy API Key / Secret / Passphrase from Polymarket settings.
@@ -292,6 +295,12 @@ settings = client.get_settings()
 print(settings)
 ```
 
+### Step 5 — Kalshi Prerequisites (Optional, for Kalshi venue)
+
+- Ensure Solana wallet is available (`SOLANA_PRIVATE_KEY` / `userPublicKey`)
+- Use `kalshi_quote()` to request unsigned tx, locally sign, then call `kalshi_submit()`
+- For BUY flows, provide `userPublicKey` so KYC/geo checks can be evaluated upstream
+
 ---
 
 ## Workflow: Market Search & Context
@@ -328,14 +337,9 @@ for event in events:
 ```python
 context = client.get_market_context("CONDITION_ID", user=wallet)
 
-market = context.get("market", {})
-positions = context.get("positions", {})
-safeguards = context.get("safeguards", {})
-
-print(f"Market:     {market.get('question') or market.get('title')}")
-print(f"Wallet:     {positions.get('walletAddress')}")
-print(f"Has pos:    {positions.get('hasPosition')}")
-print(f"Max amount: {safeguards.get('maxTradeAmount')}")
+print(f"Name:       {context.get('name')}")
+print(f"Position:   {context.get('myPosition')}")
+print(f"Risk limit: {context.get('riskLimit')}")
 print(f"Warnings:   {context.get('warnings')}")
 
 if context.get("warnings"):
@@ -445,7 +449,6 @@ For general-purpose execution, use this default policy unless the user overrides
 > - `orderSize` below `orderMinSize` → order rejected
 > - Insufficient USDC balance → server returns generic `INTERNAL_ERROR`
 > - Insufficient allowance → downstream exchange cannot spend collateral
-> - For immediate BUY (`FAK`/`FOK`), `makerAmount` must fit max 2 decimals and `takerAmount` max 4 decimals (in 6-decimal micro-units: maker % 10000 == 0, taker % 100 == 0)
 > - SDK result is empty or generic → verify recent trades and orders before reporting failure
 
 **Order types:** `GTC` (default), `FOK`, `GTD`, `FAK`
@@ -453,6 +456,46 @@ For general-purpose execution, use this default policy unless the user overrides
 **Outcomes:** `YES`, `NO`
 
 ---
+
+## Workflow: Kalshi Quote -> Sign -> Submit
+
+Use this flow for Kalshi venue execution.
+
+```python
+quote = client.kalshi_quote(
+    market_ticker="KX...",
+    side="YES",
+    action="BUY",
+    amount=10,
+    user_public_key="<solana-wallet>",
+)
+
+# Sign quote["unsignedTransaction"] locally (wallet implementation specific)
+signed_tx = "<base64-signed-tx>"
+
+submit = client.kalshi_submit(
+    market_ticker="KX...",
+    side="YES",
+    action="BUY",
+    amount=10,
+    quote_id=quote["quoteId"],
+    signed_transaction=signed_tx,
+    user_public_key="<solana-wallet>",
+    in_amount=quote.get("inAmount"),
+    out_amount=quote.get("outAmount"),
+    min_out_amount=quote.get("minOutAmount"),
+)
+print(submit)
+
+# Unified positions endpoint for Kalshi (venue = kalshi)
+kalshi_positions = client.get_current_positions(
+    user="<solana-wallet>",
+    venue="kalshi",
+)
+print(kalshi_positions)
+```
+
+Kalshi currently does not expose a dedicated cancel API in this SDK. Use a SELL flow (`kalshi_quote` -> sign -> `kalshi_submit`) to reduce/exit exposure.
 
 ## Workflow: Order Management
 
@@ -480,7 +523,7 @@ client.cancel_all_orders()
 Call periodically (every 30s–15min depending on strategy frequency).
 
 ```python
-# wallet = PolymarketClient("https://clob.polymarket.com", key=private_key, chain_id=137).get_address()
+# wallet can be Polygon or Solana based on venue flow
 briefing = client.get_briefing(user=wallet)
 
 # 1. Handle risk alerts first
@@ -492,7 +535,7 @@ open_orders = client.get_open_orders()
 print(f"Open orders: {len(open_orders)}")
 
 # 3. Scan opportunity markets
-for opp in briefing.get("opportunities", {}).get("newMarkets", [])[:5]:
+for opp in briefing.get("opportunityMarkets", [])[:5]:
     print(f"Opportunity: {opp.get('id')} — {opp.get('question')}")
 ```
 
@@ -528,9 +571,7 @@ except ApiError as e:
         print(f"API Error {e.code}: {e.message}")
 ```
 
-When trading, an `ApiError` from AION Market may still hide a successful downstream Polymarket match. If the response is ambiguous, the agent should only do read-only verification (query recent Polymarket trades and open orders) before concluding that the trade failed.
-
-Execution safety rule: never place/cancel orders through direct Polymarket SDK as a fallback. All execution must go through AION endpoints (for example `/markets/trade`, `/markets/orders/cancel`, `/markets/orders/cancel-all`) so risk controls and auditing stay effective.
+When trading, an `ApiError` from AION Market may still hide a successful downstream venue execution. If the response is ambiguous, query venue-specific follow-up endpoints before concluding failure (Polymarket orders/trades, or Kalshi submit/positions state).
 
 ---
 
@@ -549,14 +590,15 @@ Execution safety rule: never place/cancel orders through direct Polymarket SDK a
 
 ### Market Operations
 
-| Method                                                       | Description                       |
-| ------------------------------------------------------------ | --------------------------------- |
-| `get_markets(q, limit, page, venue, events_status)`          | Search markets by keyword         |
-| `get_market(market_id, venue)`                               | Single market details             |
-| `check_market_exists(market_id, venue)`                      | Existence check                   |
-| `get_prices_history(token_id, ...)`                          | Historical prices for a token     |
-| `get_briefing(venue, since, user, include_markets)`          | Heartbeat: alerts + opportunities |
-| `get_market_context(market_id, venue, user, my_probability)` | Pre-trade context & risk          |
+| Method                                                       | Description                                         |
+| ------------------------------------------------------------ | --------------------------------------------------- |
+| `get_markets(q, limit, page, venue, events_status)`          | Search markets by keyword                           |
+| `get_market(market_id, venue)`                               | Single market details                               |
+| `check_market_exists(market_id, venue)`                      | Existence check                                     |
+| `get_prices_history(token_id, ...)`                          | Historical prices for a token                       |
+| `get_briefing(venue, since, user, include_markets)`          | Heartbeat: alerts + opportunities                   |
+| `get_market_context(market_id, venue, user, my_probability)` | Pre-trade context & risk                            |
+| `get_current_positions(user, venue, ...)`                    | Unified current positions (`polymarket` / `kalshi`) |
 
 ### Wallet Management
 
@@ -567,31 +609,34 @@ Execution safety rule: never place/cancel orders through direct Polymarket SDK a
 
 ### Trading Operations
 
-| Method                                               | Description                    |
-| ---------------------------------------------------- | ------------------------------ |
-| `trade(payload)`                                     | Place a market or limit order  |
-| `get_open_orders(venue, market_condition_id, limit)` | List unfilled orders           |
-| `get_order_history(venue, ..., limit, offset)`       | Historical orders with filters |
-| `get_order_detail(order_id, venue, wallet_address)`  | Single order detail            |
-| `cancel_order(order_id, venue, wallet_address)`      | Cancel one order               |
-| `cancel_all_orders(venue, wallet_address)`           | Cancel all open orders         |
-| `redeem(market_id, side, venue, wallet_address)`     | Redeem settled position        |
+| Method                                               | Description                           |
+| ---------------------------------------------------- | ------------------------------------- |
+| `trade(payload)`                                     | Place a Polymarket market/limit order |
+| `get_open_orders(venue, market_condition_id, limit)` | List unfilled orders                  |
+| `get_order_history(venue, ..., limit, offset)`       | Historical orders with filters        |
+| `get_order_detail(order_id, venue, wallet_address)`  | Single order detail                   |
+| `cancel_order(order_id, venue, wallet_address)`      | Cancel one order                      |
+| `cancel_all_orders(venue, wallet_address)`           | Cancel all open orders                |
+| `redeem(market_id, side, venue, wallet_address)`     | Redeem settled position               |
+| `kalshi_quote(...)`                                  | Build unsigned Kalshi quote tx        |
+| `kalshi_submit(...)`                                 | Submit locally signed Kalshi tx       |
 
 ---
 
 ## Checklist: Ready to Trade
 
 - [ ] `pip install aionmarket-sdk py-clob-client python-dotenv` installed
-- [ ] `.env` file created with `AIONMARKET_API_KEY` and `WALLET_PRIVATE_KEY`
+- [ ] `.env` file created with `AIONMARKET_API_KEY` and `WALLET_PRIVATE_KEY` (plus `SOLANA_PRIVATE_KEY` if using Kalshi)
 - [ ] `.env` added to `.gitignore`
 - [ ] `get_me()` returns valid agent info
-- [ ] CLOB credentials derived from private key and registered via `register_wallet_credentials()`
-- [ ] automatic balance, gas, and allowance checks are part of the trading flow
+- [ ] Polymarket CLOB credentials derived from private key and registered via `register_wallet_credentials()`
+- [ ] automatic balance, gas/fees, and allowance checks are part of the trading flow
 - [ ] missing allowance is auto-approved when technically possible
 - [ ] Risk limits configured via `update_settings()`
 - [ ] Heartbeat loop (`get_briefing()`) running or planned
 - [ ] Error handling wraps every SDK call with `ApiError`
-- [ ] ambiguous trade responses are verified against Polymarket trades/orders
+- [ ] For Kalshi: quote -> sign -> submit flow validated with `kalshi_quote()` / `kalshi_submit()`
+- [ ] ambiguous trade responses are verified against venue-specific state endpoints
 
 > Once all boxes are checked, the agent is ready for strategy skills to drive
 > market discovery and automated trade execution.
