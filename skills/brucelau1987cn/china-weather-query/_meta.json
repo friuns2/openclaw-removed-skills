@@ -1,11 +1,17 @@
 {
   "owner": "brucelau1987cn",
   "slug": "china-weather-query",
-  "displayName": "china-weather-query",
+  "displayName": "China Weather Query",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776570439378,
-    "commit": "https://github.com/openclaw/skills/commit/16330bd70e09ba73d70f4ee9547bae4d90587dca"
+    "version": "1.1.0",
+    "publishedAt": 1777216365083,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776570439378,
+      "commit": "https://github.com/openclaw/skills/commit/16330bd70e09ba73d70f4ee9547bae4d90587dca"
+    }
+  ]
 }
