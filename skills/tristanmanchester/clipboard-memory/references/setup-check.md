@@ -36,12 +36,18 @@ clipmem setup
 brew services start clipmem
 ```
 
-## 4. OpenClaw integration (optional)
+## 4. Agent integration (optional)
 
 If the agent is OpenClaw, also check:
 
 ```bash
 clipmem agents openclaw doctor
+```
+
+If the agent is Hermes Agent, also check:
+
+```bash
+clipmem agents hermes doctor
 ```
 
 Expect every check to report `[OK]`. `[FAIL]` lines include remediation steps.
