@@ -1,11 +1,17 @@
 {
   "owner": "xuxuclassmate",
   "slug": "whisper-voice-transcription",
-  "displayName": "Whisper 语音转文字 (whisper.cpp)",
+  "displayName": "Whisper Voice Transcription (whisper.cpp)",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776494546326,
-    "commit": "https://github.com/openclaw/skills/commit/f97b684aedcc1638e924ff9a791b12ce60acd25c"
+    "version": "1.1.1",
+    "publishedAt": 1776836645082,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776494546326,
+      "commit": "https://github.com/openclaw/skills/commit/f97b684aedcc1638e924ff9a791b12ce60acd25c"
+    }
+  ]
 }
