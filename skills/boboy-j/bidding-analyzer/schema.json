@@ -1,0 +1,34 @@
+{
+  "name": "bidding_document_analyzer",
+  "description": "解析招标文件，自动输出投标准备清单、基于知识库的预算驱动型技术方案草案及风险注意事项清单（支持100-300+页深度展开）",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "bidding_content": {
+        "type": "string",
+        "description": "招标文件全文或核心章节文本（需包含采购需求、评分办法、资质/商务要求）"
+      },
+      "company_kb": {
+        "type": "string",
+        "description": "企业产品/解决方案知识库（建议提前RAG检索Top10相关片段后拼接）"
+      },
+      "company_name": {
+        "type": "string",
+        "description": "投标主体名称（默认：我司）"
+      },
+      "project_type": {
+        "type": "string",
+        "description": "项目类型（如：信息化/软硬件集成/服务类/工程施工），用于调整方案侧重点"
+      },
+      "budget_override": {
+        "type": "string",
+        "enum": ["100-200万", "200-300万", "300-500万", "500万以上"],
+        "description": "手动指定预算档位以控制方案篇幅深度（若不填则自动从招标文件提取，仅影响技术章节展开粒度）"
+      }
+    },
+    "required": ["bidding_content", "company_kb"],
+    "additionalProperties": false
+  },
+  "output_format": "markdown",
+  "strict_mode": true
+}
