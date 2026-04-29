@@ -2,7 +2,7 @@
 slug: clawquest-agent-mine-openclaw
 name: ClawQuest: Agent Mine - OpenClaw Managed Mining
 owner: "@zhzai30 - zhzai30"
-version: 1.0.9
+version: 1.0.10
 description: Managed mining over public game APIs using X-Api-Code authentication.
 metadata:
   openclaw:
@@ -19,7 +19,7 @@ This Skill exposes managed mining tools for OpenClaw session workflows.
 
 ## Agent rules OpenClaw
 
-Automated agents (including OpenClaw workflows referred to internally as **龙虾**) must follow these constraints:
+Automated agents (including OpenClaw workflows) must follow these constraints:
 
 - **Tools only**: Interact with the game **only** through this Skill’s **tool** HTTP API — `POST /tool/:name` on the skill-openclaw service, using the tool names documented below (`set_api_code`, `check_mining_state`, `start_managed_mining_loop`, etc.). Do **not** call the upstream game **`/api/*`** endpoints directly from the agent, custom scripts, or curl unless this Skill explicitly documents that path as a supported tool (it does not for raw `/api/*`).
 - **Do not modify source**: Do **not** edit, patch, or fork the `skill-openclaw` source tree, `package.json`, or runtime code to “fix” behaviour. Use documented environment variables and this `SKILL.md` only.
@@ -176,7 +176,7 @@ Request safe stop for running managed loop.
 
 1. `set_api_code` (one-time setup)
 2. `start_mining_session`
-3. poll `get_mining_session_events` or `get_mining_quick_status`
+3. (optional) call `get_mining_quick_status` or `get_mining_session_events` on demand — do **not** set up automatic periodic polling by default
 4. call `stop_managed_mining_loop` when needed
 
 ## Error Codes
@@ -206,7 +206,7 @@ All API responses include a `code` field. `0` means success; non-zero values ind
 
 | Variable                                     | Description                                                                |
 | -------------------------------------------- | -------------------------------------------------------------------------- |
-| `GAME_API_BASE_URL`                          | Optional API base URL override (default: `https://svr.km.noyagames.cn`)    |
+| `GAME_API_BASE_URL`                          | Optional API base URL override (default: `https://api.km.cocweb3.com`)     |
 | `REQUEST_TIMEOUT_MS`                         | Request timeout in milliseconds (default: `8000`)                          |
 | `MANAGED_MINING_POLL_INTERVAL_MS`            | Default polling interval in milliseconds (default: `1000`)                 |
 | `MANAGED_MINING_ROUND_INTERVAL_MS`           | Default round interval in milliseconds (default: `2000`)                   |

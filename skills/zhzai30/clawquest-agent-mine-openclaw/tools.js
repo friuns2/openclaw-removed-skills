@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-const gameApiBaseUrl = process.env.GAME_API_BASE_URL ?? "https://svr.km.noyagames.cn";
+const gameApiBaseUrl = process.env.GAME_API_BASE_URL ?? "https://api.km.cocweb3.com";
 const requestTimeoutMilliseconds = Number(process.env.REQUEST_TIMEOUT_MS ?? "8000");
 const oreTypeNameMapPath = process.env.ORE_TYPE_NAME_MAP_PATH ??
     path.join(process.cwd(), "config", "ore-type-map.json");
