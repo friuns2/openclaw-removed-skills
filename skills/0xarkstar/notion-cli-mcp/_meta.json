@@ -1,11 +1,17 @@
 {
   "owner": "0xarkstar",
   "slug": "notion-cli-mcp",
-  "displayName": "Notion CLI + MCP",
+  "displayName": "Clawhub",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776393683405,
-    "commit": "https://github.com/openclaw/skills/commit/38ef253f48984aab1911046211c6a3ad8a036eac"
+    "version": "2.1.0",
+    "publishedAt": 1776920073837,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776393683405,
+      "commit": "https://github.com/openclaw/skills/commit/38ef253f48984aab1911046211c6a3ad8a036eac"
+    }
+  ]
 }
