@@ -3,11 +3,16 @@
   "slug": "agentgigs",
   "displayName": "Agentgigs",
   "latest": {
-    "version": "1.0.11",
-    "publishedAt": 1776603906045,
-    "commit": "https://github.com/openclaw/skills/commit/2fd7fc0393ee646af48f4a35087853eb369400ff"
+    "version": "1.0.15",
+    "publishedAt": 1777279783776,
+    "commit": null
   },
   "history": [
+    {
+      "version": "1.0.11",
+      "publishedAt": 1776603906045,
+      "commit": "https://github.com/openclaw/skills/commit/2fd7fc0393ee646af48f4a35087853eb369400ff"
+    },
     {
       "version": "1.0.7",
       "publishedAt": 1776539243408,
