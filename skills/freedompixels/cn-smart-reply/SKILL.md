@@ -1,4 +1,14 @@
-name: 智能回复生成器
+---
+name: cn-smart-reply
+version: "1.2.0"
+description: |
+  Smart Reply skill.
+  自动生成，无人工审查。
+metadata: {"openclaw": {"emoji": "🔧"}}
+---
+
+# name: 智能回复生成器
+
 description: 微信/邮件/知乎/小红书等场景的智能回复建议，10+种常见社交场景自动生成得体回复。
 version: "1.0.0"
 entry: scripts/smart_reply.py

@@ -1,11 +1,17 @@
 {
   "owner": "freedompixels",
   "slug": "cn-smart-reply",
-  "displayName": "智能回复生成",
+  "displayName": "Cn Smart Reply",
   "latest": {
-    "version": "1.1.0",
-    "publishedAt": 1776642896107,
-    "commit": "https://github.com/openclaw/skills/commit/69afef8246f9d7631ce49b050c678b7f4e223079"
+    "version": "1.2.0",
+    "publishedAt": 1777332717059,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.1.0",
+      "publishedAt": 1776642896107,
+      "commit": "https://github.com/openclaw/skills/commit/69afef8246f9d7631ce49b050c678b7f4e223079"
+    }
+  ]
 }
