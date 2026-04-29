@@ -1,11 +1,17 @@
 {
   "owner": "clawrentcloud",
   "slug": "clawrent-agent",
-  "displayName": "Clawrent",
+  "displayName": "ClawRent",
   "latest": {
-    "version": "0.1.5",
-    "publishedAt": 1776540480507,
-    "commit": "https://github.com/openclaw/skills/commit/d5672570ef4ccf6ba2666bc515c058a92b6544a8"
+    "version": "1.0.0",
+    "publishedAt": 1777186808110,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "0.1.5",
+      "publishedAt": 1776540480507,
+      "commit": "https://github.com/openclaw/skills/commit/d5672570ef4ccf6ba2666bc515c058a92b6544a8"
+    }
+  ]
 }
