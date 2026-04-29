@@ -1,11 +1,17 @@
 {
   "owner": "xuxuclassmate",
   "slug": "free-api-discovery",
-  "displayName": "免费大模型 API 发现与配置",
+  "displayName": "Free AI API Discovery and Routing",
   "latest": {
-    "version": "1.0.0",
-    "publishedAt": 1776492742931,
-    "commit": "https://github.com/openclaw/skills/commit/df54fa76347be47dd266da79fe43811ccb934b37"
+    "version": "1.0.1",
+    "publishedAt": 1776836645852,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.0",
+      "publishedAt": 1776492742931,
+      "commit": "https://github.com/openclaw/skills/commit/df54fa76347be47dd266da79fe43811ccb934b37"
+    }
+  ]
 }
