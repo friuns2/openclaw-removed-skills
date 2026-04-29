@@ -3,9 +3,15 @@
   "slug": "markitdown-zh",
   "displayName": "MarkItDown文档转换中文版",
   "latest": {
-    "version": "1.0.1",
-    "publishedAt": 1776403048930,
-    "commit": "https://github.com/openclaw/skills/commit/76ac4f82b0edeed6aebf730ec1d7b01eb408f4d5"
+    "version": "1.0.3",
+    "publishedAt": 1776948163524,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "1.0.1",
+      "publishedAt": 1776403048930,
+      "commit": "https://github.com/openclaw/skills/commit/76ac4f82b0edeed6aebf730ec1d7b01eb408f4d5"
+    }
+  ]
 }
