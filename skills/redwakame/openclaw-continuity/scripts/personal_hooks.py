@@ -25,18 +25,78 @@ except Exception:  # pragma: no cover - stdlib fallback
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
-def require_state_root_dir() -> Path:
+def discover_workspace_dir() -> Path:
     state_dir_raw = os.environ.get("OPENCLAW_STATE_DIR", "").strip()
-    if not state_dir_raw:
-        raise RuntimeError(
-            "OpenClaw Continuity core requires OPENCLAW_STATE_DIR to point at the OpenClaw state root."
-        )
-    return Path(state_dir_raw).expanduser()
+    if state_dir_raw:
+        candidate = Path(state_dir_raw).expanduser() / "workspace"
+        if candidate.exists():
+            return candidate
+
+    config_path_raw = (
+        os.environ.get("PERSONAL_HOOKS_OPENCLAW_CONFIG_PATH", "").strip()
+        or os.environ.get("OPENCLAW_CONFIG_PATH", "").strip()
+    )
+    if config_path_raw:
+        candidate = Path(config_path_raw).expanduser().parent / "workspace"
+        if candidate.exists():
+            return candidate
+
+    for ancestor in SCRIPT_DIR.parents:
+        if ancestor.name == "workspace":
+            return ancestor
+
+    repo_like = SCRIPT_DIR.parent
+    if (repo_like / "USER.md").exists() or (repo_like / "personal-hooks").exists():
+        return repo_like
+
+    for ancestor in SCRIPT_DIR.parents:
+        if (ancestor / "USER.md").exists() or (ancestor / "personal-hooks").exists():
+            return ancestor
+
+    if len(SCRIPT_DIR.parents) >= 3:
+        return SCRIPT_DIR.parents[2]
+    return SCRIPT_DIR.parent
 
 
-STATE_ROOT_DIR = require_state_root_dir()
-WORKSPACE_DIR = STATE_ROOT_DIR / "workspace"
-DATA_DIR = WORKSPACE_DIR / "personal-hooks"
+WORKSPACE_DIR = discover_workspace_dir()
+
+
+def env_path(name: str, default: Path) -> Path:
+    raw = os.environ.get(name, "").strip()
+    return Path(raw).expanduser() if raw else default
+
+
+def discover_state_root_dir() -> Path:
+    state_dir_raw = os.environ.get("OPENCLAW_STATE_DIR", "").strip()
+    if state_dir_raw:
+        return Path(state_dir_raw).expanduser()
+
+    config_path_raw = (
+        os.environ.get("PERSONAL_HOOKS_OPENCLAW_CONFIG_PATH", "").strip()
+        or os.environ.get("OPENCLAW_CONFIG_PATH", "").strip()
+    )
+    if config_path_raw:
+        return Path(config_path_raw).expanduser().parent
+
+    for ancestor in SCRIPT_DIR.parents:
+        if ancestor.name == "workspace":
+            return ancestor.parent
+
+    return WORKSPACE_DIR.parent
+
+
+def env_or_existing_path(name: str, *candidates: Path) -> Path:
+    raw = os.environ.get(name, "").strip()
+    if raw:
+        return Path(raw).expanduser()
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+STATE_ROOT_DIR = discover_state_root_dir()
+DATA_DIR = env_path("PERSONAL_HOOKS_DATA_DIR", WORKSPACE_DIR / "personal-hooks")
 PROFILE_PATH = DATA_DIR / "profile.json"
 HOOKS_PATH = DATA_DIR / "hooks.json"
 INCIDENTS_PATH = DATA_DIR / "incidents.json"
@@ -62,19 +122,28 @@ REPLY_PERFORMANCE_TRACE_PATH = DATA_DIR / "reply_performance_trace.jsonl"
 RECURRING_TASKS_PATH = DATA_DIR / "recurring_tasks.json"
 POST_ACTION_RULES_PATH = DATA_DIR / "post_action_rules.json"
 BEHAVIORAL_CONSTRAINTS_PATH = DATA_DIR / "behavioral_constraints.json"
-SETTINGS_PATH = DATA_DIR / "settings.json"
-SESSIONS_INDEX_PATH = DATA_DIR / "_host_sessions_index.json"
-SESSIONS_DIR = DATA_DIR / "_host_sessions"
-JOBS_PATH = DATA_DIR / "_host_jobs.json"
-MEMORY_DIR = WORKSPACE_DIR / "memory"
-USER_MD_PATH = DATA_DIR / "_host_USER.md"
-OPENCLAW_CONFIG_PATH = DATA_DIR / "_host_openclaw_config.json"
+SETTINGS_PATH = env_path("PERSONAL_HOOKS_SETTINGS_PATH", DATA_DIR / "settings.json")
+SESSIONS_INDEX_PATH = env_or_existing_path(
+    "PERSONAL_HOOKS_SESSIONS_INDEX_PATH",
+    STATE_ROOT_DIR / "agents" / "main" / "sessions" / "sessions.json",
+)
+SESSIONS_DIR = SESSIONS_INDEX_PATH.parent
+JOBS_PATH = env_or_existing_path(
+    "PERSONAL_HOOKS_JOBS_PATH",
+    STATE_ROOT_DIR / "cron" / "jobs.json",
+)
+MEMORY_DIR = env_path("PERSONAL_HOOKS_MEMORY_DIR", WORKSPACE_DIR / "memory")
+USER_MD_PATH = WORKSPACE_DIR / "USER.md"
+OPENCLAW_CONFIG_PATH = env_or_existing_path(
+    "PERSONAL_HOOKS_OPENCLAW_CONFIG_PATH",
+    STATE_ROOT_DIR / "openclaw.json",
+)
 SEED_INTENT_EMBED_CACHE_PATH = DATA_DIR / "seed_intent_embedding_cache.json"
-EMBEDDER_ROOT = ""
-PRIMARY_SESSION_KEY = ""
-DEFAULT_RENDER_TARGET = ""
-DEFAULT_RENDER_CHANNEL = ""
-SESSION_KEY_PREFIX = ""
+EMBEDDER_ROOT = os.environ.get("PERSONAL_HOOKS_EMBEDDER_ROOT", "").strip()
+PRIMARY_SESSION_KEY = os.environ.get("PERSONAL_HOOKS_PRIMARY_SESSION_KEY", "").strip()
+DEFAULT_RENDER_TARGET = os.environ.get("PERSONAL_HOOKS_TARGET_TO", "").strip()
+DEFAULT_RENDER_CHANNEL = os.environ.get("PERSONAL_HOOKS_TARGET_CHANNEL", "").strip()
+SESSION_KEY_PREFIX = os.environ.get("PERSONAL_HOOKS_SESSION_KEY_PREFIX", "").strip()
 SKILL_FORMAL_NAME = "personal-hooks"
 SKILL_STATUS_NAME = "staged-followup-memory"
 SKILL_STATUS_VERSION = "v2.0"
@@ -527,6 +596,15 @@ DEFAULT_SETTINGS = {
     "sleep_rest_suppress": {"enabled": True, "duration_hours": 10, "auto_clear_hours": 4},
     "causal_memory": {"summary_max_facts": 3, "include_time_anchor": True, "include_state_marker": True},
     "carryover": {"enabled": True, "max_turns": 5, "top_summary_only": True},
+    "new_session_continuity": {
+        "mode": None,
+    },
+    "modality_continuity": {
+        "enabled": True,
+        "mode": None,
+        "voice_reply_on_voice_thread": True,
+        "image_context_carryover": True,
+    },
     "dispatch": {"cooldown_minutes": FOLLOWUP_DISPATCH_COOLDOWN_MINUTES, "cap": FOLLOWUP_DISPATCH_LIMIT},
     "closure": {"auto_close_on_user_reply": True},
     "proactive_chat": {
@@ -768,12 +846,44 @@ WAKE_CONTEXT_PATTERNS = (
 DEFAULT_SEED_INTENT_EMBED_CACHE = {
     "version": 1,
     "updated_at": DEFAULT_SCAFFOLD_UPDATED_AT,
-    "provider": "disabled",
+    "provider": "jina-openai-compatible",
     "config_signature": None,
     "vectors": {},
 }
 
-MEMORY_LANCEDB_EMBED_HELPER_JS = ""
+MEMORY_LANCEDB_EMBED_HELPER_JS = r"""
+import fs from 'node:fs';
+
+const payload = JSON.parse(fs.readFileSync(0, 'utf8'));
+const pluginRoot = payload.plugin_root;
+if (!pluginRoot) {
+  throw new Error('PERSONAL_HOOKS_EMBEDDER_ROOT or payload.plugin_root is required');
+}
+const jitiModulePath = `${pluginRoot}/node_modules/jiti/lib/jiti.mjs`;
+const embedderModulePath = `${pluginRoot}/src/embedder.ts`;
+const { createJiti } = await import(jitiModulePath);
+const jiti = createJiti(import.meta.url, { moduleCache: false, fsCache: false });
+const { Embedder } = await jiti.import(embedderModulePath);
+
+const cfg = payload.config || {};
+const embedder = new Embedder({
+  provider: 'openai-compatible',
+  apiKey: cfg.api_key,
+  model: cfg.model,
+  baseURL: cfg.base_url,
+  dimensions: cfg.dimensions,
+  taskQuery: cfg.task_query,
+  taskPassage: cfg.task_passage,
+  normalized: cfg.normalized,
+});
+
+const texts = Array.isArray(payload.texts) ? payload.texts : [];
+const mode = payload.mode === 'query' ? 'query' : 'passage';
+const vectors = mode === 'query'
+  ? await embedder.embedBatchQuery(texts)
+  : await embedder.embedBatchPassage(texts);
+process.stdout.write(JSON.stringify({ vectors }));
+"""
 
 FOREIGN_SCRIPT_PATTERNS = [
     re.compile(r"[\u0400-\u04FF]+"),
@@ -2027,13 +2137,12 @@ def normalize_incident_record(incident: dict) -> dict:
         incident.get("source_summary", ""),
         incident_type=incident.get("type"),
     )
-    event_chain = sanitize_event_chain_payload(
-        merge_event_chain(
-            incident.get("event_chain") or payload.get("event_chain"),
-            incident.get("source_summary", ""),
-            event_kind,
-            topic_label=topic_label,
-        )
+    event_chain = normalize_record_event_chain(
+        incident.get("event_chain"),
+        payload.get("event_chain"),
+        incident.get("source_summary", ""),
+        event_kind,
+        topic_label=topic_label,
     )
     summary = (
         normalized_existing
@@ -2082,13 +2191,12 @@ def normalize_hook_record(hook: dict) -> dict:
         hook.get("source_summary", ""),
         incident_type=payload.get("incident_type"),
     )
-    event_chain = sanitize_event_chain_payload(
-        merge_event_chain(
-            hook.get("event_chain") or payload.get("event_chain"),
-            hook.get("source_summary", ""),
-            event_kind,
-            topic_label=topic_label,
-        )
+    event_chain = normalize_record_event_chain(
+        hook.get("event_chain"),
+        payload.get("event_chain"),
+        hook.get("source_summary", ""),
+        event_kind,
+        topic_label=topic_label,
     )
     summary = (
         normalized_existing
@@ -2397,6 +2505,201 @@ def causal_memory_include_time_anchor() -> bool:
 
 def causal_memory_include_state_marker() -> bool:
     return bool(causal_memory_section().get("include_state_marker", True))
+
+
+NEW_SESSION_CONTINUITY_MODES = {
+    "recent_4_turns_first",
+    "last_user_intent_first",
+    "followup_focus_first",
+    "assistant_commitment_first",
+    "balanced",
+}
+
+
+def normalize_new_session_continuity_mode(value) -> Optional[str]:
+    raw = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+    aliases = {
+        "recent": "recent_4_turns_first",
+        "recent_4": "recent_4_turns_first",
+        "recent_4_turns": "recent_4_turns_first",
+        "four_turns": "recent_4_turns_first",
+        "last_user": "last_user_intent_first",
+        "last_user_intent": "last_user_intent_first",
+        "user_intent": "last_user_intent_first",
+        "intent": "last_user_intent_first",
+        "followup": "followup_focus_first",
+        "followup_focus": "followup_focus_first",
+        "event_chain": "followup_focus_first",
+        "event_chain_followup_focus": "followup_focus_first",
+        "commitment": "assistant_commitment_first",
+        "assistant_commitment": "assistant_commitment_first",
+        "promise": "assistant_commitment_first",
+        "auto": "balanced",
+        "balanced_context": "balanced",
+    }
+    normalized = aliases.get(raw, raw)
+    return normalized if normalized in NEW_SESSION_CONTINUITY_MODES else None
+
+
+def new_session_continuity_section(settings: Optional[dict] = None) -> dict:
+    resolved = settings if isinstance(settings, dict) else load_settings()
+    section = resolved.get("new_session_continuity") if isinstance(resolved.get("new_session_continuity"), dict) else {}
+    return section
+
+
+def new_session_continuity_mode(settings: Optional[dict] = None) -> str:
+    section = new_session_continuity_section(settings)
+    return normalize_new_session_continuity_mode(section.get("mode")) or "recent_4_turns_first"
+
+
+def _new_session_record_followup_focus(record: Optional[dict], causal_context: Optional[dict] = None) -> str:
+    record = record if isinstance(record, dict) else {}
+    event_chain = record.get("event_chain") if isinstance(record.get("event_chain"), dict) else {}
+    causal = event_chain.get("causal_memory") if isinstance(event_chain.get("causal_memory"), dict) else {}
+    causal_context = causal_context if isinstance(causal_context, dict) else {}
+    value = (
+        causal_context.get("followup_focus")
+        or causal.get("followup_focus")
+        or event_chain.get("followup_focus")
+        or record.get("followup_focus")
+        or ""
+    )
+    return normalize_story_text(value, 180)
+
+
+def _new_session_record_last_user_intent(record: Optional[dict], fallback: str = "") -> str:
+    record = record if isinstance(record, dict) else {}
+    for item in reversed(resolve_record_anchor_turns(record)):
+        if isinstance(item, dict) and item.get("role") == "user":
+            text = normalize_story_text(item.get("text", ""), 180)
+            if text:
+                return text
+    payload = record.get("payload") if isinstance(record.get("payload"), dict) else {}
+    return normalize_story_text(
+        record.get("last_user_update")
+        or payload.get("last_user_update")
+        or record.get("source_seed_text")
+        or fallback,
+        180,
+    )
+
+
+def build_new_session_continuity_priority_lines(
+    prefix: str,
+    record: Optional[dict],
+    *,
+    recent_four_turns_line: str = "",
+    latest_user_intent: str = "",
+    assistant_commitment: Optional[dict] = None,
+    causal_context: Optional[dict] = None,
+) -> list[str]:
+    record = record if isinstance(record, dict) else {}
+    mode = new_session_continuity_mode()
+    normalized_commitment = normalize_assistant_commitment(assistant_commitment or record.get(ASSISTANT_COMMITMENT_FIELD_KEY))
+    values = {
+        "event_chain_followup_focus": _new_session_record_followup_focus(record, causal_context),
+        "assistant_commitment": normalize_story_text((normalized_commitment or {}).get("phrase") or "", 180),
+        "last_user_intent": normalize_story_text(latest_user_intent, 180) or _new_session_record_last_user_intent(record),
+        "recent_4_turns": normalize_story_text(recent_four_turns_line or recent_four_turns_summary_for_new_session(record), 320),
+    }
+    selected_by_mode = {
+        "followup_focus_first": "event_chain_followup_focus",
+        "assistant_commitment_first": "assistant_commitment",
+        "last_user_intent_first": "last_user_intent",
+        "recent_4_turns_first": "recent_4_turns",
+    }
+    labels = {
+        "event_chain_followup_focus": "event_chain.followup_focus",
+        "assistant_commitment": "assistant_commitment",
+        "last_user_intent": "anchor_turns_compact.last_user_intent",
+        "recent_4_turns": "recent_4_turns_summary",
+    }
+    ordered_keys = ["event_chain_followup_focus", "assistant_commitment", "last_user_intent", "recent_4_turns"]
+    lines = [f"{prefix}_new_session_continuity_mode: {mode}"]
+    selected_key_for_skip = ""
+    if mode == "balanced":
+        lines.append(f"{prefix}_primary_continuity_field: balanced")
+        lines.append("No single continuity field is forced first. Choose the field that best matches the user's opening message, then use the other fields only to resolve ambiguity.")
+    else:
+        selected_key = selected_by_mode.get(mode, "recent_4_turns")
+        if not values.get(selected_key):
+            selected_key = next((key for key in [selected_key, *ordered_keys] if values.get(key)), selected_key)
+        selected_key_for_skip = selected_key
+        lines.append(f"{prefix}_primary_continuity_field: {labels.get(selected_key, selected_key)}")
+        if values.get(selected_key):
+            lines.append(f"{prefix}_{selected_key}: {values[selected_key]}")
+    for key in ordered_keys:
+        if mode != "balanced" and key == selected_key_for_skip:
+            continue
+        if values.get(key):
+            lines.append(f"{prefix}_support_{key}: {values[key]}")
+    lines.append("Use the selected continuity field as this user's /new definition. Routine/time context can support tone, urgency, or rest boundaries only; it must not become the main thread.")
+    return lines
+
+
+MODALITY_CONTINUITY_MODES = {"preserve_when_supported", "text_only", "ask_each_time"}
+
+
+def normalize_modality_continuity_mode(value) -> Optional[str]:
+    raw = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+    aliases = {
+        "preserve": "preserve_when_supported",
+        "preserve_supported": "preserve_when_supported",
+        "preserve_when_available": "preserve_when_supported",
+        "match": "preserve_when_supported",
+        "match_user": "preserve_when_supported",
+        "match_user_modality": "preserve_when_supported",
+        "same_as_user": "preserve_when_supported",
+        "text": "text_only",
+        "text_only": "text_only",
+        "textonly": "text_only",
+        "ask": "ask_each_time",
+        "ask_each_time": "ask_each_time",
+        "ask_first": "ask_each_time",
+    }
+    normalized = aliases.get(raw, raw)
+    return normalized if normalized in MODALITY_CONTINUITY_MODES else None
+
+
+def modality_continuity_section(settings: Optional[dict] = None) -> dict:
+    resolved = settings if isinstance(settings, dict) else load_settings()
+    section = resolved.get("modality_continuity") if isinstance(resolved.get("modality_continuity"), dict) else {}
+    return section
+
+
+def modality_continuity_enabled(settings: Optional[dict] = None) -> bool:
+    return bool(modality_continuity_section(settings).get("enabled", True))
+
+
+def modality_continuity_mode(settings: Optional[dict] = None) -> str:
+    section = modality_continuity_section(settings)
+    return normalize_modality_continuity_mode(section.get("mode")) or "preserve_when_supported"
+
+
+def build_modality_continuity_prompt(settings: Optional[dict] = None, *, is_new_session: bool = False) -> str:
+    if not is_new_session or not modality_continuity_enabled(settings):
+        return ""
+    section = modality_continuity_section(settings)
+    mode = modality_continuity_mode(settings)
+    voice_enabled = bool(section.get("voice_reply_on_voice_thread", True))
+    image_enabled = bool(section.get("image_context_carryover", True))
+    lines = [
+        "## Modality continuity preference (trusted host-neutral setting)",
+        f"modality_continuity_mode: {mode}",
+        f"voice_reply_on_voice_thread: {str(voice_enabled).lower()}",
+        f"image_context_carryover: {str(image_enabled).lower()}",
+        "This is a delivery/context preference only. It must follow the selected new_session_continuity mode and must not choose the main thread by itself.",
+    ]
+    if mode == "preserve_when_supported":
+        lines.append("If host metadata shows the user was using voice and the host can answer by voice, preserve voice delivery for the new-session continuation.")
+        lines.append("If the carried thread was about an image and the host supplied an image description or media context, continue from that description/topic rather than dropping the visual thread.")
+    elif mode == "ask_each_time":
+        lines.append("If the prior thread used voice or image context and the host can continue in that modality, ask briefly before changing delivery mode.")
+    else:
+        lines.append("Keep new-session continuity in text even if the prior thread used voice or image context.")
+    lines.append("Never claim to hear audio or see an image unless the host supplied the transcript, description, or media context.")
+    lines.append("Routine/time context is only a supporting modifier and must not become the main topic.")
+    return "\n".join(lines)
 
 
 def carryover_section() -> dict:
@@ -3104,8 +3407,8 @@ SETUP_FIELDS = [
         "key": "timezone",
         "target": "settings",
         "path": ["routine_schedule", "timezone"],
-        "question_en": "What is your timezone? (e.g. Asia/Taipei, America/New_York, UTC)",
-        "question_zh": "你的時區是？（例如：Asia/Taipei, America/New_York, UTC）",
+        "question_en": "What is your timezone? (e.g. Europe/Berlin, America/New_York, UTC)",
+        "question_zh": "你的時區是？（例如：Europe/Berlin, America/New_York, UTC）",
         "required": True,
     },
     {
@@ -3188,6 +3491,24 @@ SETUP_FIELDS = [
         "question_zh": "是否啟用定時排程（心跳/喚醒種子）？（true/false）",
         "required": False,
     },
+    {
+        "key": "new_session_continuity_mode",
+        "target": "settings",
+        "path": ["new_session_continuity", "mode"],
+        "question_en": "When a new conversation starts, which continuity anchor should lead? (recent_4_turns_first, last_user_intent_first, followup_focus_first, assistant_commitment_first, balanced)",
+        "question_zh": "新對話開始時要用哪種承接定義？（recent_4_turns_first 最近4輪, last_user_intent_first 最後使用者意圖, followup_focus_first 因果跟進焦點, assistant_commitment_first 助手承諾, balanced 綜合判斷）",
+        "required": False,
+        "initial_prompt": True,
+    },
+    {
+        "key": "modality_continuity_mode",
+        "target": "settings",
+        "path": ["modality_continuity", "mode"],
+        "question_en": "How should /new preserve voice or image discussions when the host supports them? (preserve_when_supported, text_only, ask_each_time)",
+        "question_zh": "新對話要如何延續語音或圖片討論？（preserve_when_supported 跟隨可用能力, text_only 只用文字, ask_each_time 每次先問）",
+        "required": False,
+        "initial_prompt": True,
+    },
 ]
 
 SETUP_FIELD_BY_KEY = {field["key"]: field for field in SETUP_FIELDS}
@@ -3220,6 +3541,7 @@ def is_setup_needed(profile: Optional[dict] = None, settings: Optional[dict] = N
         settings = load_settings()
     unconfigured = []
     required_unconfigured = []
+    initial_prompt_unconfigured = []
     optional_unconfigured = []
     configured = []
     for field in SETUP_FIELDS:
@@ -3232,12 +3554,15 @@ def is_setup_needed(profile: Optional[dict] = None, settings: Optional[dict] = N
                 required_unconfigured.append(field["key"])
             else:
                 optional_unconfigured.append(field["key"])
+            if field.get("initial_prompt"):
+                initial_prompt_unconfigured.append(field["key"])
         else:
             configured.append(field["key"])
     return {
-        "needs_setup": len(required_unconfigured) > 0,
+        "needs_setup": len(required_unconfigured) > 0 or len(initial_prompt_unconfigured) > 0,
         "unconfigured": unconfigured,
         "required_unconfigured": required_unconfigured,
+        "initial_prompt_unconfigured": initial_prompt_unconfigured,
         "optional_unconfigured": optional_unconfigured,
         "configured": configured,
         "total": len(SETUP_FIELDS),
@@ -3322,6 +3647,16 @@ def _apply_setup_field_values(profile: dict, settings: dict, answers: dict, sour
         if value is None or (isinstance(value, str) and value.strip() == ""):
             skipped.append(key)
             continue
+        if key == "new_session_continuity_mode":
+            value = normalize_new_session_continuity_mode(value)
+            if not value:
+                skipped.append(key)
+                continue
+        if key == "modality_continuity_mode":
+            value = normalize_modality_continuity_mode(value)
+            if not value:
+                skipped.append(key)
+                continue
         target = profile if field["target"] == "profile" else settings
         _set_nested(target, field["path"], value)
         _mark_parent_source(target, field["path"], source)
@@ -3406,9 +3741,6 @@ def infer_timezone_from_text(text: str) -> Optional[str]:
     fixed_offset = parse_fixed_offset_timezone_name(raw)
     if fixed_offset:
         return fixed_offset
-    lowered = raw.lower()
-    if any(token in raw for token in ("台灣", "台湾", "台北")) or "taiwan" in lowered or "taipei" in lowered:
-        return "Asia/Taipei"
     if re.search(r"\b(?:gmt|utc)\b", raw, re.IGNORECASE):
         return "UTC"
     return None
@@ -3699,6 +4031,53 @@ def _infer_use_case_hint_from_text(text: str) -> Optional[str]:
     return None
 
 
+def infer_modality_continuity_mode_from_text(text: str) -> Optional[str]:
+    raw = strip_leading_webchat_timestamp(text)
+    lowered = raw.lower()
+    normalized = normalize_text_for_match(raw)
+    if not raw:
+        return None
+    if re.search(r"\b(?:text only|text-only|always text|文字(?:就好|即可|模式)|只用文字|純文字|纯文字)\b", lowered) or any(token in normalized for token in ("只用文字", "純文字", "纯文字")):
+        return "text_only"
+    if re.search(r"\b(?:ask each time|ask first|ask me first)\b", lowered) or any(token in normalized for token in ("每次先問", "每次先问", "先問我", "先问我")):
+        return "ask_each_time"
+    modality_markers = (
+        "語音", "语音", "圖片", "图片", "照片", "voice", "audio", "image", "photo", "media",
+    )
+    preserve_markers = (
+        "延續", "延续", "跟隨", "跟随", "保留", "維持", "维持", "同樣", "同样", "一樣", "一样",
+        "preserve", "continue", "match", "same",
+    )
+    if any(token in lowered or token in normalized for token in modality_markers) and any(token in lowered or token in normalized for token in preserve_markers):
+        return "preserve_when_supported"
+    return None
+
+
+def infer_new_session_continuity_mode_from_text(text: str) -> Optional[str]:
+    raw = strip_leading_webchat_timestamp(text)
+    lowered = raw.lower()
+    normalized = normalize_text_for_match(raw)
+    if not raw:
+        return None
+    explicit = re.search(
+        r"\b(recent_4_turns_first|last_user_intent_first|followup_focus_first|assistant_commitment_first|balanced)\b",
+        lowered,
+    )
+    if explicit:
+        return normalize_new_session_continuity_mode(explicit.group(1))
+    if any(token in normalized for token in ("最近4輪", "最近四輪", "最近4轮", "最近四轮", "原文摘要")) or "recent 4" in lowered or "recent four" in lowered:
+        return "recent_4_turns_first"
+    if any(token in normalized for token in ("最後使用者意圖", "最后使用者意图", "最後意圖", "最后意图", "使用者意圖", "用户意图")) or "last user intent" in lowered:
+        return "last_user_intent_first"
+    if any(token in normalized for token in ("因果跟進焦點", "因果跟进焦点", "跟進焦點", "跟进焦点")) or "followup focus" in lowered or "event_chain" in lowered:
+        return "followup_focus_first"
+    if any(token in normalized for token in ("助手承諾", "助手承诺", "承諾優先", "承诺优先")) or "assistant commitment" in lowered or "promise" in lowered:
+        return "assistant_commitment_first"
+    if any(token in normalized for token in ("綜合判斷", "综合判断", "不要固定", "不固定")) or "balanced" in lowered:
+        return "balanced"
+    return None
+
+
 def infer_onboarding_setup_answers(text: str, profile: Optional[dict] = None, settings: Optional[dict] = None) -> dict:
     raw = strip_leading_webchat_timestamp(text)
     if not raw:
@@ -3731,6 +4110,16 @@ def infer_onboarding_setup_answers(text: str, profile: Optional[dict] = None, se
         use_case_hint = _infer_use_case_hint_from_text(raw)
         if use_case_hint:
             answers["use_case"] = use_case_hint
+
+    if "new_session_continuity_mode" in unconfigured:
+        new_session_mode = infer_new_session_continuity_mode_from_text(raw)
+        if new_session_mode:
+            answers["new_session_continuity_mode"] = new_session_mode
+
+    if "modality_continuity_mode" in unconfigured:
+        modality_mode = infer_modality_continuity_mode_from_text(raw)
+        if modality_mode:
+            answers["modality_continuity_mode"] = modality_mode
 
     return answers
 
@@ -3884,6 +4273,8 @@ def detect_guided_settings_request(text: str) -> dict:
         "schedule": ["作息", "時間", "时区", "時區", "timezone", "schedule", "睡", "起床", "醒", "晚睡", "夜班"],
         "proactive": ["主動關心", "主动关心", "關心頻率", "关心频率", "care interval", "check in", "pause care", "resume care"],
         "tracking": ["追蹤", "追踪", "跟進", "跟进", "記住", "记住", "continuity", "follow-up"],
+        "continuity": ["新對話", "新对话", "/new", "承接", "承續", "承续", "延續", "延续", "因果", "最近4輪", "最近四輪", "last user intent", "followup focus", "assistant commitment"],
+        "modality": ["語音", "语音", "圖片", "图片", "照片", "voice", "audio", "image", "photo", "media"],
         "tone": ["語氣", "语气", "風格", "风格", "tone", "relationship", "同事", "朋友", "助手", "collaborator", "coworker", "assistant", "顏文字", "颜文字", "emoji", "簡體", "简体"],
         "quiet_hours": ["勿擾", "勿扰", "quiet hours", "do not disturb", "dnd"],
     }
@@ -4035,6 +4426,14 @@ def infer_guided_settings_answers(text: str, profile: Optional[dict] = None, set
     if use_case_hint:
         answers["use_case"] = use_case_hint
 
+    new_session_mode = infer_new_session_continuity_mode_from_text(raw)
+    if new_session_mode:
+        answers["new_session_continuity_mode"] = new_session_mode
+
+    modality_mode = infer_modality_continuity_mode_from_text(raw)
+    if modality_mode:
+        answers["modality_continuity_mode"] = modality_mode
+
     tone = None
     if "professional" in lowered:
         tone = "professional"
@@ -4177,6 +4576,8 @@ def apply_guided_settings_answers(answers: dict) -> dict:
             "emoji_forbidden",
             "tracking_keywords",
             "heartbeat_enabled",
+            "new_session_continuity_mode",
+            "modality_continuity_mode",
         }
     }
     if setup_payload:
@@ -4222,7 +4623,15 @@ def build_setup_prompt(status: Optional[dict] = None, trigger: Optional[dict] = 
     trigger = trigger if isinstance(trigger, dict) else {"detected": False, "categories": [], "source": None}
     if not status["needs_setup"] and not trigger.get("detected"):
         return ""
-    prompt_keys = set(status["unconfigured"]) if trigger.get("detected") else set(status.get("required_unconfigured") or [])
+    if trigger.get("detected"):
+        prompt_keys = set(status["unconfigured"])
+    else:
+        prompt_keys = set(status.get("required_unconfigured") or [])
+        prompt_keys.update(
+            field["key"]
+            for field in SETUP_FIELDS
+            if field.get("initial_prompt") and field["key"] in set(status.get("unconfigured") or [])
+        )
     questions = []
     for field in SETUP_FIELDS:
         if field["key"] in prompt_keys:
@@ -4245,6 +4654,8 @@ def build_setup_prompt(status: Optional[dict] = None, trigger: Optional[dict] = 
             "- schedule / 作息\n"
             "- proactive / 主動關心\n"
             "- tracking / 追蹤記憶\n"
+            "- continuity / 新對話承接\n"
+            "- modality / 語音與圖片延續偏好\n"
             "- tone / 互動風格\n"
             "- quiet_hours / 勿擾\n"
         )
@@ -4268,7 +4679,7 @@ def build_setup_prompt(status: Optional[dict] = None, trigger: Optional[dict] = 
         "- If the user declines a setting, skip it — all fields are optional except timezone/sleep/wake.\n"
         "- Group related questions (e.g. sleep_time + wake_time + timezone together).\n"
         "- Explain what each setting does in simple terms.\n"
-        "- Let the user choose a simple category first when helpful: schedule / proactive / tracking / tone.\n"
+        "- Let the user choose a simple category first when helpful: schedule / proactive / tracking / continuity / modality / tone.\n"
         "- After collecting answers, apply them via: `setup-apply --payload-json '{...}'`\n"
         "- The user can re-run setup at any time to update settings.\n"
     )
@@ -5518,6 +5929,34 @@ def sanitize_event_chain_payload(event_chain: dict) -> dict:
     return cleaned if isinstance(cleaned, dict) else {}
 
 
+def prefer_richer_event_chain(primary: Optional[dict], secondary: Optional[dict]) -> dict:
+    primary_clean = sanitize_event_chain_payload(primary if isinstance(primary, dict) else {})
+    secondary_clean = sanitize_event_chain_payload(secondary if isinstance(secondary, dict) else {})
+    if count_event_chain_fields(secondary_clean) > count_event_chain_fields(primary_clean):
+        return secondary_clean
+    return primary_clean or secondary_clean
+
+
+def normalize_record_event_chain(
+    primary: Optional[dict],
+    secondary: Optional[dict],
+    source_summary: str,
+    event_kind: str,
+    topic_label: str = "",
+) -> dict:
+    preferred = prefer_richer_event_chain(primary, secondary)
+    if count_event_chain_fields(preferred) >= 4:
+        return preferred
+    return sanitize_event_chain_payload(
+        merge_event_chain(
+            preferred,
+            source_summary,
+            event_kind,
+            topic_label=topic_label,
+        )
+    )
+
+
 def sanitize_carryover_store(carryover: dict) -> dict:
     if not isinstance(carryover, dict):
         return {}
@@ -5871,7 +6310,7 @@ def _looks_like_profile_setup_clause_for_opener(clause: str) -> bool:
     if not text:
         return False
     lowered = text.lower()
-    if any(token in text for token in ("時區", "通常", "起床", "睡", "同事", "工作追蹤", "紐約", "台北", "台灣", "人在")):
+    if any(token in text for token in ("時區", "通常", "起床", "睡", "同事", "工作追蹤", "人在")):
         return True
     if any(
         token in lowered
@@ -6108,7 +6547,7 @@ _LOW_INFORMATION_FOCUS_CLAUSE_PATTERNS = (
 )
 
 _FOCUS_ADDRESSEE_PREFIX_RE = re.compile(
-    r"^(?:姐姐|哥哥|親愛的|亲爱的|機器人|机器人|妹妹|寶貝|宝贝)"
+    r"^(?:機器人|机器人|助手|助理|agent|assistant)"
     r"(?:[：:，,、\s]+)",
     re.I,
 )
@@ -7264,11 +7703,50 @@ def save_seed_intent_embed_cache(store: dict) -> None:
 
 
 def load_memory_lancedb_embedding_config() -> Optional[dict]:
-    return None
+    if not OPENCLAW_CONFIG_PATH.exists():
+        return None
+    try:
+        config = json.loads(OPENCLAW_CONFIG_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    embedding = (
+        config.get("plugins", {})
+        .get("entries", {})
+        .get("memory-lancedb-pro", {})
+        .get("config", {})
+        .get("embedding", {})
+    )
+    if not isinstance(embedding, dict):
+        return None
+    api_key = embedding.get("apiKey")
+    if isinstance(api_key, list):
+        api_key = next((str(item).strip() for item in api_key if str(item).strip()), "")
+    api_key = resolve_env_vars(str(api_key or "")).strip()
+    model = str(embedding.get("model") or "").strip()
+    base_url = resolve_env_vars(str(embedding.get("baseURL") or "")).strip()
+    if not api_key or not model or not base_url:
+        return None
+    return {
+        "api_key": api_key,
+        "model": model,
+        "base_url": base_url.rstrip("/"),
+        "dimensions": embedding.get("dimensions"),
+        "task_query": embedding.get("taskQuery"),
+        "task_passage": embedding.get("taskPassage"),
+        "normalized": embedding.get("normalized"),
+    }
 
 
 def build_seed_intent_embed_signature(config: dict) -> str:
-    return "disabled"
+    payload = {
+        "model": config.get("model"),
+        "base_url": config.get("base_url"),
+        "dimensions": config.get("dimensions"),
+        "task_query": config.get("task_query"),
+        "task_passage": config.get("task_passage"),
+        "normalized": config.get("normalized"),
+    }
+    return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()[:16]
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
@@ -7283,7 +7761,43 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
 
 
 def jina_embed_inputs(texts: list[str], config: dict, task: Optional[str]) -> list[list[float]]:
-    return []
+    if not texts:
+        return []
+    mode = "query" if task and task == config.get("task_query") else "passage"
+    payload = {
+        "texts": texts,
+        "mode": mode,
+        "plugin_root": EMBEDDER_ROOT or None,
+        "config": {
+            "api_key": config["api_key"],
+            "model": config["model"],
+            "base_url": config["base_url"],
+            "dimensions": config.get("dimensions"),
+            "task_query": config.get("task_query"),
+            "task_passage": config.get("task_passage"),
+            "normalized": config.get("normalized"),
+        },
+    }
+    result = subprocess.run(
+        ["node", "--input-type=module", "-e", MEMORY_LANCEDB_EMBED_HELPER_JS],
+        input=json.dumps(payload, ensure_ascii=False),
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
+    )
+    body = json.loads(result.stdout)
+    items = body.get("vectors") if isinstance(body, dict) else None
+    if not isinstance(items, list):
+        raise ValueError("embedding response missing vectors")
+    vectors: list[list[float]] = []
+    for item in items:
+        if not isinstance(item, list):
+            raise ValueError("embedding response missing embedding vector")
+        vectors.append([float(value) for value in item])
+    if len(vectors) != len(texts):
+        raise ValueError("embedding response count mismatch")
+    return vectors
 
 
 def get_seed_intent_exemplar_vectors(config: dict) -> dict[str, list[dict]]:
@@ -9163,7 +9677,7 @@ def task_hook_holding_snapshot(hook: Optional[dict], now_dt: datetime) -> dict:
     }:
         return {
             "active": False,
-            "reason": "parked-task-hook-does-not-hold-thread",
+            "reason": "parked_task_hook_does_not_hold_thread",
             "dispatch_count": int(hook.get("dispatch_count", 0) or 0),
             "cooldown_minutes": hook_dispatch_cooldown_minutes(hook),
         }
@@ -10701,10 +11215,8 @@ def relationship_terms_for_frontstage(profile: dict) -> list[str]:
 
 
 _FRONTSTAGE_GENERIC_ADDRESSEE_TERMS = ("助手", "機器人")
-_FRONTSTAGE_AFFECTION_TERMS = ("親愛的",)
-_MASCULINE_ADDRESSEE_ROLE_MARKERS = {
-    "哥哥", "老公", "先生", "男友", "弟弟", "爸爸", "叔叔", "兒子",
-}
+_FRONTSTAGE_AFFECTION_TERMS: tuple[str, ...] = ()
+_MASCULINE_ADDRESSEE_ROLE_MARKERS: set[str] = set()
 
 
 def frontstage_addressee_terms(profile: Optional[dict] = None) -> list[str]:
@@ -11222,7 +11734,6 @@ _FRONTSTAGE_HANS_TO_HANT_PHRASES = [
     ("我来找找", "我來找找"),
     ("我来看一下", "我來看一下"),
     ("我来重新", "我來重新"),
-    ("语音技能", "語音技能"),
     ("正确的路径", "正確的路徑"),
     ("设定", "設定"),
     ("记忆", "記憶"),
@@ -11286,15 +11797,11 @@ _FRONTSTAGE_INTERNAL_TOOL_NARRATION_RE = re.compile(
     r"(?:"
     r"\[TOOL_CALL\]"
     r"|memory_search"
-    r"|tts 工具(?:調用|调用)"
+    r"|工具(?:調用|调用)"
     r"|(?:正確|正确)的路徑"
-    r"|語音技能|语音技能"
-    r"|我需要用\s*(?:memory_search|tts)"
+    r"|我需要用\s*memory_search"
     r"|(?:讓我|让我|我想|我會|我会)\s*用\s*exec"
     r"|用\s*exec\s*直接"
-    r"|直接生成(?:語音|语音)"
-    r"|生成(?:語音|语音)[^。！？\n]{0,40}(?:發送|发送)"
-    r"|sendVoice"
     r"|(?:使用者|user|對方|對面)\S{0,8}(?:抱怨|在抱怨)"
     r"|讓我找找|让我找找|我來找找|我来找找|我來看一下|我来看一下|我來重新|我来重新"
     r"|/(?:Users|home)/[^/\s]+/"
@@ -11448,8 +11955,8 @@ _RUNTIME_SEND_HEARTBEAT_NOOP_RE = re.compile(
         | \b(?: outside | inside | within ) \s+ sleep \s+ time \b
         | (?: outside | before | after ) \s+ (?: sleep | wake )
         | (?: may | might | still ) \s+ (?: be \s+ )? asleep
-        | \d{1,2}:\d{2} \s* Taiwan \s* = \s* \d{1,2}:\d{2} \s* UTC
-        | Taiwan \s* = \s* \d{1,2}:\d{2} \s* UTC
+        | \d{1,2}:\d{2} \s* local \s+ time \s* = \s* \d{1,2}:\d{2} \s* UTC
+        | local \s+ time \s* = \s* \d{1,2}:\d{2} \s* UTC
         | \d{1,2}:\d{2} \s* UTC \s* [<>]=? \s* \d{1,2}:\d{2}
     )
     """,
@@ -11463,7 +11970,7 @@ def is_heartbeat_runtime_source(source: str) -> bool:
 
 
 _USER_FACING_HEARTBEAT_ADDRESSEE_RE = re.compile(
-    r"(?i)(?:\b(?:you|your)\b|[你妳您]|姐姐|哥哥|親愛的|寶貝|宝貝|老公|老婆)"
+    r"(?i)(?:\b(?:you|your)\b|[你妳您])"
 )
 _USER_FACING_HEARTBEAT_INTENT_RE = re.compile(
     r"(?i)(?:"
@@ -11479,8 +11986,23 @@ _HEARTBEAT_INTERNAL_OPERATOR_RE = re.compile(
     r"|nothing\s+(?:specific\s+)?to\s+act\s+on|nothing\s+needs\s+attention"
     r"|no\s+user\s+message|routine_phase|quiet-hours|blocked\s+by|cooldown"
     r"|sleep\s+time(?:\s+is|\s+starts|\s+begins|\s+has\s+just\s+begun)?"
-    r"|Taiwan\s*=\s*\d{1,2}:\d{2}\s*UTC|\bUTC\b"
+    r"|local\s+time\s*=\s*\d{1,2}:\d{2}\s*UTC|\bUTC\b"
     r"|the\s+owner\s+is\s+asking|the\s+conversation\s+is\s+about|the\s+message\s+reads\s+like"
+    r")"
+)
+
+_RUNTIME_OUTPUT_CONFUSION_RE = re.compile(
+    r"(?is)(?:"
+    r"\bi\s+don['’]t\s+(?:see|have)\s+any\s+(?:command\s+)?output\b"
+    r"|\bno\s+(?:actual\s+)?(?:command\s+)?output\b"
+    r"|\bcompleted\s+async\s+command\b"
+    r"|\basync\s+command\s+(?:completed|result)\b"
+    r"|\bprocess\s+list\s+shows\s+no\s+(?:running|recent)\b"
+    r"|\bwhich\s+command\s+(?:you['’]re|you\s+are)\s+referring\s+to\b"
+    r"|\bpaste\s+the\s+(?:command\s+)?output\b"
+    r"|\bshell\s+command\s+i\s+ran\s+earlier\b"
+    r"|\bconversation\s+history\s+only\s+shows\s+the\s+system\s+instructions\b"
+    r"|\blooking\s+at\s+the\s+context\b.*\b(?:an\s+acknowledgement|they\s+didn['’]t\s+answer)\b"
     r")"
 )
 
@@ -11509,13 +12031,12 @@ def looks_like_heartbeat_narration(text: str) -> bool:
         return True
     return bool(re.search(
         r"(?i)(?:"
-        r"\bowner\b.*\b(?:asleep|awake|quiet|busy)\b"
-        r"|\bwife\b.*\b(?:asleep|awake|home|work)\b"
+        r"\buser\b.*\b(?:asleep|awake|quiet|busy)\b"
         r"|\bnothing\s+(?:specific\s+)?to\s+act\s+on\b"
         r"|still\s+no\s+response"
         r"|heartbeat\s+at\s+\d{1,2}:\d{2}"
-        r"|\d{1,2}:\d{2}\s*(?:am|pm)?\s*Sunday\s+Taiwan\s+time"
-        r"|Taiwan\s*=\s*\d{1,2}:\d{2}\s*UTC"
+        r"|\d{1,2}:\d{2}\s*(?:am|pm)?\s*Sunday\s+local\s+time"
+        r"|local\s+time\s*=\s*\d{1,2}:\d{2}\s*UTC"
         r"|no\s+hooks\s+due"
         r"|no\s+new\s+hooks"
         r")",
@@ -11552,6 +12073,8 @@ def enforce_frontstage_output_rules(text: str, source: str = "frontstage", emoti
     ).strip()
     if not text:
         return block("empty-after-system-token-strip", original, "")
+    if _RUNTIME_OUTPUT_CONFUSION_RE.search(text):
+        return block("runtime-output-confusion", text, "")
     if source in {"runtime-send", "runtime-reply", "heartbeat-send"} and re.fullmatch(r"(?i)(?:now|sent)(?:[\s\W]*)", text):
         return block("placeholder-sentinel", text, "")
     if source == "runtime-reply" and _FRONTSTAGE_INTERNAL_TOOL_NARRATION_RE.search(text):
@@ -11570,7 +12093,7 @@ def enforce_frontstage_output_rules(text: str, source: str = "frontstage", emoti
         return block("heartbeat-noop-narration", text, "")
     # ── Heartbeat decision contract fail-close ──
     # Catch system narration residue that slipped past the regex above.
-    # Patterns: "Nothing to do", "Just .", "owner/wife ... asleep", etc.
+    # Patterns: "Nothing to do", "Just .", "both asleep", etc.
     if is_heartbeat_runtime_source(source) and re.search(
         r"(?i)(?:"
         r"nothing to do"
@@ -11600,7 +12123,7 @@ def enforce_frontstage_output_rules(text: str, source: str = "frontstage", emoti
     # ── A-1: Strip residue lines, keep readable content ──
     if looks_like_internal_summary_residue(normalized):
         if is_heartbeat_runtime_source(source) and re.search(
-            r"(?i)(?:autoseed|heartbeat|routine_phase|quiet-hours|nothing to send|blocked by|cooldown|no hooks due|probably asleep|likely asleep|sleep time|no user message|nothing needs attention|taiwan\s*=\s*\d{1,2}:\d{2}\s*utc|\b(?:awake|sleeping)\b)",
+            r"(?i)(?:autoseed|heartbeat|routine_phase|quiet-hours|nothing to send|blocked by|cooldown|no hooks due|probably asleep|likely asleep|sleep time|no user message|nothing needs attention|local\s+time\s*=\s*\d{1,2}:\d{2}\s*utc|\b(?:awake|sleeping)\b)",
             normalized,
         ) and not looks_like_user_facing_heartbeat_text(normalized):
             return block("heartbeat-internal-summary-residue", normalized, "")
@@ -12277,10 +12800,12 @@ def sync_linked_incident_from_staging(record: dict, now_dt: datetime) -> bool:
             continue
         hook["source_summary"] = f"[incident:{incident['id']}] {incident.get('source_summary')}"
         hook["normalized_seed_summary"] = incident.get("normalized_seed_summary")
+        hook["event_kind"] = incident.get("event_kind") or hook.get("event_kind")
         hook["event_chain_id"] = hook.get("event_chain_id") or incident.get("event_chain_id")
+        hook["event_chain"] = prefer_richer_event_chain(hook.get("event_chain"), incident.get("event_chain"))
         hook_payload = hook.get("payload") if isinstance(hook.get("payload"), dict) else {}
-        hook_payload["event_kind"] = incident.get("event_kind")
-        hook_payload["event_chain"] = incident.get("event_chain")
+        hook_payload["event_kind"] = hook.get("event_kind")
+        hook_payload["event_chain"] = deepcopy(hook.get("event_chain")) if isinstance(hook.get("event_chain"), dict) else incident.get("event_chain")
         hook_payload["event_chain_id"] = incident.get("event_chain_id")
         for key in CONTINUITY_BUNDLE_FIELD_KEYS:
             value = incident.get(key) if incident.get(key) not in (None, "", [], {}) else payload.get(key)
@@ -15195,6 +15720,21 @@ def summarize_anchor_turns_for_new_session(anchor_turns: Optional[list[dict]], l
     return normalize_story_text(" | ".join(snippets), 320)
 
 
+def recent_four_turns_summary_for_new_session(record: Optional[dict]) -> str:
+    if not isinstance(record, dict):
+        return ""
+    anchor_line = summarize_anchor_turns_for_new_session(resolve_record_anchor_turns(record))
+    if anchor_line:
+        return anchor_line
+    context_turns = sanitize_recent_user_context_list(record.get("recent_user_context"), limit_turns=4)
+    if not context_turns:
+        payload = record.get("payload") if isinstance(record.get("payload"), dict) else {}
+        context_turns = sanitize_recent_user_context_list(payload.get("recent_user_context"), limit_turns=4)
+    if not context_turns:
+        return ""
+    return normalize_story_text(" | ".join(f"user: {item}" for item in context_turns), 320)
+
+
 def estimate_loose_token_count(text: str) -> int:
     raw = normalize_skill_source_text(text)
     if not raw:
@@ -15552,8 +16092,21 @@ def build_carryover_prompt(snapshot: Optional[dict], causal_context: Optional[di
     anchor_level = str((opener_anchor or {}).get("level") or "")
     # Keep explicit-intent carryover rich enough for the model to produce a visible opener.
     compact_explicit_intent = False
-    lines = [
-        "## New-session carryover (trusted structured state)",
+    recent_four_turns_line = (
+        summarize_anchor_turns_for_new_session(recent_turns, limit_turns=4)
+        or recent_four_turns_summary_for_new_session(anchor_record)
+    )
+    lines = ["## New-session carryover (trusted structured state)"]
+    assistant_commitment = normalize_assistant_commitment(anchor_record.get(ASSISTANT_COMMITMENT_FIELD_KEY))
+    lines.extend(build_new_session_continuity_priority_lines(
+        "carryover",
+        anchor_record,
+        recent_four_turns_line=recent_four_turns_line,
+        latest_user_intent=latest_user_focus,
+        assistant_commitment=assistant_commitment,
+        causal_context=causal_context,
+    ))
+    lines.extend([
         f"The previous session left a carryover summary from the last {carryover_max_turns()} turns{time_line}.",
         f"carryover_source: {snapshot.get('source') or NEW_SESSION_CARRYOVER_SOURCE}",
         f"carryover_source_last_turn_at: {source_last_turn_at or 'unknown'}",
@@ -15561,7 +16114,7 @@ def build_carryover_prompt(snapshot: Optional[dict], causal_context: Optional[di
         "new_session_carryover_applied: true",
         f"carryover_summary_present: {str(bool(snapshot.get('summary_present'))).lower()}",
         f"carryover_summary: {carryover_user_summary}",
-    ]
+    ])
     if key_quotes and not compact_explicit_intent and not compact_carryover:
         lines.append("carryover_key_quotes: " + " | ".join(key_quotes[:2]))
     if recent_user_turns and not compact_explicit_intent and not compact_carryover:
@@ -15572,12 +16125,9 @@ def build_carryover_prompt(snapshot: Optional[dict], causal_context: Optional[di
     if latest_user_focus:
         lines.append(f"carryover_latest_user_focus: {latest_user_focus}")
     sleep_sensitive = bool((opener_anchor or {}).get("sleep_sensitive"))
-    anchor_turns_line = summarize_anchor_turns_for_new_session(resolve_record_anchor_turns(anchor_record))
-    assistant_commitment = normalize_assistant_commitment(anchor_record.get(ASSISTANT_COMMITMENT_FIELD_KEY))
+    anchor_turns_line = recent_four_turns_line
     current_addressee_terms = frontstage_addressee_terms(load_profile())
     preferred_pronoun = preferred_second_person_pronoun_for_frontstage(load_profile())
-    if anchor_turns_line and not compact_carryover and not carryover_anchor_turns_redundant(anchor_turns_line, latest_user_focus):
-        lines.append(f"carryover_anchor_turns: {anchor_turns_line}")
     if assistant_commitment and not compact_explicit_intent:
         lines.append(f"assistant_commitment: {assistant_commitment.get('phrase')}")
     if current_addressee_terms:
@@ -15597,8 +16147,8 @@ def build_carryover_prompt(snapshot: Optional[dict], causal_context: Optional[di
         lines.append("The carryover contains an explicit user intent. Open from that intent first, before any time-of-day framing, routine opener, or generic greeting.")
     else:
         lines.append("For a /new opening, prefer this fresh recent carryover over older pending topics when they conflict.")
-    if anchor_turns_line and not compact_carryover and not carryover_anchor_turns_redundant(anchor_turns_line, latest_user_focus):
-        lines.append("Use the compact anchor turns only to recover the shared context and who said what. Do not replay them like a transcript and do not quote them verbatim.")
+    if anchor_turns_line:
+        lines.append("Use the compact recent 4 turns only to recover the shared context and who said what. Do not replay them like a transcript and do not quote them verbatim.")
     if assistant_commitment and not compact_explicit_intent:
         lines.append("If the prior assistant commitment still fits the selected opening anchor, you may honor it naturally as supporting context. It must not override an explicit user intent or replace the opening anchor.")
     if latest_user_focus:
@@ -15710,7 +16260,7 @@ def build_new_session_event_state_prompt(opener_anchor: Optional[dict], *, time_
     if not anchor_text:
         return ""
     recent_user_context = sanitize_recent_user_context_list(record.get("recent_user_context"))
-    anchor_turns_line = summarize_anchor_turns_for_new_session(resolve_record_anchor_turns(record))
+    anchor_turns_line = recent_four_turns_summary_for_new_session(record)
     use_english = any(
         prefers_english_text(item)
         for item in [anchor_text, anchor_turns_line, *(recent_user_context or [])]
@@ -15721,19 +16271,23 @@ def build_new_session_event_state_prompt(opener_anchor: Optional[dict], *, time_
     anchor_text = _adjust_anchor_text_for_day_relation(anchor_text, relation_key, relation_label)
     current_status = _new_session_event_current_status(record)
     event_kind = str(record.get("event_kind") or "").strip() or "topic_continuation"
-    lines = [
-        "## Selected new-session event state (trusted structured state)",
+    lines = ["## Selected new-session event state (trusted structured state)"]
+    lines.extend(build_new_session_continuity_priority_lines(
+        "selected_opening",
+        record,
+        recent_four_turns_line=anchor_turns_line,
+        causal_context=(record.get("event_chain") or {}).get("causal_memory") if isinstance(record.get("event_chain"), dict) else None,
+    ))
+    lines.extend([
         "selected_opening_anchor_source: event_state",
         f"selected_opening_anchor_status: {current_status or 'unknown'}",
         f"selected_opening_anchor_event_kind: {event_kind}",
         f"selected_opening_anchor: {anchor_text}",
         f"selected_opening_anchor_day_relation: {relation_key}",
         f"NEVER reference any of these internal concepts in your response: {new_session_internal_label_never_reference_text(use_english=use_english)}",
-    ]
+    ])
     if recent_user_context:
         lines.append("selected_opening_recent_user_context: " + " | ".join(recent_user_context))
-    if anchor_turns_line:
-        lines.append("selected_opening_anchor_turns: " + anchor_turns_line)
     if current_status in _NEW_SESSION_EVENT_COMPLETED_STATUSES:
         lines.append("This event was already completed before the new session started.")
         lines.append("If you mention it, acknowledge completion naturally and move forward. Do not reopen it as unfinished or still pending.")
@@ -15852,7 +16406,8 @@ def normalize_new_session_opening_context(selected: dict) -> dict:
     anchor_text_clean = anchor_text.rstrip("。！？?!")
     anchor_text_opener = strip_leading_discourse_marker_for_opener(anchor_text_clean) or anchor_text_clean
     recent_user_context = sanitize_recent_user_context_list(record.get("recent_user_context"))
-    locale = _new_session_supported_locale(raw_anchor_text, anchor_text, anchor_text_clean, *recent_user_context)
+    recent_four_turns_line = recent_four_turns_summary_for_new_session(record)
+    locale = _new_session_supported_locale(raw_anchor_text, anchor_text, anchor_text_clean, recent_four_turns_line, *recent_user_context)
     pack = _new_session_locale_pack(locale)
     commitment_line = summarize_new_session_commitment_line(record.get(ASSISTANT_COMMITMENT_FIELD_KEY))
     anchor_is_temporal = bool(
@@ -15908,6 +16463,7 @@ def normalize_new_session_opening_context(selected: dict) -> dict:
         "causal_rejoin_line": causal_rejoin_line,
         "time_lead_line": time_lead_line,
         "relation_reference_en": relation_reference_en,
+        "recent_4_turns_summary": recent_four_turns_line,
         "recent_user_context": recent_user_context,
     }
 
@@ -18889,6 +19445,16 @@ def build_time_modifier_prompt(
     elif next_transition_kind == "sleep" and minutes_to_transition is not None and minutes_to_transition <= 90:
         lines.append("The user is nearing their usual rest boundary. If they sound tired or the thread is naturally winding down, you may gently lean toward 收尾 / 休息.")
         lines.append("If the time itself changes the advice, you may mention it naturally after reconnecting to the thread.")
+        wake_clock = routine_schedule_wake_time()
+        rest_text = str(user_text or "")
+        if wake_clock and any(token in rest_text.lower() for token in ["睡", "休息", "累", "晚安", "sleep", "rest", "bed", "good night"]):
+            wake_dt = next_clock_dt(now_dt, wake_clock)
+            local_wake = routine_schedule_local_dt(wake_dt)
+            if local_wake.date() == local_now.date():
+                wake_label = local_wake.strftime("%H:%M")
+                lines.append(
+                    f"The user's next natural resume point is later the same local calendar day around {wake_label}, after they wake. Use same-day handoff wording such as 下午見 / 起床後再接 / later after you wake instead of next-day goodbye wording."
+                )
     elif next_transition_kind == "active_day" and minutes_to_transition is not None and minutes_to_transition <= 60:
         lines.append("The user is just leaving the wake-window and settling into the day. Keep continuity natural and avoid over-urgent follow-up framing.")
     if user_text and any(token in user_text for token in ["睡", "休息", "累", "下班", "收工"]):
@@ -19015,9 +19581,17 @@ def build_pending_topics_prompt(records: list[dict], is_new_session: bool, user_
         ]
         if isinstance(item, str) and item.strip()
     )
-    lines = ["## Pending follow-up topics (trusted structured state)"]
     anchor_level = str((opener_anchor or {}).get("level") or "")
     sleep_sensitive = bool((opener_anchor or {}).get("sleep_sensitive"))
+    recent_four_turns_line = recent_four_turns_summary_for_new_session(primary) if is_new_session and isinstance(primary, dict) else ""
+    lines = ["## Pending follow-up topics (trusted structured state)"]
+    if is_new_session and isinstance(primary, dict):
+        lines.extend(build_new_session_continuity_priority_lines(
+            "pending",
+            primary,
+            recent_four_turns_line=recent_four_turns_line,
+            causal_context=(primary.get("event_chain") or {}).get("causal_memory") if isinstance(primary.get("event_chain"), dict) else None,
+        ))
     if is_new_session:
         if prefer_recent_carryover:
             lines.append("A fresher recent carryover exists for this /new. Treat these pending topics as background context, not the opening anchor.")
@@ -19438,6 +20012,8 @@ def build_runtime_context(session_id: str, session_key: str, user_text: str, now
         opener_anchor=new_session_anchor if isinstance(new_session_anchor, dict) else None,
         user_text=user_text,
     )
+    runtime_settings = load_settings()
+    modality_continuity_prompt = "" if heartbeat_session else build_modality_continuity_prompt(runtime_settings, is_new_session=effective_new_session)
     false_closure_prompt = "" if heartbeat_session or not allow_structured_dialogue_context else build_false_closure_prompt(records)
     pending_memory_guard_prompt = "" if heartbeat_session or not allow_structured_dialogue_context or fresh_carryover_preferred or not _records_for_pending_prompt else build_pending_memory_consistency_prompt(records, user_text, now_dt)
     active_preferences_prompt = "" if heartbeat_session else build_active_preferences_prompt(user_model, user_text=user_text)
@@ -19465,7 +20041,7 @@ def build_runtime_context(session_id: str, session_key: str, user_text: str, now
             if (_dispatch_hook_id and _dispatch_hook_id == _primary_source_id) or \
                (_dispatch_chain_id and _dispatch_chain_id == _primary_chain_id):
                 dispatch_awareness_prompt = ""  # already covered by pending topics
-    setup_status = is_setup_needed(profile, settings=load_settings())
+    setup_status = is_setup_needed(profile, settings=runtime_settings)
     setup_trigger = detect_guided_settings_request(user_text)
     suppress_setup_for_new_session = (
         effective_new_session
@@ -19536,6 +20112,9 @@ def build_runtime_context(session_id: str, session_key: str, user_text: str, now
         "carryover_prompt_length": len(carryover_prompt),
         "new_session_event_state_prompt_length": len(new_session_event_state_prompt),
         "time_modifier_prompt_length": len(time_modifier_prompt),
+        "modality_continuity_prompt_length": len(modality_continuity_prompt),
+        "new_session_continuity_mode": new_session_continuity_mode(runtime_settings),
+        "modality_continuity_mode": modality_continuity_mode(runtime_settings),
         "new_session_carryover_applied": bool(carryover_snapshot and carryover_snapshot.get("new_session_carryover_applied")),
         "primary_pending_source": primary_pending.get("source_layer") if isinstance(primary_pending, dict) else None,
         "primary_pending_event_kind": primary_pending.get("event_kind") if isinstance(primary_pending, dict) else None,
@@ -19567,6 +20146,7 @@ def build_runtime_context(session_id: str, session_key: str, user_text: str, now
         "carryover_prompt": carryover_prompt,
         "new_session_event_state_prompt": new_session_event_state_prompt,
         "time_modifier_prompt": time_modifier_prompt,
+        "modality_continuity_prompt": modality_continuity_prompt,
         "new_session_anchor": new_session_anchor,
         "time_state": time_state,
         "time_state_path": str(TIME_STATE_PATH),
@@ -20217,7 +20797,7 @@ def dispatch_awareness_horizon_hours(hook: dict) -> float:
     payload = hook.get("payload") if isinstance(hook.get("payload"), dict) else {}
     source = str(payload.get("source") or "").strip()
     hook_type = str(hook.get("type") or "").strip()
-    if source == "wake_seed" or hook_type == "wake_voice_greeting":
+    if source == "wake_seed" or hook_type == "wake_greeting":
         return 2.0
     return 12.0
 

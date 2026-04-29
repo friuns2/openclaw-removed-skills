@@ -3,9 +3,15 @@
   "slug": "openclaw-continuity",
   "displayName": "OpenClaw Continuity",
   "latest": {
-    "version": "2.0.10",
-    "publishedAt": 1776720470576,
-    "commit": "https://github.com/openclaw/skills/commit/278cc97feed02fed92a14cf2773bac47f88b5a2e"
+    "version": "2.0.21",
+    "publishedAt": 1777334319524,
+    "commit": null
   },
-  "history": []
+  "history": [
+    {
+      "version": "2.0.10",
+      "publishedAt": 1776720470576,
+      "commit": "https://github.com/openclaw/skills/commit/278cc97feed02fed92a14cf2773bac47f88b5a2e"
+    }
+  ]
 }
