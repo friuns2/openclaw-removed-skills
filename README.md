@@ -4,7 +4,7 @@ Generated from `https://github.com/openclaw/skills` git history.
 
 This file lists root skill directories that have a `delete: skills/<owner>/<skill>` commit in history and whose root `SKILL.md` is not present in `HEAD`. It is grouped by removed date, newest first. Skill links point to the last tree before deletion.
 
-Total removed root skills found: 2074.
+Total removed root skills found: 2076.
 
 ## Recovery
 
@@ -27,6 +27,24 @@ git -C skills checkout f36973c80e^ -- skills/emre-koc/zvec-local-rag-service
 | [skills/emre-koc/zvec-local-rag-service](https://github.com/openclaw/skills/tree/1d1b78936edfc19970ca1bc5fdfd634f9f5915a2/skills/emre-koc/zvec-local-rag-service) | Operate an always-on local semantic-search service using zvec + Ollama embeddings. Use when you need to ingest .txt/.md files, run meaning-based search via HTTP endpoints (/health, /ingest, /search), and keep the service running on macOS (launchd) or manually. Includes service code, launchd template, and management scripts. | 2026-03-10 | [`f36973c80e`](https://github.com/openclaw/skills/commit/f36973c80e26148a4a275964980097f38d0f125e) |
 
 ## Removed Skills
+
+<details>
+<summary>2026-04-29 (1)</summary>
+
+| Owner | Skill | Description | Path | Delete commit |
+| --- | --- | --- | --- | --- |
+| aiot-f2e-team | aqara-open-api | Query and control Aqara/Lumi Studio smart home devices and manage spaces via the Aqara Open Platform API (HTTP JSON). Use when the user asks to list Aqara devices, get device status, control lights/switches/sensors, or manage rooms/spaces. Requires AQARA_OPEN_API_TOKEN and AQARA_ENDPOINT_URL. | [skills/aiot-f2e-team/aqara-open-api](https://github.com/openclaw/skills/tree/9c82b1c62933a4ac622180d68846f4e703f4e486/skills/aiot-f2e-team/aqara-open-api) | [`599b93f7b5`](https://github.com/openclaw/skills/commit/599b93f7b5b156fd764b9899dfe7579eb1f722b5) |
+
+</details>
+
+<details>
+<summary>2026-04-28 (1)</summary>
+
+| Owner | Skill | Description | Path | Delete commit |
+| --- | --- | --- | --- | --- |
+| againcrazycode | cnbblogs-pick |  | [skills/againcrazycode/cnbblogs-pick](https://github.com/openclaw/skills/tree/289da61b5cca0112acf18bbb2f6ba4c102a9b813/skills/againcrazycode/cnbblogs-pick) | [`dd56db06ce`](https://github.com/openclaw/skills/commit/dd56db06ce89efdfbf7e66501bd978a3bbcc8a9f) |
+
+</details>
 
 <details>
 <summary>2026-04-27 (2)</summary>
